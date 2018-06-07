@@ -3,7 +3,7 @@ using Documenter, ReinforcementLearning
 makedocs(modules = [ReinforcementLearning],
 	     clean = false,
 		 format = :html,
-		 sitename = "Tabular Reinforcement Learning",
+		 sitename = "ReinforcementLearning.jl",
  		 linkcheck = !("skiplinks" in ARGS),
 		 pages = [ "Introduction" => "index.md", 
 				   "Usage" => "usage.md",
