@@ -1,4 +1,4 @@
-# TabularReinforcementLearning
+# ReinforcementLearning
 
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://jbrea.github.io/TabularReinforcementLearning.jl/latest)
 [![Build Status](https://travis-ci.org/jbrea/TabularReinforcementLearning.jl.svg?branch=master)](https://travis-ci.org/jbrea/TabularReinforcementLearning.jl)
@@ -54,7 +54,7 @@ A reinforcement learning library for [Julia](https://julialang.org/).
 
 # Installation
 
-    pkg.clone("https://github.com/jbrea/TabularReinforcementLearning.jl")
+    pkg.clone("https://github.com/jbrea/ReinforcementLearning.jl")
 
 
 # Credits
