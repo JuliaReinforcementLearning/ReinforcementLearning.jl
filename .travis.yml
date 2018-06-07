@@ -5,7 +5,7 @@ os:
   - osx
 julia:
   - 0.6
-  - nightly
+#  - nightly
 notifications:
   email: false
 git:
@@ -14,8 +14,8 @@ git:
 ## uncomment the following lines to allow failures on nightly julia
 ## (tests will run but not make your overall status red)
 #matrix:
-#  allow_failures:
-#  - julia: nightly
+# allow_failures:
+#   - julia: nightly
 
 ## uncomment and modify the following lines to manually install system packages
 #addons:
@@ -29,7 +29,7 @@ git:
 #script:
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("ReinforcementLearning"); Pkg.test("ReinforcementLearning"; coverage=true)'
 after_success:
-  # push coverage results to Coveralls
-  - julia -e 'cd(Pkg.dir("ReinforcementLearning")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
   # push coverage results to Codecov
   - julia -e 'cd(Pkg.dir("ReinforcementLearning")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'Pkg.add("Documenter")'
+  - julia -e 'cd(Pkg.dir("ReinforcementLearning")); include(joinpath("docs", "make.jl"))'
