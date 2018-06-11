@@ -1,10 +1,10 @@
 # ReinforcementLearning
 
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://jbrea.github.io/ReinforcementLearning.jl/latest)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://jbrea.github.io/ReinforcementLearning.jl/latest)
 [![Build Status](https://travis-ci.org/jbrea/ReinforcementLearning.jl.svg?branch=master)](https://travis-ci.org/jbrea/ReinforcementLearning.jl)
 [![codecov](https://codecov.io/gh/jbrea/ReinforcementLearning.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/jbrea/ReinforcementLearning.jl)
 
-A reinforcement learning library for [Julia](https://julialang.org/).
+A reinforcement learning package for [Julia](https://julialang.org/).
 
 
 # What is reinforcement learning?

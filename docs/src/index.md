@@ -1,4 +1,4 @@
-A reinforcement learning library for [Julia](https://julialang.org/).
+A reinforcement learning package for [Julia](https://julialang.org/).
 
 
 # What is reinforcement learning?
