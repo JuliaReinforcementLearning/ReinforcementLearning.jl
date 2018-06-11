@@ -5,7 +5,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "Introduction",
     "category": "page",
-    "text": "A reinforcement learning library for Julia."
+    "text": "A reinforcement learning package for Julia."
 },
 
 {
