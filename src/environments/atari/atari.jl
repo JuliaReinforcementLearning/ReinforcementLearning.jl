@@ -73,3 +73,40 @@ function reset!(env::AtariEnv)
     nothing
 end
 
+@with_kw struct AtariPreprocessor
+    gpu::Bool = false
+    croptosquare::Bool = false
+    cropfromrow::Int64 = 34
+    dimx::Int64 = 80
+    dimy::Int64 = croptosquare ? 80 : 105
+    scale::Bool = false
+    inputtype::DataType = scale ? Float32 : UInt8
+end
+togpu(x) = CuArrays.adapt(CuArray, x)
+function preprocessstate(p::AtariPreprocessor, s)
+    if p.croptosquare
+        tmp = reshape(s, 160, 210)[:,p.cropfromrow:p.cropfromrow + 159]
+        small = reshape(imresize(tmp, p.dimx, p.dimy), p.dimx, p.dimy, 1)
+    else
+        small = reshape(imresize(reshape(s, 160, 210), p.dimx, p.dimy), 
+                        p.dimx, p.dimy, 1)
+    end
+    if p.scale
+        scale!(small, 1/255)
+    else
+        small = ceil.(p.inputtype, small)
+    end
+    if p.gpu
+        togpu(small)
+    else
+        p.inputtype.(small)
+    end
+end
+function preprocessstate(p::AtariPreprocessor, ::Void)
+    s = zeros(p.inputtype, p.dimx, p.dimy, 1)
+    if p.gpu
+        togpu(s)
+    else
+        s
+    end
+end
