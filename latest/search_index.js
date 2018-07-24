@@ -369,14 +369,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "learners/#Deep-Reinforcement-Learning-1",
-    "page": "Learners",
-    "title": "Deep Reinforcement Learning",
-    "category": "section",
-    "text": ""
-},
-
-{
     "location": "learners/#ReinforcementLearning.DQN",
     "page": "Learners",
     "title": "ReinforcementLearning.DQN",
@@ -393,9 +385,9 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "learners/#Model-Based-Learner-2",
+    "location": "learners/#Deep-Reinforcement-Learning-1",
     "page": "Learners",
-    "title": "Model Based Learner",
+    "title": "Deep Reinforcement Learning",
     "category": "section",
     "text": "Modules = [ReinforcementLearning]\nPages   = [\"dqn.jl\", \"deepactorcritic.jl\"]"
 },
@@ -933,7 +925,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "Environments",
     "category": "section",
-    "text": "interact!(action, environment)Returns state, reward, done.getstate(environment)Returns reward, done.reset!(environment)Returns nothing."
+    "text": "interact!(action, environment)Returns state, reward, done.getstate(environment)Returns state, done.reset!(environment)Returns nothing."
 },
 
 {
