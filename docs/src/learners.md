@@ -34,7 +34,6 @@ Pages   = ["prioritizedsweeping.jl"]
 ```
 
 ## Deep Reinforcement Learning
-## Model Based Learner
 ```@autodocs
 Modules = [ReinforcementLearning]
 Pages   = ["dqn.jl", "deepactorcritic.jl"]

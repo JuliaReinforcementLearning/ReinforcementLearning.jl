@@ -40,7 +40,7 @@ Returns state, reward, done.
 ```
 getstate(environment)
 ```
-Returns reward, done.
+Returns state, done.
 
 ```
 reset!(environment)
