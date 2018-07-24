@@ -31,13 +31,17 @@ end
 export compare
 
 """
-    plotcomparison(df; nmaxpergroup = 20, colors = [])
+    plotcomparison(df; nmaxpergroup = 20, linestyles = [], 
+                       showbest = true, axisoptions = @pgf {})
 
-Plots results obtained with [`compare`](@ref).
+Plots results obtained with [`compare`](@ref) using [PGFPlotsX](https://github.com/KristofferC/PGFPlotsX.jl).
 """
-function plotcomparison(df; nmaxpergroup = 20, colors = [])
+function plotcomparison(df; nmaxpergroup = 20, linestyles = [], 
+                        showbest = true, axisoptions = @pgf {})
     groups = groupby(df, :name)
-    colors = colors == [] ? distinguishable_colors(length(groups)) : colors
+    linestyles = linestyles == [] ? map(c -> @pgf({color = c}), 
+                                        distinguishable_colors(length(groups))) : 
+                                    linestyles
     plots = []
     legendentries = []
     isnumber = typeof(df[:result][1]) <: Number
@@ -48,15 +52,17 @@ function plotcomparison(df; nmaxpergroup = 20, colors = [])
             push!(legendentries, g[:name][1])
         else
             m = mean(g[:result])
-            push!(plots, @pgf Plot({thick, color = colors[i]}, 
+            push!(plots, @pgf Plot({thick, style = linestyles[i]}, 
                                    Coordinates(1:length(m), m)))
             push!(legendentries, g[:name][1])
-            ma = g[:result][indmax(map(mean, g[:result]))]
-            push!(plots, @pgf Plot({thick,dashed, color = colors[i]}, 
-                                   Coordinates(1:length(ma), ma)))
-            push!(legendentries, "")
+            if showbest
+                ma = g[:result][indmax(map(mean, g[:result]))]
+                push!(plots, @pgf Plot({thick,dashed, style = linestyles[i]}, 
+                                       Coordinates(1:length(ma), ma)))
+                push!(legendentries, "")
+            end
             for k in 1:min(nmaxpergroup, length(g[:result]))
-                push!(plots, @pgf Plot({very_thin, color = colors[i], opacity = .3},
+                push!(plots, @pgf Plot({very_thin, style = linestyles[i], opacity = .3},
                                        Coordinates(1:length(g[:result][k]),
                                                    g[:result][k])))
                 push!(legendentries, "")
@@ -65,10 +71,11 @@ function plotcomparison(df; nmaxpergroup = 20, colors = [])
     end
     if isnumber
         @pgf Axis({"boxplot/draw direction=y", 
-                   xticklabels = legendentries, 
-                   xtick = collect(1:length(legendentries))}, plots...)
+                   xticklabels = legendentries,
+                   xtick = collect(1:length(legendentries)),
+                   axisoptions...}, plots...)
     else
-        @pgf Axis({no_markers, "legend pos" = "outer north east"}, 
+        @pgf Axis({no_markers, "legend pos" = "outer north east", axisoptions...}, 
                   plots..., Legend(legendentries))
     end
 end
