@@ -149,7 +149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Comparison",
     "title": "ReinforcementLearning.plotcomparison",
     "category": "method",
-    "text": "plotcomparison(df; nmaxpergroup = 20, colors = [])\n\nPlots results obtained with compare.\n\n\n\n"
+    "text": "plotcomparison(df; nmaxpergroup = 20, linestyles = [], \n                   showbest = true, axisoptions = @pgf {})\n\nPlots results obtained with compare using PGFPlotsX.\n\n\n\n"
 },
 
 {
@@ -177,7 +177,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "learning/#ReinforcementLearning.run!-Tuple{ReinforcementLearning.RLSetup}",
+    "location": "learning/#ReinforcementLearning.run!-Tuple{Any}",
     "page": "Learning",
     "title": "ReinforcementLearning.run!",
     "category": "method",
@@ -353,6 +353,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "learners/#ReinforcementLearning.MDPLearner",
+    "page": "Learners",
+    "title": "ReinforcementLearning.MDPLearner",
+    "category": "type",
+    "text": "struct MDPLearner\n    γ::Float64\n    policy::Array{Int64, 1}\n    values::Array{Float64, 1}\n    mdp::MDP\n\nUsed to solve mdp with discount factor γ.\n\n\n\n"
+},
+
+{
+    "location": "learners/#ReinforcementLearning.policy_iteration!-Tuple{ReinforcementLearning.MDPLearner}",
+    "page": "Learners",
+    "title": "ReinforcementLearning.policy_iteration!",
+    "category": "method",
+    "text": "policy_iteration!(mdplearner::MDPLearner)\n\nSolve MDP with policy iteration using MDPLearner.\n\n\n\n"
+},
+
+{
     "location": "learners/#ReinforcementLearning.SmallBackups",
     "page": "Learners",
     "title": "ReinforcementLearning.SmallBackups",
@@ -365,7 +381,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "Model Based Learner",
     "category": "section",
-    "text": "Modules = [ReinforcementLearning]\nPages   = [\"prioritizedsweeping.jl\"]"
+    "text": "Modules = [ReinforcementLearning]\nPages   = [\"mdplearner.jl\", \"prioritizedsweeping.jl\"]"
 },
 
 {
@@ -401,19 +417,131 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "environments/#ReinforcementLearning.listenvironments-Tuple{}",
+    "location": "environments/#ReinforcementLearning.MDP",
     "page": "Environments",
-    "title": "ReinforcementLearning.listenvironments",
-    "category": "method",
-    "text": "listenvironments()\n\nList all available environments.\n\n\n\n"
+    "title": "ReinforcementLearning.MDP",
+    "category": "type",
+    "text": "mutable struct MDP \n    ns::Int64\n    na::Int64\n    state::Int64\n    trans_probs::Array{AbstractArray, 2}\n    reward::Array{Float64, 2}\n    initialstates::Array{Int64, 1}\n    isterminal::Array{Int64, 1}\n\nA Markov Decision Process with ns states, na actions, current state, naxns - array of transition probabilites trans_props which consists for every (action, state) pair of a (potentially sparse) array that sums to 1 (see getprobvecrandom, getprobvecuniform, getprobvecdeterministic for helpers to constract the transition probabilities) naxns - array of reward, array of initial states initialstates, and ns - array of 0/1 indicating if a state is terminal.\n\n\n\n"
 },
 
 {
-    "location": "environments/#ReinforcementLearning.loadenvironment-Tuple{Any}",
+    "location": "environments/#ReinforcementLearning.MDP-Tuple{Any,Any}",
     "page": "Environments",
-    "title": "ReinforcementLearning.loadenvironment",
+    "title": "ReinforcementLearning.MDP",
     "category": "method",
-    "text": "loadenvironment(envname)\n\nLoad environments. See listenvironments for available envname.\n\n\n\n"
+    "text": "MDP(ns, na; init = \"random\")\nMDP(; ns = 10, na = 4, init = \"random\")\n\nReturn MDP with init in (\"random\", \"uniform\", \"deterministic\"), where the keyword init determines how to construct the transition probabilites (see also  getprobvecrandom, getprobvecuniform, getprobvecdeterministic).\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.AbsorbingDetMDP-Tuple{}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.AbsorbingDetMDP",
+    "category": "method",
+    "text": "AbsorbingDetMDP(;ns = 10^3, na = 10)\n\nReturns a random deterministic absorbing MDP\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.DetMDP-Tuple{}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.DetMDP",
+    "category": "method",
+    "text": "DetMDP(; ns = 10^4, na = 10)\n\nReturns a random deterministic MDP.\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.DetTreeMDP-Tuple{}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.DetTreeMDP",
+    "category": "method",
+    "text": "DetTreeMDP(; na = 4, depth = 5)\n\nReturns a treeMDP with random rewards at the leaf nodes.\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.DetTreeMDPwithinrew-Tuple{}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.DetTreeMDPwithinrew",
+    "category": "method",
+    "text": "DetTreeMDPwithinrew(; na = 4, depth = 5)\n\nReturns a treeMDP with random rewards.\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.StochMDP-Tuple{}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.StochMDP",
+    "category": "method",
+    "text": "StochMDP(; na = 10, ns = 50) = MDP(ns, na)\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.StochTreeMDP-Tuple{}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.StochTreeMDP",
+    "category": "method",
+    "text": "StochTreeMDP(; na = 4, depth = 4, bf = 2)\n\nReturns a random stochastic treeMDP with branching factor bf.\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.run!-Tuple{ReinforcementLearning.MDP,Array{Int64,1}}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.run!",
+    "category": "method",
+    "text": "run!(mdp::MDP, policy::Array{Int64, 1}) = run!(mdp, policy[mdp.state])\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.run!-Tuple{ReinforcementLearning.MDP,Int64}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.run!",
+    "category": "method",
+    "text": "run!(mdp::MDP, action::Int64)\n\nTransition to a new state given action. Returns the new state.\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.setterminalstates!-Tuple{Any,Any}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.setterminalstates!",
+    "category": "method",
+    "text": "setterminalstates!(mdp, range)\n\nSets mdp.isterminal[range] .= 1, empties the table of transition probabilities for terminal states and sets the reward for all actions in the terminal state to the same value.\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.treeMDP-Tuple{Any,Any}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.treeMDP",
+    "category": "method",
+    "text": "treeMDP(na, depth; init = \"random\", branchingfactor = 3)\n\nReturns a tree structured MDP with na actions and depth of the tree. If init is random, the branchingfactor determines how many possible states a (action, state) pair has. If init = \"deterministic\" the branchingfactor = na.\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.getprobvecdeterministic",
+    "page": "Environments",
+    "title": "ReinforcementLearning.getprobvecdeterministic",
+    "category": "function",
+    "text": "getprobvecdeterministic(n, min = 1, max = n)\n\nReturns a SparseVector of length n where one element in min:max has  value 1.\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.getprobvecrandom-Tuple{Any,Any,Any}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.getprobvecrandom",
+    "category": "method",
+    "text": "getprobvecrandom(n, min, max)\n\nReturns an array of length n that sums to 1 where all elements outside of min:max are zero.\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.getprobvecrandom-Tuple{Any}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.getprobvecrandom",
+    "category": "method",
+    "text": "getprobvecrandom(n)\n\nReturns an array of length n that sums to 1. More precisely, the array is a sample of a Dirichlet distribution with n categories and _1 =   = _n = 1.\n\n\n\n"
+},
+
+{
+    "location": "environments/#ReinforcementLearning.getprobvecuniform-Tuple{Any}",
+    "page": "Environments",
+    "title": "ReinforcementLearning.getprobvecuniform",
+    "category": "method",
+    "text": "getprobvecuniform(n)  = fill(1/n, n)\n\n\n\n"
 },
 
 {
@@ -421,7 +549,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Environments",
     "title": "Environments",
     "category": "section",
-    "text": "Modules = [ReinforcementLearning]\nPages   = [\"environments.jl\"]"
+    "text": "Further environments can be found in the packages RLEnvAtari, RLEnvClassicControl, RLEnvDiscrete.Here are mostly simple environments and utilities useful for testing.Modules = [ReinforcementLearning]\nPages   = [\"mdp.jl\", \"randommdp.jl\"]"
 },
 
 {
@@ -901,7 +1029,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "Learners",
     "category": "section",
-    "text": "update!(learner, buffer)Returns nothing.selectaction(learner, policy, state)Returns an action."
+    "text": "update!(learner, buffer)Returns nothing.selectaction(learner, policy, state)Returns an action.defaultbuffer(learner, environment, preprocessor)Returns nothing."
 },
 
 {
