@@ -50,7 +50,7 @@ end
 
 Runs an [`rlsetup`](@ref RLSetup) without learning.
 """
-function run!(rlsetup::RLSetup; fillbuffer = false)
+function run!(rlsetup; fillbuffer = false)
     @unpack islearning = rlsetup
     rlsetup.islearning = false
     tmp = rlsetup.fillbuffer
