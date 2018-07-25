@@ -30,7 +30,7 @@ Pages   = ["montecarlo.jl"]
 ## Model Based Learner
 ```@autodocs
 Modules = [ReinforcementLearning]
-Pages   = ["prioritizedsweeping.jl"]
+Pages   = ["mdplearner.jl", "prioritizedsweeping.jl"]
 ```
 
 ## Deep Reinforcement Learning
