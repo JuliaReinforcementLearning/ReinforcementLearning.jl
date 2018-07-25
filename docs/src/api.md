@@ -14,6 +14,11 @@ selectaction(learner, policy, state)
 ```
 Returns an action.
 
+```
+defaultbuffer(learner, environment, preprocessor)
+```
+Returns nothing.
+
 ## Policies
 ```
 selectaction(policy, values)
