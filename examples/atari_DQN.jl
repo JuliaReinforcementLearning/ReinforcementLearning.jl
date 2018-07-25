@@ -1,5 +1,5 @@
 using ReinforcementLearning, Flux
-const withgpu = true
+const withgpu = false
 if withgpu 
     using CuArrays
     const inputdtype = Float32
