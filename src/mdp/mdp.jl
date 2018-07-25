@@ -45,7 +45,7 @@ end
 Returns an array of length `n` that sums to 1. More precisely, the array is a
 sample of a [Dirichlet
 distribution](https://en.wikipedia.org/wiki/Dirichlet_distribution) with `n`
-categories and ``\alpha_1 = \cdots =\alpha_n = 1``.
+categories and ``α_1 = ⋯  = α_n = 1``.
 """
 getprobvecrandom(n) = normalize(rand(n), 1)
 """

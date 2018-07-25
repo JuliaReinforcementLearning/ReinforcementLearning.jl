@@ -7,8 +7,5 @@ JLD2
 StatsBase
 DataFrames
 Colors
-ArcadeLearningEnvironment
-Images
 FileIO
 PyCall
-POMDPs

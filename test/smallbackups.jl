@@ -18,7 +18,6 @@ for (r, done, s, a) in episode[1:end-1]; Nsa[a, s] += 1; end
 @test learner.Ns1a0s0[2] == Dict((1,1) => 2, (1, 4) => 1, (1, 5) => 1)
 @test 2 * [γ^2; γ; γ^3; γ^2; γ^2; 1] == learner.V
 
-loadenvironment("randommdp")
 mdp = DetTreeMDP(na = 2, depth = 2)
 srand(123)
 x = RLSetup(SmallBackups(ns = mdp.ns, na = mdp.na, γ = .99, initvalue = 0),
