@@ -32,11 +32,11 @@ A reinforcement learning package for [Julia](https://julialang.org/).
 
 |name | state space | action space |
 |-----|-------------|--------------|
-|Cartpole | 4D      | discrete     |
-|Mountain Car | 2D  | discrete     |
-|Pendulum | 3D     | 1D           |
-|Atari       | pixel images | discrete|
-|[POMDPs](https://github.com/JuliaPOMDP/POMDPs.jl), MDPs, Mazes, Cliffwalking | discrete | discrete|
+|[Cartpole](https://github.com/jbrea/RLEnvClassicControl.jl)| 4D      | discrete     |
+|[Mountain Car](https://github.com/jbrea/RLEnvClassicControl.jl)| 2D  | discrete     |
+|[Pendulum](https://github.com/jbrea/RLEnvClassicControl.jl) | 3D     | 1D           |
+|[Atari](https://github.com/jbrea/RLEnvAtari.jl) | pixel images | discrete|
+|[POMDPs](https://github.com/jbrea/RLEnvDiscrete.jl), MDPs, [Mazes](https://github.com/jbrea/RLEnvDiscrete.jl), [Cliffwalking](https://github.com/jbrea/RLEnvDiscrete.jl) | discrete | discrete|
 |[OpenAi Gym](https://github.com/openai/gym) (with PyCall) | see [here](https://github.com/openai/gym) | see [here](https://github.com/openai/gym) |
 
 ## Preprocessors
