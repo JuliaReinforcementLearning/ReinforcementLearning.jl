@@ -5,25 +5,6 @@ abstract type AbstractEpsilonGreedyPolicy end
           VeryOptimisticEpsilonGreedyPolicy,
           PesimisticEpsilonGreedyPolicy)
           
-
-for (typ, max, rel) in ((OptimisticEpsilonGreedyPolicy, maximumbelowInf, :(>=)),
-                        (VeryOptimisticEpsilonGreedyPolicy, maximum, :(==)),
-                        (PesimisticEpsilonGreedyPolicy, maximumbelowInf, :(==)))
-    @eval function getgreedystates(policy::$typ, values)
-        a = Int64[]
-        vmax = $max(values)
-        if isnan(vmax)
-            error("NaN encountered in getgreedystates: $values")
-        end
-        for (i, v) in enumerate(values)
-            if ($rel)(v, vmax)
-                push!(a, i)
-            end
-        end
-        a
-    end
-end
-
 const EpsilonGreedyPolicy = VeryOptimisticEpsilonGreedyPolicy
 export EpsilonGreedyPolicy
 
@@ -63,21 +44,43 @@ where never chosen before.
 """ PesimisticEpsilonGreedyPolicy
 
 
-function selectaction(policy::AbstractEpsilonGreedyPolicy, values)
-    if rand() < policy.ϵ
-        rand(1:length(values))
-    else
-        rand(getgreedystates(policy, values))
+for (typ, max, rel) in ((OptimisticEpsilonGreedyPolicy, maximumbelowInf, :(>=)),
+                        (VeryOptimisticEpsilonGreedyPolicy, maximum, :(==)),
+                        (PesimisticEpsilonGreedyPolicy, maximumbelowInf, :(==)))
+    @eval function selectaction(policy::$typ, values)
+        if rand() < policy.ϵ
+            rand(1:length(values))
+        else
+            vmax = $max(values)
+            c = 1
+            a = 1
+            for (i, v) in enumerate(values)
+                if ($rel)(v, vmax)
+                    if rand() < 1/c
+                        a = i
+                    end
+                    c += 1
+                end
+            end
+            a
+        end
     end
-end
-
-function getactionprobabilities(policy::AbstractEpsilonGreedyPolicy, values)
-    p = ones(length(values))/length(values) * policy.ϵ
-    a = getgreedystates(policy, values)
-    p2 = (1. - policy.ϵ)/length(a)
-    for i in a
-        p[i] =+ p2
+    @eval function getactionprobabilities(policy::$typ, values)
+        p = ones(length(values))/length(values) * policy.ϵ
+        vmax = $max(values)
+        c = 0
+        for v in values
+            if ($rel)(v, vmax)
+                c += 1
+            end
+        end
+        p2 = (1. - policy.ϵ)/c
+        for (i, v) in enumerate(values)
+            if ($rel)(v, vmax)
+                p[i] += p2
+            end
+        end
+        p
     end
-    p
 end
 

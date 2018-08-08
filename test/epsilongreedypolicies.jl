@@ -1,10 +1,8 @@
-getgreedystates = ReinforcementLearning.getgreedystates
-for (v, rO, rVO, r, rP) in (([-9., 12., Inf64], [2, 3], [3], [3], [2]),
-                            ([-9., -12.], [1], [1], [1], [1]),
-                            ([Inf64, Inf64], [1, 2], [1, 2], [1, 2], [1, 2]))
-    @test getgreedystates(OptimisticEpsilonGreedyPolicy(0.), v) == rO
-    @test getgreedystates(VeryOptimisticEpsilonGreedyPolicy(0.), v) == rVO
-    @test getgreedystates(PesimisticEpsilonGreedyPolicy(0.), v) == rP
+import ReinforcementLearning: selectaction
+
+function empiricalactionprop(p, v; n = 10^6)
+    res = [selectaction(p, v) for _ in 1:n]
+    map(x -> length(find(i -> i == x, res)), 1:length(v))./n
 end
 
 for (v, rO, rVO, r, rP) in (([-9., 12., Inf64], [0, .5, .5], [0, 0., 1.], 
@@ -16,7 +14,15 @@ for (v, rO, rVO, r, rP) in (([-9., 12., Inf64], [0, .5, .5], [0, 0., 1.],
     @test getactionprobabilities(OptimisticEpsilonGreedyPolicy(0.), v) == rO
     @test getactionprobabilities(VeryOptimisticEpsilonGreedyPolicy(0.), v) == rVO
     @test getactionprobabilities(PesimisticEpsilonGreedyPolicy(0.), v) == rP
+    @test isapprox(empiricalactionprop(OptimisticEpsilonGreedyPolicy(0.), v),
+                   rO, atol = .05)
+    @test isapprox(empiricalactionprop(VeryOptimisticEpsilonGreedyPolicy(0.), v),
+                   rVO, atol = .05)
+    @test isapprox(empiricalactionprop(PesimisticEpsilonGreedyPolicy(0.), v),
+                   rP, atol = .05)
+    @test isapprox(empiricalactionprop(OptimisticEpsilonGreedyPolicy(.2), v),
+                   getactionprobabilities(OptimisticEpsilonGreedyPolicy(.2), v),
+                   atol = .05)
 end
-
 
 
