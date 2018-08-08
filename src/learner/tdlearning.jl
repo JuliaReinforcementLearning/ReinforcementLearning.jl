@@ -10,11 +10,16 @@
     params::Array{Float64, 2} = zeros(na, ns) + initvalue
     tracekind = DataType = ReplacingTraces
     traces::T = λ == 0 || tracekind == NoTraces ? NoTraces() : tracekind(ns, na, λ, γ)
-    endvaluepolicy::Tp = :Sarsa
+    endvaluepolicy::Tp = SarsaEndPolicy()
+end
+struct SarsaEndPolicy end
+struct QLearningEndPolicy end
+struct ExpectedSarsaEndPolicy{Tp} 
+    policy::Tp
 end
 Sarsa(; kargs...) = TDLearner(; kargs...)
-QLearning(; kargs...) = TDLearner(; endvaluepolicy = :QLearning, kargs...)
-ExpectedSarsa(; kargs...) = TDLearner(; endvaluepolicy = VeryOptimisticEpsilonGreedyPolicy(.1), kargs...)
+QLearning(; kargs...) = TDLearner(; endvaluepolicy = QLearningEndPolicy(), kargs...)
+ExpectedSarsa(; kargs...) = TDLearner(; endvaluepolicy = ExpectedSarsaEndPolicy(VeryOptimisticEpsilonGreedyPolicy(.1)), kargs...)
 export Sarsa, QLearning, ExpectedSarsa
 
 @inline function selectaction(learner::Union{TDLearner, AbstractPolicyGradient}, 
@@ -31,35 +36,35 @@ reconstructwithparams(learner::TDLearner, w) = reconstruct(learner, params = w)
 @inline getvaluecheckinf(learner, a, s::AbstractArray) = getvalue(learner.params, a, s)
 @inline checkinf(learner, value) = (value == Inf64 ? learner.unseenvalue : value)
 
-@inline function futurevalue(learner, buffer)
+@inline function futurevalue(::QLearningEndPolicy, learner, buffer)
+    checkinf(learner, maximumbelowInf(getvalue(learner.params, buffer.states[end])))
+end
+@inline function futurevalue(::SarsaEndPolicy, learner, buffer)
+    getvaluecheckinf(learner, buffer.actions[end], buffer.states[end])
+end
+@inline function futurevalue(p::ExpectedSarsaEndPolicy, learner, buffer)
     a = buffer.actions[end]
     s = buffer.states[end]
-    if learner.endvaluepolicy == :QLearning
-        checkinf(learner, maximumbelowInf(getvalue(learner.params, s)))
-    elseif learner.endvaluepolicy == :Sarsa
-        getvaluecheckinf(learner, a, s)
-    else
-        actionprobabilites = getactionprobabilities(learner.endvaluepolicy,
-                                                    getvalue(learner.params, s))
-        m = 0.
-        for (a, w) in enumerate(actionprobabilites)
-            if w != 0.
-                m += w * getvaluecheckinf(learner, a, s)
-            end
+    actionprobabilites = getactionprobabilities(learner.endvaluepolicy.policy,
+                                                getvalue(learner.params, s))
+    m = 0.
+    for (a, w) in enumerate(actionprobabilites)
+        if w != 0.
+            m += w * getvaluecheckinf(learner, a, s)
         end
-        m
     end
+    m
 end
 
 @inline function discountedrewards(rewards, done, γ)
     gammaeff = 1.
     discr = 0.
-    for (r, done) in zip(rewards, done)
+    for (r, d) in zip(rewards, done)
         discr += gammaeff * r
-        done && return [discr; 0.]
+        d && return discr, 0.
         gammaeff *= γ
     end
-    [discr; gammaeff]
+    discr, gammaeff
 end
 @inline function tderror(rewards, done, γ, startvalue, endvalue)
     discr, gammaeff = discountedrewards(rewards, done, γ)
@@ -69,7 +74,7 @@ end
 function tderror(learner, buffer)
     tderror(buffer.rewards, buffer.done, learner.γ,
             getvaluecheckinf(learner, buffer.actions[1], buffer.states[1]),
-            futurevalue(learner, buffer))
+            futurevalue(learner.endvaluepolicy, learner, buffer))
 end
 
 # update params
