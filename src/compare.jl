@@ -56,7 +56,7 @@ function plotcomparison(df; nmaxpergroup = 20, linestyles = [],
                                    Coordinates(1:length(m), m)))
             push!(legendentries, g[:name][1])
             if showbest
-                ma = g[:result][indmax(map(mean, g[:result]))]
+                ma = g[:result][argmax(map(mean, g[:result]))]
                 push!(plots, @pgf Plot({thick,dashed, style = linestyles[i]}, 
                                        Coordinates(1:length(ma), ma)))
                 push!(legendentries, "")

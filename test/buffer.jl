@@ -53,11 +53,11 @@ x = RLSetup(DQN(x -> mean(x, 2)[1:4], nmarkov = 4), MDP(),
             callbacks = [RecordAll()])
 learn!(x)
 i = 77
-@test find(nmarkovgetindex(x.buffer.states, i, 4)) .% 10 == x.callbacks[1].states[i-4:i-1] .% 10
+@test findall(nmarkovgetindex(x.buffer.states, i, 4)) .% 10 == x.callbacks[1].states[i-4:i-1] .% 10
 @test x.buffer.actions[i-3:i+3] == x.callbacks[1].actions[i-4:i+2]
 @test endof(x.buffer.states) == endof(x.buffer.actions) == 1 + endof(x.callbacks[1].states)
 @test nmarkovgetindex(x.buffer.states, endof(x.buffer.states), 4) == nmarkovgetindex(x.policy.buffer, endof(x.policy.buffer), 4)
-@test find(nmarkovgetindex(x.buffer.states, endof(x.buffer.states), 4)) .% 10 == x.callbacks[1].states[end-3:end] .% 10
+@test findall(nmarkovgetindex(x.buffer.states, endof(x.buffer.states), 4)) .% 10 == x.callbacks[1].states[end-3:end] .% 10
 
 a1 = ArrayCircularBuffer(Array, Int64, (1), 8)
 a2 = ArrayCircularBuffer(Array, Int64, (1), 5)

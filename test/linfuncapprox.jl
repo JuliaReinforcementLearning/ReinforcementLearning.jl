@@ -11,10 +11,10 @@ for λ in [0, .8]
                 preprocessor = OneHotPreprocessor(mdp.ns),
                 environment = mdp,
                 stoppingcriterion = ConstantNumberSteps(100))
-    srand(124)
+    Random.seed!(124)
     s0 = mdp.state
     learn!(x)
-    srand(124)
+    Random.seed!(124)
     mdp.state = s0
     y = RLSetup(learner = QLearning(initvalue = 0., λ = λ,
                                     tracekind = AccumulatingTraces), 
@@ -31,10 +31,10 @@ for learner in [PolicyGradientBackward, EpisodicReinforce,
                 preprocessor = OneHotPreprocessor(mdp.ns), 
                 environment = mdp,
                 stoppingcriterion = ConstantNumberSteps(100))
-    srand(124)
+    Random.seed!(124)
     s0 = mdp.state
     learn!(x)
-    srand(124)
+    Random.seed!(124)
     mdp.state = s0
     y = RLSetup(learner = learner(initvalue = 0.), 
                 environment = mdp,
@@ -62,10 +62,10 @@ x2 = RLSetup(learner = QLearning(λ = 0, γ = .99, initvalue = 0., α = .1),
              environment = env, 
              callbacks = [EvaluationPerT(10^3, MeanReward()), RecordAll()], 
              stoppingcriterion = ConstantNumberSteps(60))
-srand(445)
+Random.seed!(445)
 reset!(env)
 learn!(x)
-srand(445)
+Random.seed!(445)
 reset!(env)
 x2.policy.t = 1
 learn!(x2)
@@ -89,10 +89,10 @@ x2 = RLSetup(learner = ActorCriticPolicyGradient(nsteps = 4, αcritic = 0.),
              environment = env, 
              callbacks = [EvaluationPerT(10^3, MeanReward()), RecordAll()], 
              stoppingcriterion = ConstantNumberSteps(5))
-srand(445)
+Random.seed!(445)
 reset!(env)
 learn!(x)
-srand(445)
+Random.seed!(445)
 reset!(env)
 x2.policy.t = 1
 learn!(x2)

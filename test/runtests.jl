@@ -1,6 +1,6 @@
 using ReinforcementLearning
 import ReinforcementLearning: getactionprobabilities, selectaction, update!
-using Base.Test
+using Test
 
 @testset "ϵ-greedy policies" begin include("epsilongreedypolicies.jl") end
 @testset "traces" begin include("traces.jl") end

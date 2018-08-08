@@ -1,5 +1,3 @@
-__precompile__()
-
 module ReinforcementLearning
 
 using DataStructures, Parameters

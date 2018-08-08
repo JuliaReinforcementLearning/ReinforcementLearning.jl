@@ -1,4 +1,4 @@
-srand(123)
+Random.seed!(123)
 mdp = MDP(ns = 5, na = 3); 
 γ = .5
 mdpl = MDPLearner(mdp = mdp, γ = γ); policy_iteration!(mdpl)
@@ -14,4 +14,4 @@ x = RLSetup(learner = mdpl, policy = EpsilonGreedyPolicy(0),
             callbacks = [MeanReward()], environment = mdp, 
             stoppingcriterion = ConstantNumberEpisodes(2))
 run!(x)
-@test 5 * getvalue(x.callbacks[1]) ≈ maximum(mdp.reward[find(mdp.reward)])
+@test 5 * getvalue(x.callbacks[1]) ≈ maximum(mdp.reward[findall(mdp.reward)])

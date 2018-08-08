@@ -97,7 +97,7 @@ function update!(learner::DQN, b)
         r, γeff = discountedrewards(b.rewards[i], b.done[i], learner.γ)
         if γeff > 0
             if learner.doubledqn
-                r += γeff * qat[indmax(qa.data[:,k]), k]
+                r += γeff * qat[argmax(qa.data[:,k]), k]
             else
                 r += γeff * maximum(qat[:, k])
             end
