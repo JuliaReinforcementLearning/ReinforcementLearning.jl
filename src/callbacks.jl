@@ -302,3 +302,26 @@ function reset!(p::AllRewards)
 end
 getvalue(p::AllRewards) = p.rewards
 export AllRewards
+
+
+"""
+    mutable struct Visualize 
+        plot
+        wait::Float64
+"""
+mutable struct Visualize 
+    wait::Float64
+end
+"""
+    Visualize(; wait = .15)
+
+A callback to be used in an `RLSetup` to visualize a maze during running or 
+learning.
+"""
+Visualize(; wait = .15) = Visualize(wait)
+export Visualize
+function callback!(c::Visualize, rlsetup, s, a, r, done)
+    plotenv(rlsetup.environment, s, a, r, done)
+    sleep(c.wait)
+end
+plotenv(env, s, a, r, d) = warn("Visualization not implemented for environments of type $(typeof(env)).")
