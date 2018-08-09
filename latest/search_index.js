@@ -905,6 +905,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "callbacks/#ReinforcementLearning.Visualize",
+    "page": "Callbacks",
+    "title": "ReinforcementLearning.Visualize",
+    "category": "type",
+    "text": "mutable struct Visualize \n    plot\n    wait::Float64\n\n\n\n"
+},
+
+{
+    "location": "callbacks/#ReinforcementLearning.Visualize-Tuple{}",
+    "page": "Callbacks",
+    "title": "ReinforcementLearning.Visualize",
+    "category": "method",
+    "text": "Visualize(; wait = .15)\n\nA callback to be used in an RLSetup to visualize a maze during running or  learning.\n\n\n\n"
+},
+
+{
     "location": "callbacks/#callbacks-1",
     "page": "Callbacks",
     "title": "Callbacks",
