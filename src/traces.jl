@@ -91,13 +91,25 @@ end
 
 discounttraces!(t) = discounttraces!(t.trace, t.γλ, t.minimaltracevalue)
 @inline function discounttraces!(trace::SparseMatrixCSC, γλ, minimaltracevalue)
-    BLAS.scale!(γλ, trace.nzval)
-    if rand() < .01
-        clamp!(trace.nzval, minimaltracevalue, Inf)
+    x = trace.nzval
+    @simd for i in 1:length(x)
+        @inbounds if x[i] <= minimaltracevalue
+                     x[i] = 0.
+                  else
+                     x[i] *= γλ
+                  end
+    end
+    if rand() < .005
+        dropzeros!(trace)
     end
 end
 @inline discounttraces!(trace, γλ, minimaltracevalue) = BLAS.scale!(γλ, trace)
-resettraces!(traces) = BLAS.scale!(0., traces.trace)
+@inline resettraces!(traces) = resettrace!(traces.trace)
+@inline resettrace!(trace) = BLAS.scale!(0., trace)
+@inline function resettrace!(trace::SparseMatrixCSC)
+    BLAS.scale!(0., trace.nzval)
+    dropzeros!(trace)
+end
 
 function updatetraceandparams!(traces, params, factor)
     updatetraceandparams!(traces.trace, params, factor)
