@@ -16,7 +16,7 @@ Estimate Q values by averaging over returns.
     γ::Float64 = .9
     initvalue = 0.
     Nsa::Array{Int64, 2} = zeros(Int64, na, ns)
-    Q::Array{Float64, 2} = zeros(na, ns) + initvalue
+    Q::Array{Float64, 2} = zeros(na, ns) .+ initvalue
 end
 function defaultbuffer(learner::MonteCarlo, env, preprocessor)
     EpisodeBuffer(statetype = typeof(preprocessstate(preprocessor,

@@ -31,7 +31,7 @@ end
 # solve MDP
 
 function get_optimal_policy_given_values!(mdplearner::MDPLearner)
-    for state in findall(1 - mdplearner.mdp.isterminal)
+    for state in findall(x -> x == 0, mdplearner.mdp.isterminal)
         mdplearner.policy[state], vmax = argmaxvalue(mdplearner, state)
     end
     return mdplearner.policy
@@ -89,7 +89,7 @@ function value_iteration!(mdplearner::MDPLearner; eps = 1.e-8)
     diff = 1.
     values = zeros(mdplearner.mdp.ns)
     while diff > eps
-        for state in findall(1 - mdplearner.mdp.isterminal)
+        for state in findall(x -> x == 0, mdplearner.mdp.isterminal)
             amax, values[state] = argmaxvalue(mdplearner, state)
         end
         diff = norm(values - mdplearner.values)
@@ -105,7 +105,8 @@ function get_Q_values(mdplearner::MDPLearner)
 end
 
 function get_value(reward, trans_probs, γ)
-    return (sparse(eye(length(reward))) - γ * transpose(trans_probs)) \ reward
+    return (sparse(Matrix(1.0I, length(reward), length(reward))) - 
+            γ * transpose(trans_probs)) \ reward
 end
 
 update!(::MDPLearner) = Nothing

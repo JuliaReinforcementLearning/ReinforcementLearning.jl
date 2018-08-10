@@ -28,7 +28,7 @@ RLSetup(learner, env, stop; kargs...) = RLSetup(learner = learner,
                                                 kargs...)
 defaultpolicy(learner, buffer) = EpsilonGreedyPolicy(.1)
 function defaultbuffer(learner, env, preprocessor)
-    capacity = :nsteps in fieldnames(learner) ? learner.nsteps + 1 : 2
+    capacity = :nsteps in fieldnames(typeof(learner)) ? learner.nsteps + 1 : 2
     statetype = typeof(preprocessstate(preprocessor, getstate(env)[1]))
     if capacity < 0
         EpisodeBuffer(statetype = statetype)

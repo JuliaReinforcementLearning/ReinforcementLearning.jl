@@ -108,7 +108,7 @@ function treeMDP(na, depth;
     end
     cns = cumsum(ns)
     func = eval(Meta.parse("getprobvec" * init))
-    T = Array{SparseVector, 2}(na, cns[end])
+    T = Array{SparseVector, 2}(undef, na, cns[end])
     for i in 1:depth - 1
         for s in 1:ns[i]
             for a in 1:na

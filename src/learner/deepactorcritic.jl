@@ -44,12 +44,12 @@ function update!(learner::DeepActorCritic, b)
     h1 = learner.net(nmarkovgetindex(b.states, learner.nmarkov, learner.nmarkov))
     p1 = learner.policylayer(h1)
     v1 = learner.valuelayer(h1)[:]
-    r, γeff = discountedrewards(view(b.rewards, learner.nmarkov:endof(b.rewards)), 
-                                view(b.done, learner.nmarkov:endof(b.done)), 
+    r, γeff = discountedrewards(view(b.rewards, learner.nmarkov:lastindex(b.rewards)), 
+                                view(b.done, learner.nmarkov:lastindex(b.done)), 
                                 learner.γ)
     advantage = r - v1.data[1]
     if γeff > 0
-        h2 = learner.net(nmarkovgetindex(b.states, endof(b.states), learner.nmarkov))
+        h2 = learner.net(nmarkovgetindex(b.states, lastindex(b.states), learner.nmarkov))
         v2 = learner.valuelayer(h2)
         advantage += γeff * v2.data[1] 
     end

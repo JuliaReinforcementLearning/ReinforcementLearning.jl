@@ -61,7 +61,7 @@ function increasetrace!(traces::ReplacingTraces, state::Int, action)
     traces.trace[action, state] = 1.
 end
 function increasetrace!(traces::ReplacingTraces, state::Vector, action)
-    @inbounds for i in find(state)
+    @inbounds for i in findall(x -> x != 0, state)
         traces.trace[action, i] = state[i]
     end
 end
@@ -78,7 +78,7 @@ function increasetrace!(traces::AccumulatingTraces, state::Int, action)
     end
 end
 function increasetrace!(traces::AccumulatingTraces, state::Vector, action)
-    @inbounds for i in find(state)
+    @inbounds for i in findall(x -> x != 0, state)
         traces.trace[action, i] += state[i]
     end
 end
@@ -103,11 +103,11 @@ discounttraces!(t) = discounttraces!(t.trace, t.γλ, t.minimaltracevalue)
         dropzeros!(trace)
     end
 end
-@inline discounttraces!(trace, γλ, minimaltracevalue) = BLAS.scale!(γλ, trace)
+@inline discounttraces!(trace, γλ, minimaltracevalue) = lmul!(γλ, trace)
 @inline resettraces!(traces) = resettrace!(traces.trace)
-@inline resettrace!(trace) = BLAS.scale!(0., trace)
+@inline resettrace!(trace) = lmul!(0., trace)
 @inline function resettrace!(trace::SparseMatrixCSC)
-    BLAS.scale!(0., trace.nzval)
+    lmul!(0., trace.nzval)
     dropzeros!(trace)
 end
 
@@ -124,7 +124,7 @@ end
     end
 end
 @inline updatetraceandparams!(t::AbstractArray, params, factor) = 
-    BLAS.axpy!(factor, t, params)
+    axpy!(factor, t, params)
 
 
 function updatetrace!(traces, state, action)

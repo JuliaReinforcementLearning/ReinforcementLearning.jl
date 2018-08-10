@@ -1,4 +1,4 @@
-import ReinforcementLearning.preprocessstate
+import ReinforcementLearning: preprocessstate
 struct OneHotPreprocessor 
     ns::Int64
 end
@@ -44,56 +44,59 @@ for learner in [PolicyGradientBackward, EpisodicReinforce,
 end
 
 using Flux
-ns = 10; na = 4;
-env = MDP(ns = ns, na = na, init = "deterministic")
-policy = ForcedPolicy(rand(1:na, 200))
-learner = DQN(Linear(ns, na), replaysize = 2, updatetargetevery = 1, 
-              updateevery = 1, startlearningat = 1, 
-              opttype = x -> Flux.SGD(x, .1/2), 
-              minibatchsize = 1, doubledqn = false)
-x = RLSetup(learner = learner, 
-            preprocessor = OneHotPreprocessor(ns),
-            policy = policy,
-            environment = env, 
-            callbacks = [EvaluationPerT(10^3, MeanReward()), RecordAll()],
-            stoppingcriterion = ConstantNumberSteps(60))
-x2 = RLSetup(learner = QLearning(λ = 0, γ = .99, initvalue = 0., α = .1), 
-             policy = policy,
-             environment = env, 
-             callbacks = [EvaluationPerT(10^3, MeanReward()), RecordAll()], 
-             stoppingcriterion = ConstantNumberSteps(60))
-Random.seed!(445)
-reset!(env)
-learn!(x)
-Random.seed!(445)
-reset!(env)
-x2.policy.t = 1
-learn!(x2)
-@test x.learner.policynet.W ≈ x2.learner.params
-
 struct Id end 
 (l::Id)(x) = x
-ns = 10; na = 4;
-env = MDP(ns = ns, na = na, init = "deterministic")
-policy = ForcedPolicy(rand(1:na, 200))
-learner = DeepActorCritic(net = Id(), nh = 10, na = 4, αcritic = 0.,
-                          opttype = x -> Flux.SGD(x, .1), nsteps = 4)
-x = RLSetup(learner = learner, 
-            preprocessor = OneHotPreprocessor(ns),
-            policy = policy,
-            environment = env, 
-            callbacks = [EvaluationPerT(10^3, MeanReward()), RecordAll()],
-            stoppingcriterion = ConstantNumberSteps(5))
-x2 = RLSetup(learner = ActorCriticPolicyGradient(nsteps = 4, αcritic = 0.), 
-             policy = policy,
-             environment = env, 
-             callbacks = [EvaluationPerT(10^3, MeanReward()), RecordAll()], 
-             stoppingcriterion = ConstantNumberSteps(5))
-Random.seed!(445)
-reset!(env)
-learn!(x)
-Random.seed!(445)
-reset!(env)
-x2.policy.t = 1
-learn!(x2)
-@test x.learner.policylayer.W.data ≈ x2.learner.params
+function testlinfuncapproxflux()
+    ns = 10; na = 4;
+    env = MDP(ns = ns, na = na, init = "deterministic")
+    policy = ForcedPolicy(rand(1:na, 200))
+    learner = DQN(Linear(ns, na), replaysize = 2, updatetargetevery = 1, 
+                  updateevery = 1, startlearningat = 1, 
+                  opttype = x -> Flux.SGD(x, .1/2), 
+                  minibatchsize = 1, doubledqn = false)
+    x = RLSetup(learner = learner, 
+                preprocessor = OneHotPreprocessor(ns),
+                policy = policy,
+                environment = env, 
+                callbacks = [EvaluationPerT(10^3, MeanReward()), RecordAll()],
+                stoppingcriterion = ConstantNumberSteps(60))
+    x2 = RLSetup(learner = QLearning(λ = 0, γ = .99, initvalue = 0., α = .1), 
+                 policy = policy,
+                 environment = env, 
+                 callbacks = [EvaluationPerT(10^3, MeanReward()), RecordAll()], 
+                 stoppingcriterion = ConstantNumberSteps(60))
+    Random.seed!(445)
+    reset!(env)
+    learn!(x)
+    Random.seed!(445)
+    reset!(env)
+    x2.policy.t = 1
+    learn!(x2)
+    @test x.learner.policynet.W ≈ x2.learner.params
+
+    ns = 10; na = 4;
+    env = MDP(ns = ns, na = na, init = "deterministic")
+    policy = ForcedPolicy(rand(1:na, 200))
+    learner = DeepActorCritic(net = Id(), nh = 10, na = 4, αcritic = 0.,
+                              opttype = x -> Flux.SGD(x, .1), nsteps = 4)
+    x = RLSetup(learner = learner, 
+                preprocessor = OneHotPreprocessor(ns),
+                policy = policy,
+                environment = env, 
+                callbacks = [EvaluationPerT(10^3, MeanReward()), RecordAll()],
+                stoppingcriterion = ConstantNumberSteps(5))
+    x2 = RLSetup(learner = ActorCriticPolicyGradient(nsteps = 4, αcritic = 0.), 
+                 policy = policy,
+                 environment = env, 
+                 callbacks = [EvaluationPerT(10^3, MeanReward()), RecordAll()], 
+                 stoppingcriterion = ConstantNumberSteps(5))
+    Random.seed!(445)
+    reset!(env)
+    learn!(x)
+    Random.seed!(445)
+    reset!(env)
+    x2.policy.t = 1
+    learn!(x2)
+    @test x.learner.policylayer.W.data ≈ x2.learner.params
+end
+testlinfuncapproxflux()

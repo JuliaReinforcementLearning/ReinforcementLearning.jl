@@ -30,7 +30,6 @@ export ConstantNumberSteps
 
 Stops learning when the agent has finished 'N' episodes.
 """
-
 mutable struct ConstantNumberEpisodes
     N::Int64
     counter::Int64

@@ -41,7 +41,7 @@ function StateAggregator(lb::Vector, ub::Vector, nbins::Vector;
     if perdimension
         offsets = [0; cumsum(nbins[1:end-1])]
     else
-        offsets = foldl((x, n) -> [x...; x[end] * n], [1], nbins[1:end-1])
+        offsets = foldl((x, n) -> [x...; x[end] * n], nbins[1:end-1]; init = [1])
     end
     StateAggregator(Box(lb, ub), prod(nbins), nbins, offsets, perdimension)
 end

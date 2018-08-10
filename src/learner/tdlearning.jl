@@ -7,7 +7,7 @@
     nsteps::Int64 = 1
     initvalue::Float64 = 0.
     unseenvalue::Float64 = initvalue == Inf64 ? 0. : initvalue
-    params::Array{Float64, 2} = zeros(na, ns) + initvalue
+    params::Array{Float64, 2} = zeros(na, ns) .+ initvalue
     tracekind = DataType = λ == 0 ? NoTraces : ReplacingTraces
     traces::T = tracekind == NoTraces ? NoTraces() : tracekind(ns, na, λ, γ)
     endvaluepolicy::Tp = SarsaEndPolicy()

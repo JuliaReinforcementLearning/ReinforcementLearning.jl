@@ -71,7 +71,7 @@ export huberloss
         push!(policy.buffer, state)
         selectaction(policy.policy, 
                      learner.policynet(nmarkovgetindex(policy.buffer, 
-                                                endof(policy.buffer),
+                                                lastindex(policy.buffer),
                                                 learner.nmarkov)))
     end
 end
@@ -90,7 +90,7 @@ function update!(learner::DQN, b)
     indices = StatsBase.sample(1:length(b.rewards), learner.minibatchsize, 
                                replace = false)
     qa = learner.net(nmarkovgetindex(b.states, indices, learner.nmarkov))
-    qat = learner.targetnet(nmarkovgetindex(b.states, indices + 1, learner.nmarkov))
+    qat = learner.targetnet(nmarkovgetindex(b.states, indices .+ 1, learner.nmarkov))
     q = selecta(qa, b.actions[indices])
     rs = Float64[]
     for (k, i) in enumerate(indices)

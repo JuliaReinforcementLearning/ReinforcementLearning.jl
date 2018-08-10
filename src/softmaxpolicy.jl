@@ -44,7 +44,7 @@ function getactionprobabilities(policy::AbstractSoftmaxPolicy, values)
     end
 end
 
-@inline getexpvals(p::SoftmaxPolicy, values) = exp.(p.β .* (values - maximum(values)))
+@inline getexpvals(p::SoftmaxPolicy, values) = exp.(p.β .* (values .- maximum(values)))
 
 # Samples from Categorical(exp(input)/sum(exp(input)))
 function actsoftmax(policy::SoftmaxPolicy, values)

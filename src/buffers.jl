@@ -53,11 +53,11 @@ function ArrayCircularBuffer(arraytype, datatype, elemshape, capacity)
     ArrayCircularBuffer(arraytype(zeros(datatype, elemshape..., capacity)),
                         capacity, 0, 0, false)
 end
-import Base.push!, Base.view, Base.endof, Base.getindex
+import Base.push!, Base.view, Base.lastindex, Base.getindex
 for N in 2:5
-    @eval current_module() begin
+    @eval @__MODULE__() begin
         function push!(a::ArrayCircularBuffer{<:AbstractArray{T, $N}}, x) where T
-            setindex!(a.data, x, $(fill(Colon(), N-1)...), a.counter + 1)
+            a.data[$(fill(Colon(), N-1)...), a.counter + 1] .= x
             a.counter += 1
             a.counter = a.counter % a.capacity
             if a.full 
@@ -69,9 +69,9 @@ for N in 2:5
         end
     end
     for func in [:view, :getindex]
-        @eval current_module() begin
+        @eval @__MODULE__() begin
             @inline function $func(a::ArrayCircularBuffer{<:AbstractArray{T, $N}}, i) where T
-                idx = (a.start + i - 1) .% a.capacity + 1
+                idx = (a.start .+ i .- 1) .% a.capacity .+ 1
                 $func(a.data, $(fill(Colon(), N-1)...), idx)
             end
             @inline function $(Symbol(:nmarkov, func))(a::ArrayCircularBuffer{<:AbstractArray{T, $N}}, i, nmarkov) where T
@@ -92,7 +92,7 @@ for N in 2:5
         end
     end
 end
-endof(a::ArrayCircularBuffer) = a.full ? a.capacity : a.counter
+lastindex(a::ArrayCircularBuffer) = a.full ? a.capacity : a.counter
 
 struct ArrayStateBuffer{Ts, Ta}
     states::ArrayCircularBuffer{Ts}

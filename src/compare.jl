@@ -12,7 +12,7 @@ intermediate results). For each run, `getvalue(rlsetup.callbacks[callbackid])`
 gets entered as result in a DataFrame with columns "name", "result", "seed".
 """
 function compare(rlsetupcreators::Dict, N; callbackid = 1, verbose = false)
-    res = @parallel (hcat) for t in 1:N
+    res = @distributed (hcat) for t in 1:N
         seed = rand(1:typemax(UInt64)-1)
         tmp = []
         for (name, setupcreator) in rlsetupcreators

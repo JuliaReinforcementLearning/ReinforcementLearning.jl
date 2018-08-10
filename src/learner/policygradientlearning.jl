@@ -28,7 +28,7 @@ abstract type AbstractPolicyGradient end
     γ::Float64 = .9
     α::Float64 = .1
     initvalue::Float64 = 0.
-    params::Array{Float64, 2} = zeros(na, ns) + initvalue
+    params::Array{Float64, 2} = zeros(na, ns) .+ initvalue
     traces::AccumulatingTraces = AccumulatingTraces(ns, na, 1., γ, 
                                                     trace = zeros(na, ns))
     biascorrector::T = NoBiasCorrector()
@@ -51,7 +51,7 @@ export PolicyGradientBackward
     γ::Float64 = .9
     α::Float64 = .1
     initvalue::Float64 = 0.
-    params::Array{Float64, 2} = zeros(na, ns) + initvalue
+    params::Array{Float64, 2} = zeros(na, ns) .+ initvalue
     biascorrector::Tb = NoBiasCorrector()
     nsteps::Int64 = typemax(Int64)
 end
@@ -118,7 +118,7 @@ export Critic
 """
     Critic(; γ = .9, α = .1, ns = 10, initvalue = 0.)
 """
-Critic(; γ = .9, α = .1, ns = 10, initvalue = 0.) = Critic(α, γ, zeros(ns) + initvalue)
+Critic(; γ = .9, α = .1, ns = 10, initvalue = 0.) = Critic(α, γ, zeros(ns) .+ initvalue)
 function correct(corrector::Critic, buffer, t = 1, G = buffer.rewards[t])
     s = buffer.states[t]
     δ = tderror(buffer.rewards, buffer.done, corrector.γ,
