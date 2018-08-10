@@ -1,6 +1,7 @@
 module ReinforcementLearning
 
-using DataStructures, Parameters, SparseArrays, LinearAlgebra, Distributed
+using DataStructures, Parameters, SparseArrays, LinearAlgebra, Distributed,
+Statistics
 
 include("helper.jl")
 include("buffers.jl")
