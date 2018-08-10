@@ -17,4 +17,4 @@ p = RandomProjection(rand(20, 2))
 
 p0 = StateAggregator(0, 1, 5, 2)
 p = TilingStateAggregator(p0, 4)
-@test length(find(preprocessstate(p, [.1, 0]))) == 4
+@test length(findall(preprocessstate(p, [.1, 0]))) == 4

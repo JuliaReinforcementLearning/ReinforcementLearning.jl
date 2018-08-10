@@ -25,7 +25,7 @@ Returns a treeMDP with random rewards.
 """
 function DetTreeMDPwithinrew(; args...)
     mdp = DetTreeMDP(; args...)
-    nonterminals = find(1 - mdp.isterminal)
+    nonterminals = findall(1 - mdp.isterminal)
     mdp.reward[:, nonterminals] = -rand(mdp.na, length(nonterminals))
     mdp
 end

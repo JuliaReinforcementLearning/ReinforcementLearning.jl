@@ -24,7 +24,7 @@ export SoftmaxPolicy
 
 function selectaction(policy::AbstractSoftmaxPolicy, values)
     if maximum(values) == Inf64
-        rand(find(v -> v == Inf64, values))
+        rand(findall(v -> v == Inf64, values))
     else
         actsoftmax(policy, values)
     end
@@ -33,7 +33,7 @@ end
 function getactionprobabilities(policy::AbstractSoftmaxPolicy, values)
     if maximum(values) == Inf64
         p = zeros(length(values))
-        a = find(v -> v == Inf64, values)
+        a = findall(v -> v == Inf64, values)
         for i in a
             p[i] = 1/length(a)
         end
@@ -49,7 +49,7 @@ end
 # Samples from Categorical(exp(input)/sum(exp(input)))
 function actsoftmax(policy::SoftmaxPolicy, values)
     if policy.β == Inf
-        indmax(values)
+        argmax(values)
     else
         actsoftmax(policy.β .* values)
     end

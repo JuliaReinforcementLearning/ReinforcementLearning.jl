@@ -79,7 +79,7 @@ keyword init determines how to construct the transition probabilites (see also
 """
 function MDP(ns, na; init = "random")
     r = randn(na, ns)
-    func = eval(parse("getprobvec" * init))
+    func = eval(Meta.parse("getprobvec" * init))
     T = [func(ns) for a in 1:na, s in 1:ns]
     MDP(ns, na, rand(1:ns), T, r,
         1:ns, zeros(ns))
@@ -107,7 +107,7 @@ function treeMDP(na, depth;
         ns = branchingfactor.^(0:depth - 1)
     end
     cns = cumsum(ns)
-    func = eval(parse("getprobvec" * init))
+    func = eval(Meta.parse("getprobvec" * init))
     T = Array{SparseVector, 2}(na, cns[end])
     for i in 1:depth - 1
         for s in 1:ns[i]
@@ -145,7 +145,7 @@ the same value.
 """
 function setterminalstates!(mdp, range)
     mdp.isterminal[range] .= 1
-    for s in find(mdp.isterminal)
+    for s in findall(mdp.isterminal)
         mdp.reward[:, s] .= mean(mdp.reward[:, s])
         for a in 1:mdp.na
             emptytransprob!(mdp.trans_probs[a, s])

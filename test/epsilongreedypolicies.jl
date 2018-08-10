@@ -2,7 +2,7 @@ import ReinforcementLearning: selectaction
 
 function empiricalactionprop(p, v; n = 10^6)
     res = [selectaction(p, v) for _ in 1:n]
-    map(x -> length(find(i -> i == x, res)), 1:length(v))./n
+    map(x -> length(findall(i -> i == x, res)), 1:length(v))./n
 end
 
 for (v, rO, rVO, r, rP) in (([-9., 12., Inf64], [0, .5, .5], [0, 0., 1.], 
