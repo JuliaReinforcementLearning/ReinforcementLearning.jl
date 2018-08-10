@@ -315,8 +315,8 @@ end
 """
     Visualize(; wait = .15)
 
-A callback to be used in an `RLSetup` to visualize a maze during running or 
-learning.
+A callback to be used in an `RLSetup` to visualize an environment during 
+running or learning.
 """
 Visualize(; wait = .15) = Visualize(wait)
 export Visualize
