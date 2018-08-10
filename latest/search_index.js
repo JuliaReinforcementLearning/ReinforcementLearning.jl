@@ -917,7 +917,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.Visualize",
     "category": "method",
-    "text": "Visualize(; wait = .15)\n\nA callback to be used in an RLSetup to visualize a maze during running or  learning.\n\n\n\n"
+    "text": "Visualize(; wait = .15)\n\nA callback to be used in an RLSetup to visualize an environment during  running or learning.\n\n\n\n"
 },
 
 {
