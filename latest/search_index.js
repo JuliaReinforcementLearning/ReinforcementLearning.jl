@@ -705,14 +705,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "preprocessors/#ReinforcementLearning.togpu-Tuple{Any}",
-    "page": "Preprocessors",
-    "title": "ReinforcementLearning.togpu",
-    "category": "method",
-    "text": "togpu(x)\n\nSend array x to GPU. Requires the using CuArrays.\n\n\n\n"
-},
-
-{
     "location": "preprocessors/#ReinforcementLearning.Box",
     "page": "Preprocessors",
     "title": "ReinforcementLearning.Box",
