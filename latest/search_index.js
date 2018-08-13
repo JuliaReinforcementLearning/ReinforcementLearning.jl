@@ -609,6 +609,38 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "preprocessors/#ReinforcementLearning.ImageCrop",
+    "page": "Preprocessors",
+    "title": "ReinforcementLearning.ImageCrop",
+    "category": "type",
+    "text": "struct ImageCrop\n    xidx::UnitRange{Int64}\n    yidx::UnitRange{Int64}\n\nSelect indices xidx and yidx from a 2 or 3 dimensional array.\n\nExample:\n\nc = ImageCrop(2:5, 3:2:9)\nc([10i + j for i in 1:10, j in 1:10])\n\n\n\n"
+},
+
+{
+    "location": "preprocessors/#ReinforcementLearning.ImagePreprocessor",
+    "page": "Preprocessors",
+    "title": "ReinforcementLearning.ImagePreprocessor",
+    "category": "type",
+    "text": "struct ImagePreprocessor\n    size\n    chain\n\nUse chain to preprocess a grayscale or color image of size = (width, height).\n\nExample:\n\np = ImagePreprocessor((100, 100), \n                      [ImageResizeNearestNeighbour((50, 80)),\n                       ImageCrop(1:30, 10:80),\n                       x -> x ./ 256])\nx = rand(UInt8, 100, 100)\ns = ReinforcementLearning.preprocessstate(p, x)\n\n\n\n"
+},
+
+{
+    "location": "preprocessors/#ReinforcementLearning.ImageResizeBilinear",
+    "page": "Preprocessors",
+    "title": "ReinforcementLearning.ImageResizeBilinear",
+    "category": "type",
+    "text": "struct ImageResizeBilinear\n    outdim::Tuple{Int64, Int64}\n\nResize any image to outdim = (width, height) with bilinear interpolation.\n\nExample:\n\nr = ImageResizeBilinear((50, 50))\nr(rand(200, 200))\nr(rand(UInt8, 3, 100, 100))\n\n\n\n"
+},
+
+{
+    "location": "preprocessors/#ReinforcementLearning.ImageResizeNearestNeighbour",
+    "page": "Preprocessors",
+    "title": "ReinforcementLearning.ImageResizeNearestNeighbour",
+    "category": "type",
+    "text": "struct ImageResizeNearestNeighbour\n    outdim::Tuple{Int64, Int64}\n\nResize any image to outdim = (width, height) by nearest-neighbour interpolation (i.e. subsampling).\n\nExample:\n\nr = ImageResizeNearestNeighbour((50, 50))\nr(rand(200, 200))\nr(rand(UInt8, 3, 100, 100))\n\n\n\n"
+},
+
+{
     "location": "preprocessors/#ReinforcementLearning.NoPreprocessor",
     "page": "Preprocessors",
     "title": "ReinforcementLearning.NoPreprocessor",
@@ -670,6 +702,14 @@ var documenterSearchIndex = {"docs": [
     "title": "ReinforcementLearning.TilingStateAggregator",
     "category": "type",
     "text": "struct TilingStateAggregator{T <: Array{StateAggregator,1}}\n    ns::Int64\n    tiling::T\n\n\n\n"
+},
+
+{
+    "location": "preprocessors/#ReinforcementLearning.togpu-Tuple{Any}",
+    "page": "Preprocessors",
+    "title": "ReinforcementLearning.togpu",
+    "category": "method",
+    "text": "togpu(x)\n\nSend array x to GPU. Requires the using CuArrays.\n\n\n\n"
 },
 
 {
