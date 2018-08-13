@@ -2,7 +2,7 @@ VERSION < v"0.7.0-beta2.199" && __precompile__()
 module ReinforcementLearning
 
 using DataStructures, Parameters, Compat.SparseArrays, Compat.LinearAlgebra,
-Compat.Distributed, Compat.Statistics, Compat.Dates, Compat
+Compat.Distributed, Compat.Statistics, Compat.Dates, Compat, Requires
 using Compat: rmul!, @info
 using Compat.Statistics: mean
 

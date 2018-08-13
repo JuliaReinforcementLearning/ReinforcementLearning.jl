@@ -266,12 +266,14 @@ struct ImageCrop{Tx, Ty}
 end
 (c::ImageCrop)(x::Array{T, 2}) where T = x[c.xidx, c.yidx]
 (c::ImageCrop)(x::Array{T, 3}) where T = x[:, c.xidx, c.yidx]
+@require CuArrays begin
 """
     togpu(x)
 
 Send array `x` to GPU. Requires the `using CuArrays`.
 """
-togpu(x) = CuArrays.adapt(CuArray, x)
+togpu(x) = CuArrays.adapt(CuArrays.CuArray, x)
+end
 
 export ImagePreprocessor, ImageCrop, ImageResizeNearestNeighbour,
 ImageResizeBilinear, togpu
