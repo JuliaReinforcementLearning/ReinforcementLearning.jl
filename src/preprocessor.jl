@@ -272,7 +272,7 @@ end
 
 Send array `x` to GPU. Requires the `using CuArrays`.
 """
-togpu(x) = CuArrays.adapt(CuArray, x)
+togpu(x) = CuArrays.adapt(CuArrays.CuArray, x)
 end
 
 export ImagePreprocessor, ImageCrop, ImageResizeNearestNeighbour,
