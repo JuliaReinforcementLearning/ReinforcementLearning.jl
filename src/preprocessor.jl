@@ -154,3 +154,122 @@ struct SparseRandomProjection
 end
 export SparseRandomProjection
 preprocessstate(p::SparseRandomProjection, s) = clamp.(p.w * s + p.b, 0, Inf)
+
+"""
+    struct ImagePreprocessor
+        size
+        chain
+
+Use `chain` to preprocess a grayscale or color image of `size = (width, height)`.
+
+Example:
+```
+p = ImagePreprocessor((100, 100), 
+                      [ImageResizeNearestNeighbour((50, 80)),
+                       ImageCrop(1:30, 10:80),
+                       x -> x ./ 256])
+x = rand(UInt8, 100, 100)
+s = ReinforcementLearning.preprocessstate(p, x)
+```
+"""
+@with_kw struct ImagePreprocessor{Ts}
+    size::Ts
+    chain::Array{Any, 1}
+end
+preprocessstate(p::ImagePreprocessor, s) = foldl((x, p) -> p(x),
+                                                 reshape(s, p.size),
+                                                 p.chain)
+"""
+    struct ImageResizeNearestNeighbour
+        outdim::Tuple{Int64, Int64}
+
+Resize any image to `outdim = (width, height)` by nearest-neighbour
+interpolation (i.e. subsampling).
+
+Example:
+```
+r = ImageResizeNearestNeighbour((50, 50))
+r(rand(200, 200))
+r(rand(UInt8, 3, 100, 100))
+```
+"""
+struct ImageResizeNearestNeighbour
+    outdim::Tuple{Int64, Int64}
+end
+function (r::ImageResizeNearestNeighbour)(x)
+    indim = size(x)
+    xidx = round.(Int64, collect(1:r.outdim[1]) .* indim[end - 1]/r.outdim[1])
+    yidx = round.(Int64, collect(1:r.outdim[2]) .* indim[end]/r.outdim[2])
+    length(indim) > 2 ? x[:, xidx, yidx] : x[xidx, yidx]
+end
+
+"""
+    struct ImageResizeBilinear
+        outdim::Tuple{Int64, Int64}
+
+Resize any image to `outdim = (width, height)` with bilinear interpolation.
+
+Example:
+```
+r = ImageResizeBilinear((50, 50))
+r(rand(200, 200))
+r(rand(UInt8, 3, 100, 100))
+```
+"""
+struct ImageResizeBilinear
+    outdim::Tuple{Int64, Int64}
+end
+for N in 2:3
+    @eval @__MODULE__() function (p::ImageResizeBilinear)(x::Array{T, $N}) where T
+        indim = size(x)
+        sx, sy = (indim[end-1] - 1)/(p.outdim[1] + 1), (indim[end] - 1)/(p.outdim[2] + 1)
+        $(N == 2 ? :(y = zeros(p.outdim...)) : :(y = zeros(3, p.outdim...)))
+        for i in 1:p.outdim[1]
+            for j in 1:p.outdim[2]
+                r = floor(Int64, i*sx)
+                c = floor(Int64, j*sy)
+                dr = i*sx - r; dc = j*sy - c
+                $(N == 2 ? :(
+                y[i, j] = x[r + 1, c + 1] * (1 - dr) * (1 - dc) + 
+                          x[r + 2, c + 1] * dr * (1 - dc) + 
+                          x[r + 1, c + 2] * (1 - dr) * dc + 
+                          x[r + 2, c + 2] * dr * dc) : 
+                           :(
+                y[:, i, j] .= x[:, r + 1, c + 1] * (1 - dr) * (1 - dc) .+ 
+                              x[:, r + 2, c + 1] * dr * (1 - dc) .+ 
+                              x[:, r + 1, c + 2] * (1 - dr) * dc .+ 
+                              x[:, r + 2, c + 2] * dr * dc))
+            end
+        end
+        y
+    end
+end
+
+"""
+    struct ImageCrop
+        xidx::UnitRange{Int64}
+        yidx::UnitRange{Int64}
+
+Select indices `xidx` and `yidx` from a 2 or 3 dimensional array.
+
+Example:
+```
+c = ImageCrop(2:5, 3:2:9)
+c([10i + j for i in 1:10, j in 1:10])
+```
+"""
+struct ImageCrop{Tx, Ty}
+    xidx::Tx
+    yidx::Ty
+end
+(c::ImageCrop)(x::Array{T, 2}) where T = x[c.xidx, c.yidx]
+(c::ImageCrop)(x::Array{T, 3}) where T = x[:, c.xidx, c.yidx]
+"""
+    togpu(x)
+
+Send array `x` to GPU. Requires the `using CuArrays`.
+"""
+togpu(x) = CuArrays.adapt(CuArray, x)
+
+export ImagePreprocessor, ImageCrop, ImageResizeNearestNeighbour,
+ImageResizeBilinear, togpu

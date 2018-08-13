@@ -2,6 +2,7 @@ __precompile__()
 
 module ReinforcementLearning
 
+using Compat: @__MODULE__
 using DataStructures, Parameters
 
 include("helper.jl")
