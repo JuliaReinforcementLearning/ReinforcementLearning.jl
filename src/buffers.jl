@@ -50,10 +50,11 @@ mutable struct ArrayCircularBuffer{T}
     full::Bool
 end
 function ArrayCircularBuffer(arraytype, datatype, elemshape, capacity)
-    ArrayCircularBuffer(arraytype(zeros(datatype, elemshape..., capacity)),
+    ArrayCircularBuffer(arraytype(zeros(datatype, 
+                                        convert(Dims, (elemshape..., capacity)))),
                         capacity, 0, 0, false)
 end
-import Base.push!, Base.view, Base.lastindex, Base.getindex
+import Base.push!, Base.view, Compat.lastindex, Base.getindex
 for N in 2:5
     @eval @__MODULE__() begin
         function push!(a::ArrayCircularBuffer{<:AbstractArray{T, $N}}, x) where T

@@ -1,7 +1,20 @@
+VERSION < v"0.7.0-beta2.199" && __precompile__()
 module ReinforcementLearning
 
-using DataStructures, Parameters, SparseArrays, LinearAlgebra, Distributed,
-Statistics
+using DataStructures, Parameters, Compat.SparseArrays, Compat.LinearAlgebra,
+Compat.Distributed, Compat.Statistics, Compat.Dates, Compat
+using Compat: rmul!, @info
+using Compat.Statistics: mean
+
+if VERSION < v"0.7.0-beta2.199" 
+    # these are ugly hacks for compatibility
+    macro distributed(x...); :(@parallel($(esc(x[1])), $(esc(x[2])))) end
+    import Compat.foldl
+    foldl(op::Function, itr; init = 0) = foldl(op, init, itr) 
+    const seed! = srand
+else
+    using Random: seed!
+end
 
 include("helper.jl")
 include("buffers.jl")

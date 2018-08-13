@@ -103,11 +103,11 @@ discounttraces!(t) = discounttraces!(t.trace, t.γλ, t.minimaltracevalue)
         dropzeros!(trace)
     end
 end
-@inline discounttraces!(trace, γλ, minimaltracevalue) = lmul!(γλ, trace)
+@inline discounttraces!(trace, γλ, minimaltracevalue) = rmul!(trace, γλ)
 @inline resettraces!(traces) = resettrace!(traces.trace)
-@inline resettrace!(trace) = lmul!(0., trace)
+@inline resettrace!(trace) = rmul!(trace, 0.)
 @inline function resettrace!(trace::SparseMatrixCSC)
-    lmul!(0., trace.nzval)
+    rmul!(trace.nzval, 0.)
     dropzeros!(trace)
 end
 

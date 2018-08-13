@@ -5,7 +5,7 @@ struct Linear{Ts}
 end
 export Linear
 function Linear(in::Int, out::Int; 
-                T = Float64, initW = (x...) -> zeros(T, x...))
+                T = Float64, initW = (out, in) -> zeros(T, out, in))
     Linear(Flux.param(initW(out, in)))
 end
 (a::Linear)(x) = a.W * x

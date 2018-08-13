@@ -12,20 +12,20 @@ intermediate results). For each run, `getvalue(rlsetup.callbacks[callbackid])`
 gets entered as result in a DataFrame with columns "name", "result", "seed".
 """
 function compare(rlsetupcreators::Dict, N; callbackid = 1, verbose = false)
-    res = @distributed (hcat) for t in 1:N
+    res = @distributed(hcat, for t in 1:N
         seed = rand(1:typemax(UInt64)-1)
         tmp = []
         for (name, setupcreator) in rlsetupcreators
             if verbose
-                info("$(now()) \tStarting comparison $t, setup $name with seed $seed.")
+                @info("$(now()) \tStarting comparison $t, setup $name with seed $seed.")
             end
-            srand(seed)
+            seed!(seed)
             rlsetup = setupcreator(t)
             learn!(rlsetup)
             push!(tmp, [name, getvalue(rlsetup.callbacks[callbackid]), seed])
         end
         hcat(tmp...)
-    end
+    end)
     DataFrame(name = res[1,:], result = res[2,:], seed = res[3,:])
 end
 export compare

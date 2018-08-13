@@ -20,12 +20,12 @@ function testsmallbackups()
     @test 2 * [γ^2; γ; γ^3; γ^2; γ^2; 1] == learner.V
 
     mdp = DetTreeMDP(na = 2, depth = 2)
-    Random.seed!(123)
+    seed!(123)
     x = RLSetup(SmallBackups(ns = mdp.ns, na = mdp.na, γ = .99, initvalue = 0),
                 mdp, ConstantNumberSteps(10^4));
     learn!(x)
     reset!(mdp)
-    Random.seed!(123)
+    seed!(123)
     y = RLSetup(SmallBackups(ns = mdp.ns, na = mdp.na, γ = .99, initvalue = Inf64),
                 mdp, ConstantNumberSteps(10^4));
     learn!(y)

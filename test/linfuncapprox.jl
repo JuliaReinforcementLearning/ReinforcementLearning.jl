@@ -11,10 +11,10 @@ for λ in [0, .8]
                 preprocessor = OneHotPreprocessor(mdp.ns),
                 environment = mdp,
                 stoppingcriterion = ConstantNumberSteps(100))
-    Random.seed!(124)
+    seed!(124)
     s0 = mdp.state
     learn!(x)
-    Random.seed!(124)
+    seed!(124)
     mdp.state = s0
     y = RLSetup(learner = QLearning(initvalue = 0., λ = λ,
                                     tracekind = AccumulatingTraces), 
@@ -31,10 +31,10 @@ for learner in [PolicyGradientBackward, EpisodicReinforce,
                 preprocessor = OneHotPreprocessor(mdp.ns), 
                 environment = mdp,
                 stoppingcriterion = ConstantNumberSteps(100))
-    Random.seed!(124)
+    seed!(124)
     s0 = mdp.state
     learn!(x)
-    Random.seed!(124)
+    seed!(124)
     mdp.state = s0
     y = RLSetup(learner = learner(initvalue = 0.), 
                 environment = mdp,
@@ -65,10 +65,10 @@ function testlinfuncapproxflux()
                  environment = env, 
                  callbacks = [EvaluationPerT(10^3, MeanReward()), RecordAll()], 
                  stoppingcriterion = ConstantNumberSteps(60))
-    Random.seed!(445)
+    seed!(445)
     reset!(env)
     learn!(x)
-    Random.seed!(445)
+    seed!(445)
     reset!(env)
     x2.policy.t = 1
     learn!(x2)
@@ -90,10 +90,10 @@ function testlinfuncapproxflux()
                  environment = env, 
                  callbacks = [EvaluationPerT(10^3, MeanReward()), RecordAll()], 
                  stoppingcriterion = ConstantNumberSteps(5))
-    Random.seed!(445)
+    seed!(445)
     reset!(env)
     learn!(x)
-    Random.seed!(445)
+    seed!(445)
     reset!(env)
     x2.policy.t = 1
     learn!(x2)

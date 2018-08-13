@@ -1,4 +1,4 @@
-Random.seed!(123)
+seed!(123)
 function learnmdp1()
     mdp = MDP(ns = 5, na = 3); 
     γ = .5
