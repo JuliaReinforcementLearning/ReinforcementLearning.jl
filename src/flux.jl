@@ -9,7 +9,11 @@ function Linear(in::Int, out::Int;
     Linear(Flux.param(initW(out, in)))
 end
 (a::Linear)(x) = a.W * x
-Flux.treelike(Linear)
+@static if VERSION < v"0.7.0-beta2.199" 
+    Flux.treelike(Linear)
+else
+    Flux.@treelike(Linear)
+end
 
 Base.show(io::IO, l::Linear) = print(io, "Linear( $(size(l.W, 2)), $(size(l.W, 1)))")
 
