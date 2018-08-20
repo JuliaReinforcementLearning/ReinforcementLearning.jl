@@ -12,9 +12,28 @@ if VERSION < v"0.7.0-beta2.199"
     import Compat.foldl
     foldl(op::Function, itr; init = 0) = foldl(op, init, itr) 
     const seed! = srand
+    @require CuArrays begin
+    """
+        togpu(x)
+
+    Send array `x` to GPU. Requires the `using CuArrays`.
+    """
+    togpu(x) = CuArrays.adapt(CuArrays.CuArray, x)
+    end
 else
     using Random: seed!
+    function __init__()
+        @require CuArrays="3a865a2d-5b23-5a0f-bc46-62713ec82fae" begin
+        """
+            togpu(x)
+
+        Send array `x` to GPU. Requires the `using CuArrays`.
+        """
+        togpu(x) = CuArrays.adapt(CuArrays.CuArray, x)
+        end
+    end
 end
+
 
 include("helper.jl")
 include("buffers.jl")
