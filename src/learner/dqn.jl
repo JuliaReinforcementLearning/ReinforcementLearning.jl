@@ -13,7 +13,9 @@
         minibatchsize::Int64 = 32
         doubledqn::Bool = true
         nmarkov::Int64 = 1
+        nsteps::Int64 = 1
         replaysize::Int64 = 10^4
+        loss::Function = Flux.mse
 """
 @with_kw mutable struct DQN{Tnet,TnetT,ToptT,Topt}
     γ::Float64 = .99
@@ -29,6 +31,7 @@
     minibatchsize::Int64 = 32
     doubledqn::Bool = true
     nmarkov::Int64 = 1
+    nsteps::Int64 = 1
     replaysize::Int64 = 10^4
     loss::Function = Flux.mse
 end
@@ -87,14 +90,19 @@ function update!(learner::DQN, b)
     end
     (learner.t < learner.startlearningat || 
      learner.t % learner.updateevery != 0) && return
-    indices = StatsBase.sample(1:length(b.rewards), learner.minibatchsize, 
+    indices = StatsBase.sample(1:length(b.rewards) - learner.nsteps + 1, 
+                               learner.minibatchsize, 
                                replace = false)
     qa = learner.net(nmarkovgetindex(b.states, indices, learner.nmarkov))
-    qat = learner.targetnet(nmarkovgetindex(b.states, indices .+ 1, learner.nmarkov))
+    qat = learner.targetnet(nmarkovgetindex(b.states, 
+                                            indices .+ learner.nsteps, 
+                                            learner.nmarkov))
     q = selecta(qa, b.actions[indices])
     rs = Float64[]
     for (k, i) in enumerate(indices)
-        r, γeff = discountedrewards(b.rewards[i], b.done[i], learner.γ)
+        r, γeff = discountedrewards(b.rewards[i:i + learner.nsteps - 1], 
+                                    b.done[i:i + learner.nsteps - 1], 
+                                    learner.γ)
         if γeff > 0
             if learner.doubledqn
                 r += γeff * qat[argmax(qa.data[:,k]), k]
