@@ -132,7 +132,7 @@ function callback!(c::Progress, rlsetup, sraw, a, r, done)
         if lastvaluestring != ""
             lastvaluestring = "latest " * lastvaluestring
         end
-        info("$(now())\t $(lpad(stop.counter, 9))/$(stop.N) $(progressunit(stop))\t $lastvaluestring.")
+        @info("$(now())\t $(lpad(stop.counter, 9))/$(stop.N) $(progressunit(stop))\t $lastvaluestring.")
     end
 end
 
