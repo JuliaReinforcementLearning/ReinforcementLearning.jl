@@ -389,7 +389,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.DQN",
     "category": "type",
-    "text": "mutable struct DQN{Tnet,TnetT,ToptT,Topt}\n    γ::Float64 = .99\n    net::TnetT\n    targetnet::Tnet = Flux.mapleaves(Flux.Tracker.data, deepcopy(net))\n    policynet::Tnet = Flux.mapleaves(Flux.Tracker.data, net)\n    updatetargetevery::Int64 = 500\n    t::Int64 = 0\n    updateevery::Int64 = 1\n    opttype::ToptT = Flux.ADAM\n    opt::Topt = opttype(Flux.params(net))\n    startlearningat::Int64 = 10^3\n    minibatchsize::Int64 = 32\n    doubledqn::Bool = true\n    nmarkov::Int64 = 1\n    replaysize::Int64 = 10^4\n\n\n\n"
+    "text": "mutable struct DQN{Tnet,TnetT,ToptT,Topt}\n    γ::Float64 = .99\n    net::TnetT\n    targetnet::Tnet = Flux.mapleaves(Flux.Tracker.data, deepcopy(net))\n    policynet::Tnet = Flux.mapleaves(Flux.Tracker.data, net)\n    updatetargetevery::Int64 = 500\n    t::Int64 = 0\n    updateevery::Int64 = 1\n    opttype::ToptT = Flux.ADAM\n    opt::Topt = opttype(Flux.params(net))\n    startlearningat::Int64 = 10^3\n    minibatchsize::Int64 = 32\n    doubledqn::Bool = true\n    nmarkov::Int64 = 1\n    nsteps::Int64 = 1\n    replaysize::Int64 = 10^4\n    loss::Function = Flux.mse\n\n\n\n"
 },
 
 {
