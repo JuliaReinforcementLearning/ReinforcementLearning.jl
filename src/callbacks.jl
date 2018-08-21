@@ -98,12 +98,14 @@ end
 @inline incrementepsilon(policy, val) = policy.ϵ += val
 function callback!(c::LinearDecreaseEpsilon, rlsetup, sraw, a, r, done)
     c.t += 1
-    if c.t == 1 setepsilon(rlsetup.policy, c.initval)
+    if c.t == 1 
+        setepsilon(rlsetup.policy, c.initval)
     elseif c.t >= c.start && c.t < c.stop
         incrementepsilon(rlsetup.policy, c.step)
-    else
+    elseif c.t == c.stop
         setepsilon(rlsetup.policy, c.finalval)
     end
+    nothing
 end
 
 """
