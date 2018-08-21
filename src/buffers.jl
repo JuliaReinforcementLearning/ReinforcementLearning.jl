@@ -58,7 +58,8 @@ import Base.push!, Base.view, Compat.lastindex, Base.getindex
 for N in 2:5
     @eval @__MODULE__() begin
         function push!(a::ArrayCircularBuffer{<:AbstractArray{T, $N}}, x) where T
-            a.data[$(fill(Colon(), N-1)...), a.counter + 1] .= x
+            n = prod(size(x))
+            setindex!(a.data, x, a.counter*n + 1:(a.counter + 1)*n)
             a.counter += 1
             a.counter = a.counter % a.capacity
             if a.full 
