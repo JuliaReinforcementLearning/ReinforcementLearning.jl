@@ -11,7 +11,7 @@ has a single integer argument (id of the comparison; useful for saving
 intermediate results). For each run, `getvalue(rlsetup.callbacks[callbackid])`
 gets entered as result in a DataFrame with columns "name", "result", "seed".
 """
-function compare(rlsetupcreators::Dict, N; callbackid = 1, verbose = false)
+function compare(rlsetupcreators, N; callbackid = 1, verbose = false)
     res = @distributed(hcat, for t in 1:N
         seed = rand(1:typemax(UInt64)-1)
         tmp = []
