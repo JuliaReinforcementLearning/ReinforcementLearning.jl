@@ -1,6 +1,7 @@
 """
     mutable struct DQN{Tnet,TnetT,ToptT,Topt}
         γ::Float64 = .99
+        na::Int64
         net::TnetT
         targetnet::Tnet = Flux.mapleaves(Flux.Tracker.data, deepcopy(net))
         policynet::Tnet = Flux.mapleaves(Flux.Tracker.data, net)
@@ -19,6 +20,7 @@
 """
 @with_kw mutable struct DQN{Tnet,TnetT,ToptT,Topt}
     γ::Float64 = .99
+    na::Int64
     net::TnetT
     policynet::Tnet = Flux.mapleaves(Flux.Tracker.data, net)
     targetnet::Tnet = deepcopy(policynet)
@@ -36,7 +38,22 @@
     loss::Function = Flux.mse
 end
 export DQN
-DQN(net; kargs...) = DQN(; net = Flux.gpu(net), kargs...)
+function DQN(net; kargs...)
+    na = 0
+    try
+        if haskey(kargs, :na)
+            na = kargs[:na]
+        elseif typeof(net) == Flux.Chain
+            na = size(net.layers[end].W, 1)
+        else
+            na = size(net.W, 1)
+        end
+    catch
+        error("Could not infer the number of actions na. Please provide them as
+               a keyword argument of the form `na = ...`.")
+    end
+    DQN(; net = Flux.gpu(net), na = na, kargs...)
+end
 function defaultbuffer(learner::Union{DQN, DeepActorCritic}, env, preprocessor)
     state = preprocessstate(preprocessor, getstate(env)[1])
     ArrayStateBuffer(capacity = typeof(learner) <: DQN ? learner.replaysize :
@@ -69,13 +86,14 @@ export huberloss
 
 @inline function selectaction(learner::Union{DQN, DeepActorCritic}, policy, state)
     if learner.nmarkov == 1
-        selectaction(policy, learner.policynet(state))
+        selectaction(policy, learner.na, learner.policynet, state)
     else
         push!(policy.buffer, state)
-        selectaction(policy.policy, 
-                     learner.policynet(nmarkovgetindex(policy.buffer, 
-                                                lastindex(policy.buffer),
-                                                learner.nmarkov)))
+        selectaction(policy.policy, learner.na,
+                     b -> learner.policynet(nmarkovgetindex(b, 
+                                                            lastindex(b),
+                                                            learner.nmarkov)),
+                     policy.buffer)
     end
 end
 function selecta(q, a)

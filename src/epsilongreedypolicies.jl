@@ -47,10 +47,11 @@ where never chosen before.
 for (typ, max, rel) in ((OptimisticEpsilonGreedyPolicy, maximumbelowInf, :(>=)),
                         (VeryOptimisticEpsilonGreedyPolicy, maximum, :(==)),
                         (PesimisticEpsilonGreedyPolicy, maximumbelowInf, :(==)))
-    @eval function selectaction(policy::$typ, values)
+    @eval function selectaction(policy::$typ, na, f, input)
         if rand() < policy.ϵ
-            rand(1:length(values))
+            rand(1:na)
         else
+            values = f(input)
             vmax = $max(values)
             c = 1
             a = 1
@@ -65,6 +66,9 @@ for (typ, max, rel) in ((OptimisticEpsilonGreedyPolicy, maximumbelowInf, :(>=)),
             a
         end
     end
+    @eval selectaction(policy::$typ, values) = selectaction(policy,
+                                                            length(values),
+                                                            x -> x, values)
     @eval function getactionprobabilities(policy::$typ, values)
         p = ones(length(values))/length(values) * policy.ϵ
         vmax = $max(values)

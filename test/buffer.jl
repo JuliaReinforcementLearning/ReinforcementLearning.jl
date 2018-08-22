@@ -49,7 +49,7 @@ function testbuffers()
         @test x.buffer.rewards[end-4:end] == x.callbacks[1].rewards[end-4:end]
     end
 
-    x = RLSetup(DQN(x -> mean(x, dims = 2)[1:4], nmarkov = 4), MDP(), 
+    x = RLSetup(DQN(x -> mean(x, dims = 2)[1:4], nmarkov = 4, na = 4), MDP(), 
                 ConstantNumberSteps(100),
                 preprocessor = MyPreprocessor(10),
                 callbacks = [RecordAll()])
