@@ -1,11 +1,24 @@
 # [Environments](@id environments)
 
-Further environments can be found in the packages
-[RLEnvAtari](https://github.com/jbrea/RLEnvAtari.jl),
-[RLEnvClassicControl](https://github.com/jbrea/RLEnvClassicControl.jl),
-[RLEnvDiscrete](https://github.com/jbrea/RLEnvDiscrete.jl).
+The following environments can be added with 
+```julia
+(v1.0) pkg> add RLEnvXZY
+```
+or
+```julia
+Pkg.add("RLEnvXYZ")
+```
 
-Here are mostly simple environments and utilities useful for testing.
+Examples can be found in the example folders of these repositories.
+
+[RLEnvAtari](https://github.com/JuliaReinforcementLearning/RLEnvAtari.jl),
+[RLEnvClassicControl](https://github.com/JuliaReinforcementLearning/RLEnvClassicControl.jl),
+[RLEnvDiscrete](https://github.com/JuliaReinforcementLearning/RLEnvDiscrete.jl).
+[RLEnvViZDoom](https://github.com/JuliaReinforcementLearning/RLEnvViZDoom.jl).
+[RLEnvViZGym](https://github.com/JuliaReinforcementLearning/RLEnvGym.jl).
+
+
+## MDPs
 ```@autodocs
 Modules = [ReinforcementLearning]
 Pages   = ["mdp.jl", "randommdp.jl"]

@@ -48,4 +48,4 @@ See section [`Comparison`](@ref comparison).
 
 ## Examples
 
-See [examples](https://github.com/jbrea/ReinforcementLearning.jl/tree/master/examples).
+See [environments](@ref environments)
