@@ -5,7 +5,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "Introduction",
     "category": "page",
-    "text": "A reinforcement learning package for Julia."
+    "text": ""
+},
+
+{
+    "location": "#ReinforcementLearning-1",
+    "page": "Introduction",
+    "title": "ReinforcementLearning",
+    "category": "section",
+    "text": "(Image: Documentation) (Image: Build Status) (Image: codecov)A reinforcement learning package for Julia."
 },
 
 {
@@ -37,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "Environments",
     "category": "section",
-    "text": "name state space action space\nCartpole 4D discrete\nMountain Car 2D discrete\nPendulum 3D 1D\nAtari pixel images discrete\nPOMDPs, MDPs, Mazes, Cliffwalking discrete discrete\nOpenAi Gym (with PyCall) see here see here"
+    "text": "name state space action space\nCartpole 4D discrete\nMountain Car 2D discrete\nPendulum 3D 1D\nAtari pixel images discrete\nVizDoom pixel images discrete\nPOMDPs, MDPs, Mazes, Cliffwalking discrete discrete\nOpenAi Gym (using PyCall) see here see here"
 },
 
 {
@@ -61,7 +69,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "Installation",
     "category": "section",
-    "text": "pkg.clone(\"https://github.com/jbrea/ReinforcementLearning.jl\")"
+    "text": "(v1.0) pkg> add ReinforcementLearningor in julia v0.6Pkg.add(\"ReinforcementLearning\")"
 },
 
 {
@@ -125,7 +133,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Usage",
     "title": "Examples",
     "category": "section",
-    "text": "See examples."
+    "text": "See environments"
 },
 
 {
@@ -137,7 +145,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "comparison/#ReinforcementLearning.compare-Tuple{Dict,Any}",
+    "location": "comparison/#ReinforcementLearning.compare-Tuple{Any,Any}",
     "page": "Comparison",
     "title": "ReinforcementLearning.compare",
     "category": "method",
@@ -166,6 +174,14 @@ var documenterSearchIndex = {"docs": [
     "title": "ReinforcementLearning.RLSetup",
     "category": "type",
     "text": "@with_kw mutable struct RLSetup{Tl,Tb,Tp,Tpp,Te,Ts}\n    learner::Tl\n    environment::Te\n    stoppingcriterion::Ts\n    preprocessor::Tpp = NoPreprocessor()\n    buffer::Tb = defaultbuffer(learner, environment, preprocessor)\n    policy::Tp = defaultpolicy(learner, buffer)\n    callbacks::Array{Any, 1} = []\n    islearning::Bool = true\n    fillbuffer::Bool = islearning\n\n\n\n"
+},
+
+{
+    "location": "learning/#ReinforcementLearning.RLSetup-Tuple{Any,Any,Any}",
+    "page": "Learning",
+    "title": "ReinforcementLearning.RLSetup",
+    "category": "method",
+    "text": "RLSetup(learner, env, stop; kargs...) = RLSetup(learner = learner,\n                                                environment = env,\n                                                stoppingcriterion = stop;\n                                                kargs...)\n\n\n\n"
 },
 
 {
@@ -357,7 +373,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.MDPLearner",
     "category": "type",
-    "text": "struct MDPLearner\n    γ::Float64\n    policy::Array{Int64, 1}\n    values::Array{Float64, 1}\n    mdp::MDP\n\nUsed to solve mdp with discount factor γ.\n\n\n\n"
+    "text": "@with_kw struct MDPLearner\n    mdp::MDP = MDP()\n    γ::Float64 = .9\n    policy::Array{Int64, 1} = ones(Int64, mdp.ns)\n    values::Array{Float64, 1} = zeros(mdp.ns)\n\nUsed to solve mdp with discount factor γ.\n\n\n\n"
 },
 
 {
@@ -389,7 +405,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.DQN",
     "category": "type",
-    "text": "mutable struct DQN{Tnet,TnetT,ToptT,Topt}\n    γ::Float64 = .99\n    net::TnetT\n    targetnet::Tnet = Flux.mapleaves(Flux.Tracker.data, deepcopy(net))\n    policynet::Tnet = Flux.mapleaves(Flux.Tracker.data, net)\n    updatetargetevery::Int64 = 500\n    t::Int64 = 0\n    updateevery::Int64 = 1\n    opttype::ToptT = Flux.ADAM\n    opt::Topt = opttype(Flux.params(net))\n    startlearningat::Int64 = 10^3\n    minibatchsize::Int64 = 32\n    doubledqn::Bool = true\n    nmarkov::Int64 = 1\n    nsteps::Int64 = 1\n    replaysize::Int64 = 10^4\n    loss::Function = Flux.mse\n\n\n\n"
+    "text": "mutable struct DQN{Tnet,TnetT,ToptT,Topt}\n    γ::Float64 = .99\n    na::Int64\n    net::TnetT\n    targetnet::Tnet = Flux.mapleaves(Flux.Tracker.data, deepcopy(net))\n    policynet::Tnet = Flux.mapleaves(Flux.Tracker.data, net)\n    updatetargetevery::Int64 = 500\n    t::Int64 = 0\n    updateevery::Int64 = 1\n    opttype::ToptT = Flux.ADAM\n    opt::Topt = opttype(Flux.params(net))\n    startlearningat::Int64 = 10^3\n    minibatchsize::Int64 = 32\n    doubledqn::Bool = true\n    nmarkov::Int64 = 1\n    nsteps::Int64 = 1\n    replaysize::Int64 = 10^4\n    loss::Function = Flux.mse\n\n\n\n"
 },
 
 {
@@ -414,6 +430,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Environments",
     "category": "page",
     "text": ""
+},
+
+{
+    "location": "environments/#environments-1",
+    "page": "Environments",
+    "title": "Environments",
+    "category": "section",
+    "text": "The following environments can be added with (v1.0) pkg> add RLEnvXZYorPkg.add(\"RLEnvXYZ\")Examples can be found in the example folders of these repositories.RLEnvAtari, RLEnvClassicControl, RLEnvDiscrete. RLEnvViZDoom. RLEnvViZGym."
 },
 
 {
@@ -545,11 +569,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "environments/#environments-1",
+    "location": "environments/#MDPs-1",
     "page": "Environments",
-    "title": "Environments",
+    "title": "MDPs",
     "category": "section",
-    "text": "Further environments can be found in the packages RLEnvAtari, RLEnvClassicControl, RLEnvDiscrete.Here are mostly simple environments and utilities useful for testing.Modules = [ReinforcementLearning]\nPages   = [\"mdp.jl\", \"randommdp.jl\"]"
+    "text": "Modules = [ReinforcementLearning]\nPages   = [\"mdp.jl\", \"randommdp.jl\"]"
 },
 
 {
