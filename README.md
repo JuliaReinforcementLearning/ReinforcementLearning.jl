@@ -1,8 +1,8 @@
 # ReinforcementLearning
 
-[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://jbrea.github.io/ReinforcementLearning.jl/latest)
-[![Build Status](https://travis-ci.org/jbrea/ReinforcementLearning.jl.svg?branch=master)](https://travis-ci.org/jbrea/ReinforcementLearning.jl)
-[![codecov](https://codecov.io/gh/jbrea/ReinforcementLearning.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/jbrea/ReinforcementLearning.jl)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaReinforcementLearning.github.io/ReinforcementLearning.jl/latest)
+[![Build Status](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearning.jl.svg?branch=master)](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearning.jl)
+[![codecov](https://codecov.io/gh/JuliaReinforcementLearning/ReinforcementLearning.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaReinforcementLearning/ReinforcementLearning.jl)
 
 A reinforcement learning package for [Julia](https://julialang.org/).
 
@@ -54,6 +54,11 @@ A reinforcement learning package for [Julia](https://julialang.org/).
   learning etc.
 
 # Installation
+
+```julia
+(v1.0) pkg> add ReinforcementLearning
+```
+ or in julia v0.6
 
 ```julia
 Pkg.add("ReinforcementLearning")
