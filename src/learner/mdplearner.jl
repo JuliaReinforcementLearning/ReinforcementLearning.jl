@@ -1,9 +1,9 @@
 """
-    struct MDPLearner
-        γ::Float64
-        policy::Array{Int64, 1}
-        values::Array{Float64, 1}
-        mdp::MDP
+    @with_kw struct MDPLearner
+        mdp::MDP = MDP()
+        γ::Float64 = .9
+        policy::Array{Int64, 1} = ones(Int64, mdp.ns)
+        values::Array{Float64, 1} = zeros(mdp.ns)
 
 Used to solve `mdp` with discount factor `γ`.
 """
@@ -14,10 +14,6 @@ Used to solve `mdp` with discount factor `γ`.
     values::Array{Float64, 1} = zeros(mdp.ns)
 end
 export MDPLearner
-
-function MDPLearner(mdp, γ::Float64)
-    return MDPLearner(γ = γ, mdp = mdp)
-end
 
 @inline function selectaction(learner::MDPLearner, 
                               policy::AbstractEpsilonGreedyPolicy, state)
