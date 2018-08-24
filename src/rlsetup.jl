@@ -22,6 +22,12 @@
     fillbuffer::Bool = islearning
 end
 export RLSetup
+"""
+    RLSetup(learner, env, stop; kargs...) = RLSetup(learner = learner,
+                                                    environment = env,
+                                                    stoppingcriterion = stop;
+                                                    kargs...)
+"""
 RLSetup(learner, env, stop; kargs...) = RLSetup(learner = learner,
                                                 environment = env,
                                                 stoppingcriterion = stop;
