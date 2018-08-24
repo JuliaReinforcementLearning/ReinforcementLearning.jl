@@ -41,8 +41,8 @@ export DQN
 function DQN(net; kargs...)
     na = 0
     try
-        if haskey(kargs, :na)
-            na = kargs[:na]
+        if haskey(Dict(kargs), :na)
+            na = Dict(kargs)[:na]
         elseif typeof(net) == Flux.Chain
             na = size(net.layers[end].W, 1)
         else
