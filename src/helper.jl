@@ -12,15 +12,6 @@
     end
 end
 
-macro subtypes(supertype, body, subtypes...)
-    for subtype in subtypes
-        @eval (mutable struct $subtype <: $supertype
-            $body
-        end;
-        export $subtype)
-    end
-end
-
 @inline getvalue(params, state::Int) = params[:, state]
 @inline getvalue(params::Vector, state::Int) = params[state]
 @inline getvalue(params, action::Int, state::Int) = params[action, state]
