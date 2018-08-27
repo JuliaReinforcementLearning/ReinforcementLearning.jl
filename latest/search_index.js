@@ -765,31 +765,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Policies",
     "title": "ReinforcementLearning.EpsilonGreedyPolicy",
     "category": "type",
-    "text": "mutable struct EpsilonGreedyPolicy <: AbstractEpsilonGreedyPolicy\n    ϵ::Float64\n\nChooses the action with the highest value with probability 1 - ϵ and selects an action uniformly random with probability ϵ. For states with actions that where never performed before, the behavior of the VeryOptimisticEpsilonGreedyPolicy is followed.\n\n\n\n"
-},
-
-{
-    "location": "policies/#ReinforcementLearning.OptimisticEpsilonGreedyPolicy",
-    "page": "Policies",
-    "title": "ReinforcementLearning.OptimisticEpsilonGreedyPolicy",
-    "category": "type",
-    "text": "mutable struct OptimisticEpsilonGreedyPolicy <: AbstractEpsilonGreedyPolicy\n    ϵ::Float64\n\nEpsilonGreedyPolicy that samples uniformly from the actions with the highest Q-value and novel actions in each state where actions are available that where never chosen before. \n\n\n\n"
-},
-
-{
-    "location": "policies/#ReinforcementLearning.PesimisticEpsilonGreedyPolicy",
-    "page": "Policies",
-    "title": "ReinforcementLearning.PesimisticEpsilonGreedyPolicy",
-    "category": "type",
-    "text": "mutable struct PesimisticEpsilonGreedyPolicy <: AbstractEpsilonGreedyPolicy\n    ϵ::Float64\n\nEpsilonGreedyPolicy that does not handle novel actions differently.\n\n\n\n"
-},
-
-{
-    "location": "policies/#ReinforcementLearning.VeryOptimisticEpsilonGreedyPolicy",
-    "page": "Policies",
-    "title": "ReinforcementLearning.VeryOptimisticEpsilonGreedyPolicy",
-    "category": "type",
-    "text": "mutable struct VeryOptimisticEpsilonGreedyPolicy <: AbstractEpsilonGreedyPolicy\n    ϵ::Float64\n\nEpsilonGreedyPolicy that samples uniformly from novel actions in each state where actions are available that where never chosen before. See also  Initial values, novel actions and unseen values.\n\n\n\n"
+    "text": "mutable struct EpsilonGreedyPolicy{kind}\n    ϵ::Float64\n\nChooses the action with the highest value with probability 1 - ϵ and selects  an action uniformly random with probability ϵ.\n\n\n\n"
 },
 
 {
