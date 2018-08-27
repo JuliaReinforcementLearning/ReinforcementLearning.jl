@@ -137,6 +137,70 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "tutorial/#",
+    "page": "Tutorial",
+    "title": "Tutorial",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "tutorial/#Tutorial-1",
+    "page": "Tutorial",
+    "title": "Tutorial",
+    "category": "section",
+    "text": "You would like to test existing reinforcement learning methods on your environment or try your method on existing environments? Extending this package is a piece of cake. Please consider registering the binding to your own environment as a new package (see e.g. ReinforcementLearningEnvironmentAtari) and open a pull request for any other extension."
+},
+
+{
+    "location": "tutorial/#Write-your-own-learner-1",
+    "page": "Tutorial",
+    "title": "Write your own learner",
+    "category": "section",
+    "text": "For a new learner you need to implement the functionsupdate!(learner, buffer)                          # returns nothing\nselectaction(learner, policy, state)              # returns an action\ndefaultbuffer(learner, environment, preprocessor) # returns a bufferLet\'s assume you want to implement plain, simple Q-learning (you don\'t need to do this; it is already implemented. Your file qlearning.jl could containimport ReinforcementLearning: update!, selectaction, defaultbuffer, Buffer\n\nstruct MyQLearning\n    Q::Array{Float64, 2} # number of actions x number of states\n    alpha::Float64       # learning rate\nend\n\nfunction update!(learner::MyQLearning, buffer)\n    s = buffer.states[1]\n    snext = buffer.states[2]\n    r = buffer.rewards[1]\n    a = buffer.actions[1]\n    Q = learner.Q\n    Q[a, s] += learner.alpha * (r + maximum(Q[:, snext]) - Q[a, s])\nend\n\nfunction selectaction(learner::MyQLearning, policy, state)\n    selectaction(policy, learner.Q[:, state])\nend\n\nfunction defaultbuffer(learner::MyQLearning, environment, preprocessor)\n    state, done = getstate(environment)\n    processedstate = preprocessstate(preprocessor, state)\n    Buffer(statetype = typeof(processedstate), capacity = 2)\nendThe function defaultbuffer gets called during the construction of an RLSetup. It returns a buffer that is filled with states, actions and rewards during interaction with the environment. Currently there are three types of Buffers implementedimport ReinforcementLearning: Buffer, EpisodeBuffer, ArrayStateBuffer\n?Buffer"
+},
+
+{
+    "location": "tutorial/#api_environments-1",
+    "page": "Tutorial",
+    "title": "Bind your own environment",
+    "category": "section",
+    "text": "For new environments you need to implement the functionsinteract!(action, environment)          # returns state, reward done\ngetstate(environment)                   # returns state, done\nreset!(environment)                     # returns stateOptionally you may also implement the functionplotenv(environment, state, action, reward, done)Please have a look at the cartpole for an example."
+},
+
+{
+    "location": "tutorial/#Preprocessors-1",
+    "page": "Tutorial",
+    "title": "Preprocessors",
+    "category": "section",
+    "text": "preprocessstate(preprocessor, state)    # returns the preprocessed stateOptional:preprocess(preprocessor, reward, state, done) # returns a preprocessed (state, reward done) tuple."
+},
+
+{
+    "location": "tutorial/#Policies-1",
+    "page": "Tutorial",
+    "title": "Policies",
+    "category": "section",
+    "text": "selectaction(policy, values)            # returns an action\ngetactionprobabilities(policy, state)   # Returns a normalized (1-norm) vector with non-negative entries."
+},
+
+{
+    "location": "tutorial/#Callbacks-1",
+    "page": "Tutorial",
+    "title": "Callbacks",
+    "category": "section",
+    "text": "callback!(callback, rlsetup, state, action, reward, done) # returns nothing"
+},
+
+{
+    "location": "tutorial/#Stopping-Criteria-1",
+    "page": "Tutorial",
+    "title": "Stopping Criteria",
+    "category": "section",
+    "text": "isbreak!(stoppingcriterion, state, action, reward, done) # returns true of false"
+},
+
+{
     "location": "comparison/#",
     "page": "Comparison",
     "title": "Comparison",
@@ -225,6 +289,30 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "learners/#ReinforcementLearning.ExpectedSarsa-Tuple{}",
+    "page": "Learners",
+    "title": "ReinforcementLearning.ExpectedSarsa",
+    "category": "method",
+    "text": "ExpectedSarsa(; kargs...) = TDLearner(; endvaluepolicy = ExpectedSarsaEndPolicy(VeryOptimisticEpsilonGreedyPolicy(.1)), kargs...)\n\n\n\n"
+},
+
+{
+    "location": "learners/#ReinforcementLearning.QLearning-Tuple{}",
+    "page": "Learners",
+    "title": "ReinforcementLearning.QLearning",
+    "category": "method",
+    "text": "QLearning(; kargs...) = TDLearner(; endvaluepolicy = QLearningEndPolicy(), kargs...)\n\n\n\n"
+},
+
+{
+    "location": "learners/#ReinforcementLearning.Sarsa-Tuple{}",
+    "page": "Learners",
+    "title": "ReinforcementLearning.Sarsa",
+    "category": "method",
+    "text": "Sarsa(; kargs...) = TDLearner(; kargs...)\n\n\n\n"
+},
+
+{
     "location": "learners/#ReinforcementLearning.AccumulatingTraces",
     "page": "Learners",
     "title": "ReinforcementLearning.AccumulatingTraces",
@@ -262,6 +350,14 @@ var documenterSearchIndex = {"docs": [
     "title": "ReinforcementLearning.ReplacingTraces",
     "category": "method",
     "text": "ReplacingTraces(ns, na, λ::Float64, γ::Float64; minimaltracevalue = 1e-12)\n\n\n\n"
+},
+
+{
+    "location": "learners/#ReinforcementLearning.TDLearner",
+    "page": "Learners",
+    "title": "ReinforcementLearning.TDLearner",
+    "category": "type",
+    "text": "mutable struct TDLearner{T,Tp}\n    ns::Int64 = 10\n    na::Int64 = 4\n    γ::Float64 = .9\n    λ::Float64 = .8\n    α::Float64 = .1\n    nsteps::Int64 = 1\n    initvalue::Float64 = 0.\n    unseenvalue::Float64 = initvalue == Inf64 ? 0. : initvalue\n    params::Array{Float64, 2} = zeros(na, ns) .+ initvalue\n    tracekind = DataType = λ == 0 ? NoTraces : ReplacingTraces\n    traces::T = tracekind == NoTraces ? NoTraces() : tracekind(ns, na, λ, γ)\n    endvaluepolicy::Tp = SarsaEndPolicy()\n\n\n\n"
 },
 
 {
@@ -425,6 +521,86 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "buffers/#",
+    "page": "Buffers",
+    "title": "Buffers",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "buffers/#ReinforcementLearning.ArrayCircularBuffer",
+    "page": "Buffers",
+    "title": "ReinforcementLearning.ArrayCircularBuffer",
+    "category": "type",
+    "text": "mutable struct ArrayCircularBuffer{T}\n    data::T\n    capacity::Int64\n    start::Int64\n    counter::Int64\n    full::Bool\n\n\n\n"
+},
+
+{
+    "location": "buffers/#ReinforcementLearning.ArrayCircularBuffer-NTuple{4,Any}",
+    "page": "Buffers",
+    "title": "ReinforcementLearning.ArrayCircularBuffer",
+    "category": "method",
+    "text": "ArrayCircularBuffer(arraytype, datatype, elemshape, capacity)\n\n\n\n"
+},
+
+{
+    "location": "buffers/#ReinforcementLearning.ArrayStateBuffer",
+    "page": "Buffers",
+    "title": "ReinforcementLearning.ArrayStateBuffer",
+    "category": "type",
+    "text": "struct ArrayStateBuffer{Ts, Ta}\n    states::ArrayCircularBuffer{Ts}\n    actions::CircularBuffer{Ta}\n    rewards::CircularBuffer{Float64}\n    done::CircularBuffer{Bool}\n\n\n\n"
+},
+
+{
+    "location": "buffers/#ReinforcementLearning.ArrayStateBuffer-Tuple{}",
+    "page": "Buffers",
+    "title": "ReinforcementLearning.ArrayStateBuffer",
+    "category": "method",
+    "text": "ArrayStateBuffer(; arraytype = Array, datatype = Float64, \n                   elemshape = (1), actiontype = Int64, \n                   capacity = 2, capacitystates = capacity,\n                   capacityrewards = capacity - 1)\n\nAn ArrayStateBuffer is similar to a Buffer but the states are stored in a prealocated array of size (elemshape..., capacity). K consecutive states at position i in the state buffer can can efficiently be retrieved with nmarkovview(buffer.states, i, K) or nmarkovgetindex(buffer.states, i, K). See the implementation of DQN for an example. \n\n\n\n"
+},
+
+{
+    "location": "buffers/#ReinforcementLearning.Buffer",
+    "page": "Buffers",
+    "title": "ReinforcementLearning.Buffer",
+    "category": "type",
+    "text": "struct Buffer{Ts, Ta}\n    states::CircularBuffer{Ts}\n    actions::CircularBuffer{Ta}\n    rewards::CircularBuffer{Float64}\n    done::CircularBuffer{Bool}\n\n\n\n"
+},
+
+{
+    "location": "buffers/#ReinforcementLearning.Buffer-Tuple{}",
+    "page": "Buffers",
+    "title": "ReinforcementLearning.Buffer",
+    "category": "method",
+    "text": "Buffer(; statetype = Int64, actiontype = Int64, \n         capacity = 2, capacitystates = capacity,\n         capacityrewards = capacity - 1)\n\n\n\n"
+},
+
+{
+    "location": "buffers/#ReinforcementLearning.EpisodeBuffer",
+    "page": "Buffers",
+    "title": "ReinforcementLearning.EpisodeBuffer",
+    "category": "type",
+    "text": "struct EpisodeBuffer{Ts, Ta}\n    states::Array{Ts, 1}\n    actions::Array{Ta, 1}\n    rewards::Array{Float64, 1}\n    done::Array{Bool, 1}\n\n\n\n"
+},
+
+{
+    "location": "buffers/#ReinforcementLearning.EpisodeBuffer-Tuple{}",
+    "page": "Buffers",
+    "title": "ReinforcementLearning.EpisodeBuffer",
+    "category": "method",
+    "text": "EpisodeBuffer(; statetype = Int64, actiontype = Int64) = \n    EpisodeBuffer(statetype[], actiontype[], Float64[], Bool[])\n\n\n\n"
+},
+
+{
+    "location": "buffers/#buffers-1",
+    "page": "Buffers",
+    "title": "Buffers",
+    "category": "section",
+    "text": "Modules = [ReinforcementLearning]\nPages   = [\"buffers.jl\"]"
+},
+
+{
     "location": "environments/#",
     "page": "Environments",
     "title": "Environments",
@@ -437,7 +613,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Environments",
     "title": "Environments",
     "category": "section",
-    "text": "The following environments can be added with (v1.0) pkg> add RLEnvXZYorPkg.add(\"RLEnvXYZ\")Examples can be found in the example folders of these repositories.RLEnvAtari, RLEnvClassicControl, RLEnvDiscrete. RLEnvViZDoom. RLEnvViZGym."
+    "text": "The following environments can be added with (v1.0) pkg> add ReinforcementLearningEnvironmentXZYorPkg.add(\"ReinforcementLearningEnvironmentXYZ\")Examples can be found in the example folders of these repositories.ReinforcementLearningEnvironmentAtari, ReinforcementLearningEnvironmentClassicControl, ReinforcementLearningEnvironmentDiscrete. ReinforcementLearningEnvironmentViZDoom. ReinforcementLearningEnvironmentViZGym."
 },
 
 {
@@ -765,31 +941,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Policies",
     "title": "ReinforcementLearning.EpsilonGreedyPolicy",
     "category": "type",
-    "text": "mutable struct EpsilonGreedyPolicy <: AbstractEpsilonGreedyPolicy\n    ϵ::Float64\n\nChooses the action with the highest value with probability 1 - ϵ and selects an action uniformly random with probability ϵ. For states with actions that where never performed before, the behavior of the VeryOptimisticEpsilonGreedyPolicy is followed.\n\n\n\n"
-},
-
-{
-    "location": "policies/#ReinforcementLearning.OptimisticEpsilonGreedyPolicy",
-    "page": "Policies",
-    "title": "ReinforcementLearning.OptimisticEpsilonGreedyPolicy",
-    "category": "type",
-    "text": "mutable struct OptimisticEpsilonGreedyPolicy <: AbstractEpsilonGreedyPolicy\n    ϵ::Float64\n\nEpsilonGreedyPolicy that samples uniformly from the actions with the highest Q-value and novel actions in each state where actions are available that where never chosen before. \n\n\n\n"
-},
-
-{
-    "location": "policies/#ReinforcementLearning.PesimisticEpsilonGreedyPolicy",
-    "page": "Policies",
-    "title": "ReinforcementLearning.PesimisticEpsilonGreedyPolicy",
-    "category": "type",
-    "text": "mutable struct PesimisticEpsilonGreedyPolicy <: AbstractEpsilonGreedyPolicy\n    ϵ::Float64\n\nEpsilonGreedyPolicy that does not handle novel actions differently.\n\n\n\n"
-},
-
-{
-    "location": "policies/#ReinforcementLearning.VeryOptimisticEpsilonGreedyPolicy",
-    "page": "Policies",
-    "title": "ReinforcementLearning.VeryOptimisticEpsilonGreedyPolicy",
-    "category": "type",
-    "text": "mutable struct VeryOptimisticEpsilonGreedyPolicy <: AbstractEpsilonGreedyPolicy\n    ϵ::Float64\n\nEpsilonGreedyPolicy that samples uniformly from novel actions in each state where actions are available that where never chosen before. See also  Initial values, novel actions and unseen values.\n\n\n\n"
+    "text": "mutable struct EpsilonGreedyPolicy{kind}\n    ϵ::Float64\n\nChooses the action with the highest value with probability 1 - ϵ and selects  an action uniformly random with probability ϵ.\n\n\n\n"
 },
 
 {
@@ -1078,70 +1230,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Evaluation Metrics",
     "category": "section",
     "text": "Modules = [ReinforcementLearning]\nPages   = [\"metrics.jl\"]"
-},
-
-{
-    "location": "api/#",
-    "page": "API",
-    "title": "API",
-    "category": "page",
-    "text": ""
-},
-
-{
-    "location": "api/#API-1",
-    "page": "API",
-    "title": "API",
-    "category": "section",
-    "text": "New learners, policies, callbacks, environments, evaluation metrics or stopping criteria need to implement the following functions."
-},
-
-{
-    "location": "api/#Learners-1",
-    "page": "API",
-    "title": "Learners",
-    "category": "section",
-    "text": "update!(learner, buffer)Returns nothing.selectaction(learner, policy, state)Returns an action.defaultbuffer(learner, environment, preprocessor)Returns nothing."
-},
-
-{
-    "location": "api/#Policies-1",
-    "page": "API",
-    "title": "Policies",
-    "category": "section",
-    "text": "selectaction(policy, values)Returns an action.getactionprobabilities(policy, state)Returns a normalized (1-norm) vector with non-negative entries."
-},
-
-{
-    "location": "api/#Callbacks-1",
-    "page": "API",
-    "title": "Callbacks",
-    "category": "section",
-    "text": "callback!(callback, rlsetup, state, action, reward, done)Returns nothing."
-},
-
-{
-    "location": "api/#api_environments-1",
-    "page": "API",
-    "title": "Environments",
-    "category": "section",
-    "text": "interact!(action, environment)Returns state, reward, done.getstate(environment)Returns state, done.reset!(environment)Returns nothing."
-},
-
-{
-    "location": "api/#getvalue-1",
-    "page": "API",
-    "title": "Evaluation Metrics",
-    "category": "section",
-    "text": "getvalue(metric)Any return value allowed."
-},
-
-{
-    "location": "api/#Stopping-Criteria-1",
-    "page": "API",
-    "title": "Stopping Criteria",
-    "category": "section",
-    "text": "isbreak!(stoppingcriterion, state, action, reward, done)Returns true or false."
 },
 
 ]}
