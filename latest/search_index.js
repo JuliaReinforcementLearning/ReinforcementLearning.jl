@@ -149,7 +149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Tutorial",
     "title": "Tutorial",
     "category": "section",
-    "text": "You would like to test existing reinforcement learning methods on your environment or try your method on existing environments? Extending this package is a piece of cake. Please consider registering the binding to your own environment as a new package (see e.g. RLEnvAtari) and open a pull request for any other extension."
+    "text": "You would like to test existing reinforcement learning methods on your environment or try your method on existing environments? Extending this package is a piece of cake. Please consider registering the binding to your own environment as a new package (see e.g. ReinforcementLearningEnvironmentAtari) and open a pull request for any other extension."
 },
 
 {
@@ -613,7 +613,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Environments",
     "title": "Environments",
     "category": "section",
-    "text": "The following environments can be added with (v1.0) pkg> add RLEnvXZYorPkg.add(\"RLEnvXYZ\")Examples can be found in the example folders of these repositories.RLEnvAtari, RLEnvClassicControl, RLEnvDiscrete. RLEnvViZDoom. RLEnvViZGym."
+    "text": "The following environments can be added with (v1.0) pkg> add ReinforcementLearningEnvironmentXZYorPkg.add(\"ReinforcementLearningEnvironmentXYZ\")Examples can be found in the example folders of these repositories.ReinforcementLearningEnvironmentAtari, ReinforcementLearningEnvironmentClassicControl, ReinforcementLearningEnvironmentDiscrete. ReinforcementLearningEnvironmentViZDoom. ReinforcementLearningEnvironmentViZGym."
 },
 
 {
