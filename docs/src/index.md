@@ -32,13 +32,13 @@ A reinforcement learning package for [Julia](https://julialang.org/).
 
 |name | state space | action space |
 |-----|-------------|--------------|
-|[Cartpole](https://github.com/JuliaReinforcementLearning/RLEnvClassicControl.jl)| 4D      | discrete     |
-|[Mountain Car](https://github.com/JuliaReinforcementLearning/RLEnvClassicControl.jl)| 2D  | discrete     |
-|[Pendulum](https://github.com/JuliaReinforcementLearning/RLEnvClassicControl.jl) | 3D     | 1D           |
-|[Atari](https://github.com/JuliaReinforcementLearning/RLEnvAtari.jl) | pixel images | discrete|
-|[VizDoom](https://github.com/JuliaReinforcementLearning/RLEnvVizDoom.jl) | pixel images | discrete|
-|[POMDPs](https://github.com/JuliaReinforcementLearning/RLEnvDiscrete.jl), MDPs, [Mazes](https://github.com/JuliaReinforcementLearning/RLEnvDiscrete.jl), [Cliffwalking](https://github.com/JuliaReinforcementLearning/RLEnvDiscrete.jl) | discrete | discrete|
-|[OpenAi Gym](https://github.com/JuliaReinforcementLearning/RLEnvGym.jl) (using PyCall) | see [here](https://github.com/openai/gym) | see [here](https://github.com/openai/gym) |
+|[Cartpole](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentClassicControl.jl)| 4D      | discrete     |
+|[Mountain Car](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentClassicControl.jl)| 2D  | discrete     |
+|[Pendulum](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentClassicControl.jl) | 3D     | 1D           |
+|[Atari](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentAtari.jl) | pixel images | discrete|
+|[VizDoom](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentVizDoom.jl) | pixel images | discrete|
+|[POMDPs](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentDiscrete.jl), MDPs, [Mazes](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentDiscrete.jl), [Cliffwalking](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentDiscrete.jl) | discrete | discrete|
+|[OpenAi Gym](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentGym.jl) (using PyCall) | see [here](https://github.com/openai/gym) | see [here](https://github.com/openai/gym) |
 
 ## Preprocessors
 

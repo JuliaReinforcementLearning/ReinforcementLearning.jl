@@ -3,7 +3,7 @@ You would like to test existing reinforcement learning methods on your
 environment or try your method on existing environments? Extending this package
 is a piece of cake. Please consider registering the binding to your own
 environment as a new package (see e.g.
-[RLEnvAtari](https://github.com/JuliaReinforcementLearning/RLEnvAtari.jl)) and
+[ReinforcementLearningEnvironmentAtari](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentAtari.jl)) and
 open a [pull
 request](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pulls)
 for any other extension.
@@ -69,7 +69,7 @@ plotenv(environment, state, action, reward, done)
 ```
 
 Please have a look at the
-[cartpole](https://github.com/JuliaReinforcementLearning/RLEnvClassicControl.jl/blob/master/src/cartpole.jl)
+[cartpole](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentClassicControl.jl/blob/master/src/cartpole.jl)
 for an example.
 
 ## Preprocessors

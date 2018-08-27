@@ -2,20 +2,20 @@
 
 The following environments can be added with 
 ```julia
-(v1.0) pkg> add RLEnvXZY
+(v1.0) pkg> add ReinforcementLearningEnvironmentXZY
 ```
 or
 ```julia
-Pkg.add("RLEnvXYZ")
+Pkg.add("ReinforcementLearningEnvironmentXYZ")
 ```
 
 Examples can be found in the example folders of these repositories.
 
-[RLEnvAtari](https://github.com/JuliaReinforcementLearning/RLEnvAtari.jl),
-[RLEnvClassicControl](https://github.com/JuliaReinforcementLearning/RLEnvClassicControl.jl),
-[RLEnvDiscrete](https://github.com/JuliaReinforcementLearning/RLEnvDiscrete.jl).
-[RLEnvViZDoom](https://github.com/JuliaReinforcementLearning/RLEnvViZDoom.jl).
-[RLEnvViZGym](https://github.com/JuliaReinforcementLearning/RLEnvGym.jl).
+[ReinforcementLearningEnvironmentAtari](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentAtari.jl),
+[ReinforcementLearningEnvironmentClassicControl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentClassicControl.jl),
+[ReinforcementLearningEnvironmentDiscrete](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentDiscrete.jl).
+[ReinforcementLearningEnvironmentViZDoom](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentViZDoom.jl).
+[ReinforcementLearningEnvironmentViZGym](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentGym.jl).
 
 
 ## MDPs
