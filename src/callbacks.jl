@@ -224,7 +224,7 @@ end
 getvalue(c::EvaluateGreedy) = c.values
 
 export EvaluateGreedy, Step, Episode
-greedypolicy(p::AbstractEpsilonGreedyPolicy) = EpsilonGreedyPolicy(0)
+greedypolicy(p::EpsilonGreedyPolicy{T}) where T = EpsilonGreedyPolicy{T}(0.)
 greedypolicy(p::SoftmaxPolicy) = SoftmaxPolicy(Inf)
 
 import FileIO:save
