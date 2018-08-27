@@ -1,3 +1,18 @@
+"""
+    mutable struct TDLearner{T,Tp}
+        ns::Int64 = 10
+        na::Int64 = 4
+        γ::Float64 = .9
+        λ::Float64 = .8
+        α::Float64 = .1
+        nsteps::Int64 = 1
+        initvalue::Float64 = 0.
+        unseenvalue::Float64 = initvalue == Inf64 ? 0. : initvalue
+        params::Array{Float64, 2} = zeros(na, ns) .+ initvalue
+        tracekind = DataType = λ == 0 ? NoTraces : ReplacingTraces
+        traces::T = tracekind == NoTraces ? NoTraces() : tracekind(ns, na, λ, γ)
+        endvaluepolicy::Tp = SarsaEndPolicy()
+"""
 @with_kw mutable struct TDLearner{T,Tp}
     ns::Int64 = 10
     na::Int64 = 4
@@ -17,9 +32,22 @@ struct QLearningEndPolicy end
 struct ExpectedSarsaEndPolicy{Tp} 
     policy::Tp
 end
-Sarsa(; kargs...) = TDLearner(; kargs...)
-QLearning(; kargs...) = TDLearner(; endvaluepolicy = QLearningEndPolicy(), kargs...)
-ExpectedSarsa(; kargs...) = TDLearner(; endvaluepolicy = ExpectedSarsaEndPolicy(VeryOptimisticEpsilonGreedyPolicy(.1)), kargs...)
+"""
+    Sarsa(; kargs...) = TDLearner(; kargs...)
+"""
+function Sarsa(; kargs...) TDLearner(; kargs...) end
+"""
+    QLearning(; kargs...) = TDLearner(; endvaluepolicy = QLearningEndPolicy(), kargs...)
+"""
+function QLearning(; kargs...) 
+    TDLearner(; endvaluepolicy = QLearningEndPolicy(), kargs...) 
+end
+"""
+    ExpectedSarsa(; kargs...) = TDLearner(; endvaluepolicy = ExpectedSarsaEndPolicy(VeryOptimisticEpsilonGreedyPolicy(.1)), kargs...)
+"""
+function ExpectedSarsa(; kargs...) 
+    TDLearner(; endvaluepolicy = ExpectedSarsaEndPolicy(VeryOptimisticEpsilonGreedyPolicy(.1)), kargs...)
+end
 export Sarsa, QLearning, ExpectedSarsa
 
 @inline function selectaction(learner::Union{TDLearner, AbstractPolicyGradient}, 
@@ -27,8 +55,6 @@ export Sarsa, QLearning, ExpectedSarsa
                               state)
     selectaction(policy, getvalue(learner.params, state))
 end
-params(learner::TDLearner) = learner.params
-reconstructwithparams(learner::TDLearner, w) = reconstruct(learner, params = w)
 
 # td error
 
