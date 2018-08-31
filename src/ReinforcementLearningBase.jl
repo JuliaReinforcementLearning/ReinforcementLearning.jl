@@ -1,6 +1,6 @@
 module ReinforcementLearningBase
 
 include("spaces/space.jl")
-include("abstract_env.jl")
+include("abstractenv.jl")
 
 end # module
