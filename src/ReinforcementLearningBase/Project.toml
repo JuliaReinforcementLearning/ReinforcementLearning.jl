@@ -1,6 +1,6 @@
 name = "ReinforcementLearningBase"
 uuid = "9b2b9cba-ac73-11e8-02b1-9f0869453fc0"
-authors = ["Johanni Brea <jbrea@users.noreply.github.com>"]
+authors = ["Johanni Brea <jbrea@users.noreply.github.com>", "Jun Tian <tianjun.cpp@gmail.com>"]
 version = "0.1.0"
 
 [extras]
