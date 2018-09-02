@@ -12,3 +12,6 @@ function interact! end
 
 "Get the action space of an environment"
 function actionspace end
+
+"Plot the current state of an environment"
+function plotenv end
