@@ -74,7 +74,6 @@ function selecta(q, a)
     na, t = size(q)
     q[na * collect(0:t-1) .+ a]
 end
-import StatsBase
 function update!(learner::DQN, b)
     learner.t += 1
     if learner.t % learner.updatetargetevery == 0

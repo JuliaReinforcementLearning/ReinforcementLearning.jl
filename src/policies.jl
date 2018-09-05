@@ -35,20 +35,8 @@ function samplesoftmaxaction(policy::SoftmaxPolicy, values)
     if policy.β == Inf
         samplegreedyaction(policy, values)
     else
-        samplesoftmaxaction(policy.β .* values)
+        StatsBase.wsample(exp.(policy.β .* values))
     end
-end
-function samplesoftmaxaction(input)
-    unnormalized_probs = exp.(input)
-    r = rand()*sum(unnormalized_probs)
-    tmp = unnormalized_probs[1]
-    @inbounds for i = 1:length(unnormalized_probs) - 1
-        if  r <= tmp
-            return i
-        end
-        tmp += unnormalized_probs[i + 1]
-    end
-    return length(unnormalized_probs)
 end
 
 function getactionprobabilities(policy::SoftmaxPolicy, state)
