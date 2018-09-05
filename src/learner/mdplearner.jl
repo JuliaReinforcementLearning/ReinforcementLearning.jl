@@ -15,12 +15,8 @@ Used to solve `mdp` with discount factor `γ`.
 end
 export MDPLearner
 
-function selectaction(learner::MDPLearner, policy::EpsilonGreedyPolicy, state)
-    if rand() < policy.ϵ
-        rand(1:learner.mdp.na)
-    else
-        learner.policy[state]
-    end
+function defaultpolicy(learner::MDPLearner, actionspace, buffer)
+    EpsilonGreedyPolicy(.1, 1:learner.mdp.na, s -> learner.policy[s])
 end
 
 # solve MDP

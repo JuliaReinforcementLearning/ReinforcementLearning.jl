@@ -96,6 +96,8 @@ function LinearDecreaseEpsilon(start, stop, initval, finalval)
 end
 @inline setepsilon(policy, val) = policy.ϵ = val
 @inline incrementepsilon(policy, val) = policy.ϵ += val
+@inline setepsilon(policy::NMarkovPolicy, val) = policy.policy.ϵ = val
+@inline incrementepsilon(policy::NMarkovPolicy, val) = policy.policy.ϵ += val
 function callback!(c::LinearDecreaseEpsilon, rlsetup, sraw, a, r, done)
     c.t += 1
     if c.t == 1 

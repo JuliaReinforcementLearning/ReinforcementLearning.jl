@@ -8,7 +8,7 @@
         s = preprocessstate(preprocessor, s0) 
     end
     if fillbuffer; pushstate!(buffer, s) end
-    a = selectaction(learner, policy, s)
+    a = policy(s)
     if fillbuffer pushaction!(buffer, a) end
     s0, a, r, done
 end
@@ -19,7 +19,7 @@ end
         if done; sraw = reset!(environment); end
         s = preprocessstate(preprocessor, sraw)
         if fillbuffer; pushstate!(buffer, s) end
-        a = selectaction(learner, policy, s)
+        a = policy(s)
         if fillbuffer; pushaction!(buffer, a) end
         a
     else

@@ -1,6 +1,6 @@
 using ReinforcementLearning, Compat, Compat.Test, Compat.Random
 using Compat.Statistics: mean
-import ReinforcementLearning: getactionprobabilities, selectaction, update!
+import ReinforcementLearning: getactionprobabilities, update!
 if VERSION < v"0.7.0-beta2.171"
     const seed! = Random.srand
 else
@@ -8,6 +8,7 @@ else
 end
 
 @testset "ϵ-greedy policies" begin include("epsilongreedypolicies.jl") end
+@testset "softmax policies" begin include("softmaxpolicies.jl") end
 @testset "traces" begin include("traces.jl") end
 @testset "tdlearning" begin include("tdlearning.jl") end
 @testset "mdp solver" begin include("learnmdp.jl") end
