@@ -3,7 +3,7 @@ module ReinforcementLearning
 using DataStructures, Parameters, SparseArrays, LinearAlgebra, Distributed,
 Statistics, Dates, Compat, Requires
 import Statistics: mean
-import ReinforcementLearningBase: interact!, getstate, reset!, plotenv
+import ReinforcementLearningBase: interact!, getstate, reset!, plotenv, sample
 
 using Random: seed!
 function __init__()
