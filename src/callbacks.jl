@@ -323,7 +323,7 @@ running or learning.
 Visualize(; wait = .15) = Visualize(wait)
 export Visualize
 function callback!(c::Visualize, rlsetup, s, a, r, done)
-    plotenv(rlsetup.environment, s, a, r, done)
+    plotenv(rlsetup.environment)
     sleep(c.wait)
 end
 plotenv(env, s, a, r, d) = warn("Visualization not implemented for environments of type $(typeof(env)).")
