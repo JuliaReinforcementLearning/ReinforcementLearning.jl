@@ -21,12 +21,12 @@ function testsmallbackups()
 
     mdp = DetTreeMDP(na = 2, depth = 2)
     seed!(123)
-    x = RLSetup(SmallBackups(ns = mdp.ns, na = mdp.na, γ = .99, initvalue = 0),
+    x = RLSetup(SmallBackups(ns = mdp.observationspace.n, na = mdp.actionspace.n, γ = .99, initvalue = 0),
                 mdp, ConstantNumberSteps(10^4));
     learn!(x)
     reset!(mdp)
     seed!(123)
-    y = RLSetup(SmallBackups(ns = mdp.ns, na = mdp.na, γ = .99, initvalue = Inf64),
+    y = RLSetup(SmallBackups(ns = mdp.observationspace.n, na = mdp.actionspace.n, γ = .99, initvalue = Inf64),
                 mdp, ConstantNumberSteps(10^4));
     learn!(y)
     @test y.learner.Q[:, 1:end-1] ≈ x.learner.Q[:, 1:end-1]

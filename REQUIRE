@@ -1,4 +1,6 @@
-julia 0.6
+julia 1.0
+ReinforcementLearningBase
+ReinforcementLearningEnvironmentDiscrete
 Requires
 Flux
 Compat
@@ -10,4 +12,3 @@ StatsBase
 DataFrames
 Colors
 FileIO
-PyCall

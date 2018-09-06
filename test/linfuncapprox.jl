@@ -8,7 +8,7 @@ for λ in [0, .8]
     x = RLSetup(learner = QLearning(λ = λ, tracekind = AccumulatingTraces),
                       # with ReplacingTraces the results will be different
                       # because of different replacingAccumulatingTraces 
-                preprocessor = OneHotPreprocessor(mdp.ns),
+                preprocessor = OneHotPreprocessor(mdp.observationspace.n),
                 environment = mdp,
                 stoppingcriterion = ConstantNumberSteps(100))
     seed!(124)
@@ -28,7 +28,7 @@ for learner in [PolicyGradientBackward, EpisodicReinforce,
                 ActorCriticPolicyGradient]
     mdp = MDP()
     x = RLSetup(learner = learner(),
-                preprocessor = OneHotPreprocessor(mdp.ns), 
+                preprocessor = OneHotPreprocessor(mdp.observationspace.n), 
                 environment = mdp,
                 stoppingcriterion = ConstantNumberSteps(100))
     seed!(124)
