@@ -1,4 +1,5 @@
 import ReinforcementLearning: getactionprobabilities
+import ReinforcementLearningBase: DiscreteSpace
 
 function empiricalactionprop(p, v; n = 10^6)
     res = [p(v) for _ in 1:n]
@@ -11,14 +12,14 @@ for (v, rO, rVO, r, rP) in (([-9., 12., Inf64], [0, .5, .5], [0, 0., 1.],
                                                    [0., 0.5, 0.5], 
                                                    [0., 0.5, 0.5], 
                                                    [1., 0., 0.]))
-    @test getactionprobabilities(EpsilonGreedyPolicy(0., 1:3, x -> x, kind = :optimistic), v) == rO
-    @test getactionprobabilities(EpsilonGreedyPolicy(0., 1:3, x -> x), v) == rVO
-    @test getactionprobabilities(EpsilonGreedyPolicy(0., 1:3, x -> x, kind = :pessimistic), v) == rP
-    @test isapprox(empiricalactionprop(EpsilonGreedyPolicy(0., 1:3, x -> x, kind = :optimistic), v), rO, atol = .05)
-    @test isapprox(empiricalactionprop(EpsilonGreedyPolicy(0., 1:3, x -> x), v), rVO, atol = .05)
-    @test isapprox(empiricalactionprop(EpsilonGreedyPolicy(0., 1:3, x -> x, kind = :pessimistic), v), rP, atol = .05)
-    @test isapprox(empiricalactionprop(EpsilonGreedyPolicy(.2, 1:3, x -> x, kind = :optimistic), v),
-                   getactionprobabilities(EpsilonGreedyPolicy(.2, 1:3, x -> x, kind = :optimistic), v),
+    @test getactionprobabilities(EpsilonGreedyPolicy(0., DiscreteSpace(3, 1), x -> x, kind = :optimistic), v) == rO
+    @test getactionprobabilities(EpsilonGreedyPolicy(0., DiscreteSpace(3, 1), x -> x), v) == rVO
+    @test getactionprobabilities(EpsilonGreedyPolicy(0., DiscreteSpace(3, 1), x -> x, kind = :pessimistic), v) == rP
+    @test isapprox(empiricalactionprop(EpsilonGreedyPolicy(0., DiscreteSpace(3, 1), x -> x, kind = :optimistic), v), rO, atol = .05)
+    @test isapprox(empiricalactionprop(EpsilonGreedyPolicy(0., DiscreteSpace(3, 1), x -> x), v), rVO, atol = .05)
+    @test isapprox(empiricalactionprop(EpsilonGreedyPolicy(0., DiscreteSpace(3, 1), x -> x, kind = :pessimistic), v), rP, atol = .05)
+    @test isapprox(empiricalactionprop(EpsilonGreedyPolicy(.2, DiscreteSpace(3, 1), x -> x, kind = :optimistic), v),
+                   getactionprobabilities(EpsilonGreedyPolicy(.2, DiscreteSpace(3, 1), x -> x, kind = :optimistic), v),
                    atol = .05)
 end
 

@@ -1,7 +1,6 @@
-using ReinforcementLearning, Test, Random,
-ReinforcementLearningEnvironmentDiscrete
+using ReinforcementLearning, Test, Random, ReinforcementLearningEnvironmentDiscrete
 import Statistics: mean
-import ReinforcementLearning: getactionprobabilities, selectaction, update!
+import ReinforcementLearning: getactionprobabilities, update!
 import Random: seed!
 
 @testset "ϵ-greedy policies" begin include("epsilongreedypolicies.jl") end

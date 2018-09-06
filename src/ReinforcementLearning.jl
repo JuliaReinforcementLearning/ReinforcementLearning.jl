@@ -1,7 +1,7 @@
 module ReinforcementLearning
 
 using DataStructures, Parameters, SparseArrays, LinearAlgebra, Distributed,
-Statistics, Dates, Compat, Requires
+Statistics, Dates, Compat, Requires, StatsBase
 import Statistics: mean
 import ReinforcementLearningBase: interact!, getstate, reset!, plotenv, sample
 

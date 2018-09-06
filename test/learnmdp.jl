@@ -14,7 +14,7 @@ learnmdp1()
 function learnmdp2()
     mdp = DetTreeMDP()
     mdpl = MDPLearner(mdp = mdp, γ =.9); policy_iteration!(mdpl)
-    x = RLSetup(learner = mdpl, policy = EpsilonGreedyPolicy(0., 1:mdp.na, s -> mdpl.policy[s]), 
+    x = RLSetup(learner = mdpl, policy = EpsilonGreedyPolicy(0., mdp.actionspace, s -> mdpl.policy[s]), 
                 callbacks = [MeanReward()], environment = mdp, 
                 stoppingcriterion = ConstantNumberEpisodes(2))
     run!(x)
