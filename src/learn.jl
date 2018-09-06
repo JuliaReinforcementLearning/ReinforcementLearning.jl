@@ -1,6 +1,6 @@
 @inline function step!(rlsetup, a)
     @unpack learner, policy, buffer, preprocessor, environment, fillbuffer = rlsetup
-    s0, r0, done0 = interact!(a, environment)
+    s0, r0, done0 = interact!(environment, a)
     s, r, done = preprocess(preprocessor, s0, r0, done0)
     if fillbuffer; pushreturn!(buffer, r, done) end
     if done

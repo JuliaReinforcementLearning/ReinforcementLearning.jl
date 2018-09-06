@@ -1,11 +1,8 @@
-using ReinforcementLearning, Compat, Compat.Test, Compat.Random
-using Compat.Statistics: mean
+using ReinforcementLearning, Test, Random,
+ReinforcementLearningEnvironmentDiscrete
+import Statistics: mean
 import ReinforcementLearning: getactionprobabilities, selectaction, update!
-if VERSION < v"0.7.0-beta2.171"
-    const seed! = Random.srand
-else
-    using Random: seed!
-end
+import Random: seed!
 
 @testset "ϵ-greedy policies" begin include("epsilongreedypolicies.jl") end
 @testset "traces" begin include("traces.jl") end
