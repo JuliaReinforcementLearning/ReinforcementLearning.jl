@@ -50,10 +50,8 @@ function ExpectedSarsa(; kargs...)
 end
 export Sarsa, QLearning, ExpectedSarsa
 
-@inline function selectaction(learner::Union{TDLearner, AbstractPolicyGradient}, 
-                              policy,
-                              state)
-    selectaction(policy, getvalue(learner.params, state))
+function defaultpolicy(learner::TDLearner, actionspace, buffer)
+    EpsilonGreedyPolicy(.1, actionspace, s -> getvalue(learner.params, s))
 end
 
 # td error

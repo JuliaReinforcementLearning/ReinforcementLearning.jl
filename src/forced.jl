@@ -1,26 +1,4 @@
 """
-    mutable struct ForcedPolicy 
-        t::Int64
-        actions::Array{Int64, 1}
-"""
-mutable struct ForcedPolicy 
-    t::Int64
-    actions::Array{Int64, 1}
-end
-export ForcedPolicy
-ForcedPolicy(actions) = ForcedPolicy(1, actions)
-selectaction(l, p::ForcedPolicy, s) = selectaction(p, s)
-selectaction(l::Union{DeepActorCritic, DQN}, p::ForcedPolicy, s) = selectaction(p, s)
-selectaction(l::Union{TDLearner, PolicyGradientForward}, p::ForcedPolicy, s) = selectaction(p, s)
-function selectaction(p::ForcedPolicy, s)
-    if p.t > length(p.actions)
-        p.t = 1
-    else
-        p.t += 1
-    end
-    p.actions[p.t]
-end
-"""
     mutable struct ForcedEpisode{Ts}
         t::Int64
         states::Ts

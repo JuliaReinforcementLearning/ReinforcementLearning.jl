@@ -1,10 +1,10 @@
-using ReinforcementLearning, Test, Random,
-ReinforcementLearningEnvironmentDiscrete
+using ReinforcementLearning, Test, Random, ReinforcementLearningEnvironmentDiscrete
 import Statistics: mean
-import ReinforcementLearning: getactionprobabilities, selectaction, update!
+import ReinforcementLearning: getactionprobabilities, update!
 import Random: seed!
 
 @testset "ϵ-greedy policies" begin include("epsilongreedypolicies.jl") end
+@testset "softmax policies" begin include("softmaxpolicies.jl") end
 @testset "traces" begin include("traces.jl") end
 @testset "tdlearning" begin include("tdlearning.jl") end
 @testset "mdp solver" begin include("learnmdp.jl") end

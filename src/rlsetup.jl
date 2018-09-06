@@ -5,7 +5,7 @@
         stoppingcriterion::Ts
         preprocessor::Tpp = NoPreprocessor()
         buffer::Tb = defaultbuffer(learner, environment, preprocessor)
-        policy::Tp = defaultpolicy(learner, buffer)
+        policy::Tp = defaultpolicy(learner, environment.actionspace, buffer)
         callbacks::Array{Any, 1} = []
         islearning::Bool = true
         fillbuffer::Bool = islearning
@@ -16,7 +16,7 @@
     stoppingcriterion::Ts
     preprocessor::Tpp = NoPreprocessor()
     buffer::Tb = defaultbuffer(learner, environment, preprocessor)
-    policy::Tp = defaultpolicy(learner, buffer)
+    policy::Tp = defaultpolicy(learner, environment.actionspace, buffer)
     callbacks::Array{Any, 1} = []
     islearning::Bool = true
     fillbuffer::Bool = islearning
@@ -32,7 +32,6 @@ RLSetup(learner, env, stop; kargs...) = RLSetup(learner = learner,
                                                 environment = env,
                                                 stoppingcriterion = stop;
                                                 kargs...)
-defaultpolicy(learner, buffer) = EpsilonGreedyPolicy(.1)
 function defaultbuffer(learner, env, preprocessor)
     capacity = :nsteps in fieldnames(typeof(learner)) ? learner.nsteps + 1 : 2
     statetype = typeof(preprocessstate(preprocessor, getstate(env)[1]))

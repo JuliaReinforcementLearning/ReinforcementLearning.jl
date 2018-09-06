@@ -37,10 +37,9 @@ the smallest priority still added to the queue.
     queue::PriorityQueue = PriorityQueue(Base.Order.Reverse, zip(Int64[], Float64[]))
 end
 export SmallBackups
-@inline function selectaction(learner::Union{SmallBackups, MonteCarlo}, 
-                              policy,
-                              state)
-    selectaction(policy, getvalue(learner.Q, state))
+function defaultpolicy(learner::Union{SmallBackups, MonteCarlo}, actionspace,
+                       buffer)
+    EpsilonGreedyPolicy(.1, actionspace, s -> getvalue(learner.Q, s))
 end
 
 function addtoqueue!(q, s, p)

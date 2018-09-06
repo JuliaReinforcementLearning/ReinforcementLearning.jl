@@ -38,6 +38,12 @@ end
 export DeepActorCritic
 DeepActorCritic(net; kargs...) = DeepActorCritic(; net = net, kargs...)
 
+function defaultpolicy(learner::DeepActorCritic, actionspace, buffer)
+    π = SoftmaxPolicy(Flux.Chain(Flux.mapleaves(Flux.Tracker.data, learner.net),
+                                 Flux.mapleaves(Flux.Tracker.data, learner.policylayer)))
+    defaultnmarkovpolicy(learner, buffer, π)
+end
+
 function update!(learner::DeepActorCritic, b)
     learner.t += 1
     (!isfull(b) || learner.t % learner.updateevery != 0) && return

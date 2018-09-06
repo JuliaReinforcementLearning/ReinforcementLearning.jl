@@ -1,9 +1,9 @@
 module ReinforcementLearning
 
 using DataStructures, Parameters, SparseArrays, LinearAlgebra, Distributed,
-Statistics, Dates, Compat, Requires
+Statistics, Dates, Compat, Requires, StatsBase
 import Statistics: mean
-import ReinforcementLearningBase: interact!, getstate, reset!, plotenv
+import ReinforcementLearningBase: interact!, getstate, reset!, plotenv, sample
 
 using Random: seed!
 function __init__()
@@ -21,8 +21,7 @@ end
 include("helper.jl")
 include("buffers.jl")
 include("traces.jl")
-include("epsilongreedypolicies.jl")
-include("softmaxpolicy.jl")
+include("policies.jl")
 include("metrics.jl")
 include("stoppingcriterion.jl")
 include("callbacks.jl")
