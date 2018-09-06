@@ -13,7 +13,7 @@ mutable struct ForcedEpisode{Ts}
 end
 export ForcedEpisode
 ForcedEpisode(states, dones, rewards) = ForcedEpisode(1, states, dones, rewards)
-function interact!(a, env::ForcedEpisode)
+function interact!(env::ForcedEpisode, a)
     env.t += 1
     env.states[env.t], env.rewards[env.t], env.dones[env.t]
 end

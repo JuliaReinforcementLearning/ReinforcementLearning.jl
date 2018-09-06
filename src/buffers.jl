@@ -123,7 +123,7 @@ for N in 2:5
                 end
                 res = $func(a.data, $(fill(Colon(), N-1)...), idx)
                 s = size(res)
-                reshape(res, $([:(s[$x]) for x in 1:N-2]...), nmarkov, numi)
+                reshape(res, $([:(s[$x]) for x in 1:N-2]...), nmarkov * s[end-1], numi)
             end
         end
     end

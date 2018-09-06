@@ -3,6 +3,6 @@
 *.jl.mem
 *~
 .backup
-.swp
+*.swp
 docs/build/
 docs/site/
