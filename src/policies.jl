@@ -73,7 +73,7 @@ function EpsilonGreedyPolicy(ϵ, actionspace::Ta, Q::Tf;
     EpsilonGreedyPolicy{kind, Ta, Tf}(ϵ, actionspace, Q)
 end
 export EpsilonGreedyPolicy
-(p::EpsilonGreedyPolicy)(s) = rand() < p.ϵ ? rand(p.actionspace) : 
+(p::EpsilonGreedyPolicy)(s) = rand() < p.ϵ ? sample(p.actionspace) : 
                                              samplegreedyaction(p, p.Q(s))
 
 
