@@ -2,14 +2,14 @@
     @unpack learner, policy, buffer, preprocessor, environment, fillbuffer = rlsetup
     s0, r0, done0 = interact!(environment, a)
     s, r, done = preprocess(preprocessor, s0, r0, done0)
-    if fillbuffer; pushreturn!(buffer, r, done) end
+    # if fillbuffer; pushreturn!(buffer, r, done) end
     if done
         s0 = reset!(environment)
         s = preprocessstate(preprocessor, s0) 
     end
-    if fillbuffer; pushstate!(buffer, s) end
+    # if fillbuffer; pushstate!(buffer, s) end
     a = policy(s)
-    if fillbuffer pushaction!(buffer, a) end
+    # if fillbuffer pushaction!(buffer, a) end
     s0, a, r, done
 end
 @inline function firststateaction!(rlsetup)
@@ -21,9 +21,9 @@ end
         if fillbuffer; pushstate!(buffer, s) end
         a = policy(s)
         if fillbuffer; pushaction!(buffer, a) end
-        a
+        (s, a)
     else
-        buffer.actions[end]
+        (buffer.states[end], buffer.actions[end])
     end
 end
 
@@ -33,15 +33,23 @@ end
 Runs an [`rlsetup`](@ref RLSetup) with learning.
 """
 function learn!(rlsetup)
-    @unpack learner, buffer, stoppingcriterion = rlsetup
-    a = firststateaction!(rlsetup) #TODO: callbacks don't see first state action
+    @unpack learner, policy, fillbuffer, preprocessor, buffer, environment, stoppingcriterion = rlsetup
+    s, a = firststateaction!(rlsetup) #TODO: callbacks don't see first state action
+    # s = preprocess(preprocessor, reset!(environment))
     while true
-        sraw, a, r, done = step!(rlsetup, a)
+        s_nxt_raw, r, isdone = interact!(environment, a)
+        fillbuffer && pushreturn!(buffer, r, isdone)
+        isdone && (s_nxt_raw = reset!(environment);)
+        s = preprocessstate(preprocessor, s_nxt_raw)
+        a = policy(s)
+        fillbuffer && (pushstate!(buffer, s); pushaction!(buffer, a))
+
         if rlsetup.islearning; update!(learner, buffer); end
         for callback in rlsetup.callbacks
-            callback!(callback, rlsetup, sraw, a, r, done)
+            callback!(callback, rlsetup, s_nxt_raw, a, r, isdone)
         end
-        if isbreak!(stoppingcriterion, sraw, a, r, done); break; end
+
+        isbreak!(stoppingcriterion, s_nxt_raw, a, r, isdone) && break
     end
 end
 
