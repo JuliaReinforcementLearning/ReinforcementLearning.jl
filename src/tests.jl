@@ -1,6 +1,5 @@
 function test_envinterface(env)
     @eval Main begin
-        import ReinforcementLearningBase: reset!, interact!, getstate, actionspace, sample
         @testset "$(typeof($env)) interface test" begin
             res = reset!($env)
             @test typeof(res) == NamedTuple{(:observation,), 
