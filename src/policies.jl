@@ -73,8 +73,13 @@ function EpsilonGreedyPolicy(ϵ, actionspace::Ta, Q::Tf;
     EpsilonGreedyPolicy{kind, Ta, Tf}(ϵ, actionspace, Q)
 end
 export EpsilonGreedyPolicy
-(p::EpsilonGreedyPolicy)(s) = rand() < p.ϵ ? sample(p.actionspace) : 
-                                             samplegreedyaction(p, p.Q(s))
+function (p::EpsilonGreedyPolicy)(s)
+    if rand() < p.ϵ 
+        rand(1:p.actionspace.n) # sample(actionspace) does not work currently because DQN expects actions in 1:n
+    else
+        samplegreedyaction(p, p.Q(s))
+    end
+end
 
 
 import Base.maximum, Base.isequal
