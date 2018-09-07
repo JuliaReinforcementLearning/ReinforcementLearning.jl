@@ -55,9 +55,9 @@ function testbuffers()
                 callbacks = [RecordAll()])
     learn!(x)
     i = 77
-    @test findall(x -> x != 0, nmarkovgetindex(x.buffer.states, i, 4)[:]) .% 10 == x.callbacks[1].states[i-4:i-1] .% 10
-    @test x.buffer.actions[i-3:i+3] == x.callbacks[1].actions[i-4:i+2]
-    @test lastindex(x.buffer.states) == lastindex(x.buffer.actions) == 1 + lastindex(x.callbacks[1].states)
+    @test findall(x -> x != 0, nmarkovgetindex(x.buffer.states, i, 4)[:]) .% 10 == x.callbacks[1].states[i-3:i] .% 10
+    @test x.buffer.actions[i-3:i+3] == x.callbacks[1].actions[i-3:i+3]
+    @test lastindex(x.buffer.states) == lastindex(x.buffer.actions) == lastindex(x.callbacks[1].states)
     @test nmarkovgetindex(x.buffer.states, lastindex(x.buffer.states), 4) == nmarkovgetindex(x.policy.buffer, lastindex(x.policy.buffer), 4)
     @test findall(x -> x != 0, nmarkovgetindex(x.buffer.states, lastindex(x.buffer.states),4)[:]) .% 10 == x.callbacks[1].states[end-3:end] .% 10
 

@@ -72,6 +72,7 @@ end
 
 
 function update!(learner::SmallBackups, buffer)
+    length(buffer.actions) < 2 && return
     a0 = buffer.actions[1]
     a1 = buffer.actions[2]
     s0 = buffer.states[1]
