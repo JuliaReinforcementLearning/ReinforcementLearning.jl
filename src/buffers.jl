@@ -131,7 +131,7 @@ end
 Store the [`Turn`](@ref) info into a buffer.
 The only difference with [`CircularTurnBuffer`](@ref) is that,
 while `push!` a `Turn` info the `EpisodeTurnBuffer`,
-the buffer is emptified first if last turn is the end of an episode
+the buffer is emptied first if last turn is the end of an episode
 
 See also: [`CircularTurnBuffer`](@ref)
 """
