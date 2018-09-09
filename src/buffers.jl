@@ -22,9 +22,10 @@ end
 ##############################
 
 """
-    CircularArrayBuffer{T}(capacity::Int, element_size::Tuple{Vararg{Int, N}})
+    CircularArrayBuffer{T}(capacity::Int, element_size::Tuple{Vararg{Int, N}}) where {T,N}
 
 Using a `N` dimension Array to simulate a `N-1` dimension circular buffer.
+Used in [`CircularTurnBuffer`](@ref).
 """
 mutable struct CircularArrayBuffer{E, T, N} <: AbstractBuffer{T, N}
     buffer::Array{T, N}
@@ -47,7 +48,7 @@ isempty(cb::CircularArrayBuffer) = length(cb) == 0
 empty!(cb::CircularArrayBuffer) = (cb.length = 0; cb)
 
 """
-    push!(cb::CircularArrayBuffer{E, T, N}, data::E)
+    push!(cb::CircularArrayBuffer{E, T, N}, data::E) where {E, T, N}
 
 Add an element to the back and overwrite front if full.
 Make sure that `length(data) == cb.stepsize`
@@ -80,12 +81,36 @@ end
 ## CircularTurnBuffer
 ##############################
 
+"""
+    CircularTurnBuffer{Ts, Ta, Tr, Td}(capacity::Int,
+                                       size_s::Tuple{Vararg{Int}},
+                                       size_a::Tuple{Vararg{Int}},
+                                       size_r::Tuple{Vararg{Int}},
+                                       size_d::Tuple{Vararg{Int}},
+                                       size_ns::Tuple{Vararg{Int}}) 
+
+Store the [`Turn`](@ref) info into a circular buffer of `capacity`.
+
+See also: [`EpisodeTurnBuffer`](@ref)
+"""
 struct CircularTurnBuffer{Ts, Ta, Tr, Td} <: AbstractTurnBuffer{Turn{Ts, Ta, Tr, Td}}
     states::CircularArrayBuffer{Ts}
     actions::CircularArrayBuffer{Ta}
     rewards::CircularArrayBuffer{Tr}
     isdone::CircularArrayBuffer{Td}
     nextstates::CircularArrayBuffer{Ts}
+    function CircularTurnBuffer{Ts, Ta, Tr, Td}(capacity::Int,
+                                                size_s::Tuple{Vararg{Int}},
+                                                size_a::Tuple{Vararg{Int}},
+                                                size_r::Tuple{Vararg{Int}},
+                                                size_d::Tuple{Vararg{Int}},
+                                                size_ns::Tuple{Vararg{Int}}) 
+        new{Ts, Ta, Tr, Td}(CircularArrayBuffer{Ts}(capacity, size_s),
+                            CircularArrayBuffer{Ta}(capacity, size_s),
+                            CircularArrayBuffer{Tr}(capacity, size_s),
+                            CircularArrayBuffer{Td}(capacity, size_s),
+                            CircularArrayBuffer{Ts}(capacity, size_s))
+    end
 end
 
 function push!(b::CircularTurnBuffer{Ts, Ta, Tr, Td}, t::Turn{Ts, Ta, Tr, Td}) where {Ts, Ta, Tr, Td}
@@ -100,16 +125,27 @@ end
 ## EpisodeTurnBuffer
 ##############################
 
+"""
+    EpisodeTurnBuffer{Ts, Ta, Tr, Td}()
+
+Store the [`Turn`](@ref) info into a buffer.
+The only difference with [`CircularTurnBuffer`](@ref) is that,
+while `push!` a `Turn` info the `EpisodeTurnBuffer`,
+the buffer is emptified first if last turn is the end of an episode
+
+See also: [`CircularTurnBuffer`](@ref)
+"""
 struct EpisodeTurnBuffer{Ts, Ta, Tr, Td} <: AbstractTurnBuffer{Turn{Ts, Ta, Tr, Td}}
-    states::CircularArrayBuffer{Ts}
-    actions::CircularArrayBuffer{Ta}
-    rewards::CircularArrayBuffer{Tr}
-    isdone::CircularArrayBuffer{Td}
-    nextstates::CircularArrayBuffer{Ts}
+    states::Vector{Ts}
+    actions::Vector{Ta}
+    rewards::Vector{Tr}
+    isdone::Vector{Td}
+    nextstates::Vector{Ts}
+    EpisodeTurnBuffer{Ts, Ta, Tr, Td}() = new(Ts[], Ta[], Tr[], Td[], Ts[])
 end
 
 function push!(b::EpisodeTurnBuffer{Ts, Ta, Tr, Td}, t::Turn{Ts, Ta, Tr, Td}) where {Ts, Ta, Tr, Td}
-    if !isempty(b) && convert(Bool, d[end]) # last turn is the end of an episode
+    if !isempty(b) && convert(Bool, b.isdone[end]) # last turn is the end of an episode
         empty!(b)
     end
     push!(b.states, t.state)
