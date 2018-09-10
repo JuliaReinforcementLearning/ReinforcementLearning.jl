@@ -106,7 +106,7 @@ end
         )
     end
     @testset "2D" begin
-        b = CircularTurnBuffer{Array{Float64, 2}, Int, Float64, Bool}(4, (2,2), (), (), (), (2,2))
+        b = CircularTurnBuffer{Array{Float64, 2}, Int, Float64, Bool}(4, (2,2), (), (), ())
         t = Turn([[1. 1.];[1. 1.]], 0, 1.0, false, [[0. 0.];[0. 0.]])
         push!(b, t)
         @test length(b) == 1

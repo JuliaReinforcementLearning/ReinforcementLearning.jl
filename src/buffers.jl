@@ -153,14 +153,13 @@ struct CircularTurnBuffer{Ts, Ta, Tr, Td} <: AbstractTurnBuffer{Turn{Ts, Ta, Tr,
         size_s::Tuple{Vararg{Int}}=(),
         size_a::Tuple{Vararg{Int}}=(),
         size_r::Tuple{Vararg{Int}}=(),
-        size_d::Tuple{Vararg{Int}}=(),
-        size_ns::Tuple{Vararg{Int}}=()) where {Ts, Ta, Tr, Td}
+        size_d::Tuple{Vararg{Int}}=()) where {Ts, Ta, Tr, Td}
         new{Ts, Ta, Tr, Td}(
             CircularArrayBuffer{Ts}(capacity, size_s...),
             CircularArrayBuffer{Ta}(capacity, size_a...),
             CircularArrayBuffer{Tr}(capacity, size_r...),
             CircularArrayBuffer{Td}(capacity, size_d...),
-            CircularArrayBuffer{Ts}(capacity, size_ns...))
+            CircularArrayBuffer{Ts}(capacity, size_s...))
     end
 end
 

@@ -11,7 +11,7 @@ import Random: seed!
 @testset "learn" begin include("learn.jl") end
 @testset "linear function approximation" begin include("linfuncapprox.jl") end
 @testset "preprocessor" begin include("preprocessors.jl") end
-@testset "buffers" begin include("buffer.jl") end
+include("buffer.jl")
 @testset "monte carlo" begin include("montecarlo.jl") end
 @testset "small backups" begin include("smallbackups.jl") end
 @testset "losses" begin include("losses.jl") end
