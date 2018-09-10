@@ -19,8 +19,7 @@ Estimate Q values by averaging over returns.
     Q::Array{Float64, 2} = zeros(na, ns) .+ initvalue
 end
 function defaultbuffer(learner::MonteCarlo, env, preprocessor)
-    EpisodeBuffer(statetype = typeof(preprocessstate(preprocessor,
-                                                     getstate(env)[1])))
+    EpisodeTurnBuffer{typeof(getstate(env)[1]), typeof(actionspace(env)), Float64, Bool}()
 end
 
 export MonteCarlo

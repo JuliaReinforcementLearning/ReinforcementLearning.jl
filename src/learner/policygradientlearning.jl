@@ -169,7 +169,7 @@ function update!(learner::PolicyGradientBackward, buffer)
 end
 
 
-function update!(learner::PolicyGradientForward, buffer::EpisodeBuffer)
+function update!(learner::PolicyGradientForward, buffer::EpisodeTurnBuffer)
     if buffer.done[end]
         rewards = buffer.rewards
         states = buffer.states
@@ -196,7 +196,7 @@ end
 # Note: Actor-Critic (episodic) on p 344 of Sutton & Barto 2017 draft optimizes
 # for V[s1] and therefore discounts all other values (see I in algo). I don't do
 # this here.
-function update!(learner::PolicyGradientForward, buffer::Buffer)
+function update!(learner::PolicyGradientForward, buffer::CircularTurnBuffer)
     !isfull(buffer) && return
     rewards = buffer.rewards
     states = buffer.states

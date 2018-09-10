@@ -139,7 +139,7 @@ function defaultnmarkovpolicy(learner, buffer, π)
         data = getindex(a, map(x -> 1:x, size(a)[1:end-1])..., 1:learner.nmarkov)
         NMarkovPolicy(learner.nmarkov, 
                       π, 
-                      ArrayCircularBuffer(data, learner.nmarkov, 0, 0, false))
+                      CircularArrayBuffer(data, learner.nmarkov, 0, 0, false))
     end
 end
 

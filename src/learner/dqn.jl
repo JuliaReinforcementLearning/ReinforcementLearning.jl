@@ -55,11 +55,7 @@ function DQN(net; kargs...)
 end
 function defaultbuffer(learner::Union{DQN, DeepActorCritic}, env, preprocessor)
     state = preprocessstate(preprocessor, getstate(env)[1])
-    ArrayStateBuffer(capacity = typeof(learner) <: DQN ? learner.replaysize :
-                                                         learner.nsteps + learner.nmarkov, 
-                     arraytype = typeof(state).name.wrapper,
-                     datatype = typeof(state[1]),
-                     elemshape = size(state))
+    CircularArrayBuffer{typeof(state)}(capacity = typeof(learner) <: DQN ? learner.replaysize : learner.nsteps + learner.nmarkov)
 end
 function defaultpolicy(learner::DQN, actionspace, buffer)
     π = EpsilonGreedyPolicy(.1, actionspace, 
