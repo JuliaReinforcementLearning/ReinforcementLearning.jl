@@ -1,75 +1,136 @@
-import ReinforcementLearning: ArrayCircularBuffer, ArrayStateBuffer, 
-pushstateaction!, pushreturn!, preprocessstate, nmarkovgetindex
+@testset "buffer" begin
+@testset "CircularArrayBuffer" begin
+    A = ones(2, 2)
+    @testset "1D Int" begin
+        b = CircularArrayBuffer{Int}(3)
 
-struct MyPreprocessor
-    N::Int64
+        @test eltype(b) == Int
+        @test capacity(b) == 3
+        @test length(b) == 0
+        @test size(b) == (0,)
+        # element must has the exact same length with the element of buffer
+        @test_throws DimensionMismatch push!(b, [1, 2])  
+
+        for x in 1:3 push!(b, x) end
+
+        @test capacity(b) == 3
+        @test length(b) == 3
+        @test size(b) == (3,)
+        @test b[1] == 1
+        @test b[end] == 3
+        @test b[1:end] == [1, 2, 3]
+
+        for x in 4:5 push!(b, x) end
+
+        @test capacity(b) == 3
+        @test length(b) == 3
+        @test size(b) == (3,)
+        @test b[1] == 3
+        @test b[end] == 5
+        @test b[1:end] == [3, 4, 5]
+    end
+
+    @testset "2D Float64" begin
+        b = CircularArrayBuffer{Array{Float64,2}}(3, (2, 2))
+
+        @test eltype(b) == Array{Float64, 2}
+        @test capacity(b) == 3
+        @test length(b) == 0
+        @test size(b) == (2, 2, 0)
+        # element must has the exact same length with the element of buffer
+        @test_throws DimensionMismatch push!(b, [1., 2.])  
+
+        for x in 1:3 push!(b, x * A) end
+
+        @test capacity(b) == 3
+        @test length(b) == 3
+        @test size(b) == (2, 2, 3)
+        for i in 1:3 @test b[i] == i * A end
+        @test b[end] == 3 * A
+
+        for x in 4:5 push!(b, x * ones(4)) end  # collection is also OK
+
+        @test capacity(b) == 3
+        @test length(b) == 3
+        @test size(b) == (2, 2, 3)
+        @test b[1] == 3 * A
+        @test b[end] == 5 * A
+        
+        @test b[1:end] == reshape([c for x in 3:5 for c in x*A], 2, 2, 3)
+    end
+
+    @testset "getconsecutive" begin
+        b = CircularArrayBuffer{Array{Float64,2}}(6, (2, 2))
+        for i in 1:6 push!(b, i * A) end
+
+        x = Array{Float64}(undef, 2, 2, 3, 2)
+        x[:, :, :, 1] = reshape([c for x in 1:3 for c in x*A], 2, 2, 3)
+        x[:, :, :, 2] = reshape([c for x in 4:6 for c in x*A], 2, 2, 3)
+
+        @test getconsecutive(b, [3, 6], 3) == x
+        @test_throws BoundsError getconsecutive(b, [3, 6], 4)
+    end
 end
-preprocessstate(p::MyPreprocessor, s) = reshape(Int64[s == i for i in 1:p.N], p.N, 1)
-function testbuffers()
-    a = ArrayCircularBuffer(Array, Int64, (1), 8)
-    for i in 1:5 push!(a, [i]) end
-    @test a[1] == [1]
-    @test a[lastindex(a)] == [5]
-    @test lastindex(a) == 5
-    @test nmarkovgetindex(a, 5, 3)[:] == collect(3:5)
-    @test nmarkovgetindex(a, lastindex(a), 4)[:] == collect(2:5)
-    for i in 6:12 push!(a, [i]) end
-    @test a[1] == [5]
-    @test a[lastindex(a)] == [12]
-    @test nmarkovgetindex(a, lastindex(a), 4)[:] == collect(9:12)
 
-    a = ArrayStateBuffer(capacity = 7)
-    for i in 1:4
-        pushstateaction!(a, [i], i)
-        pushreturn!(a, i, false)
-    end
-    pushstateaction!(a, [5], 5)
-    @test a.states[3][1] == a.actions[3] == a.rewards[3]
-    pushreturn!(a, 5, false)
-    for i in 6:9
-        pushstateaction!(a, [i], i)
-        pushreturn!(a, i, false)
-    end
-    pushstateaction!(a, [10], 10)
-    @test a.states[3][1] == a.actions[3] == a.rewards[3]
+@testset "CircularTurnBuffer" begin
+    @testset "1D" begin
+        b = CircularTurnBuffer{Int, Int, Float64, Bool}(4)
+        @test eltype(b) == Turn{Int, Int, Float64, Bool}
+        @test isempty(b) == true
 
-    for T in [7, 97]
-        p = ForcedPolicy(rand(1:4, 100))
-        ends = rand(1:100, 10)
-        env = ForcedEpisode([[rand(1:10)] for _ in 1:100], 
-                            [i in ends ? true : false for i in 1:100], rand(100))
-        x = RLSetup(1, env, ConstantNumberSteps(T), policy = p, 
-                    buffer = ArrayStateBuffer(capacity = 10, datatype = Int64), 
-                    callbacks = [RecordAll()],
-                    fillbuffer = true, islearning = false)
-        learn!(x)
-        @test x.buffer.actions[end-5:end] == x.callbacks[1].actions[end-5:end]
-        @test x.buffer.done[end-5:end] == x.callbacks[1].done[end-5:end]
-        @test x.buffer.states[end-5:end][:] == vcat(x.callbacks[1].states[end-5:end]...)
-        @test x.buffer.rewards[end-4:end] == x.callbacks[1].rewards[end-4:end]
-    end
+        push!(b, Turn(1,1,1.,false,1))
+        push!(b, Turn(2,2,2.,false,2))
+        push!(b, Turn(3,3,3.,false,3))
+        push!(b, Turn(4,4,4.,false,4))
 
-    x = RLSetup(DQN(x -> mean(x, dims = 2)[1:4], nmarkov = 4, na = 4), MDP(), 
-                ConstantNumberSteps(100),
-                preprocessor = MyPreprocessor(10),
-                callbacks = [RecordAll()])
-    learn!(x)
-    i = 77
-    @test findall(x -> x != 0, nmarkovgetindex(x.buffer.states, i, 4)[:]) .% 10 == x.callbacks[1].states[i-3:i] .% 10
-    @test x.buffer.actions[i-3:i+3] == x.callbacks[1].actions[i-3:i+3]
-    @test lastindex(x.buffer.states) == lastindex(x.buffer.actions) == lastindex(x.callbacks[1].states)
-    @test nmarkovgetindex(x.buffer.states, lastindex(x.buffer.states), 4) == nmarkovgetindex(x.policy.buffer, lastindex(x.policy.buffer), 4)
-    @test findall(x -> x != 0, nmarkovgetindex(x.buffer.states, lastindex(x.buffer.states),4)[:]) .% 10 == x.callbacks[1].states[end-3:end] .% 10
+        @test isempty(b) == false
+        @test length(b) == 4
+        @test getconsecutive(b, 3, 2) == Turn(
+            [2, 3],
+            [2, 3],
+            [2., 3.],
+            [false, false],
+            [2, 3]
+        )
 
-    a1 = ArrayCircularBuffer(Array, Int64, (1), 8)
-    a2 = ArrayCircularBuffer(Array, Int64, (1), 5)
-    a3 = ArrayCircularBuffer(Array, Int64, (1), 4)
-    is = collect(1:9)
-    for i in is
-        push!(a1, [i])
-        push!(a2, [i])
-        push!(a3, [i])
+        push!(b, Turn(5,5,5.,true,5))
+        push!(b, Turn(6,6,6.,true,6))
+
+        @test length(b) == 4
+        @test getconsecutive(b, 3, 2) == Turn(
+            [4, 5],
+            [4, 5],
+            [4., 5.],
+            [false, true],
+            [4, 5]
+        )
     end
-    @test nmarkovgetindex(a1, lastindex(a1), 4) == nmarkovgetindex(a2, lastindex(a2), 4) == nmarkovgetindex(a3, lastindex(a3), 4)
+    @testset "2D" begin
+        b = CircularTurnBuffer{Array{Float64, 2}, Int, Float64, Bool}(4, (2,2), (), (), (), (2,2))
+        t = Turn([[1. 1.];[1. 1.]], 0, 1.0, false, [[0. 0.];[0. 0.]])
+        push!(b, t)
+        @test length(b) == 1
+        @test b[1] == t
+    end
 end
-testbuffers()
+
+@testset "EpisodeTurnBuffer" begin
+    b = EpisodeTurnBuffer{Int, Int, Float64, Bool}()
+
+    @test length(b) == 0
+
+    push!(b, Turn(1,1,1.,false,1))
+    push!(b, Turn(2,2,2.,false,2))
+    push!(b, Turn(3,3,3.,false,3))
+    @test getconsecutive(b, [2,3], 2) == Turn([1 2; 2 3], [1 2; 2 3], [1.0 2.0; 2.0 3.0], Bool[false false; false false], [1 2; 2 3])
+    @test length(b) == 3
+
+    push!(b, Turn(4,4,4.,true,4))
+    @test length(b) == 4
+
+    push!(b, Turn(5,5,5.,false,5))
+    @test length(b) == 1
+    empty!(b)
+    @test length(b) == 0
+end
+end
