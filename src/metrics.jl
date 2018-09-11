@@ -1,3 +1,5 @@
+export MeanReward, EvaluationPerT, EvaluationPerEpisode, TimeSteps, TotalReward,
+       getvalue
 """
     mutable struct MeanReward 
         meanreward::Float64
@@ -24,7 +26,6 @@ function reset!(p::MeanReward)
     p.meanreward = 0.
 end
 getvalue(p::MeanReward) = p.meanreward
-export MeanReward, getvalue
 
 """
     mutable struct TotalReward 
@@ -48,7 +49,6 @@ function reset!(p::TotalReward)
     p.reward = 0.
 end
 getvalue(p::TotalReward) = p.reward
-export TotalReward
 
 """
     mutable struct TimeSteps
@@ -72,7 +72,6 @@ function reset!(p::TimeSteps)
     p.counter = 0
 end
 getvalue(p::TimeSteps) = p.counter
-export TimeSteps
 
 """
     EvaluationPerEpisode
@@ -108,7 +107,6 @@ function reset!(p::EvaluationPerEpisode)
     reset!(p.metric)
     empty!(p.values)
 end
-export EvaluationPerEpisode
 
 """
     EvaluationPerT
@@ -151,7 +149,6 @@ function reset!(p::EvaluationPerT)
 end
 getvalue(p::Union{EvaluationPerEpisode, EvaluationPerT}) = 
     p.returnmean ? mean(p.values) : p.values
-export EvaluationPerT
 function getlastvaluestring(p::Union{EvaluationPerT, EvaluationPerEpisode})
     if length(p.values) > 0
         "$(typeof(p.metric).name.name): $(p.values[end])"

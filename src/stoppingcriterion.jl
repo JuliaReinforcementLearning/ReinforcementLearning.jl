@@ -1,3 +1,5 @@
+export ConstantNumberSteps, ConstantNumberEpisodes
+
 """
     mutable struct ConstantNumberSteps
         T::Int64
@@ -21,7 +23,6 @@ function isbreak!(criterion::ConstantNumberSteps, sraw, a, r, done)
     end
     false
 end
-export ConstantNumberSteps
 
 """
     mutable struct ConstantNumberEpisodes
@@ -48,5 +49,4 @@ function isbreak!(criterion::ConstantNumberEpisodes, sraw, a, r, done)
     end
     false
 end
-export ConstantNumberEpisodes
 

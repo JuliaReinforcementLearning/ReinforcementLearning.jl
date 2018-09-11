@@ -1,8 +1,10 @@
-import ReinforcementLearning: Buffer, pushstateaction!, pushreturn!,
-update!
+import ReinforcementLearning:update!
+
 function tdlearnintest()
-    episode = [(1, 2), (0., false, 3, 1), (1., false, 1, 2), (0., false, 2, 2), 
-               (1., false, 3, 2)] # r, done, nexts, nexta
+    episode = [(1, 2, 0., false, 3),
+               (3, 1, 1., false, 1),
+               (1, 2, 0., false, 2),
+               (2, 2, 1., false, 3)]
     γ = .9
     λ = .8
     α = .1
@@ -30,39 +32,17 @@ function tdlearnintest()
     results[Sarsa, AccumulatingTraces] = deepcopy(tmp)
     for tdkind in [QLearning, Sarsa] #, ExpectedSarsa]
         for tracekind in [NoTraces, AccumulatingTraces, ReplacingTraces]
-            buffer = Buffer()
+            buffer = CircularTurnBuffer{Int, Int, Float64, Bool}(1)
             learner = tdkind(ns = 3, na = 2, γ = γ, λ = λ, α = α, initvalue = Inf64,
                              tracekind = tracekind)
-            pushstateaction!(buffer, episode[1]...)
-            for (r, done, s, a) in episode[2:end]
-                pushreturn!(buffer, r, done)
-                pushstateaction!(buffer, s, a)
+            println(learner.params, results[tdkind, tracekind])
+            for t in episode[2:end]
+                push!(buffer, Turn(t...))
                 update!(learner, buffer)
+                println(learner.params, results[tdkind, tracekind])
             end
-            @test isapprox(learner.params, results[tdkind, tracekind], atol = 1e-15) ||
-                "$tdkind $tracekind: $(learner.params) ≉ $(results[tdkind, tracekind])"
-            @test learner.params[[1,3,6]] == results[tdkind, tracekind][[1,3,6]]
+            @test isapprox(learner.params, results[tdkind, tracekind], atol = 1e-15) 
         end
     end
 end
 tdlearnintest()
-
-# buffer = Buffer(capacity = 4)
-# buffer.states.buffer = [2, 3, 4, 2]
-# buffer.actions.buffer = [1, 2, 1, 2]
-# buffer.rewards.buffer = [.5, .3, -1.]
-# buffer.done.buffer = [false, false, false]
-# 
-# learner = QLearning(initvalue = 1., γ = γ, α = α)
-# update!(learner, buffer)
-# @test learner.params[1, 2] == 1 + α * (.5 + γ * .3 - γ^2 + γ^3 * 1 - 1)
-# 
-# learner = QLearning(initvalue = Inf64, unseenvalue = 2., γ = γ, α = α)
-# update!(learner, buffer)
-# @test learner.params[1, 2] == .5 + γ * .3 - γ^2 + γ^3 * 2
-# 
-# buffer.done.buffer[2] = true
-# learner = QLearning(initvalue = Inf64, γ = γ, α = α)
-# update!(learner, buffer)
-# @test learner.params[1, 2] == .5 + γ * .3
- 

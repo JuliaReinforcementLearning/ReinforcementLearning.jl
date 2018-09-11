@@ -1,6 +1,8 @@
 import DataFrames: DataFrame, groupby
 import Colors: distinguishable_colors
 using PGFPlotsX
+export compare
+export plotcomparison
 
 """
     compare(rlsetupcreators::Dict, N; callbackid = 1, verbose = false)
@@ -28,7 +30,6 @@ function compare(rlsetupcreators, N; callbackid = 1, verbose = false)
     end)
     DataFrame(name = res[1,:], result = res[2,:], seed = res[3,:])
 end
-export compare
 
 """
     plotcomparison(df; nmaxpergroup = 20, linestyles = [], 
@@ -79,4 +80,3 @@ function plotcomparison(df; nmaxpergroup = 20, linestyles = [],
                   plots..., Legend(legendentries))
     end
 end
-export plotcomparison

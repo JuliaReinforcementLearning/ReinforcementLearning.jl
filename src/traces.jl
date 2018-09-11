@@ -1,3 +1,5 @@
+export NoTraces, updatetrace!
+
 """
     struct NoTraces <: AbstractTraces
 
@@ -5,7 +7,6 @@ No eligibility traces, i.e. ``e(a, s) = 1`` for current action ``a`` and state
 ``s`` and zero otherwise.
 """
 struct NoTraces end
-export NoTraces
 
 # TODO: combine in one struct with additional field replacing::Bool
 for kind in (:ReplacingTraces, :AccumulatingTraces)

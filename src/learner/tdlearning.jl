@@ -1,3 +1,5 @@
+export Sarsa, QLearning, ExpectedSarsa,
+       getvalues
 """
     mutable struct TDLearner{T,Tp}
         ns::Int64 = 10
@@ -48,7 +50,6 @@ end
 function ExpectedSarsa(; kargs...) 
     TDLearner(; endvaluepolicy = ExpectedSarsaEndPolicy(VeryOptimisticEpsilonGreedyPolicy(.1)), kargs...)
 end
-export Sarsa, QLearning, ExpectedSarsa
 
 function defaultpolicy(learner::TDLearner, actionspace, buffer)
     EpsilonGreedyPolicy(.1, actionspace, s -> getvalue(learner.params, s))
@@ -61,14 +62,14 @@ end
 @inline checkinf(learner, value) = (value == Inf64 ? learner.unseenvalue : value)
 
 @inline function futurevalue(::QLearningEndPolicy, learner, buffer)
-    checkinf(learner, maximumbelowInf(getvalue(learner.params, buffer.states[end])))
+    checkinf(learner, maximumbelowInf(getvalue(learner.params, buffer.nextstates[end])))
 end
 @inline function futurevalue(::SarsaEndPolicy, learner, buffer)
-    getvaluecheckinf(learner, buffer.actions[end], buffer.states[end])
+    getvaluecheckinf(learner, buffer.actions[end], buffer.nextstates[end])
 end
 @inline function futurevalue(p::ExpectedSarsaEndPolicy, learner, buffer)
     a = buffer.actions[end]
-    s = buffer.states[end]
+    s = buffer.nextstates[end]
     actionprobabilites = getactionprobabilities(learner.endvaluepolicy.policy,
                                                 getvalue(learner.params, s))
     m = 0.
@@ -96,7 +97,7 @@ end
 end
 
 function tderror(learner, buffer)
-    tderror(buffer.rewards, buffer.done, learner.γ,
+    tderror(buffer.rewards, buffer.isdone, learner.γ,
             getvaluecheckinf(learner, buffer.actions[1], buffer.states[1]),
             futurevalue(learner.endvaluepolicy, learner, buffer))
 end
@@ -133,17 +134,15 @@ end
 
 # update
 
-function update!(learner::TDLearner, buffer)
-    !isfull(buffer) && return
-    updatetraceandparams!(learner, 
-                          buffer.states[1], 
-                          buffer.actions[1],
-                          tderror(learner, buffer),
-                          buffer.done[1])
+function update!(learner::TDLearner, buffer, next)
+    isfull(buffer) && updatetraceandparams!(learner, 
+                                            buffer.states[1], 
+                                            buffer.actions[1],
+                                            tderror(learner, buffer),
+                                            buffer.isdone[1])
 end
  
 function getvalues(learner::TDLearner)
     [maximum(learner.params[:, i]) for i in 1:size(learner.params, 2)]
 end
-export getvalues
 
