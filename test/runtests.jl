@@ -1,11 +1,11 @@
 using ReinforcementLearning, Test
 
-include("buffer.jl")
+# include("buffer.jl")
 # include("traces.jl")
 # include("epsilongreedypolicies.jl")
 # include("policies.jl")
 
-# @testset "tdlearning" begin include("tdlearning.jl") end
+@testset "tdlearning" begin include("tdlearning.jl") end
 
 # @testset "mdp solver" begin include("learnmdp.jl") end
 # @testset "learn" begin include("learn.jl") end
