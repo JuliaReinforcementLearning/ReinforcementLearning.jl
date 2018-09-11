@@ -1,3 +1,4 @@
+using Random: seed!
 import DataFrames: DataFrame, groupby
 import Colors: distinguishable_colors
 using PGFPlotsX
