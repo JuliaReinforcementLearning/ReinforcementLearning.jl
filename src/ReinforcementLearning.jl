@@ -3,9 +3,10 @@ module ReinforcementLearning
 using DataStructures, Parameters, SparseArrays, LinearAlgebra, Distributed,
 Statistics, Dates, Compat, Requires, StatsBase
 import Statistics: mean
+
+using ReinforcementLearningBase
 import ReinforcementLearningBase: interact!, getstate, reset!, plotenv, sample
 
-using Random: seed!
 function __init__()
     @require CuArrays="3a865a2d-5b23-5a0f-bc46-62713ec82fae" begin
     """
