@@ -1,7 +1,12 @@
+using Random: seed!
 import ReinforcementLearning: preprocessstate
+using ReinforcementLearningBase
+using ReinforcementLearningEnvironmentDiscrete
+
 struct OneHotPreprocessor 
     ns::Int64
 end
+
 preprocessstate(p::OneHotPreprocessor, s) = Float64[i == s for i in 1:p.ns]
 for λ in [0, .8]
     mdp = MDP()

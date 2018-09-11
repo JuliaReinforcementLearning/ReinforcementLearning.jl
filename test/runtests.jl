@@ -8,7 +8,7 @@ using ReinforcementLearning, Test
 # include("losses.jl")
 # include("learnmdp.jl")
 
-# @testset "linear function approximation" begin include("linfuncapprox.jl") end
+@testset "linear function approximation" begin include("linfuncapprox.jl") end
 # @testset "preprocessor" begin include("preprocessors.jl") end
 # @testset "monte carlo" begin include("montecarlo.jl") end
 # @testset "small backups" begin include("smallbackups.jl") end
