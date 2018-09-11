@@ -1,5 +1,6 @@
 import Flux
-function testlosses()
+
+@testset "losses" begin
     m = Flux.Dense(4, 4)
     x = rand(4)
     y = m(x)
@@ -10,4 +11,3 @@ function testlosses()
     Flux.back!(huberloss(yhat, y))
     @test Wgrad1 == m.W.grad
 end
-testlosses()
