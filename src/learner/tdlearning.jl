@@ -65,10 +65,10 @@ end
     checkinf(learner, maximumbelowInf(getvalue(learner.params, buffer.nextstates[end])))
 end
 @inline function futurevalue(::SarsaEndPolicy, learner, buffer)
-    getvaluecheckinf(learner, buffer.actions[end], buffer.nextstates[end])
+    getvaluecheckinf(learner, buffer.nextactions[end], buffer.nextstates[end])
 end
 @inline function futurevalue(p::ExpectedSarsaEndPolicy, learner, buffer)
-    a = buffer.actions[end]
+    a = buffer.nextactions[end]
     s = buffer.nextstates[end]
     actionprobabilites = getactionprobabilities(learner.endvaluepolicy.policy,
                                                 getvalue(learner.params, s))
@@ -134,7 +134,7 @@ end
 
 # update
 
-function update!(learner::TDLearner, buffer, next)
+function update!(learner::TDLearner, buffer)
     isfull(buffer) && updatetraceandparams!(learner, 
                                             buffer.states[1], 
                                             buffer.actions[1],

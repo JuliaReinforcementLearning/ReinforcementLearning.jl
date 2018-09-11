@@ -1,10 +1,10 @@
 import ReinforcementLearning:update!
 
 function tdlearnintest()
-    episode = [(1, 2, 0., false, 3),
-               (3, 1, 1., false, 1),
-               (1, 2, 0., false, 2),
-               (2, 2, 1., false, 3)]
+    episode = [(1, 2, 0., false, 3, 1),
+               (3, 1, 1., false, 1, 2),
+               (1, 2, 0., false, 2, 2),
+               (2, 2, 1., false, 3, 2)]
     γ = .9
     λ = .8
     α = .1
@@ -36,7 +36,7 @@ function tdlearnintest()
             learner = tdkind(ns = 3, na = 2, γ = γ, λ = λ, α = α, initvalue = Inf64,
                              tracekind = tracekind)
             println(learner.params, results[tdkind, tracekind])
-            for t in episode[2:end]
+            for t in episode
                 push!(buffer, Turn(t...))
                 update!(learner, buffer)
                 println(learner.params, results[tdkind, tracekind])

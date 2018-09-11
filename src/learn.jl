@@ -7,10 +7,13 @@ function learn!(rlsetup)
     @unpack learner, policy, fillbuffer, preprocessor, buffer, environment, stoppingcriterion = rlsetup
     obs = reset!(environment)
     while true
-        s, a = preprocessstate(preprocessor, obs), policy(s)
+        s = preprocessstate(preprocessor, obs)
+        a = policy(s)
         next_obs, r, isdone = interact!(environment, a)
-        next_s =  preprocessstate(preprocessor, next_obs)
-        fillbuffer &&  push!(buffer, Turn(s,a,r,isdone,next_s))
+        next_s = preprocessstate(preprocessor, next_obs)
+        next_a = policy(next_s)
+
+        fillbuffer &&  push!(buffer, Turn(s,a,r,isdone,next_s, next_a))
         rlsetup.islearning && update!(learner, buffer)
 
         for callback in rlsetup.callbacks
