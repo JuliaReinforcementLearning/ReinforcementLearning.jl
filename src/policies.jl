@@ -1,3 +1,6 @@
+export SoftmaxPolicy, EpsilonGreedyPolicy, ForcedPolicy,
+       getactionprobabilities
+
 """
     mutable struct SoftmaxPolicy <: AbstractSoftmaxPolicy
         β::Float64
@@ -20,7 +23,6 @@ mutable struct SoftmaxPolicy{T}
     π::T
 end
 SoftmaxPolicy(π; β = 1.) = SoftmaxPolicy(float(β), π)
-export SoftmaxPolicy
 function (p::SoftmaxPolicy)(s)
     values = p.π(s)
     if maximum(values) == Inf64
@@ -72,7 +74,6 @@ function EpsilonGreedyPolicy(ϵ, actionspace::Ta, Q::Tf;
                              kind = :veryoptimistic) where {Ta, Tf}
     EpsilonGreedyPolicy{kind, Ta, Tf}(ϵ, actionspace, Q)
 end
-export EpsilonGreedyPolicy
 (p::EpsilonGreedyPolicy)(s) = rand() < p.ϵ ? sample(p.actionspace) : 
                                              samplegreedyaction(p, p.Q(s))
 
@@ -152,7 +153,6 @@ mutable struct ForcedPolicy
     t::Int64
     actions::Array{Int64, 1}
 end
-export ForcedPolicy
 ForcedPolicy(actions) = ForcedPolicy(1, actions)
 function (p::ForcedPolicy)(s)
     if p.t > length(p.actions)

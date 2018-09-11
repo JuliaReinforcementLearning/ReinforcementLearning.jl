@@ -1,8 +1,12 @@
+export ImagePreprocessor, ImageCrop, ImageResizeNearestNeighbour,
+       StateAggregator, TilingStateAggregator, RadialBasisFunctions,
+       NoPreprocessor, RandomProjection, SparseRandomProjection,
+       ImageResizeBilinear, togpu
+
 """
     struct NoPreprocessor end
 """
 struct NoPreprocessor end
-export NoPreprocessor
 @inline preprocessstate(p::NoPreprocessor, s) = s
 @inline preprocess(::NoPreprocessor, s, r, done) = (s, r, done)
 @inline preprocess(p, s, r, done) = (preprocessstate(p, s), r, done)
@@ -31,7 +35,6 @@ struct StateAggregator
     offsets::Array{Int64, 1}
     perdimension::Bool
 end
-export StateAggregator
 """
     StateAggregator(lb::Vector, ub::Vector, nbins::Vector;
                     perdimension = false)
@@ -78,7 +81,6 @@ struct TilingStateAggregator{T <: Array{StateAggregator,1}}
     ns::Int64
     tiling::T
 end
-export TilingStateAggregator
 
 function preprocessstate(p::TilingStateAggregator, s)
     sp = Int64[]
@@ -118,7 +120,6 @@ struct RadialBasisFunctions
     sigmas::Array{Float64, 1}
     state::Array{Float64, 1}
 end
-export RadialBasisFunctions
 function RadialBasisFunctions(box::Box, n, sigma)
     dim = length(box.low)
     means = [rand(dim) .* (box.high - box.low) .+ box.low for _ in 1:n]
@@ -140,7 +141,6 @@ end
 struct RandomProjection
     w::Array{Float64, 2}
 end
-export RandomProjection
 preprocessstate(p::RandomProjection, s) = p.w * s
 
 """
@@ -152,7 +152,6 @@ struct SparseRandomProjection
     w::Array{Float64, 2}
     b::Array{Float64, 1}
 end
-export SparseRandomProjection
 preprocessstate(p::SparseRandomProjection, s) = clamp.(p.w * s + p.b, 0, Inf)
 
 """
@@ -266,6 +265,3 @@ struct ImageCrop{Tx, Ty}
 end
 (c::ImageCrop)(x::Array{T, 2}) where T = x[c.xidx, c.yidx]
 (c::ImageCrop)(x::Array{T, 3}) where T = x[:, c.xidx, c.yidx]
-
-export ImagePreprocessor, ImageCrop, ImageResizeNearestNeighbour,
-ImageResizeBilinear, togpu

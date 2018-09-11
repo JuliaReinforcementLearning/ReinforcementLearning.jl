@@ -1,3 +1,7 @@
+export ReduceEpsilonPerEpisode, Visualize, SaveLearner, EvaluateGreedy,
+       Step, Episode, Progress, ReduceEpsilonPerT, LinearDecreaseEpsilon,
+       RecordAll, AllRewards
+
 """
     mutable struct ReduceEpsilonPerEpisode
         ϵ0::Float64
@@ -26,7 +30,6 @@ function callback!(c::ReduceEpsilonPerEpisode, rlsetup, sraw, a, r, done)
         rlsetup.policy.ϵ = c.ϵ0 / c.counter
     end
 end
-export ReduceEpsilonPerEpisode
 
 """
     mutable struct ReduceEpsilonPerT
@@ -62,7 +65,6 @@ function callback!(c::ReduceEpsilonPerT, rlsetup, sraw, a, r, done)
         rlsetup.policy.ϵ = c.ϵ0 / c.n
     end
 end
-export ReduceEpsilonPerT
 
 """
     mutable struct LinearDecreaseEpsilon
@@ -86,7 +88,6 @@ mutable struct LinearDecreaseEpsilon
     t::Int64
     step::Float64
 end
-export LinearDecreaseEpsilon
 """
     LinearDecreaseEpsilon(start, stop, initval, finalval)
 """
@@ -125,7 +126,6 @@ end
     Progress(steps = 10) = Progress(steps, 0)
 """
 Progress(steps = 10) = Progress(steps, 0)
-export Progress
 progressunit(stop::ConstantNumberSteps) = "steps"
 progressunit(stop::ConstantNumberEpisodes) = "episodes"
 function callback!(c::Progress, rlsetup, sraw, a, r, done)
@@ -225,7 +225,6 @@ function callback!(c::EvaluateGreedy, rlsetup, sraw, a, r, done)
 end
 getvalue(c::EvaluateGreedy) = c.values
 
-export EvaluateGreedy, Step, Episode
 greedypolicy(p::EpsilonGreedyPolicy{T}) where T = EpsilonGreedyPolicy{T}(0.)
 greedypolicy(p::SoftmaxPolicy) = SoftmaxPolicy(Inf)
 
@@ -242,7 +241,6 @@ step (or episode) at which the learner is saved.
     every::T = Step(10^3)
     filename::String = tempname()
 end
-export SaveLearner
 function callback!(c::SaveLearner, rlsetup, sraw, a, r, done)
     if step!(c.every, done)
         save(c.filename * "_$(c.every.t).jld2", 
@@ -281,7 +279,6 @@ function reset!(p::RecordAll)
     empty!(p.rewards); empty!(p.actions); empty!(p.states); empty!(p.done)
 end
 getvalue(p::RecordAll) = p
-export RecordAll
 
 """
     struct AllRewards
@@ -305,7 +302,6 @@ function reset!(p::AllRewards)
     empty!(p.rewards)
 end
 getvalue(p::AllRewards) = p.rewards
-export AllRewards
 
 
 """
@@ -323,7 +319,6 @@ A callback to be used in an `RLSetup` to visualize an environment during
 running or learning.
 """
 Visualize(; wait = .15) = Visualize(wait)
-export Visualize
 function callback!(c::Visualize, rlsetup, s, a, r, done)
     plotenv(rlsetup.environment)
     sleep(c.wait)
