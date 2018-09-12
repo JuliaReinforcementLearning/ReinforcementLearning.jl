@@ -109,7 +109,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Usage",
     "title": "Example 1",
     "category": "section",
-    "text": "using ReinforcementLearning\n\nlearner = QLearning()\nenv = MDP()\nstop = ConstantNumberSteps(10^3)\nx = RLSetup(learner, env, stop, callbacks = [TotalReward()])\nlearn!(x)\ngetvalue(x.callbacks[1])"
+    "text": "using ReinforcementLearning, ReinforcementLearningEnvironmentDiscrete\n\nlearner = QLearning()\nenv = MDP()\nstop = ConstantNumberSteps(10^3)\nx = RLSetup(learner, env, stop, callbacks = [TotalReward()])\nlearn!(x)\ngetvalue(x.callbacks[1])"
 },
 
 {
@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Usage",
     "title": "Example 2",
     "category": "section",
-    "text": "using ReinforcementLearning, Flux\n\nlearner = DQN(Chain(Dense(4, 24, relu), Dense(24, 48, relu), Dense(48, 2)),\n              opttype = x -> ADAM(x, .001))\nloadenvironment(\"cartpole\")\nenv = CartPole()\nstop = ConstantNumberEpisodes(2*10^3)\ncallbacks = [EvaluateGreedy(EvaluationPerEpisode(TimeSteps(), returnmean=true),\n                            ConstantNumberEpisodes(100), every = Episode(100)),\n             EvaluationPerEpisode(TimeSteps()),\n             Progress()]\nx = RLSetup(learner, env, stop, callbacks = callbacks)\nlearn!(x)\ngetvalue(x.callbacks[1])"
+    "text": "using ReinforcementLearning, ReinforcementLearningEnvironmentClassicControl, Flux\n\nlearner = DQN(Chain(Dense(4, 24, relu), Dense(24, 48, relu), Dense(48, 2)),\n              opttype = x -> ADAM(x, .001))\nenv = CartPole()\nstop = ConstantNumberEpisodes(2*10^3)\ncallbacks = [EvaluateGreedy(EvaluationPerEpisode(TimeSteps(), returnmean=true),\n                            ConstantNumberEpisodes(100), every = Episode(100)),\n             EvaluationPerEpisode(TimeSteps()),\n             Progress()]\nx = RLSetup(learner, env, stop, callbacks = callbacks)\nlearn!(x)\ngetvalue(x.callbacks[1])"
 },
 
 {
@@ -213,7 +213,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Comparison",
     "title": "ReinforcementLearning.compare",
     "category": "method",
-    "text": "compare(rlsetupcreators::Dict, N; callbackid = 1, verbose = false)\n\nRun different setups in dictionary rlsetupcreators N times. The dictionary has elements \"name\" => createrlsetup, where createrlsetup is a function that has a single integer argument (id of the comparison; useful for saving  intermediate results). For each run, getvalue(rlsetup.callbacks[callbackid]) gets entered as result in a DataFrame with columns \"name\", \"result\", \"seed\".\n\n\n\n"
+    "text": "compare(rlsetupcreators::Dict, N; callbackid = 1, verbose = false)\n\nRun different setups in dictionary rlsetupcreators N times. The dictionary has elements \"name\" => createrlsetup, where createrlsetup is a function that has a single integer argument (id of the comparison; useful for saving  intermediate results). For each run, getvalue(rlsetup.callbacks[callbackid]) gets entered as result in a DataFrame with columns \"name\", \"result\", \"seed\".\n\n\n\n\n\n"
 },
 
 {
@@ -221,7 +221,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Comparison",
     "title": "ReinforcementLearning.plotcomparison",
     "category": "method",
-    "text": "plotcomparison(df; nmaxpergroup = 20, linestyles = [], \n                   showbest = true, axisoptions = @pgf {})\n\nPlots results obtained with compare using PGFPlotsX.\n\n\n\n"
+    "text": "plotcomparison(df; nmaxpergroup = 20, linestyles = [], \n                   showbest = true, axisoptions = @pgf {})\n\nPlots results obtained with compare using PGFPlotsX.\n\n\n\n\n\n"
 },
 
 {
@@ -233,19 +233,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "learning/#ReinforcementLearning.RLSetup",
-    "page": "Learning",
-    "title": "ReinforcementLearning.RLSetup",
-    "category": "type",
-    "text": "@with_kw mutable struct RLSetup{Tl,Tb,Tp,Tpp,Te,Ts}\n    learner::Tl\n    environment::Te\n    stoppingcriterion::Ts\n    preprocessor::Tpp = NoPreprocessor()\n    buffer::Tb = defaultbuffer(learner, environment, preprocessor)\n    policy::Tp = defaultpolicy(learner, buffer)\n    callbacks::Array{Any, 1} = []\n    islearning::Bool = true\n    fillbuffer::Bool = islearning\n\n\n\n"
-},
-
-{
     "location": "learning/#ReinforcementLearning.RLSetup-Tuple{Any,Any,Any}",
     "page": "Learning",
     "title": "ReinforcementLearning.RLSetup",
     "category": "method",
-    "text": "RLSetup(learner, env, stop; kargs...) = RLSetup(learner = learner,\n                                                environment = env,\n                                                stoppingcriterion = stop;\n                                                kargs...)\n\n\n\n"
+    "text": "RLSetup(learner, env, stop; kargs...) = RLSetup(learner = learner,\n                                                environment = env,\n                                                stoppingcriterion = stop;\n                                                kargs...)\n\n\n\n\n\n"
 },
 
 {
@@ -253,7 +245,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learning",
     "title": "ReinforcementLearning.learn!",
     "category": "method",
-    "text": "learn!(rlsetup)\n\nRuns an rlsetup with learning.\n\n\n\n"
+    "text": "learn!(rlsetup)\n\nRuns an rlsetup with learning.\n\n\n\n\n\n"
 },
 
 {
@@ -261,7 +253,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learning",
     "title": "ReinforcementLearning.run!",
     "category": "method",
-    "text": "run!(rlsetup)\n\nRuns an rlsetup without learning.\n\n\n\n"
+    "text": "run!(rlsetup)\n\nRuns an rlsetup without learning.\n\n\n\n\n\n"
 },
 
 {
@@ -293,7 +285,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.ExpectedSarsa",
     "category": "method",
-    "text": "ExpectedSarsa(; kargs...) = TDLearner(; endvaluepolicy = ExpectedSarsaEndPolicy(VeryOptimisticEpsilonGreedyPolicy(.1)), kargs...)\n\n\n\n"
+    "text": "ExpectedSarsa(; kargs...) = TDLearner(; endvaluepolicy = ExpectedSarsaEndPolicy(VeryOptimisticEpsilonGreedyPolicy(.1)), kargs...)\n\n\n\n\n\n"
 },
 
 {
@@ -301,7 +293,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.QLearning",
     "category": "method",
-    "text": "QLearning(; kargs...) = TDLearner(; endvaluepolicy = QLearningEndPolicy(), kargs...)\n\n\n\n"
+    "text": "QLearning(; kargs...) = TDLearner(; endvaluepolicy = QLearningEndPolicy(), kargs...)\n\n\n\n\n\n"
 },
 
 {
@@ -309,7 +301,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.Sarsa",
     "category": "method",
-    "text": "Sarsa(; kargs...) = TDLearner(; kargs...)\n\n\n\n"
+    "text": "Sarsa(; kargs...) = TDLearner(; kargs...)\n\n\n\n\n\n"
 },
 
 {
@@ -317,7 +309,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.AccumulatingTraces",
     "category": "type",
-    "text": "struct AccumulatingTraces <: AbstractTraces\n    λ::Float64\n    γλ::Float64\n    trace::Array{Float64, 2}\n    minimaltracevalue::Float64\n\nDecaying traces with factor γλ. \n\nTraces are updated according to e(a s)   1 + e(a s) for the current action-state pair and e(a s)    e(a s) for all other pairs unless e(a s)  minimaltracevalue where the trace is set to 0  (for computational efficiency).\n\n\n\n"
+    "text": "struct AccumulatingTraces <: AbstractTraces\n    λ::Float64\n    γλ::Float64\n    trace::Array{Float64, 2}\n    minimaltracevalue::Float64\n\nDecaying traces with factor γλ. \n\nTraces are updated according to e(a s)   1 + e(a s) for the current action-state pair and e(a s)   γλ e(a s) for all other pairs unless e(a s)  minimaltracevalue where the trace is set to 0  (for computational efficiency).\n\n\n\n\n\n"
 },
 
 {
@@ -325,7 +317,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.AccumulatingTraces",
     "category": "method",
-    "text": "AccumulatingTraces(ns, na, λ::Float64, γ::Float64; minimaltracevalue = 1e-12)\n\n\n\n"
+    "text": "AccumulatingTraces(ns, na, λ::Float64, γ::Float64; minimaltracevalue = 1e-12)\n\n\n\n\n\n"
 },
 
 {
@@ -333,7 +325,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.NoTraces",
     "category": "type",
-    "text": "struct NoTraces <: AbstractTraces\n\nNo eligibility traces, i.e. e(a s) = 1 for current action a and state s and zero otherwise.\n\n\n\n"
+    "text": "struct NoTraces <: AbstractTraces\n\nNo eligibility traces, i.e. e(a s) = 1 for current action a and state s and zero otherwise.\n\n\n\n\n\n"
 },
 
 {
@@ -341,7 +333,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.ReplacingTraces",
     "category": "type",
-    "text": "struct ReplacingTraces <: AbstractTraces\n    λ::Float64\n    γλ::Float64\n    trace::Array{Float64, 2}\n    minimaltracevalue::Float64\n\nDecaying traces with factor γλ. \n\nTraces are updated according to e(a s)   1 for the current action-state pair and e(a s)    e(a s) for all other pairs unless e(a s)  minimaltracevalue where the trace is set to 0  (for computational efficiency).\n\n\n\n"
+    "text": "struct ReplacingTraces <: AbstractTraces\n    λ::Float64\n    γλ::Float64\n    trace::Array{Float64, 2}\n    minimaltracevalue::Float64\n\nDecaying traces with factor γλ. \n\nTraces are updated according to e(a s)   1 for the current action-state pair and e(a s)   γλ e(a s) for all other pairs unless e(a s)  minimaltracevalue where the trace is set to 0  (for computational efficiency).\n\n\n\n\n\n"
 },
 
 {
@@ -349,15 +341,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.ReplacingTraces",
     "category": "method",
-    "text": "ReplacingTraces(ns, na, λ::Float64, γ::Float64; minimaltracevalue = 1e-12)\n\n\n\n"
-},
-
-{
-    "location": "learners/#ReinforcementLearning.TDLearner",
-    "page": "Learners",
-    "title": "ReinforcementLearning.TDLearner",
-    "category": "type",
-    "text": "mutable struct TDLearner{T,Tp}\n    ns::Int64 = 10\n    na::Int64 = 4\n    γ::Float64 = .9\n    λ::Float64 = .8\n    α::Float64 = .1\n    nsteps::Int64 = 1\n    initvalue::Float64 = 0.\n    unseenvalue::Float64 = initvalue == Inf64 ? 0. : initvalue\n    params::Array{Float64, 2} = zeros(na, ns) .+ initvalue\n    tracekind = DataType = λ == 0 ? NoTraces : ReplacingTraces\n    traces::T = tracekind == NoTraces ? NoTraces() : tracekind(ns, na, λ, γ)\n    endvaluepolicy::Tp = SarsaEndPolicy()\n\n\n\n"
+    "text": "ReplacingTraces(ns, na, λ::Float64, γ::Float64; minimaltracevalue = 1e-12)\n\n\n\n\n\n"
 },
 
 {
@@ -381,7 +365,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.Critic",
     "category": "type",
-    "text": "mutable struct Critic <: AbstractBiasCorrector\n    α::Float64\n    V::Array{Float64, 1}\n\n\n\n"
+    "text": "mutable struct Critic <: AbstractBiasCorrector\n    α::Float64\n    V::Array{Float64, 1}\n\n\n\n\n\n"
 },
 
 {
@@ -389,7 +373,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.Critic",
     "category": "method",
-    "text": "Critic(; γ = .9, α = .1, ns = 10, initvalue = 0.)\n\n\n\n"
+    "text": "Critic(; γ = .9, α = .1, ns = 10, initvalue = 0.)\n\n\n\n\n\n"
 },
 
 {
@@ -397,7 +381,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.NoBiasCorrector",
     "category": "type",
-    "text": "struct NoBiasCorrector <: AbstractBiasCorrector\n\n\n\n"
+    "text": "struct NoBiasCorrector <: AbstractBiasCorrector\n\n\n\n\n\n"
 },
 
 {
@@ -405,7 +389,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.RewardLowpassFilterBiasCorrector",
     "category": "type",
-    "text": "mutable struct RewardLowpassFilterBiasCorrector <: AbstractBiasCorrector\nλ::Float64\nrmean::Float64\n\nFilters the reward with factor λ and uses effective reward (r - rmean) to update the parameters.\n\n\n\n"
+    "text": "mutable struct RewardLowpassFilterBiasCorrector <: AbstractBiasCorrector\nλ::Float64\nrmean::Float64\n\nFilters the reward with factor λ and uses effective reward (r - rmean) to update the parameters.\n\n\n\n\n\n"
 },
 
 {
@@ -413,7 +397,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.ActorCriticPolicyGradient",
     "category": "method",
-    "text": "ActorCriticPolicyGradient(; nsteps = 1, γ = .9, ns = 10, na = 4, \n                            α = .1, αcritic = .1, initvalue = Inf64)\n\n\n\n"
+    "text": "ActorCriticPolicyGradient(; nsteps = 1, γ = .9, ns = 10, na = 4, \n                            α = .1, αcritic = .1, initvalue = Inf64)\n\n\n\n\n\n"
 },
 
 {
@@ -421,7 +405,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.EpisodicReinforce",
     "category": "method",
-    "text": "EpisodicReinforce(; kwargs...) = PolicyGradientForward(; kwargs...)\n\n\n\n"
+    "text": "EpisodicReinforce(; kwargs...) = PolicyGradientForward(; kwargs...)\n\n\n\n\n\n"
 },
 
 {
@@ -429,15 +413,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Learners",
     "title": "ReinforcementLearning.AbstractPolicyGradient",
     "category": "type",
-    "text": "mutable struct PolicyGradientBackward <: AbstractPolicyGradient\n    ns::Int64 = 10\n    na::Int64 = 4\n    γ::Float64 = .9\n    α::Float64 = .1\n    initvalue::Float64 = 0.\n    params::Array{Float64, 2} = zeros(na, ns) + initvalue\n    traces::AccumulatingTraces = AccumulatingTraces(ns, na, 1., γ, \n                                                    trace = zeros(na, ns))\n    biascorrector::T = NoBiasCorrector()\n\nPolicy gradient learning in the backward view.\n\nThe parameters are updated according to paramsa s +=  * r_eff * ea s where r_eff =  r for NoBiasCorrector, r_eff =  r - rmean for RewardLowpassFilterBiasCorrector and e[a, s] is the eligibility trace.\n\n\n\n"
-},
-
-{
-    "location": "learners/#ReinforcementLearning.PolicyGradientForward",
-    "page": "Learners",
-    "title": "ReinforcementLearning.PolicyGradientForward",
-    "category": "type",
-    "text": "mutable struct PolicyGradientForward <: AbstractPolicyGradient\n    ns::Int64 = 10\n    na::Int64 = 4\n    γ::Float64 = .9\n    α::Float64 = .1\n    initvalue::Float64 = 0.\n    params::Array{Float64, 2} = zeros(na, ns) + initvalue\n    biascorrector::Tb = NoBiasCorrector()\n    nsteps::Int64 = typemax(Int64)\n\n\n\n"
+    "text": "mutable struct PolicyGradientBackward <: AbstractPolicyGradient\n    ns::Int64 = 10\n    na::Int64 = 4\n    γ::Float64 = .9\n    α::Float64 = .1\n    initvalue::Float64 = 0.\n    params::Array{Float64, 2} = zeros(na, ns) + initvalue\n    traces::AccumulatingTraces = AccumulatingTraces(ns, na, 1., γ, \n                                                    trace = zeros(na, ns))\n    biascorrector::T = NoBiasCorrector()\n\nPolicy gradient learning in the backward view.\n\nThe parameters are updated according to paramsa s += α * r_eff * ea s where r_eff =  r for NoBiasCorrector, r_eff =  r - rmean for RewardLowpassFilterBiasCorrector and e[a, s] is the eligibility trace.\n\n\n\n\n\n"
 },
 
 {
@@ -449,14 +425,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "learners/#ReinforcementLearning.MonteCarlo",
-    "page": "Learners",
-    "title": "ReinforcementLearning.MonteCarlo",
-    "category": "type",
-    "text": "mutable struct MonteCarlo <: AbstractReinforcementLearner\n    ns::Int64 = 10\n    na::Int64 = 4\n    γ::Float64 = .9\n    initvalue = 0.\n    Nsa::Array{Int64, 2} = zeros(Int64, na, ns)\n    Q::Array{Float64, 2} = zeros(na, ns) + initvalue\n\nEstimate Q values by averaging over returns.\n\n\n\n"
-},
-
-{
     "location": "learners/#N-step-Learner-1",
     "page": "Learners",
     "title": "N-step Learner",
@@ -465,27 +433,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "learners/#ReinforcementLearning.MDPLearner",
-    "page": "Learners",
-    "title": "ReinforcementLearning.MDPLearner",
-    "category": "type",
-    "text": "@with_kw struct MDPLearner\n    mdp::MDP = MDP()\n    γ::Float64 = .9\n    policy::Array{Int64, 1} = ones(Int64, mdp.ns)\n    values::Array{Float64, 1} = zeros(mdp.ns)\n\nUsed to solve mdp with discount factor γ.\n\n\n\n"
-},
-
-{
-    "location": "learners/#ReinforcementLearning.policy_iteration!-Tuple{ReinforcementLearning.MDPLearner}",
+    "location": "learners/#ReinforcementLearning.policy_iteration!-Tuple{MDPLearner}",
     "page": "Learners",
     "title": "ReinforcementLearning.policy_iteration!",
     "category": "method",
-    "text": "policy_iteration!(mdplearner::MDPLearner)\n\nSolve MDP with policy iteration using MDPLearner.\n\n\n\n"
-},
-
-{
-    "location": "learners/#ReinforcementLearning.SmallBackups",
-    "page": "Learners",
-    "title": "ReinforcementLearning.SmallBackups",
-    "category": "type",
-    "text": "mutable struct SmallBackups <: AbstractReinforcementLearner\n    ns::Int64 = 10\n    na::Int64 = 4\n    γ::Float64 = .9\n    initvalue::Float64 = Inf64\n    maxcount::UInt64 = 3\n    minpriority::Float64 = 1e-8\n    M::Int64 = 1\n    counter::Int64 = 0\n    Q::Array{Float64, 2} = zeros(na, ns) .+ initvalue\n    V::Array{Float64, 1} = zeros(ns) .+ (initvalue == Inf64 ? 0. : initvalue)\n    U::Array{Float64, 1} = zeros(ns) .+ (initvalue == Inf64 ? 0. : initvalue)\n    Nsa::Array{Int64, 2} = zeros(Int64, na, ns)\n    Ns1a0s0::Array{Dict{Tuple{Int64, Int64}, Int64}, 1} = [Dict{Tuple{Int64, Int64}, Int64}() for _ in 1:ns]\n    queue::PriorityQueue = PriorityQueue(Base.Order.Reverse, zip(Int64[], Float64[]))\n\nSee Harm Van Seijen, Rich Sutton ; Proceedings of the 30th International Conference on Machine Learning, PMLR 28(3):361-369, 2013.\n\nmaxcount defines the maximal number of backups per action, minpriority is the smallest priority still added to the queue.\n\n\n\n"
+    "text": "policy_iteration!(mdplearner::MDPLearner)\n\nSolve MDP with policy iteration using MDPLearner.\n\n\n\n\n\n"
 },
 
 {
@@ -494,22 +446,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Model Based Learner",
     "category": "section",
     "text": "Modules = [ReinforcementLearning]\nPages   = [\"mdplearner.jl\", \"prioritizedsweeping.jl\"]"
-},
-
-{
-    "location": "learners/#ReinforcementLearning.DQN",
-    "page": "Learners",
-    "title": "ReinforcementLearning.DQN",
-    "category": "type",
-    "text": "mutable struct DQN{Tnet,TnetT,ToptT,Topt}\n    γ::Float64 = .99\n    na::Int64\n    net::TnetT\n    targetnet::Tnet = Flux.mapleaves(Flux.Tracker.data, deepcopy(net))\n    policynet::Tnet = Flux.mapleaves(Flux.Tracker.data, net)\n    updatetargetevery::Int64 = 500\n    t::Int64 = 0\n    updateevery::Int64 = 1\n    opttype::ToptT = Flux.ADAM\n    opt::Topt = opttype(Flux.params(net))\n    startlearningat::Int64 = 10^3\n    minibatchsize::Int64 = 32\n    doubledqn::Bool = true\n    nmarkov::Int64 = 1\n    nsteps::Int64 = 1\n    replaysize::Int64 = 10^4\n    loss::Function = Flux.mse\n\n\n\n"
-},
-
-{
-    "location": "learners/#ReinforcementLearning.DeepActorCritic",
-    "page": "Learners",
-    "title": "ReinforcementLearning.DeepActorCritic",
-    "category": "type",
-    "text": "mutable struct DeepActorCritic{Tnet, Tpl, Tplm, Tvl, ToptT, Topt}\n    nh::Int64 = 4\n    na::Int64 = 2\n    γ::Float64 = .9\n    nsteps::Int64 = 5\n    net::Tnet\n    policylayer::Tpl = Linear(nh, na)\n    policynet::Tplm = Flux.Chain(Flux.mapleaves(Flux.Tracker.data, net),\n                             Flux.mapleaves(Flux.Tracker.data, policylayer))\n    valuelayer::Tvl = Linear(nh, 1)\n    params::Array{Any, 1} = vcat(map(Flux.params, [net, policylayer, valuelayer])...)\n    t::Int64 = 0\n    updateevery::Int64 = 1\n    opttype::ToptT = Flux.ADAM\n    opt::Topt = opttype(params)\n    αcritic::Float64 = .1\n    nmarkov::Int64 = 1\n\n\n\n"
 },
 
 {
@@ -533,7 +469,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Buffers",
     "title": "ReinforcementLearning.ArrayCircularBuffer",
     "category": "type",
-    "text": "mutable struct ArrayCircularBuffer{T}\n    data::T\n    capacity::Int64\n    start::Int64\n    counter::Int64\n    full::Bool\n\n\n\n"
+    "text": "mutable struct ArrayCircularBuffer{T}\n    data::T\n    capacity::Int64\n    start::Int64\n    counter::Int64\n    full::Bool\n\n\n\n\n\n"
 },
 
 {
@@ -541,7 +477,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Buffers",
     "title": "ReinforcementLearning.ArrayCircularBuffer",
     "category": "method",
-    "text": "ArrayCircularBuffer(arraytype, datatype, elemshape, capacity)\n\n\n\n"
+    "text": "ArrayCircularBuffer(arraytype, datatype, elemshape, capacity)\n\n\n\n\n\n"
 },
 
 {
@@ -549,7 +485,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Buffers",
     "title": "ReinforcementLearning.ArrayStateBuffer",
     "category": "type",
-    "text": "struct ArrayStateBuffer{Ts, Ta}\n    states::ArrayCircularBuffer{Ts}\n    actions::CircularBuffer{Ta}\n    rewards::CircularBuffer{Float64}\n    done::CircularBuffer{Bool}\n\n\n\n"
+    "text": "struct ArrayStateBuffer{Ts, Ta}\n    states::ArrayCircularBuffer{Ts}\n    actions::CircularBuffer{Ta}\n    rewards::CircularBuffer{Float64}\n    done::CircularBuffer{Bool}\n\n\n\n\n\n"
 },
 
 {
@@ -557,7 +493,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Buffers",
     "title": "ReinforcementLearning.ArrayStateBuffer",
     "category": "method",
-    "text": "ArrayStateBuffer(; arraytype = Array, datatype = Float64, \n                   elemshape = (1), actiontype = Int64, \n                   capacity = 2, capacitystates = capacity,\n                   capacityrewards = capacity - 1)\n\nAn ArrayStateBuffer is similar to a Buffer but the states are stored in a prealocated array of size (elemshape..., capacity). K consecutive states at position i in the state buffer can can efficiently be retrieved with nmarkovview(buffer.states, i, K) or nmarkovgetindex(buffer.states, i, K). See the implementation of DQN for an example. \n\n\n\n"
+    "text": "ArrayStateBuffer(; arraytype = Array, datatype = Float64, \n                   elemshape = (1), actiontype = Int64, \n                   capacity = 2, capacitystates = capacity,\n                   capacityrewards = capacity - 1)\n\nAn ArrayStateBuffer is similar to a Buffer but the states are stored in a prealocated array of size (elemshape..., capacity). K consecutive states at position i in the state buffer can can efficiently be retrieved with nmarkovview(buffer.states, i, K) or nmarkovgetindex(buffer.states, i, K). See the implementation of DQN for an example. \n\n\n\n\n\n"
 },
 
 {
@@ -565,7 +501,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Buffers",
     "title": "ReinforcementLearning.Buffer",
     "category": "type",
-    "text": "struct Buffer{Ts, Ta}\n    states::CircularBuffer{Ts}\n    actions::CircularBuffer{Ta}\n    rewards::CircularBuffer{Float64}\n    done::CircularBuffer{Bool}\n\n\n\n"
+    "text": "struct Buffer{Ts, Ta}\n    states::CircularBuffer{Ts}\n    actions::CircularBuffer{Ta}\n    rewards::CircularBuffer{Float64}\n    done::CircularBuffer{Bool}\n\n\n\n\n\n"
 },
 
 {
@@ -573,7 +509,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Buffers",
     "title": "ReinforcementLearning.Buffer",
     "category": "method",
-    "text": "Buffer(; statetype = Int64, actiontype = Int64, \n         capacity = 2, capacitystates = capacity,\n         capacityrewards = capacity - 1)\n\n\n\n"
+    "text": "Buffer(; statetype = Int64, actiontype = Int64, \n         capacity = 2, capacitystates = capacity,\n         capacityrewards = capacity - 1)\n\n\n\n\n\n"
 },
 
 {
@@ -581,7 +517,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Buffers",
     "title": "ReinforcementLearning.EpisodeBuffer",
     "category": "type",
-    "text": "struct EpisodeBuffer{Ts, Ta}\n    states::Array{Ts, 1}\n    actions::Array{Ta, 1}\n    rewards::Array{Float64, 1}\n    done::Array{Bool, 1}\n\n\n\n"
+    "text": "struct EpisodeBuffer{Ts, Ta}\n    states::Array{Ts, 1}\n    actions::Array{Ta, 1}\n    rewards::Array{Float64, 1}\n    done::Array{Bool, 1}\n\n\n\n\n\n"
 },
 
 {
@@ -589,7 +525,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Buffers",
     "title": "ReinforcementLearning.EpisodeBuffer",
     "category": "method",
-    "text": "EpisodeBuffer(; statetype = Int64, actiontype = Int64) = \n    EpisodeBuffer(statetype[], actiontype[], Float64[], Bool[])\n\n\n\n"
+    "text": "EpisodeBuffer(; statetype = Int64, actiontype = Int64) = \n    EpisodeBuffer(statetype[], actiontype[], Float64[], Bool[])\n\n\n\n\n\n"
 },
 
 {
@@ -617,134 +553,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "environments/#ReinforcementLearning.MDP",
-    "page": "Environments",
-    "title": "ReinforcementLearning.MDP",
-    "category": "type",
-    "text": "mutable struct MDP \n    ns::Int64\n    na::Int64\n    state::Int64\n    trans_probs::Array{AbstractArray, 2}\n    reward::Array{Float64, 2}\n    initialstates::Array{Int64, 1}\n    isterminal::Array{Int64, 1}\n\nA Markov Decision Process with ns states, na actions, current state, naxns - array of transition probabilites trans_props which consists for every (action, state) pair of a (potentially sparse) array that sums to 1 (see getprobvecrandom, getprobvecuniform, getprobvecdeterministic for helpers to constract the transition probabilities) naxns - array of reward, array of initial states initialstates, and ns - array of 0/1 indicating if a state is terminal.\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.MDP-Tuple{Any,Any}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.MDP",
-    "category": "method",
-    "text": "MDP(ns, na; init = \"random\")\nMDP(; ns = 10, na = 4, init = \"random\")\n\nReturn MDP with init in (\"random\", \"uniform\", \"deterministic\"), where the keyword init determines how to construct the transition probabilites (see also  getprobvecrandom, getprobvecuniform, getprobvecdeterministic).\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.AbsorbingDetMDP-Tuple{}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.AbsorbingDetMDP",
-    "category": "method",
-    "text": "AbsorbingDetMDP(;ns = 10^3, na = 10)\n\nReturns a random deterministic absorbing MDP\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.DetMDP-Tuple{}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.DetMDP",
-    "category": "method",
-    "text": "DetMDP(; ns = 10^4, na = 10)\n\nReturns a random deterministic MDP.\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.DetTreeMDP-Tuple{}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.DetTreeMDP",
-    "category": "method",
-    "text": "DetTreeMDP(; na = 4, depth = 5)\n\nReturns a treeMDP with random rewards at the leaf nodes.\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.DetTreeMDPwithinrew-Tuple{}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.DetTreeMDPwithinrew",
-    "category": "method",
-    "text": "DetTreeMDPwithinrew(; na = 4, depth = 5)\n\nReturns a treeMDP with random rewards.\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.StochMDP-Tuple{}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.StochMDP",
-    "category": "method",
-    "text": "StochMDP(; na = 10, ns = 50) = MDP(ns, na)\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.StochTreeMDP-Tuple{}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.StochTreeMDP",
-    "category": "method",
-    "text": "StochTreeMDP(; na = 4, depth = 4, bf = 2)\n\nReturns a random stochastic treeMDP with branching factor bf.\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.run!-Tuple{ReinforcementLearning.MDP,Array{Int64,1}}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.run!",
-    "category": "method",
-    "text": "run!(mdp::MDP, policy::Array{Int64, 1}) = run!(mdp, policy[mdp.state])\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.run!-Tuple{ReinforcementLearning.MDP,Int64}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.run!",
-    "category": "method",
-    "text": "run!(mdp::MDP, action::Int64)\n\nTransition to a new state given action. Returns the new state.\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.setterminalstates!-Tuple{Any,Any}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.setterminalstates!",
-    "category": "method",
-    "text": "setterminalstates!(mdp, range)\n\nSets mdp.isterminal[range] .= 1, empties the table of transition probabilities for terminal states and sets the reward for all actions in the terminal state to the same value.\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.treeMDP-Tuple{Any,Any}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.treeMDP",
-    "category": "method",
-    "text": "treeMDP(na, depth; init = \"random\", branchingfactor = 3)\n\nReturns a tree structured MDP with na actions and depth of the tree. If init is random, the branchingfactor determines how many possible states a (action, state) pair has. If init = \"deterministic\" the branchingfactor = na.\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.getprobvecdeterministic",
-    "page": "Environments",
-    "title": "ReinforcementLearning.getprobvecdeterministic",
-    "category": "function",
-    "text": "getprobvecdeterministic(n, min = 1, max = n)\n\nReturns a SparseVector of length n where one element in min:max has  value 1.\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.getprobvecrandom-Tuple{Any,Any,Any}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.getprobvecrandom",
-    "category": "method",
-    "text": "getprobvecrandom(n, min, max)\n\nReturns an array of length n that sums to 1 where all elements outside of min:max are zero.\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.getprobvecrandom-Tuple{Any}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.getprobvecrandom",
-    "category": "method",
-    "text": "getprobvecrandom(n)\n\nReturns an array of length n that sums to 1. More precisely, the array is a sample of a Dirichlet distribution with n categories and _1 =   = _n = 1.\n\n\n\n"
-},
-
-{
-    "location": "environments/#ReinforcementLearning.getprobvecuniform-Tuple{Any}",
-    "page": "Environments",
-    "title": "ReinforcementLearning.getprobvecuniform",
-    "category": "method",
-    "text": "getprobvecuniform(n)  = fill(1/n, n)\n\n\n\n"
-},
-
-{
     "location": "environments/#MDPs-1",
     "page": "Environments",
     "title": "MDPs",
@@ -765,7 +573,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Stopping Criteria",
     "title": "ReinforcementLearning.ConstantNumberEpisodes",
     "category": "type",
-    "text": "mutable struct ConstantNumberEpisodes\n    N::Int64\n    counter::Int64\n\nStops learning when the agent has finished \'N\' episodes.\n\n\n\n"
+    "text": "mutable struct ConstantNumberEpisodes\n    N::Int64\n    counter::Int64\n\nStops learning when the agent has finished \'N\' episodes.\n\n\n\n\n\n"
 },
 
 {
@@ -773,7 +581,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Stopping Criteria",
     "title": "ReinforcementLearning.ConstantNumberEpisodes",
     "category": "method",
-    "text": "    ConstantNumbeEpisodes(N) = ConstantNumberEpisodes(N, 0)\n\n\n\n"
+    "text": "    ConstantNumbeEpisodes(N) = ConstantNumberEpisodes(N, 0)\n\n\n\n\n\n"
 },
 
 {
@@ -781,7 +589,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Stopping Criteria",
     "title": "ReinforcementLearning.ConstantNumberSteps",
     "category": "type",
-    "text": "mutable struct ConstantNumberSteps\n    T::Int64\n    counter::Int64\n\nStops learning when the agent has taken \'T\' actions.\n\n\n\n"
+    "text": "mutable struct ConstantNumberSteps\n    T::Int64\n    counter::Int64\n\nStops learning when the agent has taken \'T\' actions.\n\n\n\n\n\n"
 },
 
 {
@@ -789,7 +597,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Stopping Criteria",
     "title": "ReinforcementLearning.ConstantNumberSteps",
     "category": "method",
-    "text": "ConstantNumberSteps(N) = ConstantNumberSteps(N, 0)\n\n\n\n"
+    "text": "ConstantNumberSteps(N) = ConstantNumberSteps(N, 0)\n\n\n\n\n\n"
 },
 
 {
@@ -813,15 +621,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessors",
     "title": "ReinforcementLearning.ImageCrop",
     "category": "type",
-    "text": "struct ImageCrop\n    xidx::UnitRange{Int64}\n    yidx::UnitRange{Int64}\n\nSelect indices xidx and yidx from a 2 or 3 dimensional array.\n\nExample:\n\nc = ImageCrop(2:5, 3:2:9)\nc([10i + j for i in 1:10, j in 1:10])\n\n\n\n"
-},
-
-{
-    "location": "preprocessors/#ReinforcementLearning.ImagePreprocessor",
-    "page": "Preprocessors",
-    "title": "ReinforcementLearning.ImagePreprocessor",
-    "category": "type",
-    "text": "struct ImagePreprocessor\n    size\n    chain\n\nUse chain to preprocess a grayscale or color image of size = (width, height).\n\nExample:\n\np = ImagePreprocessor((100, 100), \n                      [ImageResizeNearestNeighbour((50, 80)),\n                       ImageCrop(1:30, 10:80),\n                       x -> x ./ 256])\nx = rand(UInt8, 100, 100)\ns = ReinforcementLearning.preprocessstate(p, x)\n\n\n\n"
+    "text": "struct ImageCrop\n    xidx::UnitRange{Int64}\n    yidx::UnitRange{Int64}\n\nSelect indices xidx and yidx from a 2 or 3 dimensional array.\n\nExample:\n\nc = ImageCrop(2:5, 3:2:9)\nc([10i + j for i in 1:10, j in 1:10])\n\n\n\n\n\n"
 },
 
 {
@@ -829,7 +629,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessors",
     "title": "ReinforcementLearning.ImageResizeBilinear",
     "category": "type",
-    "text": "struct ImageResizeBilinear\n    outdim::Tuple{Int64, Int64}\n\nResize any image to outdim = (width, height) with bilinear interpolation.\n\nExample:\n\nr = ImageResizeBilinear((50, 50))\nr(rand(200, 200))\nr(rand(UInt8, 3, 100, 100))\n\n\n\n"
+    "text": "struct ImageResizeBilinear\n    outdim::Tuple{Int64, Int64}\n\nResize any image to outdim = (width, height) with bilinear interpolation.\n\nExample:\n\nr = ImageResizeBilinear((50, 50))\nr(rand(200, 200))\nr(rand(UInt8, 3, 100, 100))\n\n\n\n\n\n"
 },
 
 {
@@ -837,7 +637,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessors",
     "title": "ReinforcementLearning.ImageResizeNearestNeighbour",
     "category": "type",
-    "text": "struct ImageResizeNearestNeighbour\n    outdim::Tuple{Int64, Int64}\n\nResize any image to outdim = (width, height) by nearest-neighbour interpolation (i.e. subsampling).\n\nExample:\n\nr = ImageResizeNearestNeighbour((50, 50))\nr(rand(200, 200))\nr(rand(UInt8, 3, 100, 100))\n\n\n\n"
+    "text": "struct ImageResizeNearestNeighbour\n    outdim::Tuple{Int64, Int64}\n\nResize any image to outdim = (width, height) by nearest-neighbour interpolation (i.e. subsampling).\n\nExample:\n\nr = ImageResizeNearestNeighbour((50, 50))\nr(rand(200, 200))\nr(rand(UInt8, 3, 100, 100))\n\n\n\n\n\n"
 },
 
 {
@@ -845,7 +645,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessors",
     "title": "ReinforcementLearning.NoPreprocessor",
     "category": "type",
-    "text": "struct NoPreprocessor end\n\n\n\n"
+    "text": "struct NoPreprocessor end\n\n\n\n\n\n"
 },
 
 {
@@ -853,7 +653,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessors",
     "title": "ReinforcementLearning.RadialBasisFunctions",
     "category": "type",
-    "text": "struct RadialBasisFunctions\n    means::Array{Array{Float64, 1}, 1}\n    sigmas::Array{Float64, 1}\n    state::Array{Float64, 1}\n\n\n\n"
+    "text": "struct RadialBasisFunctions\n    means::Array{Array{Float64, 1}, 1}\n    sigmas::Array{Float64, 1}\n    state::Array{Float64, 1}\n\n\n\n\n\n"
 },
 
 {
@@ -861,7 +661,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessors",
     "title": "ReinforcementLearning.RandomProjection",
     "category": "type",
-    "text": "struct RandomProjection\n    w::Array{Float64, 2}\n\n\n\n"
+    "text": "struct RandomProjection\n    w::Array{Float64, 2}\n\n\n\n\n\n"
 },
 
 {
@@ -869,7 +669,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessors",
     "title": "ReinforcementLearning.SparseRandomProjection",
     "category": "type",
-    "text": "struct SparseRandomProjection\n    w::Array{Float64, 2}\n    b::Array{Float64, 1}\n\n\n\n"
+    "text": "struct SparseRandomProjection\n    w::Array{Float64, 2}\n    b::Array{Float64, 1}\n\n\n\n\n\n"
 },
 
 {
@@ -877,7 +677,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessors",
     "title": "ReinforcementLearning.StateAggregator",
     "category": "type",
-    "text": "struct StateAggregator\n    box::Box\n    ns::Int64\n    nbins::Array{Int64, 1}\n    offsets::Array{Int64, 1}\n    perdimension::Bool\n\n\n\n"
+    "text": "struct StateAggregator\n    box::Box\n    ns::Int64\n    nbins::Array{Int64, 1}\n    offsets::Array{Int64, 1}\n    perdimension::Bool\n\n\n\n\n\n"
 },
 
 {
@@ -885,7 +685,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessors",
     "title": "ReinforcementLearning.StateAggregator",
     "category": "method",
-    "text": "StateAggregator(lb::Vector, ub::Vector, nbins::Vector;\n                perdimension = false)\n\n\n\n"
+    "text": "StateAggregator(lb::Vector, ub::Vector, nbins::Vector;\n                perdimension = false)\n\n\n\n\n\n"
 },
 
 {
@@ -893,7 +693,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessors",
     "title": "ReinforcementLearning.StateAggregator",
     "category": "method",
-    "text": "StateAggregator(lb::Number, ub::Number, nbins::Int, ndims::Int; \n                perdimension = false)\n\n\n\n"
+    "text": "StateAggregator(lb::Number, ub::Number, nbins::Int, ndims::Int; \n                perdimension = false)\n\n\n\n\n\n"
 },
 
 {
@@ -901,7 +701,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessors",
     "title": "ReinforcementLearning.TilingStateAggregator",
     "category": "type",
-    "text": "struct TilingStateAggregator{T <: Array{StateAggregator,1}}\n    ns::Int64\n    tiling::T\n\n\n\n"
+    "text": "struct TilingStateAggregator{T <: Array{StateAggregator,1}}\n    ns::Int64\n    tiling::T\n\n\n\n\n\n"
 },
 
 {
@@ -909,7 +709,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessors",
     "title": "ReinforcementLearning.Box",
     "category": "type",
-    "text": "struct Box{T}\n    low::Array{T, 1}\n    high::Array{T, 1}\n\n\n\n"
+    "text": "struct Box{T}\n    low::Array{T, 1}\n    high::Array{T, 1}\n\n\n\n\n\n"
 },
 
 {
@@ -937,27 +737,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "policies/#ReinforcementLearning.EpsilonGreedyPolicy",
-    "page": "Policies",
-    "title": "ReinforcementLearning.EpsilonGreedyPolicy",
-    "category": "type",
-    "text": "mutable struct EpsilonGreedyPolicy{kind}\n    ϵ::Float64\n\nChooses the action with the highest value with probability 1 - ϵ and selects  an action uniformly random with probability ϵ.\n\n\n\n"
-},
-
-{
     "location": "policies/#Epsilon-Greedy-Policies-1",
     "page": "Policies",
     "title": "Epsilon Greedy Policies",
     "category": "section",
     "text": "Modules = [ReinforcementLearning]\nPages   = [\"epsilongreedypolicies.jl\"]"
-},
-
-{
-    "location": "policies/#ReinforcementLearning.AbstractSoftmaxPolicy",
-    "page": "Policies",
-    "title": "ReinforcementLearning.AbstractSoftmaxPolicy",
-    "category": "type",
-    "text": "mutable struct SoftmaxPolicy <: AbstractSoftmaxPolicy\n    β::Float64\n\nChoose action a with probability\n\nfrace^beta x_asum_a e^beta x_a\n\nwhere x is a vector of values for each action. In states with actions that were never chosen before, a uniform random novel action is returned.\n\nSoftmaxPolicy(; β = 1.)\n\nReturns a SoftmaxPolicy with default β = 1.\n\n\n\n"
 },
 
 {
@@ -973,15 +757,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Policies",
     "title": "ReinforcementLearning.ForcedEpisode",
     "category": "type",
-    "text": "mutable struct ForcedEpisode{Ts}\n    t::Int64\n    states::Ts\n    dones::Array{Bool, 1}\n    rewards::Array{Float64, 1}\n\n\n\n"
-},
-
-{
-    "location": "policies/#ReinforcementLearning.ForcedPolicy",
-    "page": "Policies",
-    "title": "ReinforcementLearning.ForcedPolicy",
-    "category": "type",
-    "text": "mutable struct ForcedPolicy \n    t::Int64\n    actions::Array{Int64, 1}\n\n\n\n"
+    "text": "mutable struct ForcedEpisode{Ts}\n    t::Int64\n    states::Ts\n    dones::Array{Bool, 1}\n    rewards::Array{Float64, 1}\n\n\n\n\n\n"
 },
 
 {
@@ -1005,7 +781,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.AllRewards",
     "category": "type",
-    "text": "struct AllRewards\n    rewards::Array{Float64, 1}\n\nRecords all rewards.\n\n\n\n"
+    "text": "struct AllRewards\n    rewards::Array{Float64, 1}\n\nRecords all rewards.\n\n\n\n\n\n"
 },
 
 {
@@ -1013,7 +789,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.AllRewards",
     "category": "method",
-    "text": "AllRewards()\n\nInitializes with empty array.\n\n\n\n"
+    "text": "AllRewards()\n\nInitializes with empty array.\n\n\n\n\n\n"
 },
 
 {
@@ -1021,7 +797,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.EvaluateGreedy",
     "category": "method",
-    "text": "EvaluateGreedy(callback, stoppincriterion; every = Episode(10))\n\nEvaluate an rlsetup greedily by leaving the normal learning loop and evaluating the agent with callback until stoppingcriterion is met, at which point normal learning is resumed. This is done every Nth Episode (where N = 10 by default) or every Nth Step (e.g. every = Step(10)).\n\nExample:\n\neg = EvaluateGreedy(EvaluationPerEpisode(TotalReward(), returnmean = true),\n                    ConstantNumberEpisodes(10), every = Episode(100))\nrlsetup = RLSetup(learner, environment, stoppingcriterion, callbacks = [eg])\nlearn!(rlsetup)\ngetvalue(eg)\n\nLeaves the learning loop every 100th episode to estimate the average total reward per episode, by running a greedy policy for 10 episodes.\n\n\n\n"
+    "text": "EvaluateGreedy(callback, stoppincriterion; every = Episode(10))\n\nEvaluate an rlsetup greedily by leaving the normal learning loop and evaluating the agent with callback until stoppingcriterion is met, at which point normal learning is resumed. This is done every Nth Episode (where N = 10 by default) or every Nth Step (e.g. every = Step(10)).\n\nExample:\n\neg = EvaluateGreedy(EvaluationPerEpisode(TotalReward(), returnmean = true),\n                    ConstantNumberEpisodes(10), every = Episode(100))\nrlsetup = RLSetup(learner, environment, stoppingcriterion, callbacks = [eg])\nlearn!(rlsetup)\ngetvalue(eg)\n\nLeaves the learning loop every 100th episode to estimate the average total reward per episode, by running a greedy policy for 10 episodes.\n\n\n\n\n\n"
 },
 
 {
@@ -1029,7 +805,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.LinearDecreaseEpsilon",
     "category": "type",
-    "text": "mutable struct LinearDecreaseEpsilon\n    start::Int64\n    stop::Int64\n    initval::Float64\n    finalval::Float64\n    t::Int64\n    step::Float64\n\nLinearly decrease ϵ of an EpsilonGreedyPolicy from initval until  step start to finalval at step stop.\n\nStepsize step = (finalval - initval)/(stop - start).\n\n\n\n"
+    "text": "mutable struct LinearDecreaseEpsilon\n    start::Int64\n    stop::Int64\n    initval::Float64\n    finalval::Float64\n    t::Int64\n    step::Float64\n\nLinearly decrease ϵ of an EpsilonGreedyPolicy from initval until  step start to finalval at step stop.\n\nStepsize step = (finalval - initval)/(stop - start).\n\n\n\n\n\n"
 },
 
 {
@@ -1037,7 +813,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.LinearDecreaseEpsilon",
     "category": "method",
-    "text": "LinearDecreaseEpsilon(start, stop, initval, finalval)\n\n\n\n"
+    "text": "LinearDecreaseEpsilon(start, stop, initval, finalval)\n\n\n\n\n\n"
 },
 
 {
@@ -1045,7 +821,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.Progress",
     "category": "type",
-    "text": "mutable struct Progress \n    steps::Int64\n    laststopcountervalue::Int64\n\nShow steps times progress information during learning.\n\n\n\n"
+    "text": "mutable struct Progress \n    steps::Int64\n    laststopcountervalue::Int64\n\nShow steps times progress information during learning.\n\n\n\n\n\n"
 },
 
 {
@@ -1053,7 +829,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.Progress",
     "category": "type",
-    "text": "Progress(steps = 10) = Progress(steps, 0)\n\n\n\n"
+    "text": "Progress(steps = 10) = Progress(steps, 0)\n\n\n\n\n\n"
 },
 
 {
@@ -1061,7 +837,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.RecordAll",
     "category": "type",
-    "text": "struct RecordAll\n    rewards::Array{Float64, 1}\n    actions::Array{Int64, 1}\n    states::Array{Int64, 1}\n    done::Array{Bool, 1}\n\nRecords everything.\n\n\n\n"
+    "text": "struct RecordAll\n    rewards::Array{Float64, 1}\n    actions::Array{Int64, 1}\n    states::Array{Int64, 1}\n    done::Array{Bool, 1}\n\nRecords everything.\n\n\n\n\n\n"
 },
 
 {
@@ -1069,7 +845,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.RecordAll",
     "category": "method",
-    "text": "RecordAll()\n\nInitializes with empty arrays.\n\n\n\n"
+    "text": "RecordAll()\n\nInitializes with empty arrays.\n\n\n\n\n\n"
 },
 
 {
@@ -1077,7 +853,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.ReduceEpsilonPerEpisode",
     "category": "type",
-    "text": "mutable struct ReduceEpsilonPerEpisode\n    ϵ0::Float64\n    counter::Int64\n\nReduces ϵ of an EpsilonGreedyPolicy after each episode.\n\nIn episode n, ϵ = ϵ0/n\n\n\n\n"
+    "text": "mutable struct ReduceEpsilonPerEpisode\n    ϵ0::Float64\n    counter::Int64\n\nReduces ϵ of an EpsilonGreedyPolicy after each episode.\n\nIn episode n, ϵ = ϵ0/n\n\n\n\n\n\n"
 },
 
 {
@@ -1085,7 +861,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.ReduceEpsilonPerEpisode",
     "category": "method",
-    "text": "ReduceEpsilonPerEpisode()\n\nInitialize callback.\n\n\n\n"
+    "text": "ReduceEpsilonPerEpisode()\n\nInitialize callback.\n\n\n\n\n\n"
 },
 
 {
@@ -1093,7 +869,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.ReduceEpsilonPerT",
     "category": "type",
-    "text": "mutable struct ReduceEpsilonPerT\n    ϵ0::Float64\n    T::Int64\n    n::Int64\n    counter::Int64\n\nReduces ϵ of an EpsilonGreedyPolicy after every T steps.\n\nAfter n * T steps, ϵ = ϵ0/n\n\n\n\n"
+    "text": "mutable struct ReduceEpsilonPerT\n    ϵ0::Float64\n    T::Int64\n    n::Int64\n    counter::Int64\n\nReduces ϵ of an EpsilonGreedyPolicy after every T steps.\n\nAfter n * T steps, ϵ = ϵ0/n\n\n\n\n\n\n"
 },
 
 {
@@ -1101,15 +877,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.ReduceEpsilonPerT",
     "category": "method",
-    "text": "ReduceEpsilonPerT()\n\nInitialize callback.\n\n\n\n"
-},
-
-{
-    "location": "callbacks/#ReinforcementLearning.SaveLearner",
-    "page": "Callbacks",
-    "title": "ReinforcementLearning.SaveLearner",
-    "category": "type",
-    "text": "@with_kw struct SaveLearner{T}\n    every::T = Step(10^3)\n    filename::String = tempname()\n\nSave learner every Nth Step (or Nth Episode) to filename_i.jld2, where i is the step (or episode) at which the learner is saved.\n\n\n\n"
+    "text": "ReduceEpsilonPerT()\n\nInitialize callback.\n\n\n\n\n\n"
 },
 
 {
@@ -1117,7 +885,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.Visualize",
     "category": "type",
-    "text": "mutable struct Visualize \n    plot\n    wait::Float64\n\n\n\n"
+    "text": "mutable struct Visualize \n    plot\n    wait::Float64\n\n\n\n\n\n"
 },
 
 {
@@ -1125,7 +893,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Callbacks",
     "title": "ReinforcementLearning.Visualize",
     "category": "method",
-    "text": "Visualize(; wait = .15)\n\nA callback to be used in an RLSetup to visualize an environment during  running or learning.\n\n\n\n"
+    "text": "Visualize(; wait = .15)\n\nA callback to be used in an RLSetup to visualize an environment during  running or learning.\n\n\n\n\n\n"
 },
 
 {
@@ -1149,7 +917,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Evaluation Metrics",
     "title": "ReinforcementLearning.EvaluationPerEpisode",
     "category": "type",
-    "text": "EvaluationPerEpisode\n    values::Array{Float64, 1}\n    metric::SimpleEvaluationMetric\n\nStores the value of the simple metric for each episode in values.\n\n\n\n"
+    "text": "EvaluationPerEpisode\n    values::Array{Float64, 1}\n    metric::SimpleEvaluationMetric\n\nStores the value of the simple metric for each episode in values.\n\n\n\n\n\n"
 },
 
 {
@@ -1157,7 +925,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Evaluation Metrics",
     "title": "ReinforcementLearning.EvaluationPerEpisode",
     "category": "type",
-    "text": "EvaluationPerEpisode(metric = MeanReward())\n\nInitializes with empty values array and simple metric (default MeanReward). Other options are TimeSteps (to measure the lengths of episodes) or TotalReward.\n\n\n\n"
+    "text": "EvaluationPerEpisode(metric = MeanReward())\n\nInitializes with empty values array and simple metric (default MeanReward). Other options are TimeSteps (to measure the lengths of episodes) or TotalReward.\n\n\n\n\n\n"
 },
 
 {
@@ -1165,7 +933,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Evaluation Metrics",
     "title": "ReinforcementLearning.EvaluationPerT",
     "category": "type",
-    "text": "EvaluationPerT\n    T::Int64\n    counter::Int64\n    values::Array{Float64, 1}\n    metric::SimpleEvaluationMetric\n\nStores the value of the simple metric after every T steps in values.\n\n\n\n"
+    "text": "EvaluationPerT\n    T::Int64\n    counter::Int64\n    values::Array{Float64, 1}\n    metric::SimpleEvaluationMetric\n\nStores the value of the simple metric after every T steps in values.\n\n\n\n\n\n"
 },
 
 {
@@ -1173,7 +941,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Evaluation Metrics",
     "title": "ReinforcementLearning.EvaluationPerT",
     "category": "type",
-    "text": "EvaluationPerT(T, metric = MeanReward())\n\nInitializes with T, counter = 0, empty values array and simple metric (default MeanReward).  Another option is TotalReward.\n\n\n\n"
+    "text": "EvaluationPerT(T, metric = MeanReward())\n\nInitializes with T, counter = 0, empty values array and simple metric (default MeanReward).  Another option is TotalReward.\n\n\n\n\n\n"
 },
 
 {
@@ -1181,7 +949,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Evaluation Metrics",
     "title": "ReinforcementLearning.MeanReward",
     "category": "type",
-    "text": "mutable struct MeanReward \n    meanreward::Float64\n    counter::Int64\n\nComputes iteratively the mean reward.\n\n\n\n"
+    "text": "mutable struct MeanReward \n    meanreward::Float64\n    counter::Int64\n\nComputes iteratively the mean reward.\n\n\n\n\n\n"
 },
 
 {
@@ -1189,7 +957,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Evaluation Metrics",
     "title": "ReinforcementLearning.MeanReward",
     "category": "method",
-    "text": "MeanReward()\n\nInitializes counter and meanreward to 0.\n\n\n\n"
+    "text": "MeanReward()\n\nInitializes counter and meanreward to 0.\n\n\n\n\n\n"
 },
 
 {
@@ -1197,7 +965,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Evaluation Metrics",
     "title": "ReinforcementLearning.TimeSteps",
     "category": "type",
-    "text": "mutable struct TimeSteps\n    counter::Int64\n\nCounts the number of timesteps the simulation is running.\n\n\n\n"
+    "text": "mutable struct TimeSteps\n    counter::Int64\n\nCounts the number of timesteps the simulation is running.\n\n\n\n\n\n"
 },
 
 {
@@ -1205,7 +973,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Evaluation Metrics",
     "title": "ReinforcementLearning.TimeSteps",
     "category": "method",
-    "text": "TimeSteps()\n\nInitializes counter to 0.\n\n\n\n"
+    "text": "TimeSteps()\n\nInitializes counter to 0.\n\n\n\n\n\n"
 },
 
 {
@@ -1213,7 +981,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Evaluation Metrics",
     "title": "ReinforcementLearning.TotalReward",
     "category": "type",
-    "text": "mutable struct TotalReward \n    reward::Float64\n\nAccumulates all rewards.\n\n\n\n"
+    "text": "mutable struct TotalReward \n    reward::Float64\n\nAccumulates all rewards.\n\n\n\n\n\n"
 },
 
 {
@@ -1221,7 +989,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Evaluation Metrics",
     "title": "ReinforcementLearning.TotalReward",
     "category": "method",
-    "text": "TotalReward()\n\nInitializes reward to 0.\n\n\n\n"
+    "text": "TotalReward()\n\nInitializes reward to 0.\n\n\n\n\n\n"
 },
 
 {
