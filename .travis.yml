@@ -30,6 +30,5 @@ matrix:
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("ReinforcementLearning"); Pkg.test("ReinforcementLearning"; coverage=true)'
 after_success:
   # push coverage results to Codecov
-  - julia -e 'cd(Pkg.dir("ReinforcementLearning")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
-  - julia -e 'Pkg.add("Documenter")'
-  - julia -e 'cd(Pkg.dir("ReinforcementLearning")); include(joinpath("docs", "make.jl"))'
+  - julia -e 'using Pkg; import ReinforcementLearning; cd(joinpath(dirname(pathof(ReinforcementLearning)), "..")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'using Pkg; Pkg.add("Documenter"); import ReinforcementLearning; cd(joinpath(dirname(pathof(ReinforcementLearning)), "..")); include(joinpath("docs", "make.jl"))'
