@@ -12,7 +12,7 @@
 ### Example 1
 
 ```julia
-using ReinforcementLearning
+using ReinforcementLearning, ReinforcementLearningEnvironmentDiscrete
 
 learner = QLearning()
 env = MDP()
@@ -25,11 +25,10 @@ getvalue(x.callbacks[1])
 ### Example 2
 
 ```julia
-using ReinforcementLearning, Flux
+using ReinforcementLearning, ReinforcementLearningEnvironmentClassicControl, Flux
 
 learner = DQN(Chain(Dense(4, 24, relu), Dense(24, 48, relu), Dense(48, 2)),
               opttype = x -> ADAM(x, .001))
-loadenvironment("cartpole")
 env = CartPole()
 stop = ConstantNumberEpisodes(2*10^3)
 callbacks = [EvaluateGreedy(EvaluationPerEpisode(TimeSteps(), returnmean=true),
