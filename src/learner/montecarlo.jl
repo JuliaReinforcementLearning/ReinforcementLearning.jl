@@ -28,10 +28,10 @@ function update!(learner::MonteCarlo, buffer)
     rewards = buffer.rewards
     states = buffer.states
     actions = buffer.actions
-    if learner.Q[actions[end-1], states[end-1]] == Inf64
-        learner.Q[actions[end-1], states[end-1]] = 0.
+    if learner.Q[actions[end], states[end]] == Inf64
+        learner.Q[actions[end], states[end]] = 0.
     end
-    if buffer.done[end]
+    if buffer.isdone[end]
         G = 0.
         for t in length(rewards):-1:1
             G = learner.γ * G + rewards[t]

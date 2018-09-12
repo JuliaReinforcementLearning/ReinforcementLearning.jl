@@ -1,4 +1,8 @@
+export EpisodicReinforce, ActorCriticPolicyGradient, NoBiasCorrector,
+       RewardLowpassFilterBiasCorrector, Critic, PolicyGradientBackward
+
 import Parameters: reconstruct
+
 """
     mutable struct PolicyGradientBackward <: AbstractPolicyGradient
         ns::Int64 = 10
@@ -34,7 +38,6 @@ abstract type AbstractPolicyGradient end
     biascorrector::T = NoBiasCorrector()
     policy::Tf = SoftmaxPolicy(s -> getvalue(params, s))
 end
-export PolicyGradientBackward
 """
     mutable struct PolicyGradientForward <: AbstractPolicyGradient
         ns::Int64 = 10
@@ -65,7 +68,6 @@ end
     EpisodicReinforce(; kwargs...) = PolicyGradientForward(; kwargs...)
 """
 EpisodicReinforce(; kwargs...) = PolicyGradientForward(; kwargs...)
-export EpisodicReinforce
 """
     ActorCriticPolicyGradient(; nsteps = 1, γ = .9, ns = 10, na = 4, 
                                 α = .1, αcritic = .1, initvalue = Inf64)
@@ -74,7 +76,6 @@ ActorCriticPolicyGradient(; nsteps = 1, γ = .9, ns = 10,
                             αcritic = .1, kargs...) =
         PolicyGradientForward(; biascorrector = Critic(γ = γ, ns = ns, α = αcritic),
                         ns = ns, γ = γ, nsteps = nsteps, kargs...)
-export ActorCriticPolicyGradient
 
 # bias correctors
 
@@ -82,7 +83,6 @@ export ActorCriticPolicyGradient
     struct NoBiasCorrector <: AbstractBiasCorrector
 """
 struct NoBiasCorrector end
-export NoBiasCorrector
 correct(::NoBiasCorrector, buffer, t = 1, G = buffer.rewards[t]) = G
 
 """
@@ -97,7 +97,6 @@ mutable struct RewardLowpassFilterBiasCorrector
     λ::Float64
     rmean::Float64
 end
-export RewardLowpassFilterBiasCorrector
 RewardLowpassFilterBiasCorrector(λ) = RewardLowpassFilterBiasCorrector(λ, 0.)
 function correct(corrector::RewardLowpassFilterBiasCorrector, buffer, 
                  t = 1, G = buffer.rewards[t])
@@ -117,7 +116,6 @@ mutable struct Critic
     γ::Float64
     V::Array{Float64, 1}
 end
-export Critic
 """
     Critic(; γ = .9, α = .1, ns = 10, initvalue = 0.)
 """
@@ -208,5 +206,3 @@ function update!(learner::PolicyGradientForward, buffer::CircularTurnBuffer)
     gradlogpolicy!(getactionprobabilities(learner.policy, states[1]),
                    states[1], actions[1], learner.params, learner.α * δ)
 end
-
-
