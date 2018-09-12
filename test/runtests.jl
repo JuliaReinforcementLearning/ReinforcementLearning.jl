@@ -1,14 +1,16 @@
 using ReinforcementLearning, Test
 
-# include("buffer.jl")
-# include("traces.jl")
-# include("epsilongreedypolicies.jl")
-# include("policies.jl")
-# include("tdlearning.jl")
-# include("losses.jl")
-# include("learnmdp.jl")
+include("buffer.jl")
+include("traces.jl")
+include("epsilongreedypolicies.jl")
+include("policies.jl")
+include("tdlearning.jl")
+include("losses.jl")
+include("learnmdp.jl")
+include("learn.jl")
+include("preprocessors.jl")
+include("montecarlo.jl")
+include("smallbackups.jl")
 
-@testset "linear function approximation" begin include("linfuncapprox.jl") end
-# @testset "preprocessor" begin include("preprocessors.jl") end
-# @testset "monte carlo" begin include("montecarlo.jl") end
-# @testset "small backups" begin include("smallbackups.jl") end
+# TODO: DQN needs to be checked
+# @testset "linear function approximation" begin include("linfuncapprox.jl") end

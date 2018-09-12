@@ -8,45 +8,6 @@ struct OneHotPreprocessor
 end
 
 preprocessstate(p::OneHotPreprocessor, s) = Float64[i == s for i in 1:p.ns]
-for λ in [0, .8]
-    mdp = MDP()
-    x = RLSetup(learner = QLearning(λ = λ, tracekind = AccumulatingTraces),
-                      # with ReplacingTraces the results will be different
-                      # because of different replacingAccumulatingTraces 
-                preprocessor = OneHotPreprocessor(mdp.observationspace.n),
-                environment = mdp,
-                stoppingcriterion = ConstantNumberSteps(100))
-    seed!(124)
-    s0 = mdp.state
-    learn!(x)
-    seed!(124)
-    mdp.state = s0
-    y = RLSetup(learner = QLearning(initvalue = 0., λ = λ,
-                                    tracekind = AccumulatingTraces), 
-                environment = mdp,
-                stoppingcriterion = ConstantNumberSteps(100))
-    learn!(y)
-    @test x.learner.params ≈ y.learner.params 
-end
-
-for learner in [PolicyGradientBackward, EpisodicReinforce,
-                ActorCriticPolicyGradient]
-    mdp = MDP()
-    x = RLSetup(learner = learner(),
-                preprocessor = OneHotPreprocessor(mdp.observationspace.n), 
-                environment = mdp,
-                stoppingcriterion = ConstantNumberSteps(100))
-    seed!(124)
-    s0 = mdp.state
-    learn!(x)
-    seed!(124)
-    mdp.state = s0
-    y = RLSetup(learner = learner(initvalue = 0.), 
-                environment = mdp,
-                stoppingcriterion = ConstantNumberSteps(100))
-    learn!(y)
-    @test x.learner.params ≈ y.learner.params 
-end
 
 using Flux
 struct Id end 

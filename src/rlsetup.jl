@@ -35,7 +35,7 @@ RLSetup(learner, env, stop; kargs...) = RLSetup(learner = learner,
                                                 stoppingcriterion = stop;
                                                 kargs...)
 function defaultbuffer(learner, env, preprocessor)
-    capacity = :nsteps in fieldnames(typeof(learner)) ? learner.nsteps + 1 : 2
+    capacity = :nsteps in fieldnames(typeof(learner)) ? learner.nsteps : 1
     statetype = typeof(preprocessstate(preprocessor, getstate(env)[1]))
     state_sz = size(preprocessstate(preprocessor, getstate(env)[1]))
     actiontype = typeof(sample(actionspace(env)))

@@ -5,10 +5,15 @@ Runs an [`rlsetup`](@ref RLSetup) with learning.
 """
 function learn!(rlsetup)
     @unpack learner, policy, fillbuffer, preprocessor, buffer, environment, stoppingcriterion = rlsetup
-    obs = reset!(environment)
-    while true
+    if isempty(buffer) || buffer[end].isdone
+        obs = reset!(environment)
         s = preprocessstate(preprocessor, obs)
         a = policy(s)
+    else
+        lastturn = buffer[end]
+        s, a = lastturn.nextstate, lastturn.nextaction
+    end
+    while true
         next_obs, r, isdone = interact!(environment, a)
         next_s = preprocessstate(preprocessor, next_obs)
         next_a = policy(next_s)
@@ -17,11 +22,18 @@ function learn!(rlsetup)
         rlsetup.islearning && update!(learner, buffer)
 
         for callback in rlsetup.callbacks
-            callback!(callback, rlsetup, obs, a, r, isdone)
+            callback!(callback, rlsetup, s, a, r, isdone)
         end
 
         isbreak!(stoppingcriterion, next_obs, a, r, isdone) && break
-        obs = isdone ? reset!(environment) : next_obs
+
+        if isdone
+            obs = reset!(environment)
+            s = preprocessstate(preprocessor, obs)
+            a = policy(s)
+        else
+            s, a = next_s, next_a  # TODO: to handle async env, use `getstate(env)`
+        end
     end
 end
 

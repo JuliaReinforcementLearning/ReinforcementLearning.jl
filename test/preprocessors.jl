@@ -1,4 +1,7 @@
 import ReinforcementLearning: preprocessstate, Box
+
+@testset "preprocess" begin
+
 for perdim in [true, false]
     p = StateAggregator([0, -5, 1], [3, 9, 2], [8, 10, 12], perdimension = perdim)
     if perdim
@@ -18,3 +21,5 @@ p = RandomProjection(rand(20, 2))
 p0 = StateAggregator(0, 1, 5, 2)
 p = TilingStateAggregator(p0, 4)
 @test length(findall(x -> x != 0, preprocessstate(p, [.1, 0]))) == 4
+
+end
