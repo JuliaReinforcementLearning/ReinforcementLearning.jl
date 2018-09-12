@@ -1,0 +1,98 @@
+loaded
+Julia Version 1.0.0
+Commit 5d4eaca0c9 (2018-08-08 20:58 UTC)
+Platform Info:
+  OS: Linux (x86_64-pc-linux-gnu)
+  CPU: Intel(R) Core(TM) i7-5600U CPU @ 2.60GHz
+  WORD_SIZE: 64
+  LIBM: libopenlibm
+  LLVM: libLLVM-6.0.0 (ORCJIT, broadwell)
+
+Project ReinforcementLearningTests v0.1.0
+    Status `Project.toml`
+  [6e4b80f9] BenchmarkTools v0.4.1
+  [587475ba] Flux v0.6.7
+  [158674fc] ReinforcementLearning v0.2.1+ #353c067 (https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl.git)
+  [1d72914e] ReinforcementLearningEnvironmentAtari v0.1.0
+  [2e05858d] ReinforcementLearningEnvironmentClassicControl v0.1.0
+  [1785f50a] ReinforcementLearningEnvironmentDiscrete v0.2.0+ #0343e7f (https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentDiscrete.jl.git)
+  [79e443b6] ReinforcementLearningEnvironmentGym v0.1.0
+
+
+CartPole ActorCriticPolicyGradient
+BenchmarkTools.Trial: 
+  memory estimate:  619.41 KiB
+  allocs estimate:  5606
+  --------------
+  minimum time:     846.356 μs (0.00% GC)
+  median time:      883.338 μs (0.00% GC)
+  mean time:        1.052 ms (9.07% GC)
+  maximum time:     64.956 ms (98.28% GC)
+  --------------
+  samples:          4742
+  evals/sample:     1
+
+CartPoleGym ActorCriticPolicyGradient
+BenchmarkTools.Trial: 
+  memory estimate:  1.63 MiB
+  allocs estimate:  36668
+  --------------
+  minimum time:     69.212 ms (0.00% GC)
+  median time:      73.968 ms (0.00% GC)
+  mean time:        76.657 ms (2.39% GC)
+  maximum time:     155.712 ms (46.56% GC)
+  --------------
+  samples:          66
+  evals/sample:     1
+
+CartPole DQN
+BenchmarkTools.Trial: 
+  memory estimate:  36.55 MiB
+  allocs estimate:  475234
+  --------------
+  minimum time:     229.149 ms (1.58% GC)
+  median time:      251.250 ms (2.96% GC)
+  mean time:        255.136 ms (4.27% GC)
+  maximum time:     322.357 ms (25.05% GC)
+  --------------
+  samples:          20
+  evals/sample:     1
+
+MountainCar TilingSarsa
+BenchmarkTools.Trial: 
+  memory estimate:  1.69 MiB
+  allocs estimate:  40893
+  --------------
+  minimum time:     4.393 ms (0.00% GC)
+  median time:      5.098 ms (0.00% GC)
+  mean time:        5.319 ms (6.19% GC)
+  maximum time:     11.906 ms (46.18% GC)
+  --------------
+  samples:          939
+  evals/sample:     1
+
+DiscreteMaze SmallBackups
+BenchmarkTools.Trial: 
+  memory estimate:  245.58 KiB
+  allocs estimate:  1317
+  --------------
+  minimum time:     196.823 μs (0.00% GC)
+  median time:      227.869 μs (0.00% GC)
+  mean time:        283.856 μs (11.62% GC)
+  maximum time:     4.439 ms (76.39% GC)
+  --------------
+  samples:          10000
+  evals/sample:     1
+
+Atari DQN
+BenchmarkTools.Trial: 
+  memory estimate:  2.27 GiB
+  allocs estimate:  86167
+  --------------
+  minimum time:     3.690 s (5.86% GC)
+  median time:      3.886 s (5.44% GC)
+  mean time:        3.970 s (5.29% GC)
+  maximum time:     4.623 s (4.76% GC)
+  --------------
+  samples:          8
+  evals/sample:     1
