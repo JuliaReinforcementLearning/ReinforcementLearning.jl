@@ -213,7 +213,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Comparison",
     "title": "ReinforcementLearning.compare",
     "category": "method",
-    "text": "compare(rlsetupcreators::Dict, N; callbackid = 1, verbose = false)\n\nRun different setups in dictionary rlsetupcreators N times. The dictionary has elements \"name\" => createrlsetup, where createrlsetup is a function that has a single integer argument (id of the comparison; useful for saving  intermediate results). For each run, getvalue(rlsetup.callbacks[callbackid]) gets entered as result in a DataFrame with columns \"name\", \"result\", \"seed\".\n\n\n\n\n\n"
+    "text": "compare(rlsetupcreators::Dict, N; callbackid = 1, verbose = false)\n\nRun different setups in dictionary rlsetupcreators N times. The dictionary has elements \"name\" => createrlsetup, where createrlsetup is a function that has a single integer argument (id of the comparison; useful for saving  intermediate results). For each run, getvalue(rlsetup.callbacks[callbackid]) gets entered as result in a DataFrame with columns \"name\", \"result\", \"seed\". It is useful to specify the callbackid if the createrlsetup creates RLSetups with multiple callbacks.\n\nExample\n\nusing ReinforcementLearningEnvironmentDiscrete\nenv = MDP()\nsetup(learner) = RLSetup(learner, env, ConstantNumberSteps(10^4), callbacks = [EvaluationPerT(10^2, MeanReward())])\nrlsetupcreators = Dict(\"sarsa\" => (i) -> setup(Sarsa()), \"smallbackups\" => (i) -> setup(SmallBackups()))\nresult = compare(rlsetupcreators, 4)\nplotcomparison(result)\n\n\n\n\n\n"
 },
 
 {
@@ -550,14 +550,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Environments",
     "category": "section",
     "text": "The following environments can be added with (v1.0) pkg> add ReinforcementLearningEnvironmentXZYorPkg.add(\"ReinforcementLearningEnvironmentXYZ\")Examples can be found in the example folders of these repositories.ReinforcementLearningEnvironmentAtari, ReinforcementLearningEnvironmentClassicControl, ReinforcementLearningEnvironmentDiscrete. ReinforcementLearningEnvironmentViZDoom. ReinforcementLearningEnvironmentViZGym."
-},
-
-{
-    "location": "environments/#MDPs-1",
-    "page": "Environments",
-    "title": "MDPs",
-    "category": "section",
-    "text": "Modules = [ReinforcementLearning]\nPages   = [\"mdp.jl\", \"randommdp.jl\"]"
 },
 
 {
