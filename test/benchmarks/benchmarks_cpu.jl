@@ -37,7 +37,8 @@ println("\n\nMountainCar TilingSarsa")
 show(stdout, "text/plain", @benchmark(learn!($rlsetup)))
 
 env = DiscreteMaze(ngoals = 5)
-rlsetup = RLSetup(SmallBackups(na = 4, ns = env.mdp.ns, γ = .99), 
+ns = length(env.mdp.isterminal)
+rlsetup = RLSetup(SmallBackups(na = 4, ns = ns, γ = .99), 
                   env, ConstantNumberSteps(400))
 println("\n\nDiscreteMaze SmallBackups")
 show(stdout, "text/plain", @benchmark(learn!($rlsetup)))
