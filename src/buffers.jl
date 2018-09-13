@@ -1,16 +1,34 @@
 import Base: (==), size, getindex, setindex!, length, push!, empty!, isempty, eltype
-export CircularArrayBuffer, CircularTurnBuffer, EpisodeTurnBuffer, Turn,
+export CircularArrayBuffer, CircularTurnBuffer, EpisodeTurnBuffer, Turn, SARDSATurn,
        getconsecutive, isfull, capacity
 
+"""
+A subtype of `AbstractTurn` must at least has the following four fields:
+
+- state::Ts
+- action::Ta
+- reward::Tr
+- isdone::Td
+"""
+abstract type AbstractTurn{Ts, Ta, Tr, Td} end
 abstract type AbstractBuffer{T, N} <: AbstractArray{T, N} end
-abstract type AbstractTurn end
+"""
+A subtype of `AbstractTurnBuffer` takes an `AbstractTurn` type as its element
+"""
 abstract type AbstractTurnBuffer{T<:AbstractTurn} <: AbstractArray{T, 1} end
 
 ##############################
 ## Turn
 ##############################
 
-struct Turn{Ts, Ta, Tr, Td} <: AbstractTurn
+struct Turn{Ts, Ta, Tr, Td} <: AbstractTurn{Ts, Ta, Tr, Td}
+    state::Ts
+    action::Ta
+    reward::Tr
+    isdone::Td
+end
+
+struct SARDSATurn{Ts, Ta, Tr, Td} <: AbstractTurn{Ts, Ta, Tr, Td}
     state::Ts
     action::Ta
     reward::Tr
@@ -19,13 +37,7 @@ struct Turn{Ts, Ta, Tr, Td} <: AbstractTurn
     nextaction::Ta
 end
 
-==(t1::Turn, t2::Turn) = t1.state == t2.state &&
-                           t1.action == t2.action && 
-                           t1.reward == t2.reward && 
-                           t1.isdone == t2.isdone && 
-                           t1.nextstate == t2.nextstate &&
-                           t1.nextaction == t2.nextaction
-
+==(t1::T, t2::T) where T<:AbstractTurn = all(getproperty(t1, f) == getproperty(t2, f) for f in fieldnames(T))
 
 ##############################
 ## CircularArrayBuffer
@@ -146,36 +158,37 @@ Store the [`Turn`](@ref) info into a circular buffer of `capacity`.
 
 See also: [`EpisodeTurnBuffer`](@ref)
 """
-struct CircularTurnBuffer{Ts, Ta, Tr, Td} <: AbstractTurnBuffer{Turn{Ts, Ta, Tr, Td}}
+struct CircularTurnBuffer{T<:Turn, Ts, Ta, Tr, Td} <: AbstractTurnBuffer{T}
     states::CircularArrayBuffer{Ts}
     actions::CircularArrayBuffer{Ta}
     rewards::CircularArrayBuffer{Tr}
     isdone::CircularArrayBuffer{Td}
-    nextstates::CircularArrayBuffer{Ts}
-    nextactions::CircularArrayBuffer{Ta}
-    function CircularTurnBuffer{Ts, Ta, Tr, Td}(
+    function CircularTurnBuffer{T}(
         capacity::Int,
         size_s::Tuple{Vararg{Int}}=(),
         size_a::Tuple{Vararg{Int}}=(),
         size_r::Tuple{Vararg{Int}}=(),
-        size_d::Tuple{Vararg{Int}}=()) where {Ts, Ta, Tr, Td}
-        new{Ts, Ta, Tr, Td}(
-            CircularArrayBuffer{Ts}(capacity, size_s...),
-            CircularArrayBuffer{Ta}(capacity, size_a...),
+        size_d::Tuple{Vararg{Int}}=()) where T<:Turn
+        Ts, Ta, Tr, Td = T.parameters
+        new{T, Ts, Ta, Tr, Td}(
+            CircularArrayBuffer{Ts}(capacity+1, size_s...),
+            CircularArrayBuffer{Ta}(capacity+1, size_a...),
             CircularArrayBuffer{Tr}(capacity, size_r...),
-            CircularArrayBuffer{Td}(capacity, size_d...),
-            CircularArrayBuffer{Ts}(capacity, size_s...),
-            CircularArrayBuffer{Ta}(capacity, size_a...))
+            CircularArrayBuffer{Td}(capacity, size_d...))
     end
 end
 
-function push!(b::CircularTurnBuffer{Ts, Ta, Tr, Td}, t::Turn{Ts, Ta, Tr, Td}) where {Ts, Ta, Tr, Td}
-    push!(b.states, t.state)
-    push!(b.actions, t.action)
-    push!(b.rewards, t.reward)
-    push!(b.isdone, t.isdone)
-    push!(b.nextstates, t.nextstate)
-    push!(b.nextactions, t.nextaction)
+function push!(b::CircularTurnBuffer{T, Ts, Ta, Tr, Td}, s::Ts, a::Ta) where {T, Ts, Ta, Tr, Td}
+    push!(b.states, s)
+    push!(b.actions, a)
+end
+
+function push!(b::CircularTurnBuffer{T, Ts, Ta, Tr, Td},
+               s::Ts, a::Ta, r::Tr, d::Td) where {T, Ts, Ta, Tr, Td}
+    push!(b.states, s)
+    push!(b.actions, a)
+    push!(b.rewards, r)
+    push!(b.isdone, d)
 end
 
 isfull(b::CircularTurnBuffer) = isfull(b.states)
@@ -194,48 +207,62 @@ the buffer is emptied first if last turn is the end of an episode
 
 See also: [`CircularTurnBuffer`](@ref)
 """
-struct EpisodeTurnBuffer{Ts, Ta, Tr, Td} <: AbstractTurnBuffer{Turn{Ts, Ta, Tr, Td}}
+struct EpisodeTurnBuffer{T<:Turn, Ts, Ta, Tr, Td} <: AbstractTurnBuffer{T}
     states::Vector{Ts}
     actions::Vector{Ta}
     rewards::Vector{Tr}
     isdone::Vector{Td}
-    nextstates::Vector{Ts}
-    nextactions::Vector{Ta}
-    EpisodeTurnBuffer{Ts, Ta, Tr, Td}() where {Ts, Ta, Tr, Td} = new(Ts[], Ta[], Tr[], Td[], Ts[], Ta[])
+    function EpisodeTurnBuffer{T}() where T<:Turn
+        Ts, Ta, Tr, Td = T.parameters
+        new{T, Ts, Ta, Tr, Td}(Ts[], Ta[], Tr[], Td[])
+    end
 end
 
-function push!(b::EpisodeTurnBuffer{Ts, Ta, Tr, Td}, t::Turn{Ts, Ta, Tr, Td}) where {Ts, Ta, Tr, Td}
-    if !isempty(b) && convert(Bool, b.isdone[end]) # last turn is the end of an episode
+function push!(b::EpisodeTurnBuffer{T, Ts, Ta, Tr, Td}, s::Ts, a::Ta) where {T, Ts, Ta, Tr, Td}
+    if !isempty(b) && convert(Bool, b[end].isdone) # last turn is the end of an episode
         empty!(b)
     end
-    push!(b.states, t.state)
-    push!(b.actions, t.action)
-    push!(b.rewards, t.reward)
-    push!(b.isdone, t.isdone)
-    push!(b.nextstates, t.nextstate)
-    push!(b.nextactions, t.nextaction)
+    push!(b.states, s)
+    push!(b.actions, a)
 end
 
-isfull(b::EpisodeTurnBuffer) = length(b) > 0 && b.isdone[end]
+function push!(b::EpisodeTurnBuffer{T, Ts, Ta, Tr, Td}, 
+               s::Ts, a::Ta, r::Tr=zero(Tr), d::Td=zero(Td)) where {T, Ts, Ta, Tr, Td}
+    if !isempty(b) && convert(Bool, b[end].isdone) # last turn is the end of an episode
+        empty!(b)
+    end
+    push!(b.states, s)
+    push!(b.actions, a)
+    push!(b.rewards, r)
+    push!(b.isdone, d)
+end
+
+isfull(b::EpisodeTurnBuffer) = length(b) > 0 && b[end].isdone
 
 ##############################
 getconsecutive(v::Vector, I::Vector{Int}, n::Int) = reshape(v[[x for i in I for x in i-n+1:i]], n, length(I))
 
-size(b::AbstractTurnBuffer{<:Turn}) = (length(b.states),)
-length(b::AbstractTurnBuffer{<:Turn}) = length(b.states)
-eltype(b::AbstractTurnBuffer{Turn{Ts, Ta, Tr, Td}}) where {Ts, Ta, Tr, Td} = Turn{Ts, Ta, Tr, Td}
-isempty(b::AbstractTurnBuffer{<:Turn}) = isempty(b.states)  # check `states` field is enough
+size(b::AbstractTurnBuffer{<:Turn}) = (length(b),)
+length(b::AbstractTurnBuffer{<:Turn}) = max(length(b.states) - 1, 0)
+eltype(b::AbstractTurnBuffer{T}) where T = T
+isempty(b::AbstractTurnBuffer{<:Turn}) = length(b) == 0
 
-getindex(b::AbstractTurnBuffer{<:Turn}, i::Int) = Turn(b.states[i], b.actions[i], b.rewards[i], b.isdone[i], b.nextstates[i], b.nextactions[end])
-getconsecutive(b::AbstractTurnBuffer{<:Turn}, i::Int, n::Int) = (s = i-n+1:i; Turn(b.states[s], b.actions[s], b.rewards[s], b.isdone[s], b.nextstates[s], b.nextactions[s]))
-getconsecutive(b::AbstractTurnBuffer{<:Turn}, I::Vector{Int}, n::Int) = Turn(
-    getconsecutive(b.states, I, n),
-    getconsecutive(b.actions, I, n),
-    getconsecutive(b.rewards, I, n),
-    getconsecutive(b.isdone, I, n),
-    getconsecutive(b.nextstates, I, n),
-    getconsecutive(b.nextactions, I, n))
+function getindex(b::AbstractTurnBuffer{<:Turn}, i::Int) 
+    SARDSATurn(b.states[i],
+               b.actions[i],
+               b.rewards[i],
+               b.isdone[i],
+               b.states[i+1],
+               b.actions[i+1])
+end
 
 function empty!(b::AbstractTurnBuffer{<:Turn})
-    empty!(b.states); empty!(b.actions); empty!(b.rewards); empty!(b.isdone); empty!(b.nextstates); empty!(b.nextactions)
+    empty!(b.states)
+    empty!(b.actions)
+    empty!(b.rewards)
+    empty!(b.isdone)
+end
+
+function push!(b::AbstractTurnBuffer, t::AbstractTurn)
+    push!(b, t.state, t.action, t.reward, t.isdone)
 end

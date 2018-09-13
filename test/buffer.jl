@@ -78,73 +78,68 @@ end
 
 @testset "CircularTurnBuffer" begin
     @testset "1D" begin
-        b = CircularTurnBuffer{Int, Int, Float64, Bool}(4)
+        b = CircularTurnBuffer{Turn{Int, Int, Float64, Bool}}(4)
         @test eltype(b) == Turn{Int, Int, Float64, Bool}
         @test isempty(b) == true
+        @test isfull(b) == false
+        @test length(b) == 0
 
-        push!(b, Turn(1,1,1.,false,1,1))
-        push!(b, Turn(2,2,2.,false,2,2))
-        push!(b, Turn(3,3,3.,false,3,3))
-        push!(b, Turn(4,4,4.,false,4,4))
+        push!(b, 1,1,1.,false)
+        @test_throws BoundsError b[end]
+        @test length(b) == 0
+
+        push!(b, 2,2,2.,false)
+
+        @test b[end] == SARDSATurn(1, 1, 1., false, 2, 2)
+
+        push!(b, 3,3,3.,false)
+        push!(b, 4,4,4.,true)
+
+        @test isempty(b) == false
+        @test isfull(b) == false
+        @test length(b) == 3
+
+        push!(b, 5,5,5.,false)
 
         @test isempty(b) == false
         @test isfull(b) == true
         @test length(b) == 4
-        @test getconsecutive(b, 3, 2) == Turn(
-            [2, 3],
-            [2, 3],
-            [2., 3.],
-            [false, false],
-            [2, 3],
-            [2, 3]
-        )
 
-        push!(b, Turn(5,5,5.,true,5,5))
-        push!(b, Turn(6,6,6.,true,6,6))
+        push!(b, 6,6,6.,true)
 
         @test length(b) == 4
-        @test getconsecutive(b, 3, 2) == Turn(
-            [4, 5],
-            [4, 5],
-            [4., 5.],
-            [false, true],
-            [4, 5],
-            [4, 5]
-        )
+        @test b[end] == SARDSATurn(5, 5, 5., false, 6, 6)
     end
+
     @testset "2D" begin
-        b = CircularTurnBuffer{Array{Float64, 2}, Int, Float64, Bool}(4, (2,2), (), (), ())
-        t = Turn([[1. 1.];[1. 1.]], 0, 1.0, false, [[0. 0.];[0. 0.]], 0)
-        push!(b, t)
+        b = CircularTurnBuffer{Turn{Array{Float64, 2}, Int, Float64, Bool}}(4, (2,2), (), (), ())
+        push!(b, [[1. 1.];[1. 1.]], 1, 1.0, false)
+        push!(b, [[2. 2.];[2. 2.]], 2, 2.0, false)
         @test length(b) == 1
-        @test b[1] == t
+        @test b[1] == SARDSATurn(
+            [[1. 1.];[1. 1.]],
+            1, 1.0, false, [[2. 2.];[2. 2.]], 2)
     end
 end
 
 @testset "EpisodeTurnBuffer" begin
-    b = EpisodeTurnBuffer{Int, Int, Float64, Bool}()
+    b = EpisodeTurnBuffer{Turn{Int, Int, Float64, Bool}}()
 
-    @test length(b) == 0
+    push!(b, 1,1,1.,false)
+    push!(b, 2,2,2.,false)
+    push!(b, 3,3,3.,false)
+    @test length(b) == 2
 
-    push!(b, Turn(1,1,1.,false,1,1))
-    push!(b, Turn(2,2,2.,false,2,2))
-    push!(b, Turn(3,3,3.,false,3,3))
-    @test getconsecutive(b, [2,3], 2) == Turn([1 2; 2 3],
-                                              [1 2; 2 3],
-                                              [1.0 2.0; 2.0 3.0],
-                                              Bool[false false; false false],
-                                              [1 2; 2 3],
-                                              [1 2; 2 3])
-    @test length(b) == 3
+    push!(b, 4,4,4.,true)
+    push!(b, 5, 5)
 
-    push!(b, Turn(4,4,4.,true,4,4))
     @test isfull(b) == true
     @test length(b) == 4
 
-    push!(b, Turn(5,5,5.,false,5,5))
+    push!(b, 6,6,6.,false)
+    push!(b, 7,7,7.,false)
     @test length(b) == 1
-    empty!(b)
-    @test length(b) == 0
     @test isfull(b) == false
+    @test b[end] == SARDSATurn(6,6,6.,false,7,7)
 end
 end

@@ -1,10 +1,11 @@
 using ReinforcementLearning:update!
 
 @testset "tdlearning" begin
-episode = [(1, 2, 0., false, 3, 1),
-            (3, 1, 1., false, 1, 2),
-            (1, 2, 0., false, 2, 2),
-            (2, 2, 1., false, 3, 2)]
+episode = [(1, 2, 0., false),
+            (3, 1, 1., false),
+            (1, 2, 0., false),
+            (2, 2, 1., false),
+            (3, 2)]
 γ = .9
 λ = .8
 α = .1
@@ -33,14 +34,14 @@ results[Sarsa, AccumulatingTraces] = deepcopy(tmp)
 
 for tdkind in [QLearning, Sarsa] #, ExpectedSarsa]
     for tracekind in [NoTraces, AccumulatingTraces, ReplacingTraces]
-        buffer = CircularTurnBuffer{Int, Int, Float64, Bool}(1)
+        buffer = CircularTurnBuffer{Turn{Int, Int, Float64, Bool}}(1)
         learner = tdkind(ns = 3, na = 2, γ = γ, λ = λ, α = α, initvalue = Inf64,
                             tracekind = tracekind)
         println(learner.params, results[tdkind, tracekind])
-        for t in episode
-            push!(buffer, Turn(t...))
+        push!(buffer, episode[1]...)
+        for t in episode[2:end]
+            push!(buffer, t...)
             update!(learner, buffer)
-            println(learner.params, results[tdkind, tracekind])
         end
         @test isapprox(learner.params, results[tdkind, tracekind], atol = 1e-15) 
     end
