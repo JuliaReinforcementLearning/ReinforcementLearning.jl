@@ -63,7 +63,7 @@
         @test b[1:end] == reshape([c for x in 3:5 for c in x*A], 2, 2, 3)
     end
 
-    @testset "getconsecutive" begin
+    @testset "viewconsecutive" begin
         b = CircularArrayBuffer{Array{Float64,2}}(6, (2, 2))
         for i in 1:6 push!(b, i * A) end
 
@@ -71,8 +71,8 @@
         x[:, :, :, 1] = reshape([c for x in 1:3 for c in x*A], 2, 2, 3)
         x[:, :, :, 2] = reshape([c for x in 4:6 for c in x*A], 2, 2, 3)
 
-        @test getconsecutive(b, [3, 6], 3) == x
-        @test_throws BoundsError getconsecutive(b, [3, 6], 4)
+        @test viewconsecutive(b, [3, 6], 3) == x
+        @test_throws BoundsError viewconsecutive(b, [3, 6], 4)
     end
 end
 

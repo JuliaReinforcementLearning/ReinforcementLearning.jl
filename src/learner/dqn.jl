@@ -84,8 +84,8 @@ function update!(learner::DQN, b)
     indices = StatsBase.sample(1:length(b.rewards) - learner.nsteps + 1, 
                                learner.minibatchsize, 
                                replace = false)
-    qa = learner.net(getconsecutive(b.states, indices, learner.nmarkov))
-    qat = learner.targetnet(getconsecutive(b.states, 
+    qa = learner.net(viewconsecutive(b.states, indices, learner.nmarkov))
+    qat = learner.targetnet(viewconsecutive(b.states, 
                                             indices .+ learner.nsteps, 
                                             learner.nmarkov))
     q = selecta(qa, b.actions[indices])

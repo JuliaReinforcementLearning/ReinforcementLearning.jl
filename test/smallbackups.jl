@@ -9,10 +9,11 @@ episode = [(0., false, 1, 1), (0., false, 2, 1), (0., false, 3, 1), # r, done, n
             (0., false, 2, 2), (0., false, 6, 1), (2., true, 1, 1), (0., false, 2, 2)]
 na = 2; ns = 6; γ = .9
 learner = SmallBackups(na = na, ns = ns, γ = γ, maxcount = 10)
-buffer = CircularTurnBuffer{Int, Int, Float64, Bool}(1)
+buffer = CircularTurnBuffer{Turn{Int, Int, Float64, Bool}}(1)
 s, a = 1, 1
+push!(buffer, s, a)
 for (r, done, next_s, next_a) in episode[2:end]
-    push!(buffer, Turn(s, a, r, done, next_s, next_a))
+    push!(buffer,r, done, next_s, next_a)
     update!(learner, buffer)
     s, a = next_s, next_a
 end

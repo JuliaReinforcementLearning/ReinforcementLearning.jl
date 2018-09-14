@@ -1,11 +1,11 @@
 using ReinforcementLearning:update!
 
 @testset "tdlearning" begin
-episode = [(1, 2, 0., false),
-            (3, 1, 1., false),
-            (1, 2, 0., false),
-            (2, 2, 1., false),
-            (3, 2)]
+episode = [(1, 2), 
+            (0., false, 3, 1), 
+            (1., false, 1, 2),
+            (0., false, 2, 2),
+            (1., false, 3, 2)]
 γ = .9
 λ = .8
 α = .1
@@ -37,7 +37,6 @@ for tdkind in [QLearning, Sarsa] #, ExpectedSarsa]
         buffer = CircularTurnBuffer{Turn{Int, Int, Float64, Bool}}(1)
         learner = tdkind(ns = 3, na = 2, γ = γ, λ = λ, α = α, initvalue = Inf64,
                             tracekind = tracekind)
-        println(learner.params, results[tdkind, tracekind])
         push!(buffer, episode[1]...)
         for t in episode[2:end]
             push!(buffer, t...)

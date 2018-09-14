@@ -1,6 +1,6 @@
 import Base: (==), size, getindex, setindex!, length, push!, empty!, isempty, eltype, getproperty, view
 export CircularArrayBuffer, CircularTurnBuffer, EpisodeTurnBuffer, Turn, SARDSATurn,
-       getconsecutive, isfull, capacity
+       viewconsecutive, isfull, capacity
 
 """
 A subtype of `AbstractTurn` must at least has the following four fields:
@@ -72,21 +72,21 @@ end
 getindex(cb::CircularArrayBuffer{E, T, N}, I::Vararg{Int, N}) where {E, T, N} = getindex(cb.buffer, I[1:N-1]...,  _buffer_index(cb, I[end]))
 
 """
-    getconsecutive(cb::CircularArrayBuffer{E, T, N}, i::Int, n::Int)
+    viewconsecutive(cb::CircularArrayBuffer{E, T, N}, i::Int, n::Int)
 
-Get the `n` consecutive elements in the buffer before `i`(`i`-th element is included).
+Get a view of the `n` consecutive elements in the buffer before `i`(`i`-th element is included).
 `i` must greater than `n`.
 """
-getconsecutive(cb::CircularArrayBuffer{E, T, N}, i::Int, n::Int) where {E,T,N} =  getindex(cb, i-n+1:i)
+viewconsecutive(cb::CircularArrayBuffer{E, T, N}, i::Int, n::Int) where {E,T,N} =  view(cb, i-n+1:i)
 
 """
-    getconsecutive(cb::CircularArrayBuffer{E, T, N}, I::Vector{Int}, n::Int)
+    viewconsecutive(cb::CircularArrayBuffer{E, T, N}, I::Vector{Int}, n::Int)
 
 Get the `n` consecutive elements in the buffer before each element in `I`.
 Each element in `I` must greater than `n`.
 Return an `Array{T, N+1}`
 """
-getconsecutive(cb::CircularArrayBuffer{E, T, N}, I::Vector{Int}, n::Int) where {E,T,N} = reshape(getindex(cb, [j for i in I for j in i-n+1:i]), size(cb.buffer)[1:N-1]..., n, length(I))
+viewconsecutive(cb::CircularArrayBuffer{E, T, N}, I::Vector{Int}, n::Int) where {E,T,N} = reshape(view(cb, [j for i in I for j in i-n+1:i]), size(cb.buffer)[1:N-1]..., n, length(I))
 
 capacity(cb::CircularArrayBuffer) = size(cb.buffer)[end]
 length(cb::CircularArrayBuffer) = cb.length
@@ -237,7 +237,7 @@ end
 isfull(b::EpisodeTurnBuffer) = length(b) > 0 && convert(Bool, b[end].isdone)
 
 ##############################
-getconsecutive(v::Vector, I::Vector{Int}, n::Int) = reshape(v[[x for i in I for x in i-n+1:i]], n, length(I))
+viewconsecutive(v::Vector, I::Vector{Int}, n::Int) = reshape(view(v, [x for i in I for x in i-n+1:i]), n, length(I))
 
 size(b::AbstractTurnBuffer{<:Turn}) = (length(b),)
 length(b::AbstractTurnBuffer{<:Turn}) = max(length(b[:states]) - 1, 0)
@@ -249,10 +249,6 @@ function empty!(b::AbstractTurnBuffer{<:Turn})
     empty!(b[:actions])
     empty!(b[:rewards])
     empty!(b[:isdone])
-end
-
-function push!(b::AbstractTurnBuffer, t::AbstractTurn)
-    push!(b, t.state, t.action, t.reward, t.isdone)
 end
 
 function getproperty(b::AbstractTurnBuffer{<:Turn}, p::Symbol)
@@ -275,6 +271,15 @@ function getindex(b::AbstractTurnBuffer{T}, i::Int) where T<:Turn
          b[:actions][i+1])::T
 end
 
-function getindex(b::AbstractTurnBuffer{<:Turn}, f::Symbol) 
-    getfield(b, f)
+getindex(b::AbstractTurnBuffer{<:Turn}, f::Symbol) = getfield(b, f)
+
+function viewconsecutive(b::AbstractTurnBuffer{<:Turn}, p::Symbol, i::Int, n::Int) 
+    f = getproperty(b, p)
+    view(f, [(:) for _ in 1:ndims(f)-1]..., i-n+1:i)
+end
+
+function viewconsecutive(b::AbstractTurnBuffer{<:Turn}, p::Symbol, I::Vector{Int}, n::Int) 
+    f = getproperty(b, p)
+    N = ndims(f)
+    reshape(view(f, [(:) for _ in 1:N-1]..., [j for i in I for j in i-n+1:i]), size(f)[1:N-1]..., n, length(I))
 end
