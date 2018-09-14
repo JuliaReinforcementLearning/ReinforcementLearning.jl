@@ -1,4 +1,4 @@
-import Base: (==), size, getindex, setindex!, length, push!, empty!, isempty, eltype
+import Base: (==), size, getindex, setindex!, length, push!, empty!, isempty, eltype, getproperty, view
 export CircularArrayBuffer, CircularTurnBuffer, EpisodeTurnBuffer, Turn, SARDSATurn,
        getconsecutive, isfull, capacity
 
@@ -22,13 +22,6 @@ abstract type AbstractTurnBuffer{T<:AbstractTurn} <: AbstractArray{T, 1} end
 ##############################
 
 struct Turn{Ts, Ta, Tr, Td} <: AbstractTurn{Ts, Ta, Tr, Td}
-    state::Ts
-    action::Ta
-    reward::Tr
-    isdone::Td
-end
-
-struct SARDSATurn{Ts, Ta, Tr, Td} <: AbstractTurn{Ts, Ta, Tr, Td}
     state::Ts
     action::Ta
     reward::Tr
@@ -65,9 +58,13 @@ end
 eltype(cb::CircularArrayBuffer{E, T, N}) where {E, T, N} = E
 size(cb::CircularArrayBuffer{E, T, N}) where {E, T, N} = (size(cb.buffer)[1:N-1]..., cb.length)
 
-getindex(cb::CircularArrayBuffer{E, T, N}, i::Int) where {E, T, N} = getindex(cb.buffer, [(:) for _ in 1 : N-1]...,  _buffer_index(cb, i))
-getindex(cb::CircularArrayBuffer{E, T, N}, i::UnitRange{Int}) where {E, T, N} = getindex(cb.buffer, [(:) for _ in 1 : N-1]...,  _buffer_index(cb, i))
-getindex(cb::CircularArrayBuffer{E, T, N}, I::Vector{Int}) where {E, T, N} = getindex(cb.buffer, [(:) for _ in 1 : N-1]..., [_buffer_index(cb, i) for i in I])
+for func in [:view, :getindex]
+     @eval @__MODULE__() begin
+        $func(cb::CircularArrayBuffer{E, T, N}, i::Int) where {E, T, N} = $func(cb.buffer, [(:) for _ in 1 : N-1]...,  _buffer_index(cb, i))
+        $func(cb::CircularArrayBuffer{E, T, N}, i::UnitRange{Int}) where {E, T, N} = $func(cb.buffer, [(:) for _ in 1 : N-1]...,  _buffer_index(cb, i))
+        $func(cb::CircularArrayBuffer{E, T, N}, I::Vector{Int}) where {E, T, N} = $func(cb.buffer, [(:) for _ in 1 : N-1]..., [_buffer_index(cb, i) for i in I])
+    end
+end
 
 ## kept only to show elements
 ## never manually get/set the inner elements because it is very slow
@@ -178,20 +175,20 @@ struct CircularTurnBuffer{T<:Turn, Ts, Ta, Tr, Td} <: AbstractTurnBuffer{T}
     end
 end
 
+"Only used at the first turn"
 function push!(b::CircularTurnBuffer{T, Ts, Ta, Tr, Td}, s::Ts, a::Ta) where {T, Ts, Ta, Tr, Td}
-    push!(b.states, s)
-    push!(b.actions, a)
+    push!(b[:states], s)
+    push!(b[:actions], a)
 end
 
-function push!(b::CircularTurnBuffer{T, Ts, Ta, Tr, Td},
-               s::Ts, a::Ta, r::Tr, d::Td) where {T, Ts, Ta, Tr, Td}
-    push!(b.states, s)
-    push!(b.actions, a)
-    push!(b.rewards, r)
-    push!(b.isdone, d)
+function push!(b::CircularTurnBuffer{T, Ts, Ta, Tr, Td}, r::Tr, d::Td, s::Ts, a::Ta) where {T, Ts, Ta, Tr, Td}
+    push!(b[:rewards], r)
+    push!(b[:isdone], d)
+    push!(b[:states], s)
+    push!(b[:actions], a)
 end
 
-isfull(b::CircularTurnBuffer) = isfull(b.states)
+isfull(b::CircularTurnBuffer) = isfull(b[:states])
 
 ##############################
 ## EpisodeTurnBuffer
@@ -218,51 +215,66 @@ struct EpisodeTurnBuffer{T<:Turn, Ts, Ta, Tr, Td} <: AbstractTurnBuffer{T}
     end
 end
 
+"Only used at the first turn"
 function push!(b::EpisodeTurnBuffer{T, Ts, Ta, Tr, Td}, s::Ts, a::Ta) where {T, Ts, Ta, Tr, Td}
-    if !isempty(b) && convert(Bool, b[end].isdone) # last turn is the end of an episode
-        empty!(b)
-    end
-    push!(b.states, s)
-    push!(b.actions, a)
+    push!(b[:states], s)
+    push!(b[:actions], a)
 end
 
-function push!(b::EpisodeTurnBuffer{T, Ts, Ta, Tr, Td}, 
-               s::Ts, a::Ta, r::Tr=zero(Tr), d::Td=zero(Td)) where {T, Ts, Ta, Tr, Td}
-    if !isempty(b) && convert(Bool, b[end].isdone) # last turn is the end of an episode
+function push!(b::EpisodeTurnBuffer{T, Ts, Ta, Tr, Td}, r::Tr, d::Td, s::Ts, a::Ta) where {T, Ts, Ta, Tr, Td}
+    if isfull(b)
+        ns, na = b.nextstates[end], b.nextactions[end]
         empty!(b)
+        push!(b, ns, na)
     end
-    push!(b.states, s)
-    push!(b.actions, a)
-    push!(b.rewards, r)
-    push!(b.isdone, d)
+    push!(b[:rewards], r)
+    push!(b[:isdone], d)
+    push!(b[:states], s)
+    push!(b[:actions], a)
 end
 
-isfull(b::EpisodeTurnBuffer) = length(b) > 0 && b[end].isdone
+"last turn is the end of an episode"
+isfull(b::EpisodeTurnBuffer) = length(b) > 0 && convert(Bool, b[end].isdone)
 
 ##############################
 getconsecutive(v::Vector, I::Vector{Int}, n::Int) = reshape(v[[x for i in I for x in i-n+1:i]], n, length(I))
 
 size(b::AbstractTurnBuffer{<:Turn}) = (length(b),)
-length(b::AbstractTurnBuffer{<:Turn}) = max(length(b.states) - 1, 0)
+length(b::AbstractTurnBuffer{<:Turn}) = max(length(b[:states]) - 1, 0)
 eltype(b::AbstractTurnBuffer{T}) where T = T
 isempty(b::AbstractTurnBuffer{<:Turn}) = length(b) == 0
 
-function getindex(b::AbstractTurnBuffer{<:Turn}, i::Int) 
-    SARDSATurn(b.states[i],
-               b.actions[i],
-               b.rewards[i],
-               b.isdone[i],
-               b.states[i+1],
-               b.actions[i+1])
-end
-
 function empty!(b::AbstractTurnBuffer{<:Turn})
-    empty!(b.states)
-    empty!(b.actions)
-    empty!(b.rewards)
-    empty!(b.isdone)
+    empty!(b[:states])
+    empty!(b[:actions])
+    empty!(b[:rewards])
+    empty!(b[:isdone])
 end
 
 function push!(b::AbstractTurnBuffer, t::AbstractTurn)
     push!(b, t.state, t.action, t.reward, t.isdone)
+end
+
+function getproperty(b::AbstractTurnBuffer{<:Turn}, p::Symbol)
+    if     p == :states      @view getfield(b, p)[1:end-1]
+    elseif p == :actions     @view getfield(b, p)[1:end-1]
+    elseif p == :rewards     @view getfield(b, p)[1:end]
+    elseif p == :isdone      @view getfield(b, p)[1:end]
+    elseif p == :nextstates  @view getfield(b, :states)[2:end]
+    elseif p == :nextactions @view getfield(b, :actions)[2:end]
+    else throw("type $(typeof(b)) has no field $p")
+    end
+end
+
+function getindex(b::AbstractTurnBuffer{T}, i::Int) where T<:Turn
+    Turn(b[:states][i],
+         b[:actions][i],
+         b[:rewards][i],
+         b[:isdone][i],
+         b[:states][i+1],
+         b[:actions][i+1])::T
+end
+
+function getindex(b::AbstractTurnBuffer{<:Turn}, f::Symbol) 
+    getfield(b, f)
 end
