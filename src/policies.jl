@@ -130,7 +130,7 @@ function NMarkovPolicy(N, pol::Tpol, buf::Tbuf) where {Tpol, Tbuf}
 end
 function (p::NMarkovPolicy{N, Tpol, Tbuf})(s) where {N, Tpol, Tbuf}
     push!(p.buffer, s)
-    p.policy(nmarkovgetindex(p.buffer, N, N))
+    p.policy(viewconsecutive(p.buffer, N, N))
 end
 function defaultnmarkovpolicy(learner, buffer, π)
     if learner.nmarkov == 1

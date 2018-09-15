@@ -1,3 +1,5 @@
+export huberloss
+
 """
     mutable struct DQN{Tnet,TnetT,ToptT,Topt}
         γ::Float64 = .99
@@ -56,7 +58,7 @@ end
 function defaultbuffer(learner::Union{DQN, DeepActorCritic}, env, preprocessor)
     state = preprocessstate(preprocessor, getstate(env)[1])
     action = sample(actionspace(env))
-    CircularTurnBuffer{typeof(state), typeof(action), Float64, Bool}(
+    CircularTurnBuffer{Turn{typeof(state), typeof(action), Float64, Bool}}(
         typeof(learner) <: DQN ? learner.replaysize : learner.nsteps + learner.nmarkov,
         size(state),
         size(action))
@@ -68,12 +70,12 @@ function defaultpolicy(learner::DQN, actionspace, buffer)
 end
 
 huberloss(yhat, y::Flux.TrackedArray) = -2*dot(clamp.(yhat - y.data, -1, 1), y)/length(y)
-export huberloss
 
 function selecta(q, a)
     na, t = size(q)
     q[na * collect(0:t-1) .+ a]
 end
+
 function update!(learner::DQN, b)
     learner.t += 1
     if learner.t % learner.updatetargetevery == 0
@@ -84,15 +86,18 @@ function update!(learner::DQN, b)
     indices = StatsBase.sample(1:length(b.rewards) - learner.nsteps + 1, 
                                learner.minibatchsize, 
                                replace = false)
-    qa = learner.net(viewconsecutive(b.states, indices, learner.nmarkov))
-    qat = learner.targetnet(viewconsecutive(b.states, 
-                                            indices .+ learner.nsteps, 
-                                            learner.nmarkov))
+
+    sd = viewconsecutive(b, :states, indices, learner.nmarkov)
+    qa = learner.net(convert(Array, reshape(sd, size(sd)[1:ndims(sd)-2]..., size(sd)[end-1] * size(sd)[end])))
+
+    st = viewconsecutive(b, :nextstates, indices .+ (learner.nsteps - 1), learner.nmarkov)
+    qat = learner.targetnet(convert(Array, reshape(st, size(st)[1:ndims(st)-2]..., size(st)[end-1] * size(st)[end])))
+
     q = selecta(qa, b.actions[indices])
     rs = Float64[]
     for (k, i) in enumerate(indices)
         r, γeff = discountedrewards(b.rewards[i:i + learner.nsteps - 1], 
-                                    b.done[i:i + learner.nsteps - 1], 
+                                    b.isdone[i:i + learner.nsteps - 1], 
                                     learner.γ)
         if γeff > 0
             if learner.doubledqn

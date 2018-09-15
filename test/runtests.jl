@@ -13,4 +13,4 @@ include("montecarlo.jl")
 include("smallbackups.jl")
 
 # TODO: DQN needs to be checked
-# @testset "linear function approximation" begin include("linfuncapprox.jl") end
+include("linfuncapprox.jl")

@@ -122,7 +122,7 @@ end
 Critic(; γ = .9, α = .1, ns = 10, initvalue = 0.) = Critic(α, γ, zeros(ns) .+ initvalue)
 function correct(corrector::Critic, buffer, t = 1, G = buffer.rewards[t])
     s = buffer.states[t]
-    δ = tderror(buffer.rewards, buffer.done, corrector.γ,
+    δ = tderror(buffer.rewards, buffer.isdone, corrector.γ,
                 getvalue(corrector.V, s), 
                 getvalue(corrector.V, buffer.states[end]))
     if typeof(s) <: Int
@@ -163,12 +163,12 @@ function update!(learner::PolicyGradientBackward, buffer)
     s = buffer.states[1]; a = buffer.actions[1];
     gradlogpolicy!(getactionprobabilities(learner.policy, s), s, a, learner.traces.trace)
     update!(learner, buffer, buffer.rewards[1], s, a)
-    if buffer.done[1]; resettraces!(learner.traces); end
+    if buffer.isdone[1]; resettraces!(learner.traces); end
 end
 
 
 function update!(learner::PolicyGradientForward, buffer::EpisodeTurnBuffer)
-    if buffer.done[end]
+    if buffer.isdone[end]
         rewards = buffer.rewards
         states = buffer.states
         actions = buffer.actions
