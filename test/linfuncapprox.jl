@@ -17,7 +17,7 @@ struct Id end
     ns = 10; na = 4;
     env = MDP(ns = ns, na = na, init = "deterministic")
     policy = ForcedPolicy(rand(1:na, 200))
-    learner = DQN(Linear(ns, na), replaysize = 2, updatetargetevery = 1, 
+    learner = DQN(Linear(ns, na), replaysize = 1, updatetargetevery = 1, 
                   updateevery = 1, startlearningat = 1, 
                   opttype = x -> Flux.SGD(x, .1/2), 
                   minibatchsize = 1, doubledqn = false)
@@ -39,7 +39,7 @@ struct Id end
     reset!(env)
     x2.policy.t = 1
     learn!(x2)
-    @test_broken x.learner.net.W.data ≈ x2.learner.params
+    @test x.learner.net.W.data ≈ x2.learner.params
 
     ns = 10; na = 4;
     env = MDP(ns = ns, na = na, init = "deterministic")
@@ -64,5 +64,5 @@ struct Id end
     reset!(env)
     x2.policy.t = 1
     learn!(x2)
-    @test_broken x.learner.policylayer.W.data ≈ x2.learner.params
+    @test x.learner.policylayer.W.data ≈ x2.learner.params
 end

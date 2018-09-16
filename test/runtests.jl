@@ -11,6 +11,4 @@ include("learn.jl")
 include("preprocessors.jl")
 include("montecarlo.jl")
 include("smallbackups.jl")
-
-# TODO: DQN needs to be checked
 include("linfuncapprox.jl")

@@ -59,7 +59,7 @@ function defaultbuffer(learner::Union{DQN, DeepActorCritic}, env, preprocessor)
     state = preprocessstate(preprocessor, getstate(env)[1])
     action = sample(actionspace(env))
     CircularTurnBuffer{Turn{typeof(state), typeof(action), Float64, Bool}}(
-        typeof(learner) <: DQN ? learner.replaysize : learner.nsteps + learner.nmarkov,
+        typeof(learner) <: DQN ? learner.replaysize : learner.nsteps,
         size(state),
         size(action))
 end
