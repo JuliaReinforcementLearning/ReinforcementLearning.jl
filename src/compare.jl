@@ -9,10 +9,22 @@ export plotcomparison
     compare(rlsetupcreators::Dict, N; callbackid = 1, verbose = false)
 
 Run different setups in dictionary `rlsetupcreators` `N` times. The dictionary
-has elements "name" => createrlsetup, where createrlsetup is a function that
+has elements `"name" => createrlsetup`, where `createrlsetup` is a function that
 has a single integer argument (id of the comparison; useful for saving 
 intermediate results). For each run, `getvalue(rlsetup.callbacks[callbackid])`
 gets entered as result in a DataFrame with columns "name", "result", "seed".
+It is useful to specify the `callbackid` if the `createrlsetup` creates `RLSetup`s
+with multiple callbacks.
+
+# Example
+```julia
+using ReinforcementLearningEnvironmentDiscrete
+env = MDP()
+setup(learner) = RLSetup(learner, env, ConstantNumberSteps(10^4), callbacks = [EvaluationPerT(10^2, MeanReward())])
+rlsetupcreators = Dict("sarsa" => (i) -> setup(Sarsa()), "smallbackups" => (i) -> setup(SmallBackups()))
+result = compare(rlsetupcreators, 4)
+plotcomparison(result)
+```
 """
 function compare(rlsetupcreators, N; callbackid = 1, verbose = false)
     res = @distributed(hcat, for t in 1:N

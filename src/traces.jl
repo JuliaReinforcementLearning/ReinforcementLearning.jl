@@ -66,6 +66,11 @@ function increasetrace!(traces::ReplacingTraces, state::Vector, action)
         traces.trace[action, i] = state[i]
     end
 end
+function increasetrace!(traces::ReplacingTraces, state::SubArray{T, 1} where T, action)
+    @inbounds for i in findall(x -> x != 0, state)
+        traces.trace[action, i] = state[i]
+    end
+end
 function increasetrace!(traces::ReplacingTraces, state::SparseVector, action)
     @inbounds for i in 1:length(state.nzind)
         traces.trace[action, state.nzind[i]] = state.nzval[i]

@@ -6,23 +6,22 @@ Runs an [`rlsetup`](@ref RLSetup) with learning.
 function learn!(rlsetup)
     @unpack learner, policy, fillbuffer, preprocessor, buffer, environment, stoppingcriterion = rlsetup
     if isempty(buffer)
-        obs = reset!(environment)
+        obs, = reset!(environment)
         s = preprocessstate(preprocessor, obs)
         a = policy(s)
         fillbuffer && push!(buffer, s, a)
     else
-        lastturn = buffer[end]
-        s, a = lastturn.nextstate, lastturn.nextaction
+        s, a = buffer[:nextstates, end], buffer[:nextactions, end]
     end
     while true
         next_obs, r, isdone = interact!(environment, a)
         if isdone 
-            next_obs = reset!(environment)
+            next_obs, = reset!(environment)
         end
         next_s = preprocessstate(preprocessor, next_obs)
-        next_a = policy(next_s)
+        a = policy(next_s)
 
-        fillbuffer &&  push!(buffer, r, isdone, next_s, next_a)
+        fillbuffer &&  push!(buffer, r, isdone, next_s, a)
         rlsetup.islearning && update!(learner, buffer)
 
         for callback in rlsetup.callbacks
@@ -30,7 +29,6 @@ function learn!(rlsetup)
         end
 
         isbreak!(stoppingcriterion, next_obs, a, r, isdone) && break
-        a = next_a
     end
 end
 

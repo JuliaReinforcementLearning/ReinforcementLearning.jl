@@ -62,14 +62,14 @@ end
 @inline checkinf(learner, value) = (value == Inf64 ? learner.unseenvalue : value)
 
 @inline function futurevalue(::QLearningEndPolicy, learner, buffer)
-    checkinf(learner, maximumbelowInf(getvalue(learner.params, buffer[end].nextstate)))
+    checkinf(learner, maximumbelowInf(getvalue(learner.params, buffer[:nextstates, end])))
 end
 @inline function futurevalue(::SarsaEndPolicy, learner, buffer)
-    getvaluecheckinf(learner, buffer[end].nextaction, buffer[end].nextstate)
+    getvaluecheckinf(learner, buffer[:nextactions, end], buffer[:nextstates, end])
 end
 @inline function futurevalue(p::ExpectedSarsaEndPolicy, learner, buffer)
-    a = buffer[end].nextaction
-    s = buffer[end].nextstate
+    a = buffer[:nextactions, end]
+    s = buffer[:nextstates, end]
     actionprobabilites = getactionprobabilities(learner.endvaluepolicy.policy,
                                                 getvalue(learner.params, s))
     m = 0.
@@ -97,8 +97,8 @@ end
 end
 
 function tderror(learner, buffer)
-    tderror(buffer.rewards, buffer.isdone, learner.γ,
-            getvaluecheckinf(learner, buffer[1].action, buffer[1].state),
+    tderror(buffer[:rewards], buffer[:isdone], learner.γ,
+            getvaluecheckinf(learner, buffer[:actions, 1], buffer[:states, 1]),
             futurevalue(learner.endvaluepolicy, learner, buffer))
 end
 
@@ -136,10 +136,10 @@ end
 
 function update!(learner::TDLearner, buffer)
     isfull(buffer) && updatetraceandparams!(learner, 
-                                            buffer[1].state, 
-                                            buffer[1].action,
+                                            buffer[:states, 1], 
+                                            buffer[:actions, 1],
                                             tderror(learner, buffer),
-                                            buffer[1].isdone)
+                                            buffer[:isdone, 1])
 end
  
 function getvalues(learner::TDLearner)

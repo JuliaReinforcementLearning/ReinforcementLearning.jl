@@ -18,9 +18,4 @@ Examples can be found in the example folders of these repositories.
 [ReinforcementLearningEnvironmentViZGym](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironmentGym.jl).
 
 
-## MDPs
-```@autodocs
-Modules = [ReinforcementLearning]
-Pages   = ["mdp.jl", "randommdp.jl"]
-```
 

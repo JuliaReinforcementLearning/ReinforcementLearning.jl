@@ -113,12 +113,11 @@ end
     end
 
     @testset "2D" begin
-        b = CircularTurnBuffer{Turn{Array{Float64, 2}, Int, Float64, Bool}}(4, (2,2), (), (), ())
+        b = CircularTurnBuffer{Turn{Array{Float64, 2}, Int, Float64, Bool}}(4, (2,2))
         push!(b, [[0. 0.];[0. 0.]], 0)
         push!(b, 1.0, false, [[1. 1.];[1. 1.]], 1)
         push!(b, 2.0, false, [[2. 2.];[2. 2.]], 2)
         @test length(b) == 2
-        @test b[end] == Turn([[1. 1.];[1. 1.]], 1, 2.0, false, [[2. 2.];[2. 2.]], 2)
     end
 end
 

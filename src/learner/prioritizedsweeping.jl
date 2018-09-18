@@ -72,12 +72,12 @@ end
 
 
 function update!(learner::SmallBackups, buffer)
-    a0 = buffer.actions[1]
-    a1 = buffer.nextactions[1]
-    s0 = buffer.states[1]
-    s1 = buffer.nextstates[1]
-    r = buffer.rewards[1]
-    if buffer.isdone[1]
+    a0 = buffer[:actions, 1]
+    a1 = buffer[:nextactions, 1]
+    s0 = buffer[:states, 1]
+    s1 = buffer[:nextstates, 1]
+    r = buffer[:rewards, 1]
+    if buffer[:isdone, 1]
         learner.Nsa[a0, s0] += 1
         if learner.Q[a0, s0] == Inf; learner.Q[a0, s0] = 0; end
         if learner.Nsa[a0, s0] >= learner.M

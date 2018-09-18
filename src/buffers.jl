@@ -1,4 +1,4 @@
-import Base: (==), size, getindex, setindex!, length, push!, empty!, isempty, eltype, getproperty, view
+import Base: (==), size, getindex, setindex!, length, push!, empty!, isempty, eltype, getproperty, view, lastindex
 export CircularArrayBuffer, CircularTurnBuffer, EpisodeTurnBuffer, Turn, SARDSATurn,
        viewconsecutive, isfull, capacity
 
@@ -41,6 +41,8 @@ end
 
 Using a `N` dimension Array to simulate a `N-1` dimension circular buffer.
 Used in [`CircularTurnBuffer`](@ref).
+
+TODO: add SparseArray support?
 """
 mutable struct CircularArrayBuffer{E, T, N} <: AbstractBuffer{T, N}
     buffer::Array{T, N}
@@ -157,38 +159,35 @@ See also: [`EpisodeTurnBuffer`](@ref)
 """
 struct CircularTurnBuffer{T<:Turn, Ts, Ta, Tr, Td} <: AbstractTurnBuffer{T}
     states::CircularArrayBuffer{Ts}
-    actions::CircularArrayBuffer{Ta}
-    rewards::CircularArrayBuffer{Tr}
-    isdone::CircularArrayBuffer{Td}
+    actions::CircularBuffer{Ta}
+    rewards::CircularBuffer{Tr}
+    isdone::CircularBuffer{Td}
     function CircularTurnBuffer{T}(
         capacity::Int,
-        size_s::Tuple{Vararg{Int}}=(),
-        size_a::Tuple{Vararg{Int}}=(),
-        size_r::Tuple{Vararg{Int}}=(),
-        size_d::Tuple{Vararg{Int}}=()) where T<:Turn
+        size_s::Tuple{Vararg{Int}}=()) where T<:Turn
         Ts, Ta, Tr, Td = T.parameters
         new{T, Ts, Ta, Tr, Td}(
             CircularArrayBuffer{Ts}(capacity+1, size_s...),
-            CircularArrayBuffer{Ta}(capacity+1, size_a...),
-            CircularArrayBuffer{Tr}(capacity, size_r...),
-            CircularArrayBuffer{Td}(capacity, size_d...))
+            CircularBuffer{Ta}(capacity+1),
+            CircularBuffer{Tr}(capacity),
+            CircularBuffer{Td}(capacity))
     end
 end
 
 "Only used at the first turn"
 function push!(b::CircularTurnBuffer{T, Ts, Ta, Tr, Td}, s::Ts, a::Ta) where {T, Ts, Ta, Tr, Td}
-    push!(b[:states], s)
-    push!(b[:actions], a)
+    push!(b.states, s)
+    push!(b.actions, a)
 end
 
 function push!(b::CircularTurnBuffer{T, Ts, Ta, Tr, Td}, r::Tr, d::Td, s::Ts, a::Ta) where {T, Ts, Ta, Tr, Td}
-    push!(b[:rewards], r)
-    push!(b[:isdone], d)
-    push!(b[:states], s)
-    push!(b[:actions], a)
+    push!(b.rewards, r)
+    push!(b.isdone, d)
+    push!(b.states, s)
+    push!(b.actions, a)
 end
 
-isfull(b::CircularTurnBuffer) = isfull(b[:states])
+isfull(b::CircularTurnBuffer) = isfull(b.states)
 
 ##############################
 ## EpisodeTurnBuffer
@@ -217,69 +216,85 @@ end
 
 "Only used at the first turn"
 function push!(b::EpisodeTurnBuffer{T, Ts, Ta, Tr, Td}, s::Ts, a::Ta) where {T, Ts, Ta, Tr, Td}
-    push!(b[:states], s)
-    push!(b[:actions], a)
+    push!(b.states, s)
+    push!(b.actions, a)
 end
 
 function push!(b::EpisodeTurnBuffer{T, Ts, Ta, Tr, Td}, r::Tr, d::Td, s::Ts, a::Ta) where {T, Ts, Ta, Tr, Td}
     if isfull(b)
-        ns, na = b.nextstates[end], b.nextactions[end]
+        ns, na = b[:nextstates, end], b[:nextactions, end]
         empty!(b)
         push!(b, ns, na)
     end
-    push!(b[:rewards], r)
-    push!(b[:isdone], d)
-    push!(b[:states], s)
-    push!(b[:actions], a)
+    push!(b.rewards, r)
+    push!(b.isdone, d)
+    push!(b.states, s)
+    push!(b.actions, a)
 end
 
 "last turn is the end of an episode"
-isfull(b::EpisodeTurnBuffer) = length(b) > 0 && convert(Bool, b[end].isdone)
+isfull(b::EpisodeTurnBuffer) = length(b) > 0 && convert(Bool, b[:isdone, end])
 
 ##############################
 viewconsecutive(v::Vector, I::Vector{Int}, n::Int) = reshape(view(v, [x for i in I for x in i-n+1:i]), n, length(I))
 
 size(b::AbstractTurnBuffer{<:Turn}) = (length(b),)
-length(b::AbstractTurnBuffer{<:Turn}) = max(length(b[:states]) - 1, 0)
+length(b::AbstractTurnBuffer{<:Turn}) = length(b.isdone)
 eltype(b::AbstractTurnBuffer{T}) where T = T
 isempty(b::AbstractTurnBuffer{<:Turn}) = length(b) == 0
+lastindex(b::AbstractTurnBuffer{<:Turn}) = length(b)
+lastindex(b::AbstractTurnBuffer{<:Turn}, d) = length(b)
 
 function empty!(b::AbstractTurnBuffer{<:Turn})
-    empty!(b[:states])
-    empty!(b[:actions])
-    empty!(b[:rewards])
-    empty!(b[:isdone])
+    empty!(b.states)
+    empty!(b.actions)
+    empty!(b.rewards)
+    empty!(b.isdone)
 end
 
-function getproperty(b::AbstractTurnBuffer{<:Turn}, p::Symbol)
-    if     p == :states      @view getfield(b, p)[1:end-1]
-    elseif p == :actions     @view getfield(b, p)[1:end-1]
-    elseif p == :rewards     @view getfield(b, p)[1:end]
-    elseif p == :isdone      @view getfield(b, p)[1:end]
-    elseif p == :nextstates  @view getfield(b, :states)[2:end]
-    elseif p == :nextactions @view getfield(b, :actions)[2:end]
-    else throw("type $(typeof(b)) has no field $p")
-    end
+function getindex(b::AbstractTurnBuffer{<:Turn}, i::Int)
+    Turn(b[:states, i],
+         b[:actions, i],
+         b[:rewards, i],
+         b[:isdone, i],
+         b[:nextstates, i],
+         b[:nextactions, i])
 end
 
-function getindex(b::AbstractTurnBuffer{T}, i::Int) where T<:Turn
-    Turn(b[:states][i],
-         b[:actions][i],
-         b[:rewards][i],
-         b[:isdone][i],
-         b[:states][i+1],
-         b[:actions][i+1])::T
+const _field_mapping = Dict(:states      => (:states, 0),
+                            :actions     => (:actions, 0),
+                            :rewards     => (:rewards, 0),
+                            :isdone      => (:isdone, 0),
+                            :nextstates  => (:states, 1),
+                            :nextactions => (:actions, 1))
+
+function getindex(b::AbstractTurnBuffer{<:Turn}, f::Symbol) 
+    field, offset = _field_mapping[f]
+    view(getfield(b, field), 1+offset:length(b)+offset)
 end
 
-getindex(b::AbstractTurnBuffer{<:Turn}, f::Symbol) = getfield(b, f)
-
-function viewconsecutive(b::AbstractTurnBuffer{<:Turn}, p::Symbol, i::Int, n::Int) 
-    f = getproperty(b, p)
-    view(f, [(:) for _ in 1:ndims(f)-1]..., i-n+1:i)
+function getindex(b::AbstractTurnBuffer{<:Turn}, f::Symbol, i::Int) 
+    field, offset = _field_mapping[f]
+    v = view(getfield(b, field), i+offset)
+    ndims(v) == 0 ? v[1] : v
 end
 
-function viewconsecutive(b::AbstractTurnBuffer{<:Turn}, p::Symbol, I::Vector{Int}, n::Int) 
-    f = getproperty(b, p)
-    N = ndims(f)
-    reshape(view(f, [(:) for _ in 1:N-1]..., [j for i in I for j in i-n+1:i]), size(f)[1:N-1]..., n, length(I))
+function getindex(b::AbstractTurnBuffer{<:Turn}, f::Symbol, I::UnitRange{Int}) 
+    field, offset = _field_mapping[f]
+    view(getfield(b, field), I.start+offset:I.stop+offset)
+end
+
+function getindex(b::AbstractTurnBuffer{<:Turn}, f::Symbol, I::Vector{Int}) 
+    field, offset = _field_mapping[f]
+    view(getfield(b, field), I.+offset)
+end
+
+function viewconsecutive(b::AbstractTurnBuffer{<:Turn}, f::Symbol, I::Vector{Int}, n::Int) 
+    field, offset = _field_mapping[f]
+    viewconsecutive(getfield(b, field), I.+offset, n)
+end
+
+function viewconsecutive(b::AbstractTurnBuffer{<:Turn}, f::Symbol, i::Int, n::Int) 
+    field, offset = _field_mapping[f]
+    viewconsecutive(getfield(b, field), i+offset, n)
 end

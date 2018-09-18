@@ -25,7 +25,7 @@ makedocs(modules = [ReinforcementLearning],
 
 deploydocs(
     repo = "github.com/JuliaReinforcementLearning/ReinforcementLearning.jl.git",
-	julia = "0.6",
+	julia = "1.0",
 	target = "build",
     deps = nothing,
 	make = nothing,

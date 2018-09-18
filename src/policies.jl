@@ -130,17 +130,18 @@ function NMarkovPolicy(N, pol::Tpol, buf::Tbuf) where {Tpol, Tbuf}
 end
 function (p::NMarkovPolicy{N, Tpol, Tbuf})(s) where {N, Tpol, Tbuf}
     push!(p.buffer, s)
-    p.policy(viewconsecutive(p.buffer, N, N))
+    st = viewconsecutive(p.buffer, N, N)
+    sz = size(st)
+    p.policy(reshape(st, sz[1:end-2]..., sz[end-1] * sz[end]))
+    
 end
 function defaultnmarkovpolicy(learner, buffer, π)
     if learner.nmarkov == 1
         π
     else
-        a = buffer.states.data
-        data = getindex(a, map(x -> 1:x, size(a)[1:end-1])..., 1:learner.nmarkov)
         NMarkovPolicy(learner.nmarkov, 
                       π, 
-                      CircularArrayBuffer(data, learner.nmarkov, 0, 0, false))
+                      CircularArrayBuffer{eltype(buffer.states)}(learner.nmarkov, size(buffer.states)[1:end-1]))
     end
 end
 
@@ -155,7 +156,7 @@ mutable struct ForcedPolicy
 end
 ForcedPolicy(actions) = ForcedPolicy(1, actions)
 function (p::ForcedPolicy)(s)
-    if p.t > length(p.actions)
+    if p.t == length(p.actions)
         p.t = 1
     else
         p.t += 1

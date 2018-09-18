@@ -19,25 +19,23 @@ Estimate Q values by averaging over returns.
     Q::Array{Float64, 2} = zeros(na, ns) .+ initvalue
 end
 function defaultbuffer(learner::MonteCarlo, env, preprocessor)
-    EpisodeTurnBuffer{typeof(getstate(env)[1]), typeof(actionspace(env)), Float64, Bool}()
+    EpisodeTurnBuffer{typeof(getstate(env).observation), typeof(actionspace(env)), Float64, Bool}()
 end
 
 export MonteCarlo
 
 function update!(learner::MonteCarlo, buffer)
-    rewards = buffer.rewards
-    states = buffer.states
-    actions = buffer.actions
-    if learner.Q[actions[end], states[end]] == Inf64
-        learner.Q[actions[end], states[end]] = 0.
+    if learner.Q[buffer[:actions, end], buffer[:states, end]] == Inf64
+        learner.Q[buffer[:actions, end], buffer[:states, end]] = 0.
     end
-    if buffer.isdone[end]
+    if buffer[:isdone, end]
         G = 0.
-        for t in length(rewards):-1:1
-            G = learner.γ * G + rewards[t]
-            n = learner.Nsa[actions[t], states[t]] += 1
-            learner.Q[actions[t], states[t]] *= (1 - 1/n)
-            learner.Q[actions[t], states[t]] += 1/n * G
+        for t in length(buffer):-1:1
+            turn = buffer[t]
+            G = learner.γ * G + buffer[:rewards, t]
+            n = learner.Nsa[buffer[:actions, t], buffer[:states,t]] += 1
+            learner.Q[buffer[:actions, t], buffer[:states, t]] *= (1 - 1/n)
+            learner.Q[buffer[:actions, t], buffer[:states, t]] += 1/n * G
         end
     end
 end
