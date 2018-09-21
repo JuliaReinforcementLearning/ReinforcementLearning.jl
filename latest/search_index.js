@@ -157,7 +157,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Tutorial",
     "title": "Write your own learner",
     "category": "section",
-    "text": "For a new learner you need to implement the functionsupdate!(learner, buffer)                          # returns nothing\nselectaction(learner, policy, state)              # returns an action\ndefaultbuffer(learner, environment, preprocessor) # returns a bufferLet\'s assume you want to implement plain, simple Q-learning (you don\'t need to do this; it is already implemented. Your file qlearning.jl could containimport ReinforcementLearning: update!, selectaction, defaultbuffer, Buffer\n\nstruct MyQLearning\n    Q::Array{Float64, 2} # number of actions x number of states\n    alpha::Float64       # learning rate\nend\n\nfunction update!(learner::MyQLearning, buffer)\n    s = buffer.states[1]\n    snext = buffer.states[2]\n    r = buffer.rewards[1]\n    a = buffer.actions[1]\n    Q = learner.Q\n    Q[a, s] += learner.alpha * (r + maximum(Q[:, snext]) - Q[a, s])\nend\n\nfunction selectaction(learner::MyQLearning, policy, state)\n    selectaction(policy, learner.Q[:, state])\nend\n\nfunction defaultbuffer(learner::MyQLearning, environment, preprocessor)\n    state, done = getstate(environment)\n    processedstate = preprocessstate(preprocessor, state)\n    Buffer(statetype = typeof(processedstate), capacity = 2)\nendThe function defaultbuffer gets called during the construction of an RLSetup. It returns a buffer that is filled with states, actions and rewards during interaction with the environment. Currently there are three types of Buffers implementedimport ReinforcementLearning: Buffer, EpisodeBuffer, ArrayStateBuffer\n?Buffer"
+    "text": "For a new learner you need to implement the functionsupdate!(learner, buffer)                          # returns nothing\ndefaultpolicy(learner, actionspace, buffer)       # returns a policy\ndefaultbuffer(learner, environment, preprocessor) # returns a bufferLet\'s assume you want to implement plain, simple Q-learning (you don\'t need to do this; it is already implemented. Your file qlearning.jl could containimport ReinforcementLearning: update!, defaultpolicy, defaultbuffer, Buffer\n\nstruct MyQLearning\n    Q::Array{Float64, 2} # number of actions x number of states\n    alpha::Float64       # learning rate\nend\n\nfunction update!(learner::MyQLearning, buffer)\n    s = buffer.states[1]\n    snext = buffer.states[2]\n    r = buffer.rewards[1]\n    a = buffer.actions[1]\n    Q = learner.Q\n    Q[a, s] += learner.alpha * (r + maximum(Q[:, snext]) - Q[a, s])\nend\n\nfunction defaultpolicy(learner::MyQLearning, actionspace, buffer)\n    EpsilonGreedyPolicy(.1, actionspace, s -> getvalue(learner.params, s))\nend\n\nfunction defaultbuffer(learner::MyQLearning, environment, preprocessor)\n    state, done = getstate(environment)\n    processedstate = preprocessstate(preprocessor, state)\n    Buffer(statetype = typeof(processedstate), capacity = 2)\nendThe functions defaultpolicy and defaultbuffer get called during the construction of an RLSetup. defaultbuffer returns a buffer that is filled with states, actions and rewards during interaction with the environment. Currently there are three types of Buffers implementedimport ReinforcementLearning: Buffer, EpisodeBuffer, ArrayStateBuffer\n?Buffer"
 },
 
 {
@@ -165,7 +165,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Tutorial",
     "title": "Bind your own environment",
     "category": "section",
-    "text": "For new environments you need to implement the functionsinteract!(action, environment)          # returns state, reward done\ngetstate(environment)                   # returns state, done\nreset!(environment)                     # returns stateOptionally you may also implement the functionplotenv(environment, state, action, reward, done)Please have a look at the cartpole for an example."
+    "text": "For new environments you need to implement the functionsinteract!(action, environment)          # returns state, reward done\ngetstate(environment)                   # returns state, done\nreset!(environment)                     # returns stateOptionally you may also implement the functionplotenv(environment)Please have a look at the cartpole for an example."
 },
 
 {
@@ -181,7 +181,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Tutorial",
     "title": "Policies",
     "category": "section",
-    "text": "selectaction(policy, values)            # returns an action\ngetactionprobabilities(policy, state)   # Returns a normalized (1-norm) vector with non-negative entries."
+    "text": "Policies are function-like objects. To implement for example a policy that returns (the action) 42 for every possible input state one could writestruct MyPolicy end\n(p::MyPolicy)(state) = 42"
 },
 
 {
