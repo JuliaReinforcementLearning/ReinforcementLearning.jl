@@ -63,12 +63,3 @@ A reinforcement learning package for [Julia](https://julialang.org/).
 ```julia
 Pkg.add("ReinforcementLearning")
 ```
-
-# Credits
-
-- Main author: Johanni Brea
-- Contributions: Marco Lehmann, Raphaël Nunes
-
-# Contribute
-
-Contributions are highly welcome. Please have a look at the issues.
