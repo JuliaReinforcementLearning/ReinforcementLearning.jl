@@ -5,7 +5,7 @@
         stoppingcriterion::Ts
         preprocessor::Tpp = NoPreprocessor()
         buffer::Tb = defaultbuffer(learner, environment, preprocessor)
-        policy::Tp = defaultpolicy(learner, environment.actionspace, buffer)
+        policy::Tp = defaultpolicy(learner, actionspace(environment), buffer)
         callbacks::Array{Any, 1} = []
         islearning::Bool = true
         fillbuffer::Bool = islearning
@@ -16,7 +16,7 @@
     stoppingcriterion::Ts
     preprocessor::Tpp = NoPreprocessor()
     buffer::Tb = defaultbuffer(learner, environment, preprocessor)
-    policy::Tp = defaultpolicy(learner, environment.actionspace, buffer)
+    policy::Tp = defaultpolicy(learner, actionspace(environment), buffer)
     callbacks::Array{Any, 1} = []
     islearning::Bool = true
     fillbuffer::Bool = islearning

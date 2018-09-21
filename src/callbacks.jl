@@ -219,15 +219,15 @@ function callback!(c::EvaluateGreedy, rlsetup, sraw, a, r, done)
         rlsetup.fillbuffer = false
         c.rlsetupcallbacks = rlsetup.callbacks
         rlsetup.callbacks = [c]
-        c.rlsetuppolicy = rlsetup.policy
-        rlsetup.policy = greedypolicy(rlsetup.policy)
+        c.rlsetuppolicy = deepcopy(rlsetup.policy)
+        greedify!(rlsetup.policy)
     end
 end
 getvalue(c::EvaluateGreedy) = c.values
 
 export EvaluateGreedy, Step, Episode
-greedypolicy(p::EpsilonGreedyPolicy{T}) where T = EpsilonGreedyPolicy{T}(0.)
-greedypolicy(p::SoftmaxPolicy) = SoftmaxPolicy(Inf)
+greedify!(p::EpsilonGreedyPolicy) where T = p.ϵ = 0
+greedify!(p::SoftmaxPolicy) =  p.β = Inf
 
 import FileIO:save
 """
@@ -328,4 +328,4 @@ function callback!(c::Visualize, rlsetup, s, a, r, done)
     plotenv(rlsetup.environment)
     sleep(c.wait)
 end
-plotenv(env, s, a, r, d) = warn("Visualization not implemented for environments of type $(typeof(env)).")
+plotenv(env) = warn("Visualization not implemented for environments of type $(typeof(env)).")

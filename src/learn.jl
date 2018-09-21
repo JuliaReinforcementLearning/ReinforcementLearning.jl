@@ -4,7 +4,7 @@
     s, r, done = preprocess(preprocessor, s0, r0, done0)
     if fillbuffer; pushreturn!(buffer, r, done) end
     if done
-        s0 = reset!(environment)
+        s0, = reset!(environment)
         s = preprocessstate(preprocessor, s0) 
     end
     if fillbuffer; pushstate!(buffer, s) end
@@ -16,7 +16,7 @@ end
     @unpack learner, policy, buffer, preprocessor, environment, fillbuffer = rlsetup
     if isempty(buffer.actions)
         sraw, done = getstate(environment)
-        if done; sraw = reset!(environment); end
+        if done; sraw, = reset!(environment); end
         s = preprocessstate(preprocessor, sraw)
         if fillbuffer; pushstate!(buffer, s) end
         a = policy(s)

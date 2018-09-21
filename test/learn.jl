@@ -1,4 +1,4 @@
-import ReinforcementLearning: reset!
+import ReinforcementLearningBase: reset!
 function testlearn()
     mdp = MDP()
     learner = Sarsa()
