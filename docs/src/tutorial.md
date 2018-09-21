@@ -13,14 +13,14 @@ for any other extension.
 For a new learner you need to implement the functions
 ```
 update!(learner, buffer)                          # returns nothing
-selectaction(learner, policy, state)              # returns an action
+defaultpolicy(learner, actionspace, buffer)       # returns a policy
 defaultbuffer(learner, environment, preprocessor) # returns a buffer
 ```
 
 Let's assume you want to implement plain, simple Q-learning (you don't need to
 do this; it is already implemented. Your file `qlearning.jl` could contain
 ```julia
-import ReinforcementLearning: update!, selectaction, defaultbuffer, Buffer
+import ReinforcementLearning: update!, defaultpolicy, defaultbuffer, Buffer
 
 struct MyQLearning
     Q::Array{Float64, 2} # number of actions x number of states
@@ -36,8 +36,8 @@ function update!(learner::MyQLearning, buffer)
     Q[a, s] += learner.alpha * (r + maximum(Q[:, snext]) - Q[a, s])
 end
 
-function selectaction(learner::MyQLearning, policy, state)
-    selectaction(policy, learner.Q[:, state])
+function defaultpolicy(learner::MyQLearning, actionspace, buffer)
+    EpsilonGreedyPolicy(.1, actionspace, s -> getvalue(learner.params, s))
 end
 
 function defaultbuffer(learner::MyQLearning, environment, preprocessor)
@@ -46,10 +46,10 @@ function defaultbuffer(learner::MyQLearning, environment, preprocessor)
     Buffer(statetype = typeof(processedstate), capacity = 2)
 end
 ```
-The function `defaultbuffer` gets called during the construction of an
-`RLSetup`. It returns a buffer that is filled with states, actions and rewards
-during interaction with the environment. Currently there are three types of
-Buffers implemented
+The functions `defaultpolicy` and `defaultbuffer` get called during the
+construction of an `RLSetup`. `defaultbuffer` returns a buffer that is filled
+with states, actions and rewards during interaction with the environment.
+Currently there are three types of Buffers implemented
 ```julia
 import ReinforcementLearning: Buffer, EpisodeBuffer, ArrayStateBuffer
 ?Buffer
@@ -65,7 +65,7 @@ reset!(environment)                     # returns state
 
 Optionally you may also implement the function
 ```
-plotenv(environment, state, action, reward, done)
+plotenv(environment)
 ```
 
 Please have a look at the
@@ -82,9 +82,11 @@ preprocess(preprocessor, reward, state, done) # returns a preprocessed (state, r
 ```
 
 ## Policies
+Policies are function-like objects. To implement for example a policy that
+returns (the action) `42` for every possible input `state` one could write
 ```
-selectaction(policy, values)            # returns an action
-getactionprobabilities(policy, state)   # Returns a normalized (1-norm) vector with non-negative entries.
+struct MyPolicy end
+(p::MyPolicy)(state) = 42
 ```
 
 ## Callbacks
