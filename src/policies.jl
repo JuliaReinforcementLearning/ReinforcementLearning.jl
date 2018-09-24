@@ -134,17 +134,14 @@ function NMarkovPolicy(N, pol::Tpol, buf::Tbuf) where {Tpol, Tbuf}
 end
 function (p::NMarkovPolicy{N, Tpol, Tbuf})(s) where {N, Tpol, Tbuf}
     push!(p.buffer, s)
-    p.policy(nmarkovgetindex(p.buffer, N, N))
+    isfull(p.buffer) && return p.policy(getindexconsecutive(p.buffer, N, N))
+    rand(1:p.policy.actionspace.n) # TODO: doesn't work with SoftmaxPolicy for now
 end
-function defaultnmarkovpolicy(learner, buffer, π)
+function defaultnmarkovpolicy(learner, buffer::Buffer{Ts, Ta}, π) where {Ts, Ta}
     if learner.nmarkov == 1
         π
     else
-        a = buffer.states.data
-        data = getindex(a, map(x -> 1:x, size(a)[1:end-1])..., 1:learner.nmarkov)
-        NMarkovPolicy(learner.nmarkov, 
-                      π, 
-                      ArrayCircularBuffer(data, learner.nmarkov, 0, 0, false))
+        NMarkovPolicy(learner.nmarkov, π, CircularBuffer{Ts}(learner.nmarkov))
     end
 end
 

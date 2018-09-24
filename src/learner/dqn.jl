@@ -55,11 +55,9 @@ function DQN(net; kargs...)
 end
 function defaultbuffer(learner::Union{DQN, DeepActorCritic}, env, preprocessor)
     state = preprocessstate(preprocessor, getstate(env)[1])
-    ArrayStateBuffer(capacity = typeof(learner) <: DQN ? learner.replaysize :
-                                                         learner.nsteps + learner.nmarkov, 
-                     arraytype = typeof(state).name.wrapper,
-                     datatype = typeof(state[1]),
-                     elemshape = size(state))
+    Buffer(capacity = typeof(learner) <: DQN ? learner.replaysize :
+                                               learner.nsteps + learner.nmarkov, 
+           statetype = typeof(state))
 end
 function defaultpolicy(learner::DQN, actionspace, buffer)
     π = EpsilonGreedyPolicy(.1, actionspace, 
@@ -81,11 +79,11 @@ function update!(learner::DQN, b)
     end
     (learner.t < learner.startlearningat || 
      learner.t % learner.updateevery != 0) && return
-    indices = StatsBase.sample(1:length(b.rewards) - learner.nsteps + 1, 
+    indices = StatsBase.sample(learner.nmarkov:length(b.rewards) - learner.nsteps + 1, 
                                learner.minibatchsize, 
                                replace = false)
-    qa = learner.net(nmarkovgetindex(b.states, indices, learner.nmarkov))
-    qat = learner.targetnet(nmarkovgetindex(b.states, 
+    qa = learner.net(getindexconsecutive(b.states, indices, learner.nmarkov))
+    qat = learner.targetnet(getindexconsecutive(b.states, 
                                             indices .+ learner.nsteps, 
                                             learner.nmarkov))
     q = selecta(qa, b.actions[indices])
