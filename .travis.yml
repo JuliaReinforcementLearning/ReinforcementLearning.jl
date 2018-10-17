@@ -31,4 +31,4 @@ matrix:
 after_success:
   # push coverage results to Codecov
   - julia -e 'using Pkg; import ReinforcementLearning; cd(joinpath(dirname(pathof(ReinforcementLearning)), "..")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
-  - julia -e 'using Pkg; Pkg.add("Documenter"); import ReinforcementLearning; cd(joinpath(dirname(pathof(ReinforcementLearning)), "..")); include(joinpath("docs", "make.jl"))'
+  - julia -e 'using Pkg; ps=Pkg.PackageSpec(name="Documenter", version="0.19"); Pkg.add(ps); Pkg.pin(ps); import ReinforcementLearning; cd(joinpath(dirname(pathof(ReinforcementLearning)), "..")); include(joinpath("docs", "make.jl"))'
