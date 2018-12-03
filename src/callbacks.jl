@@ -170,7 +170,8 @@ end
     ingreedy::Bool = false
     callback::Tc
     rlsetupcallbacks::Array{Any, 1} = []
-    rlsetuppolicy::Any = 1
+    rlsetuppolicyparameter::Float64 = 1
+    rlsetupstoppingcriterion::Any = 1
     stoppingcriterion::T
     every::Tu = Episode(10)
     values::Array{Any, 1} = []
@@ -210,7 +211,8 @@ function callback!(c::EvaluateGreedy, rlsetup, sraw, a, r, done)
             rlsetup.islearning = true
             rlsetup.fillbuffer = true
             rlsetup.callbacks = c.rlsetupcallbacks
-            rlsetup.policy = c.rlsetuppolicy
+            ungreedify!(rlsetup.policy, c.rlsetuppolicyparameter)
+            rlsetup.stoppingcriterion = c.rlsetupstoppingcriterion
         end
     end
     if !c.ingreedy && step!(c.every, done)
@@ -218,16 +220,27 @@ function callback!(c::EvaluateGreedy, rlsetup, sraw, a, r, done)
         rlsetup.islearning = false
         rlsetup.fillbuffer = false
         c.rlsetupcallbacks = rlsetup.callbacks
+        c.rlsetupstoppingcriterion = deepcopy(rlsetup.stoppingcriterion)
+        rlsetup.stoppingcriterion = typeof(rlsetup.stoppingcriterion).name.wrapper(typemax(Int)) 
         rlsetup.callbacks = [c]
-        c.rlsetuppolicy = deepcopy(rlsetup.policy)
-        greedify!(rlsetup.policy)
+        c.rlsetuppolicyparameter = greedify!(rlsetup.policy)
     end
 end
 getvalue(c::EvaluateGreedy) = c.values
 
 export EvaluateGreedy, Step, Episode
-greedify!(p::EpsilonGreedyPolicy) where T = p.ϵ = 0
-greedify!(p::SoftmaxPolicy) =  p.β = Inf
+function greedify!(p::EpsilonGreedyPolicy)
+    tmp = p.ϵ
+    p.ϵ = 0
+    tmp
+end
+ungreedify!(p::EpsilonGreedyPolicy, ϵ) = p.ϵ = ϵ
+function greedify!(p::SoftmaxPolicy)
+    tmp = p.β
+    p.β = Inf
+    tmp
+end
+ungreedify!(p::SoftmaxPolicy, β) = p.β = β
 
 import FileIO:save
 """

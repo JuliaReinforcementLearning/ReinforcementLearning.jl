@@ -33,7 +33,7 @@ end
 Runs an [`rlsetup`](@ref RLSetup) with learning.
 """
 function learn!(rlsetup)
-    @unpack learner, buffer, stoppingcriterion = rlsetup
+    @unpack learner, buffer = rlsetup
     a = firststateaction!(rlsetup) #TODO: callbacks don't see first state action
     while true
         sraw, a, r, done = step!(rlsetup, a)
@@ -41,7 +41,7 @@ function learn!(rlsetup)
         for callback in rlsetup.callbacks
             callback!(callback, rlsetup, sraw, a, r, done)
         end
-        if isbreak!(stoppingcriterion, sraw, a, r, done); break; end
+        if isbreak!(rlsetup.stoppingcriterion, sraw, a, r, done); break; end
     end
 end
 
