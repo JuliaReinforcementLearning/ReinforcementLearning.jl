@@ -89,8 +89,11 @@ isequal(::EpsilonGreedyPolicy{:optimistic, Ta, Tf}, v1, v2) where {Ta, Tf} = v1 
 maximum(::EpsilonGreedyPolicy{:veryoptimistic, Ta, Tf}, v) where {Ta, Tf} = maximum(v)
 isequal(::EpsilonGreedyPolicy, v1, v2) = v1 == v2
 isequal(::SoftmaxPolicy, v1, v2) = v1 == v2
+maximum(::Any, v) = maximum(v)
+isequal(::Any, v1, v2) = v1 == v2
 
 samplegreedyaction(p, a::Int) = a # needed by mdplearner
+samplegreedyaction(values) = samplegreedyaction(nothing, values)
 function samplegreedyaction(policy, values)
     vmax = maximum(policy, values)
     c = 1
