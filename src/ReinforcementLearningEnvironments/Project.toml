@@ -2,6 +2,10 @@ name = "ReinforcementLearningEnvironments"
 uuid = "25e41dd2-4622-11e9-1641-f1adca772921"
 authors = ["Jun Tian <juti@microsoft.com>"]
 
+[deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
