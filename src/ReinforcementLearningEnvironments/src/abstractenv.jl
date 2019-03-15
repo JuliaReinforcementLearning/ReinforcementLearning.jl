@@ -1,4 +1,5 @@
-export AbstractEnv
+export AbstractEnv, observe, reset!, interact!, action_space, observation_space, render
+
 abstract type AbstractEnv end
 
 function observe end
