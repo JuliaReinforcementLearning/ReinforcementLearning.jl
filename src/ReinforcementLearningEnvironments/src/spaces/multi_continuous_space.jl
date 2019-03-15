@@ -16,5 +16,5 @@ MultiContinuousSpace(low, high) = MultiContinuousSpace(convert(Array{Float64}, l
 
 Base.eltype(::MultiContinuousSpace{S, N}) where {S, N} = Array{Float64, N}
 Base.in(xs, s::MultiContinuousSpace{S, N}) where {S, N} = size(xs) == S && all(l <= x <= h for (l, x, h) in zip(s.low, xs, s.high))
-Base. ==(s1::MultiContinuousSpace, s2::MultiContinuousSpace) = s1.low == s2.low && s1.high == s2.high
+Base.:(==)(s1::MultiContinuousSpace, s2::MultiContinuousSpace) = s1.low == s2.low && s1.high == s2.high
 Base.rand(rng::AbstractRNG, s::MultiContinuousSpace) = map((l, h) -> rand(rng, Uniform(l, h)), s.low, s.high)

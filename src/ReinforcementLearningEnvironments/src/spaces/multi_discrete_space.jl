@@ -16,5 +16,5 @@ MultiDiscreteSpace(xs) = MultiDiscreteSpace(convert(Array{Int}, xs))
 Base.length(s::MultiDiscreteSpace) = s.n
 Base.eltype(s::MultiDiscreteSpace{T, N}) where {T, N} = Array{T, N}
 Base.in(xs, s::MultiDiscreteSpace) = size(xs) == size(s.low) && all(l <= x <= h for (l, x, h) in zip(s.low, xs, s.high))
-Base. ==(s1::MultiDiscreteSpace, s2::MultiDiscreteSpace) = s1.low == s2.low && s1.high == s2.high
+Base.:(==)(s1::MultiDiscreteSpace, s2::MultiDiscreteSpace) = s1.low == s2.low && s1.high == s2.high
 Base.rand(rng::AbstractRNG, s::MultiDiscreteSpace) = map((l, h) -> rand(rng, l:h), s.low, s.high)
