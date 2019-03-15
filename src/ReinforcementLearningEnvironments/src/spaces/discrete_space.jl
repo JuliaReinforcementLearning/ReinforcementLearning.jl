@@ -1,17 +1,19 @@
 export DiscreteSpace
 using Random:AbstractRNG
 
-struct DiscreteSpace <: AbstractDiscreteSpace
-    n::Int
-    function DiscreteSpace(x::Int) 
-        x > 0 || throw(ArgumentError("$x must be greater than zero"))
-        new(x)
+struct DiscreteSpace{T<:Integer} <: AbstractDiscreteSpace
+    low::T
+    high::T
+    n::T
+    function DiscreteSpace(high::T, low=one(T)) where T<:Integer
+        high > low || throw(ArgumentError("$high must be greater than $low"))
+        new{T}(low, high, high - low + 1)
     end
 end
 
 
 Base.length(s::DiscreteSpace) = s.n
-Base.eltype(s::DiscreteSpace) = Int
-Base.in(x, s::DiscreteSpace) = 1 <= convert(Int, x) <= s.n
-Base. ==(s1::DiscreteSpace, s2::DiscreteSpace) = s1.n == s2.n
-Base.rand(rng::AbstractRNG, s::DiscreteSpace) = rand(rng, 1:s.n)
+Base.eltype(s::DiscreteSpace{T}) where T = T
+Base.in(x, s::DiscreteSpace{T}) where T = s.low <= x <= s.high
+Base. ==(s1::DiscreteSpace, s2::DiscreteSpace) = s1.low == s2.low && s1.high == s2.high
+Base.rand(rng::AbstractRNG, s::DiscreteSpace) = rand(rng, s.low:s.high)

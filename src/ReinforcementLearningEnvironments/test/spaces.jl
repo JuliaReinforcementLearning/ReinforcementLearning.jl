@@ -25,7 +25,7 @@ end
     @test_throws ArgumentError MultiDiscreteSpace([2, -1, 3])
     @test_throws ArgumentError MultiDiscreteSpace([2, -1, 3])
     @test_throws InexactError MultiDiscreteSpace([2.1, 1.3, 3.])
-    @test_nowarn MultiDiscreteSpace([2., 1., 3.])
+    @test_nowarn MultiDiscreteSpace([2, 2, 3])
 
     s = MultiDiscreteSpace([3, 5, 4])
     @test length(s) == 60
