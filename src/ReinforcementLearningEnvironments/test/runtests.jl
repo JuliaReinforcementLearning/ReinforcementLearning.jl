@@ -1,5 +1,6 @@
 using Test
 using ReinforcementLearningEnvironments
+using POMDPModels
 
 include("utils.jl")
 

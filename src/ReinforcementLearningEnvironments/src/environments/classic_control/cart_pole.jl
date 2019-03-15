@@ -1,5 +1,6 @@
 @reexport module CartPole
 using Random
+using GR
 using ..ReinforcementLearningEnvironments
 const RLEnv = ReinforcementLearningEnvironments
 export CartPoleEnv

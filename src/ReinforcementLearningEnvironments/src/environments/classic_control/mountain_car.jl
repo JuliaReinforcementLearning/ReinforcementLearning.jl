@@ -1,5 +1,6 @@
 @reexport module MountainCar
 using Random
+using GR
 using ..ReinforcementLearningEnvironments
 const RLEnv = ReinforcementLearningEnvironments
 export MountainCarEnv
