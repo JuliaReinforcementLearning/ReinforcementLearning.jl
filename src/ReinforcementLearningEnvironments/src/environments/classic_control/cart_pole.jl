@@ -1,8 +1,6 @@
-@reexport module CartPole
 using Random
 using GR
-using ..ReinforcementLearningEnvironments
-const RLEnv = ReinforcementLearningEnvironments
+
 export CartPoleEnv
 
 struct CartPoleEnvParams{T}
@@ -44,10 +42,10 @@ function CartPoleEnv(; T = Float64, gravity = T(9.8), masscart = T(1.),
     cp
 end
 
-RLEnv.action_space(env::CartPoleEnv) = env.action_space
-RLEnv.observation_space(env::CartPoleEnv) = env.observation_space
+action_space(env::CartPoleEnv) = env.action_space
+observation_space(env::CartPoleEnv) = env.observation_space
 
-function RLEnv.reset!(env::CartPoleEnv{T}) where T <: Number
+function reset!(env::CartPoleEnv{T}) where T <: Number
     env.state[:] = T(.1) * rand(env.rng, T, 4) .- T(.05)
     env.t = 0
     env.action = 2
@@ -55,9 +53,9 @@ function RLEnv.reset!(env::CartPoleEnv{T}) where T <: Number
     nothing
 end
 
-RLEnv.observe(env::CartPoleEnv) = (observation=env.state, isdone=env.done)
+observe(env::CartPoleEnv) = (observation=env.state, isdone=env.done)
 
-function RLEnv.interact!(env::CartPoleEnv{T}, a) where T <: Number
+function interact!(env::CartPoleEnv{T}, a) where T <: Number
     env.action = a
     env.t += 1
     force = a == 2 ? env.params.forcemag : -env.params.forcemag
@@ -91,7 +89,7 @@ function plotendofepisode(x, y, d)
     return nothing
 end
 
-function RLEnv.render(env::CartPoleEnv)
+function render(env::CartPoleEnv)
     s, a, d = env.state, env.action, env.done
     x, xdot, theta, thetadot = s
     l = 2 * env.params.halflength
@@ -107,5 +105,4 @@ function RLEnv.render(env::CartPoleEnv)
     drawarrow(x + (a == 1) - .5, -.025, x + 1.4 * (a==1) - .7, -.025)
     plotendofepisode(xthreshold - .2, l, d)
     updatews()
-end
 end

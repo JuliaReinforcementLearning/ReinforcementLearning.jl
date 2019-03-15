@@ -1,7 +1,4 @@
-@reexport module Pendulum
 using Random
-using ..ReinforcementLearningEnvironments
-const RLEnv = ReinforcementLearningEnvironments
 
 export PendulumEnv
 
@@ -36,22 +33,22 @@ function PendulumEnv(; T = Float64, max_speed = T(8), max_torque = T(2),
     env
 end
 
-RLEnv.action_space(env::PendulumEnv) = env.action_space
-RLEnv.observation_space(env::PendulumEnv) = env.observation_space
+action_space(env::PendulumEnv) = env.action_space
+observation_space(env::PendulumEnv) = env.observation_space
 
 pendulum_observation(s) = [cos(s[1]), sin(s[1]), s[2]]
 angle_normalize(x) = ((x + pi) % (2*pi)) - pi
 
-RLEnv.observe(env::PendulumEnv) = (observation=pendulum_observation(env.state), isdone=env.done)
+observe(env::PendulumEnv) = (observation=pendulum_observation(env.state), isdone=env.done)
 
-function RLEnv.reset!(env::PendulumEnv{T}) where T
+function reset!(env::PendulumEnv{T}) where T
     env.state[:] = 2 * rand(env.rng, T, 2) .- 1
     env.t = 0
     env.done = false
     nothing
 end
 
-function RLEnv.interact!(env::PendulumEnv, a)
+function interact!(env::PendulumEnv, a)
     env.t += 1
     th, thdot = env.state
     a = clamp(a, -env.params.max_torque, env.params.max_torque)
@@ -64,5 +61,4 @@ function RLEnv.interact!(env::PendulumEnv, a)
     env.state[2] = newthdot
     env.done = env.t >= env.params.max_steps
     (observation=pendulum_observation(env.state), reward=-costs, isdone=env.done)
-end
 end

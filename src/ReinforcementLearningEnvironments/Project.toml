@@ -10,11 +10,13 @@ POMDPModels = "355abbd5-f08e-5560-ac9e-8b5f2592a0ca"
 POMDPs = "a93abf59-7444-517b-a68a-c42f96afdd7d"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [extras]
+ArcadeLearningEnvironment = "b7f77d8d-088d-5e02-8ac0-89aab2acc977"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["Test", "ArcadeLearningEnvironment"]

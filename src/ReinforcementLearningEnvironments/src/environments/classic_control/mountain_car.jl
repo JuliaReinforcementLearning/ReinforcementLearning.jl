@@ -1,8 +1,6 @@
-@reexport module MountainCar
 using Random
 using GR
-using ..ReinforcementLearningEnvironments
-const RLEnv = ReinforcementLearningEnvironments
+
 export MountainCarEnv
 
 struct MountainCarEnvParams{T}
@@ -38,11 +36,11 @@ function MountainCarEnv(; T = Float64, min_pos = T(-1.2), max_pos = T(.6),
     env
 end
 
-RLEnv.action_space(env::MountainCarEnv) = env.action_space
-RLEnv.observation_space(env::MountainCarEnv) = env.observation_space
-RLEnv.observe(env::MountainCarEnv) = (observation=env.state, isdone=env.done)
+action_space(env::MountainCarEnv) = env.action_space
+observation_space(env::MountainCarEnv) = env.observation_space
+observe(env::MountainCarEnv) = (observation=env.state, isdone=env.done)
 
-function RLEnv.reset!(env::MountainCarEnv{T}) where T
+function reset!(env::MountainCarEnv{T}) where T
     env.state[1] = .2 * rand(env.rng, T) - .6
     env.state[2] = 0.
     env.done = false
@@ -50,7 +48,7 @@ function RLEnv.reset!(env::MountainCarEnv{T}) where T
     nothing
 end
 
-function RLEnv.interact!(env::MountainCarEnv, a)
+function interact!(env::MountainCarEnv, a)
     env.t += 1
     x, v = env.state
     v += (a - 2)*0.001 + cos(3*x)*(-0.0025)
@@ -68,7 +66,7 @@ end
 height(xs) = sin(3 * xs)*0.45 + 0.55
 rotate(xs, ys, θ) = xs*cos(θ) - ys*sin(θ), ys*cos(θ) + xs*sin(θ)
 translate(xs, ys, t) = xs .+ t[1], ys .+ t[2]
-function RLEnv.render(env::MountainCarEnv)
+function render(env::MountainCarEnv)
     s = env.state
     d = env.done
     clearws()
@@ -91,5 +89,4 @@ function RLEnv.render(env::MountainCarEnv)
     fillarea(xs, ys)
     plotendofepisode(env.params.max_pos + .1, 0, d) 
     updatews()
-end
 end

@@ -1,7 +1,4 @@
-@reexport module MDP
 using Random, POMDPs, POMDPModels, SparseArrays, LinearAlgebra, StatsBase
-using ..ReinforcementLearningEnvironments
-const RLEnv = ReinforcementLearningEnvironments
 
 export MDPEnv, POMDPEnv, SimpleMDPEnv, absorbing_deterministic_tree_MDP, stochastic_MDP, stochastic_tree_MDP,
     deterministic_tree_MDP_with_rand_reward, deterministic_tree_MDP, deterministic_MDP
@@ -27,7 +24,7 @@ POMDPEnv(model; rng=Random.GLOBAL_RNG) = POMDPEnv(
     DiscreteSpace(n_states(model)),
     rng)
 
-function RLEnv.interact!(env::POMDPEnv, action) 
+function interact!(env::POMDPEnv, action) 
     s, o, r = generate_sor(env.model, env.state, env.actions[action], env.rng)
     env.state = s
     (observation = observationindex(env.model, o), 
@@ -35,7 +32,7 @@ function RLEnv.interact!(env::POMDPEnv, action)
      isdone = isterminal(env.model, s))
 end
 
-function RLEnv.observe(env::POMDPEnv)
+function observe(env::POMDPEnv)
     (observation = observationindex(env.model, generate_o(env.model, env.state, env.rng)),
      isdone = isterminal(env.model, env.state))
 end
@@ -61,17 +58,17 @@ MDPEnv(model; rng=Random.GLOBAL_RNG) = MDPEnv(
     DiscreteSpace(n_states(model)),
     rng)
 
-RLEnv.action_space(env::Union{MDPEnv, POMDPEnv}) = env.action_space
-RLEnv.observation_space(env::Union{MDPEnv, POMDPEnv}) = env.observation_space
+action_space(env::Union{MDPEnv, POMDPEnv}) = env.action_space
+observation_space(env::Union{MDPEnv, POMDPEnv}) = env.observation_space
 
 observationindex(env, o) = Int64(o) + 1
 
-function RLEnv.reset!(env::Union{POMDPEnv, MDPEnv})
+function reset!(env::Union{POMDPEnv, MDPEnv})
     initialstate(env.model, env.rng)
     nothing
 end
 
-function RLEnv.interact!(env::MDPEnv, action)
+function interact!(env::MDPEnv, action)
     s = rand(env.rng, transition(env.model, env.state, env.actions[action]))
     r = reward(env.model, env.state, env.actions[action])
     env.state = s
@@ -80,7 +77,7 @@ function RLEnv.interact!(env::MDPEnv, action)
      isdone = isterminal(env.model, s))
 end
 
-function RLEnv.observe(env::MDPEnv)
+function observe(env::MDPEnv)
     (observation = stateindex(env.model, env.state), 
      isdone = isterminal(env.model, env.state))
 end
@@ -120,8 +117,8 @@ function SimpleMDPEnv(ospace, aspace, state, trans_probs::Array{T, 2},
     SimpleMDPEnv{T}(ospace, aspace, state, trans_probs, reward, initialstates, isterminal)
 end
 
-RLEnv.observation_space(env::SimpleMDPEnv) = env.observation_space
-RLEnv.action_space(env::SimpleMDPEnv) = env.action_space
+observation_space(env::SimpleMDPEnv) = env.observation_space
+action_space(env::SimpleMDPEnv) = env.action_space
 
 # run SimpleMDPEnv
 """
@@ -143,17 +140,17 @@ end
 run!(mdp::SimpleMDPEnv, policy::Array{Int64, 1}) = run!(mdp, policy[mdp.state])
 
 
-function RLEnv.interact!(env::SimpleMDPEnv, action)
+function interact!(env::SimpleMDPEnv, action)
     r = env.reward[action, env.state]
     run!(env, action)
     (observation = env.state, reward = r, isdone = env.isterminal[env.state] == 1)
 end
 
-function RLEnv.observe(env::SimpleMDPEnv)
+function observe(env::SimpleMDPEnv)
     (observation = env.state, isdone = env.isterminal[env.state] == 1)
 end
 
-function RLEnv.reset!(env::SimpleMDPEnv)
+function reset!(env::SimpleMDPEnv)
     env.state = rand(env.initialstates)
     nothing
 end
@@ -320,6 +317,4 @@ function absorbing_deterministic_tree_MDP(;ns = 10^3, na = 10)
     reset!(mdp)
     set_terminal_states!(mdp, ns - div(ns, 100) + 1:ns)
     mdp
-end
-
 end

@@ -1,12 +1,11 @@
 using Test
 using ReinforcementLearningEnvironments
+using ArcadeLearningEnvironment
 using POMDPModels
-
-include("utils.jl")
 
 @testset "ReinforcementLearningEnvironments" begin
 
 include("spaces.jl")
-include("environments/environments.jl")
+include("environments.jl")
 
 end
