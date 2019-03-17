@@ -1,6 +1,4 @@
 using ArcadeLearningEnvironment, GR
-using ..ReinforcementLearningEnvironments
-const RLEnv = ReinforcementLearningEnvironments
 
 export AtariEnv
 
