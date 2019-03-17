@@ -1,5 +1,8 @@
 # ReinforcementLearningEnvironments.jl
 
+[![Build Status](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl.svg?branch=master)](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl)
+[![codecov](https://codecov.io/gh/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl)
+
 This package serves as a one-stop place for different kinds of reinforcement learning environments.
 
 Install:
@@ -7,6 +10,10 @@ Install:
 ```julia
 (v1.1) pkg> add https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl
 ```
+
+**TODO:**
+
+- [ ] Add a Docker file for quick test.
 
 ## API
 
@@ -22,7 +29,7 @@ Install:
 
 **TODO:**
 
-- Add `TupleSpace` and `DictSpace`
+- [ ] Add `TupleSpace` and `DictSpace`
 
 ## Supported Environments
 
@@ -52,9 +59,9 @@ By default, only some basic environments are installed. If you want to use some 
 
 **TODO:**
 
-- ViZDoom (Ongoing)
-- Box2d (Investigating)
-- Bullet (Investigating)
+- [ ] ViZDoom (Ongoing)
+- [ ] Box2d (Investigating)
+- [ ] Bullet (Investigating)
 
 How to enable 3-rd party environments?
 
