@@ -13,7 +13,7 @@ struct AtariEnv <: AbstractEnv
 end
 
 action_space(env::AtariEnv) = env.action_space
-RLEnv.observation_space(env::AtariEnv) = env.observation_space
+observation_space(env::AtariEnv) = env.observation_space
 
 """
     AtariEnv(name; colorspace = "Grayscale", frame_skip = 4, noopmax = 20,
