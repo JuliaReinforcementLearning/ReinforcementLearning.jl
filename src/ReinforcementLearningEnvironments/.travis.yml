@@ -8,6 +8,12 @@ julia:
 notifications:
   email: false
 
+services:
+  - docker
+
+script:
+  - docker built -t juliareinforcementlearning/reinforcementlearningenvironments .
+
 after_success:
   # push coverage results to Coveralls
   - julia -e 'import Pkg; cd(Pkg.dir("ReinforcementLearningEnvironments")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
