@@ -12,7 +12,7 @@ services:
   - docker
 
 script:
-  - docker built -t juliareinforcementlearning/reinforcementlearningenvironments .
+  - docker build -t juliareinforcementlearning/reinforcementlearningenvironments .
 
 after_success:
   # push coverage results to Coveralls
