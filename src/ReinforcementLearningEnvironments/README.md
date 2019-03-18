@@ -13,7 +13,10 @@ Install:
 
 **TODO:**
 
-- [ ] Add a Docker file for quick test.
+- [x] Add a Docker file for quick test.
+    ```
+    $ docker run -it --rm juliareinforcementlearning/reinforcementlearningenvironments
+    ```
 - [ ] Add benchmarks.
 
 ## API
@@ -57,10 +60,11 @@ By default, only some basic environments are installed. If you want to use some 
 | Environment Name | Dependent Package Name | Description |
 | :--- | :--- | :--- |
 | AtariEnv | ArcadeLearningEnvironment | |
+| ViZDoomEnv | ViZDoom | Currently only a basic environment is supported. (By calling `basic_ViZDoom_env()`)|
 
 **TODO:**
 
-- [ ] ViZDoom (Ongoing)
+- [ ] OpenAI Gym (Ongoing)
 - [ ] Box2d (Investigating)
 - [ ] Bullet (Investigating)
 

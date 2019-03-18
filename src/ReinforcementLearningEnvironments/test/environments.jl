@@ -28,7 +28,8 @@
         deterministic_tree_MDP_with_rand_reward(),
         deterministic_tree_MDP(),
         deterministic_MDP(),
-        AtariEnv("pong")
+        AtariEnv("pong"),
+        basic_ViZDoom_env()
         ]
     basic_env_test(env)
     end

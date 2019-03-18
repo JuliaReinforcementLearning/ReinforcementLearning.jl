@@ -2,6 +2,7 @@ using Test
 using ReinforcementLearningEnvironments
 using ArcadeLearningEnvironment
 using POMDPModels
+using ViZDoom
 
 @testset "ReinforcementLearningEnvironments" begin
 
