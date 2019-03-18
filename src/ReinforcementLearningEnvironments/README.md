@@ -1,7 +1,6 @@
 # ReinforcementLearningEnvironments.jl
 
 [![Build Status](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl.svg?branch=master)](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl)
-[![codecov](https://codecov.io/gh/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl)
 
 This package serves as a one-stop place for different kinds of reinforcement learning environments.
 
