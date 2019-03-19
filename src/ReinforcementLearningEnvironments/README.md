@@ -58,12 +58,13 @@ By default, only some basic environments are installed. If you want to use some 
 
 | Environment Name | Dependent Package Name | Description |
 | :--- | :--- | :--- |
-| AtariEnv | ArcadeLearningEnvironment | |
-| ViZDoomEnv | ViZDoom | Currently only a basic environment is supported. (By calling `basic_ViZDoom_env()`)|
+| AtariEnv | [ArcadeLearningEnvironment.jl](https://github.com/JuliaReinforcementLearning/ArcadeLearningEnvironment.jl) | |
+| ViZDoomEnv | [ViZDoom.jl](https://github.com/JuliaReinforcementLearning/ViZDoom.jl) | Currently only a basic environment is supported. (By calling `basic_ViZDoom_env()`)|
 
 **TODO:**
 
 - [ ] OpenAI Gym (Ongoing)
+- [ ] [Hanabi](https://github.com/deepmind/hanabi-learning-environment) (Ongoing)
 - [ ] Box2d (Investigating)
 - [ ] Bullet (Investigating)
 
