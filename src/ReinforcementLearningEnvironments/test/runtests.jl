@@ -3,6 +3,7 @@ using ReinforcementLearningEnvironments
 using ArcadeLearningEnvironment
 using POMDPModels
 using ViZDoom
+using PyCall
 
 @testset "ReinforcementLearningEnvironments" begin
 

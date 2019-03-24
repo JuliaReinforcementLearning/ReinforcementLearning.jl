@@ -31,7 +31,8 @@
         deterministic_tree_MDP(),
         deterministic_MDP(),
         AtariEnv("pong"),
-        basic_ViZDoom_env()
+        basic_ViZDoom_env(),
+        (GymEnv(x) for x in list_gym_env_names(modules=["gym.envs.algorithmic", "gym.envs.classic_control", "gym.envs.toy_text", "gym.envs.unittest"]))...
         ]
     basic_env_test(env)
     end
