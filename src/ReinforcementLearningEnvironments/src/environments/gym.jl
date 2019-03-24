@@ -48,7 +48,7 @@ function reset!(env::GymEnv)
     nothing
 end
 
-function observe(env::GymEnv{T}) 
+function observe(env::GymEnv{T}) where T
     if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type)
         obs, reward, isdone, info = convert(Tuple{T, Float64, Bool, PyDict}, env.state)
         (observation=obs, isdone=isdone)
