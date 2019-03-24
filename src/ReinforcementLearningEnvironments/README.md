@@ -30,10 +30,6 @@ Install:
 | **Optional Methods** | |
 | `render(env)` | Show the current state of environment |
 
-**TODO:**
-
-- [ ] Add `TupleSpace` and `DictSpace`
-
 ## Supported Environments
 
 By default, only some basic environments are installed. If you want to use some other environments, you'll need to add those dependencies correspondingly.
@@ -58,12 +54,12 @@ By default, only some basic environments are installed. If you want to use some 
 
 | Environment Name | Dependent Package Name | Description |
 | :--- | :--- | :--- |
-| AtariEnv | [ArcadeLearningEnvironment.jl](https://github.com/JuliaReinforcementLearning/ArcadeLearningEnvironment.jl) | |
-| ViZDoomEnv | [ViZDoom.jl](https://github.com/JuliaReinforcementLearning/ViZDoom.jl) | Currently only a basic environment is supported. (By calling `basic_ViZDoom_env()`)|
+| `AtariEnv` | [ArcadeLearningEnvironment.jl](https://github.com/JuliaReinforcementLearning/ArcadeLearningEnvironment.jl) | |
+| `ViZDoomEnv` | [ViZDoom.jl](https://github.com/JuliaReinforcementLearning/ViZDoom.jl) | Currently only a basic environment is supported. (By calling `basic_ViZDoom_env()`)|
+| `GymEnv` | [PyCall.jl](https://github.com/JuliaPy/PyCall.jl) | You need to manually install `gym` first |
 
 **TODO:**
 
-- [ ] OpenAI Gym (Ongoing)
 - [ ] [Hanabi](https://github.com/deepmind/hanabi-learning-environment) (Ongoing)
 - [ ] Box2d (Investigating)
 - [ ] Bullet (Investigating)
