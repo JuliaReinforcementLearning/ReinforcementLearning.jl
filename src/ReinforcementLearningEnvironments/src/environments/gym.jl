@@ -4,7 +4,7 @@ export GymEnv
 
 # TODO: support `seed`
 
-struct GymEnv{Ta<:AbstractSpace, To<:AbstractSpace} <: AbstractEnv
+struct GymEnv{T, Ta<:AbstractSpace, To<:AbstractSpace} <: AbstractEnv
     pyenv::PyObject
     observation_space::To
     action_space::Ta
@@ -16,18 +16,30 @@ function GymEnv(name::String)
     pyenv = gym.make(name)
     obsspace = gymspace2jlspace(pyenv.observation_space)
     actspace = gymspace2jlspace(pyenv.action_space)
-    state = PyNULL()
-    env = GymEnv(pyenv, obsspace, actspace, state)
-    reset!(env) # reset!
+    obs_type = if obsspace isa Union{MultiContinuousSpace, MultiDiscreteSpace}
+                   PyArray
+               elseif obsspace isa ContinuousSpace
+                   Float64
+               elseif obsspace isa DiscreteSpace
+                   Int
+               elseif obsspace isa TupleSpace
+                   PyVector
+               elseif obsspace isa DictSpace
+                   PyDict
+               else
+                   error("don't know how to get the observation type from observation space of $obsspace")
+               end
+    env = GymEnv{obs_type, typeof(actspace), typeof(obsspace)}(pyenv, obsspace, actspace, PyNULL())
+    reset!(env) # reset immediately to init env.state
     env
 end
 
 action_space(env::GymEnv) = env.action_space
 observation_space(env::GymEnv) = env.observation_space
 
-function interact!(env::GymEnv, action)
+function interact!(env::GymEnv{T}, action)
     pycall!(env.state, env.pyenv.step, PyObject, action)
-    obs, reward, isdone, info = convert(Tuple{PyArray, Float64, Bool, PyDict}, env.state)
+    obs, reward, isdone, info = convert(Tuple{T, Float64, Bool, PyDict}, env.state)
     (observation=obs, reward=reward, isdone=isdone)
 end
 
@@ -36,13 +48,13 @@ function reset!(env::GymEnv)
     nothing
 end
 
-function observe(env::GymEnv) 
+function observe(env::GymEnv{T}) 
     if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type)
-        obs, reward, isdone, info = convert(Tuple{PyArray, Float64, Bool, PyDict}, env.state)
+        obs, reward, isdone, info = convert(Tuple{T, Float64, Bool, PyDict}, env.state)
         (observation=obs, isdone=isdone)
     else
         # env has just been reseted
-        (observation=PyArray(env.state), isdone=false)
+        (observation=convert(T, env.state), isdone=false)
     end
 end
 

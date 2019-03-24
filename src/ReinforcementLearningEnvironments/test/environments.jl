@@ -40,6 +40,6 @@
         basic_ViZDoom_env(),
         (GymEnv(x) for x in gym_env_names)...
         ]
-    basic_env_test(env)
+        basic_env_test(env)
     end
 end
