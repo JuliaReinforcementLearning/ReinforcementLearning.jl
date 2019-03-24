@@ -17,6 +17,12 @@
         end
     end
 
+    gym_env_names = ReinforcementLearningEnvironments.list_gym_env_names(modules=[
+        "gym.envs.algorithmic",
+        "gym.envs.classic_control",
+        "gym.envs.toy_text",
+        "gym.envs.unittest"])  # mujoco, box2d, robotics are not tested here
+
     for env in [CartPoleEnv(),
         MountainCarEnv(),
         PendulumEnv(),
@@ -32,7 +38,7 @@
         deterministic_MDP(),
         AtariEnv("pong"),
         basic_ViZDoom_env(),
-        (GymEnv(x) for x in list_gym_env_names(modules=["gym.envs.algorithmic", "gym.envs.classic_control", "gym.envs.toy_text", "gym.envs.unittest"]))...
+        (GymEnv(x) for x in gym_env_names)...
         ]
     basic_env_test(env)
     end
