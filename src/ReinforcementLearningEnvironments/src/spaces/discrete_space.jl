@@ -6,7 +6,7 @@ struct DiscreteSpace{T<:Integer} <: AbstractDiscreteSpace
     high::T
     n::T
     function DiscreteSpace(high::T, low=one(T)) where T<:Integer
-        high > low || throw(ArgumentError("$high must be greater than $low"))
+        high >= low || throw(ArgumentError("$high must be >= $low"))
         new{T}(low, high, high - low + 1)
     end
 end

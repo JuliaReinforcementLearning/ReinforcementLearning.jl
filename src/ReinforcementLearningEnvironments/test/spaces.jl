@@ -1,3 +1,5 @@
+@testset "Spaces" begin
+
 function test_samples(s, n=100)
     for _ in 1:n
         @test rand(s) in s
@@ -69,4 +71,26 @@ end
 
     @test s == MultiContinuousSpace([-1, -2, -3], [1, 2, 3])
     test_samples(s)
+end
+
+@testset "TupleSpace and DictSpace" begin
+    s = TupleSpace(
+        DiscreteSpace(3),
+        ContinuousSpace(0, 1),
+        TupleSpace(
+            DiscreteSpace(3),
+            ContinuousSpace(0, 1),
+        ), # recursive
+        DictSpace(
+            :a => MultiDiscreteSpace([2, 4]),
+            :b => TupleSpace(
+                MultiContinuousSpace([-1, -2], [2.5, 3.5]),
+                MultiDiscreteSpace([3, 2]),
+            )
+        ), # combined spaces
+    )
+
+    test_samples(s)
+end
+
 end
