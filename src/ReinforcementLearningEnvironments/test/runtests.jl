@@ -4,6 +4,7 @@ using ArcadeLearningEnvironment
 using POMDPModels
 using ViZDoom
 using PyCall
+using Hanabi
 
 @testset "ReinforcementLearningEnvironments" begin
 

@@ -13,6 +13,7 @@ function __init__()
     @require ArcadeLearningEnvironment = "b7f77d8d-088d-5e02-8ac0-89aab2acc977" include("environments/atari.jl")
     @require ViZDoom                   = "13bb3beb-38fe-5ca7-9a46-050a216300b1" include("environments/vizdoom.jl")
     @require PyCall                    = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0" include("environments/gym.jl")
+    @require Hanabi                    = "79de006e-4a40-11e9-10cc-d3dd55fc5e16" include("environments/hanabi.jl")
 end
 
 end # module

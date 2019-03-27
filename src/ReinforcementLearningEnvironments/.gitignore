@@ -4,3 +4,5 @@
 deps/deps.jl
 
 Manifest.toml
+
+_vizdoom.ini

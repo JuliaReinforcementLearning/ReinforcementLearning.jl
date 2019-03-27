@@ -2,13 +2,13 @@ using ArcadeLearningEnvironment, GR
 
 export AtariEnv
 
-struct AtariEnv <: AbstractEnv
+struct AtariEnv{To} <: AbstractEnv
     ale::Ptr{Nothing}
     screen::Array{UInt8, 1}
     getscreen::Function
     actions::Array{Int32, 1}
-    action_space::DiscreteSpace
-    observation_space::MultiDiscreteSpace
+    action_space::DiscreteSpace{Int}
+    observation_space::To
     noopmax::Int64
 end
 

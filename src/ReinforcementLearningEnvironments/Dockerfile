@@ -28,6 +28,8 @@ RUN ln -s /usr/bin/pip3 /usr/bin/pip; \
 ADD . /jl_pkg
 WORKDIR /jl_pkg
 
+# Following line can be removed after Hanabi.jl get registered.
+RUN julia --color=yes -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/findmyway/Hanabi.jl", rev="master"))'
 RUN julia --color=yes -e 'using Pkg; Pkg.clone(pwd()); Pkg.build("ReinforcementLearningEnvironments"; verbose=true); Pkg.test("ReinforcementLearningEnvironments"; coverage=true)'
 
 CMD ["julia"]
