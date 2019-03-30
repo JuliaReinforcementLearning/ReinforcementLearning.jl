@@ -101,3 +101,7 @@ function render(env::AtariEnv)
     getScreenRGB(env.ale, x)
     imshowcolor(x, (160, 210))
 end
+
+function list_atari_rom_names()
+    [splitext(x)[1] for x in readdir(joinpath(dirname(pathof(ArcadeLearningEnvironment)), "..", "deps", "roms"))]
+end
