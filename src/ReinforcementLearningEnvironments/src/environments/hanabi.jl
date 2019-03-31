@@ -75,6 +75,7 @@ players                = 2
 mutable struct HanabiEnv <: AbstractEnv
     game::Base.RefValue{Hanabi.LibHanabi.PyHanabiGame}
     state::Base.RefValue{Hanabi.LibHanabi.PyHanabiState}
+    moves::Vector{Base.RefValue{Hanabi.LibHanabi.PyHanabiMove}}
     observation_encoder::Base.RefValue{Hanabi.LibHanabi.PyHanabiObservationEncoder}
     observation_space::MultiDiscreteSpace{Int64, 1}
     action_space::DiscreteSpace{Int64}
@@ -95,11 +96,16 @@ mutable struct HanabiEnv <: AbstractEnv
         observation_encoder = Ref{HanabiObservationEncoder}()
         new_observation_encoder(observation_encoder, game, CANONICAL)
         observation_length = parse(Int, unsafe_string(observation_shape(observation_encoder)))
-
         observation_space = MultiDiscreteSpace(ones(Int, observation_length), zeros(Int, observation_length))
-        action_space = DiscreteSpace(max_moves(game) - 1, 0)  # start from 0
 
-        env = new(game, state, observation_encoder, observation_space, action_space, HanabiResult(Int32(0), Int32(0)))
+        n_moves = max_moves(game)
+        action_space = DiscreteSpace(Int(n_moves))
+        moves = [Ref{HanabiMove}() for _ in 1:n_moves]
+        for i in 1:n_moves
+            get_move_by_uid(game, i-1, moves[i])
+        end
+
+        env = new(game, state, moves, observation_encoder, observation_space, action_space, HanabiResult(Int32(0), Int32(0)))
         reset!(env)  # reset immediately
         env
     end
@@ -132,9 +138,7 @@ function reset!(env::HanabiEnv)
 end
 
 function interact!(env::HanabiEnv, action::Integer)
-    move = Ref{HanabiMove}()
-    get_move_by_uid(env.game, action, move)
-    interact!(env, move)
+    interact!(env, env.moves[action])
 end
 
 function interact!(env::HanabiEnv, move::Base.RefValue{Hanabi.LibHanabi.PyHanabiMove})
@@ -178,9 +182,7 @@ end
 
 function legal_actions(env::HanabiEnv)
     actions = Int32[]
-    move = Ref{HanabiMove}()
-    for i in 0:max_moves(env.game)-1
-        get_move_by_uid(env.game, i, move)
+    for (i, move) in enumerate(env.moves)
         if move_is_legal(env.state, move)
             push!(actions, i)
         end
