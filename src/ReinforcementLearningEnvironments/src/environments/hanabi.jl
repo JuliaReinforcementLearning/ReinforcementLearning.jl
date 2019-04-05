@@ -159,7 +159,7 @@ function interact!(env::HanabiEnv, move::Base.RefValue{Hanabi.LibHanabi.PyHanabi
 
     (observation = _encode_observation(observation, env),
      reward      = env.reward.score_gain,
-     isdone      = state_end_of_game_status(env.state) != NOT_FINISHED)
+     isdone      = state_end_of_game_status(env.state) != Int(NOT_FINISHED))
 end
 
 function observe(env::HanabiEnv, observer=state_cur_player(env.state))
@@ -167,7 +167,8 @@ function observe(env::HanabiEnv, observer=state_cur_player(env.state))
     new_observation(env.state, observer, observation)
     (observation     = _encode_observation(observation, env),
      reward          = env.reward.player == observer ? env.reward.score_gain : Int32(0),
-     isdone          = state_end_of_game_status(env.state) != NOT_FINISHED)
+     isdone          = state_end_of_game_status(env.state) != Int(NOT_FINISHED),
+     raw_obs         = observation)
 end
 
 function _encode_observation(obs, env)
