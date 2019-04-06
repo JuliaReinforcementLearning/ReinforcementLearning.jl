@@ -1,6 +1,7 @@
 using Hanabi
 
 export HanabiEnv, legal_actions
+export PlayCard, DiscardCard, RevealColor, RevealRank, parse_move
 
 @enum HANABI_OBSERVATION_ENCODER_TYPE CANONICAL
 @enum COLOR R Y G W B
@@ -8,6 +9,7 @@ export HanabiEnv, legal_actions
 @enum HANABI_MOVE_TYPE INVALID PLAY DISCARD REVEAL_COLOR REVEAL_RANK DEAL
 
 const CHANCE_PLAYER_ID = -1
+const COLORS_DICT = Dict(string(x) => x for x in instances(COLOR))
 
 ###
 ### moves
@@ -37,6 +39,18 @@ function RevealRank(target_offset::Int, rank::Int)
     m
 end
 
+function parse_move(s::String)
+    m = match(r"PlayCard\((?<card_idx>[1-5])\)", s)
+    !isnothing(m) && return PlayCard(parse(Int, m[:card_idx]))
+    m = match(r"DiscardCard\((?<card_idx>[1-5])\)", s)
+    !isnothing(m) && return DiscardCard(parse(Int, m[:card_idx]))
+    m = match(r"RevealColor\((?<target>[1-5]),(?<color>[RYGWB])\)", s)
+    !isnothing(m) && return RevealColor(parse(Int, m[:target]), COLORS_DICT[m[:color]])
+    m = match(r"RevealRank\((?<target>[1-5]),(?<rank>[1-5])\)", s)
+    !isnothing(m) && return RevealRank(parse(Int, m[:target]), parse(Int, m[:rank]))
+    return nothing
+end
+
 function Base.show(io::IO, move::Base.RefValue{Hanabi.LibHanabi.PyHanabiMove})
     move_t = move_type(move)
     if move_t == Int(PLAY)
@@ -44,9 +58,9 @@ function Base.show(io::IO, move::Base.RefValue{Hanabi.LibHanabi.PyHanabiMove})
     elseif move_t == Int(DISCARD)
         print(io, "DiscardCard($(card_index(move)+1))")
     elseif move_t == Int(REVEAL_COLOR)
-        print(io, "RevealColor($(target_offset(move)), $(COLOR(move_color(move)))")
+        print(io, "RevealColor($(target_offset(move)), $(COLOR(move_color(move))))")
     elseif move_t == Int(REVEAL_RANK)
-        print(io, "RevealRank($(target_offset(move)), $(move_rank(move)+1)")
+        print(io, "RevealRank($(target_offset(move)), $(move_rank(move)+1))")
     else
         print(io, "uninitialized move")
     end
@@ -159,7 +173,8 @@ function interact!(env::HanabiEnv, move::Base.RefValue{Hanabi.LibHanabi.PyHanabi
 
     (observation = _encode_observation(observation, env),
      reward      = env.reward.score_gain,
-     isdone      = state_end_of_game_status(env.state) != Int(NOT_FINISHED))
+     isdone      = state_end_of_game_status(env.state) != Int(NOT_FINISHED),
+     raw_obs     = observation)
 end
 
 function observe(env::HanabiEnv, observer=state_cur_player(env.state))
