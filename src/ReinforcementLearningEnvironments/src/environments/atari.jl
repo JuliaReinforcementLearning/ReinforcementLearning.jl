@@ -35,18 +35,19 @@ function AtariEnv(name;
     setFloat(ale, "repeat_action_probability",
              Float32(repeat_action_probability))
     loadROM(ale, name)
+    observation_length = getScreenWidth(ale) * getScreenHeight(ale)
     if colorspace == "Grayscale"
-        screen = Array{Cuchar}(undef, 210*160)
+        screen = Array{Cuchar}(undef, observation_length)
         getscreen = getScreenGrayscale
-        observation_space = MultiDiscreteSpace(fill(typemax(Cuchar), 210*160), fill(typemin(Cuchar), 210*160))
+        observation_space = MultiDiscreteSpace(fill(typemax(Cuchar), observation_length), fill(typemin(Cuchar), observation_length))
     elseif colorspace == "RGB"
-        screen = Array{Cuchar}(undef, 3*210*160)
+        screen = Array{Cuchar}(undef, 3*observation_length)
         getscreen = getScreenRGB
-        observation_space = MultiDiscreteSpace(fill(typemax(Cuchar), 3*210*160), fill(typemin(Cuchar), 3*210*160))
+        observation_space = MultiDiscreteSpace(fill(typemax(Cuchar), 3*observation_length), fill(typemin(Cuchar), 3*observation_length))
     elseif colorspace == "Raw"
-        screen = Array{Cuchar}(undef, 210*160)
+        screen = Array{Cuchar}(undef, observation_length)
         getscreen = getScreen
-        observation_space = MultiDiscreteSpace(fill(typemax(Cuchar), 210*160), fill(typemin(Cuchar), 210*160))
+        observation_space = MultiDiscreteSpace(fill(typemax(Cuchar), observation_length), fill(typemin(Cuchar), observation_length))
     end
     actions = actionset == :minimal ? getMinimalActionSet(ale) : getLegalActionSet(ale)
     action_space = DiscreteSpace(length(actions))
