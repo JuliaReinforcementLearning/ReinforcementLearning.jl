@@ -1,6 +1,7 @@
 name = "ReinforcementLearningEnvironments"
 uuid = "25e41dd2-4622-11e9-1641-f1adca772921"
 authors = ["Jun Tian <juti@microsoft.com>"]
+version = "0.1.0"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -23,3 +24,6 @@ ViZDoom = "13bb3beb-38fe-5ca7-9a46-050a216300b1"
 
 [targets]
 test = ["Test", "ArcadeLearningEnvironment", "ViZDoom", "PyCall", "Hanabi"]
+
+[compat]
+julia = "1"

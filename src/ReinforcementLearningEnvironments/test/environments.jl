@@ -46,7 +46,7 @@
     gym_env_names = filter(x -> x != "KellyCoinflipGeneralized-v0", gym_env_names)  # not sure why this env has outliers
 
     atari_env_names = ReinforcementLearningEnvironments.list_atari_rom_names()
-    atari_env_names = filter(x -> x in ["pong"], atari_env_names)  # many atari games will have segment fault
+    atari_env_names = filter(x -> x != "defender", atari_env_names)
 
     for env_exp in [
         :(HanabiEnv()),
@@ -67,7 +67,7 @@
         (:(AtariEnv($x)) for x in atari_env_names)...,
         (:(GymEnv($x)) for x in gym_env_names)...
         ]
-        
+
         @info "Testing $env_exp"
         env = eval(env_exp)
         basic_env_test(env)
