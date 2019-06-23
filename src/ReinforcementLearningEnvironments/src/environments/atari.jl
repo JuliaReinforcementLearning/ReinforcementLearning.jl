@@ -2,10 +2,10 @@ using ArcadeLearningEnvironment, GR
 
 export AtariEnv
 
-struct AtariEnv{To} <: AbstractEnv
+struct AtariEnv{To,F} <: AbstractEnv
     ale::Ptr{Nothing}
     screen::Array{UInt8, 1}
-    getscreen::Function
+    getscreen!::F
     actions::Array{Int32, 1}
     action_space::DiscreteSpace{Int}
     observation_space::To
@@ -38,44 +38,37 @@ function AtariEnv(name;
     observation_length = getScreenWidth(ale) * getScreenHeight(ale)
     if colorspace == "Grayscale"
         screen = Array{Cuchar}(undef, observation_length)
-        getscreen = getScreenGrayscale
+        getscreen! = ArcadeLearningEnvironment.getScreenGrayscale!
         observation_space = MultiDiscreteSpace(fill(typemax(Cuchar), observation_length), fill(typemin(Cuchar), observation_length))
     elseif colorspace == "RGB"
         screen = Array{Cuchar}(undef, 3*observation_length)
-        getscreen = getScreenRGB
+        getscreen! = ArcadeLearningEnvironment.getScreenRGB!
         observation_space = MultiDiscreteSpace(fill(typemax(Cuchar), 3*observation_length), fill(typemin(Cuchar), 3*observation_length))
     elseif colorspace == "Raw"
         screen = Array{Cuchar}(undef, observation_length)
-        getscreen = getScreen
+        getscreen! = ArcadeLearningEnvironment.getScreen!
         observation_space = MultiDiscreteSpace(fill(typemax(Cuchar), observation_length), fill(typemin(Cuchar), observation_length))
     end
     actions = actionset == :minimal ? getMinimalActionSet(ale) : getLegalActionSet(ale)
     action_space = DiscreteSpace(length(actions))
-    AtariEnv(ale, screen, getscreen, actions, action_space, observation_space, noopmax)
-end
-
-function getScreen(p::Ptr, s::Array{Cuchar, 1})
-    sraw = getScreen(p)
-    for i in 1:length(s)
-        s[i] =  sraw[i] .>> 1
-    end
+    AtariEnv(ale, screen, getscreen!, actions, action_space, observation_space, noopmax)
 end
 
 function interact!(env::AtariEnv, a)
     r = act(env.ale, env.actions[a])
-    env.getscreen(env.ale, env.screen)
+    env.getscreen!(env.ale, env.screen)
     (observation=env.screen, reward=r, isdone=game_over(env.ale))
 end
 
 function observe(env::AtariEnv)
-    env.getscreen(env.ale, env.screen)
+    env.getscreen!(env.ale, env.screen)
     (observation=env.screen, isdone=game_over(env.ale))
 end
 
 function reset!(env::AtariEnv)
     reset_game(env.ale)
     for _ in 1:rand(0:env.noopmax) act(env.ale, Int32(0)) end
-    env.getscreen(env.ale, env.screen)
+    env.getscreen!(env.ale, env.screen)
     nothing
 end
 
@@ -98,11 +91,9 @@ function imshowcolor(x::Array{UInt8, 1}, dims)
 end
 
 function render(env::AtariEnv)
-    x = zeros(UInt8, 3 * 160 * 210)
-    getScreenRGB(env.ale, x)
-    imshowcolor(x, (160, 210))
+    x = getScreenRGB(env.ale)
+    imshowcolor(x, (Int(getScreenWidth(env.ale)),
+                    Int(getScreenHeight(env.ale))))
 end
 
-function list_atari_rom_names()
-    [splitext(x)[1] for x in readdir(joinpath(dirname(pathof(ArcadeLearningEnvironment)), "..", "deps", "roms"))]
-end
+list_atari_rom_names() = getROMList()
