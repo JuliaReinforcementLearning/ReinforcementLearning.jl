@@ -91,8 +91,8 @@ mutable struct HanabiEnv <: AbstractEnv
     state::Base.RefValue{Hanabi.LibHanabi.PyHanabiState}
     moves::Vector{Base.RefValue{Hanabi.LibHanabi.PyHanabiMove}}
     observation_encoder::Base.RefValue{Hanabi.LibHanabi.PyHanabiObservationEncoder}
-    observation_space::MultiDiscreteSpace{Int64, 1}
-    action_space::DiscreteSpace{Int64}
+    observation_space::MultiDiscreteSpace{Int, 1}
+    action_space::DiscreteSpace{Int}
     reward::HanabiResult
 
     function HanabiEnv(;kw...)

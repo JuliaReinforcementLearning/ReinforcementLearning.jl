@@ -63,7 +63,7 @@ MDPEnv(model; rng=Random.GLOBAL_RNG) = MDPEnv(
 action_space(env::Union{MDPEnv, POMDPEnv}) = env.action_space
 observation_space(env::Union{MDPEnv, POMDPEnv}) = env.observation_space
 
-observationindex(env, o) = Int64(o) + 1
+observationindex(env, o) = Int(o) + 1
 
 function reset!(env::Union{POMDPEnv, MDPEnv})
     initialstate(env.model, env.rng)
@@ -89,13 +89,13 @@ end
 #####
 """
     mutable struct SimpleMDPEnv
-        ns::Int64
-        na::Int64
-        state::Int64
+        ns::Int
+        na::Int
+        state::Int
         trans_probs::Array{AbstractArray, 2}
         reward::R
-        initialstates::Array{Int64, 1}
-        isterminal::Array{Int64, 1}
+        initialstates::Array{Int, 1}
+        isterminal::Array{Int, 1}
         rng::S
 A Markov Decision Process with `ns` states, `na` actions, current `state`,
 `na`x`ns` - array of transition probabilites `trans_props` which consists for
@@ -110,11 +110,11 @@ probabilities) `reward` of type `R` (see [`DeterministicStateActionReward`](@ref
 mutable struct SimpleMDPEnv{T,R,S<:AbstractRNG}
     observation_space::DiscreteSpace
     action_space::DiscreteSpace
-    state::Int64
+    state::Int
     trans_probs::Array{T, 2}
     reward::R
-    initialstates::Array{Int64, 1}
-    isterminal::Array{Int64, 1}
+    initialstates::Array{Int, 1}
+    isterminal::Array{Int, 1}
     rng::S
 end
 
@@ -186,10 +186,10 @@ expected_rewards(r::NormalStateActionReward, ::Any) = r.mean
 
 # run SimpleMDPEnv
 """
-    run!(mdp::SimpleMDPEnv, action::Int64)
+    run!(mdp::SimpleMDPEnv, action::Int)
 Transition to a new state given `action`. Returns the new state.
 """
-function run!(mdp::SimpleMDPEnv, action::Int64)
+function run!(mdp::SimpleMDPEnv, action::Int)
     if mdp.isterminal[mdp.state] == 1
         reset!(mdp)
     else
@@ -199,9 +199,9 @@ function run!(mdp::SimpleMDPEnv, action::Int64)
 end
 
 """
-    run!(mdp::SimpleMDPEnv, policy::Array{Int64, 1}) = run!(mdp, policy[mdp.state])
+    run!(mdp::SimpleMDPEnv, policy::Array{Int, 1}) = run!(mdp, policy[mdp.state])
 """
-run!(mdp::SimpleMDPEnv, policy::Array{Int64, 1}) = run!(mdp, policy[mdp.state])
+run!(mdp::SimpleMDPEnv, policy::Array{Int, 1}) = run!(mdp, policy[mdp.state])
 
 
 function interact!(env::SimpleMDPEnv, action)

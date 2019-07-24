@@ -1,46 +1,62 @@
 using Random
 using GR
 
-export MountainCarEnv
+export MountainCarEnv, ContinuousMountainCarEnv
 
 struct MountainCarEnvParams{T}
     min_pos::T
     max_pos::T
     max_speed::T
     goal_pos::T
-    max_steps::Int64
+    goal_velocity::T
+    power::T
+    gravity::T
+    max_steps::Int
+end
+function MountainCarEnvParams(; T = Float64, min_pos = -1.2, max_pos = .6,
+                                max_speed = .07, goal_pos = .5, max_steps = 200,
+                                goal_velocity = .0, power = .001, gravity = .0025)
+    MountainCarEnvParams{T}(min_pos, max_pos, max_speed, goal_pos,
+                            goal_velocity, power, gravity, max_steps)
 end
 
-mutable struct MountainCarEnv{T, R<:AbstractRNG} <: AbstractEnv
+mutable struct MountainCarEnv{A, T, R<:AbstractRNG} <: AbstractEnv
     params::MountainCarEnvParams{T}
-    action_space::DiscreteSpace
+    action_space::A
     observation_space::MultiContinuousSpace{(2,), 1}
     state::Array{T, 1}
-    action::Int64
+    action::Int
     done::Bool
-    t::Int64
+    t::Int
     rng::R
 end
 
-function MountainCarEnv(; T = Float64, min_pos = T(-1.2), max_pos = T(.6),
-                       max_speed = T(.07), goal_pos = T(.5), max_steps = 200)
-    env = MountainCarEnv(MountainCarEnvParams(min_pos, max_pos, max_speed, goal_pos, max_steps),
-                      DiscreteSpace(3),
-                      MultiContinuousSpace([min_pos, -max_speed], [max_pos, max_speed]),
-                      zeros(T, 2),
-                      1,
-                      false,
-                      0,
-                      Random.GLOBAL_RNG)
+function MountainCarEnv(; T = Float64, continuous = false,
+                          rng = Random.GLOBAL_RNG, kwargs...)
+    if continuous
+        params = MountainCarEnvParams(; goal_pos = .45, power = .0015, T = T, kwargs...)
+    else
+        params = MountainCarEnvParams(; kwargs...)
+    end
+    env = MountainCarEnv(params,
+                         continuous ? ContinuousSpace(-T(1.), T(1.)) : DiscreteSpace(3),
+                         MultiContinuousSpace([params.min_pos, -params.max_speed],
+                                              [params.max_pos, params.max_speed]),
+                         zeros(T, 2),
+                         1,
+                         false,
+                         0,
+                         rng)
     reset!(env)
     env
 end
+ContinuousMountainCarEnv(; kwargs...) = MountainCarEnv(; continuous = true, kwargs...)
 
 action_space(env::MountainCarEnv) = env.action_space
 observation_space(env::MountainCarEnv) = env.observation_space
 observe(env::MountainCarEnv) = (observation=env.state, isdone=env.done)
 
-function reset!(env::MountainCarEnv{T}) where T
+function reset!(env::MountainCarEnv{A, T}) where {A, T}
     env.state[1] = .2 * rand(env.rng, T) - .6
     env.state[2] = 0.
     env.done = false
@@ -48,15 +64,18 @@ function reset!(env::MountainCarEnv{T}) where T
     nothing
 end
 
-function interact!(env::MountainCarEnv, a)
+interact!(env::MountainCarEnv{<:ContinuousSpace}, a) = _interact!(env, min(max(a, -1, 1)))
+interact!(env::MountainCarEnv{<:DiscreteSpace}, a) = _interact!(env, a - 2)
+function _interact!(env::MountainCarEnv, force)
     env.t += 1
     x, v = env.state
-    v += (a - 2)*0.001 + cos(3*x)*(-0.0025)
+    v += force * env.params.power + cos(3*x)*(-env.params.gravity)
     v = clamp(v, -env.params.max_speed, env.params.max_speed)
     x += v
     x = clamp(x, env.params.min_pos, env.params.max_pos)
     if x == env.params.min_pos && v < 0 v = 0 end
-    env.done = x >= env.params.goal_pos || env.t >= env.params.max_steps
+    env.done = x >= env.params.goal_pos && v >= env.params.goal_velocity ||
+               env.t >= env.params.max_steps
     env.state[1] = x
     env.state[2] = v
     (observation=env.state, reward=-1., isdone=env.done)
@@ -87,6 +106,6 @@ function render(env::MountainCarEnv)
     xs, ys = rotate(xs, ys, θ)
     xs, ys = translate(xs, ys, [x, height(x)])
     fillarea(xs, ys)
-    plotendofepisode(env.params.max_pos + .1, 0, d) 
+    plotendofepisode(env.params.max_pos + .1, 0, d)
     updatews()
 end

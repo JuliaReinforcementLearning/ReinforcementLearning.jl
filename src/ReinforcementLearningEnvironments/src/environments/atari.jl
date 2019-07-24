@@ -9,7 +9,7 @@ struct AtariEnv{To,F} <: AbstractEnv
     actions::Array{Int32, 1}
     action_space::DiscreteSpace{Int}
     observation_space::To
-    noopmax::Int64
+    noopmax::Int
 end
 
 action_space(env::AtariEnv) = env.action_space

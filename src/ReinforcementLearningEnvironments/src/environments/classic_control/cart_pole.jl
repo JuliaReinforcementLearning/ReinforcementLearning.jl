@@ -14,7 +14,7 @@ struct CartPoleEnvParams{T}
     tau::T
     thetathreshold::T
     xthreshold::T
-    max_steps::Int64
+    max_steps::Int
 end
 
 mutable struct CartPoleEnv{T, R<:AbstractRNG} <: AbstractEnv
@@ -24,7 +24,7 @@ mutable struct CartPoleEnv{T, R<:AbstractRNG} <: AbstractEnv
     state::Array{T, 1}
     action::Int
     done::Bool
-    t::Int64
+    t::Int
     rng::R
 end
 

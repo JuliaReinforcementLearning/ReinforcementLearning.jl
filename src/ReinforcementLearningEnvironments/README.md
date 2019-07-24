@@ -38,6 +38,7 @@ By default, only some basic environments are installed. If you want to use some 
 
 - CartPoleEnv
 - MountainCarEnv
+- ContinuousMountainCarEnv
 - PendulumEnv
 - MDPEnv
 - POMDPEnv

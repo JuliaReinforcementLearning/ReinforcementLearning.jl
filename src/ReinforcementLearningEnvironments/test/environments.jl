@@ -53,6 +53,7 @@
         :(basic_ViZDoom_env()),
         :(CartPoleEnv()),
         :(MountainCarEnv()),
+        :(ContinuousMountainCarEnv()),
         :(PendulumEnv()),
         :(MDPEnv(LegacyGridWorld())),
         :(POMDPEnv(TigerPOMDP())),
