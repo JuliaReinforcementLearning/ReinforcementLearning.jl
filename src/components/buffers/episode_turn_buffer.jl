@@ -1,4 +1,4 @@
-export EpisodeTurnBuffer
+export EpisodeTurnBuffer, episode_SART_buffer
 
 """
     EpisodeTurnBuffer{names, types, Tbs} <: AbstractTurnBuffer{names, types}
@@ -6,7 +6,7 @@ export EpisodeTurnBuffer
 
 Using a Vector to store each element specified by `names` and `types`.
 
-See also: [`EpisodeSARDBuffer`](@ref), [`EpisodeSARDSBuffer`](@ref), [`EpisodeSARDSABuffer`](@ref)
+See also: [`EpisodeSARTBuffer`](@ref), [`EpisodeSARTSBuffer`](@ref), [`EpisodeSARTSABuffer`](@ref)
 """
 struct EpisodeTurnBuffer{names, types, Tbs} <: AbstractTurnBuffer{names, types}
     buffers::Tbs
@@ -21,18 +21,20 @@ end
 
 capacity(b::EpisodeTurnBuffer) = isfull(b) ? length(b) : typemax(Int)
 
-##############################
-# EpisodeSARDBuffer
-##############################
-function EpisodeSARDBuffer(
+function episode_SART_buffer(
     ;state_type,
     action_type=Int,
     reward_type=Float64,
-    isdone_type=Bool)
+    terminal_type=Bool)
     EpisodeTurnBuffer(
         :state => state_type,
         :action => action_type,
         :reward => reward_type,
-        :isdone => isdone_type
+        :terminal => terminal_type
     )
 end
+
+Base.length(b::EpisodeTurnBuffer{SART}) = length(b.buffers.terminal)
+
+"if the last turn is the terminal, then the EpisodeTurnBuffer is full"
+isfull(b::EpisodeTurnBuffer{SART}) = convert(Bool, b.buffers.terminal[end])

@@ -1,5 +1,7 @@
 export CircularArrayBuffer, capacity, isfull
 
+import Base:view, getindex
+
 """
     CircularArrayBuffer{E, T, N}
 
@@ -100,7 +102,7 @@ Base.empty!(cb::CircularArrayBuffer) = (cb.length = 0; cb)
 Add an element to the back and overwrite front if full.
 Make sure that `length(data) == cb.stepsize`
 """
-@inline function push!(cb::CircularArrayBuffer{E, T, N}, data::AbstractArray{T}) where {E, T, N}
+@inline function Base.push!(cb::CircularArrayBuffer{E, T, N}, data::AbstractArray{T}) where {E, T, N}
     # length(data) == cb.stepsize || throw(DimensionMismatch("the length of buffer's stepsize doesn't match the length of data, $(cb.stepsize) != $(length(data))"))
     # if full, increment and overwrite, otherwise push
     if cb.length == capacity(cb)
@@ -113,7 +115,7 @@ Make sure that `length(data) == cb.stepsize`
     cb
 end
 
-@inline function push!(cb::CircularArrayBuffer{E, T, 1}, data::T) where {E, T}
+@inline function Base.push!(cb::CircularArrayBuffer{E, T, 1}, data::T) where {E, T}
     if cb.length == capacity(cb)
         cb.first = (cb.first == capacity(cb) ? 1 : cb.first + 1)
     else
@@ -123,7 +125,7 @@ end
     cb
 end
 
-function push!(cb::CircularArrayBuffer, f::Function)
+function Base.push!(cb::CircularArrayBuffer, f::Function)
     if cb.length == capacity(cb)
         cb.first = (cb.first == capacity(cb) ? 1 : cb.first + 1)
     else

@@ -1,4 +1,4 @@
-export CircularTurnBuffer, CircularTurnBuffer, capacity, isfull
+export CircularTurnBuffer, circular_SART_buffer, capacity, isfull
 
 struct CircularTurnBuffer{names, types, Tbs} <: AbstractTurnBuffer{names, types}
     buffers::Tbs
@@ -13,11 +13,7 @@ end
 
 Base.getindex(b::CircularTurnBuffer{names, types}, i::Int) where {names, types} = NamedTuple{names, types}(Tuple(x[i] for x in b.buffers))
 
-###
-# CircularSARDBuffer
-###
-
-function CircularSARDBuffer(
+function circular_SART_buffer(
     ;capacity,
     state_eltype,
     state_size,
@@ -25,17 +21,17 @@ function CircularSARDBuffer(
     action_size=(),
     reward_eltype = Float64,
     reward_size=(),
-    isdone_eltype=Bool,
-    isdone_size=()
+    terminal_eltype=Bool,
+    terminal_size=()
 )
     CircularTurnBuffer(
         :state => (eltype=state_eltype, capacity=capacity+1, size=state_size),
         :action => (eltype=action_eltype, capacity=capacity+1, size=action_size),
         :reward => (eltype=reward_eltype, capacity=capacity, size=reward_size),
-        :isdone => (eltype=isdone_eltype, capacity=capacity, size=isdone_size)
+        :terminal => (eltype=terminal_eltype, capacity=capacity, size=terminal_size)
     )
 end
 
-Base.length(b::CircularTurnBuffer{SARD}) = length(b.buffers.isdone)
-capacity(b::CircularTurnBuffer{SARD}) = capacity(b.buffers.isdone)
-isfull(b::CircularTurnBuffer{SARD}) = isfull(b.buffers.isdone)
+Base.length(b::CircularTurnBuffer) = length(b.buffers.terminal)
+capacity(b::CircularTurnBuffer) = capacity(b.buffers.terminal)
+isfull(b::CircularTurnBuffer) = isfull(b.buffers.terminal)

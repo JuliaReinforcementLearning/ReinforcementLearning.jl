@@ -1,4 +1,6 @@
-export AbstractTurnBuffer, isfull, capacity, buffers
+export AbstractTurnBuffer, isfull, capacity, buffers,
+       get_state, get_action, get_reward, get_terminal,
+       push_state!, push_action!, push_reward!, push_terminal!
 
 """
     AbstractTurnBuffer{names, types} <: AbstractArray{NamedTuple{names, types}, 1}
@@ -33,4 +35,14 @@ Base.lastindex(b::AbstractTurnBuffer) = length(b)
 Base.getindex(b::AbstractTurnBuffer, i::Int) = eltype(b)(x[i] for x in buffers(b))
 Base.empty!(b::AbstractTurnBuffer) = for x in buffers(b) empty!(x) end
 
-const SARD = (:state, :action, :reward, :isdone)
+const SART = (:state, :action, :reward, :terminal)
+
+get_state(b::AbstractTurnBuffer) = buffers(b).state
+get_action(b::AbstractTurnBuffer) = buffers(b).action
+get_reward(b::AbstractTurnBuffer) = buffers(b).reward
+get_terminal(b::AbstractTurnBuffer) = buffers(b).terminal
+
+push_state!(b::AbstractTurnBuffer, state) = push!(get_state(b), state)
+push_action!(b::AbstractTurnBuffer, action) = push!(get_action(b), action)
+push_reward!(b::AbstractTurnBuffer, reward) = push!(get_reward(b), reward)
+push_terminal!(b::AbstractTurnBuffer, terminal) = push!(get_terminal(b), terminal)
