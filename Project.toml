@@ -1,0 +1,15 @@
+name = "ReinforcementLearning"
+uuid = "158674fc-8238-5cab-b5ba-03dfc80d1318"
+authors = ["Johanni Brea <jbrea@users.noreply.github.com>", "Jun Tian <tianjun.cpp@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
