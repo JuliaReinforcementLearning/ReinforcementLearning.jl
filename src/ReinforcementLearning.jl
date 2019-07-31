@@ -3,5 +3,7 @@ module ReinforcementLearning
     const RL = ReinforcementLearning
 
     include("Utils/Utils.jl")
+
+    import .Utils:capacity
     include("components/components.jl")
 end

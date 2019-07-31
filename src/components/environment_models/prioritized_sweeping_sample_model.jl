@@ -14,11 +14,11 @@ mutable struct PrioritizedSweepingSampleModel <: AbstractSampleBasedModel
     PQueue::PriorityQueue{Tuple{Any,Any},Float64}
     predecessors::Dict{Any,Set{Tuple{Any,Any,Float64,Bool}}}
     θ::Float64
-    sample_count::Int
-    PrioritizedSweepingSampleModel(θ::Float64=1e-4) = new(Dict{Tuple{Any,Any},Tuple{Float64,Bool,Any}}(),
-                                                     PriorityQueue{Tuple{Any,Any},Float64}(Base.Order.Reverse),
-                                                     Dict{Any,Set{Tuple{Any,Any,Float64,Bool}}}(),
-                                                     θ, 0)
+    PrioritizedSweepingSampleModel(θ::Float64=1e-4) = new(
+        Dict{Tuple{Any,Any},Tuple{Float64,Bool,Any}}(),
+        PriorityQueue{Tuple{Any,Any},Float64}(Base.Order.Reverse),
+        Dict{Any,Set{Tuple{Any,Any,Float64,Bool}}}(),
+        θ)
 end
 
 function update!(m::PrioritizedSweepingSampleModel, s, a, r, d, s′, P)
@@ -34,7 +34,6 @@ end
 
 function sample(m::PrioritizedSweepingSampleModel)
     if length(m.PQueue) > 0
-        m.sample_count += 1
         s, a = dequeue!(m.PQueue)
         r, d, s′ = m.experiences[(s, a)]
         s, a, r, d, s′
