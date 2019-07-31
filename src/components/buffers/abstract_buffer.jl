@@ -1,4 +1,4 @@
-export AbstractTurnBuffer, isfull, capacity, buffers,
+export AbstractTurnBuffer, buffers,
        get_state, get_action, get_reward, get_terminal,
        push_state!, push_action!, push_reward!, push_terminal!
 
@@ -25,15 +25,13 @@ and `types` is the coresponding types of the `names`.
 """
 abstract type AbstractTurnBuffer{names, types} <: AbstractArray{NamedTuple{names, types}, 1} end
 
-function isfull end
-function capacity end
 buffers(b::AbstractTurnBuffer) = getfield(b, :buffers)
 
 Base.size(b::AbstractTurnBuffer) = (length(b),)
 Base.isempty(b::AbstractTurnBuffer) = length(b) == 0
 Base.lastindex(b::AbstractTurnBuffer) = length(b)
-Base.getindex(b::AbstractTurnBuffer, i::Int) = eltype(b)(x[i] for x in buffers(b))
 Base.empty!(b::AbstractTurnBuffer) = for x in buffers(b) empty!(x) end
+Base.getindex(b::AbstractTurnBuffer{names, types}, i::Int) where {names, types} = NamedTuple{names, types}(Tuple(x[i] for x in buffers(b)))
 
 const SART = (:state, :action, :reward, :terminal)
 

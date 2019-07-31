@@ -2,7 +2,7 @@ export CircularTurnBuffer, circular_SART_buffer, capacity, isfull
 
 struct CircularTurnBuffer{names, types, Tbs} <: AbstractTurnBuffer{names, types}
     buffers::Tbs
-    function CircularTurnBuffer(configs::Pair{Symbol, NamedTuple{(:eltype, :capacity, :size), Tuple{DataType, Int, Tsize}}}...) where {Tsize<:NTuple{M, Int} where M}
+    function CircularTurnBuffer(configs::Vararg{Pair{Symbol, NamedTuple{(:eltype, :capacity, :size), Tuple{DataType, Int, NTuple{M, Int}}}} where M})
         buffers = merge(NamedTuple(),
                         (n, CircularArrayBuffer{c.eltype}(c.capacity, c.size...)) for (n, c) in configs)
         names = Tuple(name for (name, _) in configs)
@@ -11,12 +11,10 @@ struct CircularTurnBuffer{names, types, Tbs} <: AbstractTurnBuffer{names, types}
     end
 end
 
-Base.getindex(b::CircularTurnBuffer{names, types}, i::Int) where {names, types} = NamedTuple{names, types}(Tuple(x[i] for x in b.buffers))
-
 function circular_SART_buffer(
     ;capacity,
-    state_eltype,
-    state_size,
+    state_eltype=Int,
+    state_size=(),
     action_eltype=Int,
     action_size=(),
     reward_eltype = Float64,

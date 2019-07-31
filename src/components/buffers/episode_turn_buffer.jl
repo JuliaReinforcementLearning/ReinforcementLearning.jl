@@ -22,19 +22,19 @@ end
 capacity(b::EpisodeTurnBuffer) = isfull(b) ? length(b) : typemax(Int)
 
 function episode_SART_buffer(
-    ;state_type,
-    action_type=Int,
-    reward_type=Float64,
-    terminal_type=Bool)
+    ;state_eltype=Int,
+    action_eltype=Int,
+    reward_eltype=Float64,
+    terminal_eltype=Bool)
     EpisodeTurnBuffer(
-        :state => state_type,
-        :action => action_type,
-        :reward => reward_type,
-        :terminal => terminal_type
+        :state => state_eltype,
+        :action => action_eltype,
+        :reward => reward_eltype,
+        :terminal => terminal_eltype
     )
 end
 
 Base.length(b::EpisodeTurnBuffer{SART}) = length(b.buffers.terminal)
 
 "if the last turn is the terminal, then the EpisodeTurnBuffer is full"
-isfull(b::EpisodeTurnBuffer{SART}) = convert(Bool, b.buffers.terminal[end])
+isfull(b::EpisodeTurnBuffer{SART}) = length(b) > 0 && convert(Bool, b.buffers.terminal[end])

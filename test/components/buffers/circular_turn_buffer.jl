@@ -64,8 +64,51 @@
     @testset "2d state" begin
         b = circular_SART_buffer(
             ;capacity=3,
-            state_eltype=Int,
-            state_size=()
+            state_eltype=Array{Int, 2},
+            state_size=(2, 2)
         )
+
+        @test length(b) == 0
+        @test isfull(b) == false
+        @test isempty(b) == true
+        @test capacity(b) == 3
+
+        push_state!(b, [1 1; 1 1])
+        push_action!(b, 1)
+        push_reward!(b, 1.)
+        push_terminal!(b, false)
+        push_state!(b, [2 2; 2 2])
+        push_action!(b, 2)
+
+        @test length(b) == 1
+        @test isfull(b) == false
+        @test isempty(b) == false
+
+        push_reward!(b, 2.)
+        push_terminal!(b, false)
+        push_state!(b, [3 3; 3 3])
+        push_action!(b, 3)
+
+        push_reward!(b, 3.)
+        push_terminal!(b, false)
+        push_state!(b, [4 4; 4 4])
+        push_action!(b, 4)
+
+        @test length(b) == 3
+        @test isfull(b) == true
+        @test isempty(b) == false
+        @test b[1] == (state=[1 1; 1 1], action=1, reward=1., terminal=false)
+        @test b[end] == (state=[3 3; 3 3], action=3, reward=3., terminal=false)
+
+        push_reward!(b, 4.)
+        push_terminal!(b, true)
+        push_state!(b, [5 5; 5 5])
+        push_action!(b, 5)
+
+        # old experience should be removed
+        @test length(b) == 3
+        @test isfull(b) == true
+        @test b[1] == (state=[2 2; 2 2], action=2, reward=2., terminal=false)
+        @test b[end] == (state=[4 4; 4 4], action=4, reward=4., terminal=true)
     end
 end
