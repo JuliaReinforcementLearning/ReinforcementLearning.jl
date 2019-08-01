@@ -2,7 +2,7 @@ using Test
 using ReinforcementLearningEnvironments
 using ArcadeLearningEnvironment
 using POMDPModels
-using ViZDoom
+# using ViZDoom
 using PyCall
 using Hanabi
 

@@ -92,5 +92,5 @@ function list_gym_env_names(;
         "gym.envs.toy_text",
         "gym.envs.unittest"])
     gym = pyimport("gym")
-    [x.id for x in gym.envs.registry.all() if split(x._entry_point, ':')[1] in modules]
+    [x.id for x in gym.envs.registry.all() if split(x.entry_point, ':')[1] in modules]
 end

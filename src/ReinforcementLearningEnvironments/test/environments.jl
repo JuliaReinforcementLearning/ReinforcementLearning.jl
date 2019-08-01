@@ -50,7 +50,7 @@
 
     for env_exp in [
         :(HanabiEnv()),
-        :(basic_ViZDoom_env()),
+        # :(basic_ViZDoom_env()),  # comment out due to https://github.com/JuliaReinforcementLearning/ViZDoom.jl/issues/7
         :(CartPoleEnv()),
         :(MountainCarEnv()),
         :(ContinuousMountainCarEnv()),

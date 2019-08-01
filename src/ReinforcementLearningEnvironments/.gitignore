@@ -6,3 +6,8 @@ deps/deps.jl
 Manifest.toml
 
 _vizdoom.ini
+
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json

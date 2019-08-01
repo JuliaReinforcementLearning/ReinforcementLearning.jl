@@ -72,7 +72,7 @@ end
 
 function interact!(env::MDPEnv, action)
     s = rand(env.rng, transition(env.model, env.state, env.actions[action]))
-    r = reward(env.model, env.state, env.actions[action])
+    r = POMDPs.reward(env.model, env.state, env.actions[action])
     env.state = s
     (observation = stateindex(env.model, s),
      reward = r,
@@ -141,6 +141,7 @@ struct DeterministicNextStateReward
 end
 reward(::AbstractRNG, r::DeterministicNextStateReward, s, a, s′) = r.value[s′]
 expected_rewards(r::DeterministicNextStateReward, trans_probs) = expected_rewards(r.value, trans_probs)
+
 function expected_rewards(r::AbstractVector, trans_probs)
     result = zeros(size(trans_probs))
     for i in eachindex(trans_probs)
@@ -321,7 +322,11 @@ the same value.
 function set_terminal_states!(mdp, range)
     mdp.isterminal[range] .= 1
     for s in findall(x -> x == 1, mdp.isterminal)
-        mdp.reward[:, s] .= mean(mdp.reward[:, s])
+        if mdp.reward isa DeterministicStateActionReward
+            mdp.reward.value[:, s] .= mean(mdp.reward.value[:, s])
+        else
+            mdp.reward[:, s] .= mean(mdp.reward[:, s])
+        end
         for a in 1:length(mdp.action_space)
             empty_trans_prob!(mdp.trans_probs[a, s])
         end
@@ -334,7 +339,11 @@ Returns a random deterministic SimpleMDPEnv.
 """
 function deterministic_MDP(; ns = 10^4, na = 10)
     mdp = SimpleMDPEnv(ns, na, init = "deterministic")
-    mdp.reward = mdp.reward .* (mdp.reward .< -1.5)
+    if mdp.reward isa DeterministicStateActionReward
+        mdp.reward.value .*= mdp.reward.value .< -1.5
+    else
+        mdp.reward = mdp.reward .* (mdp.reward .< -1.5)
+    end
     mdp
 end
 
@@ -353,7 +362,11 @@ Returns a tree_MDP with random rewards.
 function deterministic_tree_MDP_with_rand_reward(; args...)
     mdp = deterministic_tree_MDP(; args...)
     nonterminals = findall(x -> x == 0, mdp.isterminal)
-    mdp.reward[:, nonterminals] = -rand(length(mdp.action_space), length(nonterminals))
+    if mdp.reward isa DeterministicStateActionReward
+        mdp.reward.value[:, nonterminals] = -rand(length(mdp.action_space), length(nonterminals))
+    else
+        mdp.reward[:, nonterminals] = -rand(length(mdp.action_space), length(nonterminals))
+    end
     mdp
 end
 
@@ -377,7 +390,11 @@ Returns a random deterministic absorbing SimpleMDPEnv
 """
 function absorbing_deterministic_tree_MDP(;ns = 10^3, na = 10)
     mdp = SimpleMDPEnv(ns, na, init = "deterministic")
-    mdp.reward .= mdp.reward .* (mdp.reward .< -.5)
+    if mdp.reward isa DeterministicStateActionReward
+        mdp.reward.value .*= mdp.reward.value .< -.5
+    else
+        mdp.reward .= mdp.reward .* (mdp.reward .< -.5)
+    end
     mdp.initialstates = 1:div(ns, 100)
     reset!(mdp)
     set_terminal_states!(mdp, ns - div(ns, 100) + 1:ns)
