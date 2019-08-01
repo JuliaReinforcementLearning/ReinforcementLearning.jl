@@ -58,6 +58,7 @@
         :(MDPEnv(LegacyGridWorld())),
         :(POMDPEnv(TigerPOMDP())),
         :(SimpleMDPEnv()),
+        :(DiscreteMazeEnv()),
         :(deterministic_MDP()),
         :(absorbing_deterministic_tree_MDP()),
         :(stochastic_MDP()),

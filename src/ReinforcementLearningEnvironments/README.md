@@ -42,6 +42,7 @@ By default, only some basic environments are installed. If you want to use some 
 - PendulumEnv
 - MDPEnv
 - POMDPEnv
+- DiscreteMazeEnv
 - SimpleMDPEnv
   - deterministic_MDP
   - absorbing_deterministic_tree_MDP
