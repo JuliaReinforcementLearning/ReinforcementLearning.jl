@@ -10,11 +10,11 @@
         end
     end
 
-    @testset "discount_reward" begin
+    @testset "discount_rewards" begin
         reward, γ = Float64[1, 2, 3], 0.5
-        @test discount_reward(reward, γ) ≈ [2.75, 3.5, 3.0]
+        @test discount_rewards(reward, γ) ≈ [2.75, 3.5, 3.0]
 
         reward, γ = [1.0], 0.5
-        @test discount_reward(reward, γ) ≈ reward
+        @test discount_rewards(reward, γ) ≈ reward
     end
 end

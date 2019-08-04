@@ -1,13 +1,14 @@
 export TDLearner, update!
 
-using .Utils: discount_reward
+using .Utils: discount_rewards, discount_rewards_reduced
 
 """
     TDLearner(approximator::Tapp, γ::Float64, α::Float64; n::Int=0) where {Tapp<:VApproximator}
     TDLearner(approximator::Tapp, γ::Float64, α::Float64; n::Int=0, method::Symbol=:SARSA) where {Tapp<:QApproximator} 
 
-The `TDLearner`(Temporal Difference Learner) use the latest `n` step experiences
-to update the `approximator`. `γ` is the discount rate of experience.
+The `TDLearner`(Temporal Difference Learner) use the latest `n` step experiences to update the `approximator`.
+Note that `n` starts with `0`, which means looking forward for the next `n` steps.
+`γ` is the discount rate of experience.
 `α` is the learning rate.
 
 For [`VApproximator`](@ref), the only supported update method is `:SRS`, which means
@@ -37,14 +38,20 @@ end
 (learner::TDLearner{<:QApproximator})(s, a) = learner.approximator(s, a)
 
 function update!(learner::TDLearner{<:VApproximator, :SRS}, states, rewards, terminals, next_states)
-    n, γ, V, α, N = learner.n, learner.γ, learner.approximator, learner.α, length(states)
-    discounted_rewards = discount_reward(rewards, γ)
-    # only use the latest `n` steps to update `learner`
-    # note that `n` starts with `0`, which means looking forward for the next `n` steps
-    @views for i in max(1, N - n):N
-        G = discounted_rewards[i] + terminals[i] * γ^n * V(next_states[end])
-        s = states[i]
-        update!(V, s => α * (G - V(s)))
+    n, γ, V, α = learner.n, learner.γ, learner.approximator, learner.α
+
+    if terminals[end]
+        @views gains = discount_rewards(rewards[max(end-n, 1):end], γ)  # n starts with 0
+        for (i, G) in enumerate(gains)
+            @views s = states[end-length(gains)+i]
+            update!(V, s => α * (G - V(s)))
+        end
+    else
+        if length(states) ≥ (n + 1)  # n starts with 0
+            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^n * V(next_states[end])
+            @views s = states[end-n]
+            update!(V, s => α * (G - V(s)))
+        end
     end
 end
 

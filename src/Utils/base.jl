@@ -1,4 +1,4 @@
-export findallmax, discount_reward, discount_reward!
+export findallmax, discount_rewards, discount_rewards!
 
 """
     findallmax(A::AbstractArray)
@@ -45,12 +45,14 @@ function findallmax(A)
     end
 end
 
-function discount_reward!(discounted_reward, reward, γ)
-    discounted_reward[end] = reward[end]
-    for i in (length(reward)-1):-1:1
-        discounted_reward[i] = reward[i] + discounted_reward[i+1] * γ
+function discount_rewards!(new_rewards, rewards, γ)
+    new_rewards[end] = rewards[end]
+    for i in (length(rewards)-1):-1:1
+        new_rewards[i] = rewards[i] + new_rewards[i+1] * γ
     end
-    discounted_reward
+    new_rewards
 end
 
-discount_reward(reward, γ) = discount_reward!(similar(reward), reward, γ)
+discount_rewards(rewards, γ) = discount_rewards!(similar(rewards), rewards, γ)
+
+discount_rewards_reduced(rewards, γ) = foldr((r, g)->r + γ * g, rewards)
