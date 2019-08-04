@@ -10,14 +10,6 @@ Install:
 (v1.1) pkg> add https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl
 ```
 
-**TODO:**
-
-- [x] Add a Docker file for quick test.
-    ```
-    $ docker run -it --rm juliareinforcementlearning/reinforcementlearningenvironments
-    ```
-- [ ] Add benchmarks.
-
 ## API
 
 | Method | Description |
@@ -25,9 +17,9 @@ Install:
 | `observe(env, observer=:default)` | Return the observation of `env` from the view of `observer`|
 | `reset!(env)` | Reset `env` to an initial state|
 | `interact!(env, action)` | Send `action` to `env`. For some multi-agent environments, `action` can be a dictionary of actions from different agents|
+| **Optional Methods** | |
 | `action_space(env)` | Return the action space of `env` |
 | `observation_space(env)` | Return the observation space of `env`|
-| **Optional Methods** | |
 | `render(env)` | Show the current state of environment |
 
 ## Supported Environments
@@ -59,7 +51,7 @@ By default, only some basic environments are installed. If you want to use some 
 | `AtariEnv` | [ArcadeLearningEnvironment.jl](https://github.com/JuliaReinforcementLearning/ArcadeLearningEnvironment.jl) | |
 | `ViZDoomEnv` | [ViZDoom.jl](https://github.com/JuliaReinforcementLearning/ViZDoom.jl) | Currently only a basic environment is supported. (By calling `basic_ViZDoom_env()`)|
 | `GymEnv` | [PyCall.jl](https://github.com/JuliaPy/PyCall.jl) | You need to manually install `gym` first |
-| `HanabiEnv` | [Hanabi.jl](https://github.com/JuliaReinforcementLearning/Hanabi.jl) | `Hanabi.jl` hasn't been registered yet. Install by `pkg> add https://github.com/JuliaReinforcementLearning/Hanabi.jl` |
+| `HanabiEnv` | [Hanabi.jl](https://github.com/JuliaReinforcementLearning/Hanabi.jl) | Hanabi is a turn based multi-player environment, the API is slightly different from the environments above.|
 
 **TODO:**
 
@@ -72,7 +64,7 @@ Take the `AtariEnv` for example:
 
 1. Install this package by:
     ```julia
-    (v1.1) pkg> add https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl
+    (v1.1) pkg> add ReinforcementLearningEnvironments
     ```
 2. Install corresponding dependent package by:
     ```julia
