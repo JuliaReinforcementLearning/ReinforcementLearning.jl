@@ -1,4 +1,4 @@
-export findallmax
+export findallmax, discount_reward, discount_reward!
 
 """
     findallmax(A::AbstractArray)
@@ -44,3 +44,13 @@ function findallmax(A)
         maxval, idxs
     end
 end
+
+function discount_reward!(discounted_reward, reward, γ)
+    discounted_reward[end] = reward[end]
+    for i in (length(reward)-1):-1:1
+        discounted_reward[i] = reward[i] + discounted_reward[i+1] * γ
+    end
+    discounted_reward
+end
+
+discount_reward(reward, γ) = discount_reward!(similar(reward), reward, γ)

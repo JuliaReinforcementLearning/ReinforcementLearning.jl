@@ -2,8 +2,8 @@ module ReinforcementLearning
     export RL
     const RL = ReinforcementLearning
 
+    using Reexport
     include("Utils/Utils.jl")
 
-    import .Utils:capacity
     include("components/components.jl")
 end
