@@ -19,7 +19,7 @@ For [`QApproximator`](@ref), the following methods are supported:
 - `:SARSA`
 - `:ExpectedSARSA`
 """
-struct TDLearner{Tapp <: AbstractApproximator, method}
+struct TDLearner{Tapp <: AbstractApproximator, method} <: AbstractLearner
     approximator::Tapp
     γ::Float64
     α::Float64

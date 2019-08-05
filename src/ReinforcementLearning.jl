@@ -4,6 +4,6 @@ module ReinforcementLearning
 
     using Reexport
     include("Utils/Utils.jl")
-
     include("components/components.jl")
+    include("glue/glue.jl")
 end
