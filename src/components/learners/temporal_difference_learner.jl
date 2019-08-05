@@ -57,4 +57,18 @@ end
 
 function update!(learner::TDLearner{<:QApproximator, :SARSA}, states, actions, rewards, terminals, next_states, next_actions)
     n, γ, Q, α = learner.n, learner.γ, learner.approximator, learner.α
+
+    if terminals[end]
+        @views gains = discount_rewards(rewards[max(end-n, 1):end], γ)  # n starts with 0
+        for (i, G) in enumerate(gains)
+            @views s, a = states[end-length(gains)+i], actions[end-length(gains)+i]
+            update!(Q, (s, a) => α * (G - Q(s, a)))
+        end
+    else
+        if length(states) ≥ (n + 1)  # n starts with 0
+            @views s, a, s′, a′ = states[end-n], actions[end-n], next_states[end], next_actions[end]
+            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^n * Q(s′, a′)
+            update!(Q, (s, a) => α * (G - Q(s, a)))
+        end
+    end
 end
