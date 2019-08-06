@@ -1,42 +1,34 @@
 export train
 
 using ReinforcementLearningEnvironments
-using TensorBoardLogger, Logging
 
-mutable struct RuntimeInfo
-    step::Int
-    episode::Int
-    logger::TBLogger
-    meta::Dict{Any,Any}
-end
+function train(
+    agent::AbstractAgent,
+    env::AbstractEnv,
+    stop_condition::Function
+    ;pre_episode_hook=identity,
+    post_episode_hook=identity,
+    pre_act_hook=identity,
+    post_act_hook=identity
+    )
 
-inc_episode(rt::RuntimeInfo) = rt.episode += 1
-inc_step(rt::RuntimeInfo) = rt.step += 1
-Logging.with_logger(f::Function, rt::RuntimeInfo) = with_logger(f, rt.logger)
+    reset!(env)
+    obs = observe(env)
+    pre_episode_hook(agent, env, obs)
 
-function train(agent::AbstractAgent, env::AbstractEnv, stop_condition::Function, runtime_info)
     while true
-        stop_condition(agent, env, runtime_info) && break
+        stop_condition(agent, env) && break
 
-        obs = observe(env)
+        pre_act_hook(agent, env, obs)
+        action = agent(obs)
+        env(action)
+        post_act_hook(agent, env, obs, action)
 
         if is_terminal(obs)
-            post_episode(agent, env, runtime_info)
-            pre_episode(agent, env, runtime_info)
+            post_episode_hook(agent, env, obs)
+            reset!(env)
             obs = observe(env)
+            pre_episode_hook(agent, env, obs)
         end
-
-        action = agent(obs, runtime_info)
-        pre_act(agent, env, runtime_info)
-        env(action)
-        post_act(agent, env, runtime_info)
     end
 end
-
-is_terminal(obs) = obs.isdone
-
-pre_episode(agent, env, runtime_info) = reset!(env)
-post_episode(agent, env, runtime_info) = inc_episode(runtime_info)
-
-pre_act(agent, env, runtime_info) = nothing
-post_act(agent, env, runtime_info) = inc_step(runtime_info)

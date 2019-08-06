@@ -1,6 +1,6 @@
 export DQN, update!
 
-struct DQN{Tq<:QApproximator, Tf} <: AbstractLearner
+struct DQN{Tq<:QApproximator, Tf} <: AbstractLearner{Tq}
     Q::Tq
     γ::Float64
     n::Int
