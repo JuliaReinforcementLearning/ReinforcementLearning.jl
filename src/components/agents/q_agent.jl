@@ -6,6 +6,5 @@ struct QAgent{Tl<:AbstractLearner, Tb<:AbstractTurnBuffer} <: AbstractAgent
     buffer::Tb
 end
 
-function (agent::Agent)(s)
-    push!(agent.buffer, obs)
+function (agent::QAgent)(s)
 end

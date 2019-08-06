@@ -1,4 +1,4 @@
-export CircularTurnBuffer, circular_SART_buffer, capacity, isfull
+export CircularTurnBuffer, circular_RTSA_buffer, capacity, isfull
 
 struct CircularTurnBuffer{names, types, Tbs} <: AbstractTurnBuffer{names, types}
     buffers::Tbs
@@ -11,7 +11,7 @@ struct CircularTurnBuffer{names, types, Tbs} <: AbstractTurnBuffer{names, types}
     end
 end
 
-function circular_SART_buffer(
+function circular_RTSA_buffer(
     ;capacity,
     state_eltype=Int,
     state_size=(),
@@ -22,14 +22,11 @@ function circular_SART_buffer(
     terminal_eltype=Bool,
     terminal_size=()
 )
+    capacity += 1  # we need to store extra dummy (reward, terminal)
     CircularTurnBuffer(
-        :state => (eltype=state_eltype, capacity=capacity+1, size=state_size),
-        :action => (eltype=action_eltype, capacity=capacity+1, size=action_size),
         :reward => (eltype=reward_eltype, capacity=capacity, size=reward_size),
-        :terminal => (eltype=terminal_eltype, capacity=capacity, size=terminal_size)
+        :terminal => (eltype=terminal_eltype, capacity=capacity, size=terminal_size),
+        :state => (eltype=state_eltype, capacity=capacity, size=state_size),
+        :action => (eltype=action_eltype, capacity=capacity, size=action_size)
     )
 end
-
-Base.length(b::CircularTurnBuffer) = length(b.buffers.terminal)
-capacity(b::CircularTurnBuffer) = capacity(b.buffers.terminal)
-isfull(b::CircularTurnBuffer) = isfull(b.buffers.terminal)

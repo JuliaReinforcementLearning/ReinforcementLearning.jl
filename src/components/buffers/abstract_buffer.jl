@@ -1,6 +1,4 @@
-export AbstractTurnBuffer, buffers,
-       get_state, get_action, get_reward, get_terminal,
-       push_state!, push_action!, push_reward!, push_terminal!
+export AbstractTurnBuffer, buffers, RTSA, isfull
 
 """
     AbstractTurnBuffer{names, types} <: AbstractArray{NamedTuple{names, types}, 1}
@@ -11,10 +9,9 @@ and `types` is the coresponding types of the `names`.
 
 
 | Required Methods| Brief Description |
-|:----------------|:------------------|
+|:----------------RTSA----------------|
 | `Base.push!(b::AbstractTurnBuffer{names, types}, s[, a, r, d, s′, a′])` | Push a turn info into the buffer. According to different `names` and `types` of the buffer `b`, it may accept different number of arguments |
 | `isfull(b)` | Check whether the buffer is full or not |
-| `capacity(b)` | The maximum length of buffer |
 | `Base.length(b)` | Return the length of buffer |
 | `Base.getindex(b::AbstractTurnBuffer{names, types})` | Return a turn of type `NamedTuple{names, types}` |
 | `Base.empty!(b)` | Reset the buffer |
@@ -28,19 +25,28 @@ abstract type AbstractTurnBuffer{names, types} <: AbstractArray{NamedTuple{names
 buffers(b::AbstractTurnBuffer) = getfield(b, :buffers)
 
 Base.size(b::AbstractTurnBuffer) = (length(b),)
-Base.isempty(b::AbstractTurnBuffer) = length(b) == 0
 Base.lastindex(b::AbstractTurnBuffer) = length(b)
+Base.isempty(b::AbstractTurnBuffer) = all(isempty(x) for x in buffers(b))
 Base.empty!(b::AbstractTurnBuffer) = for x in buffers(b) empty!(x) end
 Base.getindex(b::AbstractTurnBuffer{names, types}, i::Int) where {names, types} = NamedTuple{names, types}(Tuple(x[i] for x in buffers(b)))
+Base.length(b::AbstractTurnBuffer) = minimum(length(x) for x in buffers(b))
+isfull(b::AbstractTurnBuffer) = all(isfull(x) for x in buffers(b))
 
-const SART = (:state, :action, :reward, :terminal)
+function Base.push!(b::AbstractTurnBuffer, args...)
+    for (b, x) in zip(buffers(b), args)
+        push!(b, x)
+    end
+end
 
-get_state(b::AbstractTurnBuffer) = buffers(b).state
-get_action(b::AbstractTurnBuffer) = buffers(b).action
-get_reward(b::AbstractTurnBuffer) = buffers(b).reward
-get_terminal(b::AbstractTurnBuffer) = buffers(b).terminal
+const RTSA = (:reward, :terminal, :state, :action)
 
-push_state!(b::AbstractTurnBuffer, state) = push!(get_state(b), state)
-push_action!(b::AbstractTurnBuffer, action) = push!(get_action(b), action)
-push_reward!(b::AbstractTurnBuffer, reward) = push!(get_reward(b), reward)
-push_terminal!(b::AbstractTurnBuffer, terminal) = push!(get_terminal(b), terminal)
+Base.getindex(b::AbstractTurnBuffer{RTSA, types}, i::Int) where {types} = (
+    state = buffers(b).state[i],
+    action = buffers(b).action[i],
+    reward = buffers(b).reward[i+1],
+    terminal = buffers(b).terminal[i+1],
+    next_state = buffers(b).state[i+1],
+    next_action = buffers(b).action[i+1]
+)
+
+Base.length(b::AbstractTurnBuffer{RTSA}) = max(0, length(buffers(b).terminal) - 1)

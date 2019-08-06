@@ -8,7 +8,7 @@ learner(agent::AbstractAgent) = agent.learner
 
 buffer(agent::AbstractAgent) = agent.buffer
 
-function (agent::AbstractAgent)(obs::EnvObservation;)
+function (agent::AbstractAgent)(obs::EnvObservation)
     s = state(obs)
     a = agent(s)
     update!(agent, obs => a)

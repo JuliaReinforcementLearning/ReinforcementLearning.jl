@@ -22,6 +22,7 @@ function train(
         pre_act_hook(agent, env, obs)
         action = agent(obs)
         env(action)
+        obs = observe(env)
         post_act_hook(agent, env, obs, action)
 
         if is_terminal(obs)
