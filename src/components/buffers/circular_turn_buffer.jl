@@ -37,6 +37,10 @@ sample_indices(b::CircularTurnBuffer{RTSA}, batch_size::Int, n_step::Int) = rand
 
 function sample(b::CircularTurnBuffer{RTSA}; batch_size=32, n_step=1, λ=1.0)
     inds = sample_indices(b, batch_size, n_step)
+    select_batch(b, inds; batch_size=batch_size, n_step=n_step, λ=λ)
+end
+
+function select_batch(b::CircularTurnBuffer{RTSA}, inds; batch_size, n_step, λ)
     next_inds = inds .+ n_step
 
     states_batch = view(state(b), inds)
@@ -48,15 +52,15 @@ function sample(b::CircularTurnBuffer{RTSA}; batch_size=32, n_step=1, λ=1.0)
     # make sure that we only consider experiences in current episode
     for i in 1:batch_size
         ind = inds[i]
-        isdone_consecutive = view(terminal(b), ind:ind+n_step-1)
+        isdone_consecutive = view(terminal(b), ind+1:ind+n_step)
         d = findfirst(isdone_consecutive)
 
         if isnothing(d)
             terminals_batch[i] = false
-            rewards_batch[i] = discount_rewards_reduced(view(reward(b), ind:ind+n_step-1), λ)
+            rewards_batch[i] = discount_rewards_reduced(view(reward(b), ind+1:ind+n_step), λ)
         else
             terminals_batch[i] = true
-            rewards_batch[i] = discount_rewards_reduced(view(reward(b), ind:ind+d-1), λ)
+            rewards_batch[i] = discount_rewards_reduced(view(reward(b), ind+1:ind+d), λ)
         end
     end
 
