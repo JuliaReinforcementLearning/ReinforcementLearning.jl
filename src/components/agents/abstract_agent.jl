@@ -13,3 +13,9 @@ function (agent::AbstractAgent)(obs::EnvObservation)
     a = agent(s)
     update!(agent, obs => a)
 end
+
+function update!(agent::AbstractAgent, experience::Pair)
+    obs, a = experience
+    update!(buffer(agent); reward=reward(obs), terminal=terminal(obs), state=state(obs), action=a)
+    update!(agent)
+end

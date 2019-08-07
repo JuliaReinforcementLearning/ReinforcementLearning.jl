@@ -38,15 +38,30 @@ function Base.push!(b::AbstractTurnBuffer, args...)
     end
 end
 
+function Base.push!(b::AbstractTurnBuffer; kw...)
+    for (k, v) in kw
+        push!(getproperty(buffers(b), k), v)
+    end
+end
+
+#####
+# RTSA
+#####
+
+state(b::AbstractTurnBuffer) = buffers(b).state
+action(b::AbstractTurnBuffer) = buffers(b).action
+reward(b::AbstractTurnBuffer) = buffers(b).reward
+terminal(b::AbstractTurnBuffer) = buffers(b).terminal
+
 const RTSA = (:reward, :terminal, :state, :action)
 
 Base.getindex(b::AbstractTurnBuffer{RTSA, types}, i::Int) where {types} = (
-    state = buffers(b).state[i],
-    action = buffers(b).action[i],
-    reward = buffers(b).reward[i+1],
-    terminal = buffers(b).terminal[i+1],
-    next_state = buffers(b).state[i+1],
-    next_action = buffers(b).action[i+1]
+    state = state(b)[i],
+    action = action(b)[i],
+    reward = reward(b)[i+1],
+    terminal = terminal(b)[i+1],
+    next_state = state(b)[i+1],
+    next_action = action(b)[i+1]
 )
 
-Base.length(b::AbstractTurnBuffer{RTSA}) = max(0, length(buffers(b).terminal) - 1)
+Base.length(b::AbstractTurnBuffer{RTSA}) = max(0, length(terminal(b)) - 1)
