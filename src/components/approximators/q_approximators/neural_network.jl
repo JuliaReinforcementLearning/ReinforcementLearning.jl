@@ -18,7 +18,7 @@ end
 (Q::NeuralNetworkQ)(s, a::Int) = Q(s)[a]
 
 "get Q value of the batch"
-function (Q::NeuralNetworkQ)(s, a::Vector{Int})
+function batch_estimate(Q::NeuralNetworkQ, s, a)
     q = Q(s)
     q[CartesianIndex.(a, axes(q, 2))]
 end

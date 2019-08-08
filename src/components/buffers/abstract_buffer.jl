@@ -33,7 +33,7 @@ Base.length(b::AbstractTurnBuffer) = minimum(length(x) for x in buffers(b))
 isfull(b::AbstractTurnBuffer) = all(isfull(x) for x in buffers(b))
 
 function Base.push!(b::AbstractTurnBuffer, args...)
-    for (b, x) in zip(buffers(b), args)
+    for (b, x) in zip(buffers(b)..., args)
         push!(b, x)
     end
 end
@@ -42,6 +42,16 @@ function Base.push!(b::AbstractTurnBuffer; kw...)
     for (k, v) in kw
         push!(getproperty(buffers(b), k), v)
     end
+end
+
+function Base.push!(b::AbstractTurnBuffer, experience::Pair{<:EnvObservation})
+    obs, a = experience
+    push!(b;
+    state=state(obs),
+    reward =reward(obs),
+    terminal=terminal(obs),
+    action=a,
+    obs.meta...)
 end
 
 #####

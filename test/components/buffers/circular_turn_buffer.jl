@@ -68,4 +68,28 @@
         @test b[1] == (state=[2 2; 2 2], action=2, reward=2., terminal=false, next_state=[3 3; 3 3], next_action=3)
         @test b[end] == (state=[4 4; 4 4], action=4, reward=4., terminal=false, next_state=[5 5; 5 5], next_action=5)
     end
+
+    @testset "batch sample" begin
+        b = circular_RTSA_buffer(
+            ;capacity=5,
+            state_eltype=Int,
+            state_size=()
+        )
+
+        push!(b, 1.0, true, 1, 1)
+        push!(b, 1.0, false, 2, 2)
+        push!(b, 2.0, true, 3, 3)
+        push!(b, 3.0, false, 4, 4)
+        push!(b, 4.0, false, 5, 5)
+        push!(b, 5.0, true, 6, 6)
+
+        inds = [1, 2, 3, 4]
+        @test RL.select_batch(b, inds; n_step=2, γ=0.5) == (
+            states = [1, 2, 3, 4],
+            actions = [1, 2, 3, 4],
+            rewards = [2.0, 2.0, 5.0, 6.5],
+            terminals = [true, true, false, true],
+            next_states = [3, 4, 5, 6]
+        )
+    end
 end

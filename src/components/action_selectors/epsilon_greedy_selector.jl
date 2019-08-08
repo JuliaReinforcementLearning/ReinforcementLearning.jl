@@ -29,6 +29,15 @@ function get_ϵ(s::EpsilonGreedySelector{:linear}, step)
     end
 end
 
+function get_ϵ(s::EpsilonGreedySelector{:exp}, step)
+    if step <= s.warmup_steps
+        s.ϵ_init
+    else
+        n = step - s.warmup_steps
+        s.ϵ_stable + (s.ϵ_init - s.ϵ_stable) * exp(-1. * n / s.decay_steps)
+    end
+end
+
 """
     (s::EpsilonGreedySelector)(values; step) where T
 
