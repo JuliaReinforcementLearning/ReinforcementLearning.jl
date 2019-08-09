@@ -5,24 +5,24 @@ using ReinforcementLearningEnvironments:reset!
 
 dummy_condition = (xs...) -> nothing
 
+function stage_run()
+end
+
 function train(
     agent::AbstractAgent,
     env::AbstractEnv,
-    stop_condition::Function
-    ;pre_episode_hook=dummy_condition,
-    post_episode_hook=dummy_condition,
-    pre_act_hook=dummy_condition,
-    post_act_hook=dummy_condition
+    stop_condition
+    ;hook=EmptyHook()
     )
 
     reset!(env)
     obs = observe(env)
-    pre_episode_hook(agent, env, obs)
+    hook(PRE_EPISODE_STAGE, agent, env, obs)
 
     while true
-        stop_condition(agent, env) && break
+        stop_condition(agent, env, obs) && break
 
-        pre_act_hook(agent, env, obs)
+        hook(PRE_ACT_STAGE, agent, env, obs)
         action = agent(obs)
 
         # async here?
@@ -30,16 +30,16 @@ function train(
         env(action)
 
         obs = observe(env)
-        post_act_hook(agent, env, obs, action)
+        hook(POST_ACT_STAGE, agent, env, obs; action=action)
 
         if is_terminal(obs)
-            post_episode_hook(agent, env, obs)
+            hook(POST_EPISODE_STAGE, agent, env, obs)
             r, t = obs.reward, obs.terminal  # !!! deepcopy?
             reset!(env)
             obs = observe(env)
             obs.reward = r
             obs.terminal = t
-            pre_episode_hook(agent, env, obs)
+            hook(PRE_EPISODE_STAGE, agent, env, obs)
         end
     end
 end

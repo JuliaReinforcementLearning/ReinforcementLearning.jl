@@ -33,7 +33,7 @@ Base.length(b::AbstractTurnBuffer) = minimum(length(x) for x in buffers(b))
 isfull(b::AbstractTurnBuffer) = all(isfull(x) for x in buffers(b))
 
 function Base.push!(b::AbstractTurnBuffer, args...)
-    for (b, x) in zip(buffers(b)..., args)
+    for (b, x) in zip(buffers(b), args)
         push!(b, x)
     end
 end
