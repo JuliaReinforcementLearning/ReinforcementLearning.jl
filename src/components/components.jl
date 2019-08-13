@@ -1,4 +1,5 @@
 import .Utils:capacity
+import .Utils:update!
 
 include("action_selectors/action_selectors.jl")
 include("approximators/approximators.jl")
