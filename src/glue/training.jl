@@ -30,7 +30,7 @@ function train(
         env(action)
 
         obs = observe(env)
-        hook(POST_ACT_STAGE, agent, env, obs; action=action)
+        hook(POST_ACT_STAGE, agent, env, obs => action)
 
         if is_terminal(obs)
             hook(POST_EPISODE_STAGE, agent, env, obs)

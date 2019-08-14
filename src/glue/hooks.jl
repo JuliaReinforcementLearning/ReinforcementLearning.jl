@@ -1,3 +1,11 @@
+export AbstractStage,
+       PreEpisodeStage, PRE_EPISODE_STAGE,
+       PostEpisodeStage, POST_EPISODE_STAGE,
+       PreActStage, PRE_ACT_STAGE,
+       PostActStage, POST_ACT_STAGE,
+       AbstractHook,
+       ComposedHook, EmptyHook, StepsPerEpisode, RewardsPerEpisode, TotalRewardPerEpisode
+
 abstract type AbstractStage end
 
 struct PreEpisodeStage <: AbstractStage end
@@ -12,10 +20,25 @@ const POST_ACT_STAGE = PostActStage()
 
 abstract type AbstractHook end
 
-(hook::AbstractHook)(::T, args; kw...) where T<:AbstractStage = nothing
+(hook::AbstractHook)(::T, agent, env, obs) where T <: AbstractStage = nothing
 
 # https://github.com/JuliaLang/julia/issues/14919
 # function (f::Function)(stage::T, args...;kw...) where T<: AbstractStage end
+
+#####
+# ComposedHook
+#####
+
+struct ComposedHook{T<:Tuple} <: AbstractHook
+    hooks::T
+    ComposedHook(hooks...) = new{typeof(hooks)}(hooks)
+end
+
+function (hook::ComposedHook)(stage, args...;kw...)
+    for h in hook.hooks
+        h(stage, args...;kw...)
+    end
+end
 
 #####
 # EmptyHook
@@ -59,14 +82,15 @@ mutable struct RewardsPerEpisode <: AbstractHook
 end
 
 function RewardsPerEpisode(;rewards=Vector{Vector{Float64}}(), tag="TRAINING")
-    RewardsPerEpisode(reward, tag)
+    RewardsPerEpisode(rewards, tag)
 end
 
 function (hook::RewardsPerEpisode)(::PreEpisodeStage, agent, env, obs)
     push!(hook.rewards, [])
 end
 
-function (hook::RewardsPerEpisode)(::PostActStage, agent, env, obs)
+function (hook::RewardsPerEpisode)(::PostActStage, agent, env, obs_action)
+    obs, action = obs_action
     push!(hook.rewards[end], reward(obs))
 end
 
@@ -88,7 +112,8 @@ function TotalRewardPerEpisode(;rewards=Float64[], reward=0.0, tag="TRAINING")
     TotalRewardPerEpisode(rewards, reward, tag)
 end
 
-function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env, obs)
+function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env, obs_action)
+    obs, action = obs_action
     hook.reward += reward(obs)
 end
 
