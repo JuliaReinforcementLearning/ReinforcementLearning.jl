@@ -1,6 +1,0 @@
-include("aggregation.jl")
-include("fourier.jl")
-include("linear.jl")
-include("polynomial.jl")
-include("tabular.jl")
-include("tiling.jl")
