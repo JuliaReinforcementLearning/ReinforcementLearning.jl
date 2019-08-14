@@ -16,19 +16,6 @@ buffer =  circular_RTSA_buffer(;capacity=10000, state_eltype=Vector{Float64}, st
 selector = EpsilonGreedySelector(0.01;decay_steps=500, decay_method=:exp)
 agent = DQN(learner, buffer, selector;γ=0.99)
 
-rewards = []
-losses = []
-
-function f_pre_episode_hook(agent, env, obs)
-    push!(rewards, [])
-    push!(losses, [])
-end
-
-function f_post_act_hook(agent, env, obs, action)
-    push!(rewards[end], obs.reward)
-    push!(losses[end], agent.learner.loss)
-end
-
 hook=TotalRewardPerEpisode()
 
 train(agent, env, StopAfterStep(10000);hook=hook)
