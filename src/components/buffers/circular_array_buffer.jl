@@ -111,7 +111,7 @@ Make sure that `length(data) == cb.stepsize`
         cb.length += 1
     end
     nxt_idx = _buffer_index(cb, cb.length)
-    cb.buffer[cb.stepsize * (nxt_idx - 1) + 1: cb.stepsize * nxt_idx] = data	
+    cb.buffer[cb.stepsize * (nxt_idx - 1) + 1: cb.stepsize * nxt_idx] = data
     cb
 end
 
