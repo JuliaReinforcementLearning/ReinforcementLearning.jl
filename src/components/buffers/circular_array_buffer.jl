@@ -1,4 +1,4 @@
-export CircularArrayBuffer, capacity, isfull
+export CircularArrayBuffer, capacity, isfull, consecutive_view
 
 import Base:view, getindex
 
@@ -150,4 +150,9 @@ end
     start = _buffer_index(cb, i.start)
     stop = _buffer_index(cb, i.stop)
     start ≤ stop ? (start:stop) : vcat(start:capacity(cb), 1:stop)
+end
+
+function consecutive_view(b::CircularArrayBuffer{E, T, N}, inds, n) where {E, T, N}
+    expanded_inds = collect(Iterators.flatten(x:x+n-1 for x in inds))
+    reshape(view(b, expanded_inds), size(b.buffer)[1:N-1]..., n, length(inds))
 end

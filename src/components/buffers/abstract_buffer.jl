@@ -1,4 +1,4 @@
-export AbstractTurnBuffer, buffers, RTSA, isfull
+export AbstractTurnBuffer, buffers, RTSA, isfull, consecutive_view
 
 """
     AbstractTurnBuffer{names, types} <: AbstractArray{NamedTuple{names, types}, 1}
@@ -73,5 +73,13 @@ Base.getindex(b::AbstractTurnBuffer{RTSA, types}, i::Int) where {types} = (
     next_state = state(b)[i+1],
     next_action = action(b)[i+1]
 )
+
+consecutive_view(b::AbstractTurnBuffer{RTSA}, inds, n) = NamedTuple{RTSA}(
+    (state = consecutive_view(state(b), inds, n),
+    action = consecutive_view(action(b), inds, n),
+    reward = consecutive_view(reward(b), inds, n),
+    terminal = consecutive_view(terminal(b), inds, n))
+)
+
 
 Base.length(b::AbstractTurnBuffer{RTSA}) = max(0, length(terminal(b)) - 1)
