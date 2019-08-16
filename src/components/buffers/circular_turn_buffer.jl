@@ -35,13 +35,13 @@ end
 
 sample_indices(b::CircularTurnBuffer{RTSA}, batch_size::Int, n_step::Int) = rand(1:length(b)-n_step, batch_size)
 
-function sample(b::CircularTurnBuffer{RTSA}; batch_size=32, n_step=1, γ=1.0)
+function sample(b::CircularTurnBuffer{RTSA}; batch_size=32, n_step=1)
     inds = sample_indices(b, batch_size, n_step)
-    select_batch(b, inds; n_step=n_step, γ=γ)
+    consecutive_view(b, inds, n_step)
 end
 
 # TODO: use `consecutive_view` instead here!
-function select_batch(b::CircularTurnBuffer{RTSA}, inds;n_step, γ)
+function select_batch(b::CircularTurnBuffer{RTSA}, inds;n_step)
     n = length(inds)
     next_inds = inds .+ n_step
 
