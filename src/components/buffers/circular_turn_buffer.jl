@@ -39,36 +39,3 @@ function sample(b::CircularTurnBuffer{RTSA}; batch_size=32, n_step=1)
     inds = sample_indices(b, batch_size, n_step)
     consecutive_view(b, inds, n_step)
 end
-
-# TODO: use `consecutive_view` instead here!
-function select_batch(b::CircularTurnBuffer{RTSA}, inds;n_step)
-    n = length(inds)
-    next_inds = inds .+ n_step
-
-    states_batch = view(state(b), inds)
-    next_states_batch = view(state(b), next_inds)
-    actions_batch = view(action(b), inds)
-
-    rewards_batch, terminals_batch = zeros(Float32, n), fill(false, n)
-
-    # make sure that we only consider experiences in current episode
-    for i in 1:n
-        ind = inds[i]
-        isdone_consecutive = view(terminal(b), ind+1:ind+n_step)
-        d = findfirst(isdone_consecutive)
-
-        if isnothing(d)
-            terminals_batch[i] = false
-            rewards_batch[i] = discount_rewards_reduced(view(reward(b), ind+1:ind+n_step), γ)
-        else
-            terminals_batch[i] = true
-            rewards_batch[i] = discount_rewards_reduced(view(reward(b), ind+1:ind+d), γ)
-        end
-    end
-
-    (states     = states_batch,
-    actions     = actions_batch,
-    rewards     = rewards_batch,
-    terminals   = terminals_batch,
-    next_states = next_states_batch)
-end
