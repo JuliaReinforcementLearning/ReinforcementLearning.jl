@@ -1,0 +1,23 @@
+name = "ReinforcementLearning"
+uuid = "158674fc-8238-5cab-b5ba-03dfc80d1318"
+authors = ["Johanni Brea <jbrea@users.noreply.github.com>", "Jun Tian <tianjun.cpp@gmail.com>"]
+version = "0.4.0"
+
+[deps]
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
+
+[compat]
+julia = "1.3"
