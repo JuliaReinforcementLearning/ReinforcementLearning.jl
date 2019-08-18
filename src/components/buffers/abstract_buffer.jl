@@ -55,7 +55,7 @@ function Base.push!(b::AbstractTurnBuffer, experience::Pair{<:EnvObservation})
 end
 
 #####
-# RTSA
+# RTSA (Reward, Terminals, State, Action)
 #####
 
 state(b::AbstractTurnBuffer) = buffers(b).state
@@ -88,3 +88,36 @@ function consecutive_view(b::AbstractTurnBuffer{RTSA}, inds, n)
 end
 
 Base.length(b::AbstractTurnBuffer{RTSA}) = max(0, length(terminal(b)) - 1)
+
+#####
+# PRTSA (Prioritized, Reward, Terminal, State, Action)
+#####
+
+const PRTSA = (:priority, :reward, :terminal, :state, :action)
+
+priority(b::AbstractTurnBuffer) = buffers(b).priority
+
+Base.getindex(b::AbstractTurnBuffer{PRTSA, types}, i::Int) where {types} = (
+    state = state(b)[i],
+    action = action(b)[i],
+    reward = reward(b)[i+1],
+    terminal = terminal(b)[i+1],
+    next_state = state(b)[i+1],
+    next_action = action(b)[i+1],
+    priority = priority(b)[i+1]
+)
+
+function consecutive_view(b::AbstractTurnBuffer{PRTSA}, inds, n)
+    next_inds = inds .+ 1
+
+    (
+        states = consecutive_view(state(b), inds, n),
+        actions = consecutive_view(action(b), inds, n),
+        rewards = consecutive_view(reward(b), next_inds, n),
+        terminals = consecutive_view(terminal(b), next_inds, n),
+        next_states = consecutive_view(state(b), next_inds, n),
+        next_actions = consecutive_view(action(b), next_inds, n)
+    )
+end
+
+Base.length(b::AbstractTurnBuffer{PRTSA}) = max(0, length(terminal(b)) - 1)
