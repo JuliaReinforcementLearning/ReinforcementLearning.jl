@@ -1,9 +1,9 @@
 export ReaderCountRWLock, read_lock, read_unlock, is_read_locked
 
 mutable struct ReaderCountRWLock <: Base.AbstractLock
-    m::Threads.Mutex
+    m::Threads.ReentrantLock
     reader_count::Int
-    ReaderCountRWLock() = new(Threads.Mutex(), 0)
+    ReaderCountRWLock() = new(Threads.ReentrantLock(), 0)
 end
 
 function read_lock(l::ReaderCountRWLock)
