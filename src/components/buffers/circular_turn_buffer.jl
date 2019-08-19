@@ -9,7 +9,7 @@ end
 
 function sample(b::CircularTurnBuffer; batch_size=32, n_step=1)
     inds = sample_indices(b, batch_size, n_step)
-    consecutive_view(b, inds, n_step)
+    inds, consecutive_view(b, inds, n_step)
 end
 
 

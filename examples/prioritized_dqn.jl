@@ -11,11 +11,20 @@ model = Chain(
 )
 
 app = NeuralNetworkQ(model, ADAM(0.0005))
-learner = QLearner(app, Flux.mse, param(0.f0);γ=0.99f0)
-buffer =  circular_RTSA_buffer(;capacity=10000, state_eltype=Vector{Float64}, state_size=(ns,))
 selector = EpsilonGreedySelector(0.01;decay_steps=500, decay_method=:exp)
-agent = DQN(learner, buffer, selector;γ=0.99)
 
 hook=TotalRewardPerEpisode()
 
+buffer =  circular_PRTSA_buffer(;capacity=10000, state_eltype=Vector{Float64}, state_size=(ns,))
+
+function loss_cal(ŷ, y)
+    batch_losses = (ŷ .- y).^2
+    loss = sum(batch_losses) * 1 // length(y)
+    (loss=loss, batch_losses=batch_losses)
+end
+
+init_loss = (loss=param(0.f0), batch_losses=param(zeros(Float32,32)))
+
+learner = QLearner(app, loss_cal, init_loss;γ=0.99f0)
+agent = DQN(learner, buffer, selector;γ=0.99)
 train(agent, env, StopAfterStep(10000);hook=hook)
