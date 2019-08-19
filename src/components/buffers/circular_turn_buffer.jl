@@ -71,10 +71,10 @@ function sample_indices(b::CircularTurnBuffer{PRTSA}, batch_size::Int, n_step::I
     inds = Vector{Int}(undef, batch_size)
     for i in 1:length(inds)
         ind, p = sample(priority(b))
-        while ind < 1 || ind > length(b) - n_step
+        while ind <= 1 || ind > length(b) - n_step + 1
             ind, p = sample(priority(b))
         end
-        inds[i] = ind
+        inds[i] = ind - 1  # !!! left shift by 1 because we are padding for priority
     end
     inds
 end
