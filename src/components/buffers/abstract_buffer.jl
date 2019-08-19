@@ -105,4 +105,28 @@ function consecutive_view(b::AbstractTurnBuffer, inds, n)
     )
 end
 
+function extract_SARTS(batch, γ)
+    n_step, batch_size = size(batch.terminals)
+    states = selectdim(batch.states, ndims(batch.states)-1, 1)
+    actions = selectdim(batch.actions, ndims(batch.actions)-1, 1)
+    next_states = selectdim(batch.next_states, ndims(batch.next_states)-1, n_step)
+
+    rewards, terminals = zeros(Float32, batch_size), fill(false, batch_size)
+
+    # make sure that we only consider experiences in current episode
+    for i in 1:batch_size
+        t = findfirst(view(batch.terminals, :, i))
+
+        if isnothing(t)
+            terminals[i] = false
+            rewards[i] = discount_rewards_reduced(view(batch.rewards[:, i]), γ)
+        else
+            terminals[i] = true
+            rewards[i] = discount_rewards_reduced(view(batch.rewards[1:t, i]), γ)
+        end
+    end
+
+    states, actions, rewards, terminals, next_states
+end
+
 Base.length(b::AbstractTurnBuffer) = max(0, length(terminal(b)) - 1)
