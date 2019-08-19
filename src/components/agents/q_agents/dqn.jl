@@ -1,18 +1,6 @@
-export AbstractQAgent, DQN
+export DQN
 
-abstract type AbstractQAgent <: AbstractAgent end
-
-selector(agent::AbstractQAgent) = agent.selector
-
-function (agent::AbstractQAgent)(obs::EnvObservation)
-    obs |> state |> learner(agent) |> selector(agent)
-end
-
-#####
-# DQN
-#####
-
-mutable struct DQN{Tl<:QLearner{<:NeuralNetworkQ}, Tb<:AbstractTurnBuffer, Ts<:AbstractDiscreteActionSelector} <: AbstractQAgent
+mutable struct DQN{Tl, Tb<:AbstractTurnBuffer, Ts<:AbstractDiscreteActionSelector} <: AbstractQAgent
     role::String
     learner::Tl
     buffer::Tb

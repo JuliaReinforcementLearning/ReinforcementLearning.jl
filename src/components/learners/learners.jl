@@ -1,4 +1,5 @@
 include("abstract_learner.jl")
 include("temporal_difference_learner.jl")
 include("q_learner.jl")
+include("double_q_learner.jl")
 include("reinforce_learner.jl")

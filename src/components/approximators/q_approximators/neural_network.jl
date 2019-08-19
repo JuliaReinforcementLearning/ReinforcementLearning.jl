@@ -30,3 +30,7 @@ function update!(Q::NeuralNetworkQ, loss)
     gs = Flux.gradient(() -> loss, Q.ps)
     Flux.Optimise.update!(Q.opt, Q.ps, gs)
 end
+
+function Base.copyto!(dest::NeuralNetworkQ, src::NeuralNetworkQ)
+    Flux.loadparams!(dest.model, src.ps)
+end
