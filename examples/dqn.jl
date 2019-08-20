@@ -10,11 +10,15 @@ model = Chain(
     Dense(128, na)
 )
 
+function loss_cal(ŷ, y)
+    (ŷ .- y).^2
+end
+
 app = NeuralNetworkQ(model, ADAM(0.0005))
-learner = QLearner(app, Flux.mse, param(0.f0);γ=0.99f0)
+learner = QLearner(app, loss_cal;γ=0.99f0)
 buffer =  circular_RTSA_buffer(;capacity=10000, state_eltype=Vector{Float64}, state_size=(ns,))
 selector = EpsilonGreedySelector(0.01;decay_steps=500, decay_method=:exp)
-agent = DQN(learner, buffer, selector;γ=0.99)
+agent = DQN(learner, buffer, selector)
 
 hook=TotalRewardPerEpisode()
 
