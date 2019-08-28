@@ -1,5 +1,8 @@
 module ReinforcementLearningEnvironments
 
+export RLEnvs
+const RLEnvs = ReinforcementLearningEnvironments
+
 using Reexport, Requires
 
 include("abstractenv.jl")

@@ -2,18 +2,16 @@ using ArcadeLearningEnvironment, GR
 
 export AtariEnv
 
-struct AtariEnv{To,F} <: AbstractEnv
+mutable struct AtariEnv{To,F} <: AbstractEnv
     ale::Ptr{Nothing}
     screen::Array{UInt8, 1}
     getscreen!::F
-    actions::Array{Int32, 1}
+    actions::Array{Int64, 1}
     action_space::DiscreteSpace{Int}
     observation_space::To
     noopmax::Int
+    reward::Float32
 end
-
-action_space(env::AtariEnv) = env.action_space
-observation_space(env::AtariEnv) = env.observation_space
 
 """
     AtariEnv(name; colorspace = "Grayscale", frame_skip = 4, noopmax = 20,
@@ -51,24 +49,26 @@ function AtariEnv(name;
     end
     actions = actionset == :minimal ? getMinimalActionSet(ale) : getLegalActionSet(ale)
     action_space = DiscreteSpace(length(actions))
-    AtariEnv(ale, screen, getscreen!, actions, action_space, observation_space, noopmax)
+    AtariEnv(ale, screen, getscreen!, actions, action_space, observation_space, noopmax, 0.0f0)
 end
 
 function interact!(env::AtariEnv, a)
-    r = act(env.ale, env.actions[a])
+    env.reward = act(env.ale, env.actions[a])
     env.getscreen!(env.ale, env.screen)
-    (observation=env.screen, reward=r, isdone=game_over(env.ale))
+    nothing
 end
 
-function observe(env::AtariEnv)
-    env.getscreen!(env.ale, env.screen)
-    (observation=env.screen, isdone=game_over(env.ale))
-end
+observe(env::AtariEnv) = Observation(
+    reward = env.reward,
+    terminal = game_over(env.ale),
+    state = env.screen
+)
 
 function reset!(env::AtariEnv)
     reset_game(env.ale)
     for _ in 1:rand(0:env.noopmax) act(env.ale, Int32(0)) end
     env.getscreen!(env.ale, env.screen)
+    env.reward = 0.0f0  # dummy
     nothing
 end
 

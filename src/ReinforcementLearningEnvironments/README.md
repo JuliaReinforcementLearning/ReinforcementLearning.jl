@@ -7,7 +7,7 @@ This package serves as a one-stop place for different kinds of reinforcement lea
 Install:
 
 ```julia
-(v1.1) pkg> add https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl
+pkg> add ReinforcementLearningEnvironments
 ```
 
 ## API
@@ -64,11 +64,11 @@ Take the `AtariEnv` for example:
 
 1. Install this package by:
     ```julia
-    (v1.1) pkg> add ReinforcementLearningEnvironments
+    pkg> add ReinforcementLearningEnvironments
     ```
 2. Install corresponding dependent package by:
     ```julia
-    (v1.1) pkg> add ArcadeLearningEnvironment
+    pkg> add ArcadeLearningEnvironment
     ```
 3. Using the above two packages:
     ```julia

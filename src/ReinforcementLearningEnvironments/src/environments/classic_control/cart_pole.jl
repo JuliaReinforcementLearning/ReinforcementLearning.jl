@@ -42,9 +42,6 @@ function CartPoleEnv(; T = Float64, gravity = T(9.8), masscart = T(1.),
     cp
 end
 
-action_space(env::CartPoleEnv) = env.action_space
-observation_space(env::CartPoleEnv) = env.observation_space
-
 function reset!(env::CartPoleEnv{T}) where T <: Number
     env.state[:] = T(.1) * rand(env.rng, T, 4) .- T(.05)
     env.t = 0
@@ -53,7 +50,11 @@ function reset!(env::CartPoleEnv{T}) where T <: Number
     nothing
 end
 
-observe(env::CartPoleEnv) = (observation=env.state, isdone=env.done)
+observe(env::CartPoleEnv) = Observation(
+    reward = env.done ? 0.0 : 1.0,
+    terminal = env.done,
+    state = env.state
+)
 
 function interact!(env::CartPoleEnv{T}, a) where T <: Number
     env.action = a
@@ -76,7 +77,7 @@ function interact!(env::CartPoleEnv{T}, a) where T <: Number
     env.done = abs(env.state[1]) > env.params.xthreshold ||
                abs(env.state[3]) > env.params.thetathreshold ||
                env.t >= env.params.max_steps
-    (observation=env.state, reward=1., isdone=env.done)
+    nothing
 end
 
 function plotendofepisode(x, y, d)

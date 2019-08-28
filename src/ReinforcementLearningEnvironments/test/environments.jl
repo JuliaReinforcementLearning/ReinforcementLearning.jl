@@ -10,9 +10,10 @@
         for _ in 1:n
             a = rand(as)
             @test a in as
-            obs, reward, isdone = interact!(env, a)
-            @test obs in os
-            if isdone
+            @test interact!(env, a) === nothing
+            obs = observe(env)
+            @test get_state(obs) in os
+            if get_terminal(obs)
                 reset!(env)
             end
         end
@@ -24,8 +25,8 @@
         for _ in 1:n
             a = rand(legal_actions(env))
             interact!(env, a)
-            obs, reward, isdone = observe(env)
-            if isdone
+            obs = observe(env)
+            if get_terminal(obs)
                 reset!(env)
             end
         end

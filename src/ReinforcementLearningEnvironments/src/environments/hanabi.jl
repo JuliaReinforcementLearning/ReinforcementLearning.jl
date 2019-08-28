@@ -200,10 +200,12 @@ function observe(env::HanabiEnv, observer=state_cur_player(env.state))
     observation_finalizer(raw_obs)
     new_observation(env.state, observer, raw_obs)
 
-    (observation = raw_obs,
-     reward      = env.reward.player == observer ? env.reward.score_gain : Int32(0),
-     isdone      = state_end_of_game_status(env.state) != Int(NOT_FINISHED),
-     game        = env.game)
+    Observation(
+        reward = env.reward.player == observer ? env.reward.score_gain : Int32(0),
+        terminal = state_end_of_game_status(env.state) != Int(NOT_FINISHED),
+        state = raw_obs,
+        game = env.game
+    )
 end
 
 function encode_observation(obs, env)

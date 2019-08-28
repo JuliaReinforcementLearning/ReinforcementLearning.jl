@@ -34,13 +34,9 @@ function GymEnv(name::String)
     env
 end
 
-action_space(env::GymEnv) = env.action_space
-observation_space(env::GymEnv) = env.observation_space
-
 function interact!(env::GymEnv{T}, action) where T
     pycall!(env.state, env.pyenv.step, PyObject, action)
-    obs, reward, isdone, info = convert(Tuple{T, Float64, Bool, PyDict}, env.state)
-    (observation=obs, reward=reward, isdone=isdone)
+    nothing
 end
 
 function reset!(env::GymEnv)
@@ -51,10 +47,18 @@ end
 function observe(env::GymEnv{T}) where T
     if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type)
         obs, reward, isdone, info = convert(Tuple{T, Float64, Bool, PyDict}, env.state)
-        (observation=obs, isdone=isdone)
+        Observation(
+            reward = reward,
+            terminal = isdone,
+            state = obs
+        )
     else
         # env has just been reseted
-        (observation=convert(T, env.state), isdone=false)
+        Observation(
+            reward = 0.,  # dummy
+            terminal = false,
+            state=convert(T, env.state)
+        )
     end
 end
 

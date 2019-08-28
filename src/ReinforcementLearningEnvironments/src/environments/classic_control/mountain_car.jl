@@ -50,11 +50,14 @@ function MountainCarEnv(; T = Float64, continuous = false,
     reset!(env)
     env
 end
+
 ContinuousMountainCarEnv(; kwargs...) = MountainCarEnv(; continuous = true, kwargs...)
 
-action_space(env::MountainCarEnv) = env.action_space
-observation_space(env::MountainCarEnv) = env.observation_space
-observe(env::MountainCarEnv) = (observation=env.state, isdone=env.done)
+observe(env::MountainCarEnv) = Observation(
+    reward = env.done ? 0. : -1.,
+    terminal = env.done,
+    state = env.state
+)
 
 function reset!(env::MountainCarEnv{A, T}) where {A, T}
     env.state[1] = .2 * rand(env.rng, T) - .6
@@ -78,7 +81,7 @@ function _interact!(env::MountainCarEnv, force)
                env.t >= env.params.max_steps
     env.state[1] = x
     env.state[2] = v
-    (observation=env.state, reward=-1., isdone=env.done)
+    nothing
 end
 
 # adapted from https://github.com/JuliaML/Reinforce.jl/blob/master/src/envs/mountain_car.jl

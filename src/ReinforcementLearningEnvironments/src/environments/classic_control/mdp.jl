@@ -9,46 +9,52 @@ export MDPEnv, POMDPEnv, SimpleMDPEnv, absorbing_deterministic_tree_MDP, stochas
 ##### POMDPEnv
 #####
 
-mutable struct POMDPEnv{T,Ts,Ta, R<:AbstractRNG}
+mutable struct POMDPEnv{T,Ts,Ta, R<:AbstractRNG} <: AbstractEnv
     model::T
     state::Ts
     actions::Ta
     action_space::DiscreteSpace
     observation_space::DiscreteSpace
+    observation::Int
+    reward::Float64
     rng::R
 end
 
-POMDPEnv(model; rng=Random.GLOBAL_RNG) = POMDPEnv(
-    model,
-    initialstate(model, rng),
-    actions(model),
-    DiscreteSpace(n_actions(model)),
-    DiscreteSpace(n_states(model)),
-    rng)
+function POMDPEnv(model; rng=Random.GLOBAL_RNG)
+    state = initialstate(model, rng)
+    as = DiscreteSpace(n_actions(model))
+    os = DiscreteSpace(n_states(model))
+    actions_of_model = actions(model)
+    s, o, r = generate_sor(model, state, actions_of_model[rand(as)], rng)
+    obs = observationindex(model, o)
+    POMDPEnv(model, state, actions_of_model, as, os, obs, 0., rng)
+end
 
 function interact!(env::POMDPEnv, action)
     s, o, r = generate_sor(env.model, env.state, env.actions[action], env.rng)
     env.state = s
-    (observation = observationindex(env.model, o),
-     reward = r,
-     isdone = isterminal(env.model, s))
+    env.reward = r
+    env.observation = observationindex(env.model, o)
+    nothing
 end
 
-function observe(env::POMDPEnv)
-    (observation = observationindex(env.model, generate_o(env.model, env.state, env.rng)),
-     isdone = isterminal(env.model, env.state))
-end
+observe(env::POMDPEnv) = Observation(
+    reward = env.reward,
+    terminal = isterminal(env.model, env.state),
+    state = env.observation
+)
 
 #####
 ##### MDPEnv
 #####
 
-mutable struct MDPEnv{T, Ts, Ta, R<:AbstractRNG}
+mutable struct MDPEnv{T, Ts, Ta, R<:AbstractRNG} <: AbstractEnv
     model::T
     state::Ts
     actions::Ta
     action_space::DiscreteSpace
     observation_space::DiscreteSpace
+    reward::Float64
     rng::R
 end
 
@@ -58,10 +64,9 @@ MDPEnv(model; rng=Random.GLOBAL_RNG) = MDPEnv(
     actions(model),
     DiscreteSpace(n_actions(model)),
     DiscreteSpace(n_states(model)),
-    rng)
-
-action_space(env::Union{MDPEnv, POMDPEnv}) = env.action_space
-observation_space(env::Union{MDPEnv, POMDPEnv}) = env.observation_space
+    0.,
+    rng
+)
 
 observationindex(env, o) = Int(o) + 1
 
@@ -74,15 +79,15 @@ function interact!(env::MDPEnv, action)
     s = rand(env.rng, transition(env.model, env.state, env.actions[action]))
     r = POMDPs.reward(env.model, env.state, env.actions[action])
     env.state = s
-    (observation = stateindex(env.model, s),
-     reward = r,
-     isdone = isterminal(env.model, s))
+    env.reward = r
+    nothing
 end
 
-function observe(env::MDPEnv)
-    (observation = stateindex(env.model, env.state),
-     isdone = isterminal(env.model, env.state))
-end
+observe(env::MDPEnv) = Observation(
+    reward = env.reward,
+    terminal = isterminal(env.model, env.state),
+    state = stateindex(env.model, env.state)
+)
 
 #####
 ##### SimpleMDPEnv
@@ -107,7 +112,7 @@ probabilities) `reward` of type `R` (see [`DeterministicStateActionReward`](@ref
 [`NormalStateActionReward`](@ref)), array of initial states
 `initialstates`, and `ns` - array of 0/1 indicating if a state is terminal.
 """
-mutable struct SimpleMDPEnv{T,R,S<:AbstractRNG}
+mutable struct SimpleMDPEnv{T,R,S<:AbstractRNG} <: AbstractEnv
     observation_space::DiscreteSpace
     action_space::DiscreteSpace
     state::Int
@@ -115,6 +120,7 @@ mutable struct SimpleMDPEnv{T,R,S<:AbstractRNG}
     reward::R
     initialstates::Array{Int, 1}
     isterminal::Array{Int, 1}
+    score::Float64
     rng::S
 end
 
@@ -125,11 +131,8 @@ function SimpleMDPEnv(ospace, aspace, state, trans_probs::Array{T, 2},
         reward = DeterministicStateActionReward(reward)
     end
     SimpleMDPEnv{T,typeof(reward),S}(ospace, aspace, state, trans_probs,
-                                     reward, initialstates, isterminal, rng)
+                                     reward, initialstates, isterminal, 0., rng)
 end
-
-observation_space(env::SimpleMDPEnv) = env.observation_space
-action_space(env::SimpleMDPEnv) = env.action_space
 
 # reward types
 """
@@ -208,13 +211,15 @@ run!(mdp::SimpleMDPEnv, policy::Array{Int, 1}) = run!(mdp, policy[mdp.state])
 function interact!(env::SimpleMDPEnv, action)
     oldstate = env.state
     run!(env, action)
-    r = reward(env.rng, env.reward, oldstate, action, env.state)
-    (observation = env.state, reward = r, isdone = env.isterminal[env.state] == 1)
+    env.score = reward(env.rng, env.reward, oldstate, action, env.state)
+    nothing
 end
 
-function observe(env::SimpleMDPEnv)
-    (observation = env.state, isdone = env.isterminal[env.state] == 1)
-end
+observe(env::SimpleMDPEnv) = Observation(
+    reward = env.score,
+    terminal = env.isterminal[env.state] == 1,
+    state = env.state
+)
 
 function reset!(env::SimpleMDPEnv)
     env.state = rand(env.rng, env.initialstates)
