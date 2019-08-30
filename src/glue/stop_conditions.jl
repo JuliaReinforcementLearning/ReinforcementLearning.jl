@@ -64,7 +64,7 @@ function (s::StopAfterEpisode)(agent, env, obs)
     @debug s.tag EPISODE=s.cur
 
     res = s.cur >= s.episode
-    terminal(obs) && (s.cur += 1;)
+    get_terminal(obs) && (s.cur += 1;)
     res
 end
 
@@ -75,4 +75,4 @@ end
 struct StopWhenDone
 end
 
-(s::StopWhenDone)(agent, env, obs) = terminal(obs)
+(s::StopWhenDone)(agent, env, obs) = get_terminal(obs)

@@ -42,8 +42,8 @@ function update!(agent::DQN{Tl, Tb}, experience::Pair) where {Tl, Tb<:CircularTu
     end
 end
 
-function (agent::DQN{<:RainbowLearner})(obs::EnvObservation)
-    logits = obs |> state |> learner(agent)
+function (agent::DQN{<:RainbowLearner})(obs::Observation)
+    logits = obs |> get_state |> learner(agent)
     q = agent.learner.support .* softmax(reshape(logits, :, agent.learner.n_actions))
     # probs = vec(sum(q, dims=1)) .+ legal_action
     probs = vec(sum(q, dims=1))

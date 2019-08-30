@@ -44,12 +44,12 @@ function Base.push!(b::AbstractTurnBuffer; kw...)
     end
 end
 
-function Base.push!(b::AbstractTurnBuffer, experience::Pair{<:EnvObservation})
+function Base.push!(b::AbstractTurnBuffer, experience::Pair{<:Observation})
     obs, a = experience
     push!(b;
-    state=state(obs),
-    reward =reward(obs),
-    terminal=terminal(obs),
+    state=get_state(obs),
+    reward =get_reward(obs),
+    terminal=get_terminal(obs),
     action=a,
     obs.meta...)
 end
