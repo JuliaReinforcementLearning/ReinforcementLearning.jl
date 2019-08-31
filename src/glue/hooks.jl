@@ -91,7 +91,7 @@ end
 
 function (hook::RewardsPerEpisode)(::PostActStage, agent, env, obs_action)
     obs, action = obs_action
-    push!(hook.rewards[end], reward(obs))
+    push!(hook.rewards[end], get_reward(obs))
 end
 
 function (hook::RewardsPerEpisode)(::PostEpisodeStage, agent, env, obs)
@@ -114,7 +114,7 @@ end
 
 function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env, obs_action)
     obs, action = obs_action
-    hook.reward += reward(obs)
+    hook.reward += get_reward(obs)
 end
 
 function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env, obs)

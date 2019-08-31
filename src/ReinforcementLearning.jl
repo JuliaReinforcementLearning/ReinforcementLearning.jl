@@ -2,6 +2,8 @@ module ReinforcementLearning
     export RL
     const RL = ReinforcementLearning
 
+    using ReinforcementLearningEnvironments
+
     include("patches/patches.jl")
 
     using Reexport
