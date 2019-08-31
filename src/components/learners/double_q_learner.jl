@@ -3,6 +3,7 @@ export DoubleQLearner, update!
 using Flux
 using StatsBase
 
+# !!! this is not the real double q learner, just a delayed target Q, need rename!
 mutable struct DoubleQLearner{Tq<:QApproximator, Tf, Tl} <: AbstractLearner{Tq}
     approximator::Tq
     target_approximator::Tq

@@ -32,13 +32,12 @@ function train(
         obs = observe(env)
         hook(POST_ACT_STAGE, agent, env, obs => action)
 
-        if is_terminal(obs)
+        if get_terminal(obs)
             hook(POST_EPISODE_STAGE, agent, env, obs)
             r, t = obs.reward, obs.terminal  # !!! deepcopy?
             reset!(env)
-            obs = observe(env)
-            obs.reward = r
-            obs.terminal = t
+            temp_obs = observe(env)
+            obs = Observation(r, t, get_state(temp_obs), temp_obs.meta)
             hook(PRE_EPISODE_STAGE, agent, env, obs)
         end
     end
