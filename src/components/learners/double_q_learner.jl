@@ -4,7 +4,7 @@ using Flux
 using StatsBase
 
 # !!! this is not the real double q learner, just a delayed target Q, need rename!
-mutable struct DoubleQLearner{Tq<:QApproximator, Tf, Tl} <: AbstractLearner{Tq}
+mutable struct DoubleQLearner{Tq<:AbstractQApproximator, Tf, Tl} <: AbstractLearner
     approximator::Tq
     target_approximator::Tq
     loss_fun::Tf

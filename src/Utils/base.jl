@@ -1,4 +1,4 @@
-export findallmax, discount_rewards, discount_rewards!
+export findallmax, discount_rewards, discount_rewards!, CachedSampleAvg, SampleAvg
 
 """
     findallmax(A::AbstractArray)
@@ -56,3 +56,27 @@ end
 discount_rewards(rewards, γ) = discount_rewards!(similar(rewards), rewards, γ)
 
 discount_rewards_reduced(rewards, γ) = foldr((r, g)->r + γ * g, rewards)
+
+mutable struct SampleAvg
+    t::Int
+    avg::Float64
+    SampleAvg() = new(0, 0)
+end
+
+function (s::SampleAvg)(x)
+    s.t += 1
+    s.avg += (x-s.avg)/s.t
+    s.avg
+end
+
+struct CachedSampleAvg
+    cache::Dict{Any, Any}
+    CachedSampleAvg() = new(Dict())
+end
+
+function (c::CachedSampleAvg)(k, x)
+    if !haskey(c.cache, k)
+        c.cache[k] = SampleAvg()
+    end
+    c.cache[k](x)
+end

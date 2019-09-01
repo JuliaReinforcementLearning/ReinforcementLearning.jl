@@ -3,7 +3,7 @@ export RainbowLearner, update!
 using Flux
 using StatsBase
 
-mutable struct RainbowLearner{Tq <: QApproximator, Tf, Tl, Ts} <: AbstractLearner{Tq}
+mutable struct RainbowLearner{Tq <: AbstractQApproximator, Tf, Tl, Ts} <: AbstractLearner
    approximator::Tq
    target_approximator::Tq
    loss_fun::Tf

@@ -1,6 +1,6 @@
 export ReinforceLearner, update!
 
-struct ReinforceLearner{Tapp<:QApproximator} <: AbstractLearner{Tapp}
+struct ReinforceLearner{Tapp<:AbstractQApproximator} <: AbstractLearner
     approximator::Tapp
     α::Float64
     γ::Float64

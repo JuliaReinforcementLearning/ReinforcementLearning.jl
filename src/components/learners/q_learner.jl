@@ -1,6 +1,6 @@
 export QLearner, update!
 
-mutable struct QLearner{Tq<:QApproximator, Tf, Tl} <: AbstractLearner{Tq}
+mutable struct QLearner{Tq<:AbstractQApproximator, Tf, Tl} <: AbstractLearner
     approximator::Tq
     loss_fun::Tf
     γ::Float32

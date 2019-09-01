@@ -3,31 +3,31 @@ export TDLearner, update!
 using .Utils: discount_rewards, discount_rewards_reduced
 
 """
-    TDLearner(approximator::Tapp, γ::Float64, α::Float64; n::Int=0) where {Tapp<:VApproximator}
-    TDLearner(approximator::Tapp, γ::Float64, α::Float64; n::Int=0, method::Symbol=:SARSA) where {Tapp<:QApproximator} 
+    TDLearner(approximator::Tapp, γ::Float64, α::Float64; n::Int=0) where {Tapp<:AbstractVApproximator}
+    TDLearner(approximator::Tapp, γ::Float64, α::Float64; n::Int=0, method::Symbol=:SARSA) where {Tapp<:AbstractQApproximator} 
 
 The `TDLearner`(Temporal Difference Learner) use the latest `n` step experiences to update the `approximator`.
 Note that `n` starts with `0`, which means looking forward for the next `n` steps.
 `γ` is the discount rate of experience.
 `α` is the learning rate.
 
-For [`VApproximator`](@ref), the only supported update method is `:SRS`, which means
+For [`AbstractVApproximator`](@ref), the only supported update method is `:SRS`, which means
 only **S**tates, **R**ewards and next_**S**ates are used to update the `approximator`.
 
-For [`QApproximator`](@ref), the following methods are supported:
+For [`AbstractQApproximator`](@ref), the following methods are supported:
 
 - `:SARSA`
 - `:ExpectedSARSA`
 """
-struct TDLearner{Tapp <: AbstractApproximator, method} <: AbstractLearner{Tapp}
+struct TDLearner{Tapp <: AbstractApproximator, method} <: AbstractLearner
     approximator::Tapp
     γ::Float64
     α::Float64
     n::Int
 
-    TDLearner(approximator::Tapp, γ::Float64, α::Float64; n::Int=0) where {Tapp<:VApproximator} = new{Tapp, :SRS}(approximator, π, γ, α, n)
+    TDLearner(approximator::Tapp, γ::Float64, α::Float64; n::Int=0) where {Tapp<:AbstractVApproximator} = new{Tapp, :SRS}(approximator, π, γ, α, n)
 
-    function TDLearner(approximator::Tapp, γ::Float64, α::Float64; n::Int=0, method::Symbol=:SARSA) where {Tapp<:QApproximator} 
+    function TDLearner(approximator::Tapp, γ::Float64, α::Float64; n::Int=0, method::Symbol=:SARSA) where {Tapp<:AbstractQApproximator} 
         supported_methods = [:SARSA, :ExpectedSARSA]
         !in(method, supported_methods) && throw(ArgumentError("Supported methods are $supported_methods , your input is $method"))
         new{Tapp, method}(approximator, γ, α, n)
@@ -35,9 +35,9 @@ struct TDLearner{Tapp <: AbstractApproximator, method} <: AbstractLearner{Tapp}
 end
 
 (learner::TDLearner)(s) = learner.approximator(s)
-(learner::TDLearner{<:QApproximator})(s, a) = learner.approximator(s, a)
+(learner::TDLearner{<:AbstractQApproximator})(s, a) = learner.approximator(s, a)
 
-function update!(learner::TDLearner{<:VApproximator, :SRS}, states, rewards, terminals, next_states)
+function update!(learner::TDLearner{<:AbstractVApproximator, :SRS}, states, rewards, terminals, next_states)
     n, γ, V, α = learner.n, learner.γ, learner.approximator, learner.α
 
     if terminals[end]
@@ -55,7 +55,7 @@ function update!(learner::TDLearner{<:VApproximator, :SRS}, states, rewards, ter
     end
 end
 
-function update!(learner::TDLearner{<:QApproximator, :SARSA}, states, actions, rewards, terminals, next_states, next_actions)
+function update!(learner::TDLearner{<:AbstractQApproximator, :SARSA}, states, actions, rewards, terminals, next_states, next_actions)
     n, γ, Q, α = learner.n, learner.γ, learner.approximator, learner.α
 
     if terminals[end]

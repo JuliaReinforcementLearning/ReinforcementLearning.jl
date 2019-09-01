@@ -40,7 +40,7 @@ end
 
 function Base.push!(b::AbstractTurnBuffer; kw...)
     for (k, v) in kw
-        push!(getproperty(buffers(b), k), v)
+        hasproperty(buffers(b), k) && push!(getproperty(buffers(b), k), v)
     end
 end
 

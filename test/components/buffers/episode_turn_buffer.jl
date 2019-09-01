@@ -23,9 +23,8 @@
     @test isempty(b) == false
     @test b[end] == (state=2, action=2, reward=2., terminal=true, next_state=3, next_action=3)
 
-    empty!(b)
-
     push!(b, 0., false, 3, 3)
     push!(b, 3., false, 4, 4)
     @test b[end] == (state=3, action=3, reward=3., terminal=false, next_state=4, next_action=4)
+    @test length(b) == 1
 end

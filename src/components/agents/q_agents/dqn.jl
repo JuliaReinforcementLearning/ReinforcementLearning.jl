@@ -2,8 +2,8 @@ export DQN
 
 using Flux
 
-mutable struct DQN{Tl, Tb<:AbstractTurnBuffer, Ts<:AbstractDiscreteActionSelector} <: AbstractQAgent
-    role::String
+mutable struct DQN{Tl, Tb<:AbstractTurnBuffer, Ts<:AbstractDiscreteActionSelector, R} <: AbstractQAgent
+    role::R
     learner::Tl
     buffer::Tb
     selector::Ts

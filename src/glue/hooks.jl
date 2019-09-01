@@ -62,7 +62,7 @@ function StepsPerEpisode(;steps=Int[], count=0, tag="TRAINING")
     StepsPerEpisode(steps, count, tag)
 end
 
-function (hook::StepsPerEpisode)(::PostActStage, agent, env, obs)
+function (hook::StepsPerEpisode)(::PostActStage, agent, env, action_obs)
     hook.count += 1
 end
 
@@ -89,8 +89,8 @@ function (hook::RewardsPerEpisode)(::PreEpisodeStage, agent, env, obs)
     push!(hook.rewards, [])
 end
 
-function (hook::RewardsPerEpisode)(::PostActStage, agent, env, obs_action)
-    obs, action = obs_action
+function (hook::RewardsPerEpisode)(::PostActStage, agent, env, action_obs)
+    action, obs = action_obs
     push!(hook.rewards[end], get_reward(obs))
 end
 

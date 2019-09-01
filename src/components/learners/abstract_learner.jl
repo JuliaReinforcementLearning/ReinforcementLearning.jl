@@ -1,6 +1,6 @@
 export AbstractLearner
 
-abstract type AbstractLearner{T} end
+abstract type AbstractLearner end
 
 approximator(x::AbstractLearner) = x.approximator
 
