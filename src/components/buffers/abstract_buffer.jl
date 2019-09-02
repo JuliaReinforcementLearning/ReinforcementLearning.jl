@@ -29,14 +29,7 @@ Base.lastindex(b::AbstractTurnBuffer) = length(b)
 Base.isempty(b::AbstractTurnBuffer) = all(isempty(x) for x in buffers(b))
 Base.empty!(b::AbstractTurnBuffer) = for x in buffers(b) empty!(x) end
 Base.getindex(b::AbstractTurnBuffer{names, types}, i::Int) where {names, types} = NamedTuple{names, types}(Tuple(x[i] for x in buffers(b)))
-Base.length(b::AbstractTurnBuffer) = minimum(length(x) for x in buffers(b))
 isfull(b::AbstractTurnBuffer) = all(isfull(x) for x in buffers(b))
-
-function Base.push!(b::AbstractTurnBuffer, args...)
-    for (b, x) in zip(buffers(b), args)
-        push!(b, x)
-    end
-end
 
 function Base.push!(b::AbstractTurnBuffer; kw...)
     for (k, v) in kw

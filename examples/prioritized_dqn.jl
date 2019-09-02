@@ -24,5 +24,5 @@ end
 init_loss = (loss=param(0.f0), batch_losses=param(zeros(Float32,32)))
 
 learner = QLearner(app, loss_cal;γ=0.99f0)
-agent = DQN(learner, buffer, selector)
-train(agent, env, StopAfterStep(10000);hook=hook)
+agent = DQN(learner, buffer, selector, selector)
+run(agent, env, StopAfterStep(10000);hook=hook)

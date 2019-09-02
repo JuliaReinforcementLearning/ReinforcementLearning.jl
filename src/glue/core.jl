@@ -1,14 +1,11 @@
-export train
+import Base:run
+
+export run
 
 using ReinforcementLearningEnvironments
 using ReinforcementLearningEnvironments:reset!
 
-dummy_condition = (xs...) -> nothing
-
-function stage_run()
-end
-
-function train(agent::AbstractAgent, env::AbstractEnv, stop_condition ;hook=EmptyHook())
+function run(agent::AbstractAgent, env::AbstractEnv, stop_condition ;hook=EmptyHook())
 
     reset!(env)
     obs = observe(env)
@@ -36,9 +33,10 @@ function train(agent::AbstractAgent, env::AbstractEnv, stop_condition ;hook=Empt
             hook(PRE_EPISODE_STAGE, agent, env, obs)
         end
     end
+    hook
 end
 
-function train(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_condition; hook=EmptyHook())
+function run(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_condition; hook=EmptyHook())
     roles = [agent.role for agent in agents]
     reset!(env)
     observations = [observe(env, agent.role) for agent in agents]
@@ -88,4 +86,5 @@ function train(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_co
             end
         end
     end
+    hook
 end

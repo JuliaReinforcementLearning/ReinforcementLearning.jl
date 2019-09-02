@@ -112,8 +112,8 @@ function TotalRewardPerEpisode(;rewards=Float64[], reward=0.0, tag="TRAINING")
     TotalRewardPerEpisode(rewards, reward, tag)
 end
 
-function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env, obs_action)
-    obs, action = obs_action
+function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env, action_obs)
+    action, obs = action_obs
     hook.reward += get_reward(obs)
 end
 

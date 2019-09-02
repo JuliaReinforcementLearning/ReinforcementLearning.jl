@@ -2,11 +2,13 @@ export DQN
 
 using Flux
 
-mutable struct DQN{Tl, Tb<:AbstractTurnBuffer, Ts<:AbstractDiscreteActionSelector, R} <: AbstractQAgent
+mutable struct DQN{Tl, Tb<:AbstractTurnBuffer, Tss<:AbstractDiscreteActionSelector, Tes<:AbstractDiscreteActionSelector, R, M<:AbstractRuntimeMode} <: AbstractQAgent
     role::R
+    mode::M
     learner::Tl
     buffer::Tb
-    selector::Ts
+    training_selector::Tss
+    evaluating_selector::Tes
     batch_size::Int
     update_horizon::Int  # starts with 1
     act_step::Int
@@ -14,17 +16,25 @@ mutable struct DQN{Tl, Tb<:AbstractTurnBuffer, Ts<:AbstractDiscreteActionSelecto
     default_priority::Float64  # ignored if `buffer` doesn't contain `priority`
 end
 
-function selector(agent::DQN{Tl, Tb, <:EpsilonGreedySelector}) where {Tl, Tb}
+function selector(::TrainingMode, agent::DQN{Tl, Tb, <:EpsilonGreedySelector}) where {Tl, Tb}
     x -> begin
-        a = agent.selector(x;step=agent.act_step)
+        a = agent.training_selector(x;step=agent.act_step)
         agent.act_step += 1
         a
     end
 end
 
-DQN(learner, buffer, selector; batch_size=32, update_horizon=1, role="DEFAULT", act_step=0, min_replay_history=32, default_priority=100.) = DQN(role, learner, buffer, selector, batch_size, update_horizon, act_step, min_replay_history, default_priority)
+function selector(::EvaluatingMode, agent::DQN{Tl, Tb, Tss, <:EpsilonGreedySelector}) where {Tl, Tb, Tss}
+    x -> begin
+        a = agent.evaluating_selector(x;step=agent.act_step)
+        agent.act_step += 1
+        a
+    end
+end
 
-function update!(agent::DQN{Tl, Tb}, experience::Pair) where {Tl, Tb<:CircularTurnBuffer{RTSA}}
+DQN(learner, buffer, training_selector, evaluating_selector; batch_size=32, update_horizon=1, role="DEFAULT", act_step=0, min_replay_history=32, default_priority=100., mode=TRAINING_MODE) = DQN(role, mode, learner, buffer, training_selector, evaluating_selector, batch_size, update_horizon, act_step, min_replay_history, default_priority)
+
+function update!(::TrainingMode, agent::DQN{Tl, Tb}, experience::Pair) where {Tl, Tb<:CircularTurnBuffer{RTSA}}
     push!(buffer(agent), experience)
     if length(buffer(agent)) > agent.min_replay_history
         inds, batch = sample(buffer(agent); batch_size=agent.batch_size, n_step=agent.update_horizon)
@@ -32,7 +42,7 @@ function update!(agent::DQN{Tl, Tb}, experience::Pair) where {Tl, Tb<:CircularTu
     end
 end
 
-function update!(agent::DQN{Tl, Tb}, experience::Pair) where {Tl, Tb<:CircularTurnBuffer{PRTSA}}
+function update!(::TrainingMode, agent::DQN{Tl, Tb}, experience::Pair) where {Tl, Tb<:CircularTurnBuffer{PRTSA}}
     push!(priority(buffer(agent)), agent.default_priority)
     push!(buffer(agent), experience)
     if length(buffer(agent)) > agent.min_replay_history

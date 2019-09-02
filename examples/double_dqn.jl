@@ -26,8 +26,8 @@ end
 learner = DoubleQLearner(Q, Qₜ, loss_cal;γ=0.99f0)
 buffer =  circular_RTSA_buffer(;capacity=10000, state_eltype=Vector{Float64}, state_size=(ns,))
 selector = EpsilonGreedySelector(0.01;decay_steps=500, decay_method=:exp)
-agent = DQN(learner, buffer, selector)
+agent = DQN(learner, buffer, selector, selector)
 
 hook=TotalRewardPerEpisode()
 
-train(agent, env, StopAfterStep(10000);hook=hook)
+run(agent, env, StopAfterStep(10000);hook=hook)

@@ -36,18 +36,16 @@ end
 "if the last turn is the terminal, then the EpisodeTurnBuffer is full"
 isfull(b::EpisodeTurnBuffer{RTSA}) = length(b) > 0 && convert(Bool, b.buffers.terminal[end])
 
-function Base.push!(b::EpisodeTurnBuffer{RTSA}, experience::Pair{<:Observation})
+function Base.push!(b::EpisodeTurnBuffer{F}; kw...) where F
     if isfull(b)
-        r, t, s, a = reward(b)[end], terminal(b)[end], state(b)[end], action(b)[end]
-        empty!(b)
-        push!(b;state=s, reward=r, terminal=t, action=a)
+        for f in F
+            bf = getfield(buffers(b), f)
+            x = bf[end]
+            empty!(bf)
+            push!(bf, x)
+        end
     end
-
-    obs, a = experience
-    push!(b;
-    state=get_state(obs),
-    reward =get_reward(obs),
-    terminal=get_terminal(obs),
-    action=a,
-    obs.meta...)
+    for (k, v) in kw
+        hasproperty(buffers(b), k) && push!(getproperty(buffers(b), k), v)
+    end
 end
