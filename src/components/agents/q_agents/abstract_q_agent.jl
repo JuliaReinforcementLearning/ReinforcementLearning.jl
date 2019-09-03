@@ -2,10 +2,10 @@ export AbstractQAgent
 
 abstract type AbstractQAgent <: AbstractAgent end
 
-function (agent::AbstractQAgent)(mode::AbstractRuntimeMode, obs::Observation)
-    obs |> get_state |> learner(agent) |> selector(mode, agent)
-end
+selector(agent::AbstractQAgent) = agent.selector
+inc_act_step(agent::AbstractQAgent) = agent.act_step += 1
 
-selector(agent::AbstractQAgent) = selector(mode(agent), agent)
-selector(::TrainingMode, agent::AbstractQAgent) = agent.training_selector
-selector(::EvaluatingMode, agent::AbstractQAgent) = agent.evaluating_selector
+function (agent::AbstractQAgent)(obs::Observation)
+    inc_act_step(agent)
+    obs |> get_state |> learner(agent) |> selector(agent)
+end

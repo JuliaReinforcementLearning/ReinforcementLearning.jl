@@ -1,4 +1,4 @@
-export AbstractAgent, set_mode!, update!
+export AbstractAgent, update!
 
 abstract type AbstractAgent end
 
@@ -11,8 +11,6 @@ const EVALUATING_MODE = EvaluatingMode()
 role(agent::AbstractAgent) = agent.role
 
 mode(agent::AbstractAgent) = agent.mode
-
-set_mode!(agent, mode) = agent.mode = mode
 
 learner(agent::AbstractAgent) = agent.learner
 

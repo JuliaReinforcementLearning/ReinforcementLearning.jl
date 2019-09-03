@@ -18,7 +18,7 @@ end
 
 Initial a table of size `(ns, na)` filled with value of `init`.
 """
-TabularQ(ns::Int, na::Int=1, init::Float64=0.) = TabularQ(fill(init, ns, na))
+TabularQ(;n_state::Int, n_action::Int=1, init::Float64=0.) = TabularQ(fill(init, n_state, n_action))
 
 (Q::TabularQ)(s::Int) = @view(Q.table[s, :])
 

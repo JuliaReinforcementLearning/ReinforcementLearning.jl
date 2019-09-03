@@ -36,12 +36,12 @@ function run(agent::AbstractAgent, env::AbstractEnv, stop_condition ;hook=EmptyH
     hook
 end
 
-function run(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_condition; hook=EmptyHook())
+function run(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_condition; hook=[EmptyHook() for _ in agents])
     roles = [agent.role for agent in agents]
     reset!(env)
     observations = [observe(env, agent.role) for agent in agents]
-    for (agent, obs) in zip(agents, observations)
-        hook(PRE_EPISODE_STAGE, agent, env, obs)
+    for (h, agent, obs) in zip(hook, agents, observations)
+        h(PRE_EPISODE_STAGE, agent, env, obs)
     end
 
     while true
@@ -49,21 +49,21 @@ function run(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_cond
 
         # async here?
         actions = [agent(obs) for (agent, obs) in zip(agents, observations)]
-        for (agent, obs, action) in zip(agents, observations, actions)
-            hook(PRE_ACT_STAGE, agent, env, obs => action)
+        for (h, agent, obs, action) in zip(hook, agents, observations, actions)
+            h(PRE_ACT_STAGE, agent, env, obs => action)
             update!(agent, obs => action)
         end
 
         env(roles => actions)
 
         observations = [observe(env, agent.role) for agent in agents]
-        for (agent, action, obs) in zip(agents, actions, observations)
-            hook(POST_ACT_STAGE, agents, env, action => obs)
+        for (h, agent, action, obs) in zip(hook, agents, actions, observations)
+            h(POST_ACT_STAGE, agents, env, action => obs)
         end
 
         if get_terminal(observations)
-            for (agent, obs) in zip(agents, observations)
-                hook(POST_EPISODE_STAGE, agent, env, obs)
+            for (h, agent, obs) in zip(hook, agents, observations)
+                h(POST_EPISODE_STAGE, agent, env, obs)
             end
 
             reset!(env)
@@ -81,8 +81,8 @@ function run(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_cond
                 for (i, agent) in enumerate(agents)
             ]
 
-            for (agent, obs) in zip(agents, observations)
-                hook(PRE_EPISODE_STAGE, agent, env, obs)
+            for (h, agent, obs) in zip(hook, agents, observations)
+                h(PRE_EPISODE_STAGE, agent, env, obs)
             end
         end
     end

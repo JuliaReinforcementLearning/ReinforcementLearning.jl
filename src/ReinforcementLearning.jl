@@ -4,7 +4,7 @@ module ReinforcementLearning
 
     using ReinforcementLearningEnvironments
 
-    include("patches/patches.jl")
+    include("extensions/extensions.jl")
 
     using Reexport
     include("Utils/Utils.jl")

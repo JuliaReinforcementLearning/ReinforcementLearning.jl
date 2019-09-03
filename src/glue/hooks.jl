@@ -34,7 +34,7 @@ struct ComposedHook{T<:Tuple} <: AbstractHook
     ComposedHook(hooks...) = new{typeof(hooks)}(hooks)
 end
 
-function (hook::ComposedHook)(stage, args...;kw...)
+function (hook::ComposedHook)(stage::AbstractStage, args...;kw...)
     for h in hook.hooks
         h(stage, args...;kw...)
     end

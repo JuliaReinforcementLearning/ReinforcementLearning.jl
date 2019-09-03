@@ -19,6 +19,9 @@ struct EpisodeTurnBuffer{names, types, Tbs} <: AbstractTurnBuffer{names, types}
     end
 end
 
+function Base.similar(b::EpisodeTurnBuffer{names, types}) where {names, types}
+    EpisodeTurnBuffer(Pair.(names, types)...)
+end
 
 function episode_RTSA_buffer(
     ;state_eltype=Int,

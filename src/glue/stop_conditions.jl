@@ -28,8 +28,12 @@ mutable struct StopAfterStep{Tl}
 end
 
 function StopAfterStep(step; cur=0, is_show_progress=true, tag="TRAINING")
-    progress=Progress(step)
-    ProgressMeter.update!(progress, cur)
+    if is_show_progress
+        progress=Progress(step)
+        ProgressMeter.update!(progress, cur)
+    else
+        progress = nothing
+    end
     StopAfterStep(step, cur, progress, tag)
 end
 
@@ -54,8 +58,12 @@ mutable struct StopAfterEpisode{Tl}
 end
 
 function StopAfterEpisode(episode; cur=0, is_show_progress=true, tag="TRAINING")
-    progress=Progress(episode)
-    ProgressMeter.update!(progress, cur)
+    if is_show_progress
+        progress=Progress(episode)
+        ProgressMeter.update!(progress, cur)
+    else
+        progress = nothing
+    end
     StopAfterEpisode(episode, cur, progress, tag)
 end
 
