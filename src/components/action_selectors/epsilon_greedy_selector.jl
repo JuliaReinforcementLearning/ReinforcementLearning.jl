@@ -7,14 +7,15 @@ using .Utils:findallmax
     EpsilonGreedySelector <: AbstractDiscreteActionSelector
     EpsilonGreedySelector(ϵ; ϵ_init=1.0, warmup_steps=0, decay_steps=0, decay_method=:linear)
 """
-struct EpsilonGreedySelector{T} <: AbstractDiscreteActionSelector
+mutable struct EpsilonGreedySelector{T} <: AbstractDiscreteActionSelector
     ϵ_init::Float64
     ϵ_stable::Float64
     warmup_steps::Int
     decay_steps::Int
+    step::Int
 
-    function EpsilonGreedySelector(ϵ_stable; ϵ_init=1.0, warmup_steps=0, decay_steps=0, decay_method=:linear)
-        new{decay_method}(ϵ_init, ϵ_stable, warmup_steps, decay_steps)
+    function EpsilonGreedySelector(ϵ_stable; ϵ_init=1.0, warmup_steps=0, decay_steps=0, decay_method=:linear, step=1)
+        new{decay_method}(ϵ_init, ϵ_stable, warmup_steps, decay_steps, step)
     end
 end
 
@@ -48,7 +49,8 @@ end
     `NaN` will be filtered unless all the values are `NaN`.
     In that case, a random one will be returned.
 """
-function (s::EpsilonGreedySelector)(values; step, kw...)
-    ϵ = get_ϵ(s, step)
+function (s::EpsilonGreedySelector)(values)
+    ϵ = get_ϵ(s, s.step)
+    s.step += 1
     rand() > ϵ ? sample(findallmax(values)[2]) : rand(1:length(values))
 end

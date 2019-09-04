@@ -10,16 +10,11 @@ mutable struct DQN{Tl, Tb<:AbstractTurnBuffer, Tss<:AbstractDiscreteActionSelect
     selector::Tss
     batch_size::Int
     update_horizon::Int  # starts with 1
-    act_step::Int
     min_replay_history::Int
     default_priority::Float64  # ignored if `buffer` doesn't contain `priority`
 end
 
-function selector(agent::DQN{Tl, Tb, <:EpsilonGreedySelector}) where {Tl, Tb}
-    x -> agent.selector(x;step=agent.act_step)
-end
-
-DQN(;learner, buffer, selector, batch_size=32, update_horizon=1, role="DEFAULT", act_step=0, min_replay_history=32, default_priority=100., mode=TRAINING_MODE) = DQN(role, mode, learner, buffer, selector, batch_size, update_horizon, act_step, min_replay_history, default_priority)
+DQN(;learner, buffer, selector, batch_size=32, update_horizon=1, role="DEFAULT", min_replay_history=32, default_priority=100., mode=TRAINING_MODE) = DQN(role, mode, learner, buffer, selector, batch_size, update_horizon, min_replay_history, default_priority)
 
 function update!(::TrainingMode, agent::DQN{Tl, Tb}, experience::Pair) where {Tl, Tb<:CircularTurnBuffer{RTSA}}
     push!(buffer(agent), experience)
@@ -40,7 +35,6 @@ function update!(::TrainingMode, agent::DQN{Tl, Tb}, experience::Pair) where {Tl
 end
 
 function (agent::DQN{<:RainbowLearner})(obs::Observation)
-    inc_act_step(agent)
     logits = obs |> get_state |> learner(agent)
     q = agent.learner.support .* softmax(reshape(logits, :, agent.learner.n_actions))
     # probs = vec(sum(q, dims=1)) .+ legal_action

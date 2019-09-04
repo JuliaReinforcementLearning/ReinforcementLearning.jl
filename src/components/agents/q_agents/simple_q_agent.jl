@@ -4,14 +4,9 @@ mutable struct SimpleQAgent{L, S, B} <: AbstractQAgent
     learner::L
     selector::S
     buffer::B
-    act_step::Int
 end
 
-SimpleQAgent(;learner, selector, buffer, act_step=0) = SimpleQAgent(learner, selector, buffer, act_step)
-
-function selector(agent::SimpleQAgent{L, <:Union{EpsilonGreedySelector, UCBSelector}}) where L
-    x -> agent.selector(x;step=agent.act_step)
-end
+SimpleQAgent(;learner, selector, buffer) = SimpleQAgent(learner, selector, buffer)
 
 function extract_experience(buffer::EpisodeTurnBuffer, learner::TDLearner{<:AbstractQApproximator, :SARSA})
     @views (

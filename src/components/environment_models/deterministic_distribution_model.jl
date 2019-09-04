@@ -1,5 +1,7 @@
 export DeterministicDistributionModel, get_states, get_actions
 
+import ReinforcementLearningEnvironments:observation_space, action_space
+
 """
 Store all the transformations in the `table` field.
 """
@@ -7,7 +9,7 @@ Store all the transformations in the `table` field.
     table::Array{Vector{NamedTuple{(:nextstate, :reward, :prob), Tuple{Int, Float64, Float64}}}, 2}
  end
 
-get_states(m::DeterministicDistributionModel) = axes(m.table, 1)
-get_actions(m::DeterministicDistributionModel) = axes(m.table, 2)
+observation_space(m::DeterministicDistributionModel) = DiscreteSpace(size(m.table, 1)) 
+action_space(m::DeterministicDistributionModel) = DiscreteSpace(size(m.table, 2))
 
-(m::DeterministicDistributionModel)(s::Int, a::Int) =  m.table[s, a]
+(m::DeterministicDistributionModel)(s::Int, a::Int) = m.table[s, a]
