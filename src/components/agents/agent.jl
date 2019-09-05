@@ -15,12 +15,13 @@ function update!(agent::Agent, experience::Pair)
     end
 end
 
-function update!(agent::Agent{<:QBasedPolicy{<:PrioritizedDQNLearner}}, experience::Pair)
+function update!(agent::Agent{<:QBasedPolicy{<:Union{PrioritizedDQNLearner, RainbowLearner}}}, experience::Pair)
     push!(priority(agent.buffer), agent.π.learner.default_priority)
     push!(agent.buffer, experience)
-    transitions = extract_transitions(agent.buffer, agent.π)
-    if !isnothing(transitions)
-        inds, priorities = update!(agent.π, transitions)
+    indexed_batch = extract_transitions(agent.buffer, agent.π)
+    if !isnothing(indexed_batch)
+        inds, batch = indexed_batch
+        priorities = update!(agent.π, batch)
         isnothing(priorities) || (priority(agent.buffer)[inds] .= priorities)
     end
 end

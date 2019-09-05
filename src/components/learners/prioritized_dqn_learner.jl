@@ -47,11 +47,10 @@ mutable struct PrioritizedDQNLearner{Tq<:AbstractQApproximator, Tf, Tl} <: Abstr
     end
 end
 
-function update!(learner::PrioritizedDQNLearner{<:NeuralNetworkQ}, indexed_batch)
+function update!(learner::PrioritizedDQNLearner{<:NeuralNetworkQ}, batch)
     learner.update_step += 1
     learner.update_step % learner.update_freq == 0 || return nothing
 
-    inds, batch = indexed_batch
     Q, Qₜ, γ, loss_fun, update_horizon = learner.approximator, learner.target_approximator, learner.γ, learner.loss_fun, learner.update_horizon
     states, actions, rewards, terminals, next_states = batch
 
@@ -69,5 +68,5 @@ function update!(learner::PrioritizedDQNLearner{<:NeuralNetworkQ}, indexed_batch
         copyto!(Qₜ, Q)
     end
 
-    inds, priorities
+    priorities
 end

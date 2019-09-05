@@ -7,7 +7,7 @@ struct QBasedPolicy{Q<:AbstractLearner, S<:AbstractActionSelector} <: AbstractPo
     selector::S
 end
 
-(π::QBasedPolicy)(obs::Observation) = obs |> get_state |> π.learner |> π.selector
+(π::QBasedPolicy)(obs::Observation) = obs |> π.learner |> π.selector
 
 "This is the default method. For some specific learners, `softmax` may be removed"
 get_probs(π::QBasedPolicy, s) = s |> π.learner |> softmax
@@ -60,7 +60,7 @@ function extract_transitions(buffer::CircularTurnBuffer{RTSA}, learner::Union{QL
     end
 end
 
-function extract_transitions(buffer::CircularTurnBuffer{PRTSA}, learner::PrioritizedDQNLearner)
+function extract_transitions(buffer::CircularTurnBuffer{PRTSA}, learner::Union{PrioritizedDQNLearner, RainbowLearner})
     if length(buffer) > learner.min_replay_history
         inds, consecutive_batch = sample(buffer; batch_size=learner.batch_size, n_step=learner.update_horizon)
         inds, extract_SARTS(consecutive_batch, learner.γ)

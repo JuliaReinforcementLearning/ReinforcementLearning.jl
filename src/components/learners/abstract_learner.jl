@@ -4,5 +4,5 @@ abstract type AbstractLearner end
 
 approximator(x::AbstractLearner) = x.approximator
 
-(learner::AbstractLearner)(s) = approximator(learner)(s)
-(learner::AbstractLearner)(s, a) = approximator(learner)(s, a)
+(learner::AbstractLearner)(obs) = approximator(learner)(get_state(obs))
+(learner::AbstractLearner)(obs, a) = approximator(learner)(get_state(obs), a)
