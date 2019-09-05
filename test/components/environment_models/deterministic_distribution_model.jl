@@ -8,8 +8,8 @@
 
     m = DeterministicDistributionModel(table)
 
-    @test get_states(m) == 1:2
-    @test get_actions(m) == 1:2
+    @test length(observation_space(m)) == 2
+    @test length(action_space(m)) == 2
 
     @test m(1, 1) == table[1, 1]
     @test m(1, 2) == table[1, 2]

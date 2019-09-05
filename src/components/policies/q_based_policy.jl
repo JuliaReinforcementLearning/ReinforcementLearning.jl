@@ -1,0 +1,67 @@
+export QBasedPolicy, get_probs
+
+using Flux:softmax
+
+struct QBasedPolicy{Q<:AbstractLearner, S<:AbstractActionSelector} <: AbstractPolicy
+    learner::Q
+    selector::S
+end
+
+(π::QBasedPolicy)(s) = s |> π.learner |> selector
+(π::QBasedPolicy)(s, a) = π.learner(s, a)
+
+"This is the default method. For some specific learners, `softmax` may be removed"
+get_probs(π::QBasedPolicy, s) = s |> π.learner |> softmax
+
+update!(π::QBasedPolicy, args...) = update!(π.learner, args...)
+
+extract_transitions(buffer, π::QBasedPolicy) = extract_transitions(buffer, π.learner)
+
+function extract_transitions(buffer::EpisodeTurnBuffer, ::MonteCarloLearner{T, A}) where {T, A<:AbstractQApproximator}
+    if isfull(buffer)
+        @views (state(buffer)[1:end-1], action(buffer)[1:end-1], rewards(buffer)[2:end])
+    else
+        nothing
+    end
+end
+
+function extract_transitions(buffer::EpisodeTurnBuffer, ::TDLearner{<:AbstractQApproximator, :SARSA})
+    if length(buffer) > 0
+        @views (
+            state(buffer)[1:end-1],
+            action(buffer)[1:end-1],
+            reward(buffer)[2:end],
+            terminal(buffer)[2:end],
+            state(buffer)[2:end],
+            action(buffer)[2:end]
+        )
+    else
+        nothing
+    end
+end
+
+function extract_transitions(buffer::EpisodeTurnBuffer, ::GradientBanditLearner)
+    if length(buffer) > 0
+        state(buffer)[end-1], action(buffer)[end-1], reward(buffer)[end]
+    else
+        nothing
+    end
+end
+
+function extract_transitions(buffer::CircularTurnBuffer{RTSA}, learner::QLearner)
+    if length(buffer) > learner.min_replay_history
+        inds, consecutive_batch = sample(buffer; batch_size=learner.batch_size, n_step=learner.update_horizon)
+        extract_SARTS(consecutive_batch, learner.γ)
+    else
+        nothing
+    end
+end
+
+function extract_transitions(buffer::CircularTurnBuffer{PRTSA}, learner::PrioritizedDQNLearner)
+    if length(buffer) > learner.min_replay_history
+        inds, consecutive_batch = sample(buffer; batch_size=learner.batch_size, n_step=learner.update_horizon)
+        inds, extract_SARTS(consecutive_batch, learner.γ)
+    else
+        nothing
+    end
+end

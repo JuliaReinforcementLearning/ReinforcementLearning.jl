@@ -35,6 +35,14 @@ function RainbowLearner(Q, target_Q, loss_fun;
     RainbowLearner(Q, target_Q, loss_fun, γ, loss, update_freq, target_update_freq, update_step, Vₘₐₓ, Vₘᵢₙ, Float32(support.step), n_atoms, n_actions, collect(support))
 end
 
+function (agent::DQN{<:RainbowLearner})(obs::Observation)
+    logits = obs |> get_state |> learner(agent)
+    q = agent.learner.support .* softmax(reshape(logits, :, agent.learner.n_actions))
+    # probs = vec(sum(q, dims=1)) .+ legal_action
+    probs = vec(sum(q, dims=1))
+    probs |> selector(agent)
+end
+
 function update!(learner::RainbowLearner, consecutive_batch)
     learner.update_step += 1
     learner.update_step % learner.update_freq == 0 || return nothing
