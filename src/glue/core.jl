@@ -1,5 +1,7 @@
 import Base:run
 
+using ReinforcementLearningEnvironments:reset!
+
 export run
 
 function run(agent::AbstractAgent, env::AbstractEnv, stop_condition ;hook=EmptyHook())

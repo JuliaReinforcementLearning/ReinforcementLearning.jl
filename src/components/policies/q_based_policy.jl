@@ -7,13 +7,16 @@ struct QBasedPolicy{Q<:AbstractLearner, S<:AbstractActionSelector} <: AbstractPo
     selector::S
 end
 
-(π::QBasedPolicy)(s) = s |> π.learner |> selector
-(π::QBasedPolicy)(s, a) = π.learner(s, a)
+(π::QBasedPolicy)(obs::Observation) = obs |> get_state |> π.learner |> π.selector
 
 "This is the default method. For some specific learners, `softmax` may be removed"
 get_probs(π::QBasedPolicy, s) = s |> π.learner |> softmax
 
 update!(π::QBasedPolicy, args...) = update!(π.learner, args...)
+
+#####
+# dispatches
+#####
 
 extract_transitions(buffer, π::QBasedPolicy) = extract_transitions(buffer, π.learner)
 
@@ -48,7 +51,7 @@ function extract_transitions(buffer::EpisodeTurnBuffer, ::GradientBanditLearner)
     end
 end
 
-function extract_transitions(buffer::CircularTurnBuffer{RTSA}, learner::QLearner)
+function extract_transitions(buffer::CircularTurnBuffer{RTSA}, learner::Union{QLearner, DQNLearner})
     if length(buffer) > learner.min_replay_history
         inds, consecutive_batch = sample(buffer; batch_size=learner.batch_size, n_step=learner.update_horizon)
         extract_SARTS(consecutive_batch, learner.γ)
