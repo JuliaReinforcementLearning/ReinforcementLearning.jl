@@ -42,7 +42,8 @@ mutable struct TDLearner{Tapp <: AbstractApproximator, method, O} <: AbstractLea
     end
 end
 
-function update!(learner::TDLearner{<:AbstractVApproximator, :SRS}, states, rewards, terminals, next_states)
+function update!(learner::TDLearner{<:AbstractVApproximator, :SRS}, transitions)
+    states, rewards, terminals, next_states = transitions
     n, γ, V, optimizer = learner.n, learner.γ, learner.approximator, learner.optimizer
 
     if length(terminals) > 0 && terminals[end]
@@ -60,7 +61,8 @@ function update!(learner::TDLearner{<:AbstractVApproximator, :SRS}, states, rewa
     end
 end
 
-function update!(learner::TDLearner{<:AbstractQApproximator, :SARSA}, states, actions, rewards, terminals, next_states, next_actions)
+function update!(learner::TDLearner{<:AbstractQApproximator, :SARSA}, transitions)
+    states, actions, rewards, terminals, next_states, next_actions = transitions
     n, γ, Q, optimizer = learner.n, learner.γ, learner.approximator, learner.optimizer
 
     if length(terminals) > 0 && terminals[end]

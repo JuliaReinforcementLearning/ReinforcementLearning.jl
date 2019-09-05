@@ -14,7 +14,8 @@ end
 (learner::MonteCarloLearner)(s) = learner.approximator(s)
 (learner::MonteCarloLearner)(s, a) = learner.approximator(s, a)
 
-function update!(learner::MonteCarloLearner{:FirstVisit, <:AbstractVApproximator}, states, rewards)
+function update!(learner::MonteCarloLearner{:FirstVisit, <:AbstractVApproximator}, transitions)
+    states, rewards = transitions
     V, γ, α, Returns, G, T =  learner.approximator, learner.γ, learner.α, learner.returns, 0., length(states)
     seen_states = countmap(states)
 
@@ -30,7 +31,8 @@ function update!(learner::MonteCarloLearner{:FirstVisit, <:AbstractVApproximator
     end
 end
 
-function update!(learner::MonteCarloLearner{:EveryVisit, <:AbstractVApproximator}, states, rewards)
+function update!(learner::MonteCarloLearner{:EveryVisit, <:AbstractVApproximator}, transitions)
+    states, rewards = transitions
     α, γ, V, Returns, G = learner.α, learner.γ, learner.approximator, learner.returns, 0.
     for (s, r) in Iterators.reverse(zip(states, rewards))
         G = γ * G + r
@@ -38,7 +40,8 @@ function update!(learner::MonteCarloLearner{:EveryVisit, <:AbstractVApproximator
     end
 end
 
-function update!(learner::MonteCarloLearner{:FirstVisit,<:AbstractQApproximator}, states, actions, rewards)
+function update!(learner::MonteCarloLearner{:FirstVisit,<:AbstractQApproximator}, transitions)
+    states, actions, rewards = transitions
     α, γ, Q, π, Returns, G, T = learner.α, learner.γ, learner.approximator, learner.π, learner.returns, 0., length(states)
     seen_pairs = countmap(zip(states, actions))
 
@@ -54,7 +57,8 @@ function update!(learner::MonteCarloLearner{:FirstVisit,<:AbstractQApproximator}
     end
 end
 
-function update!(learner::MonteCarloLearner{:EveryVisit, <:AbstractQApproximator}, states, actions, rewards)
+function update!(learner::MonteCarloLearner{:EveryVisit, <:AbstractQApproximator}, transitions)
+    states, actions, rewards = transitions
     α, γ, Q, π, Returns, G = learner.α, learner.γ, learner.approximator, learner.π, learner.returns, 0.
     for (s, a, r) in Iterators.reverse(zip(states, actions, rewards))
         G = γ * G + r

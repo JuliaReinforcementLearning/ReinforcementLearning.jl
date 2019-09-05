@@ -1,9 +1,12 @@
 export Agent, update!
 
-mutable struct Agent{P, B} <: AbstractAgent
+mutable struct Agent{P, B, R} <: AbstractAgent
     π::P
     buffer::B
+    role::R
 end
+
+Agent(π, buffer; role=:DEFAULT) = Agent(π, buffer, role)
 
 (agent::Agent)(obs::Observation) = agent.π(obs)
 

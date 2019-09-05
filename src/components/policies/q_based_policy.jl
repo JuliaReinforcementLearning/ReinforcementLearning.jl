@@ -1,4 +1,4 @@
-export QBasedPolicy, get_probs
+export QBasedPolicy, get_prob
 
 using Flux:softmax
 
@@ -10,7 +10,7 @@ end
 (π::QBasedPolicy)(obs::Observation) = obs |> π.learner |> π.selector
 
 "This is the default method. For some specific learners, `softmax` may be removed"
-get_probs(π::QBasedPolicy, s) = s |> π.learner |> softmax
+get_prob(π::QBasedPolicy, s) = s |> π.learner |> softmax
 
 update!(π::QBasedPolicy, args...) = update!(π.learner, args...)
 

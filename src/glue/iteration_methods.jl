@@ -4,13 +4,13 @@ export policy_evaluation!, policy_improvement!, policy_iteration!, value_iterati
     policy_evaluation!(V::AbstractVApproximator, π, model::AbstractDistributionBasedModel; γ::Float64=0.9, θ::Float64=1e-4)
 See more details at Section (4.1) on Page 75 of the book *Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.*
 """
-function policy_evaluation!(;V::AbstractVApproximator, π, model::AbstractDistributionBasedModel, γ::Float64=0.9, θ::Float64=1e-4)
+function policy_evaluation!(;V::AbstractVApproximator, π::AbstractPolicy, model::AbstractDistributionBasedModel, γ::Float64=0.9, θ::Float64=1e-4)
     states, actions = 1:length(observation_space(model)), 1:length(action_space(model))
     while true
         Δ = 0.
         for s in states
             v = sum(
-                a -> π(s, a) * sum(p * (r + γ * V(s′)) for (s′, r, p) in model(s, a)),
+                a -> get_prob(π, s, a) * sum(p * (r + γ * V(s′)) for (s′, r, p) in model(s, a)),
                 actions
             )
             error = v - V(s)
@@ -25,7 +25,7 @@ end
 """
 See more details at Section (4.2) on Page 76 of the book *Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.*
 """
-function policy_improvement!(;V::AbstractVApproximator, π, model::AbstractDistributionBasedModel, γ::Float64=0.9)
+function policy_improvement!(;V::AbstractVApproximator, π::AbstractPolicy, model::AbstractDistributionBasedModel, γ::Float64=0.9)
     states, actions = 1:length(observation_space(model)), 1:length(action_space(model))
     is_policy_stable = true
     for s in states
@@ -44,7 +44,7 @@ end
     policy_iteration!(V::AbstractVApproximator, π, model::AbstractDistributionBasedModel; γ::Float64=0.9, θ::Float64=1e-4, max_iter=typemax(Int))
 See more details at Section (4.3) on Page 80 of the book *Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.*
 """
-function policy_iteration!(;V::AbstractVApproximator, π, model::AbstractDistributionBasedModel, γ::Float64=0.9, θ::Float64=1e-4, max_iter=typemax(Int))
+function policy_iteration!(;V::AbstractVApproximator, π::AbstractPolicy, model::AbstractDistributionBasedModel, γ::Float64=0.9, θ::Float64=1e-4, max_iter=typemax(Int))
     for i in 1:max_iter
         @debug "iteration: $i"
         policy_evaluation!(;V=V, π=π, model=model, γ=γ, θ=θ)
