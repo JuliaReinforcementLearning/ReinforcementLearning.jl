@@ -22,7 +22,7 @@ extract_transitions(buffer, π::QBasedPolicy) = extract_transitions(buffer, π.l
 
 function extract_transitions(buffer::EpisodeTurnBuffer, ::MonteCarloLearner{T, A}) where {T, A<:AbstractQApproximator}
     if isfull(buffer)
-        @views (state(buffer)[1:end-1], action(buffer)[1:end-1], rewards(buffer)[2:end])
+        @views (state(buffer)[1:end-1], action(buffer)[1:end-1], reward(buffer)[2:end])
     else
         nothing
     end

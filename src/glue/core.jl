@@ -7,7 +7,7 @@ export run
 function run(agent::AbstractAgent, env::AbstractEnv, stop_condition ;hook=EmptyHook())
 
     reset!(env)
-    obs = observe(env)
+    obs = reset(observe(env); terminal=true)
     hook(PRE_EPISODE_STAGE, agent, env, obs)
 
     while true
@@ -25,10 +25,9 @@ function run(agent::AbstractAgent, env::AbstractEnv, stop_condition ;hook=EmptyH
 
         if get_terminal(obs)
             hook(POST_EPISODE_STAGE, agent, env, obs)
-            r, t = obs.reward, obs.terminal  # !!! deepcopy?
+            r = get_reward(obs)  # !!! deepcopy?
             reset!(env)
-            temp_obs = observe(env)
-            obs = Observation(r, t, get_state(temp_obs), temp_obs.meta)
+            obs = reset(observe(env); reward=r, terminal=true)
             hook(PRE_EPISODE_STAGE, agent, env, obs)
         end
     end
@@ -38,7 +37,7 @@ end
 function run(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_condition; hook=[EmptyHook() for _ in agents])
     roles = [agent.role for agent in agents]
     reset!(env)
-    observations = [observe(env, agent.role) for agent in agents]
+    observations = [reset(observe(env, agent.role);terminal=true) for agent in agents]
     for (h, agent, obs) in zip(hook, agents, observations)
         h(PRE_EPISODE_STAGE, agent, env, obs)
     end
@@ -68,15 +67,7 @@ function run(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_cond
             reset!(env)
 
             observations = [
-                begin
-                    temp_obs = observe(env, agent.role)
-                    Observation(
-                        observations[i].reward,
-                        observations[i].terminal,
-                        get_state(temp_obs),
-                        temp_obs.meta
-                    )
-                end
+                reset(observe(env, agent.role); reward=observations[i].reward, terminal=observations[i].terminal)
                 for (i, agent) in enumerate(agents)
             ]
 
