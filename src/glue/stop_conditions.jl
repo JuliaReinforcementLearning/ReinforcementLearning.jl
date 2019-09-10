@@ -57,7 +57,7 @@ mutable struct StopAfterEpisode{Tl}
     tag::String
 end
 
-function StopAfterEpisode(episode; cur=0, is_show_progress=true, tag="TRAINING")
+function StopAfterEpisode(episode; cur=-1, is_show_progress=true, tag="TRAINING")
     if is_show_progress
         progress=Progress(episode)
         ProgressMeter.update!(progress, cur)
@@ -71,9 +71,8 @@ function (s::StopAfterEpisode)(agent, env, obs)
     !isnothing(s.progress) && next!(s.progress; showvalues=[(Symbol(s.tag, "/", :EPISODE), s.cur)])
     @debug s.tag EPISODE=s.cur
 
-    res = s.cur >= s.episode
     get_terminal(obs) && (s.cur += 1;)
-    res
+    s.cur >= s.episode
 end
 
 #####

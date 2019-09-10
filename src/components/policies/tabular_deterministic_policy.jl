@@ -1,6 +1,6 @@
 export TabularDeterministicPolicy
 
-struct TabularDeterministicPolicy <: AbstractPolicy
+Base.@kwdef struct TabularDeterministicPolicy <: AbstractPolicy
     table::Vector{Int}
     nactions::Int
 end

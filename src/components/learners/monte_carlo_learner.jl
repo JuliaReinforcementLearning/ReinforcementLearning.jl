@@ -1,22 +1,36 @@
-export MonteCarloLearner, update!
+export MonteCarloLearner, FIRST_VISIT, EVERY_VISIT, NO_SAMPLING, ORDINARY_IMPORTANCE_SAMPLING, WEIGHTED_IMPORTANCE_SAMPLING
 
 using .Utils:CachedSampleAvg
 using StatsBase:countmap
 
-struct MonteCarloLearner{T, A, R} <: AbstractLearner
+abstract type AbstractVisitType end
+struct FirstVisit <: AbstractVisitType end
+struct EveryVisit <: AbstractVisitType end
+const FIRST_VISIT = FirstVisit()
+const EVERY_VISIT = EveryVisit()
+
+abstract type AbstractSamplingType end
+struct NoSampling <: AbstractSamplingType end
+struct OrdinaryImportanceSampling <: AbstractSamplingType end
+struct WeightedImportanceSampling <: AbstractSamplingType end
+const NO_SAMPLING = NoSampling()
+const ORDINARY_IMPORTANCE_SAMPLING = OrdinaryImportanceSampling()
+const WEIGHTED_IMPORTANCE_SAMPLING = WeightedImportanceSampling()
+
+struct MonteCarloLearner{T, A, R, S} <: AbstractLearner
     approximator::A
     γ::Float64
     α::Float64
     returns::R
 
-    MonteCarloLearner(app::A; γ=1., α=1., kind=:FirstVisit, returns=CachedSampleAvg()) where A = new{kind, A, typeof(returns)}(app, γ, α, returns)
+    MonteCarloLearner(app::A; γ=1., α=1., kind=FIRST_VISIT, sampling=NO_SAMPLING, returns=CachedSampleAvg()) where A = new{typeof(kind), A, typeof(returns), typeof(sampling)}(app, γ, α, returns)
 end
 
 (learner::MonteCarloLearner)(obs) = learner.approximator(get_state(obs))
 (learner::MonteCarloLearner)(obs, a) = learner.approximator(get_state(s), a)
 
-function update!(learner::MonteCarloLearner{:FirstVisit, <:AbstractVApproximator}, transitions)
-    states, rewards = transitions
+function update!(learner::MonteCarloLearner{<:FirstVisit, <:AbstractVApproximator, <:Any, <:NoSampling}, transitions)
+    states, rewards = transitions.states, transitions.rewards
     V, γ, α, Returns, G, T =  learner.approximator, learner.γ, learner.α, learner.returns, 0., length(states)
     seen_states = countmap(states)
 
@@ -32,8 +46,47 @@ function update!(learner::MonteCarloLearner{:FirstVisit, <:AbstractVApproximator
     end
 end
 
-function update!(learner::MonteCarloLearner{:EveryVisit, <:AbstractVApproximator}, transitions)
-    states, rewards = transitions
+function update!(learner::MonteCarloLearner{<:FirstVisit, <:AbstractVApproximator, <:CachedSampleAvg, <:OrdinaryImportanceSampling}, transitions, weights)
+    states, rewards = transitions.states, transitions.rewards
+    V, γ, α, Returns, G, ρ, T =  learner.approximator, learner.γ, learner.α, learner.returns, 0., 1., length(states)
+    seen_states = countmap(states)
+
+    for t in T:-1:1
+        S, R = states[t], rewards[t]
+        G = γ * G + R
+        ρ *= weights[t]
+        if seen_states[S] == 1  # first visit
+            update!(V, S => α * (Returns(S, ρ * G) - V(S)))
+            delete!(seen_states, S)
+        else
+            seen_states[S] -= 1
+        end
+    end
+end
+
+function update!(learner::MonteCarloLearner{<:FirstVisit, <:AbstractVApproximator, <:Tuple{CachedSum, CachedSum}, <:WeightedImportanceSampling}, transitions, weights)
+    states, rewards = transitions.states, transitions.rewards
+    V, γ, α, (G_cached, ρ_cached), G, ρ, T =  learner.approximator, learner.γ, learner.α, learner.returns, 0., 1., length(states)
+    seen_states = countmap(states)
+
+    for t in T:-1:1
+        S, R = states[t], rewards[t]
+        G = γ * G + R
+        ρ *= weights[t]
+        if seen_states[S] == 1  # first visit
+            numerator = G_cached(S, ρ * G)
+            denominator = ρ_cached(S, ρ)
+            val = denominator == 0 ? 0 : numerator / denominator
+            update!(V, S => α * (val - V(S)))
+            delete!(seen_states, S)
+        else
+            seen_states[S] -= 1
+        end
+    end
+end
+
+function update!(learner::MonteCarloLearner{<:EveryVisit, <:AbstractVApproximator}, transitions)
+    states, rewards = transitions.states, transitions.rewards
     α, γ, V, Returns, G = learner.α, learner.γ, learner.approximator, learner.returns, 0.
     for (s, r) in Iterators.reverse(zip(states, rewards))
         G = γ * G + r
@@ -41,8 +94,8 @@ function update!(learner::MonteCarloLearner{:EveryVisit, <:AbstractVApproximator
     end
 end
 
-function update!(learner::MonteCarloLearner{:FirstVisit,<:AbstractQApproximator}, transitions)
-    states, actions, rewards = transitions
+function update!(learner::MonteCarloLearner{<:FirstVisit,<:AbstractQApproximator}, transitions)
+    states, actions, rewards = transitions.states, transitions.actions, transitions.rewards
     α, γ, Q, Returns, G, T = learner.α, learner.γ, learner.approximator, learner.returns, 0., length(states)
     seen_pairs = countmap(zip(states, actions))
 
@@ -60,7 +113,7 @@ function update!(learner::MonteCarloLearner{:FirstVisit,<:AbstractQApproximator}
 end
 
 function update!(learner::MonteCarloLearner{:EveryVisit, <:AbstractQApproximator}, transitions)
-    states, actions, rewards = transitions
+    states, actions, rewards = transitions.states, transitions.actions, transitions.rewards
     α, γ, Q, Returns, G = learner.α, learner.γ, learner.approximator, learner.returns, 0.
     for (s, a, r) in Iterators.reverse(zip(states, actions, rewards))
         G = γ * G + r

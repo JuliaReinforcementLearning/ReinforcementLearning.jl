@@ -1,4 +1,4 @@
-export findallmax, discount_rewards, discount_rewards!, CachedSampleAvg, SampleAvg
+export findallmax, discount_rewards, discount_rewards!, CachedSampleAvg, SampleAvg, CachedSum
 
 """
     findallmax(A::AbstractArray)
@@ -70,7 +70,7 @@ function (s::SampleAvg)(x)
 end
 
 struct CachedSampleAvg
-    cache::Dict{Any, Any}
+    cache::Dict{Any, SampleAvg}
     CachedSampleAvg() = new(Dict())
 end
 
@@ -79,4 +79,13 @@ function (c::CachedSampleAvg)(k, x)
         c.cache[k] = SampleAvg()
     end
     c.cache[k](x)
+end
+
+struct CachedSum
+    cache::Dict{Any, Float64}
+    CachedSum() = new(Dict{Any, Float64}())
+end
+
+function (c::CachedSum)(k, x)
+    c.cache[k] = get!(c.cache, k, 0.) + x
 end

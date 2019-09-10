@@ -1,9 +1,9 @@
 export Agent, update!
 
-mutable struct Agent{P, B, R} <: AbstractAgent
+Base.@kwdef mutable struct Agent{P, B, R} <: AbstractAgent
     π::P
     buffer::B
-    role::R
+    role::R=:DEFAULT
 end
 
 Agent(π, buffer; role=:DEFAULT) = Agent(π, buffer, role)

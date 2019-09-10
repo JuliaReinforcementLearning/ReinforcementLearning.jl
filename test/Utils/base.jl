@@ -32,4 +32,12 @@
         @test f(:a, 8) ≈ (3+5+8)/3
         @test f(:b, 0) ≈ 0
     end
+
+    @testset "CachedSum" begin
+        f = CachedSum()
+        @test f(:a, 1) ≈ 1
+        @test f(:a, 2) ≈ 3
+        @test f(:a, 3) ≈ 6
+        @test f(:b, 0.3) ≈ 0.3
+    end
 end

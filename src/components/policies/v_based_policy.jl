@@ -1,11 +1,13 @@
 export VBasedPolicy
 
-struct VBasedPolicy{V, F} <: AbstractPolicy
+Base.@kwdef struct VBasedPolicy{V, F} <: AbstractPolicy
     learner::V
     f::F
 end
 
-(π::VBasedPolicy)(obs) = π.f(π.learner, obs)
+(π::VBasedPolicy)(obs) = π.f(obs)
+
+get_prob(π::VBasedPolicy, s, a) = get_prob(π.f, s, a)
 
 update!(π::VBasedPolicy, args...) = update!(π.learner, args...)
 
@@ -13,7 +15,10 @@ extract_transitions(buffer, π::VBasedPolicy) = extract_transitions(buffer, π.l
 
 function extract_transitions(buffer::EpisodeTurnBuffer, ::MonteCarloLearner{T, A}) where {T, A<:AbstractVApproximator}
     if isfull(buffer)
-        @views (state(buffer)[1:end-1], reward(buffer)[2:end])
+        @views (
+            states=state(buffer)[1:end-1],
+            rewards=reward(buffer)[2:end]
+            )
     else
         nothing
     end

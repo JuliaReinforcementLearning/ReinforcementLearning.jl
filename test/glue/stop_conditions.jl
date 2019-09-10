@@ -12,10 +12,11 @@
 
     s = StopAfterEpisode(2)
 
+    @test s(agent, env, episode_end_obs) == false  # dummy first
     @test s(agent, env, episode_not_end_obs) == false
-    @test s(agent, env, episode_end_obs) == false
+    @test s(agent, env, episode_end_obs) == false  # real first episode ends
     @test s(agent, env, episode_not_end_obs) == false
-    @test s(agent, env, episode_end_obs) == false
+    @test s(agent, env, episode_end_obs) == true
     @test s(agent, env, episode_not_end_obs) == true
     @test s(agent, env, episode_end_obs) == true
 
