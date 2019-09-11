@@ -33,6 +33,8 @@ function get_ϵ(s::EpsilonGreedySelector{:exp}, step)
     end
 end
 
+get_ϵ(s::EpsilonGreedySelector) = get_ϵ(s, s.step)
+
 """
     (s::EpsilonGreedySelector)(values; step) where T
 
@@ -44,7 +46,17 @@ end
     In that case, a random one will be returned.
 """
 function (s::EpsilonGreedySelector)(values)
-    ϵ = get_ϵ(s, s.step)
+    ϵ = get_ϵ(s)
     s.step += 1
     rand() > ϵ ? sample(findallmax(values)[2]) : rand(1:length(values))
+end
+
+function get_prob(s::EpsilonGreedySelector, values)
+    ϵ, n = get_ϵ(s), length(values)
+    probs = fill(ϵ/n, n)
+    max_val_inds = findallmax(values)[2]
+    for ind in max_val_inds
+        probs[ind] += (1 - ϵ) / length(max_val_inds)
+    end
+    probs
 end

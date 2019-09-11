@@ -70,3 +70,12 @@ function update!(learner::PrioritizedDQNLearner{<:NeuralNetworkQ}, batch)
 
     priorities
 end
+
+function extract_transitions(buffer::CircularTurnBuffer{PRTSA}, learner::PrioritizedDQNLearner)
+    if length(buffer) > learner.min_replay_history
+        inds, consecutive_batch = sample(buffer; batch_size=learner.batch_size, n_step=learner.update_horizon)
+        inds, extract_SARTS(consecutive_batch, learner.γ)
+    else
+        nothing
+    end
+end

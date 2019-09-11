@@ -57,7 +57,7 @@ mutable struct StopAfterEpisode{Tl}
     tag::String
 end
 
-function StopAfterEpisode(episode; cur=-1, is_show_progress=true, tag="TRAINING")
+function StopAfterEpisode(episode; cur=0, is_show_progress=true, tag="TRAINING")
     if is_show_progress
         progress=Progress(episode)
         ProgressMeter.update!(progress, cur)

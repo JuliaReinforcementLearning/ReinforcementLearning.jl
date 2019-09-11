@@ -75,3 +75,12 @@ function update!(learner::DQNLearner{<:NeuralNetworkQ}, batch)
         copyto!(Qₜ, Q)
     end
 end
+
+function extract_transitions(buffer::CircularTurnBuffer{RTSA}, learner::DQNLearner)
+    if length(buffer) > learner.min_replay_history
+        inds, consecutive_batch = sample(buffer; batch_size=learner.batch_size, n_step=learner.update_horizon)
+        extract_SARTS(consecutive_batch, learner.γ)
+    else
+        nothing
+    end
+end

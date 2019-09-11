@@ -100,3 +100,12 @@ function project_distribution(supports, weights, target_support, delta_z, vmin, 
     projection = clamp.(1 .- abs.(tiled_support .- reshape(target_support, 1, :)) ./ delta_z, 0, 1) .* reshape(weights, n_atoms, 1, batch_size)
     reshape(sum(projection, dims=1), n_atoms, batch_size)
 end
+
+function extract_transitions(buffer::CircularTurnBuffer{PRTSA}, learner::RainbowLearner)
+    if length(buffer) > learner.min_replay_history
+        inds, consecutive_batch = sample(buffer; batch_size=learner.batch_size, n_step=learner.update_horizon)
+        inds, extract_SARTS(consecutive_batch, learner.γ)
+    else
+        nothing
+    end
+end

@@ -19,3 +19,11 @@ function update!(learner::GradientBanditLearner, transitions)
     errors = (r - r̄) .* (onehot(a, 1:length(probs)) .- probs)
     update!(learner.approximator, s => apply!(learner.optimizer, s, errors))
 end
+
+function extract_transitions(buffer::EpisodeTurnBuffer, ::GradientBanditLearner)
+    if length(buffer) > 0
+        state(buffer)[end-1], action(buffer)[end-1], reward(buffer)[end]
+    else
+        nothing
+    end
+end

@@ -23,7 +23,7 @@ struct MonteCarloLearner{T, A, R, S} <: AbstractLearner
     α::Float64
     returns::R
 
-    MonteCarloLearner(app::A; γ=1., α=1., kind=FIRST_VISIT, sampling=NO_SAMPLING, returns=CachedSampleAvg()) where A = new{typeof(kind), A, typeof(returns), typeof(sampling)}(app, γ, α, returns)
+    MonteCarloLearner(;approximator::A, γ=1., α=1., kind=FIRST_VISIT, sampling=NO_SAMPLING, returns=CachedSampleAvg()) where A = new{typeof(kind), A, typeof(returns), typeof(sampling)}(approximator, γ, α, returns)
 end
 
 (learner::MonteCarloLearner)(obs) = learner.approximator(get_state(obs))
@@ -118,5 +118,17 @@ function update!(learner::MonteCarloLearner{:EveryVisit, <:AbstractQApproximator
     for (s, a, r) in Iterators.reverse(zip(states, actions, rewards))
         G = γ * G + r
         update!(Q, (s, a) => α * (Returns((s, a), G) - Q(s, a)))
+    end
+end
+
+function extract_transitions(buffer::EpisodeTurnBuffer, ::MonteCarloLearner{T, A}) where {T, A<:AbstractQApproximator}
+    if isfull(buffer)
+        @views (
+            states=state(buffer)[1:end-1],
+            actions=action(buffer)[1:end-1],
+            rewards=reward(buffer)[2:end]
+        )
+    else
+        nothing
     end
 end

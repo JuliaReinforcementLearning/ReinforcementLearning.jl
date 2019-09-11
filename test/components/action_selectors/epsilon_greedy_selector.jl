@@ -28,4 +28,11 @@
             @test ReinforcementLearning.get_ϵ(s, i) == ϵ
         end
     end
+
+    @testset "get_prob" begin
+        ϵ = 0.4
+        s = EpsilonGreedySelector(ϵ)
+        values = [1, 2, 2, -1]
+        @test get_prob(s, values) == [0.1, 0.4, 0.4, 0.1]
+    end
 end

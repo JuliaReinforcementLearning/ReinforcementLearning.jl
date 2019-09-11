@@ -11,17 +11,22 @@ function run(agent::AbstractAgent, env::AbstractEnv, stop_condition ;hook=EmptyH
     hook(PRE_EPISODE_STAGE, agent, env, obs)
 
     while true
-        stop_condition(agent, env, obs) && break
-
         action = agent(obs)
         hook(PRE_ACT_STAGE, agent, env, obs => action)
 
         # async here?
         update!(agent, obs => action)
         env(action)
-
         obs = observe(env)
         hook(POST_ACT_STAGE, agent, env, action => obs)
+
+        if stop_condition(agent, env, obs)
+            if get_terminal(obs)
+                hook(POST_EPISODE_STAGE, agent, env, obs)
+            end
+            update!(agent, obs => agent(obs))  # push reward terminal into buffer, state and action are not that important
+            break
+        end
 
         if get_terminal(obs)
             hook(POST_EPISODE_STAGE, agent, env, obs)
@@ -43,8 +48,6 @@ function run(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_cond
     end
 
     while true
-        stop_condition(agents, env, observations) && break
-
         # async here?
         actions = [agent(obs) for (agent, obs) in zip(agents, observations)]
         for (h, agent, obs, action) in zip(hook, agents, observations, actions)
@@ -57,6 +60,18 @@ function run(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_cond
         observations = [observe(env, agent.role) for agent in agents]
         for (h, agent, action, obs) in zip(hook, agents, actions, observations)
             h(POST_ACT_STAGE, agents, env, action => obs)
+        end
+
+        if stop_condition(agents, env,  observations)
+            if get_terminal(observations)
+                for (h, agent, obs) in zip(hook, agents, observations)
+                    h(POST_EPISODE_STAGE, agent, env, obs)
+                end
+            end
+            for (agent, obs) in zip(agents, observations)
+                update!(agent, obs => agent(obs))  # push reward terminal into buffer, state and action are not that important
+            end
+            break
         end
 
         if get_terminal(observations)
