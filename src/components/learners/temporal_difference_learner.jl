@@ -1,4 +1,4 @@
-export TDLearner, update!
+export TDLearner, DoubleLearner
 
 using .Utils: discount_rewards, discount_rewards_reduced
 using Flux.Optimise:Descent
@@ -18,6 +18,7 @@ only **S**tates, **R**ewards and next_**S**ates are used to update the `approxim
 
 For [`AbstractQApproximator`](@ref), the following methods are supported:
 
+- `:SARS` (aka Q-Learning)
 - `:SARSA`
 - `:ExpectedSARSA`
 """
@@ -43,6 +44,19 @@ mutable struct TDLearner{Tapp <: AbstractApproximator, method, O} <: AbstractLea
     end
 end
 
+Base.@kwdef struct DoubleLearner{T<:TDLearner} <: AbstractLearner
+    L1::T
+    L2::T
+end
+
+extract_transitions(buffer, learner::DoubleLearner) = extract_transitions(buffer, learner.L1)
+
+function update!(learner::DoubleLearner, args...)
+    rand(Bool) ? update!(learner.L1, learner.L2, args...) : update!(learner.L2, learner.L1, args...)
+end
+
+(learner::DoubleLearner)(obs::Observation) = learner.L1(obs) .+ learner.L2(obs)
+
 function update!(learner::TDLearner{<:AbstractVApproximator, :SRS}, transitions)
     states, rewards, terminals, next_states = transitions
     n, γ, V, optimizer = learner.n, learner.γ, learner.approximator, learner.optimizer
@@ -67,9 +81,9 @@ function extract_transitions(buffer::EpisodeTurnBuffer, learner::TDLearner{<:Abs
     if length(buffer) > 0
         @views (
             states=state(buffer)[max(1, end - n - 1):end-1],
-            rewards=reward(buffer)[max(1, end - n):end],
-            terminals=terminal(buffer)[max(1, end - n):end],
-            next_states=state(buffer)[max(1, end - n):end]
+            rewards=reward(buffer)[max(1, end - n - 1)+1:end],
+            terminals=terminal(buffer)[max(1, end - n - 1)+1:end],
+            next_states=state(buffer)[max(1, end - n - 1)+1:end]
             )
     else
         nothing
@@ -101,10 +115,10 @@ function extract_transitions(buffer::EpisodeTurnBuffer, learner::TDLearner{<:Abs
         @views (
             states=state(buffer)[max(1, end - n - 1):end-1],
             actions=action(buffer)[max(1, end - n - 1):end-1],
-            rewards=reward(buffer)[max(1, end - n):end],
-            terminals=terminal(buffer)[max(1, end - n):end],
-            next_states=state(buffer)[max(1, end - n):end],
-            next_actions=action(buffer)[max(1, end - n):end]
+            rewards=reward(buffer)[max(1, end - n - 1) + 1:end],
+            terminals=terminal(buffer)[max(1, end - n - 1) + 1:end],
+            next_states=state(buffer)[max(1, end - n - 1) + 1:end],
+            next_actions=action(buffer)[max(1, end - n - 1) + 1:end]
             )
     else
         nothing
@@ -149,15 +163,35 @@ function update!(learner::TDLearner{<:AbstractQApproximator, :SARS}, transitions
     end
 end
 
+function update!(learner::T, target_learner::T, transitions) where {T<:TDLearner{<:AbstractQApproximator, :SARS}}
+    states, actions, rewards, terminals, next_states = transitions
+    n, γ, Q, Qₜ, optimizer = learner.n, learner.γ, learner.approximator, target_learner.approximator, learner.optimizer
+
+    if length(terminals) > 0 && terminals[end]
+        @views gains = discount_rewards(rewards[max(end-n, 1):end], γ)  # n starts with 0
+        for (i, G) in enumerate(gains)
+            @views s, a = states[end-length(gains)+i], actions[end-length(gains)+i]
+            update!(Q, (s, a) => apply!(optimizer, (s, a), G - Q(s, a)))
+        end
+    else
+        if length(states) ≥ (n + 1)  # n starts with 0
+            @views s, a, s′ = states[end-n], actions[end-n], next_states[end]
+            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^n * Qₜ(s′, argmax(Q(s′)))
+            update!(Q, (s, a) => apply!(optimizer, (s, a), G - Q(s, a)))
+        end
+    end
+end
+
+
 function extract_transitions(buffer::EpisodeTurnBuffer, learner::TDLearner{<:AbstractQApproximator, :SARS})
     n = learner.n
     if length(buffer) > 0
         @views (
             states=state(buffer)[max(1, end - n - 1):end-1],
             actions=action(buffer)[max(1, end - n - 1):end-1],
-            rewards=reward(buffer)[max(1, end - n):end],
-            terminals=terminal(buffer)[max(1, end - n):end],
-            next_states=state(buffer)[max(1, end - n):end]
+            rewards=reward(buffer)[max(1, end - n - 1) + 1:end],
+            terminals=terminal(buffer)[max(1, end - n - 1) + 1:end],
+            next_states=state(buffer)[max(1, end - n - 1) + 1:end]
             )
     else
         nothing
