@@ -182,6 +182,13 @@ function update!(learner::T, target_learner::T, transitions) where {T<:TDLearner
     end
 end
 
+function priority(transition, learner::TDLearner{<:AbstractQApproximator, :SARS})
+    s, a, r, d, s′ = transition
+    γ, Q, opt = learner.γ, learner.approximator, learner.optimizer
+    error = d ? apply!(opt, (s, a), r - Q(s, a)) : apply!(opt, (s, a), r + γ^(learner.n+1) * maximum(Q(s′)) - Q(s, a))
+    abs(error)
+end
+
 function update!(learner::TDLearner{<:AbstractQApproximator, :SARS}, model::Union{TimeBasedSampleModel, ExperienceBasedSampleModel};plan_step=1)
     for _ in 1:plan_step
         # @assert learner.n == 0 "n must be 0 here"
@@ -194,6 +201,32 @@ end
 
 function extract_transitions(model::Union{ExperienceBasedSampleModel, TimeBasedSampleModel}, learner::TDLearner{<:AbstractQApproximator, :SARS})
     if length(model.experiences) > 0
+        map(Base.vect, sample(model))
+    else
+        nothing
+    end
+end
+
+function update!(learner::TDLearner{<:AbstractQApproximator, :SARS}, model::PrioritizedSweepingSampleModel;plan_step=1)
+    for _ in 1:plan_step
+        # @assert learner.n == 0 "n must be 0 here"
+        transitions = extract_transitions(model, learner)
+        if !isnothing(transitions)
+            update!(learner, transitions)
+            s, _, _, _, _ = transitions
+            s = s[]  # length(s) is assumed to be 1
+            for (s̄, ā, r̄, d̄) in model.predecessors[s]
+                P = priority((s̄, ā, r̄, d̄, s), learner)
+                if P ≥ model.θ
+                    model.PQueue[(s̄, ā)] = P
+                end
+            end
+        end
+    end
+end
+
+function extract_transitions(model::PrioritizedSweepingSampleModel, learner::TDLearner{<:AbstractQApproximator, :SARS})
+    if length(model.PQueue) > 0
         map(Base.vect, sample(model))
     else
         nothing

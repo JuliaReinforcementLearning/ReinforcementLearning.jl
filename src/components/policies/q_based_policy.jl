@@ -22,6 +22,8 @@ end
 
 update!(π::QBasedPolicy, model::AbstractEnvironmentModel;kw...) = update!(π.learner, model;kw...)
 
+priority(transition, π::QBasedPolicy) = priority(transition, π.learner)
+
 #####
 # dispatches
 #####

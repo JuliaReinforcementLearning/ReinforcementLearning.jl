@@ -6,7 +6,7 @@
     s = StopAfterStep(2)
 
     @test s(agent, env, episode_not_end_obs) == false
-    @test s(agent, env, episode_not_end_obs) == false
+    @test s(agent, env, episode_not_end_obs) == true
     @test s(agent, env, episode_not_end_obs) == true
     @test s(agent, env, episode_not_end_obs) == true
 
@@ -28,7 +28,7 @@
     s = ComposedStopCondition([StopAfterEpisode(2), StopAfterStep(2)])
 
     @test s(agent, env, episode_not_end_obs) == false
-    @test s(agent, env, episode_end_obs) == false
+    @test s(agent, env, episode_end_obs) == true
     @test s(agent, env, episode_not_end_obs) == true
     @test s(agent, env, episode_end_obs) == true
     @test s(agent, env, episode_not_end_obs) == true

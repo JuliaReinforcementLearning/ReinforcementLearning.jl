@@ -27,6 +27,13 @@ function update!(model::AbstractEnvironmentModel, buffer::AbstractTurnBuffer)
     end
 end
 
+function update!(model::PrioritizedSweepingSampleModel, buffer::AbstractTurnBuffer, π::AbstractPolicy)
+    transition = extract_transitions(buffer, model)
+    if !isnothing(transition)
+        update!(model, transition, priority(transition, π))
+    end
+end
+
 function update!(π::AbstractPolicy, buffer::AbstractTurnBuffer, model::AbstractEnvironmentModel;plan_step=1)
     update!(π, buffer)  # direct RL
     update!(π, model;plan_step=plan_step)  # planning

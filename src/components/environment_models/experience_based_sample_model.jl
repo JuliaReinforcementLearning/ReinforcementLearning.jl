@@ -6,9 +6,10 @@ import StatsBase:sample
       ExperienceBasedSampleModel <: AbstractSampleBasedModel
 Generate a turn sample based on previous experiences.
 """
-struct ExperienceBasedSampleModel <: AbstractSampleBasedModel
+mutable struct ExperienceBasedSampleModel <: AbstractSampleBasedModel
    experiences::Dict{Any, Dict{Any, NamedTuple{(:reward, :terminal, :nextstate), Tuple{Float64, Bool, Any}}}}
-   ExperienceBasedSampleModel() = new(Dict{Any, Dict{Any, NamedTuple{(:reward, :terminal, :nextstate), Tuple{Float64, Bool, Any}}}}())
+   sample_count::Int
+   ExperienceBasedSampleModel() = new(Dict{Any, Dict{Any, NamedTuple{(:reward, :terminal, :nextstate), Tuple{Float64, Bool, Any}}}}(), 0)
 end
 
 function extract_transitions(buffer::EpisodeTurnBuffer, m::ExperienceBasedSampleModel)
@@ -31,5 +32,6 @@ end
 function sample(model::ExperienceBasedSampleModel)
     s = rand(keys(model.experiences))
     a = rand(keys(model.experiences[s]))
+    model.sample_count += 1
     s, a, model.experiences[s][a]...
 end
