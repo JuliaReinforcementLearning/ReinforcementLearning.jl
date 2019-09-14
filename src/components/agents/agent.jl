@@ -1,4 +1,4 @@
-export Agent, update!
+export Agent
 
 Base.@kwdef mutable struct Agent{P, B, R} <: AbstractAgent
     π::P
@@ -11,20 +11,15 @@ Agent(π, buffer; role=:DEFAULT) = Agent(π, buffer, role)
 (agent::Agent)(obs::Observation) = agent.π(obs)
 
 function update!(agent::Agent, experience::Pair)
-    push!(agent.buffer, experience)
-    transitions = extract_transitions(agent.buffer, agent.π)
-    if !isnothing(transitions)
-        update!(agent.π, transitions)
-    end
+    update!(agent.buffer, experience, agent)
+    update!(agent.π, agent.buffer)
 end
 
-function update!(agent::Agent{<:QBasedPolicy{<:Union{PrioritizedDQNLearner, RainbowLearner}}}, experience::Pair)
+function update!(buffer::AbstractTurnBuffer, experience::Pair, agent::Agent)
+    push!(agent.buffer, experience)
+end
+
+function update!(buffer::AbstractTurnBuffer, experience::Pair, agent::Agent{<:QBasedPolicy{<:Union{PrioritizedDQNLearner, RainbowLearner}}})
     push!(priority(agent.buffer), agent.π.learner.default_priority)
     push!(agent.buffer, experience)
-    indexed_batch = extract_transitions(agent.buffer, agent.π)
-    if !isnothing(indexed_batch)
-        inds, batch = indexed_batch
-        priorities = update!(agent.π, batch)
-        isnothing(priorities) || (priority(agent.buffer)[inds] .= priorities)
-    end
 end

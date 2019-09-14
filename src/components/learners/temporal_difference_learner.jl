@@ -69,7 +69,7 @@ function update!(learner::TDLearner{<:AbstractVApproximator, :SRS}, transitions)
         end
     else
         if length(states) ≥ (n + 1)  # n starts with 0
-            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^n * V(next_states[end])
+            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^(n+1) * V(next_states[end])
             @views s = states[end-n]
             update!(V, s => apply!(optimizer, s, G - V(s)))
         end
@@ -103,7 +103,7 @@ function update!(learner::TDLearner{<:AbstractQApproximator, :SARSA}, transition
     else
         if length(states) ≥ (n + 1)  # n starts with 0
             @views s, a, s′, a′ = states[end-n], actions[end-n], next_states[end], next_actions[end]
-            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^n * Q(s′, a′)
+            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^(n+1) * Q(s′, a′)
             update!(Q, (s, a) => apply!(optimizer, (s, a), G - Q(s, a)))
         end
     end
@@ -138,7 +138,7 @@ function update!(learner::TDLearner{<:AbstractQApproximator, :ExpectedSARSA}, tr
     else
         if length(states) ≥ (n + 1)  # n starts with 0
             @views s, a, s′ = states[end-n], actions[end-n], next_states[end]
-            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^n * dot(Q(s′), probs_of_a′)
+            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^(n+1) * dot(Q(s′), probs_of_a′)
             update!(Q, (s, a) => apply!(optimizer, (s, a), G - Q(s, a)))
         end
     end
@@ -157,7 +157,7 @@ function update!(learner::TDLearner{<:AbstractQApproximator, :SARS}, transitions
     else
         if length(states) ≥ (n + 1)  # n starts with 0
             @views s, a, s′ = states[end-n], actions[end-n], next_states[end]
-            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^n * maximum(Q(s′))
+            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^(n+1) * maximum(Q(s′))  # n starts with 0
             update!(Q, (s, a) => apply!(optimizer, (s, a), G - Q(s, a)))
         end
     end
@@ -176,12 +176,29 @@ function update!(learner::T, target_learner::T, transitions) where {T<:TDLearner
     else
         if length(states) ≥ (n + 1)  # n starts with 0
             @views s, a, s′ = states[end-n], actions[end-n], next_states[end]
-            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^n * Qₜ(s′, argmax(Q(s′)))
+            @views G = discount_rewards_reduced(rewards[end-n:end], γ) + γ^(n+1) * Qₜ(s′, argmax(Q(s′)))
             update!(Q, (s, a) => apply!(optimizer, (s, a), G - Q(s, a)))
         end
     end
 end
 
+function update!(learner::TDLearner{<:AbstractQApproximator, :SARS}, model::Union{TimeBasedSampleModel, ExperienceBasedSampleModel};plan_step=1)
+    for _ in 1:plan_step
+        # @assert learner.n == 0 "n must be 0 here"
+        transitions = extract_transitions(model, learner)
+        if !isnothing(transitions)
+            update!(learner, transitions)
+        end
+    end
+end
+
+function extract_transitions(model::Union{ExperienceBasedSampleModel, TimeBasedSampleModel}, learner::TDLearner{<:AbstractQApproximator, :SARS})
+    if length(model.experiences) > 0
+        map(Base.vect, sample(model))
+    else
+        nothing
+    end
+end
 
 function extract_transitions(buffer::EpisodeTurnBuffer, learner::TDLearner{<:AbstractQApproximator, :SARS})
     n = learner.n

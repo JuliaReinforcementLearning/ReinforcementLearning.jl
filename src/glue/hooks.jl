@@ -4,7 +4,7 @@ export AbstractStage,
        PreActStage, PRE_ACT_STAGE,
        PostActStage, POST_ACT_STAGE,
        AbstractHook,
-       ComposedHook, EmptyHook, StepsPerEpisode, RewardsPerEpisode, TotalRewardPerEpisode
+       ComposedHook, EmptyHook, StepsPerEpisode, RewardsPerEpisode, TotalRewardPerEpisode, CumulativeReward
 
 abstract type AbstractStage end
 
@@ -121,4 +121,19 @@ function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env, obs)
     push!(hook.rewards, hook.reward)
     hook.reward = 0
     @debug hook.tag REWARD_PER_EPISODE=hook.rewards[end]
+end
+
+#####
+# CumulativeReward
+#####
+
+Base.@kwdef struct CumulativeReward <: AbstractHook
+    rewards::Vector{Float64}=[0.]
+    tag::String="TRAINING"
+end
+
+function (hook::CumulativeReward)(::PostActStage, agent, env, action_obs)
+    action, obs = action_obs
+    push!(hook.rewards, get_reward(obs) + hook.rewards[end])
+    @debug hook.tag CUMULATIVE_REWARD=hook.rewards[end]
 end

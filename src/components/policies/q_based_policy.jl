@@ -9,9 +9,18 @@ end
 
 (π::QBasedPolicy)(obs::Observation) = obs |> π.learner |> π.selector
 
-update!(π::QBasedPolicy, args...) = update!(π.learner, args...)
-
 get_prob(π::QBasedPolicy, s) = get_prob(π.selector, π.learner(s))
+
+function update!(π::QBasedPolicy{<:Union{PrioritizedDQNLearner, RainbowLearner}}, buffer::AbstractTurnBuffer)
+    indexed_batch = extract_transitions(buffer, π)
+    if !isnothing(indexed_batch)
+        inds, batch = indexed_batch
+        priorities = update!(π, batch)
+        isnothing(priorities) || (priority(buffer)[inds] .= priorities)
+    end
+end
+
+update!(π::QBasedPolicy, model::AbstractEnvironmentModel;kw...) = update!(π.learner, model;kw...)
 
 #####
 # dispatches

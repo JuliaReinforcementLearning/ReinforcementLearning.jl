@@ -27,7 +27,7 @@ mutable struct StopAfterStep{Tl}
     tag::String
 end
 
-function StopAfterStep(step; cur=0, is_show_progress=true, tag="TRAINING")
+function StopAfterStep(step; cur=1, is_show_progress=true, tag="TRAINING")
     if is_show_progress
         progress=Progress(step)
         ProgressMeter.update!(progress, cur)

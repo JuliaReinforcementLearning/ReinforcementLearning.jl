@@ -9,8 +9,6 @@ end
 
 get_prob(π::VBasedPolicy, s, a) = get_prob(π.f, s, a)
 
-update!(π::VBasedPolicy, args...) = update!(π.learner, args...)
-
 extract_transitions(buffer, π::VBasedPolicy) = extract_transitions(buffer, π.learner)
 
 function extract_transitions(buffer::EpisodeTurnBuffer, ::MonteCarloLearner{T, A}) where {T, A<:AbstractVApproximator}
