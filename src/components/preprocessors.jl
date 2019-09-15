@@ -1,4 +1,5 @@
-export Preprocessor,
+export AbstractPreprocessor,
+       Preprocessor,
        FourierPreprocessor,
        PolynomialPreprocessor,
        TilingPreprocessor,
@@ -13,11 +14,15 @@ export Preprocessor,
 using .Utils: Tiling, encode
 using LinearAlgebra: norm
 
+abstract type AbstractPreprocessor end
+
+(p::AbstractPreprocessor)(obs::Observation) = reset(obs; state = p(obs.state))
+
 #####
 # Preprocessor
 #####
 
-struct Preprocessor{T<:Function}
+struct Preprocessor{T<:Function} <: AbstractPreprocessor
     f::T
 end
 
@@ -27,7 +32,7 @@ end
 # FourierPreprocessor
 #####
 
-struct FourierPreprocessor
+struct FourierPreprocessor <: AbstractPreprocessor
     order::Int
 end
 
@@ -37,7 +42,7 @@ end
 # PolynomialPreprocessor
 #####
 
-struct PolynomialPreprocessor
+struct PolynomialPreprocessor <: AbstractPreprocessor
     order::Int
 end
 
@@ -47,7 +52,7 @@ end
 # TilingPreprocessor
 #####
 
-struct TilingPreprocessor{Tt<:Tiling}
+struct TilingPreprocessor{Tt<:Tiling} <: AbstractPreprocessor
     tilings::Vector{Tt}
 end
 
@@ -68,7 +73,7 @@ c = ImageCrop(2:5, 3:2:9)
 c([10i + j for i in 1:10, j in 1:10])
 ```
 """
-struct ImageCrop{Tx,Ty}
+struct ImageCrop{Tx,Ty} <: AbstractPreprocessor
     xidx::Tx
     yidx::Ty
 end
@@ -91,7 +96,7 @@ r(rand(200, 200))
 r(rand(UInt8, 3, 100, 100))
 ```
 """
-struct ImageResizeBilinear
+struct ImageResizeBilinear <: AbstractPreprocessor
     outdim::Tuple{Int64,Int64}
 end
 for N = 2:3
@@ -140,7 +145,7 @@ r(rand(200, 200))
 r(rand(UInt8, 3, 100, 100))
 ```
 """
-struct ImageResizeNearestNeighbour
+struct ImageResizeNearestNeighbour <: AbstractPreprocessor
     outdim::Tuple{Int64,Int64}
 end
 function (r::ImageResizeNearestNeighbour)(x)
@@ -171,7 +176,7 @@ x = rand(UInt8, 100, 100)
 s = ReinforcementLearning.preprocessstate(p, x)
 ```
 """
-struct ImagePreprocessor{Ts}
+struct ImagePreprocessor{Ts} <: AbstractPreprocessor
     size::Ts
     chain::Array{Any,1}
 end
@@ -182,7 +187,7 @@ end
 # SparseRandomProjection
 #####
 
-struct SparseRandomProjection
+struct SparseRandomProjection <: AbstractPreprocessor
     w::Array{Float64,2}
     b::Array{Float64,1}
 end
@@ -193,7 +198,7 @@ end
 # RandomProjection
 #####
 
-struct RandomProjection
+struct RandomProjection <: AbstractPreprocessor
     w::Array{Float64,2}
 end
 (p::RandomProjection)(s) = p.w * s
@@ -202,7 +207,7 @@ end
 # RadialBasisFunctions
 #####
 
-struct RadialBasisFunctions
+struct RadialBasisFunctions <: AbstractPreprocessor
     means::Array{Array{Float64,1},1}
     sigmas::Array{Float64,1}
     state::Array{Float64,1}
