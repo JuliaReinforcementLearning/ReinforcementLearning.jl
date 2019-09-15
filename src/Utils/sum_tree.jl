@@ -1,6 +1,6 @@
 export capacity, sample, SumTree
 
-import StatsBase:sample
+import StatsBase: sample
 
 """
     SumTree(capacity::Int)
@@ -56,7 +56,7 @@ Dict{Float64,Int64} with 8 entries:
   12.0 => 12019
 ```
 """
-mutable struct SumTree{T} <: AbstractArray{Int, 1}
+mutable struct SumTree{T} <: AbstractArray{Int,1}
     capacity::Int
     first::Int
     length::Int
@@ -137,11 +137,11 @@ function get(t::SumTree, v)
     real_ind, p
 end
 
-sample(t::SumTree{T}) where T = get(t, rand(T) * t.tree[1])
+sample(t::SumTree{T}) where {T} = get(t, rand(T) * t.tree[1])
 
 function sample(t::SumTree, n::Int)
     inds, priorities = Vector{Int}(undef, n), Vector{Float64}(undef, n)
-    for i in 1:n
+    for i = 1:n
         ind, p = sample(t)
         inds[i] = ind
         priorities[i] = p

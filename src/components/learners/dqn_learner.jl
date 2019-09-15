@@ -6,7 +6,7 @@ using StatsBase
 """
 https://www.nature.com/articles/nature14236
 """
-mutable struct DQNLearner{Tq<:AbstractQApproximator, Tf, Tl} <: AbstractLearner
+mutable struct DQNLearner{Tq<:AbstractQApproximator,Tf,Tl} <: AbstractLearner
     approximator::Tq
     target_approximator::Tq
     loss_fun::Tf
@@ -19,7 +19,8 @@ mutable struct DQNLearner{Tq<:AbstractQApproximator, Tf, Tl} <: AbstractLearner
     update_step::Int
     loss::Tl
     # ??? can the code bellow simplified?
-    function DQNLearner(;
+    function DQNLearner(
+        ;
         approximator::Tq,
         target_approximator::Tq,
         loss_fun::Tf,
@@ -30,11 +31,11 @@ mutable struct DQNLearner{Tq<:AbstractQApproximator, Tf, Tl} <: AbstractLearner
         update_freq::Int = 1,
         target_update_freq::Int = 100,
         update_step::Int = 0,
-        loss::Tl = 0.f0
-        ) where {Tq, Tf, Tl}
+        loss::Tl = 0.f0,
+    ) where {Tq,Tf,Tl}
 
         copyto!(approximator, target_approximator)  # force sync
-        new{Tq, Tf, Tl}(
+        new{Tq,Tf,Tl}(
             approximator,
             target_approximator,
             loss_fun,
@@ -45,25 +46,35 @@ mutable struct DQNLearner{Tq<:AbstractQApproximator, Tf, Tl} <: AbstractLearner
             update_freq,
             target_update_freq,
             update_step,
-            loss
+            loss,
         )
     end
 end
 
-function DQNLearner(Q, target_Q, loss_fun;kw...)
+function DQNLearner(Q, target_Q, loss_fun; kw...)
     copyto!(target_Q, Q)
-    DQNLearner(;approximator=Q, target_approximator=target_Q, loss_fun=loss_fun, kw...)
+    DQNLearner(
+        ;
+        approximator = Q,
+        target_approximator = target_Q,
+        loss_fun = loss_fun,
+        kw...,
+    )
 end
 
 function update!(learner::DQNLearner{<:NeuralNetworkQ}, batch)
     learner.update_step += 1
     learner.update_step % learner.update_freq == 0 || return nothing
 
-    Q, Qₜ, γ, loss_fun, update_horizon = learner.approximator, learner.target_approximator, learner.γ, learner.loss_fun, learner.update_horizon
+    Q, Qₜ, γ, loss_fun, update_horizon = learner.approximator,
+        learner.target_approximator,
+        learner.γ,
+        learner.loss_fun,
+        learner.update_horizon
     states, actions, rewards, terminals, next_states = batch
 
     q = batch_estimate(Q, states, actions)
-    q′ = dropdims(maximum(Qₜ(next_states); dims=1), dims=1)
+    q′ = dropdims(maximum(Qₜ(next_states); dims = 1), dims = 1)
     G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
 
     batch_losses = loss_fun(G, q)
@@ -78,7 +89,11 @@ end
 
 function extract_transitions(buffer::CircularTurnBuffer{RTSA}, learner::DQNLearner)
     if length(buffer) > learner.min_replay_history
-        inds, consecutive_batch = sample(buffer; batch_size=learner.batch_size, n_step=learner.update_horizon)
+        inds, consecutive_batch = sample(
+            buffer;
+            batch_size = learner.batch_size,
+            n_step = learner.update_horizon,
+        )
         extract_SARTS(consecutive_batch, learner.γ)
     else
         nothing

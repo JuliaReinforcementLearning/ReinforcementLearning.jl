@@ -13,5 +13,5 @@
     @test haskey(m.experiences[1], 1)
     @test haskey(m.experiences[2], 2)
 
-    @test m.experiences[2][2] == (reward=-1.0, terminal=true, nextstate=3)
+    @test m.experiences[2][2] == (reward = -1.0, terminal = true, nextstate = 3)
 end

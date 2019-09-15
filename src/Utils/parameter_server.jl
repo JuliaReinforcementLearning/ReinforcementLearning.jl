@@ -1,6 +1,6 @@
 export ParameterServer, update!
 
-using Flux:Params
+using Flux: Params
 
 struct ParameterServer
     rwl::ReaderCountRWLock

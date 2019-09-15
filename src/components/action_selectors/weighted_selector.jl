@@ -1,6 +1,6 @@
 export WeightedSelector
 
-using StatsBase:sample, Weights
+using StatsBase: sample, Weights
 
 """
     WeightedSelector <: AbstractDiscreteActionSelector
@@ -20,4 +20,5 @@ end
     Action `values` are normalized to have a sum of 1.0
     and then used as the probability to sample a random action.
 """
-(s::WeightedSelector)(values::AbstractVector{T}; kw...) where T = sample(Weights(values, s.is_normalized ? one(T) : sum(wsum)))
+(s::WeightedSelector)(values::AbstractVector{T}; kw...) where {T} =
+    sample(Weights(values, s.is_normalized ? one(T) : sum(wsum)))

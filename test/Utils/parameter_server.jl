@@ -1,5 +1,5 @@
 @testset "parameter_server" begin
-    p1, p2 = param(ones(2,2)), param(zeros(2))
+    p1, p2 = param(ones(2, 2)), param(zeros(2))
     param_server = ParameterServer(params(p1, p2))
 
     xs = ones(2, 2)

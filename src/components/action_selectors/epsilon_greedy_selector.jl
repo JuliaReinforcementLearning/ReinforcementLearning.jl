@@ -1,17 +1,17 @@
 export EpsilonGreedySelector
 
-using StatsBase:sample
-using .Utils:findallmax
+using StatsBase: sample
+using .Utils: findallmax
 
 Base.@kwdef mutable struct EpsilonGreedySelector{T} <: AbstractDiscreteActionSelector
     ϵ_stable::Float64
     ϵ_init::Float64 = 1.0
     warmup_steps::Int = 0
     decay_steps::Int = 0
-    step::Int=1
+    step::Int = 1
 end
 
-EpsilonGreedySelector(ϵ) = EpsilonGreedySelector{:linear}(;ϵ_stable=ϵ)
+EpsilonGreedySelector(ϵ) = EpsilonGreedySelector{:linear}(; ϵ_stable = ϵ)
 
 function get_ϵ(s::EpsilonGreedySelector{:linear}, step)
     if step <= s.warmup_steps
@@ -53,7 +53,7 @@ end
 
 function get_prob(s::EpsilonGreedySelector, values)
     ϵ, n = get_ϵ(s), length(values)
-    probs = fill(ϵ/n, n)
+    probs = fill(ϵ / n, n)
     max_val_inds = findallmax(values)[2]
     for ind in max_val_inds
         probs[ind] += (1 - ϵ) / length(max_val_inds)

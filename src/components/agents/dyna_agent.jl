@@ -1,11 +1,11 @@
 export DynaAgent
 
-Base.@kwdef struct DynaAgent{P, B, M, R} <: AbstractAgent
+Base.@kwdef struct DynaAgent{P,B,M,R} <: AbstractAgent
     π::P
     model::M
     buffer::B
-    role::R=:DEFAULT
-    plan_step::Int=10
+    role::R = :DEFAULT
+    plan_step::Int = 10
 end
 
 (agent::DynaAgent)(obs::Observation) = agent.π(obs)
@@ -15,10 +15,11 @@ function update!(agent::DynaAgent, experience::Pair)
 
     push!(buffer, experience)
     update!(model, buffer, π)  # model learning
-    update!(π, buffer, model;plan_step=agent.plan_step)
+    update!(π, buffer, model; plan_step = agent.plan_step)
 end
 
-update!(model::AbstractEnvironmentModel, buffer::AbstractTurnBuffer, π::AbstractPolicy) = update!(model, buffer)
+update!(model::AbstractEnvironmentModel, buffer::AbstractTurnBuffer, π::AbstractPolicy) =
+    update!(model, buffer)
 
 function update!(model::AbstractEnvironmentModel, buffer::AbstractTurnBuffer)
     transitions = extract_transitions(buffer, model)
@@ -27,14 +28,23 @@ function update!(model::AbstractEnvironmentModel, buffer::AbstractTurnBuffer)
     end
 end
 
-function update!(model::PrioritizedSweepingSampleModel, buffer::AbstractTurnBuffer, π::AbstractPolicy)
+function update!(
+    model::PrioritizedSweepingSampleModel,
+    buffer::AbstractTurnBuffer,
+    π::AbstractPolicy,
+)
     transition = extract_transitions(buffer, model)
     if !isnothing(transition)
         update!(model, transition, priority(transition, π))
     end
 end
 
-function update!(π::AbstractPolicy, buffer::AbstractTurnBuffer, model::AbstractEnvironmentModel;plan_step=1)
+function update!(
+    π::AbstractPolicy,
+    buffer::AbstractTurnBuffer,
+    model::AbstractEnvironmentModel;
+    plan_step = 1,
+)
     update!(π, buffer)  # direct RL
-    update!(π, model;plan_step=plan_step)  # planning
+    update!(π, model; plan_step = plan_step)  # planning
 end

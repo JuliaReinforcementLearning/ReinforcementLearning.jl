@@ -1,13 +1,13 @@
-import Base:run
+import Base: run
 
-using ReinforcementLearningEnvironments:reset!
+using ReinforcementLearningEnvironments: reset!
 
 export run
 
-function run(agent::AbstractAgent, env::AbstractEnv, stop_condition ;hook=EmptyHook())
+function run(agent::AbstractAgent, env::AbstractEnv, stop_condition; hook = EmptyHook())
 
     reset!(env)
-    obs = reset(observe(env); terminal=true)
+    obs = reset(observe(env); terminal = true)
     hook(PRE_EPISODE_STAGE, agent, env, obs)
 
     while true
@@ -32,17 +32,22 @@ function run(agent::AbstractAgent, env::AbstractEnv, stop_condition ;hook=EmptyH
             hook(POST_EPISODE_STAGE, agent, env, obs)
             r = get_reward(obs)  # !!! deepcopy?
             reset!(env)
-            obs = reset(observe(env); reward=r, terminal=true)
+            obs = reset(observe(env); reward = r, terminal = true)
             hook(PRE_EPISODE_STAGE, agent, env, obs)
         end
     end
     hook
 end
 
-function run(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_condition; hook=[EmptyHook() for _ in agents])
+function run(
+    agents::Tuple{Vararg{<:AbstractAgent}},
+    env::AbstractEnv,
+    stop_condition;
+    hook = [EmptyHook() for _ in agents],
+)
     roles = [agent.role for agent in agents]
     reset!(env)
-    observations = [reset(observe(env, agent.role);terminal=true) for agent in agents]
+    observations = [reset(observe(env, agent.role); terminal = true) for agent in agents]
     for (h, agent, obs) in zip(hook, agents, observations)
         h(PRE_EPISODE_STAGE, agent, env, obs)
     end
@@ -62,7 +67,7 @@ function run(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_cond
             h(POST_ACT_STAGE, agents, env, action => obs)
         end
 
-        if stop_condition(agents, env,  observations)
+        if stop_condition(agents, env, observations)
             if get_terminal(observations)
                 for (h, agent, obs) in zip(hook, agents, observations)
                     h(POST_EPISODE_STAGE, agent, env, obs)
@@ -81,10 +86,11 @@ function run(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv, stop_cond
 
             reset!(env)
 
-            observations = [
-                reset(observe(env, agent.role); reward=observations[i].reward, terminal=observations[i].terminal)
-                for (i, agent) in enumerate(agents)
-            ]
+            observations = [reset(
+                observe(env, agent.role);
+                reward = observations[i].reward,
+                terminal = observations[i].terminal,
+            ) for (i, agent) in enumerate(agents)]
 
             for (h, agent, obs) in zip(hook, agents, observations)
                 h(PRE_EPISODE_STAGE, agent, env, obs)

@@ -1,6 +1,6 @@
 export UCBSelector
 
-using .Utils:findallmax
+using .Utils: findallmax
 
 """
     UCBSelector <: AbstractDiscreteActionSelector
@@ -15,7 +15,7 @@ mutable struct UCBSelector <: AbstractDiscreteActionSelector
     c::Float64
     actioncounts::Vector{Float64}
     step::Int
-    UCBSelector(na; c=2.0, ϵ=1e-10, step=1) = new(c, fill(ϵ, na), 1)
+    UCBSelector(na; c = 2.0, ϵ = 1e-10, step = 1) = new(c, fill(ϵ, na), 1)
 end
 
 @doc raw"""
@@ -32,9 +32,9 @@ A_t = \underset{a}{\arg \max} \left[ Q_t(a) + c \sqrt{\frac{\ln t}{N_t(a)}} \rig
 ```
 
 See more details at Section (2.7) on Page 35 of the book *Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.*
-"""
-function (p::UCBSelector)(values::AbstractArray)
-    action = findallmax(@. values + p.c * sqrt(log(p.step+1) / p.actioncounts))[2] |> sample
+""" function (p::UCBSelector)(values::AbstractArray)
+    action = findallmax(@. values + p.c * sqrt(log(p.step + 1) / p.actioncounts))[2] |>
+             sample
     p.actioncounts[action] += 1
     p.step += 1
     action

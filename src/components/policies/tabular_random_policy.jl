@@ -1,7 +1,7 @@
 export TabularRandomPolicy
 
 struct TabularRandomPolicy <: AbstractPolicy
-    prob::Array{Float64, 2}
+    prob::Array{Float64,2}
 end
 
 (π::TabularRandomPolicy)(s) = sample(Weights(π.prob[s, :]))

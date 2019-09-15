@@ -1,5 +1,5 @@
-import .Utils:capacity
-import .Utils:update!
+import .Utils: capacity
+import .Utils: update!
 
 include("preprocessors.jl")
 include("action_selectors/action_selectors.jl")

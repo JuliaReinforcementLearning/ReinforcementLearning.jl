@@ -1,6 +1,6 @@
 @testset "stop_conditions" begin
-    episode_end_obs = Observation(;state=nothing, reward=1.0, terminal=true)
-    episode_not_end_obs = Observation(;state=nothing, reward=1.0, terminal=false)
+    episode_end_obs = Observation(; state = nothing, reward = 1.0, terminal = true)
+    episode_not_end_obs = Observation(; state = nothing, reward = 1.0, terminal = false)
     agent, env = nothing, nothing
 
     s = StopAfterStep(2)

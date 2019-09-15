@@ -1,6 +1,6 @@
 export PrioritizedDQNLearner
 
-mutable struct PrioritizedDQNLearner{Tq<:AbstractQApproximator, Tf, Tl} <: AbstractLearner
+mutable struct PrioritizedDQNLearner{Tq<:AbstractQApproximator,Tf,Tl} <: AbstractLearner
     approximator::Tq
     target_approximator::Tq
     loss_fun::Tf
@@ -14,7 +14,8 @@ mutable struct PrioritizedDQNLearner{Tq<:AbstractQApproximator, Tf, Tl} <: Abstr
     loss::Tl
     default_priority::Float64
     # ??? can the code bellow simplified?
-    function PrioritizedDQNLearner(;
+    function PrioritizedDQNLearner(
+        ;
         approximator::Tq,
         target_approximator::Tq,
         loss_fun::Tf,
@@ -26,11 +27,11 @@ mutable struct PrioritizedDQNLearner{Tq<:AbstractQApproximator, Tf, Tl} <: Abstr
         target_update_freq::Int = 100,
         update_step::Int = 0,
         loss::Tl = 0.f0,
-        default_priority::Float64 = 100.
-        ) where {Tq, Tf, Tl}
+        default_priority::Float64 = 100.,
+    ) where {Tq,Tf,Tl}
 
         copyto!(approximator, target_approximator)  # force sync
-        new{Tq, Tf, Tl}(
+        new{Tq,Tf,Tl}(
             approximator,
             target_approximator,
             loss_fun,
@@ -42,7 +43,7 @@ mutable struct PrioritizedDQNLearner{Tq<:AbstractQApproximator, Tf, Tl} <: Abstr
             target_update_freq,
             update_step,
             loss,
-            default_priority
+            default_priority,
         )
     end
 end
@@ -51,11 +52,15 @@ function update!(learner::PrioritizedDQNLearner{<:NeuralNetworkQ}, batch)
     learner.update_step += 1
     learner.update_step % learner.update_freq == 0 || return nothing
 
-    Q, Qₜ, γ, loss_fun, update_horizon = learner.approximator, learner.target_approximator, learner.γ, learner.loss_fun, learner.update_horizon
+    Q, Qₜ, γ, loss_fun, update_horizon = learner.approximator,
+        learner.target_approximator,
+        learner.γ,
+        learner.loss_fun,
+        learner.update_horizon
     states, actions, rewards, terminals, next_states = batch
 
     q = batch_estimate(Q, states, actions)
-    q′ = dropdims(maximum(Qₜ(next_states); dims=1), dims=1)
+    q′ = dropdims(maximum(Qₜ(next_states); dims = 1), dims = 1)
     G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
 
     batch_losses = loss_fun(G, q)
@@ -71,9 +76,16 @@ function update!(learner::PrioritizedDQNLearner{<:NeuralNetworkQ}, batch)
     priorities
 end
 
-function extract_transitions(buffer::CircularTurnBuffer{PRTSA}, learner::PrioritizedDQNLearner)
+function extract_transitions(
+    buffer::CircularTurnBuffer{PRTSA},
+    learner::PrioritizedDQNLearner,
+)
     if length(buffer) > learner.min_replay_history
-        inds, consecutive_batch = sample(buffer; batch_size=learner.batch_size, n_step=learner.update_horizon)
+        inds, consecutive_batch = sample(
+            buffer;
+            batch_size = learner.batch_size,
+            n_step = learner.update_horizon,
+        )
         inds, extract_SARTS(consecutive_batch, learner.γ)
     else
         nothing

@@ -41,4 +41,4 @@ julia> [selector(any_state) for i in 1:10]  # iterate through all actions
  1
 ```
 """
-(s::AlternateSelector)(values::Any;step, kw...) = (step - 1) % s.n + 1
+(s::AlternateSelector)(values::Any; step, kw...) = (step - 1) % s.n + 1

@@ -1,6 +1,6 @@
 export DynamicDistributionModel, get_states, get_actions
 
-import ReinforcementLearningEnvironments:observation_space, action_space
+import ReinforcementLearningEnvironments: observation_space, action_space
 
 """
 Using a general function `f` to store the transformations.

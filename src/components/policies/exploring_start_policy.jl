@@ -1,6 +1,6 @@
 export ExploringStartPolicy
 
-Base.@kwdef mutable struct ExploringStartPolicy{P, A} <: AbstractPolicy
+Base.@kwdef mutable struct ExploringStartPolicy{P,A} <: AbstractPolicy
     π::P
     actions::A
 end
