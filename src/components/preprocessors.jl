@@ -1,4 +1,5 @@
 export AbstractPreprocessor,
+       Chain,
        Preprocessor,
        FourierPreprocessor,
        PolynomialPreprocessor,
@@ -13,10 +14,11 @@ export AbstractPreprocessor,
 
 using .Utils: Tiling, encode
 using LinearAlgebra: norm
+using Flux:Chain
 
 abstract type AbstractPreprocessor end
 
-(p::AbstractPreprocessor)(obs::Observation) = reset(obs; state = p(obs.state))
+(p::AbstractPreprocessor)(obs::Observation) = Observation(obs.reward, obs.terminal, p(obs.state), merge(obs.meta, (;Symbol(:state_before_, typeof(p).name) => obs.state)))
 
 #####
 # Preprocessor
@@ -36,7 +38,7 @@ struct FourierPreprocessor <: AbstractPreprocessor
     order::Int
 end
 
-(p::FourierPreprocessor)(s) = [cos(i * π * s) for i = 0:p.order]
+(p::FourierPreprocessor)(s::Number) = [cos(i * π * s) for i = 0:p.order]
 
 #####
 # PolynomialPreprocessor
@@ -46,7 +48,7 @@ struct PolynomialPreprocessor <: AbstractPreprocessor
     order::Int
 end
 
-(p::PolynomialPreprocessor)(s) = [s^i for i = 0:p.order]
+(p::PolynomialPreprocessor)(s::Number) = [s^i for i = 0:p.order]
 
 #####
 # TilingPreprocessor
@@ -56,7 +58,7 @@ struct TilingPreprocessor{Tt<:Tiling} <: AbstractPreprocessor
     tilings::Vector{Tt}
 end
 
-(p::TilingPreprocessor)(s) = [encode(t, s) for t in p.tilings]
+(p::TilingPreprocessor)(s::Number) = [encode(t, s) for t in p.tilings]
 
 #####
 # ImageCrop

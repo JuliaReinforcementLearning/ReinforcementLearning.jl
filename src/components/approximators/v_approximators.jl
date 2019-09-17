@@ -9,20 +9,16 @@ using LinearAlgebra: dot
 """
 Using a matrix `features` to represent each state along with a vector of `weights`.
 """
-struct LinearVApproximator <: AbstractVApproximator{Int}
-    features::Array{Float64,2}
-    weights::Vector{Float64}
+struct LinearVApproximator{N} <: AbstractVApproximator{Int}
+    weights::Array{Float64, N}
 end
 
 # TODO: support Vector
-(LinearVApproximator::LinearVApproximator)(s::Int) =
-    @views dot(LinearVApproximator.features[s, :], LinearVApproximator.weights)
+(V::LinearVApproximator)(s) = dot(s, V.weights)
 
-function update!(LinearVApproximator::LinearVApproximator, correction::Pair)
+function update!(V::LinearVApproximator, correction::Pair)
     s, e = correction
-    for i = 1:length(LinearVApproximator.weights)
-        LinearVApproximator.weights[i] += LinearVApproximator.features[s, i] * e
-    end
+    V.weights .+= s .* e
 end
 
 #####
