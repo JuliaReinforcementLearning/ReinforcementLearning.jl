@@ -9,7 +9,7 @@ using StatsBase: sample
 
 Using a `table` of type `Array{Float64,2}` to record the action value of each state.
 """
-struct TabularQApproximator <: AbstractQApproximator{Int}
+struct TabularQApproximator <: AbstractQApproximator
     table::Array{Float64,2}
 end
 

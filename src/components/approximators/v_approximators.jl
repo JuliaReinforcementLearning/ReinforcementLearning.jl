@@ -9,7 +9,7 @@ using LinearAlgebra: dot
 """
 Using a matrix `features` to represent each state along with a vector of `weights`.
 """
-struct LinearVApproximator{N} <: AbstractVApproximator{Int}
+struct LinearVApproximator{N} <: AbstractVApproximator
     weights::Array{Float64, N}
 end
 
@@ -28,7 +28,7 @@ end
 """
 Using a `table` of type `Vector{Float64}` to record the state values.
 """
-struct TabularVApproximator <: AbstractVApproximator{Int}
+struct TabularVApproximator <: AbstractVApproximator
     table::Vector{Float64}
 end
 

@@ -42,6 +42,9 @@ end
 Base.length(t::Tiling) = reduce(*, (length(r) - 1 for r in t.ranges))
 
 encode(range::AbstractRange, x) = floor(Int, div(x - range[1], step(range)) + 1)
+
+
+# TODO: use @generator here!
 encode(t::Tiling{1}, x::Number) = encode(t.ranges[1], x)
 encode(t::Tiling{1}, xs) = encode(t.ranges[1], xs[1])
 encode(t::Tiling{2}, xs) =

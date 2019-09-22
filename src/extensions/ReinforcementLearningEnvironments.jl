@@ -7,6 +7,8 @@ import ReinforcementLearningEnvironments: get_terminal,
                                           interact!,
                                           reset!
 
+
+
 get_terminal(obs::Vector{<:Observation}) = all(get_terminal(o) for o in obs)
 
 reset(

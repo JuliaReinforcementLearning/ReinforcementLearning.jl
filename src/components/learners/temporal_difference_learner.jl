@@ -1,4 +1,4 @@
-export TDLearner, DoubleLearner
+export TDLearner, DoubleLearner, DifferentialTDLearner
 
 using .Utils: discount_rewards, discount_rewards_reduced
 using Flux.Optimise: Descent
@@ -54,6 +54,30 @@ end
 Base.@kwdef struct DoubleLearner{T<:TDLearner} <: AbstractLearner
     L1::T
     L2::T
+end
+
+#####
+# DifferentialTDLearner
+#####
+
+Base.@kwdef mutable struct DifferentialTDLearner{A<:AbstractApproximator} <: AbstractLearner
+    approximator::A
+    α::Float64
+    β::Float64
+    R̄::Float64=0.
+    n::Int=0
+end
+
+function update!(learner::DifferentialTDLearner, transition)
+    states, actions, rewards, terminals, next_states, next_actions = transition
+    n, α, β, Q = learner.n, learner.α, learner.β, learner.approximator
+    if length(states) ≥ n + 1
+        s, a = states[1], actions[1]
+        s′, a′ = next_states[end], next_actions[end]
+        δ = sum(r -> r - learner.R̄, rewards) + Q(s′, a′) - Q(s, a)
+        learner.R̄ += β * δ
+        update!(Q, (s, a) => α * δ)
+    end
 end
 
 extract_transitions(buffer, learner::DoubleLearner) =
@@ -128,7 +152,7 @@ end
 
 function extract_transitions(
     buffer::EpisodeTurnBuffer,
-    learner::TDLearner{<:AbstractQApproximator,:SARSA},
+    learner::Union{TDLearner{<:AbstractQApproximator,:SARSA}, DifferentialTDLearner},
 )
     n = learner.n
     if length(buffer) > 0

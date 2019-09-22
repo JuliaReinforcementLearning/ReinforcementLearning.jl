@@ -1,11 +1,9 @@
 export AbstractApproximator,
        AbstractVApproximator,
-       AbstractQApproximator,
-       AbstractV,
-       AbstractQ
+       AbstractQApproximator
 
 abstract type AbstractApproximator end
 
-abstract type AbstractVApproximator{T} <: AbstractApproximator end
-abstract type AbstractQApproximator{T} <: AbstractApproximator end
-abstract type AbstractHybridApproximator{T} <: AbstractApproximator end
+abstract type AbstractVApproximator <: AbstractApproximator end
+abstract type AbstractQApproximator <: AbstractApproximator end
+abstract type AbstractHybridApproximator <: AbstractApproximator end

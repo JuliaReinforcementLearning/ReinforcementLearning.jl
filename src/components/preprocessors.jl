@@ -58,7 +58,7 @@ struct TilingPreprocessor{Tt<:Tiling} <: AbstractPreprocessor
     tilings::Vector{Tt}
 end
 
-(p::TilingPreprocessor)(s::Number) = [encode(t, s) for t in p.tilings]
+(p::TilingPreprocessor)(s::Union{<:Number, <:Array}) = [encode(t, s) for t in p.tilings]
 
 #####
 # ImageCrop
