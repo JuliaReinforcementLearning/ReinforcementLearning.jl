@@ -1,4 +1,4 @@
-export TDLearner, DoubleLearner, DifferentialTDLearner
+export TDLearner, DoubleLearner, DifferentialTDLearner, TDλReturnLearner
 
 using .Utils: discount_rewards, discount_rewards_reduced
 using Flux.Optimise: Descent
@@ -326,5 +326,44 @@ function extract_transitions(
         )
     else
         nothing
+    end
+end
+
+#####
+# TDλReturnLearner
+#####
+Base.@kwdef struct TDλReturnLearner{Tapp <: AbstractApproximator} <: AbstractLearner 
+    approximator::Tapp
+    γ::Float64=1.0
+    α::Float64
+    λ::Float64
+end
+
+function extract_transitions(buffer::EpisodeTurnBuffer, learner::TDλReturnLearner{<:AbstractVApproximator})
+    if isfull(buffer)
+        @views (
+            states = state(buffer)[1:end-1],
+            rewards = reward(buffer)[2:end],
+            terminals = terminal(buffer)[2:end],
+            next_states = state(buffer)[2:end],
+        )
+    else
+        nothing
+    end
+end
+
+function update!(learner::TDλReturnLearner, transition)
+    λ, γ, V, α = learner.λ, learner.γ, learner.approximator, learner.α
+    states, rewards, terminals, next_states = transition
+    T = length(states)
+    for t in 1:T
+        G = 0.
+        for n in 1:(T - t)
+            G += λ^(n-1) * (discount_rewards_reduced(@view(rewards[t:t+n-1]), γ) + γ^n * V(next_states[t+n-1]))
+        end
+        G *= 1 - λ
+        G += λ^(T-t) * (discount_rewards_reduced(@view(rewards[t:T]), γ) + γ^(T-t+1) * V(next_states[T]))
+        sₜ = states[t]
+        update!(V, sₜ => α * (G - V(sₜ)))
     end
 end
