@@ -90,22 +90,30 @@ end
 
 (learner::DoubleLearner)(obs::Observation) = learner.L1(obs) .+ learner.L2(obs)
 
-function update!(learner::TDLearner{<:AbstractVApproximator,:SRS}, transitions)
-    states, rewards, terminals, next_states = transitions
+update!(learner::TDLearner{<:AbstractVApproximator,:SRS}, transitions) = update!(learner, transitions, nothing)
+
+function update!(learner::TDLearner{<:AbstractVApproximator,:SRS}, transitions, weights)
+    states, rewards, terminals, next_states = transitions.states, transitions.rewards, transitions.terminals, transitions.next_states
     n, γ, V, optimizer = learner.n, learner.γ, learner.approximator, learner.optimizer
 
     if length(terminals) > 0 && terminals[end]
         @views gains = discount_rewards(rewards[max(end - n, 1):end], γ)  # n starts with 0
+        cum_weights = isnothing(weights) ? nothing : cumprod!(reverse(weights))
         for (i, G) in enumerate(gains)
             @views s = states[end-length(gains)+i]
-            update!(V, s => apply!(optimizer, s, G - V(s)))
+            if isnothing(cum_weights)
+                update!(V, s => apply!(optimizer, s, G - V(s)))
+            else
+                update!(V, s => apply!(optimizer, s, cum_weights[i] * (G - V(s))))
+            end
         end
     else
         if length(states) ≥ (n + 1)  # n starts with 0
             @views G = discount_rewards_reduced(rewards[end-n:end], γ) +
                        γ^(n + 1) * V(next_states[end])
             @views s = states[end-n]
-            update!(V, s => apply!(optimizer, s, G - V(s)))
+            w = isnothing(weights) ? 1.0 : reduce(*, weights)
+            update!(V, s => apply!(optimizer, s, w * (G - V(s))))
         end
     end
 end
