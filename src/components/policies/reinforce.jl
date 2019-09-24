@@ -13,7 +13,9 @@ end
 (π::ReinforcePolicy)(obs::Observation) = obs |> get_state |> π.approximator |> softmax |> x -> Weights(x, 1.0) |> sample
 
 get_prob(π::ReinforcePolicy, s) = s |> π.approximator |> softmax
+get_prob(π::ReinforcePolicy, s, a) = get_prob(π, s)[a]
 
+# TODO: handle neural network q approximator
 function update!(
     π::ReinforcePolicy{<:LinearQApproximator},
     buffer::EpisodeTurnBuffer,
@@ -25,7 +27,7 @@ function update!(
         γₜ = 1.0
 
         for (i, (s, a, g)) in enumerate(zip(states, actions, gains))
-            update!(Q, s => α * γₜ * g * (Q(s, a) - dot(get_prob(π, s), π.approximator(s))))
+            update!(Q, (s, a) => α * γₜ * g * (Q.feature_func(s, a) .- sum(x -> get_prob(π, s, x) .* Q.feature_func(s, x), Q.actions)))
             γₜ *= γ
         end
     end

@@ -2,16 +2,17 @@ export LinearVApproximator, LinearQApproximator
 
 using LinearAlgebra: dot
 
-struct LinearQApproximator{N, F} <: AbstractQApproximator
-    weights::Array{Float64, N}
+Base.@kwdef struct LinearQApproximator{F} <: AbstractQApproximator
+    weights::Vector{Float64}
     feature_func::F
+    actions::Vector{Int}
 end
 
-(Q::LinearQApproximator{N})(s, a::Int) where N = dot(s, selectdim(Q.weights, N, a))
+(Q::LinearQApproximator)(s, a::Int) = dot(Q.weights, Q.feature_func(s, a))
 
-(Q::LinearQApproximator{N})(s) where N = [dot(s, selectdim(Q.weights, N, a)) for a in axes(Q.weights, N)]
+(Q::LinearQApproximator)(s) = [Q(s, a) for a in Q.actions]
 
-function update!(Q::LinearQApproximator{N}, correction::Pair) where N
+function update!(Q::LinearQApproximator, correction::Pair) 
     (s, a), e = correction
-    selectdim(Q.weights, N, a) .+= s .* e
+    Q.weights .+= e
 end
