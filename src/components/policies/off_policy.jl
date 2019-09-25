@@ -16,10 +16,7 @@ learner(π::OffPolicy) = learner(π.π_target)
 
 (π::OffPolicy)(obs::Observation) = π.π_behavior(obs)
 
-function update!(
-    π::OffPolicy{<:VBasedPolicy},
-    transitions::NamedTuple,
-)
+function update!(π::OffPolicy{<:VBasedPolicy}, transitions::NamedTuple)
     # ??? define a `get_batch_prob` function for efficiency
     weights = [get_prob(π.π_target, s, a) / get_prob(π.π_behavior, s, a) for (s, a) in zip(
         transitions.states,
@@ -51,6 +48,9 @@ function extract_transitions(
     if isnothing(transitions)
         nothing
     else
-        merge(transitions, (actions=action(buffer)[max(1, end - π.π_target.learner.n - 1):end-1],))
+        merge(
+            transitions,
+            (actions = action(buffer)[max(1, end - π.π_target.learner.n - 1):end-1],),
+        )
     end
 end

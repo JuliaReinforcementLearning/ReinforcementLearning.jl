@@ -92,5 +92,5 @@ struct CachedSum
 end
 
 function (c::CachedSum)(k, x)
-    c.cache[k] = get!(c.cache, k, 0.) + x
+    c.cache[k] = get!(c.cache, k, 0.0) + x
 end

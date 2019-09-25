@@ -14,11 +14,17 @@ export AbstractPreprocessor,
 
 using .Utils: Tiling, encode
 using LinearAlgebra: norm
-using Flux:Chain
+using Flux: Chain
 
 abstract type AbstractPreprocessor end
 
-(p::AbstractPreprocessor)(obs::Observation) = Observation(obs.reward, obs.terminal, p(obs.state), merge(obs.meta, (;Symbol(:state_before_, typeof(p).name) => obs.state)))
+(p::AbstractPreprocessor)(obs::Observation) =
+    Observation(
+        obs.reward,
+        obs.terminal,
+        p(obs.state),
+        merge(obs.meta, (; Symbol(:state_before_, typeof(p).name) => obs.state)),
+    )
 
 #####
 # Preprocessor
@@ -58,7 +64,7 @@ struct TilingPreprocessor{Tt<:Tiling} <: AbstractPreprocessor
     tilings::Vector{Tt}
 end
 
-(p::TilingPreprocessor)(s::Union{<:Number, <:Array}) = [encode(t, s) for t in p.tilings]
+(p::TilingPreprocessor)(s::Union{<:Number,<:Array}) = [encode(t, s) for t in p.tilings]
 
 #####
 # ImageCrop

@@ -13,7 +13,7 @@ Q = NeuralNetworkQ(model, ADAM(0.0005))
 Qₜ = NeuralNetworkQ(target_model, ADAM(0.0005))
 
 function loss_cal(ŷ, y)
-    (ŷ .- y).^2
+    (ŷ .- y) .^ 2
 end
 
 agent = Agent(

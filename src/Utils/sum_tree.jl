@@ -105,8 +105,8 @@ function Base.push!(t::SumTree, p)
 end
 
 function Base.empty!(t::SumTree)
-    t.length = 0.
-    fill!(t.tree, 0.)
+    t.length = 0.0
+    fill!(t.tree, 0.0)
     # yes, no need to reset `t.first`
     # so, don't rely on that `t.first` is always 1 after `empty!`
     t

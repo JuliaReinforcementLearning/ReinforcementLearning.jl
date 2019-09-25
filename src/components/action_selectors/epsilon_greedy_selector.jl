@@ -29,7 +29,7 @@ function get_ϵ(s::EpsilonGreedySelector{:exp}, step)
         s.ϵ_init
     else
         n = step - s.warmup_steps
-        s.ϵ_stable + (s.ϵ_init - s.ϵ_stable) * exp(-1. * n / s.decay_steps)
+        s.ϵ_stable + (s.ϵ_init - s.ϵ_stable) * exp(-1.0 * n / s.decay_steps)
     end
 end
 

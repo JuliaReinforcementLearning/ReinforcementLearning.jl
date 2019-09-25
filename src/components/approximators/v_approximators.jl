@@ -10,7 +10,7 @@ using LinearAlgebra: dot
 Using a matrix `features` to represent each state along with a vector of `weights`.
 """
 struct LinearVApproximator{N} <: AbstractVApproximator
-    weights::Array{Float64, N}
+    weights::Array{Float64,N}
 end
 
 # TODO: support Vector
@@ -32,7 +32,7 @@ struct TabularVApproximator <: AbstractVApproximator
     table::Vector{Float64}
 end
 
-TabularVApproximator(ns::Int, init::Float64 = 0.) = TabularVApproximator(fill(init, ns))
+TabularVApproximator(ns::Int, init::Float64 = 0.0) = TabularVApproximator(fill(init, ns))
 
 (v::TabularVApproximator)(s::Int) = v.table[s]
 

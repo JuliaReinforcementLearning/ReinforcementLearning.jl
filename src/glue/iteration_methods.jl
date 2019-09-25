@@ -14,7 +14,7 @@ function policy_evaluation!(
 )
     states, actions = 1:length(observation_space(model)), 1:length(action_space(model))
     while true
-        Δ = 0.
+        Δ = 0.0
         for s in states
             v = sum(
                 a -> get_prob(π, s, a) *
@@ -91,7 +91,7 @@ function value_iteration!(
 )
     states, actions = 1:length(observation_space(model)), 1:length(action_space(model))
     for i = 1:max_iter
-        Δ = 0.
+        Δ = 0.0
         for s in states
             v = maximum(sum(p * (r + γ * V(s′)) for (s′, r, p) in model(s, a)) for a in actions)
             error = v - V(s)

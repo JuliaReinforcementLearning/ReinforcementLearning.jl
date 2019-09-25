@@ -45,7 +45,7 @@ show(stdout, "text/plain", @benchmark(learn!($rlsetup)))
 env = MountainCar(maxsteps = 10^4)
 preprocessor = TilingStateAggregator(StateAggregator([-1.2, -.07], [.5, .07], [8, 8]), 8)
 rlsetup = RLSetup(
-    Sarsa(ns = 8 * 8^2, na = 3, α = 1 / 8, λ = .96, γ = 1.),
+    Sarsa(ns = 8 * 8^2, na = 3, α = 1 / 8, λ = .96, γ = 1.0),
     env,
     ConstantNumberSteps(400),
     preprocessor = preprocessor,

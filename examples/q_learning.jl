@@ -6,7 +6,7 @@ env = CartPoleEnv()
 ns, na = length(observation_space(env)), length(action_space(env))
 
 function loss_cal(ŷ, y)
-    (ŷ .- y).^2
+    (ŷ .- y) .^ 2
 end
 
 agent = Agent(

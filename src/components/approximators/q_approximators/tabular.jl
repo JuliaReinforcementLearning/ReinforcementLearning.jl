@@ -18,7 +18,7 @@ end
 
 Initial a table of size `(ns, na)` filled with value of `init`.
 """
-TabularQApproximator(; n_state::Int, n_action::Int = 1, init::Float64 = 0.) =
+TabularQApproximator(; n_state::Int, n_action::Int = 1, init::Float64 = 0.0) =
     TabularQApproximator(fill(init, n_state, n_action))
 
 (Q::TabularQApproximator)(s::Int) = @view(Q.table[s, :])

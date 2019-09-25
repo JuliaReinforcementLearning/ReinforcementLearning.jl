@@ -31,8 +31,8 @@ struct MonteCarloLearner{T,A,R,S} <: AbstractLearner
     MonteCarloLearner(
         ;
         approximator::A,
-        γ = 1.,
-        α = 1.,
+        γ = 1.0,
+        α = 1.0,
         kind = FIRST_VISIT,
         sampling = NO_SAMPLING,
         returns = CachedSampleAvg(),
@@ -53,7 +53,7 @@ function update!(
         learner.γ,
         learner.α,
         learner.returns,
-        0.,
+        0.0,
         length(states)
     seen_states = countmap(states)
 
@@ -84,8 +84,8 @@ function update!(
         learner.γ,
         learner.α,
         learner.returns,
-        0.,
-        1.,
+        0.0,
+        1.0,
         length(states)
     seen_states = countmap(states)
 
@@ -117,8 +117,8 @@ function update!(
         learner.γ,
         learner.α,
         learner.returns,
-        0.,
-        1.,
+        0.0,
+        1.0,
         length(states)
     seen_states = countmap(states)
 
@@ -143,7 +143,7 @@ function update!(
     transitions,
 )
     states, rewards = transitions.states, transitions.rewards
-    α, γ, V, Returns, G = learner.α, learner.γ, learner.approximator, learner.returns, 0.
+    α, γ, V, Returns, G = learner.α, learner.γ, learner.approximator, learner.returns, 0.0
     for (s, r) in Iterators.reverse(zip(states, rewards))
         G = γ * G + r
         update!(V, s => α * (Returns(s, G) - V(s)))
@@ -159,7 +159,7 @@ function update!(
         learner.γ,
         learner.approximator,
         learner.returns,
-        0.,
+        0.0,
         length(states)
     seen_pairs = countmap(zip(states, actions))
 
@@ -181,7 +181,7 @@ function update!(
     transitions,
 )
     states, actions, rewards = transitions.states, transitions.actions, transitions.rewards
-    α, γ, Q, Returns, G = learner.α, learner.γ, learner.approximator, learner.returns, 0.
+    α, γ, Q, Returns, G = learner.α, learner.γ, learner.approximator, learner.returns, 0.0
     for (s, a, r) in Iterators.reverse(zip(states, actions, rewards))
         G = γ * G + r
         update!(Q, (s, a) => α * (Returns((s, a), G) - Q(s, a)))

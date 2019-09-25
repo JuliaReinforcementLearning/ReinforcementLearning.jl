@@ -13,7 +13,7 @@
     for i = 5:16
         push!(t, i)
     end
-    
+
     @test length(t) == 8
     @test size(t) == (8,)
     @test t == 9:16

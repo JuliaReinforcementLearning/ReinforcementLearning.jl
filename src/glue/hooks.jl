@@ -137,7 +137,7 @@ end
 #####
 
 Base.@kwdef struct CumulativeReward <: AbstractHook
-    rewards::Vector{Float64} = [0.]
+    rewards::Vector{Float64} = [0.0]
     tag::String = "TRAINING"
 end
 

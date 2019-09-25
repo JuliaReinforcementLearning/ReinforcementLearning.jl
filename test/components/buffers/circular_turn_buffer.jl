@@ -69,15 +69,15 @@
         @test isfull(b) == false
         @test isempty(b) == true
 
-        push!(b; reward = 1., terminal = false, state = [1 1; 1 1], action = 1)
-        push!(b; reward = 1., terminal = false, state = [2 2; 2 2], action = 2)
+        push!(b; reward = 1.0, terminal = false, state = [1 1; 1 1], action = 1)
+        push!(b; reward = 1.0, terminal = false, state = [2 2; 2 2], action = 2)
 
         @test length(b) == 1
         @test isfull(b) == false
         @test isempty(b) == false
 
-        push!(b; reward = 2., terminal = false, state = [3 3; 3 3], action = 3)
-        push!(b; reward = 3., terminal = false, state = [4 4; 4 4], action = 4)
+        push!(b; reward = 2.0, terminal = false, state = [3 3; 3 3], action = 3)
+        push!(b; reward = 3.0, terminal = false, state = [4 4; 4 4], action = 4)
 
         @test length(b) == 3
         @test isfull(b) == true
@@ -85,7 +85,7 @@
         @test b[1] == (
             state = [1 1; 1 1],
             action = 1,
-            reward = 1.,
+            reward = 1.0,
             terminal = false,
             next_state = [2 2; 2 2],
             next_action = 2,
@@ -93,13 +93,13 @@
         @test b[end] == (
             state = [3 3; 3 3],
             action = 3,
-            reward = 3.,
+            reward = 3.0,
             terminal = false,
             next_state = [4 4; 4 4],
             next_action = 4,
         )
 
-        push!(b; reward = 4., terminal = false, state = [5 5; 5 5], action = 5)
+        push!(b; reward = 4.0, terminal = false, state = [5 5; 5 5], action = 5)
 
         # old experience should be removed
         @test length(b) == 3
@@ -107,7 +107,7 @@
         @test b[1] == (
             state = [2 2; 2 2],
             action = 2,
-            reward = 2.,
+            reward = 2.0,
             terminal = false,
             next_state = [3 3; 3 3],
             next_action = 3,
@@ -115,7 +115,7 @@
         @test b[end] == (
             state = [4 4; 4 4],
             action = 4,
-            reward = 4.,
+            reward = 4.0,
             terminal = false,
             next_state = [5 5; 5 5],
             next_action = 5,

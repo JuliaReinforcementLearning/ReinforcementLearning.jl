@@ -12,7 +12,7 @@ end
 
 (Q::LinearQApproximator)(s) = [Q(s, a) for a in Q.actions]
 
-function update!(Q::LinearQApproximator, correction::Pair) 
+function update!(Q::LinearQApproximator, correction::Pair)
     (s, a), e = correction
     xs = Q.feature_func(s, a)
     Q.weights .+= xs .* e

@@ -8,7 +8,8 @@ Base.@kwdef mutable struct GradientBanditLearner{A,O,B} <: AbstractLearner
     baseline::B
 end
 
-(learner::GradientBanditLearner)(obs::Observation) = obs |> get_state |> learner.approximator |> softmax
+(learner::GradientBanditLearner)(obs::Observation) =
+    obs |> get_state |> learner.approximator |> softmax
 
 function update!(learner::GradientBanditLearner, transitions)
     s, a, r = transitions

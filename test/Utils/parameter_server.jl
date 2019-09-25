@@ -13,7 +13,7 @@
     @test model.W == p1
     @test model.b == p2
 
-    y = [0. 1.; 1. 0.]
+    y = [0.0 1.0; 1.0 0.0]
     opt = Flux.Optimise.Descent()
     gs = Flux.gradient(() -> Flux.mse(model(xs), y), ps)
     Flux.Optimise.update!(opt, ps, gs)

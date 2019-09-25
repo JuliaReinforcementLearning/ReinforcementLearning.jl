@@ -56,7 +56,7 @@ end
 function sample(m::TimeBasedSampleModel)
     s = rand(keys(m.experiences))
     a = rand(1:m.nactions)
-    r, d, s′ = get(m.experiences[s], a, (0., false, s))
+    r, d, s′ = get(m.experiences[s], a, (0.0, false, s))
     r += m.κ * sqrt(m.t - get(m.last_visit, (s, a), 0))
     s, a, r, d, s′
 end

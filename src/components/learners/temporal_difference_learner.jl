@@ -64,8 +64,8 @@ Base.@kwdef mutable struct DifferentialTDLearner{A<:AbstractApproximator} <: Abs
     approximator::A
     α::Float64
     β::Float64
-    R̄::Float64=0.
-    n::Int=0
+    R̄::Float64 = 0.0
+    n::Int = 0
 end
 
 function update!(learner::DifferentialTDLearner, transition)
@@ -90,10 +90,14 @@ end
 
 (learner::DoubleLearner)(obs::Observation) = learner.L1(obs) .+ learner.L2(obs)
 
-update!(learner::TDLearner{<:AbstractVApproximator,:SRS}, transitions) = update!(learner, transitions, nothing)
+update!(learner::TDLearner{<:AbstractVApproximator,:SRS}, transitions) =
+    update!(learner, transitions, nothing)
 
 function update!(learner::TDLearner{<:AbstractVApproximator,:SRS}, transitions, weights)
-    states, rewards, terminals, next_states = transitions.states, transitions.rewards, transitions.terminals, transitions.next_states
+    states, rewards, terminals, next_states = transitions.states,
+        transitions.rewards,
+        transitions.terminals,
+        transitions.next_states
     n, γ, V, optimizer = learner.n, learner.γ, learner.approximator, learner.optimizer
 
     if length(terminals) > 0 && terminals[end]
@@ -160,7 +164,7 @@ end
 
 function extract_transitions(
     buffer::EpisodeTurnBuffer,
-    learner::Union{TDLearner{<:AbstractQApproximator,:SARSA}, DifferentialTDLearner},
+    learner::Union{TDLearner{<:AbstractQApproximator,:SARSA},DifferentialTDLearner},
 )
     n = learner.n
     if length(buffer) > 0
@@ -332,14 +336,17 @@ end
 #####
 # TDλReturnLearner
 #####
-Base.@kwdef struct TDλReturnLearner{Tapp <: AbstractApproximator} <: AbstractLearner 
+Base.@kwdef struct TDλReturnLearner{Tapp<:AbstractApproximator} <: AbstractLearner
     approximator::Tapp
-    γ::Float64=1.0
+    γ::Float64 = 1.0
     α::Float64
     λ::Float64
 end
 
-function extract_transitions(buffer::EpisodeTurnBuffer, learner::TDλReturnLearner{<:AbstractVApproximator})
+function extract_transitions(
+    buffer::EpisodeTurnBuffer,
+    learner::TDλReturnLearner{<:AbstractVApproximator},
+)
     if isfull(buffer)
         @views (
             states = state(buffer)[1:end-1],
@@ -356,13 +363,17 @@ function update!(learner::TDλReturnLearner, transition)
     λ, γ, V, α = learner.λ, learner.γ, learner.approximator, learner.α
     states, rewards, terminals, next_states = transition
     T = length(states)
-    for t in 1:T
-        G = 0.
-        for n in 1:(T - t)
-            G += λ^(n-1) * (discount_rewards_reduced(@view(rewards[t:t+n-1]), γ) + γ^n * V(next_states[t+n-1]))
+    for t = 1:T
+        G = 0.0
+        for n = 1:(T-t)
+            G += λ^(n - 1) *
+                 (discount_rewards_reduced(@view(rewards[t:t+n-1]), γ) +
+                  γ^n * V(next_states[t+n-1]))
         end
         G *= 1 - λ
-        G += λ^(T-t) * (discount_rewards_reduced(@view(rewards[t:T]), γ) + γ^(T-t+1) * V(next_states[T]))
+        G += λ^(T - t) *
+             (discount_rewards_reduced(@view(rewards[t:T]), γ) +
+              γ^(T - t + 1) * V(next_states[T]))
         sₜ = states[t]
         update!(V, sₜ => α * (G - V(sₜ)))
     end

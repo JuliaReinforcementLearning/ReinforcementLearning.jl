@@ -27,7 +27,7 @@ mutable struct PrioritizedDQNLearner{Tq<:AbstractQApproximator,Tf,Tl} <: Abstrac
         target_update_freq::Int = 100,
         update_step::Int = 0,
         loss::Tl = 0.f0,
-        default_priority::Float64 = 100.,
+        default_priority::Float64 = 100.0,
     ) where {Tq,Tf,Tl}
 
         copyto!(approximator, target_approximator)  # force sync

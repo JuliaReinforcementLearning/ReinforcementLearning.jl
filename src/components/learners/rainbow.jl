@@ -41,7 +41,7 @@ function RainbowLearner(
     batch_size = 32,
     update_horizon = 1,
     min_replay_history = 32,
-    default_priority = 100.,
+    default_priority = 100.0,
 )
     support = range(Float32(-Vₘₐₓ), Float32(Vₘₐₓ), length = n_atoms)
     copyto!(approximator, target_approximator)  # force sync
