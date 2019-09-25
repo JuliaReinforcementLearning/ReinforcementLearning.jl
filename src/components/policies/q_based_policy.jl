@@ -21,7 +21,7 @@ function update!(
     indexed_batch = extract_transitions(buffer, π)
     if !isnothing(indexed_batch)
         inds, batch = indexed_batch
-        priorities = update!(π, batch)
+        priorities = update!(π.learner, batch)
         isnothing(priorities) || (priority(buffer)[inds] .= priorities)
     end
 end
