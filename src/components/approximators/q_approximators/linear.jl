@@ -14,5 +14,6 @@ end
 
 function update!(Q::LinearQApproximator, correction::Pair) 
     (s, a), e = correction
-    Q.weights .+= e
+    xs = Q.feature_func(s, a)
+    Q.weights .+= xs .* e
 end

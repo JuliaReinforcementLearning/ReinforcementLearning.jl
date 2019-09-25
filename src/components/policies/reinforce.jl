@@ -27,6 +27,7 @@ function update!(
         γₜ = 1.0
 
         for (i, (s, a, g)) in enumerate(zip(states, actions, gains))
+            # !!! we will multiply `Q.feature_func(s, a)` in the `LinearQApproximator` again!
             update!(Q, (s, a) => α * γₜ * g * (Q.feature_func(s, a) .- sum(x -> get_prob(π, s, x) .* Q.feature_func(s, x), Q.actions)))
             γₜ *= γ
         end

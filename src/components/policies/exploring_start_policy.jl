@@ -7,6 +7,6 @@ end
 
 (π::ExploringStartPolicy)(obs::Observation) = get_terminal(obs) ? rand(π.actions) : π.π(obs)
 
-update!(π::ExploringStartPolicy, args...) = update!(π.π, args...)
+learner(π::ExploringStartPolicy) = learner(π.π)
 
 extract_transitions(buffer, π::ExploringStartPolicy) = extract_transitions(buffer, π.π)

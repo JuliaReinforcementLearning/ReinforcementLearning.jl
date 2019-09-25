@@ -40,8 +40,9 @@ struct MonteCarloLearner{T,A,R,S} <: AbstractLearner
         new{typeof(kind),A,typeof(returns),typeof(sampling)}(approximator, γ, α, returns)
 end
 
-(learner::MonteCarloLearner)(obs) = learner.approximator(get_state(obs))
-(learner::MonteCarloLearner)(obs, a) = learner.approximator(get_state(s), a)
+(learner::MonteCarloLearner)(s) = learner.approximator(s)
+(learner::MonteCarloLearner)(obs::Observation) = learner.approximator(get_state(obs))
+(learner::MonteCarloLearner)(obs::Observation, a) = learner.approximator(get_state(s), a)
 
 function update!(
     learner::MonteCarloLearner{<:FirstVisit,<:AbstractVApproximator,<:Any,<:NoSampling},
@@ -176,7 +177,7 @@ function update!(
 end
 
 function update!(
-    learner::MonteCarloLearner{:EveryVisit,<:AbstractQApproximator},
+    learner::MonteCarloLearner{<:EveryVisit,<:AbstractQApproximator},
     transitions,
 )
     states, actions, rewards = transitions.states, transitions.actions, transitions.rewards

@@ -2,16 +2,13 @@ export GradientBanditLearner
 
 using Flux: softmax, onehot
 
-mutable struct GradientBanditLearner{A,O,B} <: AbstractLearner
+Base.@kwdef mutable struct GradientBanditLearner{A,O,B} <: AbstractLearner
     approximator::A
     optimizer::O
     baseline::B
 end
 
-GradientBanditLearner(; approximator, optimizer, baseline) =
-    GradientBanditLearner(approximator, optimizer, baseline)
-
-(learner::GradientBanditLearner)(obs) = obs |> get_state |> learner.approximator |> softmax
+(learner::GradientBanditLearner)(obs::Observation) = obs |> get_state |> learner.approximator |> softmax
 
 function update!(learner::GradientBanditLearner, transitions)
     s, a, r = transitions
