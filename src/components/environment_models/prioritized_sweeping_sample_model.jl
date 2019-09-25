@@ -2,7 +2,7 @@ export PrioritizedSweepingSampleModel, update!, sample
 
 using DataStructures
 
-import StatsBase:sample
+import StatsBase: sample
 
 """
     PrioritizedSweepingSampleModel <: AbstractSampleBasedModel
@@ -14,14 +14,34 @@ mutable struct PrioritizedSweepingSampleModel <: AbstractSampleBasedModel
     PQueue::PriorityQueue{Tuple{Any,Any},Float64}
     predecessors::Dict{Any,Set{Tuple{Any,Any,Float64,Bool}}}
     θ::Float64
-    PrioritizedSweepingSampleModel(θ::Float64=1e-4) = new(
-        Dict{Tuple{Any,Any},Tuple{Float64,Bool,Any}}(),
-        PriorityQueue{Tuple{Any,Any},Float64}(Base.Order.Reverse),
-        Dict{Any,Set{Tuple{Any,Any,Float64,Bool}}}(),
-        θ)
+    sample_count::Int
+    PrioritizedSweepingSampleModel(θ::Float64 = 1e-4) =
+        new(
+            Dict{Tuple{Any,Any},Tuple{Float64,Bool,Any}}(),
+            PriorityQueue{Tuple{Any,Any},Float64}(Base.Order.Reverse),
+            Dict{Any,Set{Tuple{Any,Any,Float64,Bool}}}(),
+            θ,
+            0,
+        )
 end
 
-function update!(m::PrioritizedSweepingSampleModel, s, a, r, d, s′, P)
+function extract_transitions(
+    buffer::EpisodeTurnBuffer,
+    model::PrioritizedSweepingSampleModel,
+)
+    if length(buffer) > 0
+        state(buffer)[end-1],
+        action(buffer)[end-1],
+        reward(buffer)[end],
+        terminal(buffer)[end],
+        state(buffer)[end]
+    else
+        nothing
+    end
+end
+
+function update!(m::PrioritizedSweepingSampleModel, transition, P)
+    s, a, r, d, s′ = transition
     m.experiences[(s, a)] = (r, d, s′)
     if P >= m.θ
         m.PQueue[(s, a)] = P
@@ -36,6 +56,7 @@ function sample(m::PrioritizedSweepingSampleModel)
     if length(m.PQueue) > 0
         s, a = dequeue!(m.PQueue)
         r, d, s′ = m.experiences[(s, a)]
+        m.sample_count += 1
         s, a, r, d, s′
     else
         nothing

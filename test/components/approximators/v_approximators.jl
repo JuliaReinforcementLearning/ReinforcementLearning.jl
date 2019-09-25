@@ -1,23 +1,20 @@
 @testset "v_approximators" begin
     @testset "LinearVApproximator" begin
-        features = [1 0 1; 0 1 1]
-        weights = [1., 2., 3.]
-        V = LinearVApproximator(features, weights)
+        weights = [1.0, 2.0, 3.0]
+        V = LinearVApproximator(weights)
 
-        @test V(1) ≈ 1. + 3.
-        @test V(2) ≈ 2. + 3.
+        @test V([1, 1, 1]) ≈ 6
 
-        update!(V, 1 => 0.5)
-        @test V(1) ≈ 1.5 + 3.5
-        @test V(2) ≈ 2. + 3.5
+        update!(V, [1, 1, 1] => [0.1, 0.2, 0.3])
+        @test V([1, 1, 1]) ≈ 6.6
     end
 
     @testset "TabularVApproximator" begin
-        V = TabularVApproximator([1., 2., 3., 2., 1.])
-        @test V(1) == 1.
-        @test V(3) == 3.
+        V = TabularVApproximator([1.0, 2.0, 3.0, 2.0, 1.0])
+        @test V(1) == 1.0
+        @test V(3) == 3.0
 
-        update!(V, 3 => -1.)
-        @test V(3) == 2.
+        update!(V, 3 => -1.0)
+        @test V(3) == 2.0
     end
 end

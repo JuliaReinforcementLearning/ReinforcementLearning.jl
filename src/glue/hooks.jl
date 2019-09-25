@@ -1,10 +1,19 @@
 export AbstractStage,
-       PreEpisodeStage, PRE_EPISODE_STAGE,
-       PostEpisodeStage, POST_EPISODE_STAGE,
-       PreActStage, PRE_ACT_STAGE,
-       PostActStage, POST_ACT_STAGE,
+       PreEpisodeStage,
+       PRE_EPISODE_STAGE,
+       PostEpisodeStage,
+       POST_EPISODE_STAGE,
+       PreActStage,
+       PRE_ACT_STAGE,
+       PostActStage,
+       POST_ACT_STAGE,
        AbstractHook,
-       ComposedHook, EmptyHook, StepsPerEpisode, RewardsPerEpisode, TotalRewardPerEpisode
+       ComposedHook,
+       EmptyHook,
+       StepsPerEpisode,
+       RewardsPerEpisode,
+       TotalRewardPerEpisode,
+       CumulativeReward
 
 abstract type AbstractStage end
 
@@ -20,7 +29,7 @@ const POST_ACT_STAGE = PostActStage()
 
 abstract type AbstractHook end
 
-(hook::AbstractHook)(::T, agent, env, obs) where T <: AbstractStage = nothing
+(hook::AbstractHook)(::T, agent, env, obs) where {T<:AbstractStage} = nothing
 
 # https://github.com/JuliaLang/julia/issues/14919
 # function (f::Function)(stage::T, args...;kw...) where T<: AbstractStage end
@@ -34,9 +43,9 @@ struct ComposedHook{T<:Tuple} <: AbstractHook
     ComposedHook(hooks...) = new{typeof(hooks)}(hooks)
 end
 
-function (hook::ComposedHook)(stage, args...;kw...)
+function (hook::ComposedHook)(stage::AbstractStage, args...; kw...)
     for h in hook.hooks
-        h(stage, args...;kw...)
+        h(stage, args...; kw...)
     end
 end
 
@@ -58,18 +67,18 @@ mutable struct StepsPerEpisode <: AbstractHook
     tag::String
 end
 
-function StepsPerEpisode(;steps=Int[], count=0, tag="TRAINING")
+function StepsPerEpisode(; steps = Int[], count = 0, tag = "TRAINING")
     StepsPerEpisode(steps, count, tag)
 end
 
-function (hook::StepsPerEpisode)(::PostActStage, agent, env, obs)
+function (hook::StepsPerEpisode)(::PostActStage, agent, env, action_obs)
     hook.count += 1
 end
 
 function (hook::StepsPerEpisode)(::PostEpisodeStage, agent, env, obs)
     push!(hook.steps, hook.count)
     hook.count = 0
-    @debug hook.tag STEPS_PER_EPISODE=hook.steps[end]
+    @debug hook.tag STEPS_PER_EPISODE = hook.steps[end]
 end
 
 #####
@@ -81,7 +90,7 @@ mutable struct RewardsPerEpisode <: AbstractHook
     tag::String
 end
 
-function RewardsPerEpisode(;rewards=Vector{Vector{Float64}}(), tag="TRAINING")
+function RewardsPerEpisode(; rewards = Vector{Vector{Float64}}(), tag = "TRAINING")
     RewardsPerEpisode(rewards, tag)
 end
 
@@ -89,13 +98,13 @@ function (hook::RewardsPerEpisode)(::PreEpisodeStage, agent, env, obs)
     push!(hook.rewards, [])
 end
 
-function (hook::RewardsPerEpisode)(::PostActStage, agent, env, obs_action)
-    obs, action = obs_action
+function (hook::RewardsPerEpisode)(::PostActStage, agent, env, action_obs)
+    action, obs = action_obs
     push!(hook.rewards[end], get_reward(obs))
 end
 
 function (hook::RewardsPerEpisode)(::PostEpisodeStage, agent, env, obs)
-    @debug hook.tag REWARDS_PER_EPISODE=hook.rewards[end]
+    @debug hook.tag REWARDS_PER_EPISODE = hook.rewards[end]
 end
 
 #####
@@ -108,17 +117,32 @@ mutable struct TotalRewardPerEpisode <: AbstractHook
     tag::String
 end
 
-function TotalRewardPerEpisode(;rewards=Float64[], reward=0.0, tag="TRAINING")
+function TotalRewardPerEpisode(; rewards = Float64[], reward = 0.0, tag = "TRAINING")
     TotalRewardPerEpisode(rewards, reward, tag)
 end
 
-function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env, obs_action)
-    obs, action = obs_action
+function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env, action_obs)
+    action, obs = action_obs
     hook.reward += get_reward(obs)
 end
 
 function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env, obs)
     push!(hook.rewards, hook.reward)
     hook.reward = 0
-    @debug hook.tag REWARD_PER_EPISODE=hook.rewards[end]
+    @debug hook.tag REWARD_PER_EPISODE = hook.rewards[end]
+end
+
+#####
+# CumulativeReward
+#####
+
+Base.@kwdef struct CumulativeReward <: AbstractHook
+    rewards::Vector{Float64} = [0.0]
+    tag::String = "TRAINING"
+end
+
+function (hook::CumulativeReward)(::PostActStage, agent, env, action_obs)
+    action, obs = action_obs
+    push!(hook.rewards, get_reward(obs) + hook.rewards[end])
+    @debug hook.tag CUMULATIVE_REWARD = hook.rewards[end]
 end

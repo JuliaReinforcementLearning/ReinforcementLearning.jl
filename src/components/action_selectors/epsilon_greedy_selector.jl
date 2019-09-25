@@ -1,22 +1,17 @@
 export EpsilonGreedySelector
 
-using StatsBase:sample
-using .Utils:findallmax
+using StatsBase: sample
+using .Utils: findallmax
 
-"""
-    EpsilonGreedySelector <: AbstractDiscreteActionSelector
-    EpsilonGreedySelector(ϵ; ϵ_init=1.0, warmup_steps=0, decay_steps=0, decay_method=:linear)
-"""
-struct EpsilonGreedySelector{T} <: AbstractDiscreteActionSelector
-    ϵ_init::Float64
+Base.@kwdef mutable struct EpsilonGreedySelector{T} <: AbstractDiscreteActionSelector
     ϵ_stable::Float64
-    warmup_steps::Int
-    decay_steps::Int
-
-    function EpsilonGreedySelector(ϵ_stable; ϵ_init=1.0, warmup_steps=0, decay_steps=0, decay_method=:linear)
-        new{decay_method}(ϵ_init, ϵ_stable, warmup_steps, decay_steps)
-    end
+    ϵ_init::Float64 = 1.0
+    warmup_steps::Int = 0
+    decay_steps::Int = 0
+    step::Int = 1
 end
+
+EpsilonGreedySelector(ϵ) = EpsilonGreedySelector{:linear}(; ϵ_stable = ϵ)
 
 function get_ϵ(s::EpsilonGreedySelector{:linear}, step)
     if step <= s.warmup_steps
@@ -34,9 +29,11 @@ function get_ϵ(s::EpsilonGreedySelector{:exp}, step)
         s.ϵ_init
     else
         n = step - s.warmup_steps
-        s.ϵ_stable + (s.ϵ_init - s.ϵ_stable) * exp(-1. * n / s.decay_steps)
+        s.ϵ_stable + (s.ϵ_init - s.ϵ_stable) * exp(-1.0 * n / s.decay_steps)
     end
 end
+
+get_ϵ(s::EpsilonGreedySelector) = get_ϵ(s, s.step)
 
 """
     (s::EpsilonGreedySelector)(values; step) where T
@@ -48,7 +45,18 @@ end
     `NaN` will be filtered unless all the values are `NaN`.
     In that case, a random one will be returned.
 """
-function (s::EpsilonGreedySelector)(values; step, kw...)
-    ϵ = get_ϵ(s, step)
+function (s::EpsilonGreedySelector)(values)
+    ϵ = get_ϵ(s)
+    s.step += 1
     rand() > ϵ ? sample(findallmax(values)[2]) : rand(1:length(values))
+end
+
+function get_prob(s::EpsilonGreedySelector, values)
+    ϵ, n = get_ϵ(s), length(values)
+    probs = fill(ϵ / n, n)
+    max_val_inds = findallmax(values)[2]
+    for ind in max_val_inds
+        probs[ind] += (1 - ϵ) / length(max_val_inds)
+    end
+    probs
 end

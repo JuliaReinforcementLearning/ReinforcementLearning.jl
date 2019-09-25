@@ -20,38 +20,37 @@ and `types` is the coresponding types of the `names`.
 | `Base.isempty(b)` | Check whether the buffer is empty or not. Return `length(b) == 0` by default |
 | `Base.lastindex(b)` | Return `length(b)` by default |
 """
-abstract type AbstractTurnBuffer{names, types} <: AbstractArray{NamedTuple{names, types}, 1} end
+abstract type AbstractTurnBuffer{names,types} <: AbstractArray{NamedTuple{names,types},1} end
 
 buffers(b::AbstractTurnBuffer) = getfield(b, :buffers)
 
 Base.size(b::AbstractTurnBuffer) = (length(b),)
 Base.lastindex(b::AbstractTurnBuffer) = length(b)
 Base.isempty(b::AbstractTurnBuffer) = all(isempty(x) for x in buffers(b))
-Base.empty!(b::AbstractTurnBuffer) = for x in buffers(b) empty!(x) end
-Base.getindex(b::AbstractTurnBuffer{names, types}, i::Int) where {names, types} = NamedTuple{names, types}(Tuple(x[i] for x in buffers(b)))
-Base.length(b::AbstractTurnBuffer) = minimum(length(x) for x in buffers(b))
-isfull(b::AbstractTurnBuffer) = all(isfull(x) for x in buffers(b))
-
-function Base.push!(b::AbstractTurnBuffer, args...)
-    for (b, x) in zip(buffers(b), args)
-        push!(b, x)
+Base.empty!(b::AbstractTurnBuffer) =
+    for x in buffers(b)
+        empty!(x)
     end
-end
+Base.getindex(b::AbstractTurnBuffer{names,types}, i::Int) where {names,types} =
+    NamedTuple{names,types}(Tuple(x[i] for x in buffers(b)))
+isfull(b::AbstractTurnBuffer) = all(isfull(x) for x in buffers(b))
 
 function Base.push!(b::AbstractTurnBuffer; kw...)
     for (k, v) in kw
-        push!(getproperty(buffers(b), k), v)
+        hasproperty(buffers(b), k) && push!(getproperty(buffers(b), k), v)
     end
 end
 
 function Base.push!(b::AbstractTurnBuffer, experience::Pair{<:Observation})
     obs, a = experience
-    push!(b;
-    state=get_state(obs),
-    reward =get_reward(obs),
-    terminal=get_terminal(obs),
-    action=a,
-    obs.meta...)
+    push!(
+        b;
+        state = get_state(obs),
+        reward = get_reward(obs),
+        terminal = get_terminal(obs),
+        action = a,
+        obs.meta...,
+    )
 end
 
 #####
@@ -65,14 +64,15 @@ terminal(b::AbstractTurnBuffer) = buffers(b).terminal
 
 const RTSA = (:reward, :terminal, :state, :action)
 
-Base.getindex(b::AbstractTurnBuffer{RTSA, types}, i::Int) where {types} = (
-    state = state(b)[i],
-    action = action(b)[i],
-    reward = reward(b)[i+1],
-    terminal = terminal(b)[i+1],
-    next_state = state(b)[i+1],
-    next_action = action(b)[i+1]
-)
+Base.getindex(b::AbstractTurnBuffer{RTSA,types}, i::Int) where {types} =
+    (
+     state = state(b)[i],
+     action = action(b)[i],
+     reward = reward(b)[i+1],
+     terminal = terminal(b)[i+1],
+     next_state = state(b)[i+1],
+     next_action = action(b)[i+1],
+    )
 
 #####
 # PRTSA (Prioritized, Reward, Terminal, State, Action)
@@ -82,39 +82,40 @@ const PRTSA = (:priority, :reward, :terminal, :state, :action)
 
 priority(b::AbstractTurnBuffer) = buffers(b).priority
 
-Base.getindex(b::AbstractTurnBuffer{PRTSA, types}, i::Int) where {types} = (
-    state = state(b)[i],
-    action = action(b)[i],
-    reward = reward(b)[i+1],
-    terminal = terminal(b)[i+1],
-    next_state = state(b)[i+1],
-    next_action = action(b)[i+1],
-    priority = priority(b)[i+1]
-)
+Base.getindex(b::AbstractTurnBuffer{PRTSA,types}, i::Int) where {types} =
+    (
+     state = state(b)[i],
+     action = action(b)[i],
+     reward = reward(b)[i+1],
+     terminal = terminal(b)[i+1],
+     next_state = state(b)[i+1],
+     next_action = action(b)[i+1],
+     priority = priority(b)[i+1],
+    )
 
 function consecutive_view(b::AbstractTurnBuffer, inds, n)
     next_inds = inds .+ 1
 
     (
-        states = consecutive_view(state(b), inds, n),
-        actions = consecutive_view(action(b), inds, n),
-        rewards = consecutive_view(reward(b), next_inds, n),
-        terminals = consecutive_view(terminal(b), next_inds, n),
-        next_states = consecutive_view(state(b), next_inds, n),
-        next_actions = consecutive_view(action(b), next_inds, n)
+     states = consecutive_view(state(b), inds, n),
+     actions = consecutive_view(action(b), inds, n),
+     rewards = consecutive_view(reward(b), next_inds, n),
+     terminals = consecutive_view(terminal(b), next_inds, n),
+     next_states = consecutive_view(state(b), next_inds, n),
+     next_actions = consecutive_view(action(b), next_inds, n),
     )
 end
 
 function extract_SARTS(batch, γ)
     n_step, batch_size = size(batch.terminals)
-    states = selectdim(batch.states, ndims(batch.states)-1, 1)
-    actions = selectdim(batch.actions, ndims(batch.actions)-1, 1)
-    next_states = selectdim(batch.next_states, ndims(batch.next_states)-1, n_step)
+    states = selectdim(batch.states, ndims(batch.states) - 1, 1)
+    actions = selectdim(batch.actions, ndims(batch.actions) - 1, 1)
+    next_states = selectdim(batch.next_states, ndims(batch.next_states) - 1, n_step)
 
     rewards, terminals = zeros(Float32, batch_size), fill(false, batch_size)
 
     # make sure that we only consider experiences in current episode
-    for i in 1:batch_size
+    for i = 1:batch_size
         t = findfirst(view(batch.terminals, :, i))
 
         if isnothing(t)

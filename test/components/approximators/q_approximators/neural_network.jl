@@ -1,8 +1,5 @@
 @testset "NeuralNetworkQ" begin
-    q = NeuralNetworkQ(
-        Dense(2,2,initW=ones, initb=zeros),
-        Flux.Optimise.Descent(0.1)
-    )
+    q = NeuralNetworkQ(Dense(2, 2, initW = ones, initb = zeros), Flux.Optimise.Descent(0.1))
     x = [1, 2]
     ŷ = q(x)
 

@@ -3,14 +3,14 @@ export NeuralNetworkQ, update!
 using Flux
 
 "TODO: Add static size check for legal input data type."
-struct NeuralNetworkQ{Tm, To, Tp}  <: AbstractQApproximator{Any}
+struct NeuralNetworkQ{Tm,To,Tp} <: AbstractQApproximator
     model::Tm
     opt::To
     ps::Tp
-    function NeuralNetworkQ(model::Tm, opt::To) where {Tm, To}
+    function NeuralNetworkQ(model::Tm, opt::To) where {Tm,To}
         m = model
         ps = params(m)
-        new{Tm, To, typeof(ps)}(m, opt, ps)
+        new{Tm,To,typeof(ps)}(m, opt, ps)
     end
 end
 

@@ -1,2 +1,3 @@
 include("abstract_agent.jl")
-include("q_agents/q_agents.jl")
+include("agent.jl")
+include("dyna_agent.jl")
