@@ -1,13 +1,13 @@
 @testset "basic environment test" begin
 
-    function basic_env_test(env, n=100)
+    function basic_env_test(env, n = 100)
         reset!(env)
         os = observation_space(env)
         as = action_space(env)
         @test os isa AbstractSpace
         @test as isa AbstractSpace
         @test reset!(env) == nothing
-        for _ in 1:n
+        for _ = 1:n
             a = rand(as)
             @test a in as
             @test interact!(env, a) === nothing
@@ -19,10 +19,10 @@
         end
     end
 
-    function basic_env_test(env::HanabiEnv, n=100)
+    function basic_env_test(env::HanabiEnv, n = 100)
         reset!(env)
         @test reset!(env) == nothing
-        for _ in 1:n
+        for _ = 1:n
             a = rand(legal_actions(env))
             interact!(env, a)
             obs = observe(env)
@@ -32,11 +32,12 @@
         end
     end
 
-    gym_env_names = ReinforcementLearningEnvironments.list_gym_env_names(modules=[
+    gym_env_names = ReinforcementLearningEnvironments.list_gym_env_names(modules = [
         "gym.envs.algorithmic",
         "gym.envs.classic_control",
         "gym.envs.toy_text",
-        "gym.envs.unittest"])  # mujoco, box2d, robotics are not tested here
+        "gym.envs.unittest",
+    ])  # mujoco, box2d, robotics are not tested here
 
     gym_env_names = filter(x -> x != "KellyCoinflipGeneralized-v0", gym_env_names)  # not sure why this env has outliers
 
@@ -62,8 +63,8 @@
         :(deterministic_tree_MDP()),
         :(deterministic_MDP()),
         (:(AtariEnv($x)) for x in atari_env_names)...,
-        (:(GymEnv($x)) for x in gym_env_names)...
-        ]
+        (:(GymEnv($x)) for x in gym_env_names)...,
+    ]
 
         @info "Testing $env_exp"
         env = eval(env_exp)

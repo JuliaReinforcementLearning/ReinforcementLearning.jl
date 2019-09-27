@@ -8,7 +8,7 @@ using Hanabi
 
 @testset "ReinforcementLearningEnvironments" begin
 
-include("spaces.jl")
-include("environments.jl")
+    include("spaces.jl")
+    include("environments.jl")
 
 end

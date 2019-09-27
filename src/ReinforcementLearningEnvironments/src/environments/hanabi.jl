@@ -2,7 +2,14 @@ using Hanabi
 
 export HanabiEnv, legal_actions, observe, reset!, interact!
 export PlayCard, DiscardCard, RevealColor, RevealRank, parse_move
-export cur_player, get_score, get_fireworks, encode_observation, encode_observation!, legal_actions!, legal_actions, get_cur_player
+export cur_player,
+       get_score,
+       get_fireworks,
+       encode_observation,
+       encode_observation!,
+       legal_actions!,
+       legal_actions,
+       get_cur_player
 
 @enum HANABI_OBSERVATION_ENCODER_TYPE CANONICAL
 @enum COLOR R Y G W B
@@ -108,7 +115,7 @@ mutable struct HanabiEnv
     observation_length::Int
     reward::HanabiResult
 
-    function HanabiEnv(;kw...)
+    function HanabiEnv(; kw...)
         game = Ref{HanabiGame}()
 
         if length(kw) == 0
@@ -127,30 +134,40 @@ mutable struct HanabiEnv
         observation_encoder = Ref{HanabiObservationEncoder}()
         new_observation_encoder(observation_encoder, game, CANONICAL)
         observation_encoder_finalizer(observation_encoder)
-        observation_length = parse(Int, unsafe_string(observation_shape(observation_encoder)))
+        observation_length = parse(
+            Int,
+            unsafe_string(observation_shape(observation_encoder)),
+        )
 
         n_moves = max_moves(game)
-        moves = [Ref{HanabiMove}() for _ in 1:n_moves]
-        for i in 1:n_moves
-            get_move_by_uid(game, i-1, moves[i])
+        moves = [Ref{HanabiMove}() for _ = 1:n_moves]
+        for i = 1:n_moves
+            get_move_by_uid(game, i - 1, moves[i])
             move_finalizer(moves[i])
         end
 
-        env = new(game, state, moves, observation_encoder, observation_length, HanabiResult(Int32(0), Int32(0)))
+        env = new(
+            game,
+            state,
+            moves,
+            observation_encoder,
+            observation_length,
+            HanabiResult(Int32(0), Int32(0)),
+        )
         reset!(env)  # reset immediately
         env
     end
 end
 
-line_sep(x, sep="=") = repeat(sep, 25) * x * repeat(sep, 25)
+line_sep(x, sep = "=") = repeat(sep, 25) * x * repeat(sep, 25)
 
 function Base.show(io::IO, env::HanabiEnv)
-    print(io,"""
-    $(line_sep("[HanabiEnv]"))
-    $(env.game)
-    $(line_sep("[State]"))
-    $(env.state)
-    """)
+    print(io, """
+     $(line_sep("[HanabiEnv]"))
+     $(env.game)
+     $(line_sep("[State]"))
+     $(env.state)
+     """)
 end
 
 function highlight(s)
@@ -162,15 +179,18 @@ function highlight(s)
     s
 end
 
-Base.show(io::IO, game::Base.RefValue{Hanabi.LibHanabi.PyHanabiGame}) = print(io, unsafe_string(game_param_string(game)))
-Base.show(io::IO, state::Base.RefValue{Hanabi.LibHanabi.PyHanabiState}) = print(io, highlight("\n" * unsafe_string(state_to_string(state))))
-Base.show(io::IO, obs::Base.RefValue{Hanabi.LibHanabi.PyHanabiObservation}) = print(io, highlight("\n" * unsafe_string(obs_to_string(obs))))
+Base.show(io::IO, game::Base.RefValue{Hanabi.LibHanabi.PyHanabiGame}) =
+    print(io, unsafe_string(game_param_string(game)))
+Base.show(io::IO, state::Base.RefValue{Hanabi.LibHanabi.PyHanabiState}) =
+    print(io, highlight("\n" * unsafe_string(state_to_string(state))))
+Base.show(io::IO, obs::Base.RefValue{Hanabi.LibHanabi.PyHanabiObservation}) =
+    print(io, highlight("\n" * unsafe_string(obs_to_string(obs))))
 
 function reset!(env::HanabiEnv)
     env.state = Ref{HanabiState}()
     state_finalizer(env.state)
     new_state(env.game, env.state)
-    while state_cur_player(env.state) == CHANCE_PLAYER_ID 
+    while state_cur_player(env.state) == CHANCE_PLAYER_ID
         state_deal_random_card(env.state)
     end
     nothing
@@ -195,7 +215,7 @@ function interact!(env::HanabiEnv, move::Base.RefValue{Hanabi.LibHanabi.PyHanabi
     nothing
 end
 
-function observe(env::HanabiEnv, observer=state_cur_player(env.state))
+function observe(env::HanabiEnv, observer = state_cur_player(env.state))
     raw_obs = Ref{HanabiObservation}()
     observation_finalizer(raw_obs)
     new_observation(env.state, observer, raw_obs)
@@ -204,7 +224,7 @@ function observe(env::HanabiEnv, observer=state_cur_player(env.state))
         reward = env.reward.player == observer ? env.reward.score_gain : Int32(0),
         terminal = state_end_of_game_status(env.state) != Int(NOT_FINISHED),
         state = raw_obs,
-        game = env.game
+        game = env.game,
     )
 end
 
@@ -236,8 +256,10 @@ function legal_actions(env::HanabiEnv)
     actions
 end
 
-legal_actions!(env::HanabiEnv, actions::AbstractVector{Bool}) = legal_actions!(env, actions, true, false)
-legal_actions!(env::HanabiEnv, actions::AbstractVector{T}) where T<:Number = legal_actions!(env, actions, zero(T), typemin(T))
+legal_actions!(env::HanabiEnv, actions::AbstractVector{Bool}) =
+    legal_actions!(env, actions, true, false)
+legal_actions!(env::HanabiEnv, actions::AbstractVector{T}) where {T<:Number} =
+    legal_actions!(env, actions, zero(T), typemin(T))
 
 function legal_actions!(env::HanabiEnv, actions, legal_value, illegal_value)
     for (i, move) in enumerate(env.moves)
@@ -258,14 +280,16 @@ function get_hand_card(obs, pid, i)
     card_ref[]
 end
 
-rank(knowledge::Base.RefValue{Hanabi.LibHanabi.PyHanabiCardKnowledge}) = rank_was_hinted(knowledge) != 0 ? known_rank(knowledge) + 1 : nothing
+rank(knowledge::Base.RefValue{Hanabi.LibHanabi.PyHanabiCardKnowledge}) =
+    rank_was_hinted(knowledge) != 0 ? known_rank(knowledge) + 1 : nothing
 rank(card::Hanabi.LibHanabi.PyHanabiCard) = card.rank + 1
-color(knowledge::Base.RefValue{Hanabi.LibHanabi.PyHanabiCardKnowledge}) = color_was_hinted(knowledge) != 0 ? COLOR(known_color(knowledge)) : nothing
+color(knowledge::Base.RefValue{Hanabi.LibHanabi.PyHanabiCardKnowledge}) =
+    color_was_hinted(knowledge) != 0 ? COLOR(known_color(knowledge)) : nothing
 color(card::Hanabi.LibHanabi.PyHanabiCard) = COLOR(card.color)
 
 function get_fireworks(game, observation)
-    fireworks = Dict{COLOR, Int}()
-    for c in 0:(num_colors(game) - 1)
+    fireworks = Dict{COLOR,Int}()
+    for c = 0:(num_colors(game)-1)
         fireworks[COLOR(c)] = obs_fireworks(observation, c) + 1
     end
     fireworks
