@@ -1,15 +1,24 @@
 using Random, POMDPs, POMDPModels, SparseArrays, LinearAlgebra, StatsBase
 
-export MDPEnv, POMDPEnv, SimpleMDPEnv, absorbing_deterministic_tree_MDP, stochastic_MDP, stochastic_tree_MDP,
-    deterministic_tree_MDP_with_rand_reward, deterministic_tree_MDP, deterministic_MDP,
-    DeterministicStateActionReward, DeterministicNextStateReward,
-    NormalStateActionReward, NormalNextStateReward
+export MDPEnv,
+       POMDPEnv,
+       SimpleMDPEnv,
+       absorbing_deterministic_tree_MDP,
+       stochastic_MDP,
+       stochastic_tree_MDP,
+       deterministic_tree_MDP_with_rand_reward,
+       deterministic_tree_MDP,
+       deterministic_MDP,
+       DeterministicStateActionReward,
+       DeterministicNextStateReward,
+       NormalStateActionReward,
+       NormalNextStateReward
 
 #####
 ##### POMDPEnv
 #####
 
-mutable struct POMDPEnv{T,Ts,Ta, R<:AbstractRNG} <: AbstractEnv
+mutable struct POMDPEnv{T,Ts,Ta,R<:AbstractRNG} <: AbstractEnv
     model::T
     state::Ts
     actions::Ta
@@ -20,7 +29,7 @@ mutable struct POMDPEnv{T,Ts,Ta, R<:AbstractRNG} <: AbstractEnv
     rng::R
 end
 
-function POMDPEnv(model; rng=Random.GLOBAL_RNG)
+function POMDPEnv(model; rng = Random.GLOBAL_RNG)
     state = initialstate(model, rng)
     as = DiscreteSpace(n_actions(model))
     os = DiscreteSpace(n_states(model))
@@ -38,17 +47,18 @@ function interact!(env::POMDPEnv, action)
     nothing
 end
 
-observe(env::POMDPEnv) = Observation(
-    reward = env.reward,
-    terminal = isterminal(env.model, env.state),
-    state = env.observation
-)
+observe(env::POMDPEnv) =
+    Observation(
+        reward = env.reward,
+        terminal = isterminal(env.model, env.state),
+        state = env.observation,
+    )
 
 #####
 ##### MDPEnv
 #####
 
-mutable struct MDPEnv{T, Ts, Ta, R<:AbstractRNG} <: AbstractEnv
+mutable struct MDPEnv{T,Ts,Ta,R<:AbstractRNG} <: AbstractEnv
     model::T
     state::Ts
     actions::Ta
@@ -58,19 +68,20 @@ mutable struct MDPEnv{T, Ts, Ta, R<:AbstractRNG} <: AbstractEnv
     rng::R
 end
 
-MDPEnv(model; rng=Random.GLOBAL_RNG) = MDPEnv(
-    model,
-    initialstate(model, rng),
-    actions(model),
-    DiscreteSpace(n_actions(model)),
-    DiscreteSpace(n_states(model)),
-    0.,
-    rng
-)
+MDPEnv(model; rng = Random.GLOBAL_RNG) =
+    MDPEnv(
+        model,
+        initialstate(model, rng),
+        actions(model),
+        DiscreteSpace(n_actions(model)),
+        DiscreteSpace(n_states(model)),
+        0.,
+        rng,
+    )
 
 observationindex(env, o) = Int(o) + 1
 
-function reset!(env::Union{POMDPEnv, MDPEnv})
+function reset!(env::Union{POMDPEnv,MDPEnv})
     initialstate(env.model, env.rng)
     nothing
 end
@@ -83,11 +94,12 @@ function interact!(env::MDPEnv, action)
     nothing
 end
 
-observe(env::MDPEnv) = Observation(
-    reward = env.reward,
-    terminal = isterminal(env.model, env.state),
-    state = stateindex(env.model, env.state)
-)
+observe(env::MDPEnv) =
+    Observation(
+        reward = env.reward,
+        terminal = isterminal(env.model, env.state),
+        state = stateindex(env.model, env.state),
+    )
 
 #####
 ##### SimpleMDPEnv
@@ -116,22 +128,38 @@ mutable struct SimpleMDPEnv{T,R,S<:AbstractRNG} <: AbstractEnv
     observation_space::DiscreteSpace
     action_space::DiscreteSpace
     state::Int
-    trans_probs::Array{T, 2}
+    trans_probs::Array{T,2}
     reward::R
-    initialstates::Array{Int, 1}
-    isterminal::Array{Int, 1}
+    initialstates::Array{Int,1}
+    isterminal::Array{Int,1}
     score::Float64
     rng::S
 end
 
-function SimpleMDPEnv(ospace, aspace, state, trans_probs::Array{T, 2},
-                      reward::R, initialstates, isterminal,
-                      rng::S = Random.GLOBAL_RNG) where {T,R,S}
+function SimpleMDPEnv(
+    ospace,
+    aspace,
+    state,
+    trans_probs::Array{T,2},
+    reward::R,
+    initialstates,
+    isterminal,
+    rng::S = Random.GLOBAL_RNG,
+) where {T,R,S}
     if R <: AbstractMatrix # to ensure compatibility with previous versions
         reward = DeterministicStateActionReward(reward)
     end
-    SimpleMDPEnv{T,typeof(reward),S}(ospace, aspace, state, trans_probs,
-                                     reward, initialstates, isterminal, 0., rng)
+    SimpleMDPEnv{T,typeof(reward),S}(
+        ospace,
+        aspace,
+        state,
+        trans_probs,
+        reward,
+        initialstates,
+        isterminal,
+        0.,
+        rng,
+    )
 end
 
 # reward types
@@ -143,7 +171,8 @@ struct DeterministicNextStateReward
     value::Vector{Float64}
 end
 reward(::AbstractRNG, r::DeterministicNextStateReward, s, a, s′) = r.value[s′]
-expected_rewards(r::DeterministicNextStateReward, trans_probs) = expected_rewards(r.value, trans_probs)
+expected_rewards(r::DeterministicNextStateReward, trans_probs) =
+    expected_rewards(r.value, trans_probs)
 
 function expected_rewards(r::AbstractVector, trans_probs)
     result = zeros(size(trans_probs))
@@ -159,7 +188,7 @@ end
 `value` should be a `na × ns`-matrix.
 """
 struct DeterministicStateActionReward
-    value::Array{Float64, 2}
+    value::Array{Float64,2}
 end
 reward(::AbstractRNG, r::DeterministicStateActionReward, s, a, s′) = r.value[a, s]
 expected_rewards(r::DeterministicStateActionReward, ::Any) = r.value
@@ -173,7 +202,8 @@ struct NormalNextStateReward
     std::Vector{Float64}
 end
 reward(rng, r::NormalNextStateReward, s, a, s′) = r.mean[s′] + randn(rng) * r.std[s′]
-expected_rewards(r::NormalNextStateReward, trans_probs) = expected_rewards(r.mean, trans_probs)
+expected_rewards(r::NormalNextStateReward, trans_probs) =
+    expected_rewards(r.mean, trans_probs)
 """
     struct NormalStateActionReward
         mean::Array{Float64, 2}
@@ -182,8 +212,8 @@ expected_rewards(r::NormalNextStateReward, trans_probs) = expected_rewards(r.mea
 `mean` and `std` should be `na × ns`-matrices.
 """
 struct NormalStateActionReward
-    mean::Array{Float64, 2}
-    std::Array{Float64, 2}
+    mean::Array{Float64,2}
+    std::Array{Float64,2}
 end
 reward(rng, r::NormalStateActionReward, s, a, s′) = r.mean[a, s] + randn(rng) * r.std[a, s]
 expected_rewards(r::NormalStateActionReward, ::Any) = r.mean
@@ -205,7 +235,7 @@ end
 """
     run!(mdp::SimpleMDPEnv, policy::Array{Int, 1}) = run!(mdp, policy[mdp.state])
 """
-run!(mdp::SimpleMDPEnv, policy::Array{Int, 1}) = run!(mdp, policy[mdp.state])
+run!(mdp::SimpleMDPEnv, policy::Array{Int,1}) = run!(mdp, policy[mdp.state])
 
 
 function interact!(env::SimpleMDPEnv, action)
@@ -215,11 +245,12 @@ function interact!(env::SimpleMDPEnv, action)
     nothing
 end
 
-observe(env::SimpleMDPEnv) = Observation(
-    reward = env.score,
-    terminal = env.isterminal[env.state] == 1,
-    state = env.state
-)
+observe(env::SimpleMDPEnv) =
+    Observation(
+        reward = env.score,
+        terminal = env.isterminal[env.state] == 1,
+        state = env.state,
+    )
 
 function reset!(env::SimpleMDPEnv)
     env.state = rand(env.rng, env.initialstates)
@@ -239,12 +270,12 @@ get_prob_vec_random(n) = normalize(rand(n), 1)
 Returns an array of length `n` that sums to 1 where all elements outside of
 `min`:`max` are zero.
 """
-get_prob_vec_random(n, min, max) = sparsevec(collect(min:max),
-                                          get_prob_vec_random(max - min + 1), n)
+get_prob_vec_random(n, min, max) =
+    sparsevec(collect(min:max), get_prob_vec_random(max - min + 1), n)
 """
     get_prob_vec_uniform(n)  = fill(1/n, n)
 """
-get_prob_vec_uniform(n) = fill(1/n, n)
+get_prob_vec_uniform(n) = fill(1 / n, n)
 """
     get_prob_vec_deterministic(n, min = 1, max = n)
 Returns a `SparseVector` of length `n` where one element in `min`:`max` has
@@ -263,9 +294,8 @@ keyword init determines how to construct the transition probabilites (see also
 function SimpleMDPEnv(ns, na; init = "random")
     r = randn(na, ns)
     func = eval(Symbol("get_prob_vec_" * init))
-    T = [func(ns) for a in 1:na, s in 1:ns]
-    SimpleMDPEnv(DiscreteSpace(ns), DiscreteSpace(na), rand(1:ns), T, r,
-        1:ns, zeros(ns))
+    T = [func(ns) for a = 1:na, s = 1:ns]
+    SimpleMDPEnv(DiscreteSpace(ns), DiscreteSpace(na), rand(1:ns), T, r, 1:ns, zeros(ns))
 end
 
 SimpleMDPEnv(; ns = 10, na = 4, init = "random") = SimpleMDPEnv(ns, na, init = init)
@@ -278,35 +308,32 @@ If `init` is random, the `branchingfactor` determines how many possible states a
 (action, state) pair has. If `init = "deterministic"` the `branchingfactor =
 na`.
 """
-function tree_MDP(na, depth;
-                 init = "random",
-                 branchingfactor = 3)
+function tree_MDP(na, depth; init = "random", branchingfactor = 3)
     isdet = (init == "deterministic")
     if isdet
         branchingfactor = na
-        ns = na.^(0:depth - 1)
+        ns = na.^(0:depth-1)
     else
-        ns = branchingfactor.^(0:depth - 1)
+        ns = branchingfactor.^(0:depth-1)
     end
     cns = cumsum(ns)
     func = eval(Symbol("get_prob_vec_" * init))
-    T = Array{SparseVector, 2}(undef, na, cns[end])
-    for i in 1:depth - 1
-        for s in 1:ns[i]
-            for a in 1:na
+    T = Array{SparseVector,2}(undef, na, cns[end])
+    for i = 1:depth-1
+        for s = 1:ns[i]
+            for a = 1:na
                 lb = cns[i] + (s - 1) * branchingfactor + (a - 1) * isdet + 1
                 ub = isdet ? lb : lb + branchingfactor - 1
-                T[a, (i == 1 ? 0 : cns[i-1]) + s] = func(cns[end] + 1, lb, ub)
+                T[a, (i == 1 ? 0 : cns[i-1])+s] = func(cns[end] + 1, lb, ub)
             end
         end
     end
     r = zeros(na, cns[end] + 1)
     isterminal = [zeros(cns[end]); 1]
-    for s in cns[end-1]+1:cns[end]
-        for a in 1:na
+    for s = cns[end-1]+1:cns[end]
+        for a = 1:na
             r[a, s] = -rand()
-            T[a, s] = get_prob_vec_deterministic(cns[end] + 1, cns[end] + 1,
-                                              cns[end] + 1)
+            T[a, s] = get_prob_vec_deterministic(cns[end] + 1, cns[end] + 1, cns[end] + 1)
         end
     end
     SimpleMDPEnv(DiscreteSpace(cns[end] + 1), DiscreteSpace(na), 1, T, r, 1:1, isterminal)
@@ -316,7 +343,7 @@ function empty_trans_prob!(v::SparseVector)
     empty!(v.nzind)
     empty!(v.nzval)
 end
-empty_trans_prob!(v::Array{Float64, 1}) = v[:] .*= 0.
+empty_trans_prob!(v::Array{Float64,1}) = v[:] .*= 0.
 
 """
     set_terminal_states!(mdp, range)
@@ -332,7 +359,7 @@ function set_terminal_states!(mdp, range)
         else
             mdp.reward[:, s] .= mean(mdp.reward[:, s])
         end
-        for a in 1:length(mdp.action_space)
+        for a = 1:length(mdp.action_space)
             empty_trans_prob!(mdp.trans_probs[a, s])
         end
     end
@@ -368,7 +395,10 @@ function deterministic_tree_MDP_with_rand_reward(; args...)
     mdp = deterministic_tree_MDP(; args...)
     nonterminals = findall(x -> x == 0, mdp.isterminal)
     if mdp.reward isa DeterministicStateActionReward
-        mdp.reward.value[:, nonterminals] = -rand(length(mdp.action_space), length(nonterminals))
+        mdp.reward.value[:, nonterminals] = -rand(
+            length(mdp.action_space),
+            length(nonterminals),
+        )
     else
         mdp.reward[:, nonterminals] = -rand(length(mdp.action_space), length(nonterminals))
     end
@@ -393,7 +423,7 @@ stochastic_MDP(; na = 10, ns = 50) = SimpleMDPEnv(ns, na)
     absorbing_deterministic_tree_MDP(;ns = 10^3, na = 10)
 Returns a random deterministic absorbing SimpleMDPEnv
 """
-function absorbing_deterministic_tree_MDP(;ns = 10^3, na = 10)
+function absorbing_deterministic_tree_MDP(; ns = 10^3, na = 10)
     mdp = SimpleMDPEnv(ns, na, init = "deterministic")
     if mdp.reward isa DeterministicStateActionReward
         mdp.reward.value .*= mdp.reward.value .< -.5
@@ -402,6 +432,6 @@ function absorbing_deterministic_tree_MDP(;ns = 10^3, na = 10)
     end
     mdp.initialstates = 1:div(ns, 100)
     reset!(mdp)
-    set_terminal_states!(mdp, ns - div(ns, 100) + 1:ns)
+    set_terminal_states!(mdp, ns-div(ns, 100)+1:ns)
     mdp
 end

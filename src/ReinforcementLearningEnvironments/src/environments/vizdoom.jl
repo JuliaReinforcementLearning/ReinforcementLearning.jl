@@ -24,9 +24,9 @@ function list_options()
     map(x -> Symbol(string(x)[5:end]), allconsts[idx])
 end
 
-struct ViZDoomEnv{O, A} <: AbstractEnv
+struct ViZDoomEnv{O,A} <: AbstractEnv
     game::vz.DoomGameAllocated
-    actions::Array{Array{Float64, 1}, 1}
+    actions::Array{Array{Float64,1},1}
     sleeptime::Float64
     observation_space::O
     action_space::A
@@ -36,9 +36,13 @@ observation_space(env::ViZDoomEnv) = env.observation_space
 action_space(env::ViZDoomEnv) = env.action_space
 
 function basic_ViZDoom_env(; add_game_args = "", kw...)
-    defaults = (screen_format = :GRAY8, screen_resolution = :RES_160X120, 
-                window_visible = false, living_reward = 0, 
-                episode_timeout = 500)
+    defaults = (
+        screen_format = :GRAY8,
+        screen_resolution = :RES_160X120,
+        window_visible = false,
+        living_reward = 0,
+        episode_timeout = 500,
+    )
     config = Dict(pairs(merge(defaults, kw)))
     for (k, v) in config
         if typeof(v) == Symbol
@@ -55,7 +59,7 @@ function basic_ViZDoom_env(; add_game_args = "", kw...)
         sleeptime = 0.
     end
     na = haskey(config, :available_buttons) ? length(config[:available_buttons]) : 3
-    actions = [Float64[i == j for i in 1:na] for j in 1:na]
+    actions = [Float64[i == j for i = 1:na] for j = 1:na]
     screen_size = vz.get_screen_size(game)
     env = ViZDoomEnv(
         game,
@@ -63,8 +67,10 @@ function basic_ViZDoom_env(; add_game_args = "", kw...)
         sleeptime,
         MultiDiscreteSpace(
             fill(typemax(UInt8), screen_size),
-            fill(typemin(UInt8), screen_size)),
-        DiscreteSpace(na))
+            fill(typemin(UInt8), screen_size),
+        ),
+        DiscreteSpace(na),
+    )
     vz.init(env.game)
     env
 end
@@ -77,8 +83,10 @@ function interact!(env::ViZDoomEnv, a)
     else
         state = vz.get_screen_buffer(env.game)
     end
-    if env.sleeptime > 0 sleep(env.sleeptime) end
-    (observation=state, reward=r, isdone=done)
+    if env.sleeptime > 0
+        sleep(env.sleeptime)
+    end
+    (observation = state, reward = r, isdone = done)
 end
 
 function reset!(env::ViZDoomEnv)
@@ -88,5 +96,8 @@ function reset!(env::ViZDoomEnv)
 end
 
 function observe(env::ViZDoomEnv)
-    (observation=vz.get_screen_buffer(env.game), isdone=vz.is_episode_finished(env.game))
+    (
+     observation = vz.get_screen_buffer(env.game),
+     isdone = vz.is_episode_finished(env.game),
+    )
 end
