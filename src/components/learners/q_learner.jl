@@ -2,14 +2,17 @@ export QLearner
 
 using StatsBase: mean
 
-Base.@kwdef mutable struct QLearner{Tq<:AbstractQApproximator,Tf,Tl} <: AbstractLearner
+"""
+https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf
+"""
+Base.@kwdef mutable struct QLearner{Tq<:AbstractQApproximator,Tf} <: AbstractLearner
     approximator::Tq
     loss_fun::Tf
     γ::Float32 = 0.99f0
     batch_size::Int = 32
     update_horizon::Int = 1
     min_replay_history::Int = 32
-    loss::Tl = 0.f0  # used to record
+    loss::Float32 = 0.f0  # used to record
 end
 
 function update!(learner::QLearner{<:NeuralNetworkQ}, batch)

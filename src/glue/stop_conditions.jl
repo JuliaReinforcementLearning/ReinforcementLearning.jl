@@ -41,7 +41,7 @@ end
 function (s::StopAfterStep)(args...)
     !isnothing(s.progress) && next!(
         s.progress;
-        showvalues = [(Symbol(s.tag, "/", :STEP), s.cur)],
+        # showvalues = [(Symbol(s.tag, "/", :STEP), s.cur)],  # https://github.com/timholy/ProgressMeter.jl/pull/131
     )
     @debug s.tag STEP = s.cur
 
@@ -74,7 +74,7 @@ end
 function (s::StopAfterEpisode)(agent, env, obs)
     !isnothing(s.progress) && next!(
         s.progress;
-        showvalues = [(Symbol(s.tag, "/", :EPISODE), s.cur)],
+        # showvalues = [(Symbol(s.tag, "/", :EPISODE), s.cur)],  # https://github.com/timholy/ProgressMeter.jl/pull/131
     )
     @debug s.tag EPISODE = s.cur
 
