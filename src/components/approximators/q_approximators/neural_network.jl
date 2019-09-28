@@ -7,10 +7,10 @@ struct NeuralNetworkQ{Tm,To,Tp} <: AbstractQApproximator
     model::Tm
     opt::To
     ps::Tp
-    function NeuralNetworkQ(model::Tm, opt::To) where {Tm,To}
+    function NeuralNetworkQ(;model::Tm, optimizer::To) where {Tm,To}
         m = model
         ps = params(m)
-        new{Tm,To,typeof(ps)}(m, opt, ps)
+        new{Tm,To,typeof(ps)}(m, optimizer, ps)
     end
 end
 

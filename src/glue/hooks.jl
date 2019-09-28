@@ -13,7 +13,8 @@ export AbstractStage,
        StepsPerEpisode,
        RewardsPerEpisode,
        TotalRewardPerEpisode,
-       CumulativeReward
+       CumulativeReward,
+       TimePerStep
 
 abstract type AbstractStage end
 
@@ -48,6 +49,8 @@ function (hook::ComposedHook)(stage::AbstractStage, args...; kw...)
         h(stage, args...; kw...)
     end
 end
+
+Base.getindex(hook::ComposedHook, inds...) = getindex(hook.hooks, inds...)
 
 #####
 # EmptyHook
@@ -146,3 +149,16 @@ function (hook::CumulativeReward)(::PostActStage, agent, env, action_obs)
     push!(hook.rewards, get_reward(obs) + hook.rewards[end])
     @debug hook.tag CUMULATIVE_REWARD = hook.rewards[end]
 end
+
+#####
+# TimePerStep
+#####
+
+Base.@kwdef mutable struct TimePerStep <: AbstractHook
+    times::Vector{Float64}=[]
+    t::UInt64=time_ns()
+end
+
+(hook::TimePerStep)(::PreActStage, agent, env, action_obs) = hook.t = time_ns()
+
+(hook::TimePerStep)(::PostActStage, agent, env, obs_action) = push!(hook.times, (time_ns() - hook.t)/1e9)

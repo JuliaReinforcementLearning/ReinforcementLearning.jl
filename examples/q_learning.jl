@@ -11,7 +11,7 @@ end
 
 agent = Agent(
     QBasedPolicy(
-        QLearner(
+        BasicDQNLearner(
             approximator = NeuralNetworkQ(
                 Chain(Dense(ns, 128, relu), Dense(128, 128, relu), Dense(128, na)),
                 ADAM(0.0005),

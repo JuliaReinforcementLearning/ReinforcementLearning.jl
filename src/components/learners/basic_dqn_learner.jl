@@ -1,11 +1,11 @@
-export QLearner
+export BasicDQNLearner
 
 using StatsBase: mean
 
 """
 https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf
 """
-Base.@kwdef mutable struct QLearner{Tq<:AbstractQApproximator,Tf} <: AbstractLearner
+Base.@kwdef mutable struct BasicDQNLearner{Tq<:AbstractQApproximator,Tf} <: AbstractLearner
     approximator::Tq
     loss_fun::Tf
     γ::Float32 = 0.99f0
@@ -15,7 +15,7 @@ Base.@kwdef mutable struct QLearner{Tq<:AbstractQApproximator,Tf} <: AbstractLea
     loss::Float32 = 0.f0  # used to record
 end
 
-function update!(learner::QLearner{<:NeuralNetworkQ}, batch)
+function update!(learner::BasicDQNLearner{<:NeuralNetworkQ}, batch)
     Q, γ, loss_fun, update_horizon = learner.approximator,
         learner.γ,
         learner.loss_fun,
@@ -32,7 +32,7 @@ function update!(learner::QLearner{<:NeuralNetworkQ}, batch)
     update!(Q, loss)
 end
 
-function extract_transitions(buffer::CircularTurnBuffer{RTSA}, learner::QLearner)
+function extract_transitions(buffer::CircularTurnBuffer{RTSA}, learner::BasicDQNLearner)
     if length(buffer) > learner.min_replay_history
         inds, consecutive_batch = sample(
             buffer;
