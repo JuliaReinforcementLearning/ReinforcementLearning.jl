@@ -127,7 +127,13 @@ function extract_SARTS(batch, γ)
         end
     end
 
-    states, actions, rewards, terminals, next_states
+    (
+        states=states,
+        actions=actions,
+        rewards=rewards,
+        terminals=terminals,
+        next_states=next_states
+    )
 end
 
 Base.length(b::AbstractTurnBuffer) = max(0, length(terminal(b)) - 1)

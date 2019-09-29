@@ -1,7 +1,6 @@
 export NeuralNetworkQ, update!
 
 using Flux
-using CuArrays: @allowscalar
 
 "TODO: Add static size check for legal input data type."
 struct NeuralNetworkQ{D, M, O, P} <: AbstractQApproximator
@@ -31,20 +30,19 @@ end
 to_device(Q::NeuralNetworkQ{:cpu}, x) = cpu(x)
 to_device(Q::NeuralNetworkQ{:gpu}, x) = gpu(x)
 
-"get Q value of some specific action"
-(Q::NeuralNetworkQ{:cpu})(s, a) = Q(to_device(Q, s))[a]
-(Q::NeuralNetworkQ{:gpu})(s, a) = @allowscalar Q(to_device(Q, s))[a]
-
 "get Q value of the batch"
 function batch_estimate(Q::NeuralNetworkQ, states, actions)
-    q = to_device(Q, states) |> Q.model
+    q = Q.model(to_device(Q, states))
     q[CartesianIndex.(actions, axes(q, ndims(q)))]
 end
 
-batch_estimate(Q::NeuralNetworkQ, states) = Q.model(to_device(Q, s))
+batch_estimate(Q::NeuralNetworkQ, states) = Q.model(to_device(Q, states))
 
 "get Q value of all actions"
 (Q::NeuralNetworkQ)(s) = Q.model(to_device(Q, s)) |> cpu
+
+"get Q value of some specific action"
+(Q::NeuralNetworkQ)(s, a) = Q(s)[a]
 
 function update!(Q::NeuralNetworkQ, loss)
     gs = Flux.gradient(() -> loss, Q.params)

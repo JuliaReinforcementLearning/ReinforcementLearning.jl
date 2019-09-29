@@ -20,13 +20,14 @@ function update!(learner::BasicDQNLearner{<:NeuralNetworkQ}, batch)
         learner.γ,
         learner.loss_fun,
         learner.update_horizon
-    states, actions, rewards, terminals, next_states = batch
+    states, actions, rewards, terminals, next_states = map(x -> to_device(Q, x), batch)
+    map(x -> to_device(Q, x), batch)
 
-    q = batch_estimate(Q, states, actions)
-    q′ = dropdims(maximum(Q(next_states); dims = 1), dims = 1)
+    q = batch_estimate(Q, states, batch.actions)  # here the actions do not need to be CuArrays
+    q′ = dropdims(maximum(batch_estimate(Q, next_states); dims = 1), dims = 1)
     G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
 
-    batch_losses = loss_fun(to_device(Q, G), q)
+    batch_losses = loss_fun(G, q)
     loss = mean(batch_losses)
     learner.loss = loss.data
     update!(Q, loss)
