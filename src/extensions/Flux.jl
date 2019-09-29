@@ -1,6 +1,8 @@
 export Descent, InvDecay
 
-import Flux.Optimise: apply!, Descent, InvDecay
+using CuArrays
+
+import Flux.Optimise: apply!, Descent, InvDecay, gpu
 
 function apply!(o::Descent, x, δ::Number)
     o.eta * δ
@@ -12,3 +14,5 @@ function apply!(o::InvDecay, x, δ::Number)
     o.state[x] = n + 1
     δ / (1 + γ * n)
 end
+
+gpu(a::SubArray) = CuArray{Float32}(a)

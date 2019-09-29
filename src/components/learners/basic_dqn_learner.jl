@@ -26,7 +26,7 @@ function update!(learner::BasicDQNLearner{<:NeuralNetworkQ}, batch)
     q′ = dropdims(maximum(Q(next_states); dims = 1), dims = 1)
     G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
 
-    batch_losses = loss_fun(G, q)
+    batch_losses = loss_fun(to_device(Q, G), q)
     loss = mean(batch_losses)
     learner.loss = loss.data
     update!(Q, loss)
