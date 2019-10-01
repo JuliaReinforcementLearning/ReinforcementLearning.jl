@@ -27,16 +27,11 @@ function NeuralNetworkQ(;model, optimizer, device=:cpu)
     end
 end
 
-to_device(Q::NeuralNetworkQ{:cpu}, x) = cpu(x)
+to_device(Q::NeuralNetworkQ{:cpu}, x) = x
 to_device(Q::NeuralNetworkQ{:gpu}, x) = gpu(x)
 
 "get Q value of the batch"
-function batch_estimate(Q::NeuralNetworkQ, states, actions)
-    q = Q.model(to_device(Q, states))
-    q[CartesianIndex.(actions, axes(q, ndims(q)))]
-end
-
-batch_estimate(Q::NeuralNetworkQ, states) = Q.model(to_device(Q, states))
+batch_estimate(Q::NeuralNetworkQ, states) = Q.model(states)
 
 "get Q value of all actions"
 (Q::NeuralNetworkQ)(s) = Q.model(to_device(Q, s)) |> cpu
@@ -44,8 +39,7 @@ batch_estimate(Q::NeuralNetworkQ, states) = Q.model(to_device(Q, states))
 "get Q value of some specific action"
 (Q::NeuralNetworkQ)(s, a) = Q(s)[a]
 
-function update!(Q::NeuralNetworkQ, loss)
-    gs = Flux.gradient(() -> loss, Q.params)
+function update!(Q::NeuralNetworkQ, gs)
     Flux.Optimise.update!(Q.optimizer, Q.params, gs)
 end
 

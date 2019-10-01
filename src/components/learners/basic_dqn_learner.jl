@@ -1,6 +1,7 @@
 export BasicDQNLearner
 
 using StatsBase: mean
+using Zygote
 
 """
 https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf
@@ -16,21 +17,25 @@ Base.@kwdef mutable struct BasicDQNLearner{Tq<:AbstractQApproximator,Tf} <: Abst
 end
 
 function update!(learner::BasicDQNLearner{<:NeuralNetworkQ}, batch)
-    Q, γ, loss_fun, update_horizon = learner.approximator,
+    Q, γ, loss_fun, update_horizon, batch_size = learner.approximator,
         learner.γ,
         learner.loss_fun,
-        learner.update_horizon
-    states, actions, rewards, terminals, next_states = map(x -> to_device(Q, x), batch)
-    map(x -> to_device(Q, x), batch)
+        learner.update_horizon,
+        learner.batch_size
+    states, rewards, terminals, next_states = map(x->to_device(Q, x), (batch.states, batch.rewards, batch.terminals, batch.next_states))
+    actions = CartesianIndex.(batch.actions, 1:batch_size) 
 
-    q = batch_estimate(Q, states, batch.actions)  # here the actions do not need to be CuArrays
-    q′ = dropdims(maximum(batch_estimate(Q, next_states); dims = 1), dims = 1)
-    G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
+    loss, back = Flux.pullback(Q.params) do 
+        q = batch_estimate(Q, states)[actions]
+        q′ = dropdims(maximum(batch_estimate(Q, next_states); dims = 1), dims = 1)
+        G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
 
-    batch_losses = loss_fun(G, q)
-    loss = mean(batch_losses)
-    learner.loss = loss.data
-    update!(Q, loss)
+        batch_losses = loss_fun(G, q)
+        mean(batch_losses)
+    end
+
+    learner.loss = loss
+    update!(Q, back(loss))
 end
 
 function extract_transitions(buffer::CircularTurnBuffer{RTSA}, learner::BasicDQNLearner)

@@ -15,11 +15,11 @@ and the [implementation](https://github.com/tensorflow/tensorflow/blob/r1.12/ten
 !!! warning
     The return is not reduced!
 """
-function huber_loss(labels, predictions;δ = 1.0)
+function huber_loss(labels, predictions;δ = 1.0f0)
     abs_error = abs.(predictions .- labels)
-    quadratic = min.(abs_error, δ)
+    quadratic = min.(abs_error, 1.0f0)  # quadratic = min.(abs_error, δ)
     linear = abs_error .- quadratic
-    0.5 .* quadratic .* quadratic .+ δ .* linear
+    0.5f0 .* quadratic .* quadratic .+ linear  # 0.5f0 .* quadratic .* quadratic .+ δ .* linear
 end
 
 """
