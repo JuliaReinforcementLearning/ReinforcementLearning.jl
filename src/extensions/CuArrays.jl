@@ -1,11 +1,11 @@
-using GPUArrays, CuArrays, CUDAdrv, CUDAnative, FillArrays
+using GPUArrays, CuArrays, FillArrays
 
 import Base:minimum, maximum, findmax, findmin
 
 import Flux.Optimise: apply!, Descent, InvDecay, gpu, cpu
 
 gpu(a::CuArray) = a
-gpu(a::SubArray) = CuArray{Float32}(a)
+gpu(a::SubArray) = CuArray{Float32}(a)  # !!! what if the parrent of SubArray is a CuArray?
 gpu(a::Array{Int}) = CuArray{Int}(a)
 gpu(a::SubArray{Int}) = CuArray{Int}(a)
 
