@@ -1,6 +1,6 @@
 export Descent, InvDecay
 
-import Flux.Optimise: apply!, Descent, InvDecay
+import Flux.Optimise: apply!, Descent, InvDecay, gpu, cpu
 
 function apply!(o::Descent, x, δ::Number)
     o.eta * δ

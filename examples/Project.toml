@@ -1,7 +1,0 @@
-[deps]
-Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
-ReinforcementLearning = "158674fc-8238-5cab-b5ba-03dfc80d1318"
-ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
-
-[compat]
-julia = "1.3"

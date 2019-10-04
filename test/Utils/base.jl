@@ -1,4 +1,20 @@
 @testset "test base" begin
+    @testset "huber_loss" begin
+        @testset "all linear delta" begin
+            δ = 1.
+            predictions = [1.5, -1.4, -1.0, 0.0]
+            labels = [0.0, 1.0, 0.0, 1.5]
+            expected = mean(δ .* [1.5, 2.4, 1.0, 1.5]) .- 0.5 .* δ ^2
+            @test expected ≈ mean(huber_loss(labels, predictions;δ=δ))
+        end
+        @testset "all quadratic delta" begin
+            δ = 1.
+            predictions = [1.5, -1.4, -0.5, 0.0]
+            labels = [1.0, -1.0, 0.0, 0.5]
+            expected = mean(0.5 .* [0.5, 0.4, 0.5, 0.5] .^2)
+            @test expected ≈ mean(huber_loss(labels, predictions;δ=δ))
+        end
+    end
 
     @testset "findallmax" begin
         @test findallmax([-Inf, -Inf, -Inf]) == (-Inf, [1, 2, 3])

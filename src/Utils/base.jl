@@ -3,7 +3,24 @@ export findallmax,
        discount_rewards!,
        CachedSampleAvg,
        SampleAvg,
-       CachedSum
+       CachedSum,
+       huber_loss
+
+"""
+    huber_loss(labels, predictions;δ = 1.0)
+
+See [huber_loss](https://en.m.wikipedia.org/wiki/Huber_loss)
+and the [implementation](https://github.com/tensorflow/tensorflow/blob/r1.12/tensorflow/python/ops/losses/losses_impl.py#L394-L469) in TensorFlow.
+
+!!! warning
+    The return is not reduced!
+"""
+function huber_loss(labels, predictions;δ = 1.0f0)
+    abs_error = abs.(predictions .- labels)
+    quadratic = min.(abs_error, 1.0f0)  # quadratic = min.(abs_error, δ)
+    linear = abs_error .- quadratic
+    0.5f0 .* quadratic .* quadratic .+ linear  # 0.5f0 .* quadratic .* quadratic .+ δ .* linear
+end
 
 """
     findallmax(A::AbstractArray)
