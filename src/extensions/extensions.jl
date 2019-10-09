@@ -1,9 +1,11 @@
 include("StatsBase.jl")
 include("ReinforcementLearningEnvironments.jl")
 include("Flux.jl")
+include("Zygote.jl")
+include("Knet.jl")
 
-using Flux
+using CUDAapi
 
-if Flux.has_cuarrays()
+if has_cuda()
     include("CuArrays.jl")
 end
