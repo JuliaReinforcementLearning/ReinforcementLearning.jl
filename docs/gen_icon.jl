@@ -43,4 +43,4 @@ aha = pi/4
     arrow(box_node4, c_node4, linewidth=arrow_width, arrowheadangle =aha)
     setcolor(0., 0., 0.) # black
     
-    end 640 640 "docs/assets/logo.png"
+    end 640 640 "docs/src/assets/logo.png"
