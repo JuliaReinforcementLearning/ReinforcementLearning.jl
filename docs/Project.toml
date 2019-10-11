@@ -1,0 +1,5 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
+ReinforcementLearning = "158674fc-8238-5cab-b5ba-03dfc80d1318"
+ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
