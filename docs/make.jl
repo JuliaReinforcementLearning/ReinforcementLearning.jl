@@ -18,9 +18,9 @@ makedocs(
         "A Quick Example" => "a_quick_example.md",
         "Overview" => "overview.md",
         "Manual" => [
-            "Core" => "core.md",
             "Components" => [
                 "Agents" => "components/agents.md",
+                "Environments" => "components/environments.md",
                 "Buffers" => "components/buffers.md",
                 "Policies" => "components/policies.md",
                 "Learners" => "components/learners.md",
@@ -28,6 +28,7 @@ makedocs(
                 "Action Selectors" => "components/action_selectors.md",
                 "Environment Models" => "components/environment_models.md"
             ],
+            "Core" => "core.md",
             "Utils" => "utils.md"
         ],
         "Tips for Developers" => "tips_for_developers.md"],
