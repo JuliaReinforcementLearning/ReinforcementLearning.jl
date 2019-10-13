@@ -1,10 +1,17 @@
 using Documenter
 using ReinforcementLearning, ReinforcementLearningEnvironments
 
+"filter concrete subtypes"
+is_concrete_type_of(t) = x ->begin
+    println(x)
+    x isa Type && x <: t && !isabstracttype(x)
+end
+
 makedocs(
     modules = [ReinforcementLearning, ReinforcementLearningEnvironments],
     format = Documenter.HTML(
         prettyurls = true,
+        analytics = "UA-149861753-1",
         canonical = "https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/",
         assets = [
             "assets/favicon.ico",

@@ -82,7 +82,7 @@ print("""
 
     backend = $backend, device = $device
     avg_reward = $(mean(hook[1].rewards))
-    avg_fps = $(1/mean(hook[2].times[max(1, end-100)]))
+    avg_fps = $(1/mean(hook[2].times[max(1, end-50):end]))
 
     """)
 ```
