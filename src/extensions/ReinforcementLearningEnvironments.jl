@@ -41,7 +41,7 @@ reset(
 """
     WrappedEnv(;env, preprocessor)
 
-The observation of `env` is processed by the `preprocessor`.
+The observation of `env` is first processed by the `preprocessor`.
 """
 Base.@kwdef struct WrappedEnv{E<:AbstractEnv,P} <: AbstractEnv
     env::E

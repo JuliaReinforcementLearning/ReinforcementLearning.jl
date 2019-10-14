@@ -88,9 +88,9 @@ version = "2.4.0"
 
 [[Cairo]]
 deps = ["BinaryProvider", "Colors", "Graphics", "Libdl"]
-git-tree-sha1 = "a922fa72801a7dd49a4164441f247af758bbc71e"
+git-tree-sha1 = "394dc757ccfd02e66056ca5b4fc551874d43ffb8"
 uuid = "159f3aea-2a34-519c-b102-8c37f9878175"
-version = "0.7.0"
+version = "0.8.0"
 
 [[CodecZlib]]
 deps = ["BinaryProvider", "Libdl", "TranscodingStreams"]
