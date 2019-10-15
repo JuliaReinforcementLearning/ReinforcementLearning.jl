@@ -4,6 +4,11 @@ img {
   margin-right: auto;
 }
 
+a code {
+  color: #2980b9;
+  background-color: #badaf038
+}
+
 code {
     padding: 2px 4px;
     font-size: 90%;
