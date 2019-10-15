@@ -12,3 +12,18 @@ A specially kind of environment is [`WrappedEnv`](@ref).
 Observation
 WrappedEnv
 ```
+
+## Preprocessors
+
+Following are some built-in preprocessors. Notice that preprocessors can be chained (like `Chain(p1, p2, ps...)`) to get a composed preprocessor.
+
+```@docs
+AbstractPreprocessor
+FourierPreprocessor
+PolynomialPreprocessor
+TilingPreprocessor
+ImageCrop
+ImageResizeBilinear 
+ImageResizeNearestNeighbour
+ImagePreprocessor
+```
