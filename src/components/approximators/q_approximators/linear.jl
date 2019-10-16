@@ -2,6 +2,19 @@ export LinearVApproximator, LinearQApproximator
 
 using LinearAlgebra: dot
 
+"""
+    LinearQApproximator(weights::Vector{Float64}, feature_func::F, actions::Vector{Int}) -> LinearQApproximator{F}
+
+Use weighted sum to represent the estimation given a state and an action.
+
+# Fields
+
+- `weights::Vector{Float64}`: the weight of each feature.
+- `feature_func::Function`: decide how to generate a feature vector of `length(weights)` given a state and an action as parameters.
+- `actions::Vector{Int}`: all possible actions.
+
+See also [`LinearVApproximator`](@ref).
+"""
 Base.@kwdef struct LinearQApproximator{F} <: AbstractQApproximator
     weights::Vector{Float64}
     feature_func::F

@@ -7,7 +7,32 @@ import Flux:params
 import Zygote:gradient
 import .Utils:to_device, to_host
 
-"TODO: Add static size check for legal input data type."
+# TODO: Add static size check for legal input data type.
+
+"""
+    NeuralNetworkQ(;kwargs...) -> NeuralNetworkQ{D, M, O, P}
+
+Use neural networks to generate estimations of state-action values.
+
+# Keywords
+
+- `model::M`: describes the network structure.
+- `optimizer::O`: defines how to update parameters given grads.
+- `parameters::P=params(model)`: the parameters of `model`.
+- `device::Symbol=:cpu`: the param `D` of `NeuralNetworkQ`, specify where to run the model. Supported keywords are:
+    - `:cpu`
+    - `:gpu`, if the specified device is `:gpu`, then we will automatically change the device to one of the following device types according to the `backend(model)`:
+        - `:Knet_gpu`, means the model is `Knet` that runs on gpu.
+        - `:Zygote_gpu`, means the model is `Flux` with `Zygote` that runs on gpu.
+
+# Fields
+
+- `model::M`
+- `optimizer::O`
+- `params::P`
+
+
+"""
 struct NeuralNetworkQ{D, M, O, P} <: AbstractQApproximator
     model::M
     optimizer::O
