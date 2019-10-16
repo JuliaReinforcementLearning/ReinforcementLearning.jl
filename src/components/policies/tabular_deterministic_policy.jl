@@ -1,5 +1,11 @@
 export TabularDeterministicPolicy
 
+"""
+    TabularDeterministicPolicy(table::Vector{Int}, nactions::Int) -> TabularDeterministicPolicy
+
+Always select the specific action according to the state defined in `table`.
+`nactions` is used to define the number of possible actions.
+"""
 Base.@kwdef struct TabularDeterministicPolicy <: AbstractPolicy
     table::Vector{Int}
     nactions::Int

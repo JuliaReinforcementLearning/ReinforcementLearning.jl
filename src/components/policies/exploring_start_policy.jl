@@ -1,5 +1,10 @@
 export ExploringStartPolicy
 
+"""
+    ExploringStartPolicy(π::P, actions::A) -> ExploringStartPolicy{P,A}
+
+Generate a random action at the beginning of an episode. For other steps, use `π` to generate the action.
+"""
 Base.@kwdef mutable struct ExploringStartPolicy{P,A} <: AbstractPolicy
     π::P
     actions::A

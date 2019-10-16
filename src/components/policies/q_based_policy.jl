@@ -2,6 +2,11 @@ export QBasedPolicy, get_prob
 
 using Flux: softmax
 
+"""
+    QBasedPolicy(learner::Q, selector::S) -> QBasedPolicy{Q, S}
+
+Use a Q-`learner` to generate the estimations of actions and use `selector` to get the action.
+"""
 Base.@kwdef struct QBasedPolicy{
     Q<:AbstractLearner,
     S<:AbstractActionSelector,

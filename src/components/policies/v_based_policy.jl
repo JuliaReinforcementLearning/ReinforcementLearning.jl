@@ -1,5 +1,10 @@
 export VBasedPolicy
 
+"""
+    VBasedPolicy(learner::V, f::F) -> VBasedPolicy{V,F}
+
+Use a function `f` to generate action and update the V-`learner` in the meantime.
+"""
 Base.@kwdef struct VBasedPolicy{V,F} <: AbstractPolicy
     learner::V
     f::F

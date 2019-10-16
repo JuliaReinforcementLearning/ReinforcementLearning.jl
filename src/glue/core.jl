@@ -4,6 +4,11 @@ using ReinforcementLearningEnvironments: reset!
 
 export run
 
+"""
+    run(agent::AbstractAgent, env::AbstractEnv, stop_condition; hook = EmptyHook())
+
+See also [Stop Conditions](@ref), [Hooks](@ref)
+"""
 function run(agent::AbstractAgent, env::AbstractEnv, stop_condition; hook = EmptyHook())
 
     reset!(env)
