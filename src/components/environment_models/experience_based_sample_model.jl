@@ -3,8 +3,9 @@ export ExperienceBasedSampleModel, sample, update!
 import StatsBase: sample
 
 """
-      ExperienceBasedSampleModel <: AbstractSampleBasedModel
-Generate a turn sample based on previous experiences.
+    ExperienceBasedSampleModel() -> ExperienceBasedSampleModel
+
+Generate a transition based on previous experiences.
 """
 mutable struct ExperienceBasedSampleModel <: AbstractSampleBasedModel
     experiences::Dict{

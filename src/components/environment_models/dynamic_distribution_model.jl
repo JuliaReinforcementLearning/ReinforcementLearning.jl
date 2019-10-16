@@ -3,7 +3,9 @@ export DynamicDistributionModel, get_states, get_actions
 import ReinforcementLearningEnvironments: observation_space, action_space
 
 """
-Using a general function `f` to store the transformations.
+    DynamicDistributionModel(f::Tf, ns::Int, na::Int) -> DynamicDistributionModel{Tf}
+
+Use a general function `f` to store the transformations. `ns` and `na` are the number of states and actions.
 """
 struct DynamicDistributionModel{Tf<:Function} <: AbstractDistributionBasedModel
     f::Tf

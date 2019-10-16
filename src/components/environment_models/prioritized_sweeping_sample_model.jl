@@ -5,8 +5,8 @@ using DataStructures
 import StatsBase: sample
 
 """
-    PrioritizedSweepingSampleModel <: AbstractSampleBasedModel
     PrioritizedSweepingSampleModel(θ::Float64=1e-4)
+
 See more details at Section (8.4) on Page 168 of the book *Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.*
 """
 mutable struct PrioritizedSweepingSampleModel <: AbstractSampleBasedModel

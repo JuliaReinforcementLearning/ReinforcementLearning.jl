@@ -2,6 +2,9 @@ export TimeBasedSampleModel, update!, sample
 
 import StatsBase: sample
 
+"""
+    TimeBasedSampleModel(nactions::Int, κ::Float64 = 1e-4)
+"""
 mutable struct TimeBasedSampleModel <: AbstractSampleBasedModel
     experiences::Dict{
         Any,
