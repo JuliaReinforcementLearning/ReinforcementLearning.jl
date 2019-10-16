@@ -1,5 +1,5 @@
 # Utils
 
 ```@autodocs
-Module = [ReinforcementLearning.Utils]
+Modules = [ReinforcementLearning.Utils]
 ```
