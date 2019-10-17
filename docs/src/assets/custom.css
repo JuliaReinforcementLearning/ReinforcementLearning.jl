@@ -16,3 +16,8 @@ code {
     background-color: #f9f2f4;
     border-radius: 4px;
 }
+
+blockquote {
+    padding: 0px 10px;
+    border-left: 5px solid #eee;
+}

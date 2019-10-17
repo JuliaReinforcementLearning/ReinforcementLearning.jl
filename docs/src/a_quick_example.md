@@ -1,6 +1,6 @@
 # A Quick Example
 
-Here's a quick example to show you how to train an agent with a [`BasicDQNLearner`](@ref) to play the [`CartPoleEnv`](@ref).
+Welcome to the world of reinforcement learning in Julia! Here's a quick example to show you how to train an agent with a [`BasicDQNLearner`](@ref) to play the [`CartPoleEnv`](@ref).
 
 !!! note
     Notice that a lot of dependent packages are under rapid development. To make sure that you can reproduce the result in this example, you are suggested to:
@@ -97,4 +97,19 @@ savefig("a_quick_example_cartpole_cpu_basic_dqn.png"); nothing # hide
 
 ![](a_quick_example_cartpole_cpu_basic_dqn.png)
 
-Sounds interesting? Welcome to the world of reinforcement learning in Julia! You can read the [Overview](@ref) section for more details!
+
+**That's fantastic!**
+
+- *"But I'm new to Julia and RL. Can I learn RL by using this package?"*
+
+    Yes! One of this package's main goals is to be educational. [Reinforcement Learning: An Introduction](http://incompleteideas.net/book/the-book-2nd.html) is a good introductory book. And we reproduce almost all the examples mentioned in that book by using this package [here](https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl).
+
+- *"What if I have a solid background in RL but new to Julia?"*
+
+    > Programming isn't hard. Programming **well** is **very** hard!  - [CS 3110](https://www.cs.cornell.edu/courses/cs3110)
+
+    Fortunately, Julia provides some amazing features together with many awesome packages to make things much easier. We provide a [Tips for Developers](@ref) section to help you grasp Julia in depth.
+
+- *"I'm experienced in both Julia and RL. But I find it hard to use this package..."*
+
+    Although we tried our best to make concepts and codes as simple as possible, it is still possible that they are not very intuitive enough. So do not hesitate to **JOIN US** (create an issue or a PR). We need **YOU** to improve all this stuff together!
