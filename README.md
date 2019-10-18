@@ -1,8 +1,14 @@
-![logo](./docs/src/assets/logo.png)
+<div align="center">
+  <p>
+  <img src="https://raw.githubusercontent.com/JuliaReinforcementLearning/ReinforcementLearning.jl/master/docs/src/assets/logo.png">
+  </p>
 
-[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaReinforcementLearning.github.io/ReinforcementLearning.jl/latest)
-[![Build Status](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearning.jl.svg?branch=master)](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearning.jl)
-[![codecov](https://codecov.io/gh/JuliaReinforcementLearning/ReinforcementLearning.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaReinforcementLearning/ReinforcementLearning.jl)
+  <p>
+  <a href="https://JuliaReinforcementLearning.github.io/ReinforcementLearning.jl/latest"><img src="https://img.shields.io/badge/docs-latest-blue.svg"></a>
+  <a href="https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearning.jl"><img src="https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearning.jl.svg?branch=master"></a>
+  <a href="https://codecov.io/gh/JuliaReinforcementLearning/ReinforcementLearning.jl"><img src="https://codecov.io/gh/JuliaReinforcementLearning/ReinforcementLearning.jl/branch/master/graph/badge.svg"></a>
+  </p>
+</div>
 
 **ReinforcementLearning.jl**, as the name says, is a package for reinforcement learning research in Julia.
 
