@@ -1,4 +1,4 @@
-![logo](.docs/src/assets/logo.png)
+![logo](./docs/src/assets/logo.png)
 
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaReinforcementLearning.github.io/ReinforcementLearning.jl/latest)
 [![Build Status](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearning.jl.svg?branch=master)](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearning.jl)
