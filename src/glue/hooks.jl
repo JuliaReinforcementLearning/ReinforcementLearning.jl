@@ -28,6 +28,9 @@ const POST_EPISODE_STAGE = PostEpisodeStage()
 const PRE_ACT_STAGE = PreActStage()
 const POST_ACT_STAGE = PostActStage()
 
+"""
+A hook is called at different stage duiring a [`run`](@ref). One can inject customized runtime logic in it.
+"""
 abstract type AbstractHook end
 
 (hook::AbstractHook)(::T, agent, env, obs) where {T<:AbstractStage} = nothing
@@ -39,6 +42,11 @@ abstract type AbstractHook end
 # ComposedHook
 #####
 
+"""
+    ComposedHook(hooks...)
+
+Compose different hooks into a single hook.
+"""
 struct ComposedHook{T<:Tuple} <: AbstractHook
     hooks::T
     ComposedHook(hooks...) = new{typeof(hooks)}(hooks)
@@ -56,6 +64,9 @@ Base.getindex(hook::ComposedHook, inds...) = getindex(hook.hooks, inds...)
 # EmptyHook
 #####
 
+"""
+Do nothing
+"""
 struct EmptyHook <: AbstractHook end
 
 const EMPTY_HOOK = EmptyHook()
@@ -64,6 +75,11 @@ const EMPTY_HOOK = EmptyHook()
 # StepsPerEpisode
 #####
 
+"""
+    StepsPerEpisode(; steps = Int[], count = 0, tag = "TRAINING")
+
+Store steps of each episode in the field of `steps`.
+"""
 mutable struct StepsPerEpisode <: AbstractHook
     steps::Vector{Int}
     count::Int
@@ -88,6 +104,11 @@ end
 # RewardsPerEpisode
 #####
 
+"""
+    RewardsPerEpisode(; rewards = Vector{Vector{Float64}}(), tag = "TRAINING")
+
+Store each reward of each step in every episode in the field of `rewards`.
+"""
 mutable struct RewardsPerEpisode <: AbstractHook
     rewards::Vector{Vector{Float64}}
     tag::String
@@ -114,6 +135,11 @@ end
 # TotalRewardPerEpisode
 #####
 
+"""
+    TotalRewardPerEpisode(; rewards = Float64[], reward = 0.0, tag = "TRAINING")
+
+Store the total rewards of each episode in the field of `rewards`.
+"""
 mutable struct TotalRewardPerEpisode <: AbstractHook
     rewards::Vector{Float64}
     reward::Float64
@@ -139,6 +165,11 @@ end
 # CumulativeReward
 #####
 
+"""
+    CumulativeReward(rewards::Vector{Float64} = [0.0], tag::String = "TRAINING")
+
+Store cumulative rewards since the beginning to the field of `rewards`.
+"""
 Base.@kwdef struct CumulativeReward <: AbstractHook
     rewards::Vector{Float64} = [0.0]
     tag::String = "TRAINING"
@@ -154,6 +185,14 @@ end
 # TimePerStep
 #####
 
+"""
+    TimePerStep(;times::Vector{Float64}=[], t::UInt64=time_ns())
+
+Store the time cost of each step in the `times` field.
+
+!!! warning
+    It seems it only counts the time cost during update step?
+"""
 Base.@kwdef mutable struct TimePerStep <: AbstractHook
     times::Vector{Float64}=[]
     t::UInt64=time_ns()

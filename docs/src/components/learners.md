@@ -4,7 +4,7 @@
 AbstractLearner
 ```
 
-### Traditional Learners
+## Traditional Learners
 
 ```@docs
 TDLearner

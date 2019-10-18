@@ -105,10 +105,10 @@ uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
 version = "0.6.0"
 
 [[ColorSchemes]]
-deps = ["Colors", "Random", "Test"]
-git-tree-sha1 = "cec817e8be9e896266fee4976447c5ced7dc7255"
+deps = ["ColorTypes", "Colors", "FixedPointNumbers", "Random", "Test"]
+git-tree-sha1 = "f876ee572cea8d066b3dd5b903efacdea4072f6b"
 uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-version = "3.4.0"
+version = "3.5.0"
 
 [[ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -404,9 +404,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[Luxor]]
 deps = ["Cairo", "Colors", "Dates", "FileIO", "ImageMagick", "Juno", "QuartzImageIO", "Random"]
-git-tree-sha1 = "d064b07cf460a0d84350ef394be32990f001092a"
+git-tree-sha1 = "f46158af3a808740fb898f44d18728b8905c805d"
 uuid = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
-version = "1.6.0"
+version = "1.7.0"
 
 [[MacroTools]]
 deps = ["CSTParser", "Compat", "DataStructures", "Test", "Tokenize"]
@@ -665,9 +665,9 @@ version = "0.7.2"
 
 [[StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "db23bbf50064c582b6f2b9b043c8e7e98ea8c0c6"
+git-tree-sha1 = "1085ffbf5fd48fdba64ef8e902ca429c4e1212d3"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "0.11.0"
+version = "0.11.1"
 
 [[Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]

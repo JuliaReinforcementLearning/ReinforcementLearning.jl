@@ -1,6 +1,6 @@
 # A Quick Example
 
-Welcome to the world of reinforcement learning in Julia! Here's a quick example to show you how to train an agent with a [`BasicDQNLearner`](@ref) to play the [`CartPoleEnv`](@ref).
+Welcome to the world of reinforcement learning in Julia! Here's a quick example to show you how to train an agent with a [`BasicDQNLearner`](@ref) to play the `CartPoleEnv`.
 
 !!! note
     Notice that a lot of dependent packages are under rapid development. To make sure that you can reproduce the result in this example, you are suggested to:
@@ -106,7 +106,7 @@ savefig("a_quick_example_cartpole_cpu_basic_dqn.png"); nothing # hide
 
 - *"What if I have a solid background in RL but new to Julia?"*
 
-    > Programming isn't hard. Programming **well** is **very** hard!  - [CS 3110](https://www.cs.cornell.edu/courses/cs3110)
+    > Programming isn't hard. Programming **well** is **very** hard!  - [CS 3110](https://www.cs.cornell.edu/courses/cs3110/)
 
     Fortunately, Julia provides some amazing features together with many awesome packages to make things much easier. We provide a [Tips for Developers](@ref) section to help you grasp Julia in depth.
 

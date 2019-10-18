@@ -8,7 +8,7 @@ is_concrete_type_of(t) = x ->begin
 end
 
 makedocs(
-    modules = [ReinforcementLearning, ReinforcementLearningEnvironments],
+    modules = [ReinforcementLearning],
     format = Documenter.HTML(
         prettyurls = true,
         analytics = "UA-149861753-1",
@@ -36,7 +36,6 @@ makedocs(
                 "Environment Models" => "components/environment_models.md"
             ],
             "Core" => "core.md",
-            "Extensions" => "extensions.md",
             "Utils" => "utils.md"
         ],
         "Tips for Developers" => "tips_for_developers.md"],

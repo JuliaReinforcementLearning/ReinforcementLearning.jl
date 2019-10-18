@@ -2,6 +2,15 @@ using Zygote
 
 export PrioritizedDQNLearner
 
+"""
+    PrioritizedDQNLearner(;kwargs...)
+
+See paper: [Prioritized Experience Replay](https://arxiv.org/abs/1511.05952)
+
+# Keywords
+
+TODO: need review
+"""
 Base.@kwdef mutable struct PrioritizedDQNLearner{Tq<:AbstractQApproximator,Tf} <: AbstractLearner
     approximator::Tq
     target_approximator::Tq

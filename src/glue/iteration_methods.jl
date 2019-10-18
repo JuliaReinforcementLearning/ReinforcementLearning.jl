@@ -2,6 +2,7 @@ export policy_evaluation!, policy_improvement!, policy_iteration!, value_iterati
 
 """
     policy_evaluation!(V::AbstractVApproximator, π, model::AbstractDistributionBasedModel; γ::Float64=0.9, θ::Float64=1e-4)
+
 See more details at Section (4.1) on Page 75 of the book *Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.*
 """
 function policy_evaluation!(
@@ -31,6 +32,8 @@ function policy_evaluation!(
 end
 
 """
+    policy_improvement!(;V::AbstractVApproximator, π::AbstractPolicy, model::AbstractDistributionBasedModel, γ::Float64 = 0.9)
+
 See more details at Section (4.2) on Page 76 of the book *Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.*
 """
 function policy_improvement!(
@@ -59,6 +62,7 @@ end
 
 """
     policy_iteration!(V::AbstractVApproximator, π, model::AbstractDistributionBasedModel; γ::Float64=0.9, θ::Float64=1e-4, max_iter=typemax(Int))
+
 See more details at Section (4.3) on Page 80 of the book *Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.*
 """
 function policy_iteration!(
@@ -79,6 +83,7 @@ end
 
 """
     value_iteration!(V::AbstractVApproximator, model::AbstractDistributionBasedModel; γ::Float64=0.9, θ::Float64=1e-4, max_iter=typemax(Int))
+
 See more details at Section (4.4) on Page 83 of the book *Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.*
 """
 function value_iteration!(

@@ -4,7 +4,13 @@ using Flux
 using StatsBase
 
 """
-https://www.nature.com/articles/nature14236
+    DQNLearner(;kwargs...)
+
+See paper: [Human-level control through deep reinforcement learning](https://www.nature.com/articles/nature14236)
+
+# Keywords
+
+TODO: need review
 """
 Base.@kwdef mutable struct DQNLearner{Tq<:AbstractQApproximator,Tf} <: AbstractLearner
     approximator::Tq

@@ -30,6 +30,8 @@ Key capabilities/features include:
     - [Flux.jl](https://github.com/FluxML/Flux.jl)
     - [Knet.jl](https://github.com/denizyuret/Knet.jl)
 
+- Built-in [TensorBoard](https://github.com/PhilipVinc/TensorBoardLogger.jl) support.
+
 
 ## Installation
 
