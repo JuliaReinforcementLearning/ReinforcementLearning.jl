@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Utils · ReinforcementLearning.jl</title><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-149861753-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="canonical" href="https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/utils/index.html"/><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/><link href="../assets/favicon.ico" rel="icon" type="image/x-icon"/><link href="../assets/custom.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../"><img class="logo" src="../assets/logo.png" alt="ReinforcementLearning.jl logo"/></a><h1>ReinforcementLearning.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Home</a></li><li><a class="toctext" href="../a_quick_example/">A Quick Example</a></li><li><a class="toctext" href="../overview/">Overview</a></li><li><span class="toctext">Manual</span><ul><li><span class="toctext">Components</span><ul><li><a class="toctext" href="../components/agents/">Agents</a></li><li><a class="toctext" href="../components/environments/">Environments</a></li><li><a class="toctext" href="../components/buffers/">Buffers</a></li><li><a class="toctext" href="../components/policies/">Policies</a></li><li><a class="toctext" href="../components/learners/">Learners</a></li><li><a class="toctext" href="../components/approximators/">Approximators</a></li><li><a class="toctext" href="../components/action_selectors/">Action Selectors</a></li><li><a class="toctext" href="../components/environment_models/">Environment Models</a></li></ul></li><li><a class="toctext" href="../core/">Core</a></li><li class="current"><a class="toctext" href>Utils</a><ul class="internal"></ul></li></ul></li><li><a class="toctext" href="../tips_for_developers/">Tips for Developers</a></li></ul></nav><article id="docs"><header><nav><ul><li>Manual</li><li><a href>Utils</a></li></ul><a class="edit-page" href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/src/utils.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Utils</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Utils-1" href="#Utils-1">Utils</a></h1><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="ReinforcementLearning.Utils.SumTree" href="#ReinforcementLearning.Utils.SumTree"><code>ReinforcementLearning.Utils.SumTree</code></a> — <span class="docstring-category">Type</span>.</div><div><div><pre><code class="language-julia">SumTree(capacity::Int)</code></pre><p>Efficiently sample and update weights. For more detals, see the post at <a href="https://jaromiru.com/2016/11/07/lets-make-a-dqn-double-learning-and-prioritized-experience-replay/">here</a>. Here we use a vector to represent the binary tree. Suppose we will have <code>capacity</code> leaves at most. Every time we <code>push!</code> new node into the tree, only the recent <code>capacity</code> node and their sum will be updated! [––––––Parent nodes––––––][––––leaves––––] [size: 2^ceil(Int, log2(capacity))-1 ][     size: capacity   ]</p><p><strong>Example</strong></p><pre><code class="language-julia">julia&gt; t = SumTree(8)
+0-element SumTree
+julia&gt; for i in 1:16
+       push!(t, i)
+       end
+julia&gt; t
+8-element SumTree:
+  9.0
+ 10.0
+ 11.0
+ 12.0
+ 13.0
+ 14.0
+ 15.0
+ 16.0
+julia&gt; sample(t)
+(2, 10.0)
+julia&gt; sample(t)
+(1, 9.0)
+julia&gt; inds, ps = sample(t,100000)
+([8, 4, 8, 1, 5, 2, 2, 7, 6, 6  …  1, 1, 7, 1, 6, 1, 5, 7, 2, 7], [16.0, 12.0, 16.0, 9.0, 13.0, 10.0, 10.0, 15.0, 14.0, 14.0  …  9.0, 9.0, 15.0, 9.0, 14.0, 9.0, 13.0, 15.0, 10.0, 15.0])
+julia&gt; countmap(inds)
+Dict{Int64,Int64} with 8 entries:
+  7 =&gt; 14991
+  4 =&gt; 12019
+  2 =&gt; 10003
+  3 =&gt; 11027
+  5 =&gt; 12971
+  8 =&gt; 16052
+  6 =&gt; 13952
+  1 =&gt; 8985
+julia&gt; countmap(ps)
+Dict{Float64,Int64} with 8 entries:
+  9.0  =&gt; 8985
+  13.0 =&gt; 12971
+  10.0 =&gt; 10003
+  14.0 =&gt; 13952
+  16.0 =&gt; 16052
+  11.0 =&gt; 11027
+  15.0 =&gt; 14991
+  12.0 =&gt; 12019</code></pre></div></div><a class="source-link" target="_blank" href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3025a3f833ff7e70c7223ef46d339b49a0acde14/src/Utils/sum_tree.jl#L5-L58">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="ReinforcementLearning.Utils.Tiling" href="#ReinforcementLearning.Utils.Tiling"><code>ReinforcementLearning.Utils.Tiling</code></a> — <span class="docstring-category">Type</span>.</div><div><div><pre><code class="language-julia">Tiling(ranges::NTuple{N, Tr}) where {N, Tr}</code></pre><p>Using a tuple of <code>ranges</code> to simulate a tiling. The length of <code>ranges</code> indicates the dimension of tilling.</p><p><strong>Example</strong></p><pre><code class="language-julia">julia&gt; t = Tiling((1:2:5, 10:5:20))
+Tiling{2,StepRange{Int64,Int64}}((1:2:5, 10:5:20), [1 3; 2 4])
+
+julia&gt; encode(t, (2, 12))  # encode into an Int
+1
+
+julia&gt; encode(t, (2, 18))
+3
+
+julia&gt; t2 = t - (1, 3)  # shift a little to get a new Tiling
+Tiling{2,StepRange{Int64,Int64}}((0:2:4, 7:5:17), [1 3; 2 4])</code></pre></div></div><a class="source-link" target="_blank" href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3025a3f833ff7e70c7223ef46d339b49a0acde14/src/Utils/tiling.jl#L5-L25">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="ReinforcementLearning.Utils.findallmax-Tuple{Any}" href="#ReinforcementLearning.Utils.findallmax-Tuple{Any}"><code>ReinforcementLearning.Utils.findallmax</code></a> — <span class="docstring-category">Method</span>.</div><div><div><pre><code class="language-julia">findallmax(A::AbstractArray)</code></pre><p>Like <code>findmax</code>, but all the indices of the maximum value are returned.</p><div class="admonition warning"><div class="admonition-title">Warning</div><div class="admonition-text"><p>All elements of value <code>NaN</code> in <code>A</code> will be ignored, unless all elements are <code>NaN</code>. In that case, the returned maximum value will be <code>NaN</code> and the returned indices will be <code>collect(1:length(A))</code></p></div></div><p>#Examples</p><pre><code class="language-julia-repl">julia&gt; findallmax([-Inf, -Inf, -Inf])
+(-Inf, [1, 2, 3])
+
+julia&gt; findallmax([Inf, Inf, Inf])
+(Inf, [1, 2, 3])
+
+julia&gt; findallmax([Inf, 0, Inf])
+(Inf, [1, 3])
+
+julia&gt; findallmax([0,1,2,1,2,1,0])
+(2, [3, 5])</code></pre></div></div><a class="source-link" target="_blank" href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3025a3f833ff7e70c7223ef46d339b49a0acde14/src/Utils/base.jl#L25-L48">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="ReinforcementLearning.Utils.huber_loss-Tuple{Any,Any}" href="#ReinforcementLearning.Utils.huber_loss-Tuple{Any,Any}"><code>ReinforcementLearning.Utils.huber_loss</code></a> — <span class="docstring-category">Method</span>.</div><div><div><pre><code class="language-julia">huber_loss(labels, predictions;δ = 1.0)</code></pre><p>See <a href="https://en.m.wikipedia.org/wiki/Huber_loss">huber_loss</a> and the <a href="https://github.com/tensorflow/tensorflow/blob/r1.12/tensorflow/python/ops/losses/losses_impl.py#L394-L469">implementation</a> in TensorFlow.</p><div class="admonition warning"><div class="admonition-title">Warning</div><div class="admonition-text"><p>The return is not reduced!</p></div></div></div></div><a class="source-link" target="_blank" href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3025a3f833ff7e70c7223ef46d339b49a0acde14/src/Utils/base.jl#L9-L17">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Base.:--Tuple{Tiling,Any}" href="#Base.:--Tuple{Tiling,Any}"><code>Base.:-</code></a> — <span class="docstring-category">Method</span>.</div><div><div><pre><code class="language-julia">(-)(t::Tiling, xs)</code></pre><p>Shift <code>t</code> along each dimension by each element in <code>xs</code>.</p></div></div><a class="source-link" target="_blank" href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3025a3f833ff7e70c7223ef46d339b49a0acde14/src/Utils/tiling.jl#L33-L37">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="ReinforcementLearning.Utils.get-Tuple{SumTree,Any}" href="#ReinforcementLearning.Utils.get-Tuple{SumTree,Any}"><code>ReinforcementLearning.Utils.get</code></a> — <span class="docstring-category">Method</span>.</div><div><div><p>!!! this is unsafe, always check the <code>real_ind</code>, or you may get bound error in some extreme cases.</p></div></div><a class="source-link" target="_blank" href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3025a3f833ff7e70c7223ef46d339b49a0acde14/src/Utils/sum_tree.jl#L115">source</a></section><footer><hr/><a class="previous" href="../core/"><span class="direction">Previous</span><span class="title">Core</span></a><a class="next" href="../tips_for_developers/"><span class="direction">Next</span><span class="title">Tips for Developers</span></a></footer></article></body></html>
