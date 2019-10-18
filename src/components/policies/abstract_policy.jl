@@ -1,5 +1,8 @@
 export AbstractPolicy
 
+"""
+A policy is a functional object to generate an action given a state.
+"""
 abstract type AbstractPolicy end
 
 learner(π::AbstractPolicy) = π.learner

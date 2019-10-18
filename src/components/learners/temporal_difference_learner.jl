@@ -51,6 +51,11 @@ mutable struct TDLearner{Tapp<:AbstractApproximator,method,O} <: AbstractLearner
     end
 end
 
+"""
+    DoubleLearner(;L1, L2)
+
+For now, this only supports [`TDLearner`](@ref) for `L1` and `L2`.
+"""
 Base.@kwdef struct DoubleLearner{T<:TDLearner} <: AbstractLearner
     L1::T
     L2::T
@@ -60,6 +65,9 @@ end
 # DifferentialTDLearner
 #####
 
+"""
+    DifferentialTDLearner(;approximator::A, α::Float64, β::Float64, R̄::Float64 = 0.0, n::Int = 0)
+"""
 Base.@kwdef mutable struct DifferentialTDLearner{A<:AbstractApproximator} <: AbstractLearner
     approximator::A
     α::Float64
@@ -336,6 +344,9 @@ end
 #####
 # TDλReturnLearner
 #####
+"""
+    TDλReturnLearner(;approximator::Tapp, γ::Float64 = 1.0, α::Float64, λ::Float64)
+"""
 Base.@kwdef struct TDλReturnLearner{Tapp<:AbstractApproximator} <: AbstractLearner
     approximator::Tapp
     γ::Float64 = 1.0

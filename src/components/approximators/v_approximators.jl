@@ -7,7 +7,12 @@ export LinearVApproximator, TabularVApproximator
 using LinearAlgebra: dot
 
 """
-Using a matrix `features` to represent each state along with a vector of `weights`.
+    LinearVApproximator(weights::Array{Float64, N}) -> LinearVApproximator{N}
+
+Use the weighted sum to represent the estimation of a state.
+The state is expected to have the same length with `weights`.
+
+See also [`LinearQApproximator`](@ref)
 """
 struct LinearVApproximator{N} <: AbstractVApproximator
     weights::Array{Float64,N}
@@ -26,7 +31,10 @@ end
 #####
 
 """
-Using a `table` of type `Vector{Float64}` to record the state values.
+    TabularVApproximator(table) -> TabularVApproximator
+    TabularVApproximator(ns::Int, init::Float64=0.0) -> TabularVApproximator
+
+Use a `table` of type `Vector{Float64}` of length `ns` to record the state values.
 """
 struct TabularVApproximator <: AbstractVApproximator
     table::Vector{Float64}

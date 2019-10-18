@@ -1,5 +1,11 @@
 export AbstractLearner
 
+"""
+A learner is used to define:
+
+- How to generate necessary training data?
+- How to update the inner [Approximators](@ref)?
+"""
 abstract type AbstractLearner end
 
 approximator(x::AbstractLearner) = x.approximator

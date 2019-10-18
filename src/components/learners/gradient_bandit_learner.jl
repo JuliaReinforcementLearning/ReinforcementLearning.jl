@@ -2,6 +2,9 @@ export GradientBanditLearner
 
 using Flux: softmax, onehot
 
+"""
+    GradientBanditLearner(;approximator::A, optimizer::O, baseline::B)
+"""
 Base.@kwdef mutable struct GradientBanditLearner{A,O,B} <: AbstractLearner
     approximator::A
     optimizer::O

@@ -22,7 +22,7 @@
         @test b[1] == (
             state = 1,
             action = 1,
-            reward = 0.3,
+            reward = 0.3f0,
             terminal = true,
             next_state = 2,
             next_action = 2,
@@ -30,7 +30,7 @@
         @test b[end] == (
             state = 2,
             action = 2,
-            reward = 0.6,
+            reward = 0.6f0,
             terminal = false,
             next_state = 3,
             next_action = 3,
@@ -42,7 +42,7 @@
         @test b[1] == (
             state = 2,
             action = 2,
-            reward = 0.6,
+            reward = 0.6f0,
             terminal = false,
             next_state = 3,
             next_action = 3,
@@ -50,7 +50,7 @@
         @test b[end] == (
             state = 3,
             action = 3,
-            reward = 0.9,
+            reward = 0.9f0,
             terminal = true,
             next_state = 4,
             next_action = 4,
@@ -85,7 +85,7 @@
         @test b[1] == (
             state = [1 1; 1 1],
             action = 1,
-            reward = 1.0,
+            reward = 1.0f0,
             terminal = false,
             next_state = [2 2; 2 2],
             next_action = 2,
@@ -93,7 +93,7 @@
         @test b[end] == (
             state = [3 3; 3 3],
             action = 3,
-            reward = 3.0,
+            reward = 3.0f0,
             terminal = false,
             next_state = [4 4; 4 4],
             next_action = 4,
@@ -107,7 +107,7 @@
         @test b[1] == (
             state = [2 2; 2 2],
             action = 2,
-            reward = 2.0,
+            reward = 2.0f0,
             terminal = false,
             next_state = [3 3; 3 3],
             next_action = 3,
@@ -115,7 +115,7 @@
         @test b[end] == (
             state = [4 4; 4 4],
             action = 4,
-            reward = 4.0,
+            reward = 4.0f0,
             terminal = false,
             next_state = [5 5; 5 5],
             next_action = 5,

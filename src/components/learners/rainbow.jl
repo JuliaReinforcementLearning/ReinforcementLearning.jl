@@ -3,6 +3,15 @@ export RainbowLearner, update!
 using Flux, Zygote
 using StatsBase
 
+"""
+    RainbowLearner(;kwargs...)
+
+See paper: [Rainbow: Combining Improvements in Deep Reinforcement Learning](https://arxiv.org/abs/1710.02298)
+
+# Keywords
+
+TODO: need review
+"""
 Base.@kwdef mutable struct RainbowLearner{Tq<:AbstractQApproximator,Tf,Ts} <: AbstractLearner
     approximator::Tq
     target_approximator::Tq

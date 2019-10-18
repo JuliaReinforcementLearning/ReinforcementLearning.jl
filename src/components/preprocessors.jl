@@ -16,6 +16,15 @@ using .Utils: Tiling, encode
 using LinearAlgebra: norm
 using Flux: Chain
 
+"""
+Preprocess an [`Observation`](@ref) and return a new observation.
+By default, the preprocessor is only applied to the state field
+of the [`Observation`](@ref) and other fields remain unchanged.
+
+For customized preprocessors that inherit `AbstractPreprocessor`,
+you can change this behavior by rewriting
+`(p::AbstractPreprocessor)(obs::Observation)` method.
+"""
 abstract type AbstractPreprocessor end
 
 (p::AbstractPreprocessor)(obs::Observation) =
@@ -26,56 +35,49 @@ abstract type AbstractPreprocessor end
         merge(obs.meta, (; Symbol(:state_before_, typeof(p).name) => obs.state)),
     )
 
-#####
-# Preprocessor
-#####
+"""
+    FourierPreprocessor(order::Int)
 
-struct Preprocessor{T<:Function} <: AbstractPreprocessor
-    f::T
-end
-
-(p::Preprocessor)(s) = p.f(s)
-
-#####
-# FourierPreprocessor
-#####
-
+Transform a scalar to a vector of `order+1` Fourier bases.
+"""
 struct FourierPreprocessor <: AbstractPreprocessor
     order::Int
 end
 
 (p::FourierPreprocessor)(s::Number) = [cos(i * π * s) for i = 0:p.order]
 
-#####
-# PolynomialPreprocessor
-#####
+"""
+    PolynomialPreprocessor(order::Int)
 
+Transform a scalar to vector of maximum `order` polynomial.
+"""
 struct PolynomialPreprocessor <: AbstractPreprocessor
     order::Int
 end
 
 (p::PolynomialPreprocessor)(s::Number) = [s^i for i = 0:p.order]
 
-#####
-# TilingPreprocessor
-#####
+"""
+    TilingPreprocessor(tilings::Vector{<:Tiling})
 
+Use each `tilings` to encode the state and return a vector.
+"""
 struct TilingPreprocessor{Tt<:Tiling} <: AbstractPreprocessor
     tilings::Vector{Tt}
 end
 
 (p::TilingPreprocessor)(s::Union{<:Number,<:Array}) = [encode(t, s) for t in p.tilings]
 
-#####
-# ImageCrop
-#####
-
 """
     struct ImageCrop
         xidx::UnitRange{Int64}
         yidx::UnitRange{Int64}
- Select indices `xidx` and `yidx` from a 2 or 3 dimensional array.
- Example:
+    end
+
+Select indices `xidx` and `yidx` from a 2 or 3 dimensional array.
+
+# Example:
+
 ```
 c = ImageCrop(2:5, 3:2:9)
 c([10i + j for i in 1:10, j in 1:10])
@@ -89,15 +91,15 @@ end
 (c::ImageCrop)(x::Array{T,2}) where {T} = x[c.xidx, c.yidx]
 (c::ImageCrop)(x::Array{T,3}) where {T} = x[:, c.xidx, c.yidx]
 
-#####
-# ImageResizeBilinear
-#####
-
 """
     struct ImageResizeBilinear
         outdim::Tuple{Int64, Int64}
- Resize any image to `outdim = (width, height)` with bilinear interpolation.
- Example:
+    end
+
+Resize any image to `outdim = (width, height)` with bilinear interpolation.
+
+# Example:
+
 ```
 r = ImageResizeBilinear((50, 50))
 r(rand(200, 200))
@@ -134,10 +136,6 @@ for N = 2:3
     end
 end
 
-#####
-# ImageResizeNearestNeighbour
-#####
-
 """
     struct ImageResizeNearestNeighbour
         outdim::Tuple{Int64, Int64}
@@ -146,7 +144,8 @@ end
 Resize any image to `outdim = (width, height)` by nearest-neighbour
 interpolation (i.e. subsampling).
 
-Example:
+# Example:
+
 ```
 r = ImageResizeNearestNeighbour((50, 50))
 r(rand(200, 200))
@@ -163,10 +162,6 @@ function (r::ImageResizeNearestNeighbour)(x)
     length(indim) > 2 ? x[:, xidx, yidx] : x[xidx, yidx]
 end
 
-#####
-# ImagePreprocessor
-#####
-
 """
     struct ImagePreprocessor
         size
@@ -174,7 +169,9 @@ end
     end
 
 Use `chain` to preprocess a grayscale or color image of `size = (width, height)`.
-Example:
+
+# Example:
+
 ```
 p = ImagePreprocessor((100, 100), 
                       [ImageResizeNearestNeighbour((50, 80)),
@@ -191,10 +188,6 @@ end
 
 (p::ImagePreprocessor)(s) = foldl((x, p) -> p(x), p.chain, init = reshape(s, p.size))
 
-#####
-# SparseRandomProjection
-#####
-
 struct SparseRandomProjection <: AbstractPreprocessor
     w::Array{Float64,2}
     b::Array{Float64,1}
@@ -202,18 +195,10 @@ end
 
 (p::SparseRandomProjection)(s) = clamp.(p.w * s + p.b, 0, Inf)
 
-#####
-# RandomProjection
-#####
-
 struct RandomProjection <: AbstractPreprocessor
     w::Array{Float64,2}
 end
 (p::RandomProjection)(s) = p.w * s
-
-#####
-# RadialBasisFunctions
-#####
 
 struct RadialBasisFunctions <: AbstractPreprocessor
     means::Array{Array{Float64,1},1}

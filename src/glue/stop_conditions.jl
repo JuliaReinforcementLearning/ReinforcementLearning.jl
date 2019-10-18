@@ -6,6 +6,11 @@ using ProgressMeter
 # ComposedStopCondition
 #####
 
+"""
+    ComposedStopCondition(stop_conditions; reducer = any)
+
+The result of `stop_conditions` is reduced by `reducer`.
+"""
 struct ComposedStopCondition{T<:Function}
     stop_conditions::Vector{Any}
     reducer::T
@@ -21,6 +26,11 @@ end
 #####
 # StopAfterStep
 #####
+"""
+    StopAfterStep(step; cur = 1, is_show_progress = true, tag = "TRAINING")
+
+Return `true` after being called for `step`.
+"""
 mutable struct StopAfterStep{Tl}
     step::Int
     cur::Int
@@ -54,6 +64,11 @@ end
 # StopAfterEpisode
 #####
 
+"""
+    StopAfterEpisode(episode; cur = 0, is_show_progress = true, tag = "TRAINING")
+
+Return `true` after being called `episode`. If `is_show_progress` is `true`, the `ProgressMeter` will be used to show progress.
+"""
 mutable struct StopAfterEpisode{Tl}
     episode::Int
     cur::Int
@@ -86,6 +101,11 @@ end
 # StopWhenDone
 #####
 
+"""
+    StopWhenDone()
+
+Return `true` if the `terminal` field of an observation is `true`.
+"""
 struct StopWhenDone end
 
 (s::StopWhenDone)(agent, env, obs) = get_terminal(obs)

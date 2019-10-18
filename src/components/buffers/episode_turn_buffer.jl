@@ -4,9 +4,12 @@ export EpisodeTurnBuffer, episode_RTSA_buffer
     EpisodeTurnBuffer{names, types, Tbs} <: AbstractTurnBuffer{names, types}
     EpisodeTurnBuffer{names, types}() where {names, types}
 
-Using a Vector to store each element specified by `names` and `types`.
+Similar to [`CircularTurnBuffer`](@ref), but instead of using [`CircularArrayBuffer`], it uses a vector to store each element specified by `names` and `types`. And when it reaches the end of an episode, the buffer is emptied first when a new observation is pushed.
 
-See also: [`EpisodeRTSABuffer`](@ref), [`EpisodeRTSASBuffer`](@ref), [`EpisodeRTSASABuffer`](@ref)
+!!! note
+    Notice that, before emptifying the `EpisodeTurnBuffer`, the last element of each field is exracted and then pushed at the head of the buffer. Without this step, the first transition of the new episode will be lost!
+
+See also: [`episode_RTSA_buffer`](@ref)
 """
 struct EpisodeTurnBuffer{names,types,Tbs} <: AbstractTurnBuffer{names,types}
     buffers::Tbs
@@ -22,11 +25,23 @@ function Base.similar(b::EpisodeTurnBuffer{names,types}) where {names,types}
     EpisodeTurnBuffer(Pair.(names, types)...)
 end
 
+"""
+    episode_RTSA_buffer(;kwargs...) -> EpisodeTurnBuffer
+
+Initialize an `EpisodeTurnBuffer` with fields of **R**eward, **T**erminal, **S**tate, **A**ction.
+
+# Keywords
+
+- `state_eltype::Type=Int`: the type of state.
+- `action_eltype::Type=Int`: the type of action.
+- `reward_eltype::Type=Float32`: the type of reward.
+- `terminal_eltype::Type=Bool`: the type of terminal.
+"""
 function episode_RTSA_buffer(
     ;
     state_eltype = Int,
     action_eltype = Int,
-    reward_eltype = Float64,
+    reward_eltype = Float32,
     terminal_eltype = Bool,
 )
     EpisodeTurnBuffer(

@@ -4,6 +4,13 @@ using Flux: softmax
 using LinearAlgebra: dot
 using StatsBase
 
+"""
+    ReinforcePolicy(approximator, α, γ)
+
+This is the very basic reinforce algorithm.
+
+TODO: implement some other variants.
+"""
 Base.@kwdef struct ReinforcePolicy{A<:AbstractQApproximator} <: AbstractPolicy
     approximator::A
     α::Float64

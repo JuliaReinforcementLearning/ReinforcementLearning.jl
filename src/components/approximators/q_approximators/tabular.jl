@@ -3,21 +3,16 @@ export TabularQApproximator, update!
 using StatsBase: sample
 
 """
-    struct TabularQApproximator <: AbstractQApproximator{Int, Int}
-        table::Array{Float64, 2}
-    end
+    TabularQApproximator(table::Array{Float64, 2})
+    TabularQApproximator(ns::Int, na::Int=1, init::Float64=0.)
 
-Using a `table` of type `Array{Float64,2}` to record the action value of each state.
+Use a `table` of type `Array{Float64,2}` to store the action value of each state.
+`ns` is the number of states. `na` is the number of actions. `init` is the initial value of `table`.
 """
 struct TabularQApproximator <: AbstractQApproximator
     table::Array{Float64,2}
 end
 
-"""
-    TabularQApproximator(ns::Int, na::Int=1, init::Float64=0.)
-
-Initial a table of size `(ns, na)` filled with value of `init`.
-"""
 TabularQApproximator(; n_state::Int, n_action::Int = 1, init::Float64 = 0.0) =
     TabularQApproximator(fill(init, n_state, n_action))
 

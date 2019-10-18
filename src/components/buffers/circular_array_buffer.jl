@@ -107,6 +107,7 @@ for func in [:view, :getindex]
     end
 end
 
+# TODO: use @generated instead
 Base.setindex!(cb::CircularArrayBuffer{E,T,1}, data, i) where {E,T} =
     cb.buffer[_buffer_index(cb, i)] = data
 Base.setindex!(cb::CircularArrayBuffer{E,T,2}, data, i) where {E,T} =
@@ -140,7 +141,7 @@ Make sure that `length(data) == cb.stepsize`
     cb::CircularArrayBuffer{E,T,N},
     data::AbstractArray{T},
 ) where {E,T,N}
-    # length(data) == cb.stepsize || throw(DimensionMismatch("the length of buffer's stepsize doesn't match the length of data, $(cb.stepsize) != $(length(data))"))
+    length(data) == cb.stepsize || throw(DimensionMismatch("the length of buffer's stepsize doesn't match the length of data, $(cb.stepsize) != $(length(data))"))
     # if full, increment and overwrite, otherwise push
     if cb.length == capacity(cb)
         cb.first = (cb.first == capacity(cb) ? 1 : cb.first + 1)
@@ -152,7 +153,7 @@ Make sure that `length(data) == cb.stepsize`
     cb
 end
 
-@inline function Base.push!(cb::CircularArrayBuffer{E,T,1}, data::T) where {E,T}
+@inline function Base.push!(cb::CircularArrayBuffer, data::Number)
     if cb.length == capacity(cb)
         cb.first = (cb.first == capacity(cb) ? 1 : cb.first + 1)
     else

@@ -3,13 +3,12 @@ export AbstractTurnBuffer, buffers, RTSA, isfull, consecutive_view
 """
     AbstractTurnBuffer{names, types} <: AbstractArray{NamedTuple{names, types}, 1}
 
-`AbstractTurnBuffer` is supertype of a collection of buffers to store the interactions between agents and environments.
-It is a subtype of `AbstractArray{NamedTuple{names, types}, 1}` where `names` specifies which fields are to store
-and `types` is the coresponding types of the `names`.
+`AbstractTurnBuffer` is supertype of a collection of buffers to store the interactions
+between agents and environments. It is a subtype of `AbstractArray{NamedTuple{names, types}, 1}` where `names` specifies which fields are to store and `types` is the coresponding types of the `names`.
 
 
 | Required Methods| Brief Description |
-|:----------------RTSA----------------|
+|:----------------|:------------------|
 | `Base.push!(b::AbstractTurnBuffer{names, types}, s[, a, r, d, s′, a′])` | Push a turn info into the buffer. According to different `names` and `types` of the buffer `b`, it may accept different number of arguments |
 | `isfull(b)` | Check whether the buffer is full or not |
 | `Base.length(b)` | Return the length of buffer |

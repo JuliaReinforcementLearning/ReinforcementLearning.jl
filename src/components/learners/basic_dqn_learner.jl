@@ -4,7 +4,13 @@ using StatsBase: mean
 using Zygote
 
 """
-https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf
+    BasicDQNLearner(;kwargs...)
+
+See paper: [Playing Atari with Deep Reinforcement Learning](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf)
+
+# Keywords
+
+TODO: need review
 """
 Base.@kwdef mutable struct BasicDQNLearner{Tq<:AbstractQApproximator,Tf} <: AbstractLearner
     approximator::Tq

@@ -22,6 +22,9 @@ const NO_SAMPLING = NoSampling()
 const ORDINARY_IMPORTANCE_SAMPLING = OrdinaryImportanceSampling()
 const WEIGHTED_IMPORTANCE_SAMPLING = WeightedImportanceSampling()
 
+"""
+    MonteCarloLearner(; approximator::A, γ = 1.0, α = 1.0, kind = FIRST_VISIT, sampling = NO_SAMPLING, returns = CachedSampleAvg())
+"""
 struct MonteCarloLearner{T,A,R,S} <: AbstractLearner
     approximator::A
     γ::Float64
