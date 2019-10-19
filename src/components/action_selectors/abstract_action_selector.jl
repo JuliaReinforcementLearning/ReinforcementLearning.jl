@@ -1,15 +1,19 @@
-export AbstractDiscreteActionSelector
+export AbstractActionSelector, AbstractDiscreteActionSelector
 
+"""
+    AbstractActionSelector
+
+Take in an estimation and return an action.
+"""
 abstract type AbstractActionSelector end
 
 """
     AbstractDiscreteActionSelector
 
-A subtype of `AbstractDiscreteActionSelector` is used to generate an action
-given the estimated value of different actions.
+Generate an action given the estimated value of different actions.
 
 | Required Methods| Brief Description |
 |:----------------|:------------------|
-| `selector(values;step, kw...)` | `selector`, an instance of `AbstractDiscreteActionSelector`, must be a callable object which takes in an estimation and returns an action. |
+| `selector(values; kwargs...)` | `selector`, an instance of `AbstractDiscreteActionSelector`, must be a callable object which takes in an estimation of all discrete actions and returns an action. |
 """
 abstract type AbstractDiscreteActionSelector <: AbstractActionSelector end

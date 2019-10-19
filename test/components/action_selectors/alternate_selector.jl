@@ -1,6 +1,6 @@
 @testset "alternate selector" begin
     N = 3
-    s = AlternateSelector(N)
+    s = AlternateSelector(n=N)
     values = zeros(N)
 
     @test s(values; step = 1) == 1

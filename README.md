@@ -21,20 +21,20 @@ Our design principles are:
 Key capabilities/features include:
 
 - Well tested traditional methods:
-    - [`TDLearner`](@ref)
-    - [`DifferentialTDLearner`](@ref)
-    - [`TDλReturnLearner`](@ref)
-    - [`DoubleLearner`](@ref)
-    - [`MonteCarloLearner`](@ref)
-    - [`GradientBanditLearner`](@ref)
-    - [`ReinforcePolicy`](@ref)
+    - [`TDLearner`](https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/components/learners/#ReinforcementLearning.TDLearner)
+    - [`DifferentialTDLearner`](https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/components/learners/#ReinforcementLearning.DifferentialTDLearner)
+    - [`TDλReturnLearner`](https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/components/learners/#ReinforcementLearning.TDλReturnLearner)
+    - [`DoubleLearner`](https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/components/learners/#ReinforcementLearning.DoubleLearner)
+    - [`MonteCarloLearner`](https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/components/learners/#ReinforcementLearning.MonteCarloLearner)
+    - [`GradientBanditLearner`](https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/components/learners/#ReinforcementLearning.GradientBanditLearner)
+    - [`ReinforcePolicy`](https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/components/policies/#ReinforcementLearning.ReinforcePolicy)
 
 - Efficiently implemented deep reinforcement learning algorithms:
     - Deep Q-Learning:
-        - [`BasicDQNLearner`](@ref)
-        - [`DQNLearner`](@ref)
-        - [`PrioritizedDQNLearner`](@ref)
-        - [`RainbowLearner`](@ref)
+        - [`BasicDQNLearner`](https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/components/learners/#ReinforcementLearning.BasicDQNLearner)
+        - [`DQNLearner`](https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/components/learners/#ReinforcementLearning.DQNLearner)
+        - [`PrioritizedDQNLearner`](https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/components/learners/#ReinforcementLearning.PrioritizedDQNLearner)
+        - [`RainbowLearner`](https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/components/learners/#ReinforcementLearning.RainbowLearner)
 
 - Pluggable deep learning framework backend:
     - [Flux.jl](https://github.com/FluxML/Flux.jl)

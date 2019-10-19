@@ -1,31 +1,32 @@
 export AlternateSelector
 
 """
-    AlternateSelector <: AbstractDiscreteActionSelector
+    AlternateSelector(n::Int)
 
 Used to ensure that all actions are selected alternatively.
 
-    AlternateSelector(n::Int)
+# Fields
 
-`n::Int` means the optional actions are `1:n`.
+- `n::Int`: means the optional actions are `1:n`.
+- `step::Int=0`: record the number of times that the selector is applied.
 """
-struct AlternateSelector <: AbstractDiscreteActionSelector
+Base.@kwdef mutable struct AlternateSelector <: AbstractDiscreteActionSelector
     n::Int
+    step::Int = 0
 end
 
 """
-    (s::AlternateSelector)(values::Any; step)
+    (s::AlternateSelector)(values::Any)
 
-`step` must start with `1`.
-Ignore the action `values`, generate an action alternatively.
+Here the `values` is ignored. The returned action is based on the `step` of `s`.
 
-## Example
+# Example
 
 ```julia
-julia> selector = AlternateSelector(3)
+julia> selector = AlternateSelector(n=3)
 AlternateSelector(3, 0)
 
-julia> any_state = 0 # for AlternateSelector, state can be anything
+julia> any_state = 0 # for AlternateSelector, the value of actions can be anything
 
 julia> [selector(any_state) for i in 1:10]  # iterate through all actions
 10-element Array{Int64,1}:
@@ -33,12 +34,14 @@ julia> [selector(any_state) for i in 1:10]  # iterate through all actions
  2
  3
  1
- 2
- 3
+ ⋮
  1
  2
  3
  1
 ```
 """
-(s::AlternateSelector)(values::Any; step, kw...) = (step - 1) % s.n + 1
+function (s::AlternateSelector)(values::Any; kw...)
+    s.step += 1
+    (s.step - 1) % s.n + 1
+end
