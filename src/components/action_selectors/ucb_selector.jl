@@ -3,7 +3,6 @@ export UCBSelector
 using .Utils: findallmax
 
 """
-    UCBSelector <: AbstractDiscreteActionSelector
     UCBSelector(na; c=2.0, ϵ=1e-10)
 
 # Arguments

@@ -3,7 +3,6 @@ export WeightedSelector
 using StatsBase: sample, Weights
 
 """
-    WeightedSelector <: AbstractDiscreteActionSelector
     WeightedSelector(is_normalized::Bool)
 
 `is_normalized` is used to indicating if the feeded action values
