@@ -57,7 +57,7 @@ to_device(Q::NeuralNetworkQ{D}, x) where D = to_device(Val(D), x)
 batch_estimate(Q::NeuralNetworkQ, states) = Q.model(states)
 
 "get Q value of all actions"
-(Q::NeuralNetworkQ)(s) = Q.model(to_device(Q, s)) |> to_host
+(Q::NeuralNetworkQ)(s) = Q.model(to_device(Q, reshape(s, size(s)..., 1))) |> to_host |> vec
 
 "get Q value of some specific action"
 (Q::NeuralNetworkQ)(s, a) = Q(s)[a]

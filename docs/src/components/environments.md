@@ -22,8 +22,7 @@ AbstractPreprocessor
 FourierPreprocessor
 PolynomialPreprocessor
 TilingPreprocessor
+ImageResize
 ImageCrop
-ImageResizeBilinear 
 ImageResizeNearestNeighbour
-ImagePreprocessor
 ```

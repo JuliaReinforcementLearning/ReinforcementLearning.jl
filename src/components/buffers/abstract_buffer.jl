@@ -92,15 +92,15 @@ Base.getindex(b::AbstractTurnBuffer{PRTSA,types}, i::Int) where {types} =
      priority = priority(b)[i+1],
     )
 
-function consecutive_view(b::AbstractTurnBuffer, inds, n)
+function consecutive_view(b::AbstractTurnBuffer, inds, n, n_frames)
     next_inds = inds .+ 1
 
     (
-     states = consecutive_view(state(b), inds, n),
+     states = consecutive_view(state(b), inds, n, n_frames),
      actions = consecutive_view(action(b), inds, n),
      rewards = consecutive_view(reward(b), next_inds, n),
      terminals = consecutive_view(terminal(b), next_inds, n),
-     next_states = consecutive_view(state(b), next_inds, n),
+     next_states = consecutive_view(state(b), next_inds, n, n_frames),
      next_actions = consecutive_view(action(b), next_inds, n),
     )
 end
