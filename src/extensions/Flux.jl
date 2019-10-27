@@ -56,6 +56,7 @@ backend(::Dense) = :Zygote
 backend(::Dense{<:Any, <:Knet.Param, <:Knet.Param}) = :Knet
 backend(m::Chain) = backend(m.layers)
 backend(m::Conv) = :Zygote
+backend(m::Tuple{}) = :Any
 
 function backend(m::Tuple)
     if haskey(BACKENDS_CACHE, m)

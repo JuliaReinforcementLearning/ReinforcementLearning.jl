@@ -20,11 +20,19 @@ struct CircularTurnBuffer{names,types,Tbs} <: AbstractTurnBuffer{names,types}
     buffers::Tbs
 end
 
-function sample(b::CircularTurnBuffer; batch_size = 32, n_step = 1, n_frames=4)
+"""
+    sample(b::CircularTurnBuffer; batch_size = 32, n_step = 1, n_frames=nothing)
+
+!!! note
+    `n_frames` can be an `Int`, and then the size of state is expanded in the last dimension.
+    For example if the original state is an image of size `(84, 84)`, then the size of new state is `(84, 84, n_frames)`.
+"""
+function sample(b::CircularTurnBuffer; batch_size = 32, n_step = 1, n_frames=nothing)
     inds = sample_indices(b, batch_size, n_step, n_frames)
     inds, consecutive_view(b, inds, n_step, n_frames)
 end
 
+sample_indices(b::CircularTurnBuffer{RTSA}, batch_size::Int, n_step::Int, n_frames::Nothing) = sample_indices(b, batch_size, n_step, 1)
 
 #####
 # RTSA

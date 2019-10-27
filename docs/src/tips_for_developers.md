@@ -81,8 +81,6 @@ Another excellent julia package for deep learning. You'll find it easy to write 
 
 ## Comparison with Other RL Packages
 
-### Comparison with [ShangtongZhang/reinforcement-learning-an-introduction](https://github.com/ShangtongZhang/reinforcement-learning-an-introduction)
-
 ### Comparison with [Dopamine](https://github.com/google/dopamine)
 
 ### Comparison with [Ray/RLlib](https://ray.readthedocs.io/en/latest/rllib.html)

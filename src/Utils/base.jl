@@ -4,7 +4,8 @@ export findallmax,
        CachedSampleAvg,
        SampleAvg,
        CachedSum,
-       huber_loss
+       huber_loss,
+       drop_last_dim
 
 """
     huber_loss(labels, predictions;δ = 1.0)
@@ -111,3 +112,5 @@ end
 function (c::CachedSum)(k, x)
     c.cache[k] = get!(c.cache, k, 0.0) + x
 end
+
+drop_last_dim(x) = dropdims(x; dims=ndims(x))

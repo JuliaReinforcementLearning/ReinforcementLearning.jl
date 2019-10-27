@@ -1,9 +1,9 @@
 [deps]
+CUDAdrv = "c5f51814-7f29-56b8-a69c-e4d8f6be1fde"
 CuArrays = "3a865a2d-5b23-5a0f-bc46-62713ec82fae"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 GR = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-IRTools = "7869d1d1-7146-5819-86e3-90919afe41df"
 Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 ReinforcementLearning = "158674fc-8238-5cab-b5ba-03dfc80d1318"

@@ -199,3 +199,5 @@ function consecutive_view(b::CircularArrayBuffer{E,T,N}, inds, n, n_frames) wher
     expanded_inds = collect(Iterators.flatten((i-n_frames+1):i for i in inds for j in i:i+n-1))
     reshape(view(b, expanded_inds), size(b.buffer)[1:N-1]..., n_frames, n, length(inds))
 end
+
+consecutive_view(b::CircularArrayBuffer{E,T,N}, inds, n, n_frames::Nothing) where {E,T,N} = consecutive_view(b, inds, n)

@@ -10,7 +10,8 @@ export AbstractPreprocessor,
        ImageResize,
        ImageResizeNearestNeighbour,
        ImageResizeBilinear,
-       ImageCrop
+       ImageCrop,
+       StackFrames
 
 using .Utils: Tiling, encode
 using LinearAlgebra: norm
@@ -176,16 +177,18 @@ function (p::RadialBasisFunctions)(s)
 end
 
 """
-    StackFramePreprocessor(stacked_state)
+    StackFrames(stacked_state)
 
 Use a [`StackedState`](@ref) to restore the latest several state frames.
 """
-Base.@kwdef struct StackFramePreprocessor{E, T, N} <: AbstractPreprocessor
+struct StackFrames{E, T, N} <: AbstractPreprocessor
     stacked_state::StackedState{E, T, N}
 end
 
-function (p::StackFramePreprocessor)(obs::Observation)
-    push!(p.stacked_state, s)
+StackFrames(;kw...) = StackFrames(StackedState(;kw...))
+
+function (p::StackFrames)(obs::Observation)
+    push!(p.stacked_state, obs.state)
     Observation(
         obs.reward,
         obs.terminal,

@@ -1,5 +1,7 @@
 export StackedState
 
+using Flux:@forward
+
 """
     StackedState(; state_size, state_eltype=Float32, n_frames=4)
 
@@ -7,7 +9,7 @@ Use a [`CircularArrayBuffer`](@ref) to store stacked states.
 
 # Example
 """
-struct StackedState{E, T, N}
+struct StackedState{E, T, N} <: AbstractArray{T, N}
     states::CircularArrayBuffer{E, T, N}
 end
 
@@ -19,9 +21,7 @@ function StackedState(; state_size, state_eltype=Float32, n_frames=4)
     StackedState(states)
 end
 
-Base.push!(s::StackedState, state) = push!(s.states, state)
-Base.getindex(s::StackedState, i::Int) = getindex(s.states, i)
-Base.view(s::StackedState, i::Int) = view(s.states, i)
-Base.lastindex(s::StackedState) = lastindex(s.states)
+# !!! do not forward Base.length
+@forward StackedState.states Base.push!, Base.getindex, Base.setindex, Base.view, Base.size, Base.lastindex
 
 Base.push!(b::CircularArrayBuffer, s::StackedState) = push!(b, @view(s[end]))
