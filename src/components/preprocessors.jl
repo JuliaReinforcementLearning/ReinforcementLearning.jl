@@ -17,6 +17,7 @@ using .Utils: Tiling, encode
 using LinearAlgebra: norm
 using Flux: Chain
 using ImageTransformations: imresize!
+using ShiftedArrays:CircShiftedVector
 
 """
 Preprocess an [`Observation`](@ref) and return a new observation.
@@ -179,20 +180,33 @@ end
 """
     StackFrames(stacked_state)
 
-Use a [`StackedState`](@ref) to restore the latest several state frames.
+TODO: [`CircularArrayBuffer`](@ref) is inefficient here.
+
+!!! note
+    Although we use `view` for the stacked frames, as the document says [Copying data is not always bad](https://docs.julialang.org/en/v1/manual/performance-tips/index.html#Copying-data-is-not-always-bad-1), sometimes it is better to copy the data first when usign CPU only. However, it is unnecessary to allocate again when using GPU.
 """
-struct StackFrames{E, T, N} <: AbstractPreprocessor
-    stacked_state::StackedState{E, T, N}
+mutable struct StackFrames{T, N} <: AbstractPreprocessor
+    frames::Array{T, N}
+    cursor::Int
+    function StackFrames(::Type{T}, I::Vararg{Int, N}) where {T, N}
+        new{T, N}(zeros(T, I), 1)
+    end
 end
 
-StackFrames(;kw...) = StackFrames(StackedState(;kw...))
+function (p::StackFrames{T, N})(obs::Observation) where {T, N}
+    state = obs.state
+    selectdim(p.frames, N, p.cursor) .= state
+    res = selectdim(p.frames, N, CircShiftedVector(1:size(p.frames, N), -p.cursor))
 
-function (p::StackFrames)(obs::Observation)
-    push!(p.stacked_state, obs.state)
+    p.cursor += 1
+    if p.cursor > size(p.frames, N)
+        p.cursor = 1
+    end
+
     Observation(
         obs.reward,
         obs.terminal,
-        p.stacked_state,
+        res,
         obs.meta
     )
 end

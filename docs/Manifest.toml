@@ -635,7 +635,7 @@ uuid = "189a3867-3050-52da-a836-e630ba90ab69"
 version = "0.2.0"
 
 [[ReinforcementLearning]]
-deps = ["Adapt", "CUDAapi", "CUDAdrv", "CuArrays", "DataStructures", "FillArrays", "Flux", "GPUArrays", "ImageTransformations", "Knet", "LinearAlgebra", "ProgressMeter", "Random", "Reexport", "ReinforcementLearningEnvironments", "StatsBase", "Zygote", "ZygoteRules"]
+deps = ["Adapt", "CUDAapi", "CUDAdrv", "CuArrays", "DataStructures", "FillArrays", "Flux", "GPUArrays", "ImageTransformations", "Knet", "LinearAlgebra", "ProgressMeter", "Random", "Reexport", "ReinforcementLearningEnvironments", "ShiftedArrays", "StatsBase", "Zygote", "ZygoteRules"]
 path = ".."
 uuid = "158674fc-8238-5cab-b5ba-03dfc80d1318"
 version = "0.4.0"
@@ -673,6 +673,11 @@ uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 [[SharedArrays]]
 deps = ["Distributed", "Mmap", "Random", "Serialization"]
 uuid = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
+
+[[ShiftedArrays]]
+git-tree-sha1 = "22395afdcf37d6709a5a0766cc4a5ca52cb85ea0"
+uuid = "1277b4bf-5013-50f5-be3d-901d8477a67a"
+version = "1.0.0"
 
 [[Showoff]]
 deps = ["Dates"]

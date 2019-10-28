@@ -122,8 +122,10 @@ Base.setindex!(cb::CircularArrayBuffer{E,T,N}, data, i) where {E,T,N} =
 ## kept only to show elements
 ## never manually get/set the inner elements because it is very slow
 ## see https://discourse.julialang.org/t/varargs-performance/13578
-Base.getindex(cb::CircularArrayBuffer{E,T,N}, I::Vararg{Int,N}) where {E,T,N} =
+function Base.getindex(cb::CircularArrayBuffer{E,T,N}, I::Vararg{Int,N}) where {E,T,N}
+    @warn "accessing inner elements of CircularArrayBuffer is slow!!!" maxlog=1
     getindex(cb.buffer, I[1:N-1]..., _buffer_index(cb, I[end]))
+end
 
 capacity(cb::CircularArrayBuffer) = size(cb.buffer)[end]
 Base.length(cb::CircularArrayBuffer) = cb.length
