@@ -61,7 +61,7 @@
         b = circular_RTSA_buffer(
             ;
             capacity = 3,
-            state_eltype = Array{Int,2},
+            state_eltype = Int,
             state_size = (2, 2),
         )
 

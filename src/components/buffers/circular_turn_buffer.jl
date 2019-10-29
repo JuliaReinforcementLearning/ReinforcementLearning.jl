@@ -153,10 +153,10 @@ function circular_RTSA_buffer(
 )
     capacity += 1  # we need to store extra dummy (reward, terminal)
     buffers = (
-        reward = CircularArrayBuffer{reward_eltype}(capacity, reward_size...),
-        terminal = CircularArrayBuffer{terminal_eltype}(capacity, terminal_size...),
-        state = CircularArrayBuffer{state_eltype}(capacity, state_size...),
-        action = CircularArrayBuffer{action_eltype}(capacity, action_size...),
+        reward = CircularArrayBuffer{reward_eltype}(reward_size..., capacity),
+        terminal = CircularArrayBuffer{terminal_eltype}(terminal_size..., capacity),
+        state = CircularArrayBuffer{state_eltype}(state_size..., capacity),
+        action = CircularArrayBuffer{action_eltype}(action_size..., capacity),
     )
     CircularTurnBuffer{
         RTSA,
@@ -212,10 +212,10 @@ function circular_PRTSA_buffer(
     capacity += 1  # we need to store extra dummy (reward, terminal)
     buffers = (
         priority = SumTree(priority_eltype, capacity),
-        reward = CircularArrayBuffer{reward_eltype}(capacity, reward_size...),
-        terminal = CircularArrayBuffer{terminal_eltype}(capacity, terminal_size...),
-        state = CircularArrayBuffer{state_eltype}(capacity, state_size...),
-        action = CircularArrayBuffer{action_eltype}(capacity, action_size...),
+        reward = CircularArrayBuffer{reward_eltype}(reward_size..., capacity),
+        terminal = CircularArrayBuffer{terminal_eltype}(terminal_size..., capacity),
+        state = CircularArrayBuffer{state_eltype}(state_size..., capacity),
+        action = CircularArrayBuffer{action_eltype}(action_size..., capacity),
     )
     CircularTurnBuffer{
         PRTSA,
