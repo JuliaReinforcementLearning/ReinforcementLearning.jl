@@ -68,4 +68,4 @@ end
 
 Base.copyto!(dest::NeuralNetworkQ, src::NeuralNetworkQ) = Flux.loadparams!(dest.model, src.params)
 
-gradient(f, Q::NeuralNetworkQ, args...) = gradient(f, Val(backend(Q.model)), args...)
+gradient(f, Q::NeuralNetworkQ) = gradient(f, Val(backend(Q.model)), params(Q))

@@ -41,7 +41,7 @@ function update!(learner::BasicDQNLearner{<:NeuralNetworkQ}, batch)
     states, rewards, terminals, next_states = map(x->to_device(Q, x), (batch.states, batch.rewards, batch.terminals, batch.next_states))
     actions = CartesianIndex.(batch.actions, 1:batch_size) 
 
-    gs = gradient(Q, params(Q)) do 
+    gs = gradient(Q) do 
         q = batch_estimate(Q, states)[actions]
         q′ = vec(maximum(batch_estimate(Q, next_states); dims = 1))
         G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
@@ -55,11 +55,7 @@ end
 
 function extract_transitions(buffer::CircularTurnBuffer{RTSA}, learner::BasicDQNLearner)
     if length(buffer) > learner.min_replay_history
-        inds, consecutive_batch = sample(
-            buffer;
-            batch_size = learner.batch_size,
-            n_step = learner.update_horizon,
-        )
+        inds, consecutive_batch = sample(buffer, learner.batch_size, learner.update_horizon, nothing)
         extract_SARTS(consecutive_batch, learner.γ)
     else
         nothing

@@ -21,18 +21,18 @@ struct CircularTurnBuffer{names,types,Tbs} <: AbstractTurnBuffer{names,types}
 end
 
 """
-    sample(b::CircularTurnBuffer; batch_size = 32, n_step = 1, n_frames=nothing)
+    sample(b::CircularTurnBuffer, batch_size, n_step, stack_size)
 
 !!! note
-    `n_frames` can be an `Int`, and then the size of state is expanded in the last dimension.
-    For example if the original state is an image of size `(84, 84)`, then the size of new state is `(84, 84, n_frames)`.
+    `stack_size` can be an `Int`, and then the size of state is expanded in the last dimension.
+    For example if the original state is an image of size `(84, 84)`, then the size of new state is `(84, 84, stack_size)`.
 """
-function sample(b::CircularTurnBuffer; batch_size = 32, n_step = 1, n_frames=nothing)
-    inds = sample_indices(b, batch_size, n_step, n_frames)
-    inds, consecutive_view(b, inds, n_step, n_frames)
+function sample(b::CircularTurnBuffer, batch_size, n_step, stack_size)
+    inds = sample_indices(b, batch_size, n_step, stack_size)
+    inds, consecutive_view(b, inds, n_step, stack_size)
 end
 
-sample_indices(b::CircularTurnBuffer{RTSA}, batch_size::Int, n_step::Int, n_frames::Nothing) = sample_indices(b, batch_size, n_step, 1)
+sample_indices(b::CircularTurnBuffer, batch_size::Int, n_step::Int, stack_size::Nothing) = sample_indices(b, batch_size, n_step, 1)
 
 #####
 # RTSA
@@ -165,8 +165,8 @@ function circular_RTSA_buffer(
     }(buffers)
 end
 
-sample_indices(b::CircularTurnBuffer{RTSA}, batch_size::Int, n_step::Int, n_frames::Int) =
-    rand(n_frames:length(b)-n_step, batch_size)
+sample_indices(b::CircularTurnBuffer{RTSA}, batch_size::Int, n_step::Int, stack_size::Int) =
+    rand(stack_size:length(b)-n_step, batch_size)
 
 #####
 # PRTSA
@@ -224,11 +224,11 @@ function circular_PRTSA_buffer(
     }(buffers)
 end
 
-function sample_indices(b::CircularTurnBuffer{PRTSA}, batch_size::Int, n_step::Int, n_frames::Int)
+function sample_indices(b::CircularTurnBuffer{PRTSA}, batch_size::Int, n_step::Int, stack_size::Int)
     inds = Vector{Int}(undef, batch_size)
     for i = 1:length(inds)
         ind, p = sample(priority(b))
-        while ind <= n_frames || ind > length(b) - n_step + 1
+        while ind <= stack_size || ind > length(b) - n_step + 1
             ind, p = sample(priority(b))
         end
         inds[i] = ind - 1  # !!! left shift by 1 because we are padding for priority

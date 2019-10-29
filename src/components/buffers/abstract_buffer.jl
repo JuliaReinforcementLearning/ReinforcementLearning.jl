@@ -92,15 +92,15 @@ Base.getindex(b::AbstractTurnBuffer{PRTSA,types}, i::Int) where {types} =
      priority = priority(b)[i+1],
     )
 
-function consecutive_view(b::AbstractTurnBuffer, inds, n, n_frames)
+function consecutive_view(b::AbstractTurnBuffer, inds, n, stack_size)
     next_inds = inds .+ 1
 
     (
-     states = consecutive_view(state(b), inds, n, n_frames),
+     states = consecutive_view(state(b), inds, n, stack_size),
      actions = consecutive_view(action(b), inds, n),
      rewards = consecutive_view(reward(b), next_inds, n),
      terminals = consecutive_view(terminal(b), next_inds, n),
-     next_states = consecutive_view(state(b), next_inds, n, n_frames),
+     next_states = consecutive_view(state(b), next_inds, n, stack_size),
      next_actions = consecutive_view(action(b), next_inds, n),
     )
 end
@@ -119,10 +119,10 @@ function extract_SARTS(batch, γ)
 
         if isnothing(t)
             terminals[i] = false
-            rewards[i] = discount_rewards_reduced(view(batch.rewards[:, i]), γ)
+            rewards[i] = discount_rewards_reduced(view(batch.rewards, :, i), γ)
         else
             terminals[i] = true
-            rewards[i] = discount_rewards_reduced(view(batch.rewards[1:t, i]), γ)
+            rewards[i] = discount_rewards_reduced(view(batch.rewards, 1:t, i), γ)
         end
     end
 
