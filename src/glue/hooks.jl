@@ -187,12 +187,12 @@ end
 
 """
     TimePerStep(;max_steps=100)
-    TimePerStep(times::CircularArrayBuffer{Float64, Float64, 1}, t::UInt64)
+    TimePerStep(times::CircularArrayBuffer{Float64, 1}, t::UInt64)
 
 Store time cost of the latest `max_steps` in the `times` field.
 """
 mutable struct TimePerStep <: AbstractHook
-    times::CircularArrayBuffer{Float64, Float64, 1}
+    times::CircularArrayBuffer{Float64, 1}
     t::UInt64
 end
 
