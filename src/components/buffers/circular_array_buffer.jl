@@ -57,6 +57,8 @@ function Base.push!(cb::CircularArrayBuffer{T,N}, data) where {T,N}
     cb
 end
 
+Base.push!(cb::CircularArrayBuffer{T, N}, data::CircularArrayBuffer{T, N}) where {T, N} = push!(cb, select_frame(data, data.length))
+
 select_frame(cb::CircularArrayBuffer{T, 1}, i::Int) where {T} = getindex(cb.buffer, _buffer_frame(cb, i))
 select_frame(cb::CircularArrayBuffer{T, 2}, i::Int) where {T} = view(cb.buffer, :, _buffer_frame(cb, i))
 select_frame(cb::CircularArrayBuffer{T, 3}, i::Int) where {T} = view(cb.buffer, :, :, _buffer_frame(cb, i))

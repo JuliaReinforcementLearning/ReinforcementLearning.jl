@@ -178,35 +178,30 @@ function (p::RadialBasisFunctions)(s)
 end
 
 """
-    StackFrames(stacked_state)
+    StackFrames(::Type{T}=Float32, d::Int...)
 
-TODO: [`CircularArrayBuffer`](@ref) is inefficient here.
-
-!!! note
-    Although we use `view` for the stacked frames, as the document says [Copying data is not always bad](https://docs.julialang.org/en/v1/manual/performance-tips/index.html#Copying-data-is-not-always-bad-1), sometimes it is better to copy the data first when usign CPU only. However, it is unnecessary to allocate again when using GPU.
+Use a pre-initialized [`CircularArrayBuffer`](@ref) to store the latest several states specified by `d`.
+Before processing any observation, the buffer is filled with `zero{T}`.
 """
 mutable struct StackFrames{T, N} <: AbstractPreprocessor
-    frames::Array{T, N}
-    cursor::Int
-    function StackFrames(::Type{T}, I::Vararg{Int, N}) where {T, N}
-        new{T, N}(zeros(T, I), 1)
+    buffer::CircularArrayBuffer{T, N}
+    StackFrames(d::Int...) = StackFrames(Float32, d...)
+    function StackFrames(::Type{T}, d::Vararg{Int, N}) where {T, N}
+        buffer = CircularArrayBuffer{T}(d...)
+        for _ in 1:N
+            push!(buffer, zeros(T, d[1:N-1]))
+        end
+        new{T, N}(buffer)
     end
 end
 
 function (p::StackFrames{T, N})(obs::Observation) where {T, N}
-    state = obs.state
-    selectdim(p.frames, N, p.cursor) .= state
-    res = selectdim(p.frames, N, CircShiftedVector(1:size(p.frames, N), -p.cursor))
-
-    p.cursor += 1
-    if p.cursor > size(p.frames, N)
-        p.cursor = 1
-    end
+    push!(p.buffer, obs.state)
 
     Observation(
         obs.reward,
         obs.terminal,
-        res,
+        p.buffer,
         obs.meta
     )
 end
