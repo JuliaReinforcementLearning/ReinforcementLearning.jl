@@ -51,5 +51,9 @@ end
 observation_space(env::WrappedEnv) = observation_space(env.env)
 action_space(env::WrappedEnv) = action_space(env.env)
 interact!(env::WrappedEnv, a) = interact!(env.env, a)
-reset!(env::WrappedEnv) = reset!(env.env)
 observe(env::WrappedEnv, args...) = env.env |> observe |> env.preprocessor
+
+function reset!(env::WrappedEnv)
+    reset!(env.preprocessor)
+    reset!(env.env)
+end
