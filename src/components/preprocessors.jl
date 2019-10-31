@@ -19,8 +19,6 @@ using Flux: Chain
 using ImageTransformations: imresize!
 using ShiftedArrays:CircShiftedVector
 
-import ReinforcementLearningEnvironments: reset!
-
 """
 Preprocess an [`Observation`](@ref) and return a new observation.
 By default, the preprocessor is only applied to the state field
@@ -31,8 +29,6 @@ you can change this behavior by rewriting
 `(p::AbstractPreprocessor)(obs::Observation)` method.
 """
 abstract type AbstractPreprocessor end
-
-reset!(p::AbstractPreprocessor) = nothing
 
 (p::AbstractPreprocessor)(obs::Observation) =
     Observation(
@@ -192,14 +188,10 @@ mutable struct StackFrames{T, N} <: AbstractPreprocessor
     StackFrames(d::Int...) = StackFrames(Float32, d...)
     function StackFrames(::Type{T}, d::Vararg{Int, N}) where {T, N}
         p = new{T, N}(CircularArrayBuffer{T}(d...))
-        reset!(p)
+        for _ in 1:capacity(p.buffer)
+            push!(p.buffer, zeros(T, size(p.buffer)[1:N-1]))
+        end
         p
-    end
-end
-
-function reset!(p::StackFrames{T,N}) where {T, N}
-    for _ in 1:capacity(p.buffer)
-        push!(p.buffer, zeros(T, size(p.buffer)[1:N-1]))
     end
 end
 
