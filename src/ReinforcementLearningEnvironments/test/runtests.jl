@@ -10,5 +10,5 @@ using Hanabi
 
     include("spaces.jl")
     include("environments.jl")
-
+    include("atari.jl")
 end

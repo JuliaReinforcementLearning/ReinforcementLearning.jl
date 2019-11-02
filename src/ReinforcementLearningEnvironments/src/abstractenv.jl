@@ -20,6 +20,21 @@ function action_space end
 function observation_space end
 function render end
 
+"""
+    Observation(;reward, terminal, state, meta...)
+
+The observation of an environment from the perspective of an agent.
+
+# Keywords & Fields
+
+- `reward`: the reward of an agent
+- `terminal`: indicates that if the environment is terminated or not.
+- `state`: the current state of the environment from the perspective of an agent
+- `meta`: some other information, like `legal_actions`...
+
+!!! note
+    The `reward` and `terminal` of the first observation before interacting with an environment may not be valid.
+"""
 struct Observation{R,T,S,M<:NamedTuple}
     reward::R
     terminal::T

@@ -62,7 +62,7 @@
         :(deterministic_tree_MDP_with_rand_reward()),
         :(deterministic_tree_MDP()),
         :(deterministic_MDP()),
-        (:(AtariEnv($x)) for x in atari_env_names)...,
+        (:(AtariEnv(;name=$x)) for x in atari_env_names)...,
         (:(GymEnv($x)) for x in gym_env_names)...,
     ]
 
