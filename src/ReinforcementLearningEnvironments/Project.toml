@@ -27,3 +27,10 @@ test = ["Test", "ArcadeLearningEnvironment", "ViZDoom", "PyCall", "Hanabi"]
 
 [compat]
 julia = "1"
+Distributions <= "1"
+GR <= "1"
+POMDPModels <= "1"
+POMDPs <= "1"
+Reexport <= "1"
+Requires <= "1"
+StatsBase <= "1"
