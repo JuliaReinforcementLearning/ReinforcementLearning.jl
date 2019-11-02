@@ -7,23 +7,6 @@ import ReinforcementLearningEnvironments: get_terminal,
                                           interact!,
                                           reset!
 
-@doc """
-    Observation(;reward, terminal, state, meta...)
-
-The observation of an environment from the perspective of an agent.
-
-# Keywords & Fields
-
-- `reward`: the reward of an agent
-- `terminal`: indicates that if the environment is terminated or not.
-- `state`: the current state of the environment from the perspective of an agent
-- `meta`: some other information, like `legal_actions`...
-
-!!! note
-    The `reward` and `terminal` of the first observation before interacting with an environment may not be valid.
-"""
-Observation
-
 get_terminal(obs::Vector{<:Observation}) = all(get_terminal(o) for o in obs)
 
 reset(
@@ -51,5 +34,6 @@ end
 observation_space(env::WrappedEnv) = observation_space(env.env)
 action_space(env::WrappedEnv) = action_space(env.env)
 interact!(env::WrappedEnv, a) = interact!(env.env, a)
-reset!(env::WrappedEnv) = reset!(env.env)
 observe(env::WrappedEnv, args...) = env.env |> observe |> env.preprocessor
+
+reset!(env::WrappedEnv) = reset!(env.env)

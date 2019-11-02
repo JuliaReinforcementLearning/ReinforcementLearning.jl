@@ -79,6 +79,12 @@ A basic understanding of how CuArrays.jl works will help you to write some effic
 
 Another excellent julia package for deep learning. You'll find it easy to write algorithms that run on both Flux and Knet in this package.
 
+## Comparison with Other RL Packages
+
+### Comparison with [Dopamine](https://github.com/google/dopamine)
+
+### Comparison with [Ray/RLlib](https://ray.readthedocs.io/en/latest/rllib.html)
+
 ## Q&A
 
 *Your questions will appear here.*

@@ -1,4 +1,4 @@
-export Descent, InvDecay
+export Descent, InvDecay, backend, set_backend!
 
 using Flux
 using Knet
@@ -18,7 +18,12 @@ function apply!(o::InvDecay, x, δ::Number)
     δ / (1 + γ * n)
 end
 
-function (a::Dense)(x)
+#####
+# extend layers defined in Flux to support Knet
+#####
+
+# relief the AbstractArray constraint to support KnetArray
+function (a::Dense)(x)  
   W, b, σ = a.W, a.b, a.σ
   σ.(W*x .+ b)
 end
@@ -35,11 +40,44 @@ end
 
 params!(p::Flux.Params, x::Knet.Param, seen = IdSet()) = push!(p, x)
 
-backend(m::T) where T = backend(T)
-backend(::Type{<:Dense}) = :Zygote
-backend(::Type{<:Dense{<:Any, <:Knet.Param, <:Knet.Param}}) = :Knet
+const BACKENDS_CACHE = IdDict()
+const SUPPORTED_BACKENDS = Set([:Zygote, :Knet, :Any])
 
-backend(m::Chain) = backend(eltype(m.layers))
+function set_backend!(m, x)
+    if x in SUPPORTED_BACKENDS
+        BACKENDS_CACHE[m] = x
+    else
+        @error "unknown backend $x, supported backends are $SUPPORTED_BACKENDS"
+    end
+end
+
+backend(m) = haskey(BACKENDS_CACHE, m) ? BACKENDS_CACHE[m] : :Any
+backend(::Dense) = :Zygote
+backend(::Dense{<:Any, <:Knet.Param, <:Knet.Param}) = :Knet
+backend(m::Chain) = backend(m.layers)
+backend(m::Conv) = :Zygote
+backend(m::Tuple{}) = :Any
+
+function backend(m::Tuple)
+    if haskey(BACKENDS_CACHE, m)
+        BACKENDS_CACHE[m]
+    else
+        res = :Any
+        res_first = backend(m[1])
+        res_rest = backend(m[2:end])
+        if res_first === :Any
+            res = res_rest
+        elseif res_rest === :Any
+            res = res_first
+        elseif res_first === res_rest
+            res = res_first
+        else
+            @error "inconsistent backend detected for $m"
+        end
+        BACKENDS_CACHE[m] = res
+        res
+    end
+end
 
 function Base.show(io::IO, l::Dense)
   print(io, "Dense(", size(l.W, 2), ", ", size(l.W, 1))

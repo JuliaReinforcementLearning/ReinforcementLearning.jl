@@ -186,18 +186,19 @@ end
 #####
 
 """
-    TimePerStep(;times::Vector{Float64}=[], t::UInt64=time_ns())
+    TimePerStep(;max_steps=100)
+    TimePerStep(times::CircularArrayBuffer{Float64, 1}, t::UInt64)
 
-Store the time cost of each step in the `times` field.
-
-!!! warning
-    It seems it only counts the time cost during update step?
+Store time cost of the latest `max_steps` in the `times` field.
 """
-Base.@kwdef mutable struct TimePerStep <: AbstractHook
-    times::Vector{Float64}=[]
-    t::UInt64=time_ns()
+mutable struct TimePerStep <: AbstractHook
+    times::CircularArrayBuffer{Float64, 1}
+    t::UInt64
 end
 
-(hook::TimePerStep)(::PreActStage, agent, env, action_obs) = hook.t = time_ns()
+TimePerStep(;max_steps=100) = TimePerStep(CircularArrayBuffer{Float64}(max_steps), time_ns())
 
-(hook::TimePerStep)(::PostActStage, agent, env, obs_action) = push!(hook.times, (time_ns() - hook.t)/1e9)
+function (hook::TimePerStep)(::PostActStage, agent, env, obs_action)
+    push!(hook.times, (time_ns() - hook.t)/1e9)
+    hook.t = time_ns()
+end

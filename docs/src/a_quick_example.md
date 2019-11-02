@@ -78,12 +78,9 @@ And finally, let's push the button:
 run(agent, env, StopAfterStep(10000; is_show_progress=false); hook = hook)
 
 print("""
-    # the first run would be slow, try multiple times and you will see the fps increases a lot
-
     backend = $backend, device = $device
     avg_reward = $(mean(hook[1].rewards))
-    avg_fps = $(1/mean(hook[2].times[max(1, end-50):end]))
-
+    avg_fps = $(1/mean(hook[2].times))
     """)
 ```
 

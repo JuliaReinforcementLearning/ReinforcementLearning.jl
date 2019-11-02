@@ -4,7 +4,7 @@ export EpisodeTurnBuffer, episode_RTSA_buffer
     EpisodeTurnBuffer{names, types, Tbs} <: AbstractTurnBuffer{names, types}
     EpisodeTurnBuffer{names, types}() where {names, types}
 
-Similar to [`CircularTurnBuffer`](@ref), but instead of using [`CircularArrayBuffer`], it uses a vector to store each element specified by `names` and `types`. And when it reaches the end of an episode, the buffer is emptied first when a new observation is pushed.
+Similar to [`CircularTurnBuffer`](@ref), but instead of using [`CircularArrayBuffer`](@ref), it uses a vector to store each element specified by `names` and `types`. And when it reaches the end of an episode, the buffer is emptied first when a new observation is pushed.
 
 !!! note
     Notice that, before emptifying the `EpisodeTurnBuffer`, the last element of each field is exracted and then pushed at the head of the buffer. Without this step, the first transition of the new episode will be lost!

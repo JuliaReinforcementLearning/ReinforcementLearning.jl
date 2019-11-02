@@ -57,7 +57,7 @@ to_device(Q::NeuralNetworkQ{D}, x) where D = to_device(Val(D), x)
 batch_estimate(Q::NeuralNetworkQ, states) = Q.model(states)
 
 "get Q value of all actions"
-(Q::NeuralNetworkQ)(s) = Q.model(to_device(Q, s)) |> to_host
+(Q::NeuralNetworkQ)(s) = Q.model(to_device(Q, reshape(s, size(s)..., 1))) |> to_host |> drop_last_dim
 
 "get Q value of some specific action"
 (Q::NeuralNetworkQ)(s, a) = Q(s)[a]
@@ -68,4 +68,4 @@ end
 
 Base.copyto!(dest::NeuralNetworkQ, src::NeuralNetworkQ) = Flux.loadparams!(dest.model, src.params)
 
-gradient(f, Q::NeuralNetworkQ, args...) = gradient(f, Val(backend(Q.model)), args...)
+gradient(f, Q::NeuralNetworkQ) = gradient(f, Val(backend(Q.model)), params(Q))

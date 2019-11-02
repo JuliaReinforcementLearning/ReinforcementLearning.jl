@@ -20,11 +20,19 @@ struct CircularTurnBuffer{names,types,Tbs} <: AbstractTurnBuffer{names,types}
     buffers::Tbs
 end
 
-function sample(b::CircularTurnBuffer; batch_size = 32, n_step = 1)
-    inds = sample_indices(b, batch_size, n_step)
-    inds, consecutive_view(b, inds, n_step)
+"""
+    sample(b::CircularTurnBuffer, batch_size, n_step, stack_size)
+
+!!! note
+    `stack_size` can be an `Int`, and then the size of state is expanded in the last dimension.
+    For example if the original state is an image of size `(84, 84)`, then the size of new state is `(84, 84, stack_size)`.
+"""
+function sample(b::CircularTurnBuffer, batch_size, n_step, stack_size)
+    inds = sample_indices(b, batch_size, n_step, stack_size)
+    inds, consecutive_view(b, inds, n_step, stack_size)
 end
 
+sample_indices(b::CircularTurnBuffer, batch_size::Int, n_step::Int, stack_size::Nothing) = sample_indices(b, batch_size, n_step, 1)
 
 #####
 # RTSA
@@ -145,10 +153,10 @@ function circular_RTSA_buffer(
 )
     capacity += 1  # we need to store extra dummy (reward, terminal)
     buffers = (
-        reward = CircularArrayBuffer{reward_eltype}(capacity, reward_size...),
-        terminal = CircularArrayBuffer{terminal_eltype}(capacity, terminal_size...),
-        state = CircularArrayBuffer{state_eltype}(capacity, state_size...),
-        action = CircularArrayBuffer{action_eltype}(capacity, action_size...),
+        reward = CircularArrayBuffer{reward_eltype}(reward_size..., capacity),
+        terminal = CircularArrayBuffer{terminal_eltype}(terminal_size..., capacity),
+        state = CircularArrayBuffer{state_eltype}(state_size..., capacity),
+        action = CircularArrayBuffer{action_eltype}(action_size..., capacity),
     )
     CircularTurnBuffer{
         RTSA,
@@ -157,8 +165,8 @@ function circular_RTSA_buffer(
     }(buffers)
 end
 
-sample_indices(b::CircularTurnBuffer{RTSA}, batch_size::Int, n_step::Int) =
-    rand(1:length(b)-n_step, batch_size)
+sample_indices(b::CircularTurnBuffer{RTSA}, batch_size::Int, n_step::Int, stack_size::Int) =
+    rand(stack_size:length(b)-n_step, batch_size)
 
 #####
 # PRTSA
@@ -204,10 +212,10 @@ function circular_PRTSA_buffer(
     capacity += 1  # we need to store extra dummy (reward, terminal)
     buffers = (
         priority = SumTree(priority_eltype, capacity),
-        reward = CircularArrayBuffer{reward_eltype}(capacity, reward_size...),
-        terminal = CircularArrayBuffer{terminal_eltype}(capacity, terminal_size...),
-        state = CircularArrayBuffer{state_eltype}(capacity, state_size...),
-        action = CircularArrayBuffer{action_eltype}(capacity, action_size...),
+        reward = CircularArrayBuffer{reward_eltype}(reward_size..., capacity),
+        terminal = CircularArrayBuffer{terminal_eltype}(terminal_size..., capacity),
+        state = CircularArrayBuffer{state_eltype}(state_size..., capacity),
+        action = CircularArrayBuffer{action_eltype}(action_size..., capacity),
     )
     CircularTurnBuffer{
         PRTSA,
@@ -216,11 +224,11 @@ function circular_PRTSA_buffer(
     }(buffers)
 end
 
-function sample_indices(b::CircularTurnBuffer{PRTSA}, batch_size::Int, n_step::Int)
+function sample_indices(b::CircularTurnBuffer{PRTSA}, batch_size::Int, n_step::Int, stack_size::Int)
     inds = Vector{Int}(undef, batch_size)
     for i = 1:length(inds)
         ind, p = sample(priority(b))
-        while ind <= 1 || ind > length(b) - n_step + 1
+        while ind <= stack_size || ind > length(b) - n_step + 1
             ind, p = sample(priority(b))
         end
         inds[i] = ind - 1  # !!! left shift by 1 because we are padding for priority

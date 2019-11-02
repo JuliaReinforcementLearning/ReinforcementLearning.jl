@@ -65,12 +65,12 @@ const RTSA = (:reward, :terminal, :state, :action)
 
 Base.getindex(b::AbstractTurnBuffer{RTSA,types}, i::Int) where {types} =
     (
-     state = state(b)[i],
-     action = action(b)[i],
-     reward = reward(b)[i+1],
-     terminal = terminal(b)[i+1],
-     next_state = state(b)[i+1],
-     next_action = action(b)[i+1],
+     state = select_frame(state(b), i),
+     action = select_frame(action(b), i),
+     reward = select_frame(reward(b), i+1),
+     terminal = select_frame(terminal(b), i+1),
+     next_state = select_frame(state(b), i+1),
+     next_action = select_frame(action(b), i+1),
     )
 
 #####
@@ -83,24 +83,24 @@ priority(b::AbstractTurnBuffer) = buffers(b).priority
 
 Base.getindex(b::AbstractTurnBuffer{PRTSA,types}, i::Int) where {types} =
     (
-     state = state(b)[i],
-     action = action(b)[i],
-     reward = reward(b)[i+1],
-     terminal = terminal(b)[i+1],
-     next_state = state(b)[i+1],
-     next_action = action(b)[i+1],
-     priority = priority(b)[i+1],
+     state = select_frame(state(b), i),
+     action = select_frame(action(b), i),
+     reward = select_frame(reward(b), i+1),
+     terminal = select_frame(terminal(b), i+1),
+     next_state = select_frame(state(b), i+1),
+     next_action = select_frame(action(b), i+1),
+     priority = select_frame(priority(b), i+1),
     )
 
-function consecutive_view(b::AbstractTurnBuffer, inds, n)
+function consecutive_view(b::AbstractTurnBuffer, inds, n, stack_size)
     next_inds = inds .+ 1
 
     (
-     states = consecutive_view(state(b), inds, n),
+     states = consecutive_view(state(b), inds, n, stack_size),
      actions = consecutive_view(action(b), inds, n),
      rewards = consecutive_view(reward(b), next_inds, n),
      terminals = consecutive_view(terminal(b), next_inds, n),
-     next_states = consecutive_view(state(b), next_inds, n),
+     next_states = consecutive_view(state(b), next_inds, n, stack_size),
      next_actions = consecutive_view(action(b), next_inds, n),
     )
 end
@@ -119,10 +119,10 @@ function extract_SARTS(batch, γ)
 
         if isnothing(t)
             terminals[i] = false
-            rewards[i] = discount_rewards_reduced(view(batch.rewards[:, i]), γ)
+            rewards[i] = discount_rewards_reduced(view(batch.rewards, :, i), γ)
         else
             terminals[i] = true
-            rewards[i] = discount_rewards_reduced(view(batch.rewards[1:t, i]), γ)
+            rewards[i] = discount_rewards_reduced(view(batch.rewards, 1:t, i), γ)
         end
     end
 

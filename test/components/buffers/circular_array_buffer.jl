@@ -65,15 +65,13 @@
     end
 
     @testset "2D Float64" begin
-        b = CircularArrayBuffer{Array{Float64,2}}(3, (2, 2))
+        b = CircularArrayBuffer{Float64}(2, 2, 3)
 
-        @test eltype(b) == Array{Float64,2}
+        @test eltype(b) == Float64
         @test capacity(b) == 3
         @test isfull(b) == false
         @test length(b) == 0
         @test size(b) == (2, 2, 0)
-        # element must has the exact same length with the element of buffer
-        @test_throws DimensionMismatch push!(b, [1.0, 2.0])
 
         for x = 1:3
             push!(b, x * A)
@@ -81,22 +79,22 @@
 
         @test capacity(b) == 3
         @test isfull(b) == true
-        @test length(b) == 3
+        @test length(b) == 2 * 2 * 3
         @test size(b) == (2, 2, 3)
         for i = 1:3
-            @test b[i] == i * A
+            @test b[:, :, i] == i * A
         end
-        @test b[end] == 3 * A
+        @test b[:, :, end] == 3 * A
 
         for x = 4:5  # collection is also OK
-            push!(b, x * ones(4))  # collection is also OK
+            push!(b, x * ones(2, 2))  # collection is also OK
         end  # collection is also OK
 
         @test capacity(b) == 3
-        @test length(b) == 3
+        @test length(b) == 2 * 2 * 3
         @test size(b) == (2, 2, 3)
-        @test b[1] == 3 * A
-        @test b[end] == 5 * A
+        @test b[:, :, 1] == 3 * A
+        @test b[:, :, end] == 5 * A
 
         @test b == reshape([c for x = 3:5 for c in x * A], 2, 2, 3)
     end

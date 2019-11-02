@@ -7,14 +7,17 @@ export AbstractPreprocessor,
        RadialBasisFunctions,
        RandomProjection,
        SparseRandomProjection,
-       ImagePreprocessor,
+       ImageResize,
        ImageResizeNearestNeighbour,
        ImageResizeBilinear,
-       ImageCrop
+       ImageCrop,
+       StackFrames
 
 using .Utils: Tiling, encode
 using LinearAlgebra: norm
 using Flux: Chain
+using ImageTransformations: imresize!
+using ShiftedArrays:CircShiftedVector
 
 """
 Preprocess an [`Observation`](@ref) and return a new observation.
@@ -69,12 +72,32 @@ end
 (p::TilingPreprocessor)(s::Union{<:Number,<:Array}) = [encode(t, s) for t in p.tilings]
 
 """
+    ImageResize(img::Array{T, N})
+    ImageResize(dims::Int...) -> ImageResize(Float32, dims...)
+    ImageResize(T::Type{<:Number}, dims::Int...)
+
+Using BSpline method to resize the `state` field of an [`Observation`](@ref) to size of `img` (or `dims`).
+"""
+struct ImageResize{T, N} <: AbstractPreprocessor
+    img::Array{T, N}
+end
+
+ImageResize(dims::Int...) = ImageResize(Float32, dims...)
+ImageResize(T::Type{<:Number}, dims::Int...) = ImageResize(Array{T}(undef, dims))
+
+function (p::ImageResize)(obs::Observation)
+    imresize!(p.img, obs.state)
+    Observation(obs.reward, obs.terminal, p.img, obs.meta)
+end
+
+"""
     struct ImageCrop
         xidx::UnitRange{Int64}
         yidx::UnitRange{Int64}
     end
 
 Select indices `xidx` and `yidx` from a 2 or 3 dimensional array.
+TODO: Inefficient!
 
 # Example:
 
@@ -91,50 +114,6 @@ end
 (c::ImageCrop)(x::Array{T,2}) where {T} = x[c.xidx, c.yidx]
 (c::ImageCrop)(x::Array{T,3}) where {T} = x[:, c.xidx, c.yidx]
 
-"""
-    struct ImageResizeBilinear
-        outdim::Tuple{Int64, Int64}
-    end
-
-Resize any image to `outdim = (width, height)` with bilinear interpolation.
-
-# Example:
-
-```
-r = ImageResizeBilinear((50, 50))
-r(rand(200, 200))
-r(rand(UInt8, 3, 100, 100))
-```
-"""
-struct ImageResizeBilinear <: AbstractPreprocessor
-    outdim::Tuple{Int64,Int64}
-end
-for N = 2:3
-    @eval @__MODULE__() function (p::ImageResizeBilinear)(x::Array{T,$N}) where {T}
-        indim = size(x)
-        sx, sy = (indim[end-1] - 1) / (p.outdim[1] + 1),
-            (indim[end] - 1) / (p.outdim[2] + 1)
-        $(N == 2 ? :(y = zeros(p.outdim[1], p.outdim[2])) :
-          :(y = zeros(3, p.outdim[1], p.outdim[2])))
-        for i = 1:p.outdim[1]
-            for j = 1:p.outdim[2]
-                r = floor(Int64, i * sx)
-                c = floor(Int64, j * sy)
-                dr = i * sx - r
-                dc = j * sy - c
-                $(N == 2 ?
-                  :(y[i, j] = x[r+1, c+1] * (1 - dr) * (1 - dc) +
-                              x[r+2, c+1] * dr * (1 - dc) + x[r+1, c+2] * (1 - dr) * dc +
-                              x[r+2, c+2] * dr * dc) :
-                  :(y[:, i, j] .= x[:, r+1, c+1] * (1 - dr) * (1 - dc) .+
-                                  x[:, r+2, c+1] * dr * (1 - dc) .+
-                                  x[:, r+1, c+2] * (1 - dr) * dc .+
-                                  x[:, r+2, c+2] * dr * dc))
-            end
-        end
-        y
-    end
-end
 
 """
     struct ImageResizeNearestNeighbour
@@ -161,32 +140,6 @@ function (r::ImageResizeNearestNeighbour)(x)
     yidx = round.(Int64, collect(1:r.outdim[2]) .* indim[end] / r.outdim[2])
     length(indim) > 2 ? x[:, xidx, yidx] : x[xidx, yidx]
 end
-
-"""
-    struct ImagePreprocessor
-        size
-        chain
-    end
-
-Use `chain` to preprocess a grayscale or color image of `size = (width, height)`.
-
-# Example:
-
-```
-p = ImagePreprocessor((100, 100), 
-                      [ImageResizeNearestNeighbour((50, 80)),
-                       ImageCrop(1:30, 10:80),
-                       x -> x ./ 256])
-x = rand(UInt8, 100, 100)
-s = ReinforcementLearning.preprocessstate(p, x)
-```
-"""
-struct ImagePreprocessor{Ts} <: AbstractPreprocessor
-    size::Ts
-    chain::Array{Any,1}
-end
-
-(p::ImagePreprocessor)(s) = foldl((x, p) -> p(x), p.chain, init = reshape(s, p.size))
 
 struct SparseRandomProjection <: AbstractPreprocessor
     w::Array{Float64,2}
@@ -222,4 +175,33 @@ function (p::RadialBasisFunctions)(s)
         p.state[i] = exp(-norm(s - p.means[i]) / p.sigmas[i])
     end
     p.state
+end
+
+"""
+    StackFrames(::Type{T}=Float32, d::Int...)
+
+Use a pre-initialized [`CircularArrayBuffer`](@ref) to store the latest several states specified by `d`.
+Before processing any observation, the buffer is filled with `zero{T}`.
+"""
+mutable struct StackFrames{T, N} <: AbstractPreprocessor
+    buffer::CircularArrayBuffer{T, N}
+    StackFrames(d::Int...) = StackFrames(Float32, d...)
+    function StackFrames(::Type{T}, d::Vararg{Int, N}) where {T, N}
+        p = new{T, N}(CircularArrayBuffer{T}(d...))
+        for _ in 1:capacity(p.buffer)
+            push!(p.buffer, zeros(T, size(p.buffer)[1:N-1]))
+        end
+        p
+    end
+end
+
+function (p::StackFrames{T, N})(obs::Observation) where {T, N}
+    push!(p.buffer, obs.state)
+
+    Observation(
+        obs.reward,
+        obs.terminal,
+        p.buffer,
+        obs.meta
+    )
 end

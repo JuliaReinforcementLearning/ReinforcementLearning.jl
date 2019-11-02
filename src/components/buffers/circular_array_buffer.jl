@@ -1,180 +1,36 @@
-export CircularArrayBuffer, capacity, isfull, consecutive_view
+export CircularArrayBuffer, capacity, isfull, consecutive_view, select_frame
 
-import Base: view, getindex
-
-"""
-    CircularArrayBuffer{E, T, N}
-
-Using a `N` dimension Array to simulate a circular buffer of `N-1` dimensional elements.
-Here `E` is the type of element and `T` is same with the `eltype` of `E`.
-Call `eltype(b::CircularArrayBuffer{E,T,N})` will return `E`.
-
-# Examples
-
-```julia-repl
-julia> b = CircularArrayBuffer{Float64}(2)
-0-element CircularArrayBuffer{Float64,Float64,1}
-
-julia> push!(b, rand())
-1-element CircularArrayBuffer{Float64,Float64,1}:
- 0.9709012378596478
-
-julia> push!(b, rand())
-2-element CircularArrayBuffer{Float64,Float64,1}:
- 0.9709012378596478
- 0.4510778027035365
-
-julia> push!(b, rand())
-2-element CircularArrayBuffer{Float64,Float64,1}:
- 0.4510778027035365
- 0.6774251288208646
-
-julia> b = CircularArrayBuffer{Array{Float64,2}}(3, (3,3))
-3×3×0 CircularArrayBuffer{Array{Float64,2},Float64,3}
-
-julia> push!(b, randn(3,3))
-3×3×1 CircularArrayBuffer{Array{Float64,2},Float64,3}:
-[:, :, 1] =
- -0.548592   0.926179  -1.40998
- -0.0888621  0.177208   0.342665
-  0.0925987  1.18531    0.962738
-```
-"""
-mutable struct CircularArrayBuffer{E,T,N} <: AbstractArray{T,N}
+mutable struct CircularArrayBuffer{T,N} <: AbstractArray{T,N}
     buffer::Array{T,N}
     first::Int
     length::Int
-    stepsize::Int
-    CircularArrayBuffer{T}(capacity::Integer) where {T} =
-        new{T,T,1}(Vector{T}(undef, capacity), 1, 0, 1)
-    function CircularArrayBuffer{T}(
-        capacity::Integer,
-        element_size::Vararg{<:Integer,N},
-    ) where {T<:AbstractArray,N}
-        ndims(T) == N || throw(DimensionMismatch("the ndims of the specified type $T doesn't math the length of element_size $element_size"))
-        new{T,eltype(T),N + 1}(
-            Array{eltype(T),N + 1}(undef, element_size..., capacity),
-            1,
-            0,
-            *(element_size...),
-        )
-    end
-    CircularArrayBuffer{T}(
-        capacity::Int,
-        element_size::Tuple{Vararg{<:Integer,N}},
-    ) where {T<:AbstractArray,N} = CircularArrayBuffer{T}(capacity, element_size...)
-end
+    step_size::Int
 
-Base.eltype(cb::CircularArrayBuffer{E,T,N}) where {E,T,N} = E
-Base.size(cb::CircularArrayBuffer{E,T,N}) where {E,T,N} =
-    (size(cb.buffer)[1:N-1]..., cb.length)
-
-# TODO: simplify code bellow
-for func in [:view, :getindex]
-    @eval @__MODULE__() begin
-        $func(cb::CircularArrayBuffer{E,T,1}, i::Int) where {E,T} =
-            $func(cb.buffer, _buffer_index(cb, i))
-        $func(cb::CircularArrayBuffer{E,T,2}, i::Int) where {E,T} =
-            $func(cb.buffer, :, _buffer_index(cb, i))
-        $func(cb::CircularArrayBuffer{E,T,3}, i::Int) where {E,T} =
-            $func(cb.buffer, :, :, _buffer_index(cb, i))
-        $func(cb::CircularArrayBuffer{E,T,4}, i::Int) where {E,T} =
-            $func(cb.buffer, :, :, :, _buffer_index(cb, i))
-        $func(cb::CircularArrayBuffer{E,T,N}, i::Int) where {E,T,N} =
-            $func(cb.buffer, [(:) for _ = 1:N-1]..., _buffer_index(cb, i))
-
-        $func(cb::CircularArrayBuffer{E,T,1}, I::Vector{Int}) where {E,T} =
-            $func(cb.buffer, map(i -> _buffer_index(cb, i), I))
-        $func(cb::CircularArrayBuffer{E,T,2}, I::Vector{Int}) where {E,T} =
-            $func(cb.buffer, :, map(i -> _buffer_index(cb, i), I))
-        $func(cb::CircularArrayBuffer{E,T,3}, I::Vector{Int}) where {E,T} =
-            $func(cb.buffer, :, :, map(i -> _buffer_index(cb, i), I))
-        $func(cb::CircularArrayBuffer{E,T,4}, I::Vector{Int}) where {E,T} =
-            $func(cb.buffer, :, :, :, map(i -> _buffer_index(cb, i), I))
-        $func(cb::CircularArrayBuffer{E,T,N}, I::Vector{Int}) where {E,T,N} =
-            $func(cb.buffer, [(:) for _ = 1:N-1]..., map(i -> _buffer_index(cb, i), I))
-
-        $func(cb::CircularArrayBuffer{E,T,1}, i::UnitRange{Int}) where {E,T} =
-            $func(cb.buffer, _buffer_index(cb, i))
-        $func(cb::CircularArrayBuffer{E,T,2}, i::UnitRange{Int}) where {E,T} =
-            $func(cb.buffer, :, _buffer_index(cb, i))
-        $func(cb::CircularArrayBuffer{E,T,3}, i::UnitRange{Int}) where {E,T} =
-            $func(cb.buffer, :, :, _buffer_index(cb, i))
-        $func(cb::CircularArrayBuffer{E,T,4}, i::UnitRange{Int}) where {E,T} =
-            $func(cb.buffer, :, :, :, _buffer_index(cb, i))
-        $func(cb::CircularArrayBuffer{E,T,N}, i::UnitRange{Int}) where {E,T,N} =
-            $func(cb.buffer, [(:) for _ = 1:N-1]..., _buffer_index(cb, i))
+    function CircularArrayBuffer{T}(d::Integer...) where {T}
+        N = length(d)
+        N > 0 || throw(ArgumentError("dimension must be greater than 0"))
+        new{T,N}(Array{T}(undef, d...), 1, 0, N == 1 ? 1 : *(d[1:end-1]...))
     end
 end
 
-# TODO: use @generated instead
-Base.setindex!(cb::CircularArrayBuffer{E,T,1}, data, i) where {E,T} =
-    cb.buffer[_buffer_index(cb, i)] = data
-Base.setindex!(cb::CircularArrayBuffer{E,T,2}, data, i) where {E,T} =
-    cb.buffer[:, _buffer_index(cb, i)] = data
-Base.setindex!(cb::CircularArrayBuffer{E,T,3}, data, i) where {E,T} =
-    cb.buffer[:, :, _buffer_index(cb, i)] = data
-Base.setindex!(cb::CircularArrayBuffer{E,T,4}, data, i) where {E,T} =
-    cb.buffer[:, :, :, _buffer_index(cb, i)] = data
-Base.setindex!(cb::CircularArrayBuffer{E,T,N}, data, i) where {E,T,N} =
-    cb.buffer[[(:) for _ = 1:N-1]..., _buffer_index(cb, i)] = data
-
-## kept only to show elements
-## never manually get/set the inner elements because it is very slow
-## see https://discourse.julialang.org/t/varargs-performance/13578
-Base.getindex(cb::CircularArrayBuffer{E,T,N}, I::Vararg{Int,N}) where {E,T,N} =
-    getindex(cb.buffer, I[1:N-1]..., _buffer_index(cb, I[end]))
-
-capacity(cb::CircularArrayBuffer) = size(cb.buffer)[end]
-Base.length(cb::CircularArrayBuffer) = cb.length
-isfull(cb::CircularArrayBuffer) = length(cb) == capacity(cb)
-Base.isempty(cb::CircularArrayBuffer) = length(cb) == 0
-Base.empty!(cb::CircularArrayBuffer) = (cb.length = 0; cb)
-
-"""
-    push!(cb::CircularArrayBuffer{E, T, N}, data::E) where {E, T, N}
-
-Add an element to the back and overwrite front if full.
-Make sure that `length(data) == cb.stepsize`
-"""
-@inline function Base.push!(
-    cb::CircularArrayBuffer{E,T,N},
-    data::AbstractArray{T},
-) where {E,T,N}
-    length(data) == cb.stepsize || throw(DimensionMismatch("the length of buffer's stepsize doesn't match the length of data, $(cb.stepsize) != $(length(data))"))
-    # if full, increment and overwrite, otherwise push
-    if cb.length == capacity(cb)
-        cb.first = (cb.first == capacity(cb) ? 1 : cb.first + 1)
-    else
-        cb.length += 1
-    end
-    nxt_idx = _buffer_index(cb, cb.length)
-    cb.buffer[cb.stepsize*(nxt_idx-1)+1:cb.stepsize*nxt_idx] = data
-    cb
-end
-
-@inline function Base.push!(cb::CircularArrayBuffer, data::Number)
-    if cb.length == capacity(cb)
-        cb.first = (cb.first == capacity(cb) ? 1 : cb.first + 1)
-    else
-        cb.length += 1
-    end
-    cb.buffer[_buffer_index(cb, cb.length)] = data
-    cb
-end
-
-function Base.push!(cb::CircularArrayBuffer, f::Function)
-    if cb.length == capacity(cb)
-        cb.first = (cb.first == capacity(cb) ? 1 : cb.first + 1)
-    else
-        cb.length += 1
-    end
-    x = @view(cb[end])
-    f(x)
-    x
-end
+Base.IndexStyle(::CircularArrayBuffer) = IndexLinear()
+Base.size(cb::CircularArrayBuffer{T,N}) where {T,N} = (size(cb.buffer)[1:N-1]..., cb.length)
+Base.getindex(cb::CircularArrayBuffer{T, N}, i::Int) where {T, N} = getindex(cb.buffer, _buffer_index(cb, i))
+Base.setindex!(cb::CircularArrayBuffer{T, N}, v, i::Int) where {T, N} = setindex!(cb.buffer, v, _buffer_index(cb, i))
+capacity(cb::CircularArrayBuffer{T, N}) where {T, N} = size(cb.buffer, N)
+isfull(cb::CircularArrayBuffer) = cb.length == capacity(cb)
+Base.isempty(cb::CircularArrayBuffer) = cb.length == 0
 
 @inline function _buffer_index(cb::CircularArrayBuffer, i::Int)
+    ind = (cb.first - 1) * cb.step_size + i
+    if ind > length(cb.buffer)
+        ind - length(cb.buffer)
+    else
+        ind
+    end
+end
+
+@inline function _buffer_frame(cb::CircularArrayBuffer, i::Int)
     n = capacity(cb)
     idx = cb.first + i - 1
     if idx > n
@@ -184,13 +40,46 @@ end
     end
 end
 
-@inline function _buffer_index(cb::CircularArrayBuffer, i::UnitRange{Int})
-    start = _buffer_index(cb, i.start)
-    stop = _buffer_index(cb, i.stop)
-    start ≤ stop ? (start:stop) : vcat(start:capacity(cb), 1:stop)
+function Base.empty!(cb::CircularArrayBuffer)
+    cb.first = 1
+    cb.length = 0
+    cb
 end
 
-function consecutive_view(b::CircularArrayBuffer{E,T,N}, inds, n) where {E,T,N}
-    expanded_inds = collect(Iterators.flatten(x:x+n-1 for x in inds))
-    reshape(view(b, expanded_inds), size(b.buffer)[1:N-1]..., n, length(inds))
+function Base.push!(cb::CircularArrayBuffer{T,N}, data) where {T,N}
+    # length(data) == cb.step_size || throw(ArgumentError("length of , $(cb.step_size) != $(length(data))"))
+    if cb.length == capacity(cb)
+        cb.first = (cb.first == capacity(cb) ? 1 : cb.first + 1)
+    else
+        cb.length += 1
+    end
+    selectdim(cb.buffer, N, _buffer_frame(cb, cb.length)) .= data
+    cb
 end
+
+Base.push!(cb::CircularArrayBuffer{T, N}, data::CircularArrayBuffer{T, N}) where {T, N} = push!(cb, select_frame(data, data.length))
+
+select_frame(cb::CircularArrayBuffer{T, 1}, i::Int) where {T} = getindex(cb.buffer, _buffer_frame(cb, i))
+select_frame(cb::CircularArrayBuffer{T, 2}, i::Int) where {T} = view(cb.buffer, :, _buffer_frame(cb, i))
+select_frame(cb::CircularArrayBuffer{T, 3}, i::Int) where {T} = view(cb.buffer, :, :, _buffer_frame(cb, i))
+select_frame(cb::CircularArrayBuffer{T, 4}, i::Int) where {T} = view(cb.buffer, :, :, :, _buffer_frame(cb, i))
+
+select_frame(cb::Array{T, 1}, i::Int) where {T} = getindex(cb, i)
+select_frame(cb::Array{T, N}, i::Int) where {T, N} = selectdim(cb, N, i)
+
+consecutive_view(cb::CircularArrayBuffer{T,1}, inds, n) where {T} = reshape(view(cb.buffer, [_buffer_frame(cb, i) for x in inds for i in x:x+n-1]), n, length(inds))
+consecutive_view(cb::CircularArrayBuffer{T,2}, inds, n) where {T} = reshape(view(cb.buffer, :, [_buffer_frame(cb, i) for x in inds for i in x:x+n-1]), size(cb.buffer, 1), n, length(inds))
+consecutive_view(cb::CircularArrayBuffer{T,3}, inds, n) where {T} = reshape(view(cb.buffer, :, :, [_buffer_frame(cb, i) for x in inds for i in x:x+n-1]), size(cb.buffer, 1), size(cb.buffer, 2), n, length(inds))
+consecutive_view(cb::CircularArrayBuffer{T,4}, inds, n) where {T} = reshape(view(cb.buffer, :, :, :, [_buffer_frame(cb, i) for x in inds for i in x:x+n-1]), size(cb.buffer, 1), size(cb.buffer, 2), size(cb.buffer, 3), n, length(inds))
+
+
+consecutive_view(cb::CircularArrayBuffer{T,1}, inds, n, c) where {T} = reshape(view(cb.buffer, [_buffer_frame(cb, c) for x in inds for i in x:x+n-1 for c in i-c+1:i]), c, n, length(inds))
+consecutive_view(cb::CircularArrayBuffer{T,2}, inds, n, c) where {T} = reshape(view(cb.buffer, :, [_buffer_frame(cb, c) for x in inds for i in x:x+n-1 for c in i-c+1:i]), size(cb.buffer, 1), c, n, length(inds))
+consecutive_view(cb::CircularArrayBuffer{T,3}, inds, n, c) where {T} = reshape(view(cb.buffer, :, :, [_buffer_frame(cb, c) for x in inds for i in x:x+n-1 for c in i-c+1:i]), size(cb.buffer, 1), size(cb.buffer, 2), c, n, length(inds))
+consecutive_view(cb::CircularArrayBuffer{T,4}, inds, n, c) where {T} = reshape(view(cb.buffer, :, :, :, [_buffer_frame(cb, c) for x in inds for i in x:x+n-1 for c in i-c+1:i]), size(cb.buffer, 1), size(cb.buffer, 2), size(cb.buffer, 3), c, n, length(inds))
+
+consecutive_view(cb::CircularArrayBuffer, inds, n, ::Nothing) = consecutive_view(cb, inds, n)
+
+Base.getindex(cb::CircularArrayBuffer{T, 2}, i1::Int, i2::Int) where T = cb.buffer[i1, _buffer_frame(cb, i2)]
+Base.getindex(cb::CircularArrayBuffer{T, 3}, i1::Int, i2::Int, i3::Int) where T = cb.buffer[i1, i2, _buffer_frame(cb, i3)]
+Base.getindex(cb::CircularArrayBuffer{T, 4}, i1::Int, i2::Int, i3::Int, i4::Int) where T = cb.buffer[i1, i2, i3, _buffer_frame(cb, i4)]
