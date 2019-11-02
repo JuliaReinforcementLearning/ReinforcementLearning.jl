@@ -53,7 +53,7 @@ agent = Agent(
     ),
     buffer = circular_RTSA_buffer(
         capacity = 1000,
-        state_eltype = Vector{Float32},
+        state_eltype = Float32,
         state_size = (ns,),
     )
 )
