@@ -72,6 +72,12 @@ consecutive_view(cb::CircularArrayBuffer{T,2}, inds, n) where {T} = reshape(view
 consecutive_view(cb::CircularArrayBuffer{T,3}, inds, n) where {T} = reshape(view(cb.buffer, :, :, [_buffer_frame(cb, i) for x in inds for i in x:x+n-1]), size(cb.buffer, 1), size(cb.buffer, 2), n, length(inds))
 consecutive_view(cb::CircularArrayBuffer{T,4}, inds, n) where {T} = reshape(view(cb.buffer, :, :, :, [_buffer_frame(cb, i) for x in inds for i in x:x+n-1]), size(cb.buffer, 1), size(cb.buffer, 2), size(cb.buffer, 3), n, length(inds))
 
+
+consecutive_view(cb::CircularArrayBuffer{T,1}, inds, n, c) where {T} = reshape(view(cb.buffer, [_buffer_frame(cb, c) for x in inds for i in x:x+n-1 for c in i-c+1:i]), c, n, length(inds))
+consecutive_view(cb::CircularArrayBuffer{T,2}, inds, n, c) where {T} = reshape(view(cb.buffer, :, [_buffer_frame(cb, c) for x in inds for i in x:x+n-1 for c in i-c+1:i]), size(cb.buffer, 1), c, n, length(inds))
+consecutive_view(cb::CircularArrayBuffer{T,3}, inds, n, c) where {T} = reshape(view(cb.buffer, :, :, [_buffer_frame(cb, c) for x in inds for i in x:x+n-1 for c in i-c+1:i]), size(cb.buffer, 1), size(cb.buffer, 2), c, n, length(inds))
+consecutive_view(cb::CircularArrayBuffer{T,4}, inds, n, c) where {T} = reshape(view(cb.buffer, :, :, :, [_buffer_frame(cb, c) for x in inds for i in x:x+n-1 for c in i-c+1:i]), size(cb.buffer, 1), size(cb.buffer, 2), size(cb.buffer, 3), c, n, length(inds))
+
 consecutive_view(cb::CircularArrayBuffer, inds, n, ::Nothing) = consecutive_view(cb, inds, n)
 
 Base.getindex(cb::CircularArrayBuffer{T, 2}, i1::Int, i2::Int) where T = cb.buffer[i1, _buffer_frame(cb, i2)]

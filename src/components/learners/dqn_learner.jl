@@ -23,9 +23,9 @@ See paper: [Human-level control through deep reinforcement learning](https://www
 - `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
 
 """
-Base.@kwdef mutable struct DQNLearner{Tq<:AbstractQApproximator,Tf, Ts<:Union{Int, Nothing}} <: AbstractLearner
+Base.@kwdef mutable struct DQNLearner{Tq<:AbstractQApproximator, Tt<:AbstractQApproximator, Tf, Ts<:Union{Int, Nothing}} <: AbstractLearner
     approximator::Tq
-    target_approximator::Tq
+    target_approximator::Tt
     loss_fun::Tf
     stack_size::Ts = 4
     γ::Float32 = 0.99f0
@@ -36,9 +36,9 @@ Base.@kwdef mutable struct DQNLearner{Tq<:AbstractQApproximator,Tf, Ts<:Union{In
     target_update_freq::Int = 100
     update_step::Int = 0
 
-    function DQNLearner(approximator::Tq, target_approximator::Tq, loss_fun::Tf, stack_size::Ts, args...) where {Tq, Tf, Ts}
+    function DQNLearner(approximator::Tq, target_approximator::Tt, loss_fun::Tf, stack_size::Ts, args...) where {Tq, Tt, Tf, Ts}
         copyto!(approximator, target_approximator)
-        new{Tq, Tf, Ts}(approximator, target_approximator, loss_fun, stack_size, args...)
+        new{Tq, Tt, Tf, Ts}(approximator, target_approximator, loss_fun, stack_size, args...)
     end
 end
 
