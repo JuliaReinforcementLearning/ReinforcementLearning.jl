@@ -5,6 +5,9 @@ import Zygote:gradient
 
 gradient(f, ::Val{:Zygote}, args...) = gradient(f, args...)
 
+Zygote.@adjoint argmax(xs; dims = :) = argmax(xs;dims=dims), _ -> nothing
+
+# ??? can safely removed now
 Zygote.@adjoint function Base.broadcasted(::typeof(relu), x::Array{T}) where T<:Real
     y = relu.(x)
     return y, Δ -> begin

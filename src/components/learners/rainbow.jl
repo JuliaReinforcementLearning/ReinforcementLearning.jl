@@ -10,9 +10,25 @@ See paper: [Rainbow: Combining Improvements in Deep Reinforcement Learning](http
 
 # Keywords
 
-TODO: need review
+- `approximator`::[`AbstractQApproximator`](@ref): used to get Q-values of a state.
+- `target_approximator`::[`AbstractQApproximator`](@ref): similar to `approximator`, but used to estimate the target (the next state).
+- `loss_fun`: the loss function.
+- `Vₘₐₓ::Float32`: the maximum value of distribution.
+- `Vₘᵢₙ::Float32`: the minimum value of distribution.
+- `n_actions::Int`: number of possible actions.
+- `γ::Float32=0.99f0`: discount rate.
+- `batch_size::Int=32`
+- `update_horizon::Int=1`: length of update ('n' in n-step update).
+- `min_replay_history::Int=32`: number of transitions that should be experienced before updating the `approximator`.
+- `update_freq::Int=4`: the frequency of updating the `approximator`.
+- `target_update_freq::Int=500`: the frequency of syncing `target_approximator`.
+- `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
+- `default_priority::Float64=100.`: the default priority for newly added transitions.
+- `n_atoms::Int=51`: the number of buckets of the value function distribution.
+- `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
+- `default_priority::Float64=100.`: the default priority for newly added transitions.
 """
-Base.@kwdef mutable struct RainbowLearner{Tq<:AbstractQApproximator,Tf,Ts} <: AbstractLearner
+Base.@kwdef mutable struct RainbowLearner{Tq<:AbstractQApproximator, Tt<:AbstractQApproximator,Tf,Ts,Tss<:Union{Int, Nothing}} <: AbstractLearner
     approximator::Tq
     target_approximator::Tq
     loss_fun::Tf
@@ -21,9 +37,9 @@ Base.@kwdef mutable struct RainbowLearner{Tq<:AbstractQApproximator,Tf,Ts} <: Ab
     n_actions::Int
     n_atoms::Int = 51
     support::Ts = collect(range(Float32(-Vₘₐₓ), Float32(Vₘₐₓ), length = n_atoms))
+    stack_size::Tss = 4
     delta_z::Float32 = Float32(support[2] - support[1])
     γ::Float32 = 0.99
-    loss::Float32 = 0.f0
     batch_size::Int = 32
     update_horizon::Int = 1
     min_replay_history::Int = 32
@@ -32,9 +48,9 @@ Base.@kwdef mutable struct RainbowLearner{Tq<:AbstractQApproximator,Tf,Ts} <: Ab
     update_step::Int = 0
     default_priority::Float64 = 100.0
 
-    function RainbowLearner(approximator::Tq, target_approximator::Tq, loss_fun::Tf, Vₘₐₓ::Float32, Vₘᵢₙ::Float32, n_actions::Int, n_atoms::Int, support::Ts, args...) where {Tq,Tf, Ts}
+    function RainbowLearner(approximator::Tq, target_approximator::Tt, loss_fun::Tf, Vₘₐₓ::Float32, Vₘᵢₙ::Float32, n_actions::Int, n_atoms::Int, support::Ts, stack_size::Tss, args...) where {Tq,Tt, Tf, Ts, Tss}
         copyto!(approximator, target_approximator)  # force sync
-        new{Tq,Tf, Ts}(approximator, target_approximator, loss_fun, Vₘₐₓ, Vₘᵢₙ, n_actions, n_atoms, support, args...)
+        new{Tq,Tt,Tf, Ts, Tss}(approximator, target_approximator, loss_fun, Vₘₐₓ, Vₘᵢₙ, n_actions, n_atoms, support, stack_size, args...)
     end
 end
 
@@ -69,7 +85,7 @@ function update!(learner::RainbowLearner, batch)
 
     updated_priorities = Vector{Float32}()
 
-    loss, back = Flux.pullback(Q.params) do 
+    gs = gradient(Q) do
         logits = reshape(batch_estimate(Q, states), n_atoms, n_actions, :)
         select_logits = logits[:, actions]
         next_logits = batch_estimate(Qₜ, next_states)
@@ -92,25 +108,25 @@ function update!(learner::RainbowLearner, batch)
         updated_priorities = vec(clamp.(sqrt.(Zygote.dropgrad(batch_losses) .+ 1f-10), 1.f0, 1.f2))
 
         target_priorities = 1.0f0 ./ sqrt.(updated_priorities .+ 1f-10)
-        target_priorities ./= maximum(target_priorities)
+        normalized_target_priorities = target_priorities ./ maximum(target_priorities)
 
-        mean(Zygote.dropgrad(target_priorities) .* batch_losses)
+        mean(normalized_target_priorities .* batch_losses)
     end
 
-    learner.loss = loss
-    update!(Q, back(loss))
+    update!(Q, gs)
 
     if learner.update_step % learner.target_update_freq == 0
         copyto!(Qₜ, Q)
     end
 
-    updated_priorities
+    updated_priorities |> to_host
 end
 
 function project_distribution(supports, weights, target_support, delta_z, vmin, vmax)
     batch_size, n_atoms = size(supports, 2), length(target_support)
     clampped_support = clamp.(supports, vmin, vmax)
-    tiled_support = reshape(repeat(clampped_support, n_atoms), n_atoms, n_atoms, batch_size)
+    # !!! `repeat` will make the back prop very slow, need revisit!
+    tiled_support = reshape(repeat(clampped_support; outer=(n_atoms, 1)), n_atoms, n_atoms, batch_size)
 
     projection = clamp.(
         1 .- abs.(tiled_support .- reshape(target_support, 1, :)) ./ delta_z,
@@ -122,11 +138,7 @@ end
 
 function extract_transitions(buffer::CircularTurnBuffer{PRTSA}, learner::RainbowLearner)
     if length(buffer) > learner.min_replay_history
-        inds, consecutive_batch = sample(
-            buffer;
-            batch_size = learner.batch_size,
-            n_step = learner.update_horizon,
-        )
+        inds, consecutive_batch = sample(buffer, learner.batch_size, learner.update_horizon, learner.stack_size)
         inds, extract_SARTS(consecutive_batch, learner.γ)
     else
         nothing
