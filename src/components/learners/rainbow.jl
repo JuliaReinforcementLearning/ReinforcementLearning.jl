@@ -125,6 +125,7 @@ end
 function project_distribution(supports, weights, target_support, delta_z, vmin, vmax)
     batch_size, n_atoms = size(supports, 2), length(target_support)
     clampped_support = clamp.(supports, vmin, vmax)
+    # !!! `repeat` will make the back prop very slow, need revisit!
     tiled_support = reshape(repeat(clampped_support; outer=(n_atoms, 1)), n_atoms, n_atoms, batch_size)
 
     projection = clamp.(
