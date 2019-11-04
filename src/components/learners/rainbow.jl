@@ -27,6 +27,9 @@ See paper: [Rainbow: Combining Improvements in Deep Reinforcement Learning](http
 - `n_atoms::Int=51`: the number of buckets of the value function distribution.
 - `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
 - `default_priority::Float64=100.`: the default priority for newly added transitions.
+
+!!! warning
+    The `Zygote_gpu` version is slow due to that the `argmax(A, dims=1)` falls back to the CPU version in CuArrays.
 """
 Base.@kwdef mutable struct RainbowLearner{Tq<:AbstractQApproximator, Tt<:AbstractQApproximator,Tf,Ts,Tss<:Union{Int, Nothing}} <: AbstractLearner
     approximator::Tq
@@ -50,15 +53,17 @@ Base.@kwdef mutable struct RainbowLearner{Tq<:AbstractQApproximator, Tt<:Abstrac
 
     function RainbowLearner(approximator::Tq, target_approximator::Tt, loss_fun::Tf, Vₘₐₓ::Float32, Vₘᵢₙ::Float32, n_actions::Int, n_atoms::Int, support::Ts, stack_size::Tss, args...) where {Tq,Tt, Tf, Ts, Tss}
         copyto!(approximator, target_approximator)  # force sync
-        new{Tq,Tt,Tf, Ts, Tss}(approximator, target_approximator, loss_fun, Vₘₐₓ, Vₘᵢₙ, n_actions, n_atoms, support, stack_size, args...)
+        support = to_device(approximator, support)
+        new{Tq,Tt,Tf, typeof(support), Tss}(approximator, target_approximator, loss_fun, Vₘₐₓ, Vₘᵢₙ, n_actions, n_atoms, support, stack_size, args...)
     end
 end
 
 function (learner::RainbowLearner)(obs::Observation)
-    logits = obs |> get_state |> learner.approximator
+    state = get_state(obs)
+    logits = batch_estimate(learner.approximator, to_device(learner.approximator, state))
     q = learner.support .* softmax(reshape(logits, :, learner.n_actions))
     # probs = vec(sum(q, dims=1)) .+ legal_action
-    vec(sum(q, dims = 1))
+    vec(sum(q, dims = 1)) |> to_host
 end
 
 function update!(learner::RainbowLearner, batch)
@@ -104,13 +109,13 @@ function update!(learner::RainbowLearner, batch)
             learner.Vₘₐₓ,
         )
 
-        batch_losses = loss_fun(select_logits, target_distribution)
-        updated_priorities = vec(clamp.(sqrt.(Zygote.dropgrad(batch_losses) .+ 1f-10), 1.f0, 1.f2))
+        batch_losses = loss_fun(select_logits, Zygote.dropgrad(target_distribution))
+        updated_priorities = vec(clamp.(sqrt.(batch_losses .+ 1f-10), 1.f0, 1.f2))
 
         target_priorities = 1.0f0 ./ sqrt.(updated_priorities .+ 1f-10)
-        normalized_target_priorities = target_priorities ./ maximum(target_priorities)
+        target_priorities = target_priorities ./ maximum(target_priorities)
 
-        mean(normalized_target_priorities .* batch_losses)
+        mean(Zygote.dropgrad(target_priorities) .* batch_losses)
     end
 
     update!(Q, gs)
@@ -125,7 +130,6 @@ end
 function project_distribution(supports, weights, target_support, delta_z, vmin, vmax)
     batch_size, n_atoms = size(supports, 2), length(target_support)
     clampped_support = clamp.(supports, vmin, vmax)
-    # !!! `repeat` will make the back prop very slow, need revisit!
     tiled_support = reshape(repeat(clampped_support; outer=(n_atoms, 1)), n_atoms, n_atoms, batch_size)
 
     projection = clamp.(
