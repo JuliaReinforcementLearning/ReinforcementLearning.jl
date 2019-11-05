@@ -38,7 +38,10 @@ makedocs(
             "Core" => "core.md",
             "Utils" => "utils.md"
         ],
-        "Tips for Developers" => "tips_for_developers.md"],
+        "Tips for Developers" => "tips_for_developers.md",
+        "Experiments" => [
+            "Play Atari Games with DQN" => "experiments/atari_dqn.md"
+        ]],
 )
 
 deploydocs(
