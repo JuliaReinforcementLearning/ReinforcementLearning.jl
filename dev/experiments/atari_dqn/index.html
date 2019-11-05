@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Play Atari Games with DQN · ReinforcementLearning.jl</title><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-149861753-1', 'auto');
+ga('send', 'pageview');
+</script><link rel="canonical" href="https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/experiments/atari_dqn/index.html"/><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/><link href="../../assets/custom.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../../"><img class="logo" src="../../assets/logo.png" alt="ReinforcementLearning.jl logo"/></a><h1>ReinforcementLearning.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../">Home</a></li><li><a class="toctext" href="../../a_quick_example/">A Quick Example</a></li><li><a class="toctext" href="../../overview/">Overview</a></li><li><span class="toctext">Manual</span><ul><li><span class="toctext">Components</span><ul><li><a class="toctext" href="../../components/agents/">Agents</a></li><li><a class="toctext" href="../../components/environments/">Environments</a></li><li><a class="toctext" href="../../components/buffers/">Buffers</a></li><li><a class="toctext" href="../../components/policies/">Policies</a></li><li><a class="toctext" href="../../components/learners/">Learners</a></li><li><a class="toctext" href="../../components/approximators/">Approximators</a></li><li><a class="toctext" href="../../components/action_selectors/">Action Selectors</a></li><li><a class="toctext" href="../../components/environment_models/">Environment Models</a></li></ul></li><li><a class="toctext" href="../../core/">Core</a></li><li><a class="toctext" href="../../utils/">Utils</a></li></ul></li><li><a class="toctext" href="../../tips_for_developers/">Tips for Developers</a></li><li><span class="toctext">Experiments</span><ul><li class="current"><a class="toctext" href>Play Atari Games with DQN</a><ul class="internal"></ul></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Experiments</li><li><a href>Play Atari Games with DQN</a></li></ul><a class="edit-page" href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/src/experiments/atari_dqn.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Play Atari Games with DQN</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Playing-the-Atari-Games-with-DQN-1" href="#Playing-the-Atari-Games-with-DQN-1">Playing the Atari Games with DQN</a></h1><p>Here we provide an example to show you how to play the Atari games with DQN. First, let&#39;s install some required packages:</p><ul><li><code>] add ArcadeLearningEnvironment</code>. Please note that this package only works on Linux systems. For now, it doesn&#39;t use the BinaryBuilder.jl and you have to make sure that some necessary building tools are properly installed(Good First Issue!!!). If you are using Ubuntu, you are lucky. <code>sudo apt-get install -y --no-install-recommends cmake build-essential libz-dev unzip</code> should be enough.</li><li><code>] add ReinforcementLearningEnvironments</code>. This package provides some unified interfaces.</li><li><code>] add ReinforcementLearning#master</code>. This package is still under rapid development, so we need to install the master branch.</li><li><code>] add CuArrays</code>. To enable the GPU support.</li><li><code>] add Flux#master</code>. We need the master branch of Flux to use Zygote.jl for backprop.</li><li><code>] add Plots</code>. To plot the rewards.</li></ul><p>Now we can try to train a DQN agent.</p><pre><code class="language-none">using ReinforcementLearning, ReinforcementLearningEnvironments, ArcadeLearningEnvironment, Flux, Plots
+
+using Random
+Random.seed!(11)
+
+state_size = (84, 84)
+n_frames = 4
+
+env = WrappedEnv(
+    env = AtariEnv(;
+        name=&quot;pong&quot;,
+        grayscale_obs=true,
+        noop_max=30,
+        frame_skip=4,
+        terminal_on_life_loss=false,
+        repeat_action_probability=0.,
+        max_num_frames_per_episode=4 * 100000,
+        color_averaging=false,
+        full_action_space=false,
+        seed=(22, 33)
+        ),
+    preprocessor = Chain(
+        ImageResize(84, 84),
+        StackFrames(state_size..., n_frames)
+    )
+)
+
+na = length(action_space(env))
+
+device = :gpu
+
+agent = Agent(
+    π = QBasedPolicy(
+        learner = DQNLearner(
+            approximator = NeuralNetworkQ(
+                model = Chain(
+                    x -&gt; x ./ 255,
+                    Conv((8,8), n_frames =&gt; 32, relu; stride=4),
+                    Conv((4,4), 32 =&gt; 64, relu; stride=2),
+                    Conv((3,3), 64 =&gt; 64, relu; stride=1),
+                    x -&gt; reshape(x, :, size(x)[end]),
+                    Dense(7*7*64, 512, relu),
+                    Dense(512, na),
+                    ),
+                optimizer = ADAM(0.00001),
+                device = device
+            ),
+            target_approximator = NeuralNetworkQ(
+                model = Chain(
+                    x -&gt; x ./ 255,
+                    Conv((8,8), n_frames =&gt; 32, relu; stride=4),
+                    Conv((4,4), 32 =&gt; 64, relu; stride=2),
+                    Conv((3,3), 64 =&gt; 64, relu; stride=1),
+                    x -&gt; reshape(x, :, size(x)[end]),
+                    Dense(7*7*64, 512, relu),
+                    Dense(512, na),
+                    ),
+                optimizer = ADAM(0.00001),
+                device = device
+            ),
+            update_freq = 4,
+            γ = 0.99f0,
+            update_horizon = 1,
+            batch_size = 32,
+            stack_size = n_frames,
+            min_replay_history = 10000,
+            loss_fun = huber_loss,
+            target_update_freq = 1000,
+        ),
+        selector = EpsilonGreedySelector{:exp}(ϵ_init=1.0, ϵ_stable = 0.01, decay_steps = 30000),
+    ),
+    buffer = circular_RTSA_buffer(
+        capacity = 100000,
+        state_eltype = Float32,
+        state_size = state_size,
+    )
+)
+
+hook = ComposedHook(
+    TotalRewardPerEpisode(),
+    TimePerStep()
+);
+
+run(agent, env, StopAfterStep(3000000; is_show_progress=true); hook = hook)</code></pre><p>Finally we can plot the rewards of each episode:</p><pre><code class="language-none">plot(hook[1].rewards, xlabel=&quot;Episode&quot;, ylabel=&quot;Reward&quot;, label=&quot;&quot;)</code></pre><p><img src="../../assets/img/pong_dqn.png" alt/></p><footer><hr/><a class="previous" href="../../tips_for_developers/"><span class="direction">Previous</span><span class="title">Tips for Developers</span></a></footer></article></body></html>
