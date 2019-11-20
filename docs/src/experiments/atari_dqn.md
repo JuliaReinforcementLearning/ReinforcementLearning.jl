@@ -12,7 +12,7 @@ First, let's install some required packages:
 
 Now we can try to train a DQN agent.
 
-```
+```julia
 using ReinforcementLearning, ReinforcementLearningEnvironments, ArcadeLearningEnvironment, Flux, Plots
 
 using Random

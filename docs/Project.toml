@@ -1,5 +1,4 @@
 [deps]
-CUDAdrv = "c5f51814-7f29-56b8-a69c-e4d8f6be1fde"
 CuArrays = "3a865a2d-5b23-5a0f-bc46-62713ec82fae"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
@@ -10,4 +9,3 @@ ReinforcementLearning = "158674fc-8238-5cab-b5ba-03dfc80d1318"
 ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
-ZygoteRules = "700de1a5-db45-46bc-99cf-38207098b444"
