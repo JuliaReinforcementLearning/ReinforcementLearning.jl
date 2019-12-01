@@ -7,7 +7,7 @@ First, let's install some required packages:
 - `] add ReinforcementLearningEnvironments`. This package provides some unified interfaces.
 - `] add ReinforcementLearning#master`. This package is still under rapid development, so we need to install the master branch.
 - `] add CuArrays`. To enable the GPU support.
-- `] add Flux#master`. We need the master branch of Flux to use Zygote.jl for backprop.
+- `] add Flux`. We need the latest Flux to use Zygote.jl for backprop.
 - `] add Plots`. To plot the rewards.
 
 Now we can try to train a DQN agent.

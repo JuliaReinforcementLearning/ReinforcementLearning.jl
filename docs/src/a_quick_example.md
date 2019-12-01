@@ -2,14 +2,6 @@
 
 Welcome to the world of reinforcement learning in Julia! Here's a quick example to show you how to train an agent with a [`BasicDQNLearner`](@ref) to play the `CartPoleEnv`.
 
-!!! note
-    Notice that a lot of dependent packages are under rapid development. To make sure that you can reproduce the result in this example, you are suggested to:
-    1. Make sure that your Julia version is `v1.3-rc3` or above
-    1. Clone `git@github.com:JuliaReinforcementLearning/ReinforcementLearning.jl.git`
-    1. `cd ReinforcementLearning.jl`
-    1. `julia --project=docs`
-    1. `]instantiate`
-
 First, let's make sure that running the following code will not trigger any error:
 
 ```@example 1
