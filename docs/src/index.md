@@ -42,14 +42,8 @@ This package can be installed from the package manager in Julia's REPL:
 ```
 
 !!! note
-    This package relies on many new features introduced since [Julia 1.3](https://julialang.org/downloads/), so make sure that you have the proper Julia version installed. Considering that this package is still under rapid development, you're strongly suggested to install the master branch of this package by the following steps:
-    1. Make sure that your Julia version is `v1.3-rc3` or above
-    1. `git clone git@github.com:JuliaReinforcementLearning/ReinforcementLearning.jl.git`
-    1. `cd ReinforcementLearning.jl`
-    1. `julia --project=.`
-    1. `] instantiate`
+    This package relies on many new features introduced since [Julia 1.3](https://julialang.org/downloads/), so make sure that you have the proper Julia version installed. Considering that this package is still under rapid development, you're strongly suggested to install the master branch of this package by `] add ReinforcementLearning#master`.
 
-    
 To play with some common reinforcement learning environments, you may also want to install:
 
 ```
