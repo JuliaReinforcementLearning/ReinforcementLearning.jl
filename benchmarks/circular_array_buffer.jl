@@ -1,4 +1,4 @@
-using ReinforcementLearning, ReinforcementLearningEnvironments, Flux, BenchmarkTools
+using ReinforcementLearning, ReinforcementLearningEnvironments, Flux, BenchmarkTools, CuArrays
 
 b = CircularArrayBuffer{Float64}(84, 84, 10)
 
@@ -13,6 +13,7 @@ end
 
 show_msg("push a frame into buffer", @benchmark(push!($b, $(rand(84, 84)))))
 show_msg("view a frame", @benchmark(select_frame($b, $(rand(1:10)))))
+show_msg("view frames", @benchmark(select_frame($b, $(rand(1:10, 32)))))
 show_msg("consecutive view a batch", @benchmark(consecutive_view($b, $(rand(1:5, 32)), 4)))
 show_msg("get an element", @benchmark(getindex($b, $(rand(1:84)), $(rand(1:84)), $(rand(1:10)))))
 
