@@ -55,8 +55,8 @@ end
 
 function extract_transitions(buffer::CircularTurnBuffer{RTSA}, learner::BasicDQNLearner)
     if length(buffer) > learner.min_replay_history
-        inds, consecutive_batch = sample(buffer, learner.batch_size, learner.update_horizon, nothing)
-        extract_SARTS(consecutive_batch, learner.γ)
+        inds = sample_indices(buffer, learner.batch_size, learner.update_horizon, nothing)
+        extract_SARTS(buffer, inds, learner.γ, learner.update_horizon, nothing)
     else
         nothing
     end

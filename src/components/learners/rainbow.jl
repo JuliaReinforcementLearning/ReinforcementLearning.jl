@@ -142,8 +142,8 @@ end
 
 function extract_transitions(buffer::CircularTurnBuffer{PRTSA}, learner::RainbowLearner)
     if length(buffer) > learner.min_replay_history
-        inds, consecutive_batch = sample(buffer, learner.batch_size, learner.update_horizon, learner.stack_size)
-        inds, extract_SARTS(consecutive_batch, learner.γ)
+        inds = sample_indices(buffer, learner.batch_size, learner.update_horizon, learner.stack_size)
+        inds, extract_SARTS(buffer, inds, learner.γ, learner.update_horizon, learner.stack_size)
     else
         nothing
     end
