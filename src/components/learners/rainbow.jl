@@ -82,8 +82,7 @@ function update!(learner::RainbowLearner, batch)
         learner.batch_size
 
     states, rewards, terminals, next_states = map(x->to_device(Q, x), (batch.states, batch.rewards, batch.terminals, batch.next_states))
-    actions = CartesianIndex.(batch.actions, 1:batch_size)
-
+    actions = CartesianIndex.(batch.actions, 1:batch_size) 
     target_support = reshape(rewards, 1, :) .+
                      (reshape(support, :, 1) *
                       reshape((γ^update_horizon) .* (1 .- terminals), 1, :))
@@ -97,8 +96,7 @@ function update!(learner::RainbowLearner, batch)
         next_probs = reshape(softmax(reshape(next_logits, n_atoms, :)), n_atoms, n_actions, :)
         next_q = reshape(sum(support .* next_probs, dims = 1), n_actions, :)
         # next_q_argmax = argmax(cpu(next_q .+ next_legal_actions), dims=1)
-        next_q_argmax = argmax(next_q, dims = 1)
-        next_prob_select = reshape(next_probs[:, next_q_argmax], n_atoms, :)
+        next_prob_select = select_best_probs(next_probs, next_q)
 
         target_distribution = project_distribution(
             target_support,
@@ -127,6 +125,12 @@ function update!(learner::RainbowLearner, batch)
     updated_priorities |> to_host
 end
 
+@inline function select_best_probs(probs, q)
+    q_argmax = argmax(q, dims = 1)
+    prob_select = @inbounds probs[:, q_argmax] # !!! without @inbounds it would be really slow
+    reshape(prob_select, :, length(q_argmax))
+end
+
 function project_distribution(supports, weights, target_support, delta_z, vmin, vmax)
     batch_size, n_atoms = size(supports, 2), length(target_support)
     clampped_support = clamp.(supports, vmin, vmax)
@@ -142,8 +146,8 @@ end
 
 function extract_transitions(buffer::CircularTurnBuffer{PRTSA}, learner::RainbowLearner)
     if length(buffer) > learner.min_replay_history
-        inds, consecutive_batch = sample(buffer, learner.batch_size, learner.update_horizon, learner.stack_size)
-        inds, extract_SARTS(consecutive_batch, learner.γ)
+        inds = sample_indices(buffer, learner.batch_size, learner.update_horizon, learner.stack_size)
+        inds, extract_SARTS(buffer, inds, learner.γ, learner.update_horizon, learner.stack_size)
     else
         nothing
     end

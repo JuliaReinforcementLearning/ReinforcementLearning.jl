@@ -92,37 +92,28 @@ Base.getindex(b::AbstractTurnBuffer{PRTSA,types}, i::Int) where {types} =
      priority = select_frame(priority(b), i+1),
     )
 
-function consecutive_view(b::AbstractTurnBuffer, inds, n, stack_size)
-    next_inds = inds .+ 1
+function extract_SARTS(buffer, inds, γ, update_horizon, stack_size)
+    n = length(inds)
+    end_inds = inds .+ update_horizon
+    shift_inds = inds .+ 1
+    states = consecutive_view(state(buffer), inds, nothing, stack_size)
+    actions = consecutive_view(action(buffer), inds, nothing, nothing)
+    next_states = consecutive_view(state(buffer), end_inds, nothing, stack_size)
+    batch_rewards = consecutive_view(reward(buffer), shift_inds, update_horizon, nothing)
+    batch_terminals = consecutive_view(terminal(buffer), shift_inds, update_horizon, nothing)
 
-    (
-     states = consecutive_view(state(b), inds, n, stack_size),
-     actions = consecutive_view(action(b), inds, n),
-     rewards = consecutive_view(reward(b), next_inds, n),
-     terminals = consecutive_view(terminal(b), next_inds, n),
-     next_states = consecutive_view(state(b), next_inds, n, stack_size),
-     next_actions = consecutive_view(action(b), next_inds, n),
-    )
-end
-
-function extract_SARTS(batch, γ)
-    n_step, batch_size = size(batch.terminals)
-    states = selectdim(batch.states, ndims(batch.states) - 1, 1)
-    actions = selectdim(batch.actions, ndims(batch.actions) - 1, 1)
-    next_states = selectdim(batch.next_states, ndims(batch.next_states) - 1, n_step)
-
-    rewards, terminals = zeros(Float32, batch_size), fill(false, batch_size)
+    rewards, terminals = zeros(Float32, n), fill(false, n)
 
     # make sure that we only consider experiences in current episode
-    for i = 1:batch_size
-        t = findfirst(view(batch.terminals, :, i))
+    for i = 1:n
+        t = findfirst(view(batch_terminals, :, i))
 
         if isnothing(t)
             terminals[i] = false
-            rewards[i] = discount_rewards_reduced(view(batch.rewards, :, i), γ)
+            rewards[i] = discount_rewards_reduced(view(batch_rewards, :, i), γ)
         else
             terminals[i] = true
-            rewards[i] = discount_rewards_reduced(view(batch.rewards, 1:t, i), γ)
+            rewards[i] = discount_rewards_reduced(view(batch_rewards, 1:t, i), γ)
         end
     end
 
