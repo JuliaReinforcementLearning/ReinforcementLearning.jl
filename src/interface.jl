@@ -23,14 +23,7 @@ Only do dry-run, shouldn't have any side-effect.
 An approximator is a functional object for value estimation.
 """
 @interface abstract type AbstractApproximator end
-
 @interface (app::AbstractApproximator)(x)
-
-"""
-Only do dry-run, shouldn't have any side-effect.
-"""
-@interface predict(a::AbstractApproximator, x)
-
 @interface update!(a::AbstractApproximator, correction)
 
 #####
@@ -54,7 +47,6 @@ It defines the expected inputs and how to udpate inner approximators.
 Define how to select actions.
 """
 @interface abstract type AbstractExplorer end
-
 @interface (p::AbstractExplorer)(x)
 
 """
