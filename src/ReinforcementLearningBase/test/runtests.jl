@@ -1,4 +1,5 @@
 using ReinforcementLearningBase
 using Test
 
-include("space.jl")
+@testset "ReinforcementLearningBase" begin
+end
