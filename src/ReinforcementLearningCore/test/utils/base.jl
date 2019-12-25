@@ -68,10 +68,13 @@ end
     @test find_all_max([-Inf, -Inf, -Inf]) == (-Inf, [1, 2, 3])
     @test find_all_max([Inf, Inf, Inf]) == (Inf, [1, 2, 3])
     @test find_all_max([0, 1, 2, 1, 2, 1, 0]) == (2, [3, 5])
-    @test begin
-        max_val, inds = find_all_max([NaN, NaN, NaN])
-        isnan(max_val) && inds == [1, 2, 3]
-    end
+
+    max_val, inds = find_all_max([NaN, NaN, NaN])
+    @test isnan(max_val) && inds == [1, 2, 3]
+
+    max_val, inds = find_all_max([0, 1, 2, 1, 2, 1, 0], [true, true, false, false, false, true, true])
+    @test max_val == 1
+    @test inds == [2, 6]
 end
 
 end

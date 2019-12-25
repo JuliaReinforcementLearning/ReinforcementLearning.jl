@@ -12,11 +12,12 @@
 
     @test explorer(nothing) == 1
     @test explorer(nothing) == 2
-    @test get_distribution(explorer, nothing) == [0, 1, 0]
+    @test get_distribution(explorer, nothing) == [0, 0, 1]
+    @test explorer(nothing) == 3
 
     reset!(explorer)
-    @test explorer(nothing) == 1
     @test get_distribution(explorer, nothing) == [1, 0, 0]
+    @test explorer(nothing) == 1
 end
 
 @testset "EpsilonGreedyExplorer" begin
@@ -51,15 +52,51 @@ end
 
     @testset "linear" begin
         explorer = EpsilonGreedyExplorer(; ϵ_stable=0.1, ϵ_init=0.9, warmup_steps=3, decay_steps=8, kind=:linear)
-        Ε = [RLCore.get_ϵ(explorer, i) for i in 1:15]
-        @test Ε ≈ [0.9, 0.9, range(0.9; stop=0.1, step=-0.1)..., 0.1, 0.1, 0.1, 0.1]
+        xs = [0, 1, 2, -1, 2]
+        mask = [true, true, false, true, false]
+        E = [0.9, 0.9, range(0.9; stop=0.1, step=-0.1)..., 0.1, 0.1, 0.1, 0.1]
+
+        for ϵ in E
+            @test RLCore.get_ϵ(explorer) ≈ ϵ
+            @test isapprox(get_distribution(explorer, xs), [ϵ/5, ϵ/5, ϵ/5+(1-ϵ)/2, ϵ/5, ϵ/5+(1-ϵ)/2])
+            explorer(xs)
+        end
+
+        reset!(explorer)
+
+        for ϵ in E
+            @test RLCore.get_ϵ(explorer) ≈ ϵ
+            @test isapprox(get_distribution(explorer, xs, mask), [ϵ/3, (1-ϵ) + ϵ/3, 0., ϵ/3, 0.])
+            explorer(xs)
+        end
+
+        reset!(explorer)
+        for i in 1:100
+            @test mask[explorer(xs, mask)]
+        end
     end
 
     @testset "exp" begin
         explorer = EpsilonGreedyExplorer(; ϵ_stable=0.1, ϵ_init=0.9, warmup_steps=3, decay_steps=8, kind=:exp)
-        @test isapprox(RLCore.get_ϵ(explorer, 100), 0.1; atol=1e-5)
-    end
+        xs = [0, 1, 2, -1, 2]
+        mask = [true, true, false, true, false]
+        for i in 1:10
+            explorer(xs)
+        end
+        ϵ = 0.1 + (0.9 - 0.1) * exp(-1)
+        @test isapprox(get_distribution(explorer, xs), [ϵ/5, ϵ/5, ϵ/5+(1-ϵ)/2, ϵ/5, ϵ/5+(1-ϵ)/2])
 
+        for i in 1:100
+            explorer(xs)
+        end
+        ϵ = 0.1
+        @test isapprox(get_distribution(explorer, xs), [ϵ/5, ϵ/5, ϵ/5+(1-ϵ)/2, ϵ/5, ϵ/5+(1-ϵ)/2]; atol=1e-5)
+
+        reset!(explorer)
+        for i in 1:100
+            @test mask[explorer(xs, mask)]
+        end
+    end
 end
 
 end

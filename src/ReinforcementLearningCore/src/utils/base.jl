@@ -48,3 +48,24 @@ function find_all_max(A)
         maxval, idxs
     end
 end
+
+function find_all_max(A, mask)
+    maxval = typemin(eltype(A))
+    idxs = Int[]
+    for (i, x) in enumerate(A)
+        if mask[i] && (!isnan(x))
+            if x > maxval
+                maxval = x
+                empty!(idxs)
+                push!(idxs, i)
+            elseif x == maxval
+                push!(idxs, i)
+            end
+        end
+    end
+    if length(idxs) == 0
+        NaN, collect(1:length(A))
+    else
+        maxval, idxs
+    end
+end

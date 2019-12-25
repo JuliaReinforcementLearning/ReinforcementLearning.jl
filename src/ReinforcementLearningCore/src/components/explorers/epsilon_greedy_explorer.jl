@@ -102,6 +102,12 @@ function (s::EpsilonGreedyExplorer)(values)
     rand(s.rng) > ϵ ? sample(s.rng, find_all_max(values)[2]) : rand(s.rng, 1:length(values))
 end
 
+function (s::EpsilonGreedyExplorer)(values, mask)
+    ϵ = get_ϵ(s)
+    s.step += 1
+    rand(s.rng) > ϵ ? sample(s.rng, find_all_max(values, mask)[2]) : rand(s.rng, findall(mask))
+end
+
 Random.seed!(s::EpsilonGreedyExplorer, seed) = Random.seed!(s.rng, seed)
 
 """
@@ -123,7 +129,7 @@ function RLBase.get_distribution(s::EpsilonGreedyExplorer, values, mask)
     ϵ, n = get_ϵ(s), length(values)
     probs = zeros(n)
     probs[mask] .= ϵ / sum(mask)
-    max_val_inds = find_all_max(values[mask])[2]
+    max_val_inds = find_all_max(values, mask)[2]
     for ind in max_val_inds
         probs[ind] += (1 - ϵ) / length(max_val_inds)
     end

@@ -177,8 +177,8 @@ end
     t4 = (state=4, action=5)
     push!(b;t4...)
 
-    @test length(b) == 3
-    @test size(b) == (3, )
+    @test length(b) == 2
+    @test size(b) == (2, )
     @test isempty(b) == false
     @test isfull(b) == false
     @test get_trace(b, :state) == [1, 2]

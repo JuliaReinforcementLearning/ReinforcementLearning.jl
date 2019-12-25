@@ -45,4 +45,4 @@ end
 
 RLBase.get_distribution(s::AlternateExplorer, values) = Flux.OneHotVector((s.step - 1) % s.n + 1, s.n)
 
-RLBase.reset!(s::AlternateExplorer) = s.step=0
+RLBase.reset!(s::AlternateExplorer) = s.step=1
