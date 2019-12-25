@@ -40,11 +40,13 @@ Define how to select actions.
 """
 @interface abstract type AbstractExplorer end
 @interface (p::AbstractExplorer)(x)
+@interface (p::AbstractExplorer)(x, mask)
 @interface reset!(p::AbstractExplorer)
 @interface Base.copy(p::AbstractExplorer)
 
 "Get the action distribution given action values"
 @interface get_distribution(p::AbstractExplorer, x)
+@interface get_distribution(p::AbstractExplorer, x, mask)
 
 #####
 # Policy
