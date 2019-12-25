@@ -1,5 +1,14 @@
 module ReinforcementLearningCore
 
-greet() = print("Hello World!")
+using Reexport
+
+const RLCore = ReinforcementLearningCore
+export RLCore
+
+@reexport using ReinforcementLearningBase
+
+include("utils/utils.jl")
+include("core/core.jl")
+include("components/components.jl")
 
 end # module

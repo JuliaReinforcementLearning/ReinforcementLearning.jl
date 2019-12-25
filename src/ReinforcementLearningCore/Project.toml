@@ -3,6 +3,15 @@ uuid = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
 authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
 version = "0.1.0"
 
+[deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+ReinforcementLearningBase = "9b2b9cba-ac73-11e8-02b1-9f0869453fc0"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+
 [compat]
 julia = "1"
 
