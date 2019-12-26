@@ -1,12 +1,28 @@
 using Random
 
 #####
+# general
+#####
+
+@interface abstract type AbstractStage end
+
+@interface struct PreEpisodeStage <: AbstractStage end
+@interface struct PostEpisodeStage <: AbstractStage end
+@interface struct PreActStage <: AbstractStage end
+@interface struct PostActStage <: AbstractStage end
+
+@interface const PRE_EPISODE_STAGE = PreEpisodeStage()
+@interface const POST_EPISODE_STAGE = PostEpisodeStage()
+@interface const PRE_ACT_STAGE = PreActStage()
+@interface const POST_ACT_STAGE = PostActStage()
+
+#####
 # Agent
 #####
 
 "An agent is a functional object which takes in an observation and returns an action."
 @interface abstract type AbstractAgent end
-@interface (agent::AbstractAgent)(obs)
+@interface (agent::AbstractAgent)(stage::AbstractStage, obs)
 
 #####
 # Approximator
