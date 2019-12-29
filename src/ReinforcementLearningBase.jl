@@ -1,9 +1,9 @@
 module ReinforcementLearningBase
 
-include("spaces/space.jl")
-include("abstractenv.jl")
-include("tests.jl")
+const RLBase = ReinforcementLearningBase
+export RLBase
 
-export interact!, reset!, getstate, plotenv, actionspace, sample,
-test_envinterface
+include("inline_export.jl")
+include("interface.jl")
+
 end # module
