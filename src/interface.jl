@@ -90,19 +90,22 @@ Record useful information during the interactions between agents and environment
 
 The length of `names` and `types` must match.
 """
-@interface abstract type AbstractTrajectory{names,types} <: AbstractArray{NamedTuple{names,types},1} end
+@interface abstract type AbstractTrajectory{names,types} <:
+                         AbstractArray{NamedTuple{names,types},1} end
 
 # some typical trace names
 @interface const RTSA = (:reward, :terminal, :state, :action)
 @interface const SARTSA = (:state, :action, :reward, :terminal, :next_state, :next_action)
 
 @interface get_trace(t::AbstractTrajectory, s::Symbol)
-@interface get_traces(t::AbstractTrajectory{names}) where {names} = merge(NamedTuple(), (s, get_trace(t, s)) for s in names)
+@interface get_traces(t::AbstractTrajectory{names}) where {names} =
+    merge(NamedTuple(), (s, get_trace(t, s)) for s in names)
 
 @interface Base.length(t::AbstractTrajectory) = maximum(length(x) for x in get_traces(t))
 @interface Base.size(t::AbstractTrajectory) = (length(t),)
 @interface Base.lastindex(t::AbstractTrajectory) = length(t)
-@interface Base.getindex(t::AbstractTrajectory{names,types}, i::Int) where {names,types} = NamedTuple{names,types}(Tuple(x[i] for x in get_traces(t)))
+@interface Base.getindex(t::AbstractTrajectory{names,types}, i::Int) where {names,types} =
+    NamedTuple{names,types}(Tuple(x[i] for x in get_traces(t)))
 
 @interface Base.isempty(t::AbstractTrajectory) = all(isempty(t) for t in get_traces(t))
 @interface isfull(t::AbstractTrajectory) = all(isfull(x) for x in get_traces(t))
@@ -113,7 +116,7 @@ The length of `names` and `types` must match.
     end
 end
 
-@interface function Base.push!(t::AbstractTrajectory;kwargs...)
+@interface function Base.push!(t::AbstractTrajectory; kwargs...)
     for (k, v) in kwargs
         push!(get_trace(t, k), v)
     end
@@ -205,8 +208,11 @@ abstract type AbstractActionSet end
 Specify whether the observation contains a full action set or a minimal action set.
 """
 @interface ActionStyle(::NamedTuple{(:reward, :terminal, :state)}) = MINIMAL_ACTION_SET
-@interface ActionStyle(::NamedTuple{(:reward, :terminal, :state, :legal_actions)}) = FULL_ACTION_SET
-@interface ActionStyle(::NamedTuple{(:reward, :terminal, :state, :legal_actions, :legal_actions_mask)}) = FULL_ACTION_SET
+@interface ActionStyle(::NamedTuple{(:reward, :terminal, :state, :legal_actions)}) =
+    FULL_ACTION_SET
+@interface ActionStyle(
+    ::NamedTuple{(:reward, :terminal, :state, :legal_actions, :legal_actions_mask)},
+) = FULL_ACTION_SET
 
 
 @interface legal_actions(x) = findall(legal_actions_mask(x))
