@@ -1,2 +1,43 @@
-- name: Automatic Changelog Generator
-  uses: CharMixer/auto-changelog-action@v1
+name: Changelog
+
+on:
+  pull_request:
+    types: [closed]
+    
+  release:
+    types: [published]
+
+  issues:
+    types: [closed, edited]
+
+jobs:
+  generate_changelog:
+    runs-on: ubuntu-latest
+    name: Generate changelog for master branch
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Generate changelog
+        uses: charmixer/auto-changelog-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for changes
+        run: |
+          if [[ `git status --porcelain` ]]; then
+            echo ::set-env name=changes::1
+          fi
+      - name: Create Pull Request
+        if: env.changes == 1
+        uses: peter-evans/create-pull-request@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          author: noreply <noreply@juliareinforcementlearning.org>
+          committer: noreply <noreply@juliareinforcementlearning.org>
+          commit-message: "Updated CHANGELOG.md"
+          title: 'Update CHANGELOG'
+          body: |
+            Updated CHANGELOG.md
+          labels: ci
+          assignees: noreply
+          branch: changelog
