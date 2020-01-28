@@ -6,11 +6,15 @@ using Random
 
 @interface abstract type AbstractStage end
 
+@interface struct PreExperimentStage <: AbstractStage end
+@interface struct PostExperimentStage <: AbstractStage end
 @interface struct PreEpisodeStage <: AbstractStage end
 @interface struct PostEpisodeStage <: AbstractStage end
 @interface struct PreActStage <: AbstractStage end
 @interface struct PostActStage <: AbstractStage end
 
+@interface const PRE_EXPERIMENT_STAGE = PreExperimentStage()
+@interface const POST_EXPERIMENT_STAGE = PostExperimentStage()
 @interface const PRE_EPISODE_STAGE = PreEpisodeStage()
 @interface const POST_EPISODE_STAGE = PostEpisodeStage()
 @interface const PRE_ACT_STAGE = PreActStage()
@@ -164,8 +168,6 @@ Preprocess an observation and return a new observation.
 Super type of all reinforcement learning environments.
 """
 @interface abstract type AbstractEnv end
-@interface (env::AbstractEnv)(action)
-
 """
 Determine whether the players can play simultaneous or not.
 """
@@ -179,9 +181,13 @@ abstract type AbstractDynamicStyle end
 
 struct DefaultPlayer end
 @interface const DEFAULT_PLAYER = DefaultPlayer()
+
+@interface (env::AbstractEnv)(action) = env(DEFAULT_PLAYER, action)
+@interface (env::AbstractEnv)(player, action)
+
 @interface get_current_player(env::AbstractEnv) = DEFAULT_PLAYER
 @interface observe(env::AbstractEnv) = observe(env, get_current_player(env))
-@interface observe(::AbstractEnv, players)
+@interface observe(::AbstractEnv, player)
 @interface get_action_space(env::AbstractEnv) = env.action_space
 @interface get_observation_space(env::AbstractEnv) = env.observation_space
 @interface render(::AbstractEnv)
@@ -218,7 +224,7 @@ Specify whether the observation contains a full action set or a minimal action s
 @interface legal_actions(x) = findall(legal_actions_mask(x))
 @interface legal_actions_mask(x) = x.legal_actions_mask
 
-@interface is_terminal(x) = x.terminal
+@interface get_terminal(x) = x.terminal
 @interface get_reward(x) = x.reward
 @interface get_state(x) = x.state
 
