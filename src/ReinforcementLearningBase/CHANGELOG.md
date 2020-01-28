@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/HEAD)
+## [v0.4.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.4.0) (2020-01-28)
 
-[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.3.0...HEAD)
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.3.0...v0.4.0)
 
 **Closed issues:**
 
@@ -11,6 +11,7 @@
 
 **Merged pull requests:**
 
+- add two extra stages [\#10](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/10) ([findmyway](https://github.com/findmyway))
 - \[AUTO\] Format .jl files [\#8](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/8) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [v0.3.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.3.0) (2019-12-29)
