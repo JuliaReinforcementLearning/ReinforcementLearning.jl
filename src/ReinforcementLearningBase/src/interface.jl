@@ -213,7 +213,7 @@ abstract type AbstractActionSet end
 
 Specify whether the observation contains a full action set or a minimal action set.
 """
-@interface ActionStyle(::NamedTuple{(:reward, :terminal, :state)}) = MINIMAL_ACTION_SET
+@interface ActionStyle(x) = MINIMAL_ACTION_SET
 @interface ActionStyle(::NamedTuple{(:reward, :terminal, :state, :legal_actions)}) =
     FULL_ACTION_SET
 @interface ActionStyle(
