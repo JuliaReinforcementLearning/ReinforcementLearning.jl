@@ -126,7 +126,7 @@ end
     end
 end
 
-@interface function Base.pop!(t::AbstractTrajectory{names}) where names
+@interface function Base.pop!(t::AbstractTrajectory{names}) where {names}
     pop!(t, names...)
 end
 
