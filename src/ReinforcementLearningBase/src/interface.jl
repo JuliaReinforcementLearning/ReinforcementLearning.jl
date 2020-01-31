@@ -121,10 +121,12 @@ The length of `names` and `types` must match.
 end
 
 @interface function Base.push!(t::AbstractTrajectory; kwargs...)
-    for (k, v) in kwargs
-        push!(get_trace(t, k), v)
+    for kv in kwargs
+        push!(t, kv)
     end
 end
+
+@interface Base.push!(t::AbstractTrajectory, kv::Pair{Symbol})
 
 @interface function Base.pop!(t::AbstractTrajectory{names}) where {names}
     pop!(t, names...)
@@ -219,7 +221,7 @@ abstract type AbstractActionSet end
 
 Specify whether the observation contains a full action set or a minimal action set.
 """
-@interface ActionStyle(::NamedTuple{(:reward, :terminal, :state)}) = MINIMAL_ACTION_SET
+@interface ActionStyle(x) = MINIMAL_ACTION_SET
 @interface ActionStyle(::NamedTuple{(:reward, :terminal, :state, :legal_actions)}) =
     FULL_ACTION_SET
 @interface ActionStyle(
