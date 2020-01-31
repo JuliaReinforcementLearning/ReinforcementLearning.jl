@@ -121,10 +121,12 @@ The length of `names` and `types` must match.
 end
 
 @interface function Base.push!(t::AbstractTrajectory; kwargs...)
-    for (k, v) in kwargs
-        push!(get_trace(t, k), v)
+    for kv in kwargs
+        push!(t, kv)
     end
 end
+
+@interface Base.push!(t::AbstractTrajectory, kv::Pair{Symbol})
 
 """
     extract_transitions(trajectory::AbstractTrajectory, learner::AbstractLearner)
