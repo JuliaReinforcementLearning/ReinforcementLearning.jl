@@ -126,6 +126,12 @@ end
     end
 end
 
+@interface function Base.pop!(t::AbstractTrajectory{names}) where names
+    pop!(t, names...)
+end
+
+@interface Base.pop!(t::AbstractTrajectory, s::Symbol...)
+
 """
     extract_transitions(trajectory::AbstractTrajectory, learner::AbstractLearner)
 
