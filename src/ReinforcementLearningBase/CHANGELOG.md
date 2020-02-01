@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.5.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.5.0) (2020-02-01)
+
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.4.0...v0.5.0)
+
+**Merged pull requests:**
+
+- make ActionStyle return MINIMAL\_ACTION\_SET by default [\#14](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/14) ([findmyway](https://github.com/findmyway))
+- change the default implementation of push! for trajectory [\#13](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/13) ([findmyway](https://github.com/findmyway))
+- add pop! method for AbstractTrajectory [\#12](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/12) ([findmyway](https://github.com/findmyway))
+
 ## [v0.4.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.4.0) (2020-01-28)
 
 [Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.3.0...v0.4.0)
