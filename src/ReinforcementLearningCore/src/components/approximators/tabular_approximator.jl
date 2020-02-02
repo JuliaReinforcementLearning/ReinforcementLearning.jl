@@ -10,7 +10,8 @@ struct TabularApproximator <: AbstractApproximator
     table::Vector{Float64}
 end
 
-TabularApproximator(;n_state::Int, init::Float64 = 0.0) = TabularApproximator(fill(init, n_state))
+TabularApproximator(; n_state::Int, init::Float64 = 0.0) =
+    TabularApproximator(fill(init, n_state))
 
 (v::TabularApproximator)(s::Int) = v.table[s]
 

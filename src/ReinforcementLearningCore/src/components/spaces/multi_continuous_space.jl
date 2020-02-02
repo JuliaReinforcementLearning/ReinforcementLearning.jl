@@ -1,27 +1,33 @@
 export MultiContinuousSpace
-using Distributions: Uniform
-using Random: AbstractRNG
 
-struct MultiContinuousSpace{N} <: AbstractSpace
-    low::Array{Float64,N}
-    high::Array{Float64,N}
-    function MultiContinuousSpace(low::Array{Float64}, high::Array{Float64})
-        size(low) == size(high) || throw(ArgumentError("$(size(low)) != $(size(high)), size must match"))
-        all(l < h for (l, h) in zip(
-            low,
-            high,
-        )) || throw(ArgumentError("each element of $low must be less than $high"))
-        new{ndims(low)}(low, high)
+using Flux
+using Random
+using CuArrays
+
+struct MultiContinuousSpace{T<:AbstractArray} <: AbstractSpace
+    low::T
+    high::T
+    function MultiContinuousSpace(low::T, high::T) where {T<:AbstractArray}
+        size(low) == size(high) ||
+        throw(ArgumentError("$(size(low)) != $(size(high)), size must match"))
+        all(map((l, h) -> l <= h, low, high)) ||
+        throw(ArgumentError("each element of $low must be ≤ than $high"))
+        new{T}(low, high)
     end
 end
 
-MultiContinuousSpace(low, high) =
-    MultiContinuousSpace(convert(Array{Float64}, low), convert(Array{Float64}, high))
+MultiContinuousSpace(low, high) = MultiContinuousSpace(promote(low, high)...)
 
-Base.eltype(::MultiContinuousSpace{N}) where {N} = Array{Float64,N}
-Base.in(xs, s::MultiContinuousSpace{N}) where {N} = size(xs) == element_size(s) && all(l <= x <= h for (l, x, h) in zip(s.low, xs, s.high))
-Base.rand(rng::AbstractRNG, s::MultiContinuousSpace) = map((l, h) -> rand(rng, Uniform(l, h)), s.low, s.high)
+Base.eltype(::MultiContinuousSpace{T}) where {T} = T
+Base.in(xs, s::MultiContinuousSpace) =
+    size(xs) == element_size(s) && all(map((l, x, h) -> l <= x <= h, s.low, xs, s.high))
 
 Base.length(s::MultiContinuousSpace) = error("MultiContinuousSpace is uncountable")
 element_size(s::MultiContinuousSpace) = size(s.low)
 element_length(s::MultiContinuousSpace) = length(s.low)
+
+function Random.rand(rng::AbstractRNG, s::MultiContinuousSpace)
+    (s.high .- s.low) .* rand(rng, size(s.low)...) .+ s.low
+end
+
+Random.rand(s::MultiContinuousSpace{<:CuArray}) = rand(CuArrays.CURAND.generator(), s)

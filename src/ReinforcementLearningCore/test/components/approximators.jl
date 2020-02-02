@@ -1,13 +1,13 @@
 @testset "Approximators" begin
 
-@testset "TabularApproximator" begin
-    A = TabularApproximator(;n_state=3)
+    @testset "TabularApproximator" begin
+        A = TabularApproximator(; n_state = 3)
 
-    @test A(1) == 0.
-    @test A(2) == 0.
+        @test A(1) == 0.0
+        @test A(2) == 0.0
 
-    update!(A, 2 => 3.)
-    @test A(2) == 3.
-end
+        update!(A, 2 => 3.0)
+        @test A(2) == 3.0
+    end
 
 end

@@ -2,6 +2,7 @@ export EpsilonGreedyExplorer
 
 using Random
 using StatsBase: sample
+using Distributions: DiscreteNonParametric
 
 """
     EpsilonGreedyExplorer{T}(;kwargs...)
@@ -36,7 +37,7 @@ plot([RL.get_ϵ(s, i) for i in 1:500], label="exp epsilon")
 ```
 ![](../assets/img/exp_epsilon_greedy_selector.png)
 """
-mutable struct EpsilonGreedyExplorer{T, R} <: AbstractExplorer
+mutable struct EpsilonGreedyExplorer{T,R} <: AbstractExplorer
     ϵ_stable::Float64
     ϵ_init::Float64
     warmup_steps::Int
@@ -45,20 +46,35 @@ mutable struct EpsilonGreedyExplorer{T, R} <: AbstractExplorer
     rng::R
 end
 
-function Base.copy(p::EpsilonGreedyExplorer{T, R}) where {T, R}
-    EpsilonGreedyExplorer{T, R}(
+function Base.copy(p::EpsilonGreedyExplorer{T,R}) where {T,R}
+    EpsilonGreedyExplorer{T,R}(
         p.ϵ_stable,
         p.ϵ_init,
         p.warmup_steps,
         p.decay_steps,
         p.step,
-        copy(p.rng)
+        copy(p.rng),
     )
 end
 
-function EpsilonGreedyExplorer(;ϵ_stable, kind=:linear, ϵ_init=1.0, warmup_steps=0, decay_steps=0, step=1, seed=nothing)
+function EpsilonGreedyExplorer(;
+    ϵ_stable,
+    kind = :linear,
+    ϵ_init = 1.0,
+    warmup_steps = 0,
+    decay_steps = 0,
+    step = 1,
+    seed = nothing,
+)
     rng = MersenneTwister(seed)
-    EpsilonGreedyExplorer{kind, typeof(rng)}(ϵ_stable, ϵ_init, warmup_steps, decay_steps, step, rng)
+    EpsilonGreedyExplorer{kind,typeof(rng)}(
+        ϵ_stable,
+        ϵ_init,
+        warmup_steps,
+        decay_steps,
+        step,
+        rng,
+    )
 end
 
 EpsilonGreedyExplorer(ϵ) = EpsilonGreedyExplorer(; ϵ_stable = ϵ)
@@ -105,13 +121,15 @@ end
 function (s::EpsilonGreedyExplorer)(values, mask)
     ϵ = get_ϵ(s)
     s.step += 1
-    rand(s.rng) > ϵ ? sample(s.rng, find_all_max(values, mask)[2]) : rand(s.rng, findall(mask))
+    rand(s.rng) > ϵ ? sample(s.rng, find_all_max(values, mask)[2]) :
+    rand(s.rng, findall(mask))
 end
 
 Random.seed!(s::EpsilonGreedyExplorer, seed) = Random.seed!(s.rng, seed)
 
 """
-    get_distribution(s::EpsilonGreedyExplorer, values)
+    get_distribution(s::EpsilonGreedyExplorer, values) -> DiscreteNonParametric
+    get_distribution(s::EpsilonGreedyExplorer, values, mask) -> DiscreteNonParametric
 
 Return the probability of selecting each action given the estimated `values` of each action.
 """
@@ -122,7 +140,7 @@ function RLBase.get_distribution(s::EpsilonGreedyExplorer, values)
     for ind in max_val_inds
         probs[ind] += (1 - ϵ) / length(max_val_inds)
     end
-    probs
+    DiscreteNonParametric(1:length(probs), probs)
 end
 
 function RLBase.get_distribution(s::EpsilonGreedyExplorer, values, mask)
@@ -133,7 +151,7 @@ function RLBase.get_distribution(s::EpsilonGreedyExplorer, values, mask)
     for ind in max_val_inds
         probs[ind] += (1 - ϵ) / length(max_val_inds)
     end
-    probs
+    DiscreteNonParametric(1:length(probs), probs)
 end
 
-RLBase.reset!(s::EpsilonGreedyExplorer) = s.step=1
+RLBase.reset!(s::EpsilonGreedyExplorer) = s.step = 1

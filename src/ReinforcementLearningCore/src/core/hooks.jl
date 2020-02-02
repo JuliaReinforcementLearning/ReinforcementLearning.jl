@@ -1,39 +1,18 @@
-export AbstractStage,
-       PreEpisodeStage,
-       PRE_EPISODE_STAGE,
-       PostEpisodeStage,
-       POST_EPISODE_STAGE,
-       PreActStage,
-       PRE_ACT_STAGE,
-       PostActStage,
-       POST_ACT_STAGE,
-       AbstractHook,
-       ComposedHook,
-       EmptyHook,
-       StepsPerEpisode,
-       RewardsPerEpisode,
-       TotalRewardPerEpisode,
-       CumulativeReward,
-       TimePerStep
-
-abstract type AbstractStage end
-
-struct PreEpisodeStage <: AbstractStage end
-struct PostEpisodeStage <: AbstractStage end
-struct PreActStage <: AbstractStage end
-struct PostActStage <: AbstractStage end
-
-const PRE_EPISODE_STAGE = PreEpisodeStage()
-const POST_EPISODE_STAGE = PostEpisodeStage()
-const PRE_ACT_STAGE = PreActStage()
-const POST_ACT_STAGE = PostActStage()
+export AbstractHook,
+    ComposedHook,
+    EmptyHook,
+    StepsPerEpisode,
+    RewardsPerEpisode,
+    TotalRewardPerEpisode,
+    CumulativeReward,
+    TimePerStep
 
 """
 A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
 """
 abstract type AbstractHook end
 
-(hook::AbstractHook)(::T, agent, env, obs) where {T<:AbstractStage} = nothing
+(hook::AbstractHook)(args...) = nothing
 
 # https://github.com/JuliaLang/julia/issues/14919
 # function (f::Function)(stage::T, args...;kw...) where T<: AbstractStage end
@@ -86,11 +65,16 @@ Base.@kwdef mutable struct StepsPerEpisode <: AbstractHook
     tag::String = "TRAINING"
 end
 
-function (hook::StepsPerEpisode)(::PostActStage, agent, env, action_obs)
+function (hook::StepsPerEpisode)(::PostActStage, args...)
     hook.count += 1
 end
 
-function (hook::StepsPerEpisode)(::PostEpisodeStage, agent, env, obs)
+function (hook::StepsPerEpisode)(
+    ::Union{PostEpisodeStage,PostExperimentStage},
+    agent,
+    env,
+    obs,
+)
     push!(hook.steps, hook.count)
     hook.count = 0
     @debug hook.tag STEPS_PER_EPISODE = hook.steps[end]
@@ -114,8 +98,7 @@ function (hook::RewardsPerEpisode)(::PreEpisodeStage, agent, env, obs)
     push!(hook.rewards, [])
 end
 
-function (hook::RewardsPerEpisode)(::PostActStage, agent, env, action_obs)
-    action, obs = action_obs
+function (hook::RewardsPerEpisode)(::PostActStage, agent, env, action, obs)
     push!(hook.rewards[end], get_reward(obs))
 end
 
@@ -138,12 +121,16 @@ Base.@kwdef mutable struct TotalRewardPerEpisode <: AbstractHook
     tag::String = "TRAINING"
 end
 
-function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env, action_obs)
-    action, obs = action_obs
+function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env, action, obs)
     hook.reward += get_reward(obs)
 end
 
-function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env, obs)
+function (hook::TotalRewardPerEpisode)(
+    ::Union{PostEpisodeStage,PostExperimentStage},
+    agent,
+    env,
+    obs,
+)
     push!(hook.rewards, hook.reward)
     hook.reward = 0
     @debug hook.tag REWARD_PER_EPISODE = hook.rewards[end]
@@ -163,8 +150,7 @@ Base.@kwdef struct CumulativeReward <: AbstractHook
     tag::String = "TRAINING"
 end
 
-function (hook::CumulativeReward)(::PostActStage, agent, env, action_obs)
-    action, obs = action_obs
+function (hook::CumulativeReward)(::PostActStage, agent, env, action, obs)
     push!(hook.rewards, get_reward(obs) + hook.rewards[end])
     @debug hook.tag CUMULATIVE_REWARD = hook.rewards[end]
 end
@@ -180,13 +166,14 @@ end
 Store time cost of the latest `max_steps` in the `times` field.
 """
 mutable struct TimePerStep <: AbstractHook
-    times::CircularArrayBuffer{Float64, 1}
+    times::CircularArrayBuffer{Float64,1}
     t::UInt64
 end
 
-TimePerStep(;max_steps=100) = TimePerStep(CircularArrayBuffer{Float64}(max_steps), time_ns())
+TimePerStep(; max_steps = 100) =
+    TimePerStep(CircularArrayBuffer{Float64}(max_steps), time_ns())
 
-function (hook::TimePerStep)(::PostActStage, agent, env, obs_action)
-    push!(hook.times, (time_ns() - hook.t)/1e9)
+function (hook::TimePerStep)(::PostActStage, agent, env, action, obs)
+    push!(hook.times, (time_ns() - hook.t) / 1e9)
     hook.t = time_ns()
 end

@@ -12,5 +12,6 @@ end
 
 Base.eltype(::DictSpace{K}) where {K} = Dict{K}
 Base.in(xs::Dict, s::DictSpace) =
-    length(xs) == length(s.data) && all(haskey(s.data, k) && x in s.data[k] for (k, x) in xs)
-Base.rand(rng::AbstractRNG, s::DictSpace) = Dict(k => rand(rng, s) for (k, s) in s.data)
+    length(xs) == length(s.data) &&
+    all(haskey(s.data, k) && x in s.data[k] for (k, x) in xs)
+Random.rand(rng::AbstractRNG, s::DictSpace) = Dict(k => rand(rng, s) for (k, s) in s.data)

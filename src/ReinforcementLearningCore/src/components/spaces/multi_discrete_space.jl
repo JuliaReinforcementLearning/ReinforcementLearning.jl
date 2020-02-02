@@ -1,29 +1,25 @@
 export MultiDiscreteSpace
-using Random: AbstractRNG
+using Random
 
-struct MultiDiscreteSpace{T<:Integer,N} <: AbstractSpace
-    low::Array{T,N}
-    high::Array{T,N}
-    n::Int
+struct MultiDiscreteSpace{T<:AbstractArray} <: AbstractSpace
+    low::T
+    high::T
+    n::Int  # pre-calculation
     function MultiDiscreteSpace(
-        high::Array{T,N},
-        low = ones(T, size(high)),
-    ) where {T<:Integer,N}
-        all(l < h for (l, h) in zip(
-            low,
-            high,
-        )) || throw(ArgumentError("each element of $high must be greater than $low"))
-        new{T,N}(low, high, reduce(*, h - l + 1 for (l, h) in zip(low, high)))
+        high::T,
+        low = ones(eltype(T), size(high)),
+    ) where {T<:AbstractArray}
+        all(map((l, h) -> l <= h, low, high)) ||
+        throw(ArgumentError("each element of $high must be ≥r $low"))
+        new{T}(low, high, reduce(*, map((l, h) -> h - l + 1, low, high)))
     end
 end
 
-MultiDiscreteSpace(xs) = MultiDiscreteSpace(convert(Array{Int}, xs))
-
 Base.length(s::MultiDiscreteSpace) = s.n
-Base.eltype(s::MultiDiscreteSpace{T,N}) where {T,N} = Array{T,N}
+Base.eltype(s::MultiDiscreteSpace{T}) where {T} = T
 Base.in(xs, s::MultiDiscreteSpace) =
-    size(xs) == size(s.low) && all(l <= x <= h for (l, x, h) in zip(s.low, xs, s.high))
-Base.rand(rng::AbstractRNG, s::MultiDiscreteSpace) =
+    size(xs) == size(s.low) && all(map((l, x, h) -> l <= x <= h, s.low, xs, s.high))
+Random.rand(rng::AbstractRNG, s::MultiDiscreteSpace) =
     map((l, h) -> rand(rng, l:h), s.low, s.high)
 
 element_size(s::MultiDiscreteSpace) = size(s.low)

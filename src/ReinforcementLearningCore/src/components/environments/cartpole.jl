@@ -16,10 +16,15 @@ struct CartPoleEnvParams{T}
     max_steps::Int
 end
 
+Base.show(io::IO, params::CartPoleEnvParams) = print(
+    io,
+    join(["$p=$(getfield(params, p))" for p in fieldnames(CartPoleEnvParams)], ","),
+)
+
 mutable struct CartPoleEnv{T,R<:AbstractRNG} <: AbstractEnv
     params::CartPoleEnvParams{T}
     action_space::DiscreteSpace{Int64}
-    observation_space::MultiContinuousSpace{1}
+    observation_space::MultiContinuousSpace{Vector{T}}
     state::Array{T,1}
     action::Int
     done::Bool
@@ -27,16 +32,18 @@ mutable struct CartPoleEnv{T,R<:AbstractRNG} <: AbstractEnv
     rng::R
 end
 
-function CartPoleEnv(
-    ;
+Base.show(io::IO, env::CartPoleEnv{T}) where {T} =
+    print(io, "CartPoleEnv{$T}($(env.params))")
+
+function CartPoleEnv(;
     T = Float64,
     gravity = T(9.8),
-    masscart = T(1.),
-    masspole = T(.1),
-    halflength = T(.5),
-    forcemag = T(10.),
+    masscart = T(1.0),
+    masspole = T(0.1),
+    halflength = T(0.5),
+    forcemag = T(10.0),
     max_steps = 200,
-    seed = nothing
+    seed = nothing,
 )
     params = CartPoleEnvParams(
         gravity,
@@ -46,7 +53,7 @@ function CartPoleEnv(
         halflength,
         masspole * halflength,
         forcemag,
-        T(.02),
+        T(0.02),
         T(2 * 12 * π / 360),
         T(2.4),
         max_steps,
@@ -66,18 +73,18 @@ function CartPoleEnv(
     cp
 end
 
+CartPoleEnv{T}(; kwargs...) where {T} = CartPoleEnv(; T = T, kwargs...)
+
 function RLBase.reset!(env::CartPoleEnv{T}) where {T<:Number}
-    env.state[:] = T(.1) * rand(env.rng, T, 4) .- T(.05)
+    env.state[:] = T(0.1) * rand(env.rng, T, 4) .- T(0.05)
     env.t = 0
     env.action = 2
     env.done = false
     nothing
 end
 
-RLBase.observe(env::CartPoleEnv) = (
-    reward = env.done ? 0.0 : 1.0,
-    terminal = env.done,
-    state = env.state)
+RLBase.observe(env::CartPoleEnv) =
+    (reward = env.done ? 0.0 : 1.0, terminal = env.done, state = env.state)
 
 function (env::CartPoleEnv)(a)
     env.action = a
@@ -87,17 +94,19 @@ function (env::CartPoleEnv)(a)
     costheta = cos(theta)
     sintheta = sin(theta)
     tmp = (force + env.params.polemasslength * thetadot^2 * sintheta) / env.params.totalmass
-    thetaacc = (env.params.gravity * sintheta - costheta * tmp) /
-               (env.params.halflength *
-                (4 / 3 - env.params.masspole * costheta^2 / env.params.totalmass))
+    thetaacc =
+        (env.params.gravity * sintheta - costheta * tmp) / (
+            env.params.halflength *
+            (4 / 3 - env.params.masspole * costheta^2 / env.params.totalmass)
+        )
     xacc = tmp - env.params.polemasslength * thetaacc * costheta / env.params.totalmass
     env.state[1] += env.params.tau * xdot
     env.state[2] += env.params.tau * xacc
     env.state[3] += env.params.tau * thetadot
     env.state[4] += env.params.tau * thetaacc
-    env.done = abs(env.state[1]) > env.params.xthreshold ||
-               abs(env.state[3]) > env.params.thetathreshold ||
-               env.t > env.params.max_steps
+    env.done =
+        abs(env.state[1]) > env.params.xthreshold ||
+        abs(env.state[3]) > env.params.thetathreshold || env.t > env.params.max_steps
     nothing
 end
 

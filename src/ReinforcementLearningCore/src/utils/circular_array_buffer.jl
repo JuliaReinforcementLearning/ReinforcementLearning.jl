@@ -1,5 +1,111 @@
-export CircularArrayBuffer, capacity, isfull
+export CircularArrayBuffer, capacity, isfull, nframes
 
+"""
+    CircularArrayBuffer{T}(d::Integer...) -> CircularArrayBuffer{T, N}
+
+`CircularArrayBuffer` uses a `N`-dimention `Array` of size `d` to serve as a buffer for
+`N-1`-dimention `Array`s with the same size.
+
+# Examples
+
+```julia-repl
+julia> b = CircularArrayBuffer{Float64}(2, 2, 3)
+2×2×0 CircularArrayBuffer{Float64,3}
+
+julia> capacity(b)
+3
+
+julia> length(b)
+0
+
+julia> push!(b, [1. 1.; 2. 2.])
+2×2×1 CircularArrayBuffer{Float64,3}:
+[:, :, 1] =
+ 1.0  1.0
+ 2.0  2.0
+
+julia> b
+2×2×1 CircularArrayBuffer{Float64,3}:
+[:, :, 1] =
+ 1.0  1.0
+ 2.0  2.0
+
+julia> length(b)
+4
+
+julia> nframes(cb::CircularArrayBuffer) = cb.length
+nframes (generic function with 1 method)
+
+julia> nframes(b)
+1
+
+julia> ones(2,2)
+2×2 Array{Float64,2}:
+ 1.0  1.0
+ 1.0  1.0
+
+julia> 3 .* ones(2,2)
+2×2 Array{Float64,2}:
+ 3.0  3.0
+ 3.0  3.0
+
+julia> 3 * ones(2,2)
+2×2 Array{Float64,2}:
+ 3.0  3.0
+ 3.0  3.0
+
+julia> b = CircularArrayBuffer{Float64}(2, 2, 3)
+2×2×0 CircularArrayBuffer{Float64,3}
+
+julia> capacity(b)
+3
+
+julia> nframes(b)
+0
+
+julia> push!(b, 1 .* ones(2,2))
+2×2×1 CircularArrayBuffer{Float64,3}:
+[:, :, 1] =
+ 1.0  1.0
+ 1.0  1.0
+
+julia> b
+2×2×1 CircularArrayBuffer{Float64,3}:
+[:, :, 1] =
+ 1.0  1.0
+ 1.0  1.0
+
+julia> nframes(b)
+1
+
+julia> for i in 2:4
+           push!(b, i .* ones(2,2))
+       end
+
+julia> b
+2×2×3 CircularArrayBuffer{Float64,3}:
+[:, :, 1] =
+ 2.0  2.0
+ 2.0  2.0
+
+[:, :, 2] =
+ 3.0  3.0
+ 3.0  3.0
+
+[:, :, 3] =
+ 4.0  4.0
+ 4.0  4.0
+
+julia> isfull(b)
+true
+
+julia> nframes(b)
+3
+
+julia> size(b)
+(2, 2, 3)
+```
+"""
 mutable struct CircularArrayBuffer{T,N} <: AbstractArray{T,N}
     buffer::Array{T,N}
     first::Int
@@ -13,12 +119,16 @@ mutable struct CircularArrayBuffer{T,N} <: AbstractArray{T,N}
 end
 
 Base.IndexStyle(::CircularArrayBuffer) = IndexLinear()
-Base.size(cb::CircularArrayBuffer{<:Any, N}, i::Integer) where {N} = i == N ? cb.length : size(cb.buffer, i)
+Base.size(cb::CircularArrayBuffer{<:Any,N}, i::Integer) where {N} =
+    i == N ? cb.length : size(cb.buffer, i)
 Base.size(cb::CircularArrayBuffer{<:Any,N}) where {N} = ntuple(M -> size(cb, M), N)
-Base.getindex(cb::CircularArrayBuffer{T, N}, i::Int) where {T, N} = getindex(cb.buffer, _buffer_index(cb, i))
-Base.setindex!(cb::CircularArrayBuffer{T, N}, v, i::Int) where {T, N} = setindex!(cb.buffer, v, _buffer_index(cb, i))
-capacity(cb::CircularArrayBuffer{T, N}) where {T, N} = size(cb.buffer, N)
-RLBase.isfull(cb::CircularArrayBuffer) = cb.length == capacity(cb)
+Base.getindex(cb::CircularArrayBuffer{T,N}, i::Int) where {T,N} =
+    getindex(cb.buffer, _buffer_index(cb, i))
+Base.setindex!(cb::CircularArrayBuffer{T,N}, v, i::Int) where {T,N} =
+    setindex!(cb.buffer, v, _buffer_index(cb, i))
+capacity(cb::CircularArrayBuffer{T,N}) where {T,N} = size(cb.buffer, N)
+nframes(cb::CircularArrayBuffer) = cb.length
+isfull(cb::CircularArrayBuffer) = cb.length == capacity(cb)
 Base.isempty(cb::CircularArrayBuffer) = cb.length == 0
 
 @inline function _buffer_index(cb::CircularArrayBuffer, i::Int)
@@ -48,7 +158,12 @@ function Base.empty!(cb::CircularArrayBuffer)
     cb
 end
 
-function RLBase.update!(cb::CircularArrayBuffer{T,N}, data::AbstractArray{T}) where {T, N}
+"""
+    update!(cb::CircularArrayBuffer{T,N}, data::AbstractArray{T})
+
+`update!` the last frame of `cb` with data.
+"""
+function RLBase.update!(cb::CircularArrayBuffer{T,N}, data::AbstractArray{T}) where {T,N}
     select_last_dim(cb.buffer, _buffer_frame(cb, cb.length)) .= data
     cb
 end
@@ -65,20 +180,23 @@ function Base.push!(cb::CircularArrayBuffer, data)
     cb
 end
 
-"""
-!!! note
-    When `push!`` a CircularArrayBuffer into a CircularArrayBuffer,
-    only the last frame of the former is pushed!
-"""
-Base.push!(cb::CircularArrayBuffer{T, N}, data::CircularArrayBuffer{T, N}) where {T, N} = push!(cb, select_last_frame(data))
-
-function Base.push!(cb::CircularArrayBuffer{T, N}, ::Missing) where {T, N}
+function Base.push!(cb::CircularArrayBuffer{T,N}, ::Missing) where {T,N}
     if cb.length == capacity(cb)
         cb.first = (cb.first == capacity(cb) ? 1 : cb.first + 1)
     else
         cb.length += 1
     end
     cb
+end
+
+function Base.pop!(cb::CircularArrayBuffer)
+    res = select_last_frame(cb)
+    if cb.length <= 0
+        throw(ArgumentError("buffer must be non-empty"))
+    else
+        cb.length -= 1
+    end
+    res
 end
 
 # #####

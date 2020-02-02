@@ -31,7 +31,7 @@ end
 """
     StopAfterStep(step; cur = 1, is_show_progress = true, tag = "TRAINING")
 
-Return `true` after being called for `step`.
+Return `true` after being called `step` times.
 """
 mutable struct StopAfterStep{Tl}
     step::Int
@@ -50,11 +50,18 @@ function StopAfterStep(step; cur = 1, is_show_progress = true, tag = "TRAINING")
     StopAfterStep(step, cur, progress, tag)
 end
 
-function (s::StopAfterStep)(args...)
-    !isnothing(s.progress) && next!(
-        s.progress;
-        # showvalues = [(Symbol(s.tag, "/", :STEP), s.cur)],  # https://github.com/timholy/ProgressMeter.jl/pull/131
-    )
+function (s::StopAfterStep{Nothing})(args...)
+    @debug s.tag STEP = s.cur
+
+    res = s.cur >= s.step
+    s.cur += 1
+    res
+end
+
+function (s::StopAfterStep{Progress})(args...)
+    # https://github.com/timholy/ProgressMeter.jl/pull/131
+    # next!(s.progress; showvalues = [(Symbol(s.tag, "/", :STEP), s.cur)])
+    next!(s.progress)
     @debug s.tag STEP = s.cur
 
     res = s.cur >= s.step
@@ -88,14 +95,20 @@ function StopAfterEpisode(episode; cur = 0, is_show_progress = true, tag = "TRAI
     StopAfterEpisode(episode, cur, progress, tag)
 end
 
-function (s::StopAfterEpisode)(agent, env, obs)
-    !isnothing(s.progress) && next!(
-        s.progress;
-        # showvalues = [(Symbol(s.tag, "/", :EPISODE), s.cur)],  # https://github.com/timholy/ProgressMeter.jl/pull/131
-    )
+function (s::StopAfterEpisode{Nothing})(agent, env, obs)
     @debug s.tag EPISODE = s.cur
 
-    is_terminal(obs) && (s.cur += 1)
+    get_terminal(obs) && (s.cur += 1)
+    s.cur >= s.episode
+end
+
+function (s::StopAfterEpisode{Progress})(agent, env, obs)
+    # https://github.com/timholy/ProgressMeter.jl/pull/131
+    # next!(s.progress; showvalues = [(Symbol(s.tag, "/", :EPISODE), s.cur)])
+    next!(s.progress;)
+    @debug s.tag EPISODE = s.cur
+
+    get_terminal(obs) && (s.cur += 1)
     s.cur >= s.episode
 end
 
@@ -110,4 +123,4 @@ Return `true` if the `terminal` field of an observation is `true`.
 """
 struct StopWhenDone end
 
-(s::StopWhenDone)(agent, env, obs) = is_terminal(obs)
+(s::StopWhenDone)(agent, env, obs) = get_terminal(obs)
