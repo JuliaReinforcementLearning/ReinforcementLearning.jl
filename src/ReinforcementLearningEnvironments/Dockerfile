@@ -1,4 +1,4 @@
-FROM julia:1.2
+FROM julia:1.3
 
 # install dependencies
 RUN set -eux; \

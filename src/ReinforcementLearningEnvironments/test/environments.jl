@@ -2,30 +2,17 @@
 
     function basic_env_test(env, n = 100)
         reset!(env)
-        os = observation_space(env)
-        as = action_space(env)
-        @test os isa AbstractSpace
-        @test as isa AbstractSpace
+        observation_space = get_observation_space(env)
+        action_space = get_action_space(env)
+        @test observation_space isa AbstractSpace
+        @test action_space isa AbstractSpace
         @test reset!(env) == nothing
         for _ = 1:n
-            a = rand(as)
-            @test a in as
-            @test interact!(env, a) === nothing
+            a = rand(action_space)
+            @test a in action_space
+            @test env(a) === nothing
             obs = observe(env)
-            @test get_state(obs) in os
-            if get_terminal(obs)
-                reset!(env)
-            end
-        end
-    end
-
-    function basic_env_test(env::HanabiEnv, n = 100)
-        reset!(env)
-        @test reset!(env) == nothing
-        for _ = 1:n
-            a = rand(legal_actions(env))
-            interact!(env, a)
-            obs = observe(env)
+            @test get_state(obs) in observation_space
             if get_terminal(obs)
                 reset!(env)
             end
@@ -45,23 +32,11 @@
     atari_env_names = filter(x -> x != "defender", atari_env_names)
 
     for env_exp in [
-        :(HanabiEnv()),
         # :(basic_ViZDoom_env()),  # comment out due to https://github.com/JuliaReinforcementLearning/ViZDoom.jl/issues/7
-        :(CartPoleEnv()),
+        :(POMDPEnv(TigerPOMDP())),
         :(MountainCarEnv()),
         :(ContinuousMountainCarEnv()),
         :(PendulumEnv()),
-        :(MDPEnv(LegacyGridWorld())),
-        :(POMDPEnv(TigerPOMDP())),
-        :(SimpleMDPEnv()),
-        :(DiscreteMazeEnv()),
-        :(deterministic_MDP()),
-        :(absorbing_deterministic_tree_MDP()),
-        :(stochastic_MDP()),
-        :(stochastic_tree_MDP()),
-        :(deterministic_tree_MDP_with_rand_reward()),
-        :(deterministic_tree_MDP()),
-        :(deterministic_MDP()),
         (:(AtariEnv(;name=$x)) for x in atari_env_names)...,
         (:(GymEnv($x)) for x in gym_env_names)...,
     ]

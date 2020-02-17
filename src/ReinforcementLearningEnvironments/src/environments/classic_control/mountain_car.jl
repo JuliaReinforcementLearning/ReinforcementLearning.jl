@@ -1,5 +1,4 @@
 using Random
-using GR
 
 export MountainCarEnv, ContinuousMountainCarEnv
 
@@ -13,6 +12,7 @@ struct MountainCarEnvParams{T}
     gravity::T
     max_steps::Int
 end
+
 function MountainCarEnvParams(
     ;
     T = Float64,
@@ -40,8 +40,8 @@ end
 mutable struct MountainCarEnv{A,T,R<:AbstractRNG} <: AbstractEnv
     params::MountainCarEnvParams{T}
     action_space::A
-    observation_space::MultiContinuousSpace{(2,),1}
-    state::Array{T,1}
+    observation_space::MultiContinuousSpace{Vector{T}}
+    state::Vector{T}
     action::Int
     done::Bool
     t::Int
@@ -52,7 +52,7 @@ function MountainCarEnv(
     ;
     T = Float64,
     continuous = false,
-    rng = Random.GLOBAL_RNG,
+    seed = nothing,
     kwargs...,
 )
     if continuous
@@ -71,7 +71,7 @@ function MountainCarEnv(
         1,
         false,
         0,
-        rng,
+        MersenneTwister(seed),
     )
     reset!(env)
     env
@@ -79,10 +79,15 @@ end
 
 ContinuousMountainCarEnv(; kwargs...) = MountainCarEnv(; continuous = true, kwargs...)
 
-observe(env::MountainCarEnv) =
-    Observation(reward = env.done ? 0. : -1., terminal = env.done, state = env.state)
+Random.seed!(env::MountainCarEnv, seed) = Random.seed!(env.rng, seed)
 
-function reset!(env::MountainCarEnv{A,T}) where {A,T}
+RLBase.observe(env::MountainCarEnv) = (
+    reward = env.done ? 0. : -1.,
+    terminal = env.done,
+    state = env.state
+)
+
+function RLBase.reset!(env::MountainCarEnv{A,T}) where {A,T}
     env.state[1] = .2 * rand(env.rng, T) - .6
     env.state[2] = 0.
     env.done = false
@@ -90,8 +95,10 @@ function reset!(env::MountainCarEnv{A,T}) where {A,T}
     nothing
 end
 
-interact!(env::MountainCarEnv{<:ContinuousSpace}, a) = _interact!(env, min(max(a, -1, 1)))
-interact!(env::MountainCarEnv{<:DiscreteSpace}, a) = _interact!(env, a - 2)
+(env::MountainCarEnv{<:ContinuousSpace})(a) = _interact!(env, min(max(a, -1, 1)))
+
+(env::MountainCarEnv{<:DiscreteSpace})(a) = _interact!(env, a - 2)
+
 function _interact!(env::MountainCarEnv, force)
     env.t += 1
     x, v = env.state

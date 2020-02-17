@@ -6,8 +6,8 @@ mutable struct AtariEnv{IsGrayScale, TerminalOnLifeLoss, N, S<:AbstractRNG} <: A
     ale::Ptr{Nothing}
     screens::Tuple{Array{UInt8, N}, Array{UInt8, N}}  # for max-pooling
     actions::Vector{Int64}
-    action_space::DiscreteSpace{Int}
-    observation_space::MultiDiscreteSpace{UInt8, N}
+    action_space::DiscreteSpace{UnitRange{Int}}
+    observation_space::MultiDiscreteSpace{Array{UInt8, N}}
     noopmax::Int
     frame_skip::Int
     reward::Float32
@@ -69,8 +69,8 @@ function AtariEnv(
 
     observation_size = grayscale_obs ? (getScreenWidth(ale), getScreenHeight(ale)) : (3, getScreenWidth(ale), getScreenHeight(ale))  # !!! note the order
     observation_space = MultiDiscreteSpace(
-        fill(typemax(Cuchar), observation_size),
         fill(typemin(Cuchar), observation_size),
+        fill(typemax(Cuchar), observation_size),
     )
 
     actions = full_action_space ? getLegalActionSet(ale) : getMinimalActionSet(ale)
@@ -97,7 +97,7 @@ end
 update_screen!(env::AtariEnv{true}, screen) = ArcadeLearningEnvironment.getScreenGrayscale!(env.ale, vec(screen))
 update_screen!(env::AtariEnv{false}, screen) = ArcadeLearningEnvironment.getScreenRGB!(env.ale, vec(screen))
 
-function interact!(env::AtariEnv{is_gray_scale, is_terminal_on_life_loss}, a) where {is_gray_scale, is_terminal_on_life_loss}
+function (env::AtariEnv{is_gray_scale, is_terminal_on_life_loss})(a) where {is_gray_scale, is_terminal_on_life_loss}
     r = 0.0f0
 
     for i in 1:env.frame_skip
@@ -121,9 +121,9 @@ end
 is_terminal(env::AtariEnv{<:Any, true}) = game_over(env.ale) || (lives(env.ale) < env.lives)
 is_terminal(env::AtariEnv{<:Any, false}) = game_over(env.ale)
 
-observe(env::AtariEnv) = Observation(reward = env.reward, terminal = is_terminal(env), state = env.screens[1])
+RLBase.observe(env::AtariEnv) = (reward = env.reward, terminal = is_terminal(env), state = env.screens[1])
 
-function reset!(env::AtariEnv)
+function RLBase.reset!(env::AtariEnv)
     reset_game(env.ale)
     for _ = 1:rand(env.seed, 0:env.noopmax)
         act(env.ale, Int32(0))
@@ -152,7 +152,7 @@ function imshowcolor(x::Array{UInt8,1}, dims)
     updatews()
 end
 
-function render(env::AtariEnv)
+function RLBase.render(env::AtariEnv)
     x = getScreenRGB(env.ale)
     imshowcolor(x, (Int(getScreenWidth(env.ale)), Int(getScreenHeight(env.ale))))
 end

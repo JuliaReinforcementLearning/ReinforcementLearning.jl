@@ -14,8 +14,8 @@ end
 function GymEnv(name::String)
     gym = pyimport("gym")
     pyenv = gym.make(name)
-    obs_space = gymspace2jlspace(pyenv.observation_space)
-    act_space = gymspace2jlspace(pyenv.action_space)
+    obs_space = convert(AbstractSpace, pyenv.observation_space)
+    act_space = convert(AbstractSpace, pyenv.action_space)
     obs_type =
         if obs_space isa Union{MultiContinuousSpace,MultiDiscreteSpace}
             PyArray
@@ -40,23 +40,23 @@ function GymEnv(name::String)
     env
 end
 
-function interact!(env::GymEnv{T}, action) where {T}
+function (env::GymEnv{T})(action) where {T}
     pycall!(env.state, env.pyenv.step, PyObject, action)
     nothing
 end
 
-function reset!(env::GymEnv)
+function RLBase.reset!(env::GymEnv)
     pycall!(env.state, env.pyenv.reset, PyObject)
     nothing
 end
 
-function observe(env::GymEnv{T}) where {T}
+function RLBase.observe(env::GymEnv{T}) where {T}
     if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type)
         obs, reward, isdone, info = convert(Tuple{T,Float64,Bool,PyDict}, env.state)
-        Observation(reward = reward, terminal = isdone, state = obs)
+        (reward = reward, terminal = isdone, state = obs)
     else
         # env has just been reseted
-        Observation(
+        (
             reward = 0.,  # dummy
             terminal = false,
             state = convert(T, env.state),
@@ -64,29 +64,29 @@ function observe(env::GymEnv{T}) where {T}
     end
 end
 
-render(env::GymEnv) = env.pyenv.render()
+RLBase.render(env::GymEnv) = env.pyenv.render()
 
 ###
 ### utils
 ###
 
-function gymspace2jlspace(s::PyObject)
+function Base.convert(::Type{AbstractSpace}, s::PyObject)
     spacetype = s.__class__.__name__
     if spacetype == "Box"
         MultiContinuousSpace(s.low, s.high)
     elseif spacetype == "Discrete"  # for GymEnv("CliffWalking-v0"), `s.n` is of type PyObject (numpy.int64)
-        DiscreteSpace(py"int($s.n)" - 1, 0)  # for GymEnv("CliffWalking-v0"), `s.n` is of type PyObject (numpy.int64)
+        DiscreteSpace(0, py"int($s.n)" - 1)  # for GymEnv("CliffWalking-v0"), `s.n` is of type PyObject (numpy.int64)
     elseif spacetype == "MultiBinary"
-        MultiDiscreteSpace(ones(Int8, s.n), zeros(Int8, s.n))
+        MultiDiscreteSpace(zeros(Int8, s.n), ones(Int8, s.n))
     elseif spacetype == "MultiDiscrete"
         MultiDiscreteSpace(
-            s.nvec .- one(eltype(s.nvec)),
             zeros(eltype(s.nvec), size(s.nvec)),
+            s.nvec .- one(eltype(s.nvec)),
         )
     elseif spacetype == "Tuple"
-        TupleSpace((gymspace2jlspace(x) for x in s.spaces)...)
+        TupleSpace((convert(AbstractSpace, x) for x in s.spaces)...)
     elseif spacetype == "Dict"
-        DictSpace((k => gymspace2jlspace(v) for (k, v) in s.spaces)...)
+        DictSpace((k => convert(AbstractSpace, v) for (k, v) in s.spaces)...)
     else
         error("Don't know how to convert Gym Space of class [$(spacetype)]")
     end

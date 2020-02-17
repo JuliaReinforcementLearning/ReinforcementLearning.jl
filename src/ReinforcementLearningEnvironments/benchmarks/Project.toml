@@ -1,8 +1,0 @@
-[deps]
-ArcadeLearningEnvironment = "b7f77d8d-088d-5e02-8ac0-89aab2acc977"
-BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-Hanabi = "705708ad-e62c-5f47-9095-732127600058"
-POMDPModels = "355abbd5-f08e-5560-ac9e-8b5f2592a0ca"
-PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
-ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
-ViZDoom = "13bb3beb-38fe-5ca7-9a46-050a216300b1"
