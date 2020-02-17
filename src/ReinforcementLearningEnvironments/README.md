@@ -12,15 +12,7 @@ pkg> add ReinforcementLearningEnvironments
 
 ## API
 
-| Method | Description |
-| :---  | :--------- |
-| `observe(env, observer=:default)` | Return the observation of `env` from the view of `observer`|
-| `reset!(env)` | Reset `env` to an initial state|
-| `interact!(env, action)` | Send `action` to `env`. For some multi-agent environments, `action` can be a dictionary of actions from different agents|
-| **Optional Methods** | |
-| `action_space(env)` | Return the action space of `env` |
-| `observation_space(env)` | Return the observation space of `env`|
-| `render(env)` | Show the current state of environment |
+All the environments here are supposed to have implemented the [`AbstractEnvironment`](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/blob/9205f6d7bdde5d17a5d2baedefcf8a1854b40698/src/interface.jl#L230-L261) related interfaces in [ReinforcementLearningBase.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl).
 
 ## Supported Environments
 
@@ -32,51 +24,34 @@ By default, only some basic environments are installed. If you want to use some 
 - MountainCarEnv
 - ContinuousMountainCarEnv
 - PendulumEnv
-- MDPEnv
-- POMDPEnv
-- DiscreteMazeEnv
-- SimpleMDPEnv
-  - deterministic_MDP
-  - absorbing_deterministic_tree_MDP
-  - stochastic_MDP
-  - stochastic_tree_MDP
-  - deterministic_tree_MDP_with_rand_reward
-  - deterministic_tree_MDP
-  - deterministic_MDP
 
 ### 3-rd Party Environments
 
 | Environment Name | Dependent Package Name | Description |
 | :--- | :--- | :--- |
-| `AtariEnv` | [ArcadeLearningEnvironment.jl](https://github.com/JuliaReinforcementLearning/ArcadeLearningEnvironment.jl) | |
+| `AtariEnv` | [ArcadeLearningEnvironment.jl](https://github.com/JuliaReinforcementLearning/ArcadeLearningEnvironment.jl) | Tested only on Linux|
 | `ViZDoomEnv` | [ViZDoom.jl](https://github.com/JuliaReinforcementLearning/ViZDoom.jl) | Currently only a basic environment is supported. (By calling `basic_ViZDoom_env()`)|
-| `GymEnv` | [PyCall.jl](https://github.com/JuliaPy/PyCall.jl) | You need to manually install `gym` first |
-| `HanabiEnv` | [Hanabi.jl](https://github.com/JuliaReinforcementLearning/Hanabi.jl) | Hanabi is a turn based multi-player environment, the API is slightly different from the environments above.|
+| `GymEnv` | [PyCall.jl](https://github.com/JuliaPy/PyCall.jl) | You need to manually install `gym` first in Python |
+| `MDPEnv`,`POMDPEnv`| [POMDPs.jl](https://github.com/JuliaPOMDP/POMDPs.jl)| The `get_observation_space` method is undefined|
+| `OpenSpielEnv` | [OpenSpiel.jl](https://github.com/JuliaReinforcementLearning/OpenSpiel.jl) | (WIP) |
 
-**TODO:**
+## Usage
 
-- [ ] Box2d (Investigating)
-- [ ] Bullet (Investigating)
+```julia
+julia> using ReinforcementLearningEnvironments
 
-How to enable 3-rd party environments?
+julia> using ReinforcementLearningBase
 
-Take the `AtariEnv` for example:
+julia> env = CartPoleEnv()
+CartPoleEnv{Float64}(gravity=9.8,masscart=1.0,masspole=0.1,totalmass=1.1,halflength=0.5,polemasslength=0.05,forcemag=10.0,tau=0.02,thetathreshold=0.20943951023931953,xthreshold=2.4,max_steps=200)
 
-1. Install this package by:
-    ```julia
-    pkg> add ReinforcementLearningEnvironments
-    ```
-2. Install corresponding dependent package by:
-    ```julia
-    pkg> add ArcadeLearningEnvironment
-    ```
-3. Using the above two packages:
-    ```julia
-    using ReinforcementLearningEnvironments
-    using ArcadeLearningEnvironment
-    env = AtariEnv("pong")
-    ```
+julia> action_space = get_action_space(env)
+DiscreteSpace{UnitRange{Int64}}(1:2)
 
-## Style Guide
-
-We favor the [YASGuide](https://github.com/jrevels/YASGuide) style guide.
+julia> while true
+           action = rand(action_space)
+           env(action)
+           obs = observe(env)
+           get_terminal(obs) && break
+       end
+```
