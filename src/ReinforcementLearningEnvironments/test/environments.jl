@@ -7,7 +7,7 @@
         @test observation_space isa AbstractSpace
         @test action_space isa AbstractSpace
         @test reset!(env) == nothing
-        for _ = 1:n
+        for _ in 1:n
             a = rand(action_space)
             @test a in action_space
             @test env(a) === nothing
@@ -19,12 +19,14 @@
         end
     end
 
-    gym_env_names = ReinforcementLearningEnvironments.list_gym_env_names(modules = [
-        "gym.envs.algorithmic",
-        "gym.envs.classic_control",
-        "gym.envs.toy_text",
-        "gym.envs.unittest",
-    ])  # mujoco, box2d, robotics are not tested here
+    gym_env_names = ReinforcementLearningEnvironments.list_gym_env_names(
+        modules = [
+            "gym.envs.algorithmic",
+            "gym.envs.classic_control",
+            "gym.envs.toy_text",
+            "gym.envs.unittest",
+        ],
+    )  # mujoco, box2d, robotics are not tested here
 
     gym_env_names = filter(x -> x != "KellyCoinflipGeneralized-v0", gym_env_names)  # not sure why this env has outliers
 
@@ -37,10 +39,9 @@
         :(MountainCarEnv()),
         :(ContinuousMountainCarEnv()),
         :(PendulumEnv()),
-        (:(AtariEnv(;name=$x)) for x in atari_env_names)...,
+        (:(AtariEnv(; name = $x)) for x in atari_env_names)...,
         (:(GymEnv($x)) for x in gym_env_names)...,
     ]
-
         @info "Testing $env_exp"
         env = eval(env_exp)
         basic_env_test(env)

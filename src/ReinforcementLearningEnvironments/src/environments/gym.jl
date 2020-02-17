@@ -16,20 +16,19 @@ function GymEnv(name::String)
     pyenv = gym.make(name)
     obs_space = convert(AbstractSpace, pyenv.observation_space)
     act_space = convert(AbstractSpace, pyenv.action_space)
-    obs_type =
-        if obs_space isa Union{MultiContinuousSpace,MultiDiscreteSpace}
-            PyArray
-        elseif obs_space isa ContinuousSpace
-            Float64
-        elseif obs_space isa DiscreteSpace
-            Int
-        elseif obs_space isa TupleSpace
-            PyVector
-        elseif obs_space isa DictSpace
-            PyDict
-        else
-            error("don't know how to get the observation type from observation space of $obs_space")
-        end
+    obs_type = if obs_space isa Union{MultiContinuousSpace,MultiDiscreteSpace}
+        PyArray
+    elseif obs_space isa ContinuousSpace
+        Float64
+    elseif obs_space isa DiscreteSpace
+        Int
+    elseif obs_space isa TupleSpace
+        PyVector
+    elseif obs_space isa DictSpace
+        PyDict
+    else
+        error("don't know how to get the observation type from observation space of $obs_space")
+    end
     env = GymEnv{obs_type,typeof(act_space),typeof(obs_space)}(
         pyenv,
         obs_space,
@@ -57,7 +56,7 @@ function RLBase.observe(env::GymEnv{T}) where {T}
     else
         # env has just been reseted
         (
-            reward = 0.,  # dummy
+            reward = 0.0,  # dummy
             terminal = false,
             state = convert(T, env.state),
         )
@@ -107,7 +106,8 @@ function list_gym_env_names(;
         "gym.envs.robotics",
         "gym.envs.toy_text",
         "gym.envs.unittest",
-    ])
+    ],
+)
     gym = pyimport("gym")
     [x.id for x in gym.envs.registry.all() if split(x.entry_point, ':')[1] in modules]
 end

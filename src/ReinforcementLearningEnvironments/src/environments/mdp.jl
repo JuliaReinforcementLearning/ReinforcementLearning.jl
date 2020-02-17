@@ -3,7 +3,7 @@ export POMDPEnv
 using POMDPs
 using Random
 
-RLBase.get_action_space(m::Union{<:POMDP, <:MDP}) = convert(AbstractSpace, actions(m))
+RLBase.get_action_space(m::Union{<:POMDP,<:MDP}) = convert(AbstractSpace, actions(m))
 
 #####
 # POMDPEnv
@@ -20,7 +20,7 @@ end
 
 Random.seed!(env::POMDPEnv, seed) = seed!(env.rng, seed)
 
-function POMDPEnv(model::POMDP; seed=nothing)
+function POMDPEnv(model::POMDP; seed = nothing)
     rng = MersenneTwister(seed)
     s = initialstate(model, rng)
     a = rand(rng, actions(model))
@@ -54,11 +54,11 @@ function (env::POMDPEnv)(a)
 end
 
 RLBase.observe(env::POMDPEnv) = (
-    state=env.observation,
-    reward=env.reward,
-    terminal=isterminal(env.model, env.state),
-    inner_state=env.state,
-    info=env.info
+    state = env.observation,
+    reward = env.reward,
+    terminal = isterminal(env.model, env.state),
+    inner_state = env.state,
+    info = env.info,
 )
 
 function RLBase.reset!(env::POMDPEnv)
@@ -84,7 +84,7 @@ end
 
 Random.seed!(env::MDPEnv, seed) = seed!(env.rng, seed)
 
-function MDPEnv(model::MDP; seed=nothing)
+function MDPEnv(model::MDP; seed = nothing)
     rng = MersenneTwister(seed)
     s = initialstate(model, rng)
     a = rand(rng, actions(model))
@@ -116,10 +116,10 @@ function (env::MDPEnv)(a)
 end
 
 RLBase.observe(env::MDPEnv) = (
-    state=env.state,
-    reward=env.reward,
-    terminal=isterminal(env.model, env.state),
-    info=env.info
+    state = env.state,
+    reward = env.reward,
+    terminal = isterminal(env.model, env.state),
+    info = env.info,
 )
 
 function RLBase.reset!(env::MDPEnv)
