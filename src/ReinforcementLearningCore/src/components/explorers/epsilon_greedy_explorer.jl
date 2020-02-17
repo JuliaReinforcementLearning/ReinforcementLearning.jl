@@ -36,7 +36,7 @@ plot([RL.get_ϵ(s, i) for i in 1:500], label="exp epsilon")
 ```
 ![](../assets/img/exp_epsilon_greedy_selector.png)
 """
-mutable struct EpsilonGreedyExplorer{Kind, IsBreakTie,R} <: AbstractExplorer
+mutable struct EpsilonGreedyExplorer{Kind,IsBreakTie,R} <: AbstractExplorer
     ϵ_stable::Float64
     ϵ_init::Float64
     warmup_steps::Int
@@ -45,8 +45,8 @@ mutable struct EpsilonGreedyExplorer{Kind, IsBreakTie,R} <: AbstractExplorer
     rng::R
 end
 
-function Base.copy(p::EpsilonGreedyExplorer{Kind, IsBreakTie, R}) where {Kind, IsBreakTie, R}
-    EpsilonGreedyExplorer{Kind, IsBreakTie, R}(
+function Base.copy(p::EpsilonGreedyExplorer{Kind,IsBreakTie,R}) where {Kind,IsBreakTie,R}
+    EpsilonGreedyExplorer{Kind,IsBreakTie,R}(
         p.ϵ_stable,
         p.ϵ_init,
         p.warmup_steps,
@@ -63,11 +63,11 @@ function EpsilonGreedyExplorer(;
     warmup_steps = 0,
     decay_steps = 0,
     step = 1,
-    is_break_tie=false,
+    is_break_tie = false,
     seed = nothing,
 )
     rng = MersenneTwister(seed)
-    EpsilonGreedyExplorer{kind,is_break_tie, typeof(rng)}(
+    EpsilonGreedyExplorer{kind,is_break_tie,typeof(rng)}(
         ϵ_stable,
         ϵ_init,
         warmup_steps,
@@ -77,7 +77,7 @@ function EpsilonGreedyExplorer(;
     )
 end
 
-EpsilonGreedyExplorer(ϵ;kwargs...) = EpsilonGreedyExplorer(; ϵ_stable = ϵ, kwargs...)
+EpsilonGreedyExplorer(ϵ; kwargs...) = EpsilonGreedyExplorer(; ϵ_stable = ϵ, kwargs...)
 
 function get_ϵ(s::EpsilonGreedyExplorer{:linear}, step)
     if step <= s.warmup_steps
@@ -112,30 +112,29 @@ get_ϵ(s::EpsilonGreedyExplorer) = get_ϵ(s, s.step)
     `NaN` will be filtered unless all the values are `NaN`.
     In that case, a random one will be returned.
 """
-function (s::EpsilonGreedyExplorer{<:Any, true})(values)
+function (s::EpsilonGreedyExplorer{<:Any,true})(values)
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values)[2]) : rand(s.rng, 1:length(values))
 end
 
-function (s::EpsilonGreedyExplorer{<:Any, false})(values)
+function (s::EpsilonGreedyExplorer{<:Any,false})(values)
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? find_max(values)[2] : rand(s.rng, 1:length(values))
 end
 
-function (s::EpsilonGreedyExplorer{<:Any, true})(values, mask)
+function (s::EpsilonGreedyExplorer{<:Any,true})(values, mask)
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values, mask)[2]) :
     rand(s.rng, findall(mask))
 end
 
-function (s::EpsilonGreedyExplorer{<:Any, false})(values, mask)
+function (s::EpsilonGreedyExplorer{<:Any,false})(values, mask)
     ϵ = get_ϵ(s)
     s.step += 1
-    rand(s.rng) >= ϵ ? find_max(values, mask)[2] :
-    rand(s.rng, findall(mask))
+    rand(s.rng) >= ϵ ? find_max(values, mask)[2] : rand(s.rng, findall(mask))
 end
 
 Random.seed!(s::EpsilonGreedyExplorer, seed) = Random.seed!(s.rng, seed)
@@ -146,7 +145,7 @@ Random.seed!(s::EpsilonGreedyExplorer, seed) = Random.seed!(s.rng, seed)
 
 Return the probability of selecting each action given the estimated `values` of each action.
 """
-function RLBase.get_prob(s::EpsilonGreedyExplorer{<:Any, true}, values)
+function RLBase.get_prob(s::EpsilonGreedyExplorer{<:Any,true}, values)
     ϵ, n = get_ϵ(s), length(values)
     probs = fill(ϵ / n, n)
     max_val_inds = find_all_max(values)[2]
@@ -156,14 +155,14 @@ function RLBase.get_prob(s::EpsilonGreedyExplorer{<:Any, true}, values)
     DiscreteNonParametric(1:length(probs), probs)
 end
 
-function RLBase.get_prob(s::EpsilonGreedyExplorer{<:Any, false}, values)
+function RLBase.get_prob(s::EpsilonGreedyExplorer{<:Any,false}, values)
     ϵ, n = get_ϵ(s), length(values)
     probs = fill(ϵ / n, n)
     probs[find_max(values)[2]] += 1 - ϵ
     DiscreteNonParametric(1:length(probs), probs)
 end
 
-function RLBase.get_prob(s::EpsilonGreedyExplorer{<:Any, true}, values, mask)
+function RLBase.get_prob(s::EpsilonGreedyExplorer{<:Any,true}, values, mask)
     ϵ, n = get_ϵ(s), length(values)
     probs = zeros(n)
     probs[mask] .= ϵ / sum(mask)
@@ -174,7 +173,7 @@ function RLBase.get_prob(s::EpsilonGreedyExplorer{<:Any, true}, values, mask)
     DiscreteNonParametric(1:length(probs), probs)
 end
 
-function RLBase.get_prob(s::EpsilonGreedyExplorer{<:Any, false}, values, mask)
+function RLBase.get_prob(s::EpsilonGreedyExplorer{<:Any,false}, values, mask)
     ϵ, n = get_ϵ(s), length(values)
     probs = zeros(n)
     probs[mask] .= ϵ / sum(mask)
@@ -184,8 +183,7 @@ end
 
 RLBase.reset!(s::EpsilonGreedyExplorer) = s.step = 1
 
-struct GreedyExplorer <:AbstractExplorer
-end
+struct GreedyExplorer <: AbstractExplorer end
 
 (s::GreedyExplorer)(values) = find_max(values)[2]
 (s::GreedyExplorer)(values, mask) = find_max(values, mask)[2]

@@ -25,8 +25,8 @@ A_t = \underset{a}{\arg \max} \left[ Q_t(a) + c \sqrt{\frac{\ln t}{N_t(a)}} \rig
 ```
 See more details at Section (2.7) on Page 35 of the book *Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.*
 """ function (p::UCBExplorer)(values::AbstractArray)
-    action = find_all_max(@. values + p.c * sqrt(log(p.step + 1) / p.actioncounts))[2] |>
-             sample
+    action =
+        find_all_max(@. values + p.c * sqrt(log(p.step + 1) / p.actioncounts))[2] |> sample
     p.actioncounts[action] += 1
     p.step += 1
     action

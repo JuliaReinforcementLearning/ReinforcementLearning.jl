@@ -1,6 +1,11 @@
 export DynaAgent
 
-Base.@kwdef struct DynaAgent{P<:AbstractPolicy, B<:AbstractTrajectory, M<:AbstractEnvironmentModel, R} <: AbstractAgent
+Base.@kwdef struct DynaAgent{
+    P<:AbstractPolicy,
+    B<:AbstractTrajectory,
+    M<:AbstractEnvironmentModel,
+    R,
+} <: AbstractAgent
     policy::P
     model::M
     trajectory::B

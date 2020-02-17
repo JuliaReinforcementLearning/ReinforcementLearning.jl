@@ -1,17 +1,13 @@
 import Base: run
 
-run(
-    agent,
-    env,
-    args...
-) = run(DynamicStyle(env), agent, env, args...)
+run(agent, env, args...) = run(DynamicStyle(env), agent, env, args...)
 
 function run(
     ::Sequential,
     agent::AbstractAgent,
     env::AbstractEnv,
     stop_condition,
-    hook::AbstractHook=EmptyHook(),
+    hook::AbstractHook = EmptyHook(),
 )
 
     reset!(env)

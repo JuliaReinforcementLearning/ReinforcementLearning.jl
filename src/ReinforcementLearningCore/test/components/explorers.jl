@@ -2,7 +2,7 @@
 
     @testset "EpsilonGreedyExplorer" begin
         @testset "API" begin
-            explorer = EpsilonGreedyExplorer(0.1; is_break_tie=true)
+            explorer = EpsilonGreedyExplorer(0.1; is_break_tie = true)
             Random.seed!(explorer, 123)
 
             values = [0, 1, 2, -1]
@@ -11,10 +11,7 @@
 
             # https://github.com/JuliaLang/julia/issues/10391#issuecomment-488642687
             # @test isapprox(get_prob(explorer, values), target_prob)
-            @test isapprox(
-                probs(get_prob(explorer, values)),
-                probs(target_prob),
-            )
+            @test isapprox(probs(get_prob(explorer, values)), probs(target_prob))
 
             actions = [explorer(values) for _ in 1:10000]
             action_counts = countmap(actions)
@@ -41,7 +38,7 @@
                 warmup_steps = 3,
                 decay_steps = 8,
                 kind = :linear,
-                is_break_tie=true
+                is_break_tie = true,
             )
             xs = [0, 1, 2, -1, 2]
             mask = [true, true, false, true, false]
@@ -80,7 +77,7 @@
                 warmup_steps = 3,
                 decay_steps = 8,
                 kind = :exp,
-                is_break_tie=true
+                is_break_tie = true,
             )
             xs = [0, 1, 2, -1, 2]
             mask = [true, true, false, true, false]

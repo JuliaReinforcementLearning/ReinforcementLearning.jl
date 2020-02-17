@@ -3,30 +3,40 @@ export WeightedRandomPolicy
 using Random
 using StatsBase: sample, Weights
 
-struct WeightedRandomPolicy{N, A, W<:AbstractArray, S, R<:AbstractRNG} <: AbstractPolicy
+struct WeightedRandomPolicy{N,A,W<:AbstractArray,S,R<:AbstractRNG} <: AbstractPolicy
     actions::A
     weight::W
     sums::S
     rng::R
 end
 
-function WeightedRandomPolicy(weight::W; actions=axes(weights, 1), seed=nothing) where {W<:AbstractArray}
+function WeightedRandomPolicy(
+    weight::W;
+    actions = axes(weights, 1),
+    seed = nothing,
+) where {W<:AbstractArray}
     rng = MersenneTwister(seed)
     N = ndims(W)
 
     if N == 1
         sums = sum(weight)
     elseif N == 2
-        sums = vec(sum(weight, dims=1))
+        sums = vec(sum(weight, dims = 1))
     end
-    WeightedRandomPolicy{ndims(W), typeof(actions), W, typeof(sums), typeof(rng)}(actions, weight, sums, rng)
+    WeightedRandomPolicy{ndims(W),typeof(actions),W,typeof(sums),typeof(rng)}(
+        actions,
+        weight,
+        sums,
+        rng,
+    )
 end
 
 Random.seed!(p::WeightedRandomPolicy, seed) = Random.seed!(p.rng, seed)
 
 RLBase.update!(p::WeightedRandomPolicy, experience) = nothing
 
-(p::WeightedRandomPolicy{1})(obs, ::MinimalActionSet) = sample(p.rng, p.actions, Weights(p.weight, p.sums))
+(p::WeightedRandomPolicy{1})(obs, ::MinimalActionSet) =
+    sample(p.rng, p.actions, Weights(p.weight, p.sums))
 
 function (p::WeightedRandomPolicy{1})(obs, ::FullActionSet)
     legal_actions = get_legal_actions(obs)
