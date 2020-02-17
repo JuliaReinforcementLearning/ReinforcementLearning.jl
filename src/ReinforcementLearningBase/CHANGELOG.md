@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- CompatHelper: add new compat entry for "MacroTools" at version "0.5" [\#19](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/19) ([github-actions[bot]](https://github.com/apps/github-actions))
 - CompatHelper: add new compat entry for "Distributions" at version "0.22" [\#18](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/18) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Install TagBot as a GitHub Action [\#17](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/17) ([JuliaTagBot](https://github.com/JuliaTagBot))
 - Dev [\#16](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/16) ([findmyway](https://github.com/findmyway))
