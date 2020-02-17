@@ -38,8 +38,7 @@ By default the `MINIMAL_ACTION_SET` is returned.
 """
 @interface ActionStyle(x) = MINIMAL_ACTION_SET
 
-ActionStyle(::NamedTuple{(:reward, :terminal, :state, :legal_actions)}) =
-    FULL_ACTION_SET
+ActionStyle(::NamedTuple{(:reward, :terminal, :state, :legal_actions)}) = FULL_ACTION_SET
 ActionStyle(::NamedTuple{(:reward, :terminal, :state, :legal_actions_mask)}) =
     FULL_ACTION_SET
 ActionStyle(
@@ -140,7 +139,8 @@ given an observation of the environment.
 @interface get_prob(p::AbstractPolicy, obs) = get_prob(p, obs, ActionStyle(obs))
 @interface get_prob(p::AbstractPolicy, obs, ::AbstractActionStyle)
 @interface get_prob(p::AbstractPolicy, obs, a) = get_prob(p, obs, ActionStyle(obs), a)
-@interface get_prob(p::AbstractPolicy, obs, ::AbstractActionStyle, a) = pdf(get_prob(p, obs), a)
+@interface get_prob(p::AbstractPolicy, obs, ::AbstractActionStyle, a) =
+    pdf(get_prob(p, obs), a)
 
 @interface get_priority(p::AbstractPolicy, experience)
 
@@ -166,7 +166,8 @@ The length of `names` and `types` must match.
 @interface const SARTSA = (:state, :action, :reward, :terminal, :next_state, :next_action)
 
 @interface get_trace(t::AbstractTrajectory, s::Symbol)
-@interface get_trace(t::AbstractTrajectory, s::Symbol...) = merge(NamedTuple(), (x, get_trace(t, x)) for x in s)
+@interface get_trace(t::AbstractTrajectory, s::Symbol...) =
+    merge(NamedTuple(), (x, get_trace(t, x)) for x in s)
 @interface get_trace(t::AbstractTrajectory{names}) where {names} =
     merge(NamedTuple(), (s, get_trace(t, s)) for s in names)
 
@@ -270,8 +271,11 @@ abstract type AbstractDynamicStyle end
 @interface get_legal_actions_mask(x) = x.legal_actions_mask
 @interface get_legal_actions(x) = findall(get_legal_actions_mask(x))
 
-get_legal_actions(x::NamedTuple{(:reward, :terminal, :state, :legal_actions, :legal_actions_mask)}) = x.legal_actions
-get_legal_actions(x::NamedTuple{(:reward, :terminal, :state, :legal_actions)}) = x.legal_actions
+get_legal_actions(
+    x::NamedTuple{(:reward, :terminal, :state, :legal_actions, :legal_actions_mask)},
+) = x.legal_actions
+get_legal_actions(x::NamedTuple{(:reward, :terminal, :state, :legal_actions)}) =
+    x.legal_actions
 
 
 @interface get_terminal(x) = x.terminal

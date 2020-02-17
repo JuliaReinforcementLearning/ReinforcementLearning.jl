@@ -20,4 +20,3 @@ Random.seed!
 
 observe(env::WrappedEnv, player) = env.preprocessor(observe(env.env, player))
 observe(env::WrappedEnv) = env.preprocessor(observe(env.env))
-
