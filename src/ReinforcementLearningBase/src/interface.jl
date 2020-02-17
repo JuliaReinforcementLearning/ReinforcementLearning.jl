@@ -1,4 +1,5 @@
 using Random
+using Distributions: pdf
 
 #####
 # general
@@ -20,24 +21,79 @@ using Random
 @interface const PRE_ACT_STAGE = PreActStage()
 @interface const POST_ACT_STAGE = PostActStage()
 
+struct DefaultPlayer end
+@interface const DEFAULT_PLAYER = DefaultPlayer()
+
+abstract type AbstractActionStyle end
+@interface struct FullActionSet <: AbstractActionStyle end
+@interface const FULL_ACTION_SET = FullActionSet()
+@interface struct MinimalActionSet <: AbstractActionStyle end
+@interface const MINIMAL_ACTION_SET = MinimalActionSet()
+
+"""
+    ActionStyle(x)
+
+Specify whether the observation contains a full action set or a minimal action set.
+By default the `MINIMAL_ACTION_SET` is returned.
+"""
+@interface ActionStyle(x) = MINIMAL_ACTION_SET
+
+ActionStyle(::NamedTuple{(:reward, :terminal, :state, :legal_actions)}) =
+    FULL_ACTION_SET
+ActionStyle(::NamedTuple{(:reward, :terminal, :state, :legal_actions_mask)}) =
+    FULL_ACTION_SET
+ActionStyle(
+    ::NamedTuple{(:reward, :terminal, :state, :legal_actions, :legal_actions_mask)},
+) = FULL_ACTION_SET
+
+
 #####
 # Agent
 #####
 
 "An agent is a functional object which takes in an observation and returns an action."
 @interface abstract type AbstractAgent end
+
+@interface (agent::AbstractAgent)(obs) = agent(PRE_ACT_STAGE, obs)
 @interface (agent::AbstractAgent)(stage::AbstractStage, obs)
+@interface get_role(::AbstractAgent) = DEFAULT_PLAYER
 
 #####
 # Approximator
 #####
 
+abstract type AbstractApproximatorStyle end
+
+"""
+For `VApproximator`, we assume that `(V::AbstractApproximator)(s)` is implemented.
+"""
+@interface struct VApproximator <: AbstractApproximatorStyle end
+
+"""
+For `QApproximator`, we assume that the following methods are implemented:
+
+- `(Q::AbstractApproximator)(s, a)`, estimate the Q value.
+- `(Q::AbstractApproximator)(s)`, estimate the Q value among all possible actions.
+"""
+@interface struct QApproximator <: AbstractApproximatorStyle end
+
+"""
+For `HybridApproximator`, the following methods are assumed to be implemented:
+- `(Q::AbstractApproximator)(s, a)`, estimate the Q value.
+- `(Q::AbstractApproximator)(s)`, estimate the state value.
+"""
+@interface struct HybridApproximator <: AbstractApproximatorStyle end
+
 """
 An approximator is a functional object for value estimation.
 """
 @interface abstract type AbstractApproximator end
-@interface (app::AbstractApproximator)(x)
+@interface (app::AbstractApproximator)(obs) = app(get_state(obs))
+
+"Usually the `correction` is the gradient of inner parameters"
 @interface update!(a::AbstractApproximator, correction)
+
+@interface ApproximatorStyle(x::AbstractApproximator)
 
 #####
 # Learner
@@ -48,15 +104,16 @@ A learner is usually a wrapper around [`AbstractApproximator`](@ref)s.
 It defines the expected inputs and how to udpate inner approximators.
 """
 @interface abstract type AbstractLearner end
-@interface (learner::AbstractLearner)(x)
+@interface (learner::AbstractLearner)(obs)
 @interface update!(learner::AbstractLearner, experience)
+@interface get_priority(p::AbstractLearner, experience)
 
 #####
 # Explorer
 #####
 
 """
-Define how to select actions.
+Define how to select an action based on action values.
 """
 @interface abstract type AbstractExplorer end
 @interface (p::AbstractExplorer)(x)
@@ -65,8 +122,8 @@ Define how to select actions.
 @interface Base.copy(p::AbstractExplorer)
 
 "Get the action distribution given action values"
-@interface get_distribution(p::AbstractExplorer, x)
-@interface get_distribution(p::AbstractExplorer, x, mask)
+@interface get_prob(p::AbstractExplorer, x)
+@interface get_prob(p::AbstractExplorer, x, mask)
 
 #####
 # Policy
@@ -77,8 +134,15 @@ A policy is a functional object which defines how to generate action(s)
 given an observation of the environment.
 """
 @interface abstract type AbstractPolicy end
-@interface (p::AbstractPolicy)(x)
+@interface (p::AbstractPolicy)(obs) = p(obs, ActionStyle(obs))
 @interface update!(p::AbstractPolicy, experience)
+
+@interface get_prob(p::AbstractPolicy, obs) = get_prob(p, obs, ActionStyle(obs))
+@interface get_prob(p::AbstractPolicy, obs, ::AbstractActionStyle)
+@interface get_prob(p::AbstractPolicy, obs, a) = get_prob(p, obs, ActionStyle(obs), a)
+@interface get_prob(p::AbstractPolicy, obs, ::AbstractActionStyle, a) = pdf(get_prob(p, obs), a)
+
+@interface get_priority(p::AbstractPolicy, experience)
 
 #####
 # Trajectory
@@ -102,20 +166,20 @@ The length of `names` and `types` must match.
 @interface const SARTSA = (:state, :action, :reward, :terminal, :next_state, :next_action)
 
 @interface get_trace(t::AbstractTrajectory, s::Symbol)
-@interface get_traces(t::AbstractTrajectory{names}) where {names} =
+@interface get_trace(t::AbstractTrajectory, s::Symbol...) = merge(NamedTuple(), (x, get_trace(t, x)) for x in s)
+@interface get_trace(t::AbstractTrajectory{names}) where {names} =
     merge(NamedTuple(), (s, get_trace(t, s)) for s in names)
 
-@interface Base.length(t::AbstractTrajectory) = maximum(length(x) for x in get_traces(t))
+@interface Base.length(t::AbstractTrajectory) = maximum(length(x) for x in get_trace(t))
 @interface Base.size(t::AbstractTrajectory) = (length(t),)
 @interface Base.lastindex(t::AbstractTrajectory) = length(t)
 @interface Base.getindex(t::AbstractTrajectory{names,types}, i::Int) where {names,types} =
-    NamedTuple{names,types}(Tuple(x[i] for x in get_traces(t)))
+    NamedTuple{names,types}(Tuple(x[i] for x in get_trace(t)))
 
-@interface Base.isempty(t::AbstractTrajectory) = all(isempty(t) for t in get_traces(t))
-@interface isfull(t::AbstractTrajectory) = all(isfull(x) for x in get_traces(t))
+@interface Base.isempty(t::AbstractTrajectory) = all(isempty(t) for t in get_trace(t))
 
 @interface function Base.empty!(t::AbstractTrajectory)
-    for x in get_traces(t)
+    for x in get_trace(t)
         empty!(x)
     end
 end
@@ -134,12 +198,7 @@ end
 
 @interface Base.pop!(t::AbstractTrajectory, s::Symbol...)
 
-"""
-    extract_transitions(trajectory::AbstractTrajectory, learner::AbstractLearner)
-
-Extract transitions given a `learner`. Then the result is used to update the `learner`.
-"""
-@interface extract_transitions(trajectory::AbstractTrajectory, learner::AbstractLearner)
+@interface extract_experience(trajectory::AbstractTrajectory, learner::AbstractLearner)
 
 #####
 # EnvironmentModel
@@ -166,7 +225,6 @@ Ref: https://bair.berkeley.edu/blog/2019/12/12/mbpo/
 Preprocess an observation and return a new observation.
 """
 @interface abstract type AbstractPreprocessor end
-@interface (p::AbstractPreprocessor)(x)
 
 #####
 # Environment
@@ -187,17 +245,15 @@ abstract type AbstractDynamicStyle end
 @interface const SIMULTANEOUS = Simultaneous()
 @interface DynamicStyle(x::AbstractEnv) = SEQUENTIAL
 
-struct DefaultPlayer end
-@interface const DEFAULT_PLAYER = DefaultPlayer()
-
 @interface (env::AbstractEnv)(action) = env(DEFAULT_PLAYER, action)
 @interface (env::AbstractEnv)(player, action)
 
-@interface get_current_player(env::AbstractEnv) = DEFAULT_PLAYER
 @interface observe(env::AbstractEnv) = observe(env, get_current_player(env))
 @interface observe(::AbstractEnv, player)
 @interface get_action_space(env::AbstractEnv) = env.action_space
 @interface get_observation_space(env::AbstractEnv) = env.observation_space
+@interface get_current_player(env::AbstractEnv) = DEFAULT_PLAYER
+@interface get_num_players(env::AbstractEnv) = 1
 @interface render(::AbstractEnv)
 
 @interface reset!(::AbstractEnv)
@@ -210,27 +266,13 @@ struct DefaultPlayer end
 # By default, we assume an observation is a NamedTuple, which is the most common case.
 #####
 
-abstract type AbstractActionSet end
-@interface struct FullActionSet <: AbstractActionSet end
-@interface const FULL_ACTION_SET = FullActionSet()
-@interface struct MinimalActionSet <: AbstractActionSet end
-@interface const MINIMAL_ACTION_SET = MinimalActionSet()
 
-"""
-    ActionStyle(x)
+@interface get_legal_actions_mask(x) = x.legal_actions_mask
+@interface get_legal_actions(x) = findall(get_legal_actions_mask(x))
 
-Specify whether the observation contains a full action set or a minimal action set.
-"""
-@interface ActionStyle(x) = MINIMAL_ACTION_SET
-@interface ActionStyle(::NamedTuple{(:reward, :terminal, :state, :legal_actions)}) =
-    FULL_ACTION_SET
-@interface ActionStyle(
-    ::NamedTuple{(:reward, :terminal, :state, :legal_actions, :legal_actions_mask)},
-) = FULL_ACTION_SET
+get_legal_actions(x::NamedTuple{(:reward, :terminal, :state, :legal_actions, :legal_actions_mask)}) = x.legal_actions
+get_legal_actions(x::NamedTuple{(:reward, :terminal, :state, :legal_actions)}) = x.legal_actions
 
-
-@interface legal_actions(x) = findall(legal_actions_mask(x))
-@interface legal_actions_mask(x) = x.legal_actions_mask
 
 @interface get_terminal(x) = x.terminal
 @interface get_reward(x) = x.reward
@@ -249,6 +291,3 @@ Describe the span of observations and actions.
 @interface Base.in(x, s::AbstractSpace)
 @interface Base.rand(rng::AbstractRNG, s::AbstractSpace)
 @interface Base.eltype(s::AbstractSpace)
-
-@interface element_size(s::AbstractSpace)
-@interface element_length(s::AbstractSpace) = reduce(*, element_size(s))
