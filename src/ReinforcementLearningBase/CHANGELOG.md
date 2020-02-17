@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/HEAD)
+
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.5.0...HEAD)
+
+**Merged pull requests:**
+
+- Install TagBot as a GitHub Action [\#17](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/17) ([JuliaTagBot](https://github.com/JuliaTagBot))
+- Dev [\#16](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/16) ([findmyway](https://github.com/findmyway))
+
 ## [v0.5.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.5.0) (2020-02-01)
 
 [Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.4.0...v0.5.0)
