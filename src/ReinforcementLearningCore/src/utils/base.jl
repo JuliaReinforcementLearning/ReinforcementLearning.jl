@@ -1,4 +1,4 @@
-export select_last_dim, select_last_frame, consecutive_view, find_all_max
+export select_last_dim, select_last_frame, consecutive_view, find_all_max, find_max
 
 select_last_dim(xs::AbstractArray{T,N}, inds) where {T,N} =
     @views xs[ntuple(_ -> (:), N - 1)..., inds]
@@ -37,7 +37,7 @@ consecutive_view(cb::AbstractArray, inds::Vector{Int}, n_stack::Int, n_horizeon:
 """
     find_all_max(A::AbstractArray)
 
-Like `findmax`, but all the indices of the maximum value are returned.
+Like `find_max`, but all the indices of the maximum value are returned.
 
 !!! warning
     All elements of value `NaN` in `A` will be ignored, unless all elements are `NaN`.
@@ -101,4 +101,18 @@ function find_all_max(A, mask)
     else
         maxval, idxs
     end
+end
+
+find_max(A) = findmax(A)
+
+function find_max(A, mask)
+    maxval = typemin(eltype(A))
+    ind = 0
+    for (i, x) in enumerate(A)
+        if mask[i] && x >= maxval
+            maxval = x
+            ind = i
+        end
+    end
+    maxval, ind
 end

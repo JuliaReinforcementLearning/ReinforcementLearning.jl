@@ -2,18 +2,18 @@
 
     @testset "EpsilonGreedyExplorer" begin
         @testset "API" begin
-            explorer = EpsilonGreedyExplorer(0.1)
+            explorer = EpsilonGreedyExplorer(0.1; is_break_tie=true)
             Random.seed!(explorer, 123)
 
             values = [0, 1, 2, -1]
-            target_distribution =
+            target_prob =
                 DiscreteNonParametric(1:length(values), [0.025, 0.025, 0.925, 0.025])
 
             # https://github.com/JuliaLang/julia/issues/10391#issuecomment-488642687
-            # @test isapprox(get_distribution(explorer, values), target_distribution)
+            # @test isapprox(get_prob(explorer, values), target_prob)
             @test isapprox(
-                probs(get_distribution(explorer, values)),
-                probs(target_distribution),
+                probs(get_prob(explorer, values)),
+                probs(target_prob),
             )
 
             actions = [explorer(values) for _ in 1:10000]
@@ -21,7 +21,7 @@
 
             @test all(isapprox.(
                 [action_counts[i] for i in 1:length(values)] ./ 10000,
-                probs(target_distribution);
+                probs(target_prob);
                 atol = 0.005,
             ))
 
@@ -41,6 +41,7 @@
                 warmup_steps = 3,
                 decay_steps = 8,
                 kind = :linear,
+                is_break_tie=true
             )
             xs = [0, 1, 2, -1, 2]
             mask = [true, true, false, true, false]
@@ -49,7 +50,7 @@
             for ϵ in E
                 @test RLCore.get_ϵ(explorer) ≈ ϵ
                 @test isapprox(
-                    probs(get_distribution(explorer, xs)),
+                    probs(get_prob(explorer, xs)),
                     [ϵ / 5, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2],
                 )
                 explorer(xs)
@@ -60,7 +61,7 @@
             for ϵ in E
                 @test RLCore.get_ϵ(explorer) ≈ ϵ
                 @test isapprox(
-                    probs(get_distribution(explorer, xs, mask)),
+                    probs(get_prob(explorer, xs, mask)),
                     [ϵ / 3, (1 - ϵ) + ϵ / 3, 0.0, ϵ / 3, 0.0],
                 )
                 explorer(xs)
@@ -79,6 +80,7 @@
                 warmup_steps = 3,
                 decay_steps = 8,
                 kind = :exp,
+                is_break_tie=true
             )
             xs = [0, 1, 2, -1, 2]
             mask = [true, true, false, true, false]
@@ -87,7 +89,7 @@
             end
             ϵ = 0.1 + (0.9 - 0.1) * exp(-1)
             @test isapprox(
-                probs(get_distribution(explorer, xs)),
+                probs(get_prob(explorer, xs)),
                 [ϵ / 5, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2],
             )
 
@@ -96,7 +98,7 @@
             end
             ϵ = 0.1
             @test isapprox(
-                probs(get_distribution(explorer, xs)),
+                probs(get_prob(explorer, xs)),
                 [ϵ / 5, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2];
                 atol = 1e-5,
             )

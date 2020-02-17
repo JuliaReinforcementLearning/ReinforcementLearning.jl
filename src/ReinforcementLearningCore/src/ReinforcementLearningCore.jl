@@ -1,11 +1,9 @@
 module ReinforcementLearningCore
 
-using Reexport
+using ReinforcementLearningBase
 
 const RLCore = ReinforcementLearningCore
 export RLCore
-
-@reexport using ReinforcementLearningBase
 
 include("utils/utils.jl")
 include("core/core.jl")

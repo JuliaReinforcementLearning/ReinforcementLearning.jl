@@ -1,9 +1,10 @@
+using ReinforcementLearningBase
 using ReinforcementLearningCore
 using Random
 using Test
 using StatsBase
 using Distributions
-using Flux
+using ReinforcementLearningEnvironments
 
 @testset "ReinforcementLearningCore.jl" begin
     include("core/core.jl")

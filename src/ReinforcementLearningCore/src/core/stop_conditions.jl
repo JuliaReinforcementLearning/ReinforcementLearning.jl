@@ -108,7 +108,12 @@ function (s::StopAfterEpisode{Progress})(agent, env, obs)
     next!(s.progress;)
     @debug s.tag EPISODE = s.cur
 
-    get_terminal(obs) && (s.cur += 1)
+    is_terminal = get_num_players(env) == 1 ? get_terminal(obs) : get_terminal(obs[1])
+
+    if is_terminal
+        s.cur += 1
+    end
+
     s.cur >= s.episode
 end
 

@@ -10,8 +10,7 @@ end
 EpisodicCompactSARTSATrajectory(; kwargs...) =
     EpisodicCompactSARTSATrajectory(VectorialCompactSARTSATrajectory(; kwargs...))
 
-@forward EpisodicCompactSARTSATrajectory.trajectories RLBase.get_traces,
-Base.length,
+@forward EpisodicCompactSARTSATrajectory.trajectories Base.length,
 Base.isempty,
 Base.empty!,
 Base.push!,

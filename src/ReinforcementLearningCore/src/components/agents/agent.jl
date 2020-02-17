@@ -23,6 +23,8 @@ Base.@kwdef mutable struct Agent{P<:AbstractPolicy,T<:AbstractTrajectory,R} <: A
     role::R = DEFAULT_PLAYER
 end
 
+RLBase.get_role(agent::Agent) = agent.role
+
 function (agent::Agent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
     ::PreEpisodeStage,
     obs,
@@ -35,9 +37,9 @@ function (agent::Agent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
     ::PreActStage,
     obs,
 )
-    update!(agent.policy, agent.trajectory)
     action = agent.policy(obs)
     push!(agent.trajectory; state = get_state(obs), action = action)
+    update!(agent.policy, agent.trajectory)
     action
 end
 
@@ -55,6 +57,7 @@ function (agent::Agent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
 )
     action = agent.policy(obs)
     push!(agent.trajectory; state = get_state(obs), action = action)
+    update!(agent.policy, agent.trajectory)
     action
 end
 
@@ -72,9 +75,9 @@ function (agent::Agent{<:AbstractPolicy,<:CircularCompactSARTSATrajectory})(
     ::PreActStage,
     obs,
 )
-    update!(agent.policy, agent.trajectory)
     action = agent.policy(obs)
     push!(agent.trajectory; state = get_state(obs), action = action)
+    update!(agent.policy, agent.trajectory)
     action
 end
 
@@ -92,6 +95,7 @@ function (agent::Agent{<:AbstractPolicy,<:CircularCompactSARTSATrajectory})(
 )
     action = agent.policy(obs)
     push!(agent.trajectory; state = get_state(obs), action = action)
+    update!(agent.policy, agent.trajectory)
     action
 end
 
@@ -109,9 +113,9 @@ function (agent::Agent{<:AbstractPolicy,<:VectorialCompactSARTSATrajectory})(
     ::PreActStage,
     obs,
 )
-    update!(agent.policy, agent.trajectory)
     action = agent.policy(obs)
     push!(agent.trajectory; state = get_state(obs), action = action)
+    update!(agent.policy, agent.trajectory)
     action
 end
 
@@ -129,5 +133,6 @@ function (agent::Agent{<:AbstractPolicy,<:VectorialCompactSARTSATrajectory})(
 )
     action = agent.policy(obs)
     push!(agent.trajectory; state = get_state(obs), action = action)
+    update!(agent.policy, agent.trajectory)
     action
 end

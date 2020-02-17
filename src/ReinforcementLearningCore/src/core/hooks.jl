@@ -98,7 +98,7 @@ function (hook::RewardsPerEpisode)(::PreEpisodeStage, agent, env, obs)
     push!(hook.rewards, [])
 end
 
-function (hook::RewardsPerEpisode)(::PostActStage, agent, env, action, obs)
+function (hook::RewardsPerEpisode)(::PostActStage, agent, env, obs)
     push!(hook.rewards[end], get_reward(obs))
 end
 
@@ -121,7 +121,7 @@ Base.@kwdef mutable struct TotalRewardPerEpisode <: AbstractHook
     tag::String = "TRAINING"
 end
 
-function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env, action, obs)
+function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env, obs)
     hook.reward += get_reward(obs)
 end
 
@@ -150,7 +150,7 @@ Base.@kwdef struct CumulativeReward <: AbstractHook
     tag::String = "TRAINING"
 end
 
-function (hook::CumulativeReward)(::PostActStage, agent, env, action, obs)
+function (hook::CumulativeReward)(::PostActStage, agent, env, obs)
     push!(hook.rewards, get_reward(obs) + hook.rewards[end])
     @debug hook.tag CUMULATIVE_REWARD = hook.rewards[end]
 end
@@ -173,7 +173,7 @@ end
 TimePerStep(; max_steps = 100) =
     TimePerStep(CircularArrayBuffer{Float64}(max_steps), time_ns())
 
-function (hook::TimePerStep)(::PostActStage, agent, env, action, obs)
+function (hook::TimePerStep)(::PostActStage, agent, env, obs)
     push!(hook.times, (time_ns() - hook.t) / 1e9)
     hook.t = time_ns()
 end

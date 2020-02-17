@@ -1,7 +1,7 @@
 @testset "Agent" begin
     action_space = DiscreteSpace(3)
     agent = Agent(;
-        policy = RandomPolicy(; action_space = action_space),
+        policy = RandomPolicy(action_space),
         trajectory = VectorialCompactSARTSATrajectory(),
     )
 
