@@ -2,7 +2,16 @@
 
 ## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/HEAD)
 
-[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.5.0...HEAD)
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.6.0...HEAD)
+
+**Merged pull requests:**
+
+- Automatic JuliaFormatter.jl run [\#23](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/23) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Allow converting Set to DiscreteSpace [\#22](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/22) ([findmyway](https://github.com/findmyway))
+
+## [v0.6.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.6.0) (2020-02-17)
+
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.5.0...v0.6.0)
 
 **Merged pull requests:**
 
