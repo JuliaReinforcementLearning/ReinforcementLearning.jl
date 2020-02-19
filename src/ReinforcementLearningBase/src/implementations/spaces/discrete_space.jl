@@ -20,7 +20,9 @@ Random.rand(rng::AbstractRNG, s::DiscreteSpace) = rand(rng, s.span)
 
 Base.length(s::DiscreteSpace) = length(s.span)
 
-Base.convert(::Type{AbstractSpace}, s::Union{<:Integer,<:UnitRange,<:Vector,<:Tuple, <:Set}) =
-    DiscreteSpace(s)
+Base.convert(
+    ::Type{AbstractSpace},
+    s::Union{<:Integer,<:UnitRange,<:Vector,<:Tuple,<:Set},
+) = DiscreteSpace(s)
 
 Base.iterate(s::DiscreteSpace, args...) = iterate(s.span, args...)
