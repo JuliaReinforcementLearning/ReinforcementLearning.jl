@@ -1,5 +1,8 @@
+module POMDPWrapper
+
 export POMDPEnv
 
+using ReinforcementLearningBase
 using POMDPs
 using Random
 
@@ -18,7 +21,7 @@ mutable struct POMDPEnv{M<:POMDP,S,O,I,R,RNG<:AbstractRNG} <: AbstractEnv
     rng::RNG
 end
 
-Random.seed!(env::POMDPEnv, seed) = seed!(env.rng, seed)
+Random.seed!(env::POMDPEnv, seed) = Random.seed!(env.rng, seed)
 
 function POMDPEnv(model::POMDP; seed = nothing)
     rng = MersenneTwister(seed)
@@ -129,3 +132,8 @@ end
 
 RLBase.get_observation_space(env::MDPEnv) = get_observation_space(env.model)
 RLBase.get_action_space(env::MDPEnv) = get_action_space(env.model)
+
+end
+
+using .POMDPWrapper
+export POMDPEnv

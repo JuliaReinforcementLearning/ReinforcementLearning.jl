@@ -1,3 +1,6 @@
+module GymWrapper
+
+using ReinforcementLearningBase
 using PyCall
 
 export GymEnv
@@ -111,3 +114,8 @@ function list_gym_env_names(;
     gym = pyimport("gym")
     [x.id for x in gym.envs.registry.all() if split(x.entry_point, ':')[1] in modules]
 end
+
+end
+
+using .GymWrapper
+export GymEnv

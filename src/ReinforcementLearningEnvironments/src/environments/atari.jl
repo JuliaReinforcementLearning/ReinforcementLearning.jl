@@ -1,4 +1,7 @@
+module AtariWrapper
+
 using ArcadeLearningEnvironment, GR, Random
+using ReinforcementLearningBase
 
 export AtariEnv
 
@@ -163,3 +166,8 @@ function RLBase.render(env::AtariEnv)
 end
 
 list_atari_rom_names() = getROMList()
+
+end
+
+using .AtariWrapper
+export AtariEnv
