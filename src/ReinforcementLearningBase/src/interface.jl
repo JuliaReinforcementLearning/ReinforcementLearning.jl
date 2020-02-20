@@ -5,6 +5,8 @@ using Distributions: pdf
 # general
 #####
 
+@interface const INVALID_ACTION = 0
+
 @interface abstract type AbstractStage end
 
 @interface struct PreExperimentStage <: AbstractStage end
@@ -281,6 +283,7 @@ get_legal_actions(x::NamedTuple{(:reward, :terminal, :state, :legal_actions)}) =
 @interface get_terminal(x) = x.terminal
 @interface get_reward(x) = x.reward
 @interface get_state(x) = x.state
+@interface get_invalid_action(x) = INVALID_ACTION
 
 #####
 # Space
