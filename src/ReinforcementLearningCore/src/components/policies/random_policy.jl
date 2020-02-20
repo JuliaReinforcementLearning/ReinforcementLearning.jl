@@ -16,7 +16,11 @@ RandomPolicy(s; seed = nothing) = RandomPolicy(s, MersenneTwister(seed))
 RandomPolicy(env::AbstractEnv; seed = nothing) =
     RandomPolicy(get_action_space(env), MersenneTwister(seed))
 
-(p::RandomPolicy)(obs, ::FullActionSet) = rand(p.rng, get_legal_actions(obs))
+function (p::RandomPolicy)(obs, ::FullActionSet)
+    legal_actions = get_legal_actions(obs)
+    length(legal_actions) == 0 ? get_invalid_action(obs) : rand(p.rng, legal_actions)
+end
+
 (p::RandomPolicy)(obs, ::MinimalActionSet) = rand(p.rng, p.action_space)
 
 RLBase.update!(p::RandomPolicy, experience) = nothing
