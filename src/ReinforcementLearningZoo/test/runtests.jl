@@ -1,6 +1,17 @@
 using ReinforcementLearningZoo
 using Test
+using ReinforcementLearningBase
+using ReinforcementLearningCore
+using Flux
+using CUDAapi
+using StatsBase
+
+if has_cuda()
+    using CuArrays
+end
 
 @testset "ReinforcementLearningZoo.jl" begin
-    # Write your own tests here.
+
+include("basic_dqn.jl")
+
 end

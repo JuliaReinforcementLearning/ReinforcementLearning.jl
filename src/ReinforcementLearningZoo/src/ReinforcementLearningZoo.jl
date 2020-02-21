@@ -1,5 +1,8 @@
 module ReinforcementLearningZoo
 
-greet() = print("Hello World!")
+using ReinforcementLearningBase
+using ReinforcementLearningCore
+
+include("algorithms/algorithms.jl")
 
 end # module
