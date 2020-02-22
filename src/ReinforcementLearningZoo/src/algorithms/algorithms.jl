@@ -1,1 +1,1 @@
-include("dqn/dqn.jl")
+include("dqns/dqns.jl")
