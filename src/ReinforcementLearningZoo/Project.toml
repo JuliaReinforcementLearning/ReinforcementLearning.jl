@@ -4,13 +4,10 @@ authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
 version = "0.1.0"
 
 [deps]
-CUDAapi = "3895d2a7-ec45-59b8-82bb-cfc6a382f9b3"
-CuArrays = "3a865a2d-5b23-5a0f-bc46-62713ec82fae"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 ReinforcementLearningBase = "e575027e-6cd6-5018-9292-cdc6200d2b44"
 ReinforcementLearningCore = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
-ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
@@ -19,6 +16,7 @@ julia = "1.3"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
 
 [targets]
-test = ["Test"]
+test = ["Test", "ReinforcementLearningEnvironments"]
