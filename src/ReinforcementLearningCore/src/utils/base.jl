@@ -1,4 +1,16 @@
-export select_last_dim, select_last_frame, consecutive_view, find_all_max, find_max
+export select_last_dim,
+    select_last_frame,
+    consecutive_view,
+    find_all_max,
+    find_max,
+    huber_loss,
+    huber_loss_unreduced,
+    discount_rewards,
+    discount_rewards!,
+    discount_rewards_reduced,
+    logitcrossentropy_unreduced
+
+using StatsBase
 
 select_last_dim(xs::AbstractArray{T,N}, inds) where {T,N} =
     @views xs[ntuple(_ -> (:), N - 1)..., inds]
@@ -116,3 +128,29 @@ function find_max(A, mask)
     end
     maxval, ind
 end
+
+function logitcrossentropy_unreduced(logŷ::AbstractVecOrMat, y::AbstractVecOrMat)
+    return vec(-sum(y .* logsoftmax(logŷ), dims = 1))
+end
+
+function huber_loss_unreduced(labels, predictions; δ = 1.0f0)
+    abs_error = abs.(predictions .- labels)
+    quadratic = min.(abs_error, 1.0f0)  # quadratic = min.(abs_error, δ)
+    linear = abs_error .- quadratic
+    0.5f0 .* quadratic .* quadratic .+ linear  # 0.5f0 .* quadratic .* quadratic .+ δ .* linear
+end
+
+huber_loss(labels, predictions; δ = 1.0f0) =
+    huber_loss_unreduced(labels, predictions; δ = δ) |> mean
+
+function discount_rewards!(new_rewards, rewards, γ)
+    new_rewards[end] = rewards[end]
+    for i in (length(rewards)-1):-1:1
+        new_rewards[i] = rewards[i] + new_rewards[i+1] * γ
+    end
+    new_rewards
+end
+
+discount_rewards(rewards, γ) = discount_rewards!(similar(rewards), rewards, γ)
+
+discount_rewards_reduced(rewards, γ) = foldr((r, g) -> r + γ * g, rewards)

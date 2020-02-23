@@ -3,8 +3,14 @@ using ReinforcementLearningCore
 using Random
 using Test
 using StatsBase
-using Distributions
+using Distributions: probs
 using ReinforcementLearningEnvironments
+using Flux
+using CUDAapi
+
+if has_cuda()
+    using CuArrays
+end
 
 @testset "ReinforcementLearningCore.jl" begin
     include("core/core.jl")

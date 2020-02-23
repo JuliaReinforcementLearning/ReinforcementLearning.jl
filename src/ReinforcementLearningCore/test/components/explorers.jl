@@ -6,19 +6,18 @@
             Random.seed!(explorer, 123)
 
             values = [0, 1, 2, -1]
-            target_prob =
-                DiscreteNonParametric(1:length(values), [0.025, 0.025, 0.925, 0.025])
+            target_prob = [0.025, 0.025, 0.925, 0.025]
 
             # https://github.com/JuliaLang/julia/issues/10391#issuecomment-488642687
             # @test isapprox(get_prob(explorer, values), target_prob)
-            @test isapprox(probs(get_prob(explorer, values)), probs(target_prob))
+            @test isapprox(probs(get_prob(explorer, values)), target_prob)
 
             actions = [explorer(values) for _ in 1:10000]
             action_counts = countmap(actions)
 
             @test all(isapprox.(
                 [action_counts[i] for i in 1:length(values)] ./ 10000,
-                probs(target_prob);
+                target_prob;
                 atol = 0.005,
             ))
 

@@ -168,7 +168,7 @@ function RLBase.update!(cb::CircularArrayBuffer{T,N}, data::AbstractArray{T}) wh
     cb
 end
 
-function RLBase.update!(cb::CircularArrayBuffer{T,1}, data::T) where {T}
+function RLBase.update!(cb::CircularArrayBuffer{T,1}, data::Number) where {T}
     cb.buffer[_buffer_frame(cb, cb.length)] = data
     cb
 end
@@ -199,13 +199,4 @@ function Base.pop!(cb::CircularArrayBuffer)
     res
 end
 
-# #####
-# # gpu related
-# ####
-
-# if has_cuda()
-#     using CuArrays
-#     import Adapt:adapt
-
-#     adapt(T::Type{<:CuArray}, x::SubArray{<:Any, <:Any, <:CircularArrayBuffer}) = T(x)
-# end
+nframes(a::AbstractArray{T,N}) where {T,N} = size(a, N)

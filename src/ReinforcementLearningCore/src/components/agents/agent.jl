@@ -25,6 +25,9 @@ end
 
 RLBase.get_role(agent::Agent) = agent.role
 
+#####
+# EpisodicCompactSARTSATrajectory
+#####
 function (agent::Agent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
     ::PreEpisodeStage,
     obs,
@@ -61,7 +64,16 @@ function (agent::Agent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
     action
 end
 
-function (agent::Agent{<:AbstractPolicy,<:CircularCompactSARTSATrajectory})(
+#####
+# Union{CircularCompactSARTSATrajectory, CircularCompactPSARTSATrajectory}
+#####
+
+function (
+    agent::Agent{
+        <:AbstractPolicy,
+        <:Union{CircularCompactSARTSATrajectory,CircularCompactPSARTSATrajectory},
+    }
+)(
     ::PreEpisodeStage,
     obs,
 )
@@ -71,7 +83,12 @@ function (agent::Agent{<:AbstractPolicy,<:CircularCompactSARTSATrajectory})(
     nothing
 end
 
-function (agent::Agent{<:AbstractPolicy,<:CircularCompactSARTSATrajectory})(
+function (
+    agent::Agent{
+        <:AbstractPolicy,
+        <:Union{CircularCompactSARTSATrajectory,CircularCompactPSARTSATrajectory},
+    }
+)(
     ::PreActStage,
     obs,
 )
@@ -81,7 +98,12 @@ function (agent::Agent{<:AbstractPolicy,<:CircularCompactSARTSATrajectory})(
     action
 end
 
-function (agent::Agent{<:AbstractPolicy,<:CircularCompactSARTSATrajectory})(
+function (
+    agent::Agent{
+        <:AbstractPolicy,
+        <:Union{CircularCompactSARTSATrajectory,CircularCompactPSARTSATrajectory},
+    }
+)(
     ::PostActStage,
     obs,
 )
@@ -89,7 +111,12 @@ function (agent::Agent{<:AbstractPolicy,<:CircularCompactSARTSATrajectory})(
     nothing
 end
 
-function (agent::Agent{<:AbstractPolicy,<:CircularCompactSARTSATrajectory})(
+function (
+    agent::Agent{
+        <:AbstractPolicy,
+        <:Union{CircularCompactSARTSATrajectory,CircularCompactPSARTSATrajectory},
+    }
+)(
     ::PostEpisodeStage,
     obs,
 )
@@ -98,6 +125,10 @@ function (agent::Agent{<:AbstractPolicy,<:CircularCompactSARTSATrajectory})(
     update!(agent.policy, agent.trajectory)
     action
 end
+
+#####
+# VectorialCompactSARTSATrajectory
+#####
 
 function (agent::Agent{<:AbstractPolicy,<:VectorialCompactSARTSATrajectory})(
     ::PreEpisodeStage,

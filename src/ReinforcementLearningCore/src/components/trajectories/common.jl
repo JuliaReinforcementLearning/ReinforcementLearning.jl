@@ -3,13 +3,13 @@ const CompactSARTSATrajectory =
 
 function RLBase.get_trace(b::CompactSARTSATrajectory, s::Symbol)
     if s == :state || s == :action
-        select_last_dim(b[s], 1:(length(b[s]) > 1 ? length(b[s]) - 1 : length(b[s])))
+        select_last_dim(b[s], 1:(nframes(b[s]) > 1 ? nframes(b[s]) - 1 : nframes(b[s])))
     elseif s == :reward || s == :terminal
         b[s]
     elseif s == :next_state
-        select_last_dim(b[:state], 2:length(b[:state]))
+        select_last_dim(b[:state], 2:nframes(b[:state]))
     elseif s == :next_action
-        select_last_dim(b[:action], 2:length(b[:action]))
+        select_last_dim(b[:action], 2:nframes(b[:action]))
     else
         throw(ArgumentError("unknown trace name: $s"))
     end
@@ -50,17 +50,15 @@ function Base.push!(b::CompactSARTSATrajectory, kv::Pair{Symbol})
     b
 end
 
-function Base.pop!(t::CompactSARTSATrajectory, traces::Symbol...)
-    for s in traces
-        if s == :state || s == :next_state
-            pop!(t[:state])
-        elseif s == :action || s == :next_action
-            pop!(t[:action])
-        elseif s == :reward || s == :terminal
-            pop!(t[s])
-        else
-            throw(ArgumentError("unknown trace name: $s"))
-        end
+function Base.pop!(t::CompactSARTSATrajectory, s::Symbol)
+    if s == :state || s == :next_state
+        pop!(t[:state])
+    elseif s == :action || s == :next_action
+        pop!(t[:action])
+    elseif s == :reward || s == :terminal
+        pop!(t[s])
+    else
+        throw(ArgumentError("unknown trace name: $s"))
     end
     t
 end

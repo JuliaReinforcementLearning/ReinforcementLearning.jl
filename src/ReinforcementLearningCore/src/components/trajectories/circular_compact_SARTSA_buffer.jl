@@ -12,7 +12,7 @@ function CircularCompactSARTSATrajectory(;
     state_size = (),
     action_type = Int,
     action_size = (),
-    reward_type = Float64,
+    reward_type = Float32,
     reward_size = (),
     terminal_type = Bool,
     terminal_size = (),
