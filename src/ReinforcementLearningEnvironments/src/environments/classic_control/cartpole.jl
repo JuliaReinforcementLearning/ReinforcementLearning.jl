@@ -83,8 +83,8 @@ function RLBase.reset!(env::CartPoleEnv{T}) where {T<:Number}
     nothing
 end
 
-RLBase.observe(env::CartPoleEnv) =
-    (reward = env.done ? 0.0 : 1.0, terminal = env.done, state = env.state)
+RLBase.observe(env::CartPoleEnv{T}) where {T} =
+    (reward = env.done ? zero(T) : one(T), terminal = env.done, state = env.state)
 
 function (env::CartPoleEnv)(a)
     env.action = a
