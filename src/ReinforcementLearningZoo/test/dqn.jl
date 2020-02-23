@@ -45,6 +45,6 @@
     hook = ComposedHook(TotalRewardPerEpisode(), TimePerStep())
     run(agent, env, StopAfterStep(10000), hook)
 
-    @info "stats for BasicDQNLearner" avg_reward = mean(hook[1].rewards) avg_fps =
+    @info "stats for DQNLearner" avg_reward = mean(hook[1].rewards) avg_fps =
         1 / mean(hook[2].times)
 end
