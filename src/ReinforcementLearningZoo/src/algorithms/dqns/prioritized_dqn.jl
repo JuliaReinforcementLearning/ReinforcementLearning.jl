@@ -148,7 +148,9 @@ function RLBase.update!(p::QBasedPolicy{<:PrioritizedDQNLearner}, t::AbstractTra
     if !isnothing(indexed_experience)
         inds, experience = indexed_experience
         priorities = update!(p.learner, experience)
-        get_trace(t, :priority)[inds] .= priorities
+        if !isnothing(priorities)
+            get_trace(t, :priority)[inds] .= priorities
+        end
     end
 end
 
