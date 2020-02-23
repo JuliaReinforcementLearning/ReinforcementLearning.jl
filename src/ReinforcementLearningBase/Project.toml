@@ -1,7 +1,7 @@
 name = "ReinforcementLearningBase"
 uuid = "e575027e-6cd6-5018-9292-cdc6200d2b44"
 authors = ["Johanni Brea <jbrea@users.noreply.github.com>", "Jun Tian <tianjun.cpp@gmail.com>"]
-version = "0.6.1"
+version = "0.6.2"
 
 [deps]
 CUDAapi = "3895d2a7-ec45-59b8-82bb-cfc6a382f9b3"
