@@ -1,5 +1,14 @@
-# ReinforcementLearningZoo
+<div align="center"> 
+<p> <a href="https://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast">"Make It Work Make It Right Make It Fast"</a></p>
+<p>― <a href="https://wiki.c2.com/?KentBeck">KentBeck</a></p>
+</div>
 
-[![Build Status](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl.svg?branch=master)](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl)
+<hr>
+<p align="center">
+  <a href="https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl">
+  <img src="https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl.svg?branch=master">
+  </a>
+</p>
 
-This project aims to provide the implementation of some typical reinforcement learning algorithms based on ReinforcementLearningCore.jl.
+
+This project aims to provide some typical implementations of the most typical reinforcement learning algorithms.
