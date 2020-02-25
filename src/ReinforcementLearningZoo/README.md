@@ -12,4 +12,4 @@
 </p>
 
 
-This project aims to provide some typical implementations of the most typical reinforcement learning algorithms.
+This project aims to provide some implementations of the most typical reinforcement learning algorithms.
