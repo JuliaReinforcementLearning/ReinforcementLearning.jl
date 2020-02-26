@@ -29,9 +29,9 @@
     end
 
     @testset "EmptySpace" begin
-      e = EmptySpace()
-      @test e isa EmptySpace
-      @test nothing in e
+        e = EmptySpace()
+        @test e isa EmptySpace
+        @test nothing in e
     end
 
     @testset "MultiDiscreteSpace" begin
