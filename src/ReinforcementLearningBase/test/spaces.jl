@@ -28,6 +28,12 @@
         @test s3 isa DiscreteSpace
     end
 
+    @testset "EmptySpace" begin
+      e = EmptySpace()
+      @test e isa EmptySpace
+      @test nothing in e
+    end
+
     @testset "MultiDiscreteSpace" begin
         @test_throws ArgumentError MultiDiscreteSpace([2, -1, 3])
         @test_throws ArgumentError MultiDiscreteSpace([2, -1, 3])
