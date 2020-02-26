@@ -8,6 +8,7 @@ const RLEnvs = ReinforcementLearningEnvironments
 using Requires
 
 # built-in environments
+include("environments/non_interactive/non_interactive.jl")
 include("environments/classic_control/classic_control.jl")
 
 # dynamic loading environments

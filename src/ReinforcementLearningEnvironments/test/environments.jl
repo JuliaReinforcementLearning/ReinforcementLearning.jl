@@ -39,6 +39,7 @@
         :(MountainCarEnv()),
         :(ContinuousMountainCarEnv()),
         :(PendulumEnv()),
+        :(PendulumNonInteractiveEnv()),
         (:(AtariEnv(; name = $x)) for x in atari_env_names)...,
         (:(GymEnv($x)) for x in gym_env_names)...,
     ]
