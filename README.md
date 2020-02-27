@@ -1,6 +1,6 @@
 <div align="center">
   <p>
-  <img src="https://raw.githubusercontent.com/JuliaReinforcementLearning/ReinforcementLearning.jl/dev/docs/src/assets/logo.png">
+  <img src="https://raw.githubusercontent.com/JuliaReinforcementLearning/ReinforcementLearning.jl/master/docs/src/assets/logo.png" width="320">
   </p>
 
   <p>
@@ -21,41 +21,40 @@ Our design principles are:
 
 `ReinforcementLearning.jl` itself is just a wrapper around several other packages inside the [JuliaReinforcementLearning](https://github.com/JuliaReinforcementLearning) org. The relationship between different packages is described below:
 
-```
-+-------------------------------------------------------------------------------------------+
+<pre>+-------------------------------------------------------------------------------------------+
 |                                                                                           |
-|  ReinforcementLearning.jl                                                                 |
+|  <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl">ReinforcementLearning.jl</a>                                                                 |
 |                                                                                           |
 |      +------------------------------+                                                     |
-|      | ReinforcementLearningBase.jl |                                                     |
+|      | <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl">ReinforcementLearningBase.jl</a> |                                                     |
 |      +--------|---------------------+                                                     |
 |               |                                                                           |
 |               |         +--------------------------------------+                          |
-|               |         | ReinforcementLearningEnvironments.jl |                          |
+|               |         | <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl">ReinforcementLearningEnvironments.jl</a> |                          |
 |               |         |                                      |                          |
 |               |         |     (Conditionally depends on)       |                          |
 |               |         |                                      |                          |
-|               |         |     ArcadeLearningEnvironment.jl     |                          |
-|               +-------->+     OpenSpiel.jl                     |                          |
-|               |         |     POMDPs.jl                        |                          |
-|               |         |     PyCall.jl                        |                          |
-|               |         |     ViZDoom.jl                       |                          |
+|               |         |     <a href="https://github.com/JuliaReinforcementLearning/ArcadeLearningEnvironment.jl">ArcadeLearningEnvironment.jl</a>     |                          |
+|               +--------&gt;+     <a href="https://github.com/JuliaReinforcementLearning/OpenSpiel.jl">OpenSpiel.jl</a>                     |                          |
+|               |         |     <a href="https://github.com/JuliaPOMDP/POMDPs.jl">POMDPs.jl</a>                        |                          |
+|               |         |     <a href="https://github.com/JuliaPy/PyCall.jl">PyCall.jl</a>                        |                          |
+|               |         |     <a href="https://github.com/JuliaReinforcementLearning/ViZDoom.jl">ViZDoom.jl</a>                       |                          |
 |               |         |     Maze.jl(WIP)                     |                          |
 |               |         +--------------------------------------+                          |
 |               |                                                                           |
 |               |         +------------------------------+                                  |
-|               +-------->+ ReinforcementLearningCore.jl |                                  |
+|               +--------&gt;+ <a href="">ReinforcementLearningCore.jl</a> |                                  |
 |                         +--------|---------------------+                                  |
 |                                  |                                                        |
 |                                  |          +-----------------------------+               |
-|                                  |--------->+ ReinforcementLearningZoo.jl |               |
+|                                  |---------&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ViZDoom.jl">ReinforcementLearningZoo.jl</a> |               |
 |                                  |          +-----------------------------+               |
 |                                  |                                                        |
 |                                  |          +----------------------------------------+    |
-|                                  +--------->+ ReinforcementLearningAnIntroduction.jl |    |
+|                                  +---------&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl">ReinforcementLearningAnIntroduction.jl</a> |    |
 |                                             +----------------------------------------+    |
 +-------------------------------------------------------------------------------------------+
-```
+</pre>
 
 Key capabilities/features include:
 
