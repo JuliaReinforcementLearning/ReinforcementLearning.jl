@@ -16,6 +16,7 @@ A non-interactive pendulum environment.
 
 Accepts only `nothing` actions, which result in the system being simulated for one time step.
 Sets `env.done` to `true` once `maximum_time` is reached. Resets to a random position and momentum.
+Always returns zero rewards.
 
 Useful for debugging and development purposes, particularly in model-based reinforcement learning.
 """
@@ -69,7 +70,7 @@ end
 Random.seed!(env::PendulumNonInteractiveEnv, seed) = Random.seed!(env.rng, seed)
 
 function RLBase.observe(env::PendulumNonInteractiveEnv)
-    (reward = nothing, terminal = false, state = env.state)
+    (reward = 0, terminal = env.done, state = env.state)
 end
 
 function RLBase.reset!(env::PendulumNonInteractiveEnv{Fl}) where {Fl}
