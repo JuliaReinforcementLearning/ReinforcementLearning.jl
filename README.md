@@ -1,6 +1,6 @@
 <div align="center">
   <p>
-  <img src="https://raw.githubusercontent.com/JuliaReinforcementLearning/ReinforcementLearning.jl/master/docs/src/assets/logo.png" width="320">
+  <img src="./docs/src/assets/logo.svg">
   </p>
 
   <p>
@@ -9,7 +9,7 @@
   </p>
 </div>
 
-**ReinforcementLearning.jl**, as the name says, is a package for reinforcement learning research in Julia.
+[**ReinforcementLearning.jl**](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl), as the name says, is a package for reinforcement learning research in Julia.
 
 Our design principles are:
 
@@ -68,45 +68,27 @@ This package can be installed from the package manager in Julia's REPL:
 
 ```julia
 using ReinforcementLearning
-using Flux
-using StatsBase
-
-env = CartPoleEnv(; T = Float32, seed = 11)
-
-ns, na = length(rand(get_observation_space(env))), length(get_action_space(env))
+using StatsBase:mean
 
 agent = Agent(
-    policy = QBasedPolicy(
-        learner = BasicDQNLearner(
-            approximator = NeuralNetworkApproximator(
-                model = Chain(
-                    Dense(ns, 128, relu; initW = seed_glorot_uniform(seed = 17)),
-                    Dense(128, 128, relu; initW = seed_glorot_uniform(seed = 23)),
-                    Dense(128, na; initW = seed_glorot_uniform(seed = 39)),
-                ) |> gpu,
-                optimizer = ADAM(),
-            ),
-            batch_size = 32,
-            min_replay_history = 100,
-            loss_func = huber_loss,
-            seed = 22,
-        ),
-        explorer = EpsilonGreedyExplorer(
-            kind = :exp,
-            ϵ_stable = 0.01,
-            decay_steps = 500,
-            seed = 33,
-        ),
-    ),
-    trajectory = CircularCompactSARTSATrajectory(
-        capacity = 1000,
-        state_type = Float32,
-        state_size = (ns,),
-    ),
+    policy = RandomPolicy(env;seed=456),
+    trajectory = EpisodicCompactSARTSATrajectory(; state_type = Vector{Float32}),
+)
+
+env = WrappedEnv(
+    CloneStatePreprocessor(),
+    CartPoleEnv{Float32}(;seed=123)
 )
 
 hook = ComposedHook(TotalRewardPerEpisode(), TimePerStep())
-run(agent, env, StopAfterStep(10000), hook)
 
-@info "stats for BasicDQNLearner" avg_reward = mean(hook[1].rewards) avg_fps = 1 / mean(hook[2].times)
+run(agent, env, StopAfterEpisode(10_000), hook)
+
+@info "stats for random policy" avg_reward = mean(hook[1].rewards) avg_fps = 1 / mean(hook[2].times)
+
+# ┌ Info: stats for random policy
+# │   avg_reward = 21.0591
+# └   avg_fps = 1.6062450808744398e6
 ```
+
+See also [here](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/a_quick_example/) for detailed explanation.

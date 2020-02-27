@@ -8,5 +8,6 @@ using Reexport
 @reexport using ReinforcementLearningBase
 @reexport using ReinforcementLearningCore
 @reexport using ReinforcementLearningEnvironments
+@reexport using ReinforcementLearningZoo
 
 end

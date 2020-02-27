@@ -1,7 +1,7 @@
 using Luxor
 
 origin = Point(0, 0)
-scale = 2
+scale = 1
 r = 90 * scale
 c1 = Point(0, -r) + origin
 c2 = Point(-r * 3^0.5 / 2, r/2) + origin
@@ -26,7 +26,7 @@ arc_node2 = box_node4 + (c_node4 - box_node4) * 0.2
 arrow_width = 5 * scale
 aha = pi/4
 
-Drawing(640, 640, "docs/src/assets/logo.svg")
+Drawing(320, 320, "docs/src/assets/logo.svg")
 background(1, 1, 1, 0)
 Luxor.origin()
 
