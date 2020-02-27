@@ -1,5 +1,5 @@
 using Documenter
-using ReinforcementLearning, ReinforcementLearningEnvironments
+using ReinforcementLearning
 
 "filter concrete subtypes"
 is_concrete_type_of(t) = x ->begin
