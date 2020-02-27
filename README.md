@@ -1,6 +1,6 @@
 <div align="center">
   <p>
-  <img src="https://raw.githubusercontent.com/JuliaReinforcementLearning/ReinforcementLearning.jl/dev/docs/src/assets/logo.svg">
+  <img src="https://raw.githubusercontent.com/JuliaReinforcementLearning/ReinforcementLearning.jl/dev/docs/src/assets/logo.png">
   </p>
 
   <p>
