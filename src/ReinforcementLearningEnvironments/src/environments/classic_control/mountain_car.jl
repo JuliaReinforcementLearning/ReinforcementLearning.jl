@@ -47,6 +47,23 @@ mutable struct MountainCarEnv{A,T,R<:AbstractRNG} <: AbstractEnv
     rng::R
 end
 
+"""
+    MountainCarEnv(;kwargs...)
+
+# Keyword arguments
+
+- `T = Float64`
+- `continuous = false`
+- `seed = nothing`
+- `min_pos = -1.2`
+- `max_pos = 0.6`
+- `max_speed = 0.07`
+- `goal_pos = 0.5`
+- `max_steps = 200`
+- `goal_velocity = 0.0`
+- `power = 0.001`
+- `gravity = 0.0025`
+"""
 function MountainCarEnv(; T = Float64, continuous = false, seed = nothing, kwargs...)
     if continuous
         params = MountainCarEnvParams(; goal_pos = 0.45, power = 0.0015, T = T, kwargs...)
