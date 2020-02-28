@@ -3,6 +3,23 @@ export BasicDQNLearner
 using Random
 using Flux
 
+"""
+    BasicDQNLearner(;kwargs...)
+
+See paper: [Playing Atari with Deep Reinforcement Learning](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf)
+
+This is the very basic implementation of DQN. Compared to the traditional Q learning, the only difference is that,
+in the updating step it uses a batch of transitions sampled from an experience buffer instead of current transition.
+And the `approximator` is usually a [`NeuralNetworkApproximator`](@ref).
+You can start from this implementation to understand how everything is organized and how to write your own customized algorithm.
+# Keywords
+- `approximator`::[`AbstractApproximator`](@ref): used to get Q-values of a state.
+- `loss_func`: the loss function to use. TODO: provide a default [`huber_loss`](@ref)?
+- `γ::Float32=0.99f0`: discount rate.
+- `batch_size::Int=32`
+- `min_replay_history::Int=32`: number of transitions that should be experienced before updating the `approximator`.
+- `seed=nothing`.
+"""
 struct BasicDQNLearner{Q,F,R} <: AbstractLearner
     approximator::Q
     loss_func::F

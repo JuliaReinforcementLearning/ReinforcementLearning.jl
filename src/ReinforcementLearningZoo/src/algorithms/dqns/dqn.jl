@@ -3,6 +3,22 @@ export DQNLearner
 using Random
 using Flux
 
+"""
+    DQNLearner(;kwargs...)
+See paper: [Human-level control through deep reinforcement learning](https://www.nature.com/articles/nature14236)
+# Keywords
+- `approximator`::[`AbstractApproximator`](@ref): used to get Q-values of a state.
+- `target_approximator`::[`AbstractApproximator`](@ref): similar to `approximator`, but used to estimate the target (the next state).
+- `loss_func`: the loss function.
+- `γ::Float32=0.99f0`: discount rate.
+- `batch_size::Int=32`
+- `update_horizon::Int=1`: length of update ('n' in n-step update).
+- `min_replay_history::Int=32`: number of transitions that should be experienced before updating the `approximator`.
+- `update_freq::Int=4`: the frequency of updating the `approximator`.
+- `target_update_freq::Int=100`: the frequency of syncing `target_approximator`.
+- `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
+- `seed = nothing`
+"""
 mutable struct DQNLearner{
     Tq<:AbstractApproximator,
     Tt<:AbstractApproximator,
