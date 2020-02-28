@@ -1,10 +1,40 @@
 export DiscreteSpace
 using Random
 
+"""
+    DiscreteSpace(span)
+
+The `span` can be of any iterators.
+
+# Example
+
+```julia-repl
+julia> s = DiscreteSpace([1,2,3])
+DiscreteSpace{Array{Int64,1}}([1, 2, 3])
+
+julia> 0 ∉ s
+true
+
+julia> 2 ∈ s
+true
+
+julia> s = DiscreteSpace(Set([:a, :c, :a, :b]))
+DiscreteSpace{Set{Symbol}}(Set(Symbol[:a, :b, :c]))
+
+julia> s = DiscreteSpace(3)
+DiscreteSpace{UnitRange{Int64}}(1:3)
+```
+
+"""
 struct DiscreteSpace{T} <: AbstractSpace
     span::T
 end
 
+"""
+    DiscreteSpace(high::T)
+
+Create a `DiscreteSpace` with span of `1:high`
+"""
 DiscreteSpace(high::T) where {T<:Integer} = DiscreteSpace(one(T), high)
 
 function DiscreteSpace(low::T, high::T) where {T<:Integer}
@@ -12,6 +42,11 @@ function DiscreteSpace(low::T, high::T) where {T<:Integer}
     DiscreteSpace(low:high)
 end
 
+"""
+    DiscreteSpace(low, high)
+
+Create a `DiscreteSpace` with span of `low:high`
+"""
 DiscreteSpace(low, high) = DiscreteSpace(promote(low, high)...)
 
 Base.eltype(s::DiscreteSpace) = eltype(s.span)

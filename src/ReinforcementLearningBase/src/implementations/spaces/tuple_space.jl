@@ -4,6 +4,9 @@ struct TupleSpace{T<:Tuple{Vararg{<:AbstractSpace}}} <: AbstractSpace
     data::T
 end
 
+"""
+    TupleSpace(args::AbstractSpace...)
+"""
 TupleSpace(args::AbstractSpace...) = TupleSpace(Tuple(args))
 
 Base.eltype(s::TupleSpace) = Tuple{(eltype(x) for x in s.data)...}

@@ -1,5 +1,10 @@
 export EmptySpace
 
+"""
+    EmptySpace()
+
+There's `nothing` in the `EmptySpace`!
+"""
 struct EmptySpace <: AbstractSpace end
 
 Base.eltype(s::EmptySpace) = Nothing

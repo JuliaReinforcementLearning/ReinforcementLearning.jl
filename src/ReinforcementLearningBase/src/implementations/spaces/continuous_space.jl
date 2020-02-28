@@ -12,6 +12,11 @@ struct ContinuousSpace{T<:Number} <: AbstractSpace
     end
 end
 
+"""
+    ContinuousSpace(low, high)
+
+Similar to [`DiscreteSpace`](@ref), but the span is continuous.
+"""
 ContinuousSpace(low, high) = ContinuousSpace(promote(low, high)...)
 
 Base.eltype(::ContinuousSpace{T}) where {T} = T

@@ -3,6 +3,11 @@ export WrappedEnv
 using MacroTools: @forward
 using Random
 
+"""
+    WrappedEnv(;preprocessor, env)
+
+Wrap the `env` with a `preprocessor`
+"""
 Base.@kwdef struct WrappedEnv{P<:AbstractPreprocessor,E<:AbstractEnv} <: AbstractEnv
     preprocessor::P
     env::E

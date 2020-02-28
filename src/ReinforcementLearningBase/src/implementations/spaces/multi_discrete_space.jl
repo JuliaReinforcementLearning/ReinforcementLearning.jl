@@ -1,6 +1,11 @@
 export MultiDiscreteSpace
 using Random
 
+"""
+    MultiDiscreteSpace(low::T, high::T) where {T<:AbstractArray}
+
+Similar to [`DiscreteSpace`](@ref), but scaled to multi-dimension.
+"""
 struct MultiDiscreteSpace{T<:AbstractArray} <: AbstractSpace
     low::T
     high::T
@@ -12,6 +17,11 @@ struct MultiDiscreteSpace{T<:AbstractArray} <: AbstractSpace
     end
 end
 
+"""
+    MultiDiscreteSpace(high::T) where {T<:AbstractArray}
+
+The `low` will fall back to `ones(eltype(T), size(high))`.
+"""
 MultiDiscreteSpace(high::T) where {T<:AbstractArray} =
     MultiDiscreteSpace(ones(eltype(T), size(high)), high)
 

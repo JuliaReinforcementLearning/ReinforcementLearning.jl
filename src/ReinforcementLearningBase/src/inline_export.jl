@@ -3,6 +3,10 @@
 # - https://github.com/QuantumBFS/YaoBase.jl/blob/master/src/utils/interface.jl
 
 macro interface(ex)
+    interfacem(__module__, __source__, ex)
+end
+
+function interfacem(__module__::Module, __source__::LineNumberNode, ex::Expr)
     name, is_body_missing = handle(ex)
     if name === nothing
         :(error("unknown expression"))

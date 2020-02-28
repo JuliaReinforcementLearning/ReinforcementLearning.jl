@@ -4,6 +4,9 @@ struct DictSpace{K<:Union{Symbol,AbstractString},V<:AbstractSpace} <: AbstractSp
     data::Dict{K,V}
 end
 
+"""
+    DictSpace(ps::Pair{<:Union{Symbol,AbstractString},<:AbstractSpace}...)
+"""
 function DictSpace(ps::Pair{<:Union{Symbol,AbstractString},<:AbstractSpace}...)
     data = Dict(ps)
     K, V = typeof(data).parameters
