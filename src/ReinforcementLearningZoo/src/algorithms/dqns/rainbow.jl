@@ -5,6 +5,32 @@ using Zygote
 using StatsBase
 using Random
 
+"""
+    RainbowLearner(;kwargs...)
+
+See paper: [Rainbow: Combining Improvements in Deep Reinforcement Learning](https://arxiv.org/abs/1710.02298)
+
+# Keywords
+
+- `approximator`::[`AbstractApproximator`](@ref): used to get Q-values of a state.
+- `target_approximator`::[`AbstractApproximator`](@ref): similar to `approximator`, but used to estimate the target (the next state).
+- `loss_func`: the loss function.
+- `Vₘₐₓ::Float32`: the maximum value of distribution.
+- `Vₘᵢₙ::Float32`: the minimum value of distribution.
+- `n_actions::Int`: number of possible actions.
+- `γ::Float32=0.99f0`: discount rate.
+- `batch_size::Int=32`
+- `update_horizon::Int=1`: length of update ('n' in n-step update).
+- `min_replay_history::Int=32`: number of transitions that should be experienced before updating the `approximator`.
+- `update_freq::Int=4`: the frequency of updating the `approximator`.
+- `target_update_freq::Int=500`: the frequency of syncing `target_approximator`.
+- `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
+- `default_priority::Float64=100.`: the default priority for newly added transitions.
+- `n_atoms::Int=51`: the number of buckets of the value function distribution.
+- `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
+- `default_priority::Float64=100.`: the default priority for newly added transitions.
+- `seed = nothing`
+"""
 mutable struct RainbowLearner{
     Tq<:AbstractApproximator,
     Tt<:AbstractApproximator,
