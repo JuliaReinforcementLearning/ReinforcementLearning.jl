@@ -8,6 +8,18 @@ struct NeuralNetworkApproximator{T,M,O,P} <: AbstractApproximator
     params::P
 end
 
+"""
+    NeuralNetworkApproximator(;kwargs)
+
+Use a DNN model for value estimation.
+
+# Keyword arguments
+
+- `model`, a Flux based DNN model.
+- `optimizer`
+- `parameters=params(model)`
+- `kind=Q_APPROXIMATOR`, specify the type of model.
+"""
 function NeuralNetworkApproximator(;
     model::M,
     optimizer::O,

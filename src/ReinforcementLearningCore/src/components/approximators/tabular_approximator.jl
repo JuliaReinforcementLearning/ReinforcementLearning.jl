@@ -3,7 +3,7 @@ export TabularApproximator
 """
     TabularApproximator(table<:AbstractArray)
 
-For `table` of 1-d, it will create a [`VApproximator`](@ref). For `table` of 2-d, it will create a [`QApproximator`].
+For `table` of 1-d, it will create a [`V_APPROXIMATOR`](@ref). For `table` of 2-d, it will create a [`QApproximator`].
 
 !!! warning
     For `table` of 2-d, the first dimension is action and the second dimension is state.
@@ -17,6 +17,9 @@ struct TabularApproximator{N,T<:AbstractArray} <: AbstractApproximator
     end
 end
 
+"""
+    TabularApproximator(; n_state, n_action = nothing, init = 0.0)
+"""
 function TabularApproximator(; n_state, n_action = nothing, init = 0.0)
     table = isnothing(n_action) ? fill(init, n_state) : fill(init, n_action, n_state)
     TabularApproximator(table)

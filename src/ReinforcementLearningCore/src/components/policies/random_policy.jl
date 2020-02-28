@@ -2,6 +2,11 @@ export RandomPolicy
 
 using Random
 
+"""
+    RandomPolicy(action_space, rng)
+
+Randomly return a valid action.
+"""
 struct RandomPolicy{S<:AbstractSpace,R<:AbstractRNG} <: AbstractPolicy
     action_space::S
     rng::R
@@ -11,8 +16,14 @@ Base.show(io::IO, p::RandomPolicy) = print(io, "RandomPolicy($(p.action_space))"
 
 Random.seed!(p::RandomPolicy, seed) = Random.seed!(p.rng, seed)
 
+"""
+    RandomPolicy(action_space; seed=nothing)
+"""
 RandomPolicy(s; seed = nothing) = RandomPolicy(s, MersenneTwister(seed))
 
+"""
+    RandomPolicy(env::AbstractEnv; seed=nothing)
+"""
 RandomPolicy(env::AbstractEnv; seed = nothing) =
     RandomPolicy(get_action_space(env), MersenneTwister(seed))
 

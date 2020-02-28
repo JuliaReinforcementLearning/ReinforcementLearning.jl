@@ -1,7 +1,9 @@
 export VBasedPolicy
 
 """
-# Fields
+    VBasedPolicy(;kwargs...)
+
+# Key words & Fields
 
 - `learner`::[`AbstractLearner`](@ref), learn how to estimate state values.
 - `mapping`, a customized function `(obs, learner) -> action_values`

@@ -3,6 +3,15 @@ export WeightedRandomPolicy
 using Random
 using StatsBase: sample, Weights
 
+"""
+    WeightedRandomPolicy(actions, weight, sums, rng)
+
+Similar to [`RandomPolicy`](@ref), but the probability of
+each action is set in advance instead of a uniform distribution.
+
+- `actions` are all possible actions.
+- `weight` can be an 1-D or 2-D array. If it's 1-D, then the `weight` applies to all states. If it's 2-D, then the state is assume to be of `Int` and for different state, the corresponding weight is selected.
+"""
 struct WeightedRandomPolicy{N,A,W<:AbstractArray,S,R<:AbstractRNG} <: AbstractPolicy
     actions::A
     weight::W

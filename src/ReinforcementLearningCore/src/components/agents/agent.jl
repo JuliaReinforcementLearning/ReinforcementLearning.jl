@@ -5,16 +5,12 @@ export Agent
 
 One of the most commonly used [`AbstractAgent`](@ref).
 
-Generally speaking, it does nothing but
-
-1. Pass observation to the policy to generate an action
-1. Update the trajectory using the `observation => action` pair
-1. Update the policy with the newly updated trajectory
+Generally speaking, it does nothing but update the trajectory and policy appropriately in different stages.
 
 # Keywords & Fields
 
 - `policy`::[`AbstractPolicy`](@ref): the policy to use
-- `trajectory`::[`AbstractTrajectory`](@ref): used to store transitions between agent and environment
+- `trajectory`::[`AbstractTrajectory`](@ref): used to store transitions between an agent and an environment
 - `role=DEFAULT_PLAYER`: used to distinguish different agents
 """
 Base.@kwdef mutable struct Agent{P<:AbstractPolicy,T<:AbstractTrajectory,R} <: AbstractAgent

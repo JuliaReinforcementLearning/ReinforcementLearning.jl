@@ -1,5 +1,23 @@
 export DynaAgent
 
+"""
+    DynaAgent(;kwargs...)
+
+`DynaAgent` is first introduced in: *Sutton, Richard S. "Dyna, an integrated architecture for learning, planning, and reacting." ACM Sigart Bulletin 2.4 (1991): 160-163.*
+
+# Keywords & Fields
+
+- `policy`::[`AbstractPolicy`](@ref): the policy to use
+- `model`::[`AbstractEnvironmentModel`](@ref): describe the environment to interact with
+- `trajectory`::[`AbstractTrajectory`](@ref): used to store transitions between agent and environment
+- `role=:DEFAULT`: used to distinguish different agents
+- `plan_step::Int=10`: the count of planning steps
+
+The main difference between [`DynaAgent`](@ref) and [`Agent`](@ref) is that an environment model is involved. It is best described in the book: *Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.*
+
+![](/assets/img/RL_book_fig_8_1.png)
+![](/assets/img/RL_book_fig_8_2.png)
+"""
 Base.@kwdef struct DynaAgent{
     P<:AbstractPolicy,
     B<:AbstractTrajectory,

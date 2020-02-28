@@ -2,6 +2,12 @@ export DoubleLearner
 
 using Random
 
+"""
+    DoubleLearner(;L1, L2, rng=MersenneTwister())
+
+This is a meta-learner, it will randomly select one learner and update another learner.
+The estimation of an observation is the sum of result from two learners.
+"""
 Base.@kwdef struct DoubleLearner{T1<:AbstractLearner,T2<:AbstractLearner,R<:AbstractRNG} <:
                    AbstractLearner
     L1::T1
@@ -9,6 +15,9 @@ Base.@kwdef struct DoubleLearner{T1<:AbstractLearner,T2<:AbstractLearner,R<:Abst
     rng::R = MersenneTwister()
 end
 
+"""
+    DoubleLearner(l1, l2; seed = nothing)
+"""
 DoubleLearner(l1, l2; seed = nothing) = DoubleLearner(l1, l2, MersenneTwister(seed))
 
 (learner::DoubleLearner)(obs) = learner.L1(obs) .+ learner.L2(obs)

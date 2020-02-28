@@ -28,13 +28,13 @@ Two kinds of epsilon-decreasing strategy are implmented here (`linear` and `exp`
 s = EpsilonGreedyExplorer{:linear}(ϵ_init=0.9, ϵ_stable=0.1, warmup_steps=100, decay_steps=100)
 plot([RL.get_ϵ(s, i) for i in 1:500], label="linear epsilon")
 ```
-![](../assets/img/linear_epsilon_greedy_selector.png)
+![](/assets/img/linear_epsilon_greedy_selector.png)
 
 ```julia
 s = EpsilonGreedyExplorer{:exp}(ϵ_init=0.9, ϵ_stable=0.1, warmup_steps=100, decay_steps=100)
 plot([RL.get_ϵ(s, i) for i in 1:500], label="exp epsilon")
 ```
-![](../assets/img/exp_epsilon_greedy_selector.png)
+![](/assets/img/exp_epsilon_greedy_selector.png)
 """
 mutable struct EpsilonGreedyExplorer{Kind,IsBreakTie,R} <: AbstractExplorer
     ϵ_stable::Float64

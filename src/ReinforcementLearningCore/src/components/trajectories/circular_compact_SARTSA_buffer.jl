@@ -6,6 +6,24 @@ const CircularCompactSARTSATrajectory = Trajectory{
     NamedTuple{RTSA,T2},
 } where {T1,T2<:Tuple{Vararg{<:CircularArrayBuffer}}}
 
+"""
+    CircularCompactSARTSATrajectory(;kwargs...)
+
+Similar to [`VectorialCompactSARTSATrajectory`](@ref),
+instead of using `Vector`s as containers, [`CircularArrayBuffer`](@ref)s are used here.
+
+# Key word arguments
+
+- `capacity`::Int, the maximum length of each trace.
+- `state_type` = Int
+- `state_size` = ()
+- `action_type` = Int
+- `action_size` = ()
+- `reward_type` = Float32
+- `reward_size` = ()
+- `terminal_type` = Bool
+- `terminal_size` = ()
+"""
 function CircularCompactSARTSATrajectory(;
     capacity,
     state_type = Int,

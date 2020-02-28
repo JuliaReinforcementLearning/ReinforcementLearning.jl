@@ -8,6 +8,23 @@ struct CircularCompactPSARTSATrajectory{T<:CircularCompactSARTSATrajectory,P,nam
     priority::P
 end
 
+"""
+    CircularCompactPSARTSATrajectory(;kwargs)
+
+Similar to [`CircularCompactSARTSATrajectory`](@ref), except that another trace named `priority` is added.
+
+# Key word arguments
+
+- `capacity`::Int, the maximum length of each trace.
+- `state_type` = Int
+- `state_size` = ()
+- `action_type` = Int
+- `action_size` = ()
+- `reward_type` = Float32
+- `reward_size` = ()
+- `terminal_type` = Bool
+- `terminal_size` = ()
+"""
 function CircularCompactPSARTSATrajectory(; kw...)
     t = CircularCompactSARTSATrajectory(; kw...)
     p = SumTree(kw.data.capacity)

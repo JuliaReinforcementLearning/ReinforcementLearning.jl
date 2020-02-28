@@ -1,5 +1,11 @@
 export Trajectory
 
+"""
+    Trajectory{names,types,Tbs}(trajectories::Tbs)
+
+A container of different `trajectories`.
+Usually you won't use it directly.
+"""
 struct Trajectory{names,types,Tbs} <: AbstractTrajectory{names,types}
     trajectories::Tbs
 end

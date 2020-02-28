@@ -133,6 +133,11 @@ function logitcrossentropy_unreduced(logŷ::AbstractVecOrMat, y::AbstractVecOrM
     return vec(-sum(y .* logsoftmax(logŷ), dims = 1))
 end
 
+"""
+    huber_loss_unreduced(labels, predictions; δ = 1.0f0)
+
+Similar to [`huber_loss`](@ref), but it doesn't do the `mean` operation in the last step.
+"""
 function huber_loss_unreduced(labels, predictions; δ = 1.0f0)
     abs_error = abs.(predictions .- labels)
     quadratic = min.(abs_error, 1.0f0)  # quadratic = min.(abs_error, δ)
@@ -140,6 +145,11 @@ function huber_loss_unreduced(labels, predictions; δ = 1.0f0)
     0.5f0 .* quadratic .* quadratic .+ linear  # 0.5f0 .* quadratic .* quadratic .+ δ .* linear
 end
 
+"""
+    huber_loss(labels, predictions; δ = 1.0f0)
+
+See [Huber loss](https://en.wikipedia.org/wiki/Huber_loss)
+"""
 huber_loss(labels, predictions; δ = 1.0f0) =
     huber_loss_unreduced(labels, predictions; δ = δ) |> mean
 

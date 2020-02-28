@@ -1,7 +1,8 @@
 export QBasedPolicy
 
 """
-    QBasedPolicy(learner::Q, explorer::S) -> QBasedPolicy{Q, S}
+    QBasedPolicy(;learner::Q, explorer::S)
+
 Use a Q-`learner` to generate the estimations of actions and use `explorer` to get the action.
 """
 Base.@kwdef struct QBasedPolicy{Q<:AbstractLearner,E<:AbstractExplorer} <: AbstractPolicy

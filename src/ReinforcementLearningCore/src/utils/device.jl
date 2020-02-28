@@ -12,6 +12,12 @@ send_to_device(::Val{:gpu}, x) = Flux.fmap(a -> adapt(CuArray{Float32}, a), x)
 send_to_device(::Val{:gpu}, x::SubArray{T,N,<:CircularArrayBuffer}) where {T,N} =
     CuArray{T}(x)
 
+"""
+    device(model)
+
+Detect the suitable running device for the `model`.
+Return `Val(:cpu)` by default.
+"""
 device(x) = Val(:cpu)
 device(x::Function) = nothing
 device(::CuArray) = Val(:gpu)

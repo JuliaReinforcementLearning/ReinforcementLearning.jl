@@ -9,6 +9,12 @@ export AbstractHook,
 
 """
 A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
+By default, a `AbstractHook` will do nothing. One can override the behavior by implementing the following methods:
+
+- `(hook::YourHook)(::PreActStage, agent, env, obs, action)`, note that there's an extra argument of `action`.
+- `(hook::YourHook)(::PostActStage, agent, env, obs)`
+- `(hook::YourHook)(::PreEpisodeStage, agent, env, obs)`
+- `(hook::YourHook)(::PostEpisodeStage, agent, env, obs)`
 """
 abstract type AbstractHook end
 
