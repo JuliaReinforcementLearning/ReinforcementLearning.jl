@@ -6,6 +6,8 @@
 
 **Merged pull requests:**
 
+- Automatic JuliaFormatter.jl run [\#30](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/30) ([github-actions[bot]](https://github.com/apps/github-actions))
+- update doc [\#29](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/29) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#28](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/28) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [v0.6.3](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.6.3) (2020-02-26)
@@ -33,7 +35,6 @@
 
 - Add invalid action [\#24](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/24) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#23](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/23) ([github-actions[bot]](https://github.com/apps/github-actions))
-- Allow converting Set to DiscreteSpace [\#22](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/22) ([findmyway](https://github.com/findmyway))
 
 ## [v0.6.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.6.0) (2020-02-17)
 
@@ -41,6 +42,7 @@
 
 **Merged pull requests:**
 
+- Allow converting Set to DiscreteSpace [\#22](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/22) ([findmyway](https://github.com/findmyway))
 - CompatHelper: add new compat entry for "CUDAapi" at version "3.1" [\#21](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/21) ([github-actions[bot]](https://github.com/apps/github-actions))
 - CompatHelper: add new compat entry for "CuArrays" at version "1.7" [\#20](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/20) ([github-actions[bot]](https://github.com/apps/github-actions))
 - CompatHelper: add new compat entry for "MacroTools" at version "0.5" [\#19](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/19) ([github-actions[bot]](https://github.com/apps/github-actions))
