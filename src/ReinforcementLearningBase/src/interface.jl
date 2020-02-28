@@ -353,7 +353,8 @@ Optional Methods:
 """
     get_trace(t::AbstractTrajectory, s::NTuple{N,Symbol}) where {N}
 """
-get_trace(t::AbstractTrajectory, s::NTuple{N,Symbol}) where {N} = NamedTuple{s}(get_trace(t, x) for x in s)
+get_trace(t::AbstractTrajectory, s::NTuple{N,Symbol}) where {N} =
+    NamedTuple{s}(get_trace(t, x) for x in s)
 
 """
     get_trace(t::AbstractTrajectory, s::Symbol...)
