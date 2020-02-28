@@ -26,18 +26,7 @@ makedocs(
         "A Quick Example" => "a_quick_example.md",
         "Manual" => [
             "RLBase" => "rl_base.md",
-            "RLCore" => [
-                "Environments" => "rl_core/environments.md",
-                "Agents" => "rl_core/agents.md",
-                "Trajectories" => "rl_core/trajectories.md",
-                "Policies" => "rl_core/policies.md",
-                "Learners" => "rl_core/learners.md",
-                "Approximators" => "rl_core/approximators.md",
-                "Explorers" => "rl_core/explorers.md",
-                "Environment Models" => "rl_core/environment_models.md",
-                "Core" => "core.md",
-                "Utils" => "utils.md"
-            ],
+            "RLCore" => "rl_core.md",
             "RLEnvs" => "rl_envs.md",
             "RLZoo" => "rl_zoo.md",
         ],

@@ -247,10 +247,10 @@ uuid = "0c68f7d7-f131-5f86-a1c3-88cf8149b2d7"
 version = "2.0.1"
 
 [[GR]]
-deps = ["Base64", "DelimitedFiles", "LinearAlgebra", "Printf", "Random", "Serialization", "Sockets", "Test"]
-git-tree-sha1 = "10633436bc2fc836347bda5073b7b6f06dcdc5e6"
+deps = ["Base64", "DelimitedFiles", "LinearAlgebra", "Printf", "Random", "Serialization", "Sockets", "Test", "UUIDs"]
+git-tree-sha1 = "41dd1395d4dc559f1c2cb558cba784ef37b561fe"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.46.0"
+version = "0.47.0"
 
 [[Gettext_jll]]
 deps = ["Libdl", "Libiconv_jll", "Pkg", "XML2_jll"]
@@ -541,7 +541,7 @@ version = "0.4.0"
 
 [[ReinforcementLearningBase]]
 deps = ["CUDAapi", "CuArrays", "Distributions", "MacroTools", "Random"]
-git-tree-sha1 = "668d6de636de962a81ffb36ce533fca285795490"
+path = "../../ReinforcementLearningBase.jl"
 uuid = "e575027e-6cd6-5018-9292-cdc6200d2b44"
 version = "0.6.3"
 
@@ -553,13 +553,13 @@ version = "0.2.1"
 
 [[ReinforcementLearningEnvironments]]
 deps = ["GR", "Random", "ReinforcementLearningBase", "Requires", "StatsBase"]
-git-tree-sha1 = "0bb985f0393224bc5d25e09b49c08359a9882dca"
+path = "../../ReinforcementLearningEnvironments.jl"
 uuid = "25e41dd2-4622-11e9-1641-f1adca772921"
 version = "0.2.2"
 
 [[ReinforcementLearningZoo]]
 deps = ["Flux", "Random", "ReinforcementLearningBase", "ReinforcementLearningCore", "StatsBase", "Zygote"]
-git-tree-sha1 = "ff9a23fcf140f0aece7bd77358bcb38176341a6b"
+path = "../../ReinforcementLearningZoo"
 uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 version = "0.1.0"
 
