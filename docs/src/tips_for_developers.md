@@ -2,7 +2,6 @@
 
 This page aims to provide a short introduction to Julia and some related packages for those who are interested in making contributions to this package.
 
-
 ## Basic
 
 Go through the [latest doc](https://docs.julialang.org/en/latest/). Especially keep an eye on the following sections if you come from other programming languages:
@@ -35,33 +34,7 @@ Go through the [latest doc](https://docs.julialang.org/en/latest/). Especially k
 
     Multi-Threading *will be* heavily use in some async algorithms.
 
-## Code Structure
-
-```
-src
-├── components
-│   ├── action_selectors
-│   ├── agents
-│   ├── approximators
-│   ├── buffers
-│   ├── environment_models
-│   ├── learners
-│   └── policies
-├── extensions
-├── glue
-└── Utils
-```
-
-- `components`: many important concepts in reinforcement learning have a corresponding component here.
-- `extensions`: patches for upstream packages.
-- `glue`: functions and types related to running experiments are here (like how to configure experiments, logging...).
-- `Utils`: an inner module which provides many common helper functions.
-
 ## Some Important Packages
-
-### [ReinforcementLearningEnvironments.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl)
-
-ReinforcementLearningEnvironments.jl provides only some very common environments (for example: CartPoleEnv). But it also provides a set of unified interfaces for some other environments with the help of [Requires.jl](https://github.com/MikeInnes/Requires.jl). 
 
 ### [Flux.jl](https://github.com/FluxML/Flux.jl)
 
@@ -83,7 +56,11 @@ Another excellent julia package for deep learning. You'll find it easy to write 
 
 ### Comparison with [Dopamine](https://github.com/google/dopamine)
 
+TODO:
+
 ### Comparison with [Ray/RLlib](https://ray.readthedocs.io/en/latest/rllib.html)
+
+TODO:
 
 ## Q&A
 

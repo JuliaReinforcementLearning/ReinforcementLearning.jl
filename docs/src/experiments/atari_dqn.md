@@ -105,4 +105,4 @@ Finally we can plot the rewards of each episode:
 plot(hook[1].rewards, xlabel="Episode", ylabel="Reward", label="")
 ```
 
-![](../assets/img/pong_dqn.png)
+![](/assets/img/pong_dqn.png)

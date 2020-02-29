@@ -1,37 +1,18 @@
-![logo](./assets/logo.png)
+```@raw html
+<div align="center">
+  <p>
+  <img src="/assets/logo.svg" width="320px">
+  </p>
+</div>
+```
 
-**ReinforcementLearning.jl**, as the name says, is a package for reinforcement learning research in Julia.
+[**ReinforcementLearning.jl**](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl), as the name says, is a package for reinforcement learning research in Julia.
 
 Our design principles are:
 
 - **Reusability and extensibility**: Provide elaborately designed components and interfaces to help users implement new algorithms.
 - **Easy experimentation**: Make it easy for new users to run benchmark experiments, compare different algorithms, evaluate and diagnose agents.
 - **Reproducibility**: Facilitate reproducibility from traditional tabular methods to modern deep reinforcement learning algorithms.
-
-Key capabilities/features include:
-
-- Well tested traditional methods:
-    - [`TDLearner`](@ref)
-    - [`DifferentialTDLearner`](@ref)
-    - [`TDλReturnLearner`](@ref)
-    - [`DoubleLearner`](@ref)
-    - [`MonteCarloLearner`](@ref)
-    - [`GradientBanditLearner`](@ref)
-    - [`ReinforcePolicy`](@ref)
-
-- Efficiently implemented deep reinforcement learning algorithms:
-    - Deep Q-Learning:
-        - [`BasicDQNLearner`](@ref)
-        - [`DQNLearner`](@ref)
-        - [`PrioritizedDQNLearner`](@ref)
-        - [`RainbowLearner`](@ref)
-
-- Pluggable deep learning framework backend:
-    - [Flux.jl](https://github.com/FluxML/Flux.jl)
-    - [Knet.jl](https://github.com/denizyuret/Knet.jl)
-
-- Built-in [TensorBoard](https://github.com/PhilipVinc/TensorBoardLogger.jl) support.
-
 
 ## Installation
 
@@ -41,11 +22,46 @@ This package can be installed from the package manager in Julia's REPL:
 ] add ReinforcementLearning
 ```
 
+## Project Structure
+
+[**ReinforcementLearning.jl**](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl) itself is just a wrapper around several other packages inside the [JuliaReinforcementLearning](https://github.com/JuliaReinforcementLearning) org. The relationship between different packages is described below:
+
+```@raw html
+<pre>+-------------------------------------------------------------------------------------------+
+|                                                                                           |
+|  <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl">ReinforcementLearning.jl</a>                                                                 |
+|                                                                                           |
+|      +------------------------------+                                                     |
+|      | <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl">ReinforcementLearningBase.jl</a> |                                                     |
+|      +--------|---------------------+                                                     |
+|               |                                                                           |
+|               |         +--------------------------------------+                          |
+|               |         | <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl">ReinforcementLearningEnvironments.jl</a> |                          |
+|               |         |                                      |                          |
+|               |         |     (Conditionally depends on)       |                          |
+|               |         |                                      |                          |
+|               |         |     <a href="https://github.com/JuliaReinforcementLearning/ArcadeLearningEnvironment.jl">ArcadeLearningEnvironment.jl</a>     |                          |
+|               +--------&gt;+     <a href="https://github.com/JuliaReinforcementLearning/OpenSpiel.jl">OpenSpiel.jl</a>                     |                          |
+|               |         |     <a href="https://github.com/JuliaPOMDP/POMDPs.jl">POMDPs.jl</a>                        |                          |
+|               |         |     <a href="https://github.com/JuliaPy/PyCall.jl">PyCall.jl</a>                        |                          |
+|               |         |     <a href="https://github.com/JuliaReinforcementLearning/ViZDoom.jl">ViZDoom.jl</a>                       |                          |
+|               |         |     Maze.jl(WIP)                     |                          |
+|               |         +--------------------------------------+                          |
+|               |                                                                           |
+|               |         +------------------------------+                                  |
+|               +--------&gt;+ <a href="">ReinforcementLearningCore.jl</a> |                                  |
+|                         +--------|---------------------+                                  |
+|                                  |                                                        |
+|                                  |          +-----------------------------+               |
+|                                  |---------&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ViZDoom.jl">ReinforcementLearningZoo.jl</a> |               |
+|                                  |          +-----------------------------+               |
+|                                  |                                                        |
+|                                  |          +----------------------------------------+    |
+|                                  +---------&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl">ReinforcementLearningAnIntroduction.jl</a> |    |
+|                                             +----------------------------------------+    |
++-------------------------------------------------------------------------------------------+
+</pre>
+```
+
 !!! note
-    This package relies on many new features introduced since [Julia 1.3](https://julialang.org/downloads/), so make sure that you have the proper Julia version installed. Considering that this package is still under rapid development, you're strongly suggested to install the master branch of this package by `] add ReinforcementLearning#master`.
-
-To play with some common reinforcement learning environments, you may also want to install:
-
-```
-] add ReinforcementLearningEnvironments
-```
+    [ReinforcementLearningAnIntroduction.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl) contains some traditional reinforcement algorithms and it is not registered yet. So it is not included in [ReinforcementLearning.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl). The reason to do so is to ease the burden of maintainance.
