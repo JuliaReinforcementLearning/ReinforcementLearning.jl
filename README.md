@@ -70,14 +70,11 @@ This package can be installed from the package manager in Julia's REPL:
 using ReinforcementLearning
 using StatsBase:mean
 
+env = CartPoleEnv(;T=Float32, seed=123)
+
 agent = Agent(
     policy = RandomPolicy(env;seed=456),
-    trajectory = EpisodicCompactSARTSATrajectory(; state_type = Vector{Float32}),
-)
-
-env = WrappedEnv(
-    CloneStatePreprocessor(),
-    CartPoleEnv{Float32}(;seed=123)
+    trajectory = CircularCompactSARTSATrajectory(; capacity=3, state_type=Float32, state_size = (4,)),
 )
 
 hook = ComposedHook(TotalRewardPerEpisode(), TimePerStep())
