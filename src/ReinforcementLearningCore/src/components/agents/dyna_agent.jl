@@ -15,8 +15,8 @@ export DynaAgent
 
 The main difference between [`DynaAgent`](@ref) and [`Agent`](@ref) is that an environment model is involved. It is best described in the book: *Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.*
 
-![](/assets/img/RL_book_fig_8_1.png)
-![](/assets/img/RL_book_fig_8_2.png)
+![](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/img/RL_book_fig_8_1.png)
+![](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/img/RL_book_fig_8_2.png)
 """
 Base.@kwdef struct DynaAgent{
     P<:AbstractPolicy,
