@@ -113,7 +113,7 @@ using Plots
 plot(hook[1].rewards, xlabel="Episode", ylabel="Reward", label="")
 ```
 
-![](/assets/img/a_quick_example_cartpole_cpu_basic_dqn.png)
+![](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/img/a_quick_example_cartpole_cpu_basic_dqn.png)
 
 
 **That's fantastic!**
