@@ -43,11 +43,11 @@ Our design principles are:
 |               |         +--------------------------------------+                          |
 |               |                                                                           |
 |               |         +------------------------------+                                  |
-|               +--------&gt;+ <a href="">ReinforcementLearningCore.jl</a> |                                  |
+|               +--------&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl">ReinforcementLearningCore.jl</a> |                                  |
 |                         +--------|---------------------+                                  |
 |                                  |                                                        |
 |                                  |          +-----------------------------+               |
-|                                  |---------&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ViZDoom.jl">ReinforcementLearningZoo.jl</a> |               |
+|                                  |---------&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl">ReinforcementLearningZoo.jl</a> |               |
 |                                  |          +-----------------------------+               |
 |                                  |                                                        |
 |                                  |          +----------------------------------------+    |
