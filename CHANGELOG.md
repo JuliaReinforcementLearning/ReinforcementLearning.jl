@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- add compat [\#55](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/55) ([findmyway](https://github.com/findmyway))
 - clean up code [\#54](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/54) ([findmyway](https://github.com/findmyway))
 
 ## [v0.4.0-beta](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/v0.4.0-beta) (2020-02-09)
