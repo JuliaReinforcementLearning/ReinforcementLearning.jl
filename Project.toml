@@ -11,11 +11,12 @@ ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
 ReinforcementLearningZoo = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 
 [compat]
-julia = "1.3"
+Reexport = "0.2"
 ReinforcementLearningBase = "0.6"
 ReinforcementLearningCore = "0.2"
 ReinforcementLearningEnvironments = "0.2"
 ReinforcementLearningZoo = "0.1"
+julia = "1.3"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
