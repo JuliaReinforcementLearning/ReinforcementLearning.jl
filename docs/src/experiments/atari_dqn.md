@@ -105,4 +105,4 @@ Finally we can plot the rewards of each episode:
 plot(hook[1].rewards, xlabel="Episode", ylabel="Reward", label="")
 ```
 
-![](/assets/img/pong_dqn.png)
+![](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/img/pong_dqn.png)

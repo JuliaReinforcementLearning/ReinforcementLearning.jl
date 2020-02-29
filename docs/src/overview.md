@@ -7,7 +7,7 @@ Before diving into details, let's review some basic concepts in **RL(Reinforceme
 ### Agent and Environment
 
 ```@raw html
-<img src="/assets/img/agent_env_relation.png" width="640px">
+<img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/img/agent_env_relation.png" width="640px">
 ```
 
 Generally speaking, RL is to learn how to take actions so as to maximize a numerical reward. Two core concepts in RL are **Agent** and **Environment**. In each step, the agent is provided with the observation of the environment and is required to take an action. Then the environment consumes that action and transites to another state, providing a numerical reward in the meantime.
