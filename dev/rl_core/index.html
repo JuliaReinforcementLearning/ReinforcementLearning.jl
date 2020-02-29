@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>RLCore · ReinforcementLearning.jl</title><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-149861753-1', 'auto');
+ga('send', 'pageview', {'page': location.pathname + location.search + location.hash});
+</script><link rel="canonical" href="https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/rl_core/index.html"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/favicon.ico" rel="icon" type="image/x-icon"/><link href="../assets/custom.css" rel="stylesheet" type="text/css"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="ReinforcementLearning.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit">ReinforcementLearning.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../overview/">Overview</a></li><li><a class="tocitem" href="../a_quick_example/">A Quick Example</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../rl_base/">RLBase</a></li><li class="is-active"><a class="tocitem" href>RLCore</a><ul class="internal"><li><a class="tocitem" href="#Core-1"><span>Core</span></a></li><li><a class="tocitem" href="#Agents-1"><span>Agents</span></a></li><li><a class="tocitem" href="#Policies-1"><span>Policies</span></a></li><li><a class="tocitem" href="#Trajectories-1"><span>Trajectories</span></a></li><li><a class="tocitem" href="#Preprocessors-1"><span>Preprocessors</span></a></li><li><a class="tocitem" href="#Learners-1"><span>Learners</span></a></li><li><a class="tocitem" href="#Approximators-1"><span>Approximators</span></a></li><li><a class="tocitem" href="#Explorers-1"><span>Explorers</span></a></li><li><a class="tocitem" href="#Utils-1"><span>Utils</span></a></li></ul></li><li><a class="tocitem" href="../rl_envs/">RLEnvs</a></li><li><a class="tocitem" href="../rl_zoo/">RLZoo</a></li></ul></li><li><a class="tocitem" href="../tips_for_developers/">Tips for Developers</a></li><li><span class="tocitem">Experiments</span><ul><li><a class="tocitem" href="../experiments/atari_dqn/">Play Atari Games with DQN</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li class="is-active"><a href>RLCore</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>RLCore</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/src/rl_core.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="ReinforcementLearningCore.jl-1"><a class="docs-heading-anchor" href="#ReinforcementLearningCore.jl-1">ReinforcementLearningCore.jl</a><a class="docs-heading-anchor-permalink" href="#ReinforcementLearningCore.jl-1" title="Permalink"></a></h1><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.RLCore" href="#ReinforcementLearningCore.RLCore"><code>ReinforcementLearningCore.RLCore</code></a> — <span class="docstring-category">Module</span></header><section><div><p><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl">ReinforcementLearningCore.jl</a> (<strong>RLCore</strong>) provides some standard and reusable components defined by <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl"><strong>RLBase</strong></a>, hoping that they are useful for people to implement and experiment with different kinds of algorithms.</p></div></section></article><h2 id="Core-1"><a class="docs-heading-anchor" href="#Core-1">Core</a><a class="docs-heading-anchor-permalink" href="#Core-1" title="Permalink"></a></h2><p>The most important function in RLCore is <code>run(agent, env, stop_condition, hook)</code>. In practice, it will be dispatched to different implementations based on the type of <code>agent</code> and <code>env</code>. For a <code>stop_condition</code>, it can be arbitrary function which accepts <code>agent, env, obs</code> as arguments and return a <code>Bool</code> value indicates whether to stop or not. For a <code>hook</code>, it can should be instances of <a href="#ReinforcementLearningCore.AbstractHook"><code>AbstractHook</code></a>.</p><h3 id="Stop-Conditions-1"><a class="docs-heading-anchor" href="#Stop-Conditions-1">Stop Conditions</a><a class="docs-heading-anchor-permalink" href="#Stop-Conditions-1" title="Permalink"></a></h3><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.ComposedStopCondition" href="#ReinforcementLearningCore.ComposedStopCondition"><code>ReinforcementLearningCore.ComposedStopCondition</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">ComposedStopCondition(stop_conditions; reducer = any)</code></pre><p>The result of <code>stop_conditions</code> is reduced by <code>reducer</code>.</p></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.StopAfterStep" href="#ReinforcementLearningCore.StopAfterStep"><code>ReinforcementLearningCore.StopAfterStep</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">StopAfterStep(step; cur = 1, is_show_progress = true, tag = &quot;TRAINING&quot;)</code></pre><p>Return <code>true</code> after being called <code>step</code> times.</p></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.StopAfterEpisode" href="#ReinforcementLearningCore.StopAfterEpisode"><code>ReinforcementLearningCore.StopAfterEpisode</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">StopAfterEpisode(episode; cur = 0, is_show_progress = true, tag = &quot;TRAINING&quot;)</code></pre><p>Return <code>true</code> after being called <code>episode</code>. If <code>is_show_progress</code> is <code>true</code>, the <code>ProgressMeter</code> will be used to show progress.</p></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.StopWhenDone" href="#ReinforcementLearningCore.StopWhenDone"><code>ReinforcementLearningCore.StopWhenDone</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">StopWhenDone()</code></pre><p>Return <code>true</code> if the <code>terminal</code> field of an observation is <code>true</code>.</p></div></section></article><h3 id="Hooks-1"><a class="docs-heading-anchor" href="#Hooks-1">Hooks</a><a class="docs-heading-anchor-permalink" href="#Hooks-1" title="Permalink"></a></h3><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.AbstractHook" href="#ReinforcementLearningCore.AbstractHook"><code>ReinforcementLearningCore.AbstractHook</code></a> — <span class="docstring-category">Type</span></header><section><div><p>A hook is called at different stage duiring a <a href="@ref"><code>run</code></a> to allow users to inject customized runtime logic. By default, a <code>AbstractHook</code> will do nothing. One can override the behavior by implementing the following methods:</p><ul><li><code>(hook::YourHook)(::PreActStage, agent, env, obs, action)</code>, note that there&#39;s an extra argument of <code>action</code>.</li><li><code>(hook::YourHook)(::PostActStage, agent, env, obs)</code></li><li><code>(hook::YourHook)(::PreEpisodeStage, agent, env, obs)</code></li><li><code>(hook::YourHook)(::PostEpisodeStage, agent, env, obs)</code></li></ul></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.EmptyHook" href="#ReinforcementLearningCore.EmptyHook"><code>ReinforcementLearningCore.EmptyHook</code></a> — <span class="docstring-category">Type</span></header><section><div><p>Do nothing</p></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.ComposedHook" href="#ReinforcementLearningCore.ComposedHook"><code>ReinforcementLearningCore.ComposedHook</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">ComposedHook(hooks::AbstractHook...)</code></pre><p>Compose different hooks into a single hook.</p></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.StepsPerEpisode" href="#ReinforcementLearningCore.StepsPerEpisode"><code>ReinforcementLearningCore.StepsPerEpisode</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">StepsPerEpisode(; steps = Int[], count = 0, tag = &quot;TRAINING&quot;)</code></pre><p>Store steps of each episode in the field of <code>steps</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/2d5741174ce3e6a394010d2e470e4269ca54607f/base/#L0-L4">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.RewardsPerEpisode" href="#ReinforcementLearningCore.RewardsPerEpisode"><code>ReinforcementLearningCore.RewardsPerEpisode</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">RewardsPerEpisode(; rewards = Vector{Vector{Float64}}(), tag = &quot;TRAINING&quot;)</code></pre><p>Store each reward of each step in every episode in the field of <code>rewards</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/2d5741174ce3e6a394010d2e470e4269ca54607f/base/#L0-L4">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.TotalRewardPerEpisode" href="#ReinforcementLearningCore.TotalRewardPerEpisode"><code>ReinforcementLearningCore.TotalRewardPerEpisode</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">TotalRewardPerEpisode(; rewards = Float64[], reward = 0.0, tag = &quot;TRAINING&quot;)</code></pre><p>Store the total rewards of each episode in the field of <code>rewards</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/2d5741174ce3e6a394010d2e470e4269ca54607f/base/#L0-L4">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.CumulativeReward" href="#ReinforcementLearningCore.CumulativeReward"><code>ReinforcementLearningCore.CumulativeReward</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">CumulativeReward(rewards::Vector{Float64} = [0.0], tag::String = &quot;TRAINING&quot;)</code></pre><p>Store cumulative rewards since the beginning to the field of <code>rewards</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/2d5741174ce3e6a394010d2e470e4269ca54607f/base/#L0-L4">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.TimePerStep" href="#ReinforcementLearningCore.TimePerStep"><code>ReinforcementLearningCore.TimePerStep</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">TimePerStep(;max_steps=100)
+TimePerStep(times::CircularArrayBuffer{Float64}, t::UInt64)</code></pre><p>Store time cost of the latest <code>max_steps</code> in the <code>times</code> field.</p></div></section></article><h2 id="Agents-1"><a class="docs-heading-anchor" href="#Agents-1">Agents</a><a class="docs-heading-anchor-permalink" href="#Agents-1" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.Agent" href="#ReinforcementLearningCore.Agent"><code>ReinforcementLearningCore.Agent</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">Agent(;kwargs...)</code></pre><p>One of the most commonly used <a href="../rl_base/#ReinforcementLearningBase.AbstractAgent"><code>AbstractAgent</code></a>.</p><p>Generally speaking, it does nothing but update the trajectory and policy appropriately in different stages.</p><p><strong>Keywords &amp; Fields</strong></p><ul><li><code>policy</code>::<a href="../rl_base/#ReinforcementLearningBase.AbstractPolicy"><code>AbstractPolicy</code></a>: the policy to use</li><li><code>trajectory</code>::<a href="../rl_base/#ReinforcementLearningBase.AbstractTrajectory"><code>AbstractTrajectory</code></a>: used to store transitions between an agent and an environment</li><li><code>role=DEFAULT_PLAYER</code>: used to distinguish different agents</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/2d5741174ce3e6a394010d2e470e4269ca54607f/base/#L0-L12">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.DynaAgent" href="#ReinforcementLearningCore.DynaAgent"><code>ReinforcementLearningCore.DynaAgent</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">DynaAgent(;kwargs...)</code></pre><p><code>DynaAgent</code> is first introduced in: <em>Sutton, Richard S. &quot;Dyna, an integrated architecture for learning, planning, and reacting.&quot; ACM Sigart Bulletin 2.4 (1991): 160-163.</em></p><p><strong>Keywords &amp; Fields</strong></p><ul><li><code>policy</code>::<a href="../rl_base/#ReinforcementLearningBase.AbstractPolicy"><code>AbstractPolicy</code></a>: the policy to use</li><li><code>model</code>::<a href="../rl_base/#ReinforcementLearningBase.AbstractEnvironmentModel"><code>AbstractEnvironmentModel</code></a>: describe the environment to interact with</li><li><code>trajectory</code>::<a href="../rl_base/#ReinforcementLearningBase.AbstractTrajectory"><code>AbstractTrajectory</code></a>: used to store transitions between agent and environment</li><li><code>role=:DEFAULT</code>: used to distinguish different agents</li><li><code>plan_step::Int=10</code>: the count of planning steps</li></ul><p>The main difference between <a href="#ReinforcementLearningCore.DynaAgent"><code>DynaAgent</code></a> and <a href="#ReinforcementLearningCore.Agent"><code>Agent</code></a> is that an environment model is involved. It is best described in the book: <em>Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.</em></p><p><img src="/assets/img/RL_book_fig_8_1.png" alt/> <img src="/assets/img/RL_book_fig_8_2.png" alt/></p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/2d5741174ce3e6a394010d2e470e4269ca54607f/base/#L0-L17">source</a></section></article><h2 id="Policies-1"><a class="docs-heading-anchor" href="#Policies-1">Policies</a><a class="docs-heading-anchor-permalink" href="#Policies-1" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.OffPolicy" href="#ReinforcementLearningCore.OffPolicy"><code>ReinforcementLearningCore.OffPolicy</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">OffPolicy(π_target::P, π_behavior::B) -&gt; OffPolicy{P,B}</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/2d5741174ce3e6a394010d2e470e4269ca54607f/base/#L0-L2">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.QBasedPolicy" href="#ReinforcementLearningCore.QBasedPolicy"><code>ReinforcementLearningCore.QBasedPolicy</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">QBasedPolicy(;learner::Q, explorer::S)</code></pre><p>Use a Q-<code>learner</code> to generate the estimations of actions and use <code>explorer</code> to get the action.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/2d5741174ce3e6a394010d2e470e4269ca54607f/base/#L0-L4">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.RandomPolicy" href="#ReinforcementLearningCore.RandomPolicy"><code>ReinforcementLearningCore.RandomPolicy</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">RandomPolicy(action_space, rng)</code></pre><p>Randomly return a valid action.</p></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.VBasedPolicy" href="#ReinforcementLearningCore.VBasedPolicy"><code>ReinforcementLearningCore.VBasedPolicy</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">VBasedPolicy(;kwargs...)</code></pre><p><strong>Key words &amp; Fields</strong></p><ul><li><code>learner</code>::<a href="../rl_base/#ReinforcementLearningBase.AbstractLearner"><code>AbstractLearner</code></a>, learn how to estimate state values.</li><li><code>mapping</code>, a customized function <code>(obs, learner) -&gt; action_values</code></li><li><code>explorer</code>::<a href="../rl_base/#ReinforcementLearningBase.AbstractExplorer"><code>AbstractExplorer</code></a>, decide which action to take based on action values.</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/2d5741174ce3e6a394010d2e470e4269ca54607f/base/#L0-L8">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.WeightedRandomPolicy" href="#ReinforcementLearningCore.WeightedRandomPolicy"><code>ReinforcementLearningCore.WeightedRandomPolicy</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">WeightedRandomPolicy(actions, weight, sums, rng)</code></pre><p>Similar to <a href="#ReinforcementLearningCore.RandomPolicy"><code>RandomPolicy</code></a>, but the probability of each action is set in advance instead of a uniform distribution.</p><ul><li><code>actions</code> are all possible actions.</li><li><code>weight</code> can be an 1-D or 2-D array. If it&#39;s 1-D, then the <code>weight</code> applies to all states. If it&#39;s 2-D, then the state is assume to be of <code>Int</code> and for different state, the corresponding weight is selected.</li></ul></div></section></article><h2 id="Trajectories-1"><a class="docs-heading-anchor" href="#Trajectories-1">Trajectories</a><a class="docs-heading-anchor-permalink" href="#Trajectories-1" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.Trajectory" href="#ReinforcementLearningCore.Trajectory"><code>ReinforcementLearningCore.Trajectory</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">Trajectory{names,types,Tbs}(trajectories::Tbs)</code></pre><p>A container of different <code>trajectories</code>. Usually you won&#39;t use it directly.</p></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.VectorialTrajectory" href="#ReinforcementLearningCore.VectorialTrajectory"><code>ReinforcementLearningCore.VectorialTrajectory</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">VectorialTrajectory(;trace_name=trace_type ...)</code></pre><p>Use <code>Vector</code> to store the traces.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; t = VectorialTrajectory(;a=Int, b=Symbol)
+0-element Trajectory{(:a, :b),Tuple{Int64,Symbol},NamedTuple{(:a, :b),Tuple{Array{Int64,1},Array{Symbol,1}}}}
+
+julia&gt; push!(t, a=0, b=:x)
+
+julia&gt; push!(t, a=1, b=:y)
+
+julia&gt; t
+2-element Trajectory{(:a, :b),Tuple{Int64,Symbol},NamedTuple{(:a, :b),Tuple{Array{Int64,1},Array{Symbol,1}}}}:
+ (a = 0, b = :x)
+ (a = 1, b = :y)
+
+julia&gt; get_trace(t, :b)
+2-element Array{Symbol,1}:
+ :x
+ :y
+
+julia&gt; pop!(t)
+
+julia&gt; t
+1-element Trajectory{(:a, :b),Tuple{Int64,Symbol},NamedTuple{(:a, :b),Tuple{Array{Int64,1},Array{Symbol,1}}}}:
+ (a = 0, b = :x)</code></pre></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.CircularTrajectory" href="#ReinforcementLearningCore.CircularTrajectory"><code>ReinforcementLearningCore.CircularTrajectory</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">CircularTrajectory(; capacity, trace_name=eltype=&gt;size...)</code></pre><p>Similar to <a href="#ReinforcementLearningCore.VectorialTrajectory"><code>VectorialTrajectory</code></a>, but we use the <a href="#ReinforcementLearningCore.CircularArrayBuffer"><code>CircularArrayBuffer</code></a> to store the traces. The <code>capacity</code> here is used to specify the maximum length of the trajectory.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; t = CircularTrajectory(capacity=10, state=Float64=&gt;(3,3), reward=Int=&gt;tuple())
+0-element Trajectory{(:state, :reward),Tuple{Float64,Int64},NamedTuple{(:state, :reward),Tuple{CircularArrayBuffer{Float64,3},CircularArrayBuffer{Int64,1}}}}
+
+julia&gt; push!(t,state=rand(3,3), reward=1)
+
+julia&gt; push!(t,state=rand(3,3), reward=2)
+
+julia&gt; get_trace(t, :reward)
+2-element CircularArrayBuffer{Int64,1}:
+ 1
+ 2
+
+julia&gt; get_trace(t, :state)
+3×3×2 CircularArrayBuffer{Float64,3}:
+[:, :, 1] =
+ 0.699906  0.382396   0.927411
+ 0.269807  0.0581324  0.239609
+ 0.222304  0.514408   0.318905
+
+[:, :, 2] =
+ 0.956228  0.992505  0.109743
+ 0.763497  0.381387  0.540566
+ 0.223081  0.834308  0.634759
+
+julia&gt; pop!(t)
+
+julia&gt; get_trace(t, :state)
+3×3×1 CircularArrayBuffer{Float64,3}:
+[:, :, 1] =
+ 0.699906  0.382396   0.927411
+ 0.269807  0.0581324  0.239609
+ 0.222304  0.514408   0.318905
+</code></pre></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.VectorialCompactSARTSATrajectory" href="#ReinforcementLearningCore.VectorialCompactSARTSATrajectory"><code>ReinforcementLearningCore.VectorialCompactSARTSATrajectory</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">VectorialCompactSARTSATrajectory(; state_type = Int, action_type = Int, reward_type = Float32, terminal_type = Bool)</code></pre><p>This function creates a <a href="#ReinforcementLearningCore.VectorialTrajectory"><code>VectorialTrajectory</code></a> of <a href="../rl_base/#ReinforcementLearningBase.RTSA"><code>RTSA</code></a> fields. Here the <strong>Compact</strong> in the function name means that, <code>state</code> and <code>next_state</code>, <code>action</code> and <code>next_action</code> reuse a same vector underlying.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; t = VectorialCompactSARTSATrajectory()
+0-element Trajectory{(:state, :action, :reward, :terminal, :next_state, :next_action),Tuple{Int64,Int64,Float32,Bool,Int64,Int64},NamedTuple{(:reward, :terminal, :state, :action),Tuple{Array{Float32,1},Array{Bool,1},Array{Int64,1},Array{Int64,1}}}}
+
+julia&gt; push!(t, state=0, action=0)
+
+julia&gt; push!(t, reward=0.f0, terminal=false, state=1, action=1)
+
+julia&gt; t
+1-element Trajectory{(:state, :action, :reward, :terminal, :next_state, :next_action),Tuple{Int64,Int64,Float32,Bool,Int64,Int64},NamedTuple{(:reward, :terminal, :state, :action),Tuple{Array{Float32,1},Array{Bool,1},Array{Int64,1},Array{Int64,1}}}}:
+ (state = 0, action = 0, reward = 0.0, terminal = 0, next_state = 1, next_action = 1)
+
+julia&gt; push!(t, reward=1.f0, terminal=true, state=2, action=2)
+
+julia&gt; t
+2-element Trajectory{(:state, :action, :reward, :terminal, :next_state, :next_action),Tuple{Int64,Int64,Float32,Bool,Int64,Int64},NamedTuple{(:reward, :terminal, :state, :action),Tuple{Array{Float32,1},Array{Bool,1},Array{Int64,1},Array{Int64,1}}}}:
+ (state = 0, action = 0, reward = 0.0, terminal = 0, next_state = 1, next_action = 1)
+ (state = 1, action = 1, reward = 1.0, terminal = 1, next_state = 2, next_action = 2)
+
+julia&gt; get_trace(t, :state, :action)
+(state = [0, 1], action = [0, 1])
+
+julia&gt; get_trace(t, :next_state, :next_action)
+(next_state = [1, 2], next_action = [1, 2])
+
+julia&gt; pop!(t)
+1-element Trajectory{(:state, :action, :reward, :terminal, :next_state, :next_action),Tuple{Int64,Int64,Float32,Bool,Int64,Int64},NamedTuple{(:reward, :terminal, :state, :action),Tuple{Array{Float32,1},Array{Bool,1},Array{Int64,1},Array{Int64,1}}}}:
+ (state = 0, action = 0, reward = 0.0, terminal = 0, next_state = 1, next_action = 1)</code></pre></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.EpisodicCompactSARTSATrajectory" href="#ReinforcementLearningCore.EpisodicCompactSARTSATrajectory"><code>ReinforcementLearningCore.EpisodicCompactSARTSATrajectory</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EpisodicCompactSARTSATrajectory(; state_type = Int, action_type = Int, reward_type = Float32, terminal_type = Bool)</code></pre><p>Exactly the same with <a href="#ReinforcementLearningCore.VectorialCompactSARTSATrajectory"><code>VectorialCompactSARTSATrajectory</code></a>. It only exists for multiple dispatch purpose.</p><div class="admonition is-warning"><header class="admonition-header">Warning</header><div class="admonition-body"><p>The <code>EpisodicCompactSARTSATrajectory</code> will not be automatically emptified when reaching the end of an episode.</p></div></div></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.CircularCompactSARTSATrajectory" href="#ReinforcementLearningCore.CircularCompactSARTSATrajectory"><code>ReinforcementLearningCore.CircularCompactSARTSATrajectory</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">CircularCompactSARTSATrajectory(;kwargs...)</code></pre><p>Similar to <a href="#ReinforcementLearningCore.VectorialCompactSARTSATrajectory"><code>VectorialCompactSARTSATrajectory</code></a>, instead of using <code>Vector</code>s as containers, <a href="#ReinforcementLearningCore.CircularArrayBuffer"><code>CircularArrayBuffer</code></a>s are used here.</p><p><strong>Key word arguments</strong></p><ul><li><code>capacity</code>::Int, the maximum length of each trace.</li><li><code>state_type</code> = Int</li><li><code>state_size</code> = ()</li><li><code>action_type</code> = Int</li><li><code>action_size</code> = ()</li><li><code>reward_type</code> = Float32</li><li><code>reward_size</code> = ()</li><li><code>terminal_type</code> = Bool</li><li><code>terminal_size</code> = ()</li></ul></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.CircularCompactPSARTSATrajectory" href="#ReinforcementLearningCore.CircularCompactPSARTSATrajectory"><code>ReinforcementLearningCore.CircularCompactPSARTSATrajectory</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">CircularCompactPSARTSATrajectory(;kwargs)</code></pre><p>Similar to <a href="#ReinforcementLearningCore.CircularCompactSARTSATrajectory"><code>CircularCompactSARTSATrajectory</code></a>, except that another trace named <code>priority</code> is added.</p><p><strong>Key word arguments</strong></p><ul><li><code>capacity</code>::Int, the maximum length of each trace.</li><li><code>state_type</code> = Int</li><li><code>state_size</code> = ()</li><li><code>action_type</code> = Int</li><li><code>action_size</code> = ()</li><li><code>reward_type</code> = Float32</li><li><code>reward_size</code> = ()</li><li><code>terminal_type</code> = Bool</li><li><code>terminal_size</code> = ()</li></ul></div></section></article><h2 id="Preprocessors-1"><a class="docs-heading-anchor" href="#Preprocessors-1">Preprocessors</a><a class="docs-heading-anchor-permalink" href="#Preprocessors-1" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.ComposedPreprocessor" href="#ReinforcementLearningCore.ComposedPreprocessor"><code>ReinforcementLearningCore.ComposedPreprocessor</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">ComposedPreprocessor(p::AbstractPreprocessor...)</code></pre><p>Compose multiple preprocessors.</p></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.CloneStatePreprocessor" href="#ReinforcementLearningCore.CloneStatePreprocessor"><code>ReinforcementLearningCore.CloneStatePreprocessor</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">CloneStatePreprocessor()</code></pre><p>Do <code>deepcopy</code> for the state in an observation.</p></div></section></article><h2 id="Learners-1"><a class="docs-heading-anchor" href="#Learners-1">Learners</a><a class="docs-heading-anchor-permalink" href="#Learners-1" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.DoubleLearner" href="#ReinforcementLearningCore.DoubleLearner"><code>ReinforcementLearningCore.DoubleLearner</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">DoubleLearner(;L1, L2, rng=MersenneTwister())</code></pre><p>This is a meta-learner, it will randomly select one learner and update another learner. The estimation of an observation is the sum of result from two learners.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/2d5741174ce3e6a394010d2e470e4269ca54607f/base/#L0-L5">source</a></section></article><h2 id="Approximators-1"><a class="docs-heading-anchor" href="#Approximators-1">Approximators</a><a class="docs-heading-anchor-permalink" href="#Approximators-1" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.TabularApproximator" href="#ReinforcementLearningCore.TabularApproximator"><code>ReinforcementLearningCore.TabularApproximator</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">TabularApproximator(table&lt;:AbstractArray)</code></pre><p>For <code>table</code> of 1-d, it will create a <a href="../rl_base/#ReinforcementLearningBase.V_APPROXIMATOR"><code>V_APPROXIMATOR</code></a>. For <code>table</code> of 2-d, it will create a [<code>QApproximator</code>].</p><div class="admonition is-warning"><header class="admonition-header">Warning</header><div class="admonition-body"><p>For <code>table</code> of 2-d, the first dimension is action and the second dimension is state.</p></div></div></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.NeuralNetworkApproximator" href="#ReinforcementLearningCore.NeuralNetworkApproximator"><code>ReinforcementLearningCore.NeuralNetworkApproximator</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">NeuralNetworkApproximator(;kwargs)</code></pre><p>Use a DNN model for value estimation.</p><p><strong>Keyword arguments</strong></p><ul><li><code>model</code>, a Flux based DNN model.</li><li><code>optimizer</code></li><li><code>parameters=params(model)</code></li><li><code>kind=Q_APPROXIMATOR</code>, specify the type of model.</li></ul></div></section></article><h2 id="Explorers-1"><a class="docs-heading-anchor" href="#Explorers-1">Explorers</a><a class="docs-heading-anchor-permalink" href="#Explorers-1" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.EpsilonGreedyExplorer" href="#ReinforcementLearningCore.EpsilonGreedyExplorer"><code>ReinforcementLearningCore.EpsilonGreedyExplorer</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EpsilonGreedyExplorer{T}(;kwargs...)
+EpsilonGreedyExplorer(ϵ) -&gt; EpsilonGreedyExplorer{:linear}(; ϵ_stable = ϵ)</code></pre><blockquote><p>Epsilon-greedy strategy: The best lever is selected for a proportion <code>1 - epsilon</code> of the trials, and a lever is selected at random (with uniform probability) for a proportion epsilon . <a href="https://en.wikipedia.org/wiki/Multi-armed_bandit">Multi-armed_bandit</a></p></blockquote><p>Two kinds of epsilon-decreasing strategy are implmented here (<code>linear</code> and <code>exp</code>).</p><blockquote><p>Epsilon-decreasing strategy: Similar to the epsilon-greedy strategy, except that the value of epsilon decreases as the experiment progresses, resulting in highly explorative behaviour at the start and highly exploitative behaviour at the finish.  - <a href="https://en.wikipedia.org/wiki/Multi-armed_bandit">Multi-armed_bandit</a></p></blockquote><p><strong>Keywords</strong></p><ul><li><code>T::Symbol</code>: defines how to calculate the epsilon in the warmup steps. Supported values are <code>linear</code> and <code>exp</code>.</li><li><code>step::Int = 1</code>: record the current step.</li><li><code>ϵ_init::Float64 = 1.0</code>: initial epsilon.</li><li><code>warmup_steps::Int=0</code>: the number of steps to use <code>ϵ_init</code>.</li><li><code>decay_steps::Int=0</code>: the number of steps for epsilon to decay from <code>ϵ_init</code> to <code>ϵ_stable</code>.</li><li><code>ϵ_stable::Float64</code>: the epsilon after <code>warmup_steps + decay_steps</code>.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia">s = EpsilonGreedyExplorer{:linear}(ϵ_init=0.9, ϵ_stable=0.1, warmup_steps=100, decay_steps=100)
+plot([RL.get_ϵ(s, i) for i in 1:500], label=&quot;linear epsilon&quot;)</code></pre><p><img src="/assets/img/linear_epsilon_greedy_selector.png" alt/></p><pre><code class="language-julia">s = EpsilonGreedyExplorer{:exp}(ϵ_init=0.9, ϵ_stable=0.1, warmup_steps=100, decay_steps=100)
+plot([RL.get_ϵ(s, i) for i in 1:500], label=&quot;exp epsilon&quot;)</code></pre><p><img src="/assets/img/exp_epsilon_greedy_selector.png" alt/></p></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.UCBExplorer" href="#ReinforcementLearningCore.UCBExplorer"><code>ReinforcementLearningCore.UCBExplorer</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">UCBExplorer(na; c=2.0, ϵ=1e-10)</code></pre><p><strong>Arguments</strong></p><ul><li><code>na</code> is the number of actions used to create a internal counter.</li><li><code>t</code> is used to store current time step.</li><li><code>c</code> is used to control the degree of exploration.</li></ul></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.WeightedExplorer" href="#ReinforcementLearningCore.WeightedExplorer"><code>ReinforcementLearningCore.WeightedExplorer</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">WeightedExplorer(;is_normalized::Bool)</code></pre><p><code>is_normalized</code> is used to indicate if the feeded action values are alrady normalized to have a sum of <code>1.0</code>.</p></div></section></article><h2 id="Utils-1"><a class="docs-heading-anchor" href="#Utils-1">Utils</a><a class="docs-heading-anchor-permalink" href="#Utils-1" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.huber_loss" href="#ReinforcementLearningCore.huber_loss"><code>ReinforcementLearningCore.huber_loss</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">huber_loss(labels, predictions; δ = 1.0f0)</code></pre><p>See <a href="https://en.wikipedia.org/wiki/Huber_loss">Huber loss</a></p></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.huber_loss_unreduced" href="#ReinforcementLearningCore.huber_loss_unreduced"><code>ReinforcementLearningCore.huber_loss_unreduced</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">huber_loss_unreduced(labels, predictions; δ = 1.0f0)</code></pre><p>Similar to <a href="#ReinforcementLearningCore.huber_loss"><code>huber_loss</code></a>, but it doesn&#39;t do the <code>mean</code> operation in the last step.</p></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.CircularArrayBuffer" href="#ReinforcementLearningCore.CircularArrayBuffer"><code>ReinforcementLearningCore.CircularArrayBuffer</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">CircularArrayBuffer{T}(d::Integer...) -&gt; CircularArrayBuffer{T, N}</code></pre><p><code>CircularArrayBuffer</code> uses a <code>N</code>-dimention <code>Array</code> of size <code>d</code> to serve as a buffer for <code>N-1</code>-dimention <code>Array</code>s with the same size.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; b = CircularArrayBuffer{Float64}(2, 2, 3)
+2×2×0 CircularArrayBuffer{Float64,3}
+
+julia&gt; capacity(b)
+3
+
+julia&gt; length(b)
+0
+
+julia&gt; push!(b, [1. 1.; 2. 2.])
+2×2×1 CircularArrayBuffer{Float64,3}:
+[:, :, 1] =
+ 1.0  1.0
+ 2.0  2.0
+
+julia&gt; b
+2×2×1 CircularArrayBuffer{Float64,3}:
+[:, :, 1] =
+ 1.0  1.0
+ 2.0  2.0
+
+julia&gt; length(b)
+4
+
+julia&gt; nframes(cb::CircularArrayBuffer) = cb.length
+nframes (generic function with 1 method)
+
+julia&gt; nframes(b)
+1
+
+julia&gt; ones(2,2)
+2×2 Array{Float64,2}:
+ 1.0  1.0
+ 1.0  1.0
+
+julia&gt; 3 .* ones(2,2)
+2×2 Array{Float64,2}:
+ 3.0  3.0
+ 3.0  3.0
+
+julia&gt; 3 * ones(2,2)
+2×2 Array{Float64,2}:
+ 3.0  3.0
+ 3.0  3.0
+
+julia&gt; b = CircularArrayBuffer{Float64}(2, 2, 3)
+2×2×0 CircularArrayBuffer{Float64,3}
+
+julia&gt; capacity(b)
+3
+
+julia&gt; nframes(b)
+0
+
+julia&gt; push!(b, 1 .* ones(2,2))
+2×2×1 CircularArrayBuffer{Float64,3}:
+[:, :, 1] =
+ 1.0  1.0
+ 1.0  1.0
+
+julia&gt; b
+2×2×1 CircularArrayBuffer{Float64,3}:
+[:, :, 1] =
+ 1.0  1.0
+ 1.0  1.0
+
+julia&gt; nframes(b)
+1
+
+julia&gt; for i in 2:4
+           push!(b, i .* ones(2,2))
+       end
+
+julia&gt; b
+2×2×3 CircularArrayBuffer{Float64,3}:
+[:, :, 1] =
+ 2.0  2.0
+ 2.0  2.0
+
+[:, :, 2] =
+ 3.0  3.0
+ 3.0  3.0
+
+[:, :, 3] =
+ 4.0  4.0
+ 4.0  4.0
+
+julia&gt; isfull(b)
+true
+
+julia&gt; nframes(b)
+3
+
+julia&gt; size(b)
+(2, 2, 3)</code></pre></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.device" href="#ReinforcementLearningCore.device"><code>ReinforcementLearningCore.device</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">device(model)</code></pre><p>Detect the suitable running device for the <code>model</code>. Return <code>Val(:cpu)</code> by default.</p></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.SumTree" href="#ReinforcementLearningCore.SumTree"><code>ReinforcementLearningCore.SumTree</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">SumTree(capacity::Int)</code></pre><p>Efficiently sample and update weights. For more detals, see the post at <a href="https://jaromiru.com/2016/11/07/lets-make-a-dqn-double-learning-and-prioritized-experience-replay/">here</a>. Here we use a vector to represent the binary tree. Suppose we will have <code>capacity</code> leaves at most. Every time we <code>push!</code> new node into the tree, only the recent <code>capacity</code> node and their sum will be updated! [––––––Parent nodes––––––][––––leaves––––] [size: 2^ceil(Int, log2(capacity))-1 ][     size: capacity   ]</p><p><strong>Example</strong></p><pre><code class="language-julia">julia&gt; t = SumTree(8)
+0-element SumTree
+julia&gt; for i in 1:16
+       push!(t, i)
+       end
+julia&gt; t
+8-element SumTree:
+  9.0
+ 10.0
+ 11.0
+ 12.0
+ 13.0
+ 14.0
+ 15.0
+ 16.0
+julia&gt; sample(t)
+(2, 10.0)
+julia&gt; sample(t)
+(1, 9.0)
+julia&gt; inds, ps = sample(t,100000)
+([8, 4, 8, 1, 5, 2, 2, 7, 6, 6  …  1, 1, 7, 1, 6, 1, 5, 7, 2, 7], [16.0, 12.0, 16.0, 9.0, 13.0, 10.0, 10.0, 15.0, 14.0, 14.0  …  9.0, 9.0, 15.0, 9.0, 14.0, 9.0, 13.0, 15.0, 10.0, 15.0])
+julia&gt; countmap(inds)
+Dict{Int64,Int64} with 8 entries:
+  7 =&gt; 14991
+  4 =&gt; 12019
+  2 =&gt; 10003
+  3 =&gt; 11027
+  5 =&gt; 12971
+  8 =&gt; 16052
+  6 =&gt; 13952
+  1 =&gt; 8985
+julia&gt; countmap(ps)
+Dict{Float64,Int64} with 8 entries:
+  9.0  =&gt; 8985
+  13.0 =&gt; 12971
+  10.0 =&gt; 10003
+  14.0 =&gt; 13952
+  16.0 =&gt; 16052
+  11.0 =&gt; 11027
+  15.0 =&gt; 14991
+  12.0 =&gt; 12019</code></pre></div></section></article><article class="docstring"><header><a class="docstring-binding" id="ReinforcementLearningCore.find_all_max" href="#ReinforcementLearningCore.find_all_max"><code>ReinforcementLearningCore.find_all_max</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">find_all_max(A::AbstractArray)</code></pre><p>Like <code>find_max</code>, but all the indices of the maximum value are returned.</p><div class="admonition is-warning"><header class="admonition-header">Warning</header><div class="admonition-body"><p>All elements of value <code>NaN</code> in <code>A</code> will be ignored, unless all elements are <code>NaN</code>. In that case, the returned maximum value will be <code>NaN</code> and the returned indices will be <code>collect(1:length(A))</code></p></div></div><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; find_all_max([-Inf, -Inf, -Inf])
+(-Inf, [1, 2, 3])
+julia&gt; find_all_max([Inf, Inf, Inf])
+(Inf, [1, 2, 3])
+julia&gt; find_all_max([Inf, 0, Inf])
+(Inf, [1, 3])
+julia&gt; find_all_max([0,1,2,1,2,1,0])
+(2, [3, 5])</code></pre></div></section><section><div><pre><code class="language-none">find_all_max(A, mask)</code></pre><p>Similar to <code>find_all_max(A)</code>, but only the masked elements in <code>A</code> will be considered.</p></div></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../rl_base/">« RLBase</a><a class="docs-footer-nextpage" href="../rl_envs/">RLEnvs »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Saturday 29 February 2020 06:47">Saturday 29 February 2020</span>. Using Julia version 1.3.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
