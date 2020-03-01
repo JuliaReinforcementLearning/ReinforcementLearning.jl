@@ -53,4 +53,5 @@ Struct Actor
                 target_weights = tau.*main_weight .+ (1 - tau).*target_weight
                 target_model_weight = target_weights
              end
+         end
     end
