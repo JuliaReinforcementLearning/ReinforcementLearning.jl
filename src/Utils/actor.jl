@@ -3,7 +3,7 @@ using Flux
 
 
 
-Struct Actor
+struct Actor
    state_size::Int8
    action_size::Int8
    layer_size = Int8[5,6,4]
