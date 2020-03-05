@@ -229,8 +229,13 @@ function RLBase.extract_experience(t::AbstractTrajectory, learner::RainbowLearne
             consecutive_view(get_trace(t, :terminal), inds; n_horizon = h)
         rewards, terminals = zeros(Float32, n), fill(false, n)
 
-        rewards = discount_rewards_reduced(consecutive_rewards, γ; terminal=consecutive_terminals, dims=1)
-        terminals = mapslices(any, consecutive_terminals;dims=1) |> vec
+        rewards = discount_rewards_reduced(
+            consecutive_rewards,
+            γ;
+            terminal = consecutive_terminals,
+            dims = 1,
+        )
+        terminals = mapslices(any, consecutive_terminals; dims = 1) |> vec
 
         inds,
         (
