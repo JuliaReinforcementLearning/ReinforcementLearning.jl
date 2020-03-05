@@ -18,15 +18,14 @@ send_to_device(::Val{:gpu}, x::SubArray{T,N,<:CircularArrayBuffer}) where {T,N} 
 Detect the suitable running device for the `model`.
 Return `Val(:cpu)` by default.
 """
-device(x) = Val(:cpu)
+device(x) = device(Flux.trainable(x))
 device(x::Function) = nothing
 device(::CuArray) = Val(:gpu)
-device(x::Dense) = device(x.W)
-device(x::Chain) = device(x.layers)
-device(x::Conv) = device(x.weight)
+device(::Array) = Val(:cpu)
 device(x::Tuple{}) = nothing
+device(x::NamedTuple{(),Tuple{}}) = nothing
 
-function device(x::Tuple)
+function device(x::Union{Tuple, NamedTuple})
     d1 = device(x[1])
     if isnothing(d1)
         device(Base.tail(x))

@@ -46,6 +46,33 @@ end
 
 function run(
     ::Sequential,
+    agent::AbstractAgent,
+    env::MultiThreadEnv,
+    stop_condition,
+    hook::AbstractHook = EmptyHook(),
+)
+
+    while true
+        reset!(env)
+        obs = observe(env)
+        action = agent(PRE_ACT_STAGE, obs)
+        hook(PRE_ACT_STAGE, agent, env, obs, action)
+
+        env(action)
+        obs = observe(env)
+        agent(POST_ACT_STAGE, obs)
+        hook(POST_ACT_STAGE, agent, env, obs)
+
+        if stop_condition(agent, env, obs)
+            agent(PRE_ACT_STAGE, obs)  # let the agent see the last observation
+            break
+        end
+    end
+    hook
+end
+
+function run(
+    ::Sequential,
     agents::Tuple{Vararg{<:AbstractAgent}},
     env::AbstractEnv,
     stop_condition,

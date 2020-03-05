@@ -51,3 +51,7 @@ function CircularCompactSARTSATrajectory(;
         action = CircularArrayBuffer{action_type}(action_size..., capacity + 1),
     ))
 end
+
+isfull(t::CircularCompactSARTSATrajectory) = isfull(t[:action])
+
+Base.length(t::CircularCompactSARTSATrajectory) = nframes(t[:terminal])

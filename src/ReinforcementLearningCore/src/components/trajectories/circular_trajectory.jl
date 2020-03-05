@@ -63,3 +63,5 @@ function CircularTrajectory(; capacity, kwargs...)
     )
     CircularTrajectory{names,Tuple{types...},typeof(values(trajectories))}(trajectories)
 end
+
+Base.length(t::CircularTrajectory) = maximum(nframes(x) for x in get_trace(t))

@@ -50,18 +50,13 @@ function StopAfterStep(step; cur = 1, is_show_progress = true, tag = "TRAINING")
     StopAfterStep(step, cur, progress, tag)
 end
 
-function (s::StopAfterStep{Nothing})(args...)
-    @debug s.tag STEP = s.cur
+function (s::StopAfterStep)(args...)
+    if !isnothing(s.progress)
+        # https://github.com/timholy/ProgressMeter.jl/pull/131
+        # next!(s.progress; showvalues = [(Symbol(s.tag, "/", :STEP), s.cur)])
+        next!(s.progress)
+    end
 
-    res = s.cur >= s.step
-    s.cur += 1
-    res
-end
-
-function (s::StopAfterStep{Progress})(args...)
-    # https://github.com/timholy/ProgressMeter.jl/pull/131
-    # next!(s.progress; showvalues = [(Symbol(s.tag, "/", :STEP), s.cur)])
-    next!(s.progress)
     @debug s.tag STEP = s.cur
 
     res = s.cur >= s.step
@@ -95,27 +90,24 @@ function StopAfterEpisode(episode; cur = 0, is_show_progress = true, tag = "TRAI
     StopAfterEpisode(episode, cur, progress, tag)
 end
 
-function (s::StopAfterEpisode{Nothing})(agent, env, obs)
-    @debug s.tag EPISODE = s.cur
-
-    get_terminal(obs) && (s.cur += 1)
-    s.cur >= s.episode
-end
-
-function (s::StopAfterEpisode{Progress})(agent, env, obs)
-    # https://github.com/timholy/ProgressMeter.jl/pull/131
-    # next!(s.progress; showvalues = [(Symbol(s.tag, "/", :EPISODE), s.cur)])
-    next!(s.progress;)
+function (s::StopAfterEpisode)(agent, env, obs)
     @debug s.tag EPISODE = s.cur
 
     is_terminal = get_num_players(env) == 1 ? get_terminal(obs) : get_terminal(obs[1])
 
     if is_terminal
         s.cur += 1
+        if !isnothing(s.progress)
+            # https://github.com/timholy/ProgressMeter.jl/pull/131
+            # next!(s.progress; showvalues = [(Symbol(s.tag, "/", :EPISODE), s.cur)])
+            next!(s.progress;)
+        end
     end
 
     s.cur >= s.episode
 end
+
+(s::StopAfterEpisode)(agent, env::MultiThreadEnv, obs::BatchObs) = @error "MultiThreadEnv is not supported!"
 
 #####
 # StopWhenDone

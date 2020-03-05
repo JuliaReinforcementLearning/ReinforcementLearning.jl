@@ -1,3 +1,4 @@
+include("batch_exploer.jl")
 include("epsilon_greedy_explorer.jl")
 include("UCB_explorer.jl")
 include("weighted_explorer.jl")
