@@ -156,17 +156,9 @@ function RLBase.extract_experience(t::AbstractTrajectory, learner::PrioritizedDQ
             consecutive_view(get_trace(t, :terminal), inds; n_horizon = h)
         rewards, terminals = zeros(Float32, n), fill(false, n)
 
-        # 3. make sure that we only consider experiences in current episode for rewards and terminals
-        for i in 1:n
-            m = findfirst(view(consecutive_terminals, :, i))
-            if isnothing(m)
-                terminals[i] = false
-                rewards[i] = discount_rewards_reduced(view(consecutive_rewards, :, i), γ)
-            else
-                terminals[i] = true
-                rewards[i] = discount_rewards_reduced(view(consecutive_rewards, 1:m, i), γ)
-            end
-        end
+        rewards = discount_rewards_reduced(consecutive_rewards, γ; terminal=consecutive_terminals, dims=1)
+        terminals = mapslices(any, consecutive_terminals;dims=1) |> vec
+
         inds,
         (
             states = states,
