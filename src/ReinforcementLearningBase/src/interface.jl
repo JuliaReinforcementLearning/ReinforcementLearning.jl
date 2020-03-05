@@ -154,7 +154,9 @@ For `Q_APPROXIMATOR`, we assume that the following methods are implemented:
 
 """
 For `HYBRID_APPROXIMATOR`, the following methods are assumed to be implemented:
-- `(Q::AbstractApproximator)(s)`, estimate the state value and state action values.
+- `(app::AbstractApproximator)(s, ::Val{:Q})`, estimate the action values of state `s`.
+- `(app::AbstractApproximator)(s, ::Val{:V})`, estimate the state values.
+- `(app::AbstractApproximator)(s, a)`, estimate state-action values.
 """
 @interface const HYBRID_APPROXIMATOR = HybridApproximator()
 
