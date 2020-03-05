@@ -128,7 +128,7 @@ end
 height(xs) = sin(3 * xs) * 0.45 + 0.55
 rotate(xs, ys, θ) = xs * cos(θ) - ys * sin(θ), ys * cos(θ) + xs * sin(θ)
 translate(xs, ys, t) = xs .+ t[1], ys .+ t[2]
-function render(env::MountainCarEnv)
+function RLBase.render(env::MountainCarEnv)
     s = env.state
     d = env.done
     clearws()
