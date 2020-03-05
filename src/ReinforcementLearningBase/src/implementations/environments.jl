@@ -42,15 +42,12 @@ observe(env::WrappedEnv) = env.preprocessor(observe(env.env))
 Wrap multiple environments in one environment.
 Each environment will run in parallel by leveraging `Threads.@spawn`.
 """
-struct MultiThreadEnv{O, E} <: AbstractEnv
+struct MultiThreadEnv{O,E} <: AbstractEnv
     obs::BatchObs{O}
     envs::Vector{E}
 end
 
-MultiThreadEnv(envs) = MultiThreadEnv(
-    BatchObs([observe(env) for env in envs]),
-    envs
-)
+MultiThreadEnv(envs) = MultiThreadEnv(BatchObs([observe(env) for env in envs]), envs)
 
 @forward MultiThreadEnv.envs Base.getindex, Base.length, Base.setindex!
 
@@ -68,7 +65,7 @@ end
 
 RLBase.observe(env::MultiThreadEnv) = env.obs
 
-function RLBase.reset!(env::MultiThreadEnv;is_force=false)
+function RLBase.reset!(env::MultiThreadEnv; is_force = false)
     if is_force
         for i in 1:length(env)
             reset!(env.envs[i])
