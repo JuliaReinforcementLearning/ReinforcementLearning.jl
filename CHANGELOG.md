@@ -8,6 +8,10 @@
 
 - StopAfterEpisode with progress meter [\#51](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/51)
 
+**Closed issues:**
+
+- Improve code coverage [\#40](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/40)
+
 **Merged pull requests:**
 
 - Add doc in travis [\#58](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/58) ([findmyway](https://github.com/findmyway))
