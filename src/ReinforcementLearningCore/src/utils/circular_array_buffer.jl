@@ -168,7 +168,7 @@ function RLBase.update!(cb::CircularArrayBuffer{T,N}, data::AbstractArray{T}) wh
     cb
 end
 
-function RLBase.update!(cb::CircularArrayBuffer{T,1}, data::Number) where {T}
+function RLBase.update!(cb::CircularArrayBuffer{T,1}, data) where {T}
     cb.buffer[_buffer_frame(cb, cb.length)] = data
     cb
 end
