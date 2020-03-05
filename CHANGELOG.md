@@ -72,6 +72,7 @@
 - fix examples [\#18](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/18) ([jbrea](https://github.com/jbrea))
 - Add ReinforcementLearningBase as dependent [\#16](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/16) ([jbrea](https://github.com/jbrea))
 - refactor policies [\#15](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/15) ([jbrea](https://github.com/jbrea))
+- implement epsilon-greedy policy with parametric type [\#12](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/12) ([jbrea](https://github.com/jbrea))
 
 ## [v0.2.1](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/v0.2.1) (2018-08-27)
 
@@ -80,7 +81,6 @@
 **Merged pull requests:**
 
 - improve docs [\#13](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/13) ([jbrea](https://github.com/jbrea))
-- implement epsilon-greedy policy with parametric type [\#12](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/12) ([jbrea](https://github.com/jbrea))
 
 ## [v0.2.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/v0.2.0) (2018-08-24)
 
