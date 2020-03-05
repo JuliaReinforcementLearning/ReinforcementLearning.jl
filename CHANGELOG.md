@@ -4,6 +4,10 @@
 
 [Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/compare/v0.4.0-beta...HEAD)
 
+**Implemented enhancements:**
+
+- A2C [\#32](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/32)
+
 **Fixed bugs:**
 
 - StopAfterEpisode with progress meter [\#51](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/51)
