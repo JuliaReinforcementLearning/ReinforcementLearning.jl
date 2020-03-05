@@ -31,9 +31,3 @@ function Random.rand(rng::AbstractRNG, s::MultiContinuousSpace)
     (s.high .- s.low) .* rand(rng, size(s.low)...) .+ s.low
 end
 
-
-using CUDAapi
-if has_cuda()
-    using CuArrays
-    Random.rand(s::MultiContinuousSpace{<:CuArray}) = rand(CuArrays.CURAND.generator(), s)
-end

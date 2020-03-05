@@ -19,7 +19,6 @@ Julia. From the concept level, they can be organized in the following parts:
 """ RLBase
 
 using Random
-using Distributions: pdf
 
 #####
 # general
@@ -289,13 +288,10 @@ Get the probability distribution of actions from the policy `p` given an observa
 
 """
     get_prob(p::AbstractPolicy, obs, a) = get_prob(p, obs, ActionStyle(obs), a)
-    get_prob(p::AbstractPolicy, obs, ::AbstractActionStyle, a) = pdf(get_prob(p, obs), a)
 
 Get the probability of to take action `a` from the policy `p` given an observation `obs`
 """
 @interface get_prob(p::AbstractPolicy, obs, a) = get_prob(p, obs, ActionStyle(obs), a)
-@interface get_prob(p::AbstractPolicy, obs, ::AbstractActionStyle, a) =
-    pdf(get_prob(p, obs), a)
 
 """
     get_priority(p::AbstractPolicy, experience)

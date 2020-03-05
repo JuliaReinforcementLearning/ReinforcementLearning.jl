@@ -98,17 +98,4 @@
         test_samples(s)
     end
 
-    # https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl/pull/28
-    if has_cuda()
-        using CuArrays
-        @testset "MultiContinuousSpace with CuArrays" begin
-            low = cu([1.0 2.0; 3.0 4.0])
-            high = cu([2.0 3.0; 4.0 5.0])
-            s = MultiContinuousSpace(low, high)
-
-            @test low ∈ s
-            test_samples(s)
-            @test high ∈ s
-        end
-    end
 end
