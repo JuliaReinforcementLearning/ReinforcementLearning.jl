@@ -157,12 +157,8 @@ end
 
 Similar to [`TotalRewardPerEpisode`](@ref), but will record total rewards per episode in [`BatchObs`](@ref).
 """
-function TotalBatchRewardPerEpisode(batch_size::Int;tag="TRAINING")
-    TotalBatchRewardPerEpisode(
-        [Float64[] for _ in 1:batch_size],
-        zeros(batch_size),
-        tag
-    )
+function TotalBatchRewardPerEpisode(batch_size::Int; tag = "TRAINING")
+    TotalBatchRewardPerEpisode([Float64[] for _ in 1:batch_size], zeros(batch_size), tag)
 end
 
 function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env, obs::BatchObs)
@@ -170,7 +166,7 @@ function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env, obs::Bat
         hook.reward[i] += get_reward(obs[i])
         if get_terminal(obs[i])
             push!(hook.rewards[i], hook.reward[i])
-            hook.reward[i] = 0.
+            hook.reward[i] = 0.0
         end
     end
 end

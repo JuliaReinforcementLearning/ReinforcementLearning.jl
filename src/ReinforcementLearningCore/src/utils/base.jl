@@ -47,9 +47,11 @@ julia> flatten_batch(x)
  2  4  6  8  10  12
 ```
 """
-flatten_batch(x::AbstractArray) = reshape(x,  (size(x) |> reverse |> Base.tail |> Base.tail |> reverse)..., :)  # much faster than  `reshape(x, size(x)[1:end-2]..., :)`
+flatten_batch(x::AbstractArray) =
+    reshape(x, (size(x) |> reverse |> Base.tail |> Base.tail |> reverse)..., :)  # much faster than  `reshape(x, size(x)[1:end-2]..., :)`
 
-unflatten_batch(x::AbstractArray, i::Int...) = reshape(x, (size(x) |> reverse |> Base.tail |> reverse)..., i...)
+unflatten_batch(x::AbstractArray, i::Int...) =
+    reshape(x, (size(x) |> reverse |> Base.tail |> reverse)..., i...)
 
 consecutive_view(
     cb::AbstractArray,
@@ -187,7 +189,7 @@ See [Huber loss](https://en.wikipedia.org/wiki/Huber_loss)
 huber_loss(labels, predictions; δ = 1.0f0) =
     huber_loss_unreduced(labels, predictions; δ = δ) |> mean
 
-const VectorOrMatrix = Union{AbstractMatrix, AbstractVector}
+const VectorOrMatrix = Union{AbstractMatrix,AbstractVector}
 
 """
     discount_rewards(rewards::VectorOrMatrix, γ::Number;kwargs...)
@@ -203,64 +205,92 @@ Calculate the gain started from the current step with discount rate of `γ`.
 
 # Example
 """
-function discount_rewards(rewards::VectorOrMatrix, γ::T;kwargs...) where {T<:Number}
+function discount_rewards(rewards::VectorOrMatrix, γ::T; kwargs...) where {T<:Number}
     res = similar(rewards, promote_type(eltype(rewards), T))
     discount_rewards!(res, rewards, γ; kwargs...)
     res
 end
 
-discount_rewards!(new_rewards, rewards, γ;terminal=nothing, init=nothing, dims=:) = _discount_rewards!(new_rewards, rewards, γ, terminal, init, dims)
+discount_rewards!(new_rewards, rewards, γ; terminal = nothing, init = nothing, dims = :) =
+    _discount_rewards!(new_rewards, rewards, γ, terminal, init, dims)
 
-function _discount_rewards!(new_rewards::AbstractMatrix, rewards::AbstractMatrix, γ, terminal::Nothing, init::Nothing, dims::Int)
+function _discount_rewards!(
+    new_rewards::AbstractMatrix,
+    rewards::AbstractMatrix,
+    γ,
+    terminal::Nothing,
+    init::Nothing,
+    dims::Int,
+)
     dims = ndims(rewards) - dims + 1
-    for (r′, r) in zip(
-        eachslice(new_rewards, dims=dims),
-        eachslice(rewards, dims=dims),
-        )
+    for (r′, r) in zip(eachslice(new_rewards, dims = dims), eachslice(rewards, dims = dims))
         _discount_rewards!(r′, r, γ, nothing, nothing)
     end
 end
 
-function _discount_rewards!(new_rewards::AbstractMatrix, rewards::AbstractMatrix, γ, terminal::Nothing, init, dims::Int)
+function _discount_rewards!(
+    new_rewards::AbstractMatrix,
+    rewards::AbstractMatrix,
+    γ,
+    terminal::Nothing,
+    init,
+    dims::Int,
+)
     dims = ndims(rewards) - dims + 1
-    for (i, (r′, r)) in enumerate(
-        zip(
-            eachslice(new_rewards, dims=dims),
-            eachslice(rewards, dims=dims),
-            )
-        )
+    for (i, (r′, r)) in
+        enumerate(zip(eachslice(new_rewards, dims = dims), eachslice(rewards, dims = dims)))
         _discount_rewards!(r′, r, γ, nothing, init[i])
     end
 end
 
-function _discount_rewards!(new_rewards::AbstractMatrix, rewards::AbstractMatrix, γ, terminal, init::Nothing, dims::Int)
+function _discount_rewards!(
+    new_rewards::AbstractMatrix,
+    rewards::AbstractMatrix,
+    γ,
+    terminal,
+    init::Nothing,
+    dims::Int,
+)
     dims = ndims(rewards) - dims + 1
     for (r′, r, t) in zip(
-        eachslice(new_rewards, dims=dims),
-        eachslice(rewards, dims=dims),
-        eachslice(terminal, dims=dims)
-        )
+        eachslice(new_rewards, dims = dims),
+        eachslice(rewards, dims = dims),
+        eachslice(terminal, dims = dims),
+    )
         _discount_rewards!(r′, r, γ, t, nothing)
     end
 end
 
-function _discount_rewards!(new_rewards::AbstractMatrix, rewards::AbstractMatrix, γ, terminal, init, dims::Int)
+function _discount_rewards!(
+    new_rewards::AbstractMatrix,
+    rewards::AbstractMatrix,
+    γ,
+    terminal,
+    init,
+    dims::Int,
+)
     dims = ndims(rewards) - dims + 1
-    for (i, (r′, r, t)) in enumerate(
-        zip(
-            eachslice(new_rewards, dims=dims),
-            eachslice(rewards, dims=dims),
-            eachslice(terminal, dims=dims)
-            )
-        )
+    for (i, (r′, r, t)) in enumerate(zip(
+        eachslice(new_rewards, dims = dims),
+        eachslice(rewards, dims = dims),
+        eachslice(terminal, dims = dims),
+    ))
         _discount_rewards!(r′, r, γ, t, init[i])
     end
 end
 
-_discount_rewards!(new_rewards::AbstractVector, rewards::AbstractVector, γ, terminal, init, dims::Colon) = _discount_rewards!(new_rewards, rewards, γ, terminal, init)
+_discount_rewards!(
+    new_rewards::AbstractVector,
+    rewards::AbstractVector,
+    γ,
+    terminal,
+    init,
+    dims::Colon,
+) = _discount_rewards!(new_rewards, rewards, γ, terminal, init)
 
 "assuming rewards and new_rewards are Vector"
-_discount_rewards!(new_rewards, rewards, γ, terminal, init::Nothing) = _discount_rewards!(new_rewards, rewards, γ, terminal, zero(eltype(new_rewards)))
+_discount_rewards!(new_rewards, rewards, γ, terminal, init::Nothing) =
+    _discount_rewards!(new_rewards, rewards, γ, terminal, zero(eltype(new_rewards)))
 
 function _discount_rewards!(new_rewards, rewards, γ, terminal, init)
     gain = init
@@ -272,16 +302,24 @@ function _discount_rewards!(new_rewards, rewards, γ, terminal, init)
     new_rewards
 end
 
-discount_rewards_reduced(rewards::AbstractVector, γ;terminal=nothing, init=nothing) = _discount_rewards_reduced(rewards, γ, terminal, init)
+discount_rewards_reduced(rewards::AbstractVector, γ; terminal = nothing, init = nothing) =
+    _discount_rewards_reduced(rewards, γ, terminal, init)
 
-function discount_rewards_reduced(rewards::AbstractMatrix, γ::T;terminal=nothing, init=nothing, dims) where {T<:Number}
+function discount_rewards_reduced(
+    rewards::AbstractMatrix,
+    γ::T;
+    terminal = nothing,
+    init = nothing,
+    dims,
+) where {T<:Number}
     dims = ndims(rewards) - dims + 1
     res = Array{promote_type(eltype(rewards), T)}(undef, size(rewards, dims))
     _discount_rewards_reduced!(res, rewards, γ, terminal, init, dims)
     res
 end
 
-_discount_rewards_reduced(rewards, γ, terminal, init::Nothing) = _discount_rewards_reduced(rewards, γ, terminal, zero(eltype(rewards)))
+_discount_rewards_reduced(rewards, γ, terminal, init::Nothing) =
+    _discount_rewards_reduced(rewards, γ, terminal, zero(eltype(rewards)))
 
 function _discount_rewards_reduced(rewards, γ, terminal, init)
     gain = init
@@ -292,38 +330,58 @@ function _discount_rewards_reduced(rewards, γ, terminal, init)
     gain
 end
 
-discount_rewards_reduced!(reduced_rewards::AbstractVector, rewards::AbstractMatrix, γ;terminal=nothing, init=nothing, dims) = _discount_rewards_reduced!(reduced_rewards, rewards, γ, terminal, init, dims)
+discount_rewards_reduced!(
+    reduced_rewards::AbstractVector,
+    rewards::AbstractMatrix,
+    γ;
+    terminal = nothing,
+    init = nothing,
+    dims,
+) = _discount_rewards_reduced!(reduced_rewards, rewards, γ, terminal, init, dims)
 
-function _discount_rewards_reduced!(reduced_rewards, rewards, γ, terminal::Nothing, init::Nothing, dims::Int)
-    for (i, r) in enumerate(eachslice(rewards, dims=dims))
+function _discount_rewards_reduced!(
+    reduced_rewards,
+    rewards,
+    γ,
+    terminal::Nothing,
+    init::Nothing,
+    dims::Int,
+)
+    for (i, r) in enumerate(eachslice(rewards, dims = dims))
         reduced_rewards[i] = _discount_rewards_reduced(r, γ, nothing, nothing)
     end
 end
 
-function _discount_rewards_reduced!(reduced_rewards, rewards, γ, terminal::Nothing, init, dims::Int)
-    for (i, r) in enumerate(eachslice(rewards, dims=dims))
+function _discount_rewards_reduced!(
+    reduced_rewards,
+    rewards,
+    γ,
+    terminal::Nothing,
+    init,
+    dims::Int,
+)
+    for (i, r) in enumerate(eachslice(rewards, dims = dims))
         reduced_rewards[i] = _discount_rewards_reduced(r, γ, nothing, init[i])
     end
 end
 
-function _discount_rewards_reduced!(reduced_rewards, rewards, γ, terminal, init::Nothing, dims::Int)
-    for (i, (r, t)) in enumerate(
-        zip(
-            eachslice(rewards, dims=dims),
-            eachslice(terminal, dims=dims),
-            )
-        )
+function _discount_rewards_reduced!(
+    reduced_rewards,
+    rewards,
+    γ,
+    terminal,
+    init::Nothing,
+    dims::Int,
+)
+    for (i, (r, t)) in
+        enumerate(zip(eachslice(rewards, dims = dims), eachslice(terminal, dims = dims)))
         reduced_rewards[i] = _discount_rewards_reduced(r, γ, t, nothing)
     end
 end
 
 function _discount_rewards_reduced!(reduced_rewards, rewards, γ, terminal, init, dims::Int)
-    for (i, (r, t)) in enumerate(
-        zip(
-            eachslice(rewards, dims=dims),
-            eachslice(terminal, dims=dims),
-            )
-        )
+    for (i, (r, t)) in
+        enumerate(zip(eachslice(rewards, dims = dims), eachslice(terminal, dims = dims)))
         reduced_rewards[i] = _discount_rewards_reduced(r, γ, t, init[i])
     end
 end

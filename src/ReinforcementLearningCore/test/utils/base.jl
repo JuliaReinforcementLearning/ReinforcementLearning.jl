@@ -79,7 +79,7 @@
     end
 
     @testset "flatten_batch" begin
-        x = rand(2,3,4)
+        x = rand(2, 3, 4)
         y = flatten_batch(x)
         @test size(y) == (2, 12)
 
@@ -90,15 +90,17 @@
     @testset "discount_rewards" begin
         reward, γ = [1.0], 0.5
         @test discount_rewards(reward, γ) ≈ reward
-        @test discount_rewards(reward, γ; init=2.0) ≈ [2.0]
+        @test discount_rewards(reward, γ; init = 2.0) ≈ [2.0]
 
         reward, γ = Float64[1, 2, 3], 0.5
 
         @test discount_rewards(reward, γ) ≈ [2.75, 3.5, 3.0]
-        @test discount_rewards(reward, γ; init=4.0) ≈ [3.25, 4.5, 5.0]
+        @test discount_rewards(reward, γ; init = 4.0) ≈ [3.25, 4.5, 5.0]
 
-        @test discount_rewards(reward, γ; terminal=[false true false], init=2.0) ≈ [2.0, 2.0, 4.0]
-        @test discount_rewards(reward, γ; terminal=[true false true], init= 2.0) ≈ [1.0, 3.5, 3.0]
+        @test discount_rewards(reward, γ; terminal = [false true false], init = 2.0) ≈
+              [2.0, 2.0, 4.0]
+        @test discount_rewards(reward, γ; terminal = [true false true], init = 2.0) ≈
+              [1.0, 3.5, 3.0]
 
         # type stable
         reward, γ = [1, 2, 3], 0.5f0
@@ -106,18 +108,25 @@
 
         # 2D
         reward, γ = reshape(1:9, 3, 3), 0.5
-        init = [-2., 0., 2.]
+        init = [-2.0, 0.0, 2.0]
         # for 2d rewards, the keyword argument of `dim` must be either `1` or `2`
         @test_throws MethodError discount_rewards(reward, γ)
-        @test discount_rewards(reward, γ; dims=1) ≈ [2.75 8.0 13.25;3.5 8.0 12.5;3.0 6.0 9.0]
-        @test discount_rewards(reward, γ; dims=2) ≈ [4.75 7.5 7.;6.5 9. 8.;8.25 10.5 9.]
-        @test discount_rewards(reward, γ; init=init, dims=1) ≈ [2.5 8. 13.5;3. 8. 13.;2. 6. 10.]
-        @test discount_rewards(reward, γ; init=init, dims=2) ≈ [4.5 7. 6.;6.5 9. 8.;8.5 11. 10;]
+        @test discount_rewards(reward, γ; dims = 1) ≈
+              [2.75 8.0 13.25; 3.5 8.0 12.5; 3.0 6.0 9.0]
+        @test discount_rewards(reward, γ; dims = 2) ≈
+              [4.75 7.5 7.0; 6.5 9.0 8.0; 8.25 10.5 9.0]
+        @test discount_rewards(reward, γ; init = init, dims = 1) ≈
+              [2.5 8.0 13.5; 3.0 8.0 13.0; 2.0 6.0 10.0]
+        @test discount_rewards(reward, γ; init = init, dims = 2) ≈
+              [4.5 7.0 6.0; 6.5 9.0 8.0; 8.5 11.0 10]
 
         terminal = [false true false; true false true; false true false]
-        @test discount_rewards(reward, γ; dims=1, terminal=terminal) ≈ [2. 4. 11.; 2. 8. 8.; 3. 6. 9.]
-        @test discount_rewards(reward, γ; dims=1, terminal=terminal, init=init) ≈ [2. 4. 11.;2. 8. 8.;2. 6. 10.]
-        @test discount_rewards(reward, γ; dims=2, terminal=terminal, init=init) ≈ [3. 4. 6.;2.  9. 8.;6. 6. 10.]
+        @test discount_rewards(reward, γ; dims = 1, terminal = terminal) ≈
+              [2.0 4.0 11.0; 2.0 8.0 8.0; 3.0 6.0 9.0]
+        @test discount_rewards(reward, γ; dims = 1, terminal = terminal, init = init) ≈
+              [2.0 4.0 11.0; 2.0 8.0 8.0; 2.0 6.0 10.0]
+        @test discount_rewards(reward, γ; dims = 2, terminal = terminal, init = init) ≈
+              [3.0 4.0 6.0; 2.0 9.0 8.0; 6.0 6.0 10.0]
     end
 
     @testset "discount_rewards_reduced" begin
@@ -126,20 +135,37 @@
 
         reward, γ = Float64[1, 2, 3], 0.5
         @test discount_rewards_reduced(reward, γ) ≈ 2.75
-        @test discount_rewards_reduced(reward, γ;init=4.) ≈ 3.25
-        @test discount_rewards_reduced(reward, γ; terminal=[false, true, false]) ≈ 2.
-        @test discount_rewards_reduced(reward, γ; terminal=[false, true, false], init=4.) ≈ 2.
+        @test discount_rewards_reduced(reward, γ; init = 4.0) ≈ 3.25
+        @test discount_rewards_reduced(reward, γ; terminal = [false, true, false]) ≈ 2.0
+        @test discount_rewards_reduced(
+            reward,
+            γ;
+            terminal = [false, true, false],
+            init = 4.0,
+        ) ≈ 2.0
 
         reward, γ = reshape(1:9, 3, 3), 0.5
-        init = [-2., 0., 2.]
+        init = [-2.0, 0.0, 2.0]
         terminal = [false true false; true false true; false true false]
 
         # for reward of 2D, `dims` must be provided
         @test_throws Exception discount_rewards_reduced(reward, γ)
 
-        @test discount_rewards_reduced(reward, γ; dims=1) ≈ [2.75, 8., 13.25]
-        @test discount_rewards_reduced(reward, γ; dims=2) ≈ [4.75, 6.5, 8.25]
-        @test discount_rewards_reduced(reward, γ; dims=1, terminal=terminal, init=init) ≈ [2., 4., 11.]
-        @test discount_rewards_reduced(reward, γ; dims=2, terminal=terminal, init=init) ≈ [3., 2., 6.]
+        @test discount_rewards_reduced(reward, γ; dims = 1) ≈ [2.75, 8.0, 13.25]
+        @test discount_rewards_reduced(reward, γ; dims = 2) ≈ [4.75, 6.5, 8.25]
+        @test discount_rewards_reduced(
+            reward,
+            γ;
+            dims = 1,
+            terminal = terminal,
+            init = init,
+        ) ≈ [2.0, 4.0, 11.0]
+        @test discount_rewards_reduced(
+            reward,
+            γ;
+            dims = 2,
+            terminal = terminal,
+            init = init,
+        ) ≈ [3.0, 2.0, 6.0]
     end
 end

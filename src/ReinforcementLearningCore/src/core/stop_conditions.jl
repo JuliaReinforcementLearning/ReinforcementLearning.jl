@@ -107,7 +107,8 @@ function (s::StopAfterEpisode)(agent, env, obs)
     s.cur >= s.episode
 end
 
-(s::StopAfterEpisode)(agent, env::MultiThreadEnv, obs::BatchObs) = @error "MultiThreadEnv is not supported!"
+(s::StopAfterEpisode)(agent, env::MultiThreadEnv, obs::BatchObs) =
+    @error "MultiThreadEnv is not supported!"
 
 #####
 # StopWhenDone

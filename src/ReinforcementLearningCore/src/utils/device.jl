@@ -25,7 +25,7 @@ device(::Array) = Val(:cpu)
 device(x::Tuple{}) = nothing
 device(x::NamedTuple{(),Tuple{}}) = nothing
 
-function device(x::Union{Tuple, NamedTuple})
+function device(x::Union{Tuple,NamedTuple})
     d1 = device(x[1])
     if isnothing(d1)
         device(Base.tail(x))
