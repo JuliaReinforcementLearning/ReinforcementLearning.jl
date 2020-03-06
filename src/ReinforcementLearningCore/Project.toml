@@ -20,7 +20,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 Adapt = "1"
-CUDAapi = "3"
+CUDAapi = "3, 4.0"
 CuArrays = "1.7"
 Distributions = "0.22"
 FillArrays = "0.8"
