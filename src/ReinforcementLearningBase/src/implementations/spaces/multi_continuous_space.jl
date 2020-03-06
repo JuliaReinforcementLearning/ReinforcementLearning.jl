@@ -30,4 +30,3 @@ Base.length(s::MultiContinuousSpace) = error("MultiContinuousSpace is uncountabl
 function Random.rand(rng::AbstractRNG, s::MultiContinuousSpace)
     (s.high .- s.low) .* rand(rng, size(s.low)...) .+ s.low
 end
-
