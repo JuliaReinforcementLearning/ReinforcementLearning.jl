@@ -408,9 +408,7 @@ end
 `pop!` out one element of the traces specified in `s`
 """
 @interface function Base.pop!(t::AbstractTrajectory, s::Symbol...)
-    for x in s
-        pop!(t, x)
-    end
+    NamedTuple{s}(pop!(t, x) for x in s)
 end
 
 """
