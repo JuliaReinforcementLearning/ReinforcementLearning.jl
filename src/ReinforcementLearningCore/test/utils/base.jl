@@ -173,17 +173,22 @@
         reward, values, γ, λ = [1.0], [2.0, 3.0], 0.5, 0.3
         @test generalized_advantage_estimation(reward, values, γ, λ) ≈ [0.5]
 
-        reward, values, γ, λ = [1.0, 1.0], [1 , 2, 3] , 0.5, 0.3
+        reward, values, γ, λ = [1.0, 1.0], [1, 2, 3], 0.5, 0.3
         @test generalized_advantage_estimation(reward, values, γ, λ) ≈ [1.075, 0.5]
 
-        reward, values, γ, λ = Float64[1, 2, 3], [1,2,3,4], 0.5, 0.3
+        reward, values, γ, λ = Float64[1, 2, 3], [1, 2, 3, 4], 0.5, 0.3
         @test generalized_advantage_estimation(reward, values, γ, λ) ≈ [1.27, 1.8, 2]
 
-        @test generalized_advantage_estimation(reward, values, γ, λ; terminal = [true false true]) ≈
-              [0.0, 1.5, 0.0]
+        @test generalized_advantage_estimation(
+            reward,
+            values,
+            γ,
+            λ;
+            terminal = [true false true],
+        ) ≈ [0.0, 1.5, 0.0]
 
         # type stable
-        reward, values, γ, λ = [1, 2, 3], [1,2,3,4], 0.5f0, 0.5f0
+        reward, values, γ, λ = [1, 2, 3], [1, 2, 3, 4], 0.5f0, 0.5f0
         @test eltype(generalized_advantage_estimation(reward, values, γ, λ)) == Float32
 
         # 2D
@@ -198,12 +203,18 @@
               [2.6375 4.25 5.0; 3.22375 4.825 5.5; 3.81 5.4 6.0]
 
         reward, values, γ, λ = reshape(1:9, 3, 3), reshape(1:12, 4, 3), 0.5, 0.3
-        terminal = [false true false; true false true; false true false;]
+        terminal = [false true false; true false true; false true false]
 
-        @test generalized_advantage_estimation(reward, values, γ, λ; dims = 1, terminal = terminal) ≈
-              [1.0 -1.0 2.7; 0.0 2.35 -2.0; 2.0 -1.0 4.0]
+        @test generalized_advantage_estimation(
+            reward,
+            values,
+            γ,
+            λ;
+            dims = 1,
+            terminal = terminal,
+        ) ≈ [1.0 -1.0 2.7; 0.0 2.35 -2.0; 2.0 -1.0 4.0]
 
-        values = reshape(1:12,3,4)
+        values = reshape(1:12, 3, 4)
         @test generalized_advantage_estimation(reward, values, γ, λ; dims = 2) ≈
               [2.6375 4.25 5.0; 3.22375 4.825 5.5; 3.81 5.4 6.0]
     end
