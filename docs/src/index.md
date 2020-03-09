@@ -53,7 +53,7 @@ This package can be installed from the package manager in Julia's REPL:
 |                         +--------|---------------------+                                  |
 |                                  |                                                        |
 |                                  |          +-----------------------------+               |
-|                                  |---------&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ViZDoom.jl">ReinforcementLearningZoo.jl</a> |               |
+|                                  |---------&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl">ReinforcementLearningZoo.jl</a> |               |
 |                                  |          +-----------------------------+               |
 |                                  |                                                        |
 |                                  |          +----------------------------------------+    |
