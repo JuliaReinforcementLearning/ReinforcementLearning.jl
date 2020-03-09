@@ -26,7 +26,7 @@ Similar to [`CircularCompactSARTSATrajectory`](@ref), except that another trace 
 - `terminal_size = ()`
 - `priority_type = Float32`
 """
-function CircularCompactPSARTSATrajectory(;priority_type=Float32, kw...)
+function CircularCompactPSARTSATrajectory(; priority_type = Float32, kw...)
     t = CircularCompactSARTSATrajectory(; kw...)
     p = SumTree(priority_type, kw.data.capacity)
     names = typeof(t).parameters[1]
@@ -82,5 +82,5 @@ function Base.pop!(t::CircularCompactPSARTSATrajectory, s::Symbol)
 end
 
 function Base.pop!(t::CircularCompactPSARTSATrajectory)
-    (priority=pop!(t.priority), pop!(t.trajectory)...)
+    (priority = pop!(t.priority), pop!(t.trajectory)...)
 end
