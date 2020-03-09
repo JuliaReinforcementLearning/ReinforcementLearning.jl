@@ -15,19 +15,20 @@ Similar to [`CircularCompactSARTSATrajectory`](@ref), except that another trace 
 
 # Key word arguments
 
-- `capacity`::Int, the maximum length of each trace.
-- `state_type` = Int
-- `state_size` = ()
-- `action_type` = Int
-- `action_size` = ()
-- `reward_type` = Float32
-- `reward_size` = ()
-- `terminal_type` = Bool
-- `terminal_size` = ()
+- `capacity::Int`, the maximum length of each trace.
+- `state_type = Int`
+- `state_size = ()`
+- `action_type = Int`
+- `action_size = ()`
+- `reward_type = Float32`
+- `reward_size = ()`
+- `terminal_type = Bool`
+- `terminal_size = ()`
+- `priority_type = Float32`
 """
-function CircularCompactPSARTSATrajectory(; kw...)
+function CircularCompactPSARTSATrajectory(;priority_type=Float32, kw...)
     t = CircularCompactSARTSATrajectory(; kw...)
-    p = SumTree(kw.data.capacity)
+    p = SumTree(priority_type, kw.data.capacity)
     names = typeof(t).parameters[1]
     types = typeof(t).parameters[2]
     CircularCompactPSARTSATrajectory{
@@ -81,6 +82,5 @@ function Base.pop!(t::CircularCompactPSARTSATrajectory, s::Symbol)
 end
 
 function Base.pop!(t::CircularCompactPSARTSATrajectory)
-    pop!(t.priority)
-    pop!(t.trajectory)
+    (priority=pop!(t.priority), pop!(t.trajectory)...)
 end

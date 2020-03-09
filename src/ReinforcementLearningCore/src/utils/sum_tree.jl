@@ -108,7 +108,9 @@ end
 
 function Base.pop!(t::SumTree)
     if t.length > 0
+        res = t[end]
         t.length -= 1
+        res
     else
         @error "can not pop! from an empty SumTree"
     end

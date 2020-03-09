@@ -67,10 +67,14 @@ function Base.pop!(t::CompactSARTSATrajectory)
     if length(t) <= 0
         throw(ArgumentError("can not pop! from an empty trajectory"))
     else
-        pop!(t, :state)
-        pop!(t, :action)
-        pop!(t, :reward)
-        pop!(t, :terminal)
+        NamedTuple{RTSA}(
+            (
+                pop!(t, :reward),
+                pop!(t, :terminal),
+                pop!(t, :state),
+                pop!(t, :action),
+            )
+        )
     end
     t
 end
