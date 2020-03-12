@@ -28,17 +28,13 @@ Flux.@functor ActorCritic
 - `actor_loss_weight::Float32`
 - `critic_loss_weight::Float32`
 - `entropy_loss_weight::Float32`
-- `update_freq=1`, it **must** be the same with the length of the `CircularCompactSARTSATrajectory`.
-- `update_step=0`, an internal counter to record how many times the `update!(learner, experience)` method has been called.
 """
-Base.@kwdef mutable struct A2CLearner{A} <: AbstractLearner
+Base.@kwdef struct A2CLearner{A} <: AbstractLearner
     approximator::A
     γ::Float32
     actor_loss_weight::Float32
     critic_loss_weight::Float32
     entropy_loss_weight::Float32
-    update_freq::Int = 1
-    update_step::Int = 0
 end
 
 (learner::A2CLearner)(obs::BatchObs) =
@@ -48,9 +44,6 @@ end
     ) |> send_to_host
 
 function RLBase.update!(learner::A2CLearner, experience)
-    learner.update_step += 1
-    learner.update_step % learner.update_freq == 0 || return nothing
-
     AC = learner.approximator
     γ = learner.γ
     w₁ = learner.actor_loss_weight
@@ -101,4 +94,21 @@ function RLBase.extract_experience(t::CircularCompactSARTSATrajectory, learner::
     else
         nothing
     end
+end
+
+function (agent::Agent{<:QBasedPolicy{<:A2CLearner}, <:CircularCompactSARTSATrajectory})(
+    ::PreActStage,
+    obs,
+)
+    action = agent.policy(obs)
+    push!(agent.trajectory; state = get_state(obs), action = action)
+    update!(agent.policy, agent.trajectory)
+
+    # the main difference is we'd like to flush the buffer after each update!
+    if isfull(agent.trajectory)
+        empty!(agent.trajectory)
+        push!(agent.trajectory; state = get_state(obs), action = action)
+    end
+
+    action
 end
