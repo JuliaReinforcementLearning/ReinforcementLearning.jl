@@ -101,13 +101,14 @@ function (agent::Agent{<:QBasedPolicy{<:A2CLearner}, <:CircularCompactSARTSATraj
     obs,
 )
     action = agent.policy(obs)
-    push!(agent.trajectory; state = get_state(obs), action = action)
+    state = get_state(obs)
+    push!(agent.trajectory; state = state, action = action)
     update!(agent.policy, agent.trajectory)
 
     # the main difference is we'd like to flush the buffer after each update!
     if isfull(agent.trajectory)
         empty!(agent.trajectory)
-        push!(agent.trajectory; state = get_state(obs), action = action)
+        push!(agent.trajectory; state = state, action = action)
     end
 
     action
