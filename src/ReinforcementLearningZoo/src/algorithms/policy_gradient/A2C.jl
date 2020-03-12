@@ -8,7 +8,7 @@ using Flux
 The `actor` part must return a **normalized** vector representing the action values,
 and the `critic` part must return a state value.
 """
-Base.@kwdef struct ActorCritic{A, C}
+Base.@kwdef struct ActorCritic{A,C}
     actor::A
     critic::C
 end
@@ -41,7 +41,11 @@ Base.@kwdef mutable struct A2CLearner{A} <: AbstractLearner
     update_step::Int = 0
 end
 
-(learner::A2CLearner)(obs::BatchObs) = learner.approximator(send_to_device(device(learner.approximator), get_state(obs)), Val(:Q)) |> send_to_host
+(learner::A2CLearner)(obs::BatchObs) =
+    learner.approximator(
+        send_to_device(device(learner.approximator), get_state(obs)),
+        Val(:Q),
+    ) |> send_to_host
 
 function RLBase.update!(learner::A2CLearner, experience)
     learner.update_step += 1
@@ -55,15 +59,21 @@ function RLBase.update!(learner::A2CLearner, experience)
     states, actions, rewards, terminals, next_state = experience
     states = send_to_device(device(AC), states)
     next_state = send_to_device(device(AC), next_state)
-    
+
     states_flattened = flatten_batch(states) # (state_size..., n_thread * update_step)
     actions = flatten_batch(actions)
     actions = CartesianIndex.(actions, 1:length(actions))
-    
+
     next_state_values = AC(next_state, Val(:V))
-    gains = discount_rewards(rewards, γ;dims=2, init=send_to_host(next_state_values), terminal=terminals)
+    gains = discount_rewards(
+        rewards,
+        γ;
+        dims = 2,
+        init = send_to_host(next_state_values),
+        terminal = terminals,
+    )
     gains = send_to_device(device(AC), gains)
-    
+
     gs = gradient(Flux.params(AC)) do
         probs = AC(states_flattened, Val(:Q))
         log_probs = log.(probs)
@@ -71,8 +81,8 @@ function RLBase.update!(learner::A2CLearner, experience)
         values = AC(states_flattened, Val(:V))
         advantage = vec(gains) .- vec(values)
         actor_loss = -mean(log_probs_select .* Zygote.dropgrad(advantage))
-        critic_loss = mean(advantage.^2)
-        entropy_loss = sum(probs .* log_probs) * 1 // size(probs,2)
+        critic_loss = mean(advantage .^ 2)
+        entropy_loss = sum(probs .* log_probs) * 1 // size(probs, 2)
         loss = w₁ * actor_loss + w₂ * critic_loss - w₃ * entropy_loss
         loss
     end
@@ -86,7 +96,7 @@ function RLBase.extract_experience(t::CircularCompactSARTSATrajectory, learner::
             actions = get_trace(t, :action),
             rewards = get_trace(t, :reward),
             terminals = get_trace(t, :terminal),
-            next_state = select_last_frame(get_trace(t, :next_state))
+            next_state = select_last_frame(get_trace(t, :next_state)),
         )
     else
         nothing
