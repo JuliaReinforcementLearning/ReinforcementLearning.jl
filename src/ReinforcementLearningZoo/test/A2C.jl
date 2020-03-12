@@ -1,4 +1,5 @@
 @testset "A2C" begin
+# Remember to set the ENV["JULIA_NUM_THREADS"]
 N_ENV = 16
 UPDATE_FREQ = 5
 env = MultiThreadEnv([CartPoleEnv(;T=Float32, seed=i) for i in 1:N_ENV])
@@ -18,16 +19,17 @@ agent = Agent(
                         Dense(ns, 256, relu;initW = seed_glorot_uniform(seed = 29)),
                         Dense(256, 1;initW = seed_glorot_uniform(seed = 29)),
                     )
-                ) |> gpu,
-                optimizer=ADAM(3e-4),
+                ) |> cpu,
+                optimizer=ADAM(),
                 kind=HYBRID_APPROXIMATOR
             ),
             γ=0.99f0,
             actor_loss_weight = 1.0f0,
             critic_loss_weight = 0.5f0,
-            entropy_loss_weight = - 0.001f0
+            entropy_loss_weight = - 0.001f0,
+            update_freq = UPDATE_FREQ
         ),
-        explorer = BatchExplorer(WeightedExplorer(;is_normalized=true, seed=33))
+        explorer = BatchExplorer((WeightedExplorer(;is_normalized=true, seed=s) for s in 10:9+N_ENV)...)
     ),
     trajectory = CircularCompactSARTSATrajectory(
         ;capacity=UPDATE_FREQ,
@@ -42,5 +44,6 @@ agent = Agent(
     )
 )
 hook = TotalBatchRewardPerEpisode(N_ENV)
-run(agent, env, StopAfterStep(10000), hook)
+run(agent, env, StopAfterStep(50000), hook)
+@info "stats for A2CLearner" avg_reward = mean(Iterators.flatten(hook.rewards))
 end
