@@ -18,7 +18,7 @@ agent = Agent(
                         Dense(ns, 256, relu;initW = seed_glorot_uniform(seed = 29)),
                         Dense(256, 1;initW = seed_glorot_uniform(seed = 29)),
                     )
-                ) |> cpu,
+                ) |> gpu,
                 optimizer=ADAM(1e-3),
                 kind=HYBRID_APPROXIMATOR
             ),
