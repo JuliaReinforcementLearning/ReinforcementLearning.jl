@@ -11,7 +11,7 @@ Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
-GR = "0.46, 0.47"
+GR = "0.46, 0.47, 0.48"
 ReinforcementLearningBase = "0.6"
 Requires = "1.0"
 StatsBase = "0.32"
