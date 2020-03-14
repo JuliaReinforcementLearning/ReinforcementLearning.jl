@@ -1,4 +1,4 @@
-export CircularArrayBuffer, capacity, isfull, nframes
+export CircularArrayBuffer, capacity, isfull
 
 """
     CircularArrayBuffer{T}(d::Integer...) -> CircularArrayBuffer{T, N}
@@ -127,7 +127,6 @@ Base.getindex(cb::CircularArrayBuffer{T,N}, i::Int) where {T,N} =
 Base.setindex!(cb::CircularArrayBuffer{T,N}, v, i::Int) where {T,N} =
     setindex!(cb.buffer, v, _buffer_index(cb, i))
 capacity(cb::CircularArrayBuffer{T,N}) where {T,N} = size(cb.buffer, N)
-nframes(cb::CircularArrayBuffer) = cb.length
 isfull(cb::CircularArrayBuffer) = cb.length == capacity(cb)
 Base.isempty(cb::CircularArrayBuffer) = cb.length == 0
 
@@ -199,4 +198,5 @@ function Base.pop!(cb::CircularArrayBuffer)
     res
 end
 
-nframes(a::AbstractArray{T,N}) where {T,N} = size(a, N)
+frame_type(::CircularArrayBuffer{T, N}) where {T, N} = Array{T, N-1}
+frame_type(::CircularArrayBuffer{T, 1}) where {T} = T

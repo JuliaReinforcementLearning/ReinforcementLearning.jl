@@ -1,4 +1,6 @@
-export select_last_dim,
+export nframes,
+    frame_type,
+    select_last_dim,
     select_last_frame,
     consecutive_view,
     find_all_max,
@@ -15,6 +17,10 @@ export select_last_dim,
     unflatten_batch
 
 using StatsBase
+
+nframes(a::AbstractArray{T,N}) where {T,N} = size(a, N)
+frame_type(::Array{T, N}) where {T, N} = Array{T, N-1}
+frame_type(::Vector{T}) where T = T
 
 select_last_dim(xs::AbstractArray{T,N}, inds) where {T,N} =
     @views xs[ntuple(_ -> (:), N - 1)..., inds]

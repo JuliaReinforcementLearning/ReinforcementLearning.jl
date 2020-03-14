@@ -49,13 +49,13 @@ RLBase.get_trace(t::CircularCompactPSARTSATrajectory, s::Symbol) =
 
 function Base.getindex(b::CircularCompactPSARTSATrajectory, i::Int)
     (
-        priority = select_last_dim(b.priority, i),
         state = select_last_dim(b.trajectory[:state], i),
         action = select_last_dim(b.trajectory[:action], i),
         reward = select_last_dim(b.trajectory[:reward], i),
         terminal = select_last_dim(b.trajectory[:terminal], i),
         next_state = select_last_dim(b.trajectory[:state], i + 1),
         next_action = select_last_dim(b.trajectory[:action], i + 1),
+        priority = select_last_dim(b.priority, i),
     )
 end
 
@@ -82,5 +82,5 @@ function Base.pop!(t::CircularCompactPSARTSATrajectory, s::Symbol)
 end
 
 function Base.pop!(t::CircularCompactPSARTSATrajectory)
-    (priority = pop!(t.priority), pop!(t.trajectory)...)
+    (pop!(t.trajectory)..., priority = pop!(t.priority))
 end

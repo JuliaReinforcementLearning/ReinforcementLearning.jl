@@ -36,20 +36,16 @@ function CircularCompactSARTSATrajectory(;
     terminal_size = (),
 )
     capacity > 0 || throw(ArgumentError("capacity must > 0"))
+    reward = CircularArrayBuffer{reward_type}(reward_size..., capacity)
+    terminal = CircularArrayBuffer{terminal_type}(terminal_size..., capacity)
+    state = CircularArrayBuffer{state_type}(state_size..., capacity + 1)
+    action = CircularArrayBuffer{action_type}(action_size..., capacity + 1)
+    ts = NamedTuple{RTSA}((reward, terminal, state, action))
+
     CircularCompactSARTSATrajectory{
-        Tuple{state_type,action_type,reward_type,terminal_type,state_type,action_type},
-        Tuple{
-            CircularArrayBuffer{reward_type,length(reward_size) + 1},
-            CircularArrayBuffer{terminal_type,length(terminal_size) + 1},
-            CircularArrayBuffer{state_type,length(state_size) + 1},
-            CircularArrayBuffer{action_type,length(action_size) + 1},
-        },
-    }((
-        reward = CircularArrayBuffer{reward_type}(reward_size..., capacity),
-        terminal = CircularArrayBuffer{terminal_type}(terminal_size..., capacity),
-        state = CircularArrayBuffer{state_type}(state_size..., capacity + 1),
-        action = CircularArrayBuffer{action_type}(action_size..., capacity + 1),
-    ))
+        Tuple{frame_type(state), frame_type(action), map(frame_type, ts)...},
+        typeof(ts).parameters[2]
+    }(ts)
 end
 
 isfull(t::CircularCompactSARTSATrajectory) = isfull(t[:action])
