@@ -43,9 +43,11 @@ function CircularCompactSARTSATrajectory(;
     ts = NamedTuple{RTSA}((reward, terminal, state, action))
 
     CircularCompactSARTSATrajectory{
-        Tuple{frame_type(state), frame_type(action), map(frame_type, ts)...},
-        typeof(ts).parameters[2]
-    }(ts)
+        Tuple{frame_type(state),frame_type(action),map(frame_type, ts)...},
+        typeof(ts).parameters[2],
+    }(
+        ts,
+    )
 end
 
 isfull(t::CircularCompactSARTSATrajectory) = isfull(t[:action])

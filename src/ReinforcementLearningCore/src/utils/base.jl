@@ -19,8 +19,8 @@ export nframes,
 using StatsBase
 
 nframes(a::AbstractArray{T,N}) where {T,N} = size(a, N)
-frame_type(::Array{T, N}) where {T, N} = Array{T, N-1}
-frame_type(::Vector{T}) where T = T
+frame_type(::Array{T,N}) where {T,N} = Array{T,N - 1}
+frame_type(::Vector{T}) where {T} = T
 
 select_last_dim(xs::AbstractArray{T,N}, inds) where {T,N} =
     @views xs[ntuple(_ -> (:), N - 1)..., inds]

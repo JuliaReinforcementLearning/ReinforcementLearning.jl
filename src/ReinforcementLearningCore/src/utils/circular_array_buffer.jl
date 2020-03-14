@@ -198,5 +198,5 @@ function Base.pop!(cb::CircularArrayBuffer)
     res
 end
 
-frame_type(::CircularArrayBuffer{T, N}) where {T, N} = Array{T, N-1}
-frame_type(::CircularArrayBuffer{T, 1}) where {T} = T
+frame_type(::CircularArrayBuffer{T,N}) where {T,N} = Array{T,N - 1}
+frame_type(::CircularArrayBuffer{T,1}) where {T} = T
