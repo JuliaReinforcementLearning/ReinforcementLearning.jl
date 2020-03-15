@@ -10,16 +10,20 @@ import Base.Threads.@spawn
 #####
 
 """
-    WrappedEnv(;preprocessor, env)
+    WrappedEnv(;preprocessor, env, postprocessor=identity)
 
-Wrap the `env` with a `preprocessor`
+The observation of the inner `env` is first transformed by the `preprocessor`.
+And the action is transformed by `postprocessor` and then send to the inner `env`.
 """
-Base.@kwdef struct WrappedEnv{P<:AbstractPreprocessor,E<:AbstractEnv} <: AbstractEnv
+Base.@kwdef struct WrappedEnv{P<:AbstractPreprocessor,E<:AbstractEnv,T} <: AbstractEnv
     preprocessor::P
     env::E
+    postprocessor::T = identity
 end
 
-(env::WrappedEnv)(args...; kwargs...) = env.env(args..., kwargs...)
+WrappedEnv(p, env) = WrappedEnv(preprocessor=p, env=env)
+
+(env::WrappedEnv)(args...) = env.env(env.postprocessor(args)...)
 
 @forward WrappedEnv.env DynamicStyle,
 get_current_player,
