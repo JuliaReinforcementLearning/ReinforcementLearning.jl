@@ -6,6 +6,9 @@
 
 **Merged pull requests:**
 
+- Automatic JuliaFormatter.jl run [\#37](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/37) ([github-actions[bot]](https://github.com/apps/github-actions))
+- update WrappedEnv to support postprocessor [\#36](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/36) ([findmyway](https://github.com/findmyway))
+- keep pop! always return element [\#35](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/35) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#34](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/34) ([github-actions[bot]](https://github.com/apps/github-actions))
 - keep dependency concise [\#33](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/33) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#32](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/32) ([github-actions[bot]](https://github.com/apps/github-actions))
