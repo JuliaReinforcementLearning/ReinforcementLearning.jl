@@ -21,7 +21,7 @@ Base.@kwdef struct WrappedEnv{P<:AbstractPreprocessor,E<:AbstractEnv,T} <: Abstr
     postprocessor::T = identity
 end
 
-WrappedEnv(p, env) = WrappedEnv(preprocessor=p, env=env)
+WrappedEnv(p, env) = WrappedEnv(preprocessor = p, env = env)
 
 (env::WrappedEnv)(args...) = env.env(env.postprocessor(args)...)
 
