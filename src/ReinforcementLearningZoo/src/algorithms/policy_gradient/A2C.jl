@@ -96,7 +96,7 @@ function RLBase.extract_experience(t::CircularCompactSARTSATrajectory, learner::
     end
 end
 
-function (agent::Agent{<:QBasedPolicy{<:A2CLearner}, <:CircularCompactSARTSATrajectory})(
+function (agent::Agent{<:QBasedPolicy{<:A2CLearner},<:CircularCompactSARTSATrajectory})(
     ::PreActStage,
     obs,
 )

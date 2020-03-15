@@ -45,7 +45,11 @@ function RLBase.update!(learner::A2CGAELearner, experience)
 
     rollout_values = AC(rollout, Val(:V))
     rollout_values = send_to_host(rollout_values)
-    rollout_values = reshape(rollout_values,size(states,ndims(states)-1),size(states,ndims(states))+1)
+    rollout_values = reshape(
+        rollout_values,
+        size(states, ndims(states) - 1),
+        size(states, ndims(states)) + 1,
+    )
     advantages = generalized_advantage_estimation(
         rewards,
         rollout_values,
@@ -75,7 +79,10 @@ function RLBase.update!(learner::A2CGAELearner, experience)
     update!(AC, gs)
 end
 
-function RLBase.extract_experience(t::CircularCompactSARTSATrajectory, learner::A2CGAELearner)
+function RLBase.extract_experience(
+    t::CircularCompactSARTSATrajectory,
+    learner::A2CGAELearner,
+)
     if isfull(t)
         (
             states = get_trace(t, :state),
@@ -89,7 +96,7 @@ function RLBase.extract_experience(t::CircularCompactSARTSATrajectory, learner::
     end
 end
 
-function (agent::Agent{<:QBasedPolicy{<:A2CGAELearner}, <:CircularCompactSARTSATrajectory})(
+function (agent::Agent{<:QBasedPolicy{<:A2CGAELearner},<:CircularCompactSARTSATrajectory})(
     ::PreActStage,
     obs,
 )
