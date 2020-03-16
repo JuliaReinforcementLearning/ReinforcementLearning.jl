@@ -25,8 +25,8 @@ makedocs(
     linkcheck = !("skiplinks" in ARGS),
     pages = [
         "Home" => "index.md",
-        "Overview" => "overview.md",
         "A Quick Example" => "a_quick_example.md",
+        "Overview" => "overview.md",
         "Manual" => [
             "RLBase" => "rl_base.md",
             "RLCore" => "rl_core.md",
