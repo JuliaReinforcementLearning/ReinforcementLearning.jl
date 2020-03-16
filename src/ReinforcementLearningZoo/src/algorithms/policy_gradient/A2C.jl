@@ -70,7 +70,7 @@ function RLBase.update!(learner::A2CLearner, experience)
     gs = gradient(Flux.params(AC)) do
         probs = AC(states_flattened, Val(:Q))
         log_probs = log.(probs)
-        log_probs_select = probs[actions]
+        log_probs_select = log_probs[actions]
         values = AC(states_flattened, Val(:V))
         advantage = vec(gains) .- vec(values)
         actor_loss = -mean(log_probs_select .* Zygote.dropgrad(advantage))

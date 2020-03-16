@@ -25,7 +25,7 @@
                 γ = 0.99f0,
                 actor_loss_weight = 1.0f0,
                 critic_loss_weight = 0.5f0,
-                entropy_loss_weight = -0.001f0,
+                entropy_loss_weight = 0.001f0,
             ),
             explorer = BatchExplorer((
                 WeightedExplorer(; is_normalized = true, seed = s) for s in 10:9+N_ENV
