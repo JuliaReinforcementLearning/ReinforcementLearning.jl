@@ -29,7 +29,8 @@ function OpenSpielEnv(name; seed = nothing, observation_type = nothing, kwargs..
 
     has_info_state = provides_information_state_tensor(game_type)
     has_obs_state = provides_observation_tensor(game_type)
-    has_info_state || has_obs_state ||
+    has_info_state ||
+    has_obs_state ||
     @error "the environment neither provides information tensor nor provides observation tensor"
     if isnothing(observation_type)
         observation_type = has_info_state ? :information : :observation
