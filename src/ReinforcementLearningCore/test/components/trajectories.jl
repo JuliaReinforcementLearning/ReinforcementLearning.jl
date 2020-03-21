@@ -82,15 +82,15 @@
         @test get_trace(b, :next_state) == [2]
         @test get_trace(b, :next_action) == [3]
         @test b[1] ==
-        b[end] ==
-        (
-            state = 1,
-            action = 2,
-            reward = 1.0f0,
-            terminal = false,
-            next_state = 2,
-            next_action = 3,
-        )
+              b[end] ==
+              (
+                  state = 1,
+                  action = 2,
+                  reward = 1.0f0,
+                  terminal = false,
+                  next_state = 2,
+                  next_action = 3,
+              )
 
         t3 = (reward = 2.0, terminal = true, state = 3, action = 4)
         push!(b; t3...)
@@ -159,15 +159,15 @@
         @test get_trace(b, :next_state) == [2]
         @test get_trace(b, :next_action) == [3]
         @test b[1] ==
-        b[end] ==
-        (
-            state = 1,
-            action = 2,
-            reward = 1.0f0,
-            terminal = false,
-            next_state = 2,
-            next_action = 3,
-        )
+              b[end] ==
+              (
+                  state = 1,
+                  action = 2,
+                  reward = 1.0f0,
+                  terminal = false,
+                  next_state = 2,
+                  next_action = 3,
+              )
 
         t3 = (reward = 2.0, terminal = true, state = 3, action = 4)
         push!(b; t3...)
@@ -205,15 +205,15 @@
         pop!(b)
 
         @test b[1] ==
-        b[end] ==
-        (
-            state = 1,
-            action = 2,
-            reward = 1.0f0,
-            terminal = false,
-            next_state = 2,
-            next_action = 3,
-        )
+              b[end] ==
+              (
+                  state = 1,
+                  action = 2,
+                  reward = 1.0f0,
+                  terminal = false,
+                  next_state = 2,
+                  next_action = 3,
+              )
         @test length(b) == 1
 
         t4 = (reward = 3.0, terminal = false, state = 4, action = 5)
