@@ -18,6 +18,7 @@
 
 **Merged pull requests:**
 
+- Fix link in docs/src/index.md [\#60](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/60) ([amanbh](https://github.com/amanbh))
 - Add doc in travis [\#58](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/58) ([findmyway](https://github.com/findmyway))
 - add documentation stage in travis [\#57](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/57) ([findmyway](https://github.com/findmyway))
 - CompatHelper: add new compat entry for "Reexport" at version "0.2" [\#56](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/56) ([github-actions[bot]](https://github.com/apps/github-actions))
