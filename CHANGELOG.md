@@ -14,6 +14,7 @@
 
 **Closed issues:**
 
+- Support julia 1.4 [\#63](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/63)
 - Improve code coverage [\#40](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/40)
 
 **Merged pull requests:**
