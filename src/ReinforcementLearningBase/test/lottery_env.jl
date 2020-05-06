@@ -21,7 +21,7 @@ mutable struct LotteryEnv <: AbstractEnv
     rng::MersenneTwister
 end
 
-LotteryEnv(;seed=nothing) = LotteryEnv(0, false, MersenneTwister(seed))
+LotteryEnv(; seed = nothing) = LotteryEnv(0, false, MersenneTwister(seed))
 
 RLBase.get_action_space(env::LotteryEnv) = DiscreteSpace((:PowerRich, :MegaHaul, nothing))
 
@@ -36,6 +36,6 @@ function (env::LotteryEnv)(action::Union{Symbol,Nothing})
     env.is_done = true
 end
 
-RLBase.observe(env::LotteryEnv) = (reward=env.reward, terminal=env.is_done)
+RLBase.observe(env::LotteryEnv) = (reward = env.reward, terminal = env.is_done)
 
 RLBase.reset!(env::LotteryEnv) = env.is_done = false

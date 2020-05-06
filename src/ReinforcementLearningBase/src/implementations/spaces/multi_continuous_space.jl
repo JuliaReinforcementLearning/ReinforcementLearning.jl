@@ -7,9 +7,9 @@ struct MultiContinuousSpace{T<:AbstractArray} <: AbstractSpace
     high::T
     function MultiContinuousSpace(low::T, high::T) where {T<:AbstractArray}
         size(low) == size(high) ||
-        throw(ArgumentError("$(size(low)) != $(size(high)), size must match"))
+            throw(ArgumentError("$(size(low)) != $(size(high)), size must match"))
         all(map((l, h) -> l <= h, low, high)) ||
-        throw(ArgumentError("each element of $low must be ≤ than $high"))
+            throw(ArgumentError("each element of $low must be ≤ than $high"))
         new{T}(low, high)
     end
 end

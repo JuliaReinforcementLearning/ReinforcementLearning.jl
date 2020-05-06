@@ -12,7 +12,7 @@ struct MultiDiscreteSpace{T<:AbstractArray} <: AbstractSpace
     n::Int  # pre-calculation
     function MultiDiscreteSpace(low::T, high::T) where {T<:AbstractArray}
         all(map((l, h) -> l <= h, low, high)) ||
-        throw(ArgumentError("each element of $high must be ≥r $low"))
+            throw(ArgumentError("each element of $high must be ≥r $low"))
         new{T}(low, high, reduce(*, map((l, h) -> h - l + 1, low, high)))
     end
 end

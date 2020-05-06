@@ -1,8 +1,5 @@
 export WrappedEnv,
-    MultiThreadEnv,
-    AbstractPreprocessor,
-    CloneStatePreprocessor,
-    ComposedPreprocessor
+    MultiThreadEnv, AbstractPreprocessor, CloneStatePreprocessor, ComposedPreprocessor
 
 using MacroTools: @forward
 using Random
