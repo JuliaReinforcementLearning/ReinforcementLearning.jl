@@ -4,8 +4,13 @@
 
 [Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.6.5...HEAD)
 
+**Closed issues:**
+
+- The approximator is over-designed [\#39](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/issues/39)
+
 **Merged pull requests:**
 
+- Simplify APIs [\#41](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/41) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#37](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/37) ([github-actions[bot]](https://github.com/apps/github-actions))
 - update WrappedEnv to support postprocessor [\#36](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/36) ([findmyway](https://github.com/findmyway))
 - keep pop! always return element [\#35](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/35) ([findmyway](https://github.com/findmyway))
