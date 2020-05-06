@@ -9,8 +9,6 @@ Julia. From the concept level, they can be organized in the following parts:
   - [Traits for Environment](@ref)
   - [Observation of Environment](@ref)
   - [Observation Space and Action Space](@ref)
-- [ EnvironmentModel](@ref)
-
 """ RLBase
 
 using Random
