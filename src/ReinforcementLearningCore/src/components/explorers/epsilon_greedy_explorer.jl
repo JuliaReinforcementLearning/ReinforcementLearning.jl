@@ -69,11 +69,11 @@ function EpsilonGreedyExplorer(;
         decay_steps,
         step,
         rng,
-        is_training
+        is_training,
     )
 end
 
-Flux.testmode!(p::EpsilonGreedyExplorer, mode=true) = p.is_training = !mode
+Flux.testmode!(p::EpsilonGreedyExplorer, mode = true) = p.is_training = !mode
 
 EpsilonGreedyExplorer(ϵ; kwargs...) = EpsilonGreedyExplorer(; ϵ_stable = ϵ, kwargs...)
 
@@ -98,7 +98,7 @@ function get_ϵ(s::EpsilonGreedyExplorer{:exp}, step)
     end
 end
 
-get_ϵ(s::EpsilonGreedyExplorer) = s.is_training ? get_ϵ(s, s.step) : 0.
+get_ϵ(s::EpsilonGreedyExplorer) = s.is_training ? get_ϵ(s, s.step) : 0.0
 
 """
     (s::EpsilonGreedyExplorer)(values; step) where T

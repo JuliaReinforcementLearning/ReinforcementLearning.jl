@@ -24,12 +24,13 @@ end
 
 get_role(agent::Agent) = agent.role
 
-function Flux.testmode!(agent::Agent, mode=true)
+function Flux.testmode!(agent::Agent, mode = true)
     agent.is_training = !mode
     testmode!(agent.policy, mode)
 end
 
-(agent::Agent)(stage::AbstractStage, obs) = agent.is_training ? agent(Training(stage), obs) : agent(Testing(stage), obs)
+(agent::Agent)(stage::AbstractStage, obs) =
+    agent.is_training ? agent(Training(stage), obs) : agent(Testing(stage), obs)
 
 (agent::Agent)(::Testing, obs) = nothing
 (agent::Agent)(::Testing{PreActStage}, obs) = agent.policy(obs)

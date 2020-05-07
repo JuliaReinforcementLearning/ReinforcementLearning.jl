@@ -29,4 +29,5 @@ function extract_experience end
 function RLBase.get_priority(p::AbstractLearner, experience) end
 
 # avoid fallback silently
-Flux.testmode!(::AbstractLearner, mode=false) = @error "someone forgets to implement this method!!!"
+Flux.testmode!(::AbstractLearner, mode = false) =
+    @error "someone forgets to implement this method!!!"

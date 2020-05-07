@@ -27,7 +27,7 @@ RLBase.get_prob(p::QBasedPolicy, obs, ::FullActionSet) =
 
 @forward QBasedPolicy.learner RLBase.get_priority, RLBase.update!
 
-function Flux.testmode!(p::QBasedPolicy, mode=true)
+function Flux.testmode!(p::QBasedPolicy, mode = true)
     testmode!(p.learner, mode)
     testmode!(p.explorer, mode)
 end

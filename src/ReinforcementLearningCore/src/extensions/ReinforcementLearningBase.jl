@@ -9,4 +9,5 @@ RLBase.get_prob(p::AbstractPolicy, obs, ::RLBase.AbstractActionStyle, a) =
 Random.rand(s::MultiContinuousSpace{<:CuArray}) = rand(CuArrays.CURAND.generator(), s)
 
 # avoid fallback silently
-Flux.testmode!(p::AbstractPolicy, mode=true) = @error "someone forgets to implement this method!!!"
+Flux.testmode!(p::AbstractPolicy, mode = true) =
+    @error "someone forgets to implement this method!!!"
