@@ -20,7 +20,8 @@ end
 (app::NeuralNetworkApproximator)(x) = app.model(x)
 
 # !!! watch https://github.com/FluxML/Functors.jl/blob/master/src/functor.jl#L2
-Flux.functor(x::NeuralNetworkApproximator) = (model=x.model,), y -> NeuralNetworkApproximator(y.model, x.optimizer)
+Flux.functor(x::NeuralNetworkApproximator) =
+    (model = x.model,), y -> NeuralNetworkApproximator(y.model, x.optimizer)
 
 device(app::NeuralNetworkApproximator) = device(app.model)
 

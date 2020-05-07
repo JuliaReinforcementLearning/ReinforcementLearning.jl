@@ -29,14 +29,8 @@
 
     @testset "ActorCritic" begin
         ac_cpu = ActorCritic(
-            actor = NeuralNetworkApproximator(
-                model = Dense(3,2),
-                optimizer = ADAM()
-            ),
-            critic = NeuralNetworkApproximator(
-                model = Dense(3,1),
-                optimizer = RMSProp()
-            )
+            actor = NeuralNetworkApproximator(model = Dense(3, 2), optimizer = ADAM()),
+            critic = NeuralNetworkApproximator(model = Dense(3, 1), optimizer = RMSProp()),
         )
 
         ac = ac_cpu |> gpu
