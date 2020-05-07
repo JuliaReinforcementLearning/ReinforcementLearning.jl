@@ -26,4 +26,30 @@
 
         @assert old_params != new_params
     end
+
+    @testset "ActorCritic" begin
+        ac_cpu = ActorCritic(
+            actor = NeuralNetworkApproximator(
+                model = Dense(3,2),
+                optimizer = ADAM()
+            ),
+            critic = NeuralNetworkApproximator(
+                model = Dense(3,1),
+                optimizer = RMSProp()
+            )
+        )
+
+        ac = ac_cpu |> gpu
+
+        # make sure optimizer is not changed
+        @test ac_cpu.actor.optimizer === ac.actor.optimizer
+        @test ac_cpu.critic.optimizer === ac.critic.optimizer
+
+        D = ac.actor.model |> gpu |> device
+        @test D === device(ac) === device(ac.actor) == device(ac.critic)
+
+        A = send_to_device(D, rand(3))
+        ac.actor(A)
+        ac.critic(A)
+    end
 end
