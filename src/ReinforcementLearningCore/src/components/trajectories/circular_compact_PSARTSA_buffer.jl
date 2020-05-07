@@ -44,7 +44,7 @@ end
 
 @forward CircularCompactPSARTSATrajectory.trajectory Base.length, Base.isempty
 
-RLBase.get_trace(t::CircularCompactPSARTSATrajectory, s::Symbol) =
+get_trace(t::CircularCompactPSARTSATrajectory, s::Symbol) =
     s == :priority ? t.priority : get_trace(t.trajectory, s)
 
 function Base.getindex(b::CircularCompactPSARTSATrajectory, i::Int)

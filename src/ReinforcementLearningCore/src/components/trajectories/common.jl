@@ -1,7 +1,7 @@
 const CompactSARTSATrajectory =
     Union{CircularCompactSARTSATrajectory,VectorialCompactSARTSATrajectory}
 
-function RLBase.get_trace(b::CompactSARTSATrajectory, s::Symbol)
+function get_trace(b::CompactSARTSATrajectory, s::Symbol)
     if s == :state || s == :action
         select_last_dim(b[s], 1:(nframes(b[s]) > 1 ? nframes(b[s]) - 1 : nframes(b[s])))
     elseif s == :reward || s == :terminal

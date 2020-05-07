@@ -1,6 +1,6 @@
 import Base: run
 
-run(agent, env, args...) = run(DynamicStyle(env), agent, env, args...)
+run(agent, env::AbstractEnv, args...) = run(DynamicStyle(env), agent, env, args...)
 
 function run(
     ::Sequential,

@@ -16,12 +16,6 @@
         q_values = NN(rand(2))
         @test size(q_values) == (3,)
 
-        v = NN(rand(2), 2)
-        @test v isa Number
-
-        batch_q_values = batch_estimate(NN, rand(2, 5))
-        @test size(batch_q_values) == (3, 5)
-
         gs = gradient(params(NN)) do
             sum(NN(rand(2, 5)))
         end

@@ -20,14 +20,6 @@
                 target_prob;
                 atol = 0.005,
             ))
-
-            explorer_copy = copy(explorer)
-            reset!(explorer_copy)
-            Random.seed!(explorer_copy, 123)
-
-            new_actions = [explorer_copy(values) for _ in 1:10000]
-
-            @test actions == new_actions
         end
 
         @testset "linear" begin
@@ -52,8 +44,14 @@
                 explorer(xs)
             end
 
-            reset!(explorer)
-
+            explorer = EpsilonGreedyExplorer(;
+                ϵ_stable = 0.1,
+                ϵ_init = 0.9,
+                warmup_steps = 3,
+                decay_steps = 8,
+                kind = :linear,
+                is_break_tie = true,
+            )
             for ϵ in E
                 @test RLCore.get_ϵ(explorer) ≈ ϵ
                 @test isapprox(
@@ -63,7 +61,14 @@
                 explorer(xs)
             end
 
-            reset!(explorer)
+            explorer = EpsilonGreedyExplorer(;
+                ϵ_stable = 0.1,
+                ϵ_init = 0.9,
+                warmup_steps = 3,
+                decay_steps = 8,
+                kind = :linear,
+                is_break_tie = true,
+            )
             for i in 1:100
                 @test mask[explorer(xs, mask)]
             end
@@ -98,11 +103,6 @@
                 [ϵ / 5, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2];
                 atol = 1e-5,
             )
-
-            reset!(explorer)
-            for i in 1:100
-                @test mask[explorer(xs, mask)]
-            end
         end
     end
 

@@ -1,7 +1,9 @@
 export VBasedPolicy
 
+using MacroTools: @forward
+
 """
-    VBasedPolicy(;kwargs...)
+    VBasedPolicy(;learner, mapping, explorer=GreedyExplorer())
 
 # Key words & Fields
 
@@ -15,6 +17,8 @@ Base.@kwdef struct VBasedPolicy{L<:AbstractLearner,M,E<:AbstractExplorer} <: Abs
     explorer::E = GreedyExplorer()
 end
 
+(p::VBasedPolicy)(obs) = p(obs, ActionStyle(obs))
+
 (p::VBasedPolicy)(obs, ::MinimalActionSet) = p.mapping(obs, p.learner) |> p.explorer
 
 function (p::VBasedPolicy)(obs, ::FullActionSet)
@@ -22,21 +26,19 @@ function (p::VBasedPolicy)(obs, ::FullActionSet)
     p.explorer(action_values, get_legal_actions_mask(obs))
 end
 
-function RLBase.get_prob(p::VBasedPolicy, obs, ::MinimalActionSet)
-    get_prob(p.explorer, p.mapping(obs, p.learner))
-end
+RLBase.get_prob(p::VBasedPolicy, obs, action::Integer) = get_prob(p, obs, ActionStyle(obs), action)
+
+RLBase.get_prob(p::VBasedPolicy, obs, ::MinimalActionSet) = get_prob(p.explorer, p.mapping(obs, p.learner))
+RLBase.get_prob(p::VBasedPolicy, obs, ::MinimalActionSet, action) = get_prob(p.explorer, p.mapping(obs, p.learner), action)
 
 function RLBase.get_prob(p::VBasedPolicy, obs, ::FullActionSet)
     action_values = p.mapping(obs, p.learner)
     get_prob(p.explorer, action_values, get_legal_actions_mask(obs))
 end
 
-RLBase.update!(p::VBasedPolicy, experience) = update!(p.learner, experience)
-
-function RLBase.update!(p::VBasedPolicy, t::AbstractTrajectory)
-    experience = extract_experience(t, p)
-    isnothing(experience) || update!(p, experience)
+function RLBase.get_prob(p::VBasedPolicy, obs, ::FullActionSet, action)
+    action_values = p.mapping(obs, p.learner)
+    get_prob(p.explorer, action_values, get_legal_actions_mask(obs), action)
 end
 
-RLBase.extract_experience(trajectory::AbstractTrajectory, p::VBasedPolicy) =
-    extract_experience(trajectory, p.learner)
+@forward VBasedPolicy.learner RLBase.get_priority, RLBase.update!

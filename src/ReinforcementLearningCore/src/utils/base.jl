@@ -4,7 +4,6 @@ export nframes,
     select_last_frame,
     consecutive_view,
     find_all_max,
-    find_max,
     huber_loss,
     huber_loss_unreduced,
     discount_rewards,
@@ -90,88 +89,22 @@ consecutive_view(cb::AbstractArray, inds::Vector{Int}, n_stack::Int, n_horizeon:
         ),
     )
 
-"""
-    find_all_max(A::AbstractArray)
-
-Like `find_max`, but all the indices of the maximum value are returned.
-
-!!! warning
-    All elements of value `NaN` in `A` will be ignored, unless all elements are `NaN`.
-    In that case, the returned maximum value will be `NaN` and the returned indices will be `collect(1:length(A))`
-
-# Examples
-
-```julia-repl
-julia> find_all_max([-Inf, -Inf, -Inf])
-(-Inf, [1, 2, 3])
-julia> find_all_max([Inf, Inf, Inf])
-(Inf, [1, 2, 3])
-julia> find_all_max([Inf, 0, Inf])
-(Inf, [1, 3])
-julia> find_all_max([0,1,2,1,2,1,0])
-(2, [3, 5])
-```
-"""
-function find_all_max(A)
-    maxval = typemin(eltype(A))
-    idxs = Int[]
-    for (i, x) in enumerate(A)
-        if !isnan(x)
-            if x > maxval
-                maxval = x
-                empty!(idxs)
-                push!(idxs, i)
-            elseif x == maxval
-                push!(idxs, i)
-            end
-        end
-    end
-    if length(idxs) == 0
-        NaN, collect(1:length(A))
-    else
-        maxval, idxs
-    end
+function find_all_max(x)
+    v = maximum(x)
+    v, findall(==(v), x)
 end
 
-"""
-    find_all_max(A, mask)
-
-Similar to `find_all_max(A)`, but only the masked elements in `A` will be considered.
-"""
-function find_all_max(A, mask)
-    maxval = typemin(eltype(A))
-    idxs = Int[]
-    for (i, x) in enumerate(A)
-        if mask[i] && (!isnan(x))
-            if x > maxval
-                maxval = x
-                empty!(idxs)
-                push!(idxs, i)
-            elseif x == maxval
-                push!(idxs, i)
-            end
-        end
-    end
-    if length(idxs) == 0
-        NaN, collect(1:length(A))
-    else
-        maxval, idxs
-    end
+function find_all_max(x, mask::AbstractVector{Bool})
+    v = maximum(view(x,mask))
+    v, [k for (m, k) in zip(mask, keys(x)) if m && x[k]==v]
 end
 
-find_max(A) = findmax(A)
+# !!! watch https://github.com/JuliaLang/julia/pull/35316#issuecomment-622629895
+Base.findmax(f, domain) = mapfoldl(x -> (f(x), x), _rf_findmax, domain)
+_rf_findmax((fm, m), (fx, x)) = isless(fm, fx) ? (fx, x) : (fm, m)
 
-function find_max(A, mask)
-    maxval = typemin(eltype(A))
-    ind = 0
-    for (i, x) in enumerate(A)
-        if mask[i] && x >= maxval
-            maxval = x
-            ind = i
-        end
-    end
-    maxval, ind
-end
+# !!! type piracy
+Base.findmax(A::AbstractVector, mask::AbstractVector{Bool}) = findmax(i -> A[i], view(keys(A), mask))
 
 function logitcrossentropy_unreduced(logŷ::AbstractVecOrMat, y::AbstractVecOrMat)
     return vec(-sum(y .* logsoftmax(logŷ), dims = 1))

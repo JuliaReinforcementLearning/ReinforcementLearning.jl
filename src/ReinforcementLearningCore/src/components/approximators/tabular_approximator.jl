@@ -3,7 +3,8 @@ export TabularApproximator
 """
     TabularApproximator(table<:AbstractArray)
 
-For `table` of 1-d, it will create a [`V_APPROXIMATOR`](@ref). For `table` of 2-d, it will create a [`QApproximator`].
+For `table` of 1-d, it will serve as a state value approximator.
+For `table` of 2-d, it will serve as a state-action value approximator.
 
 !!! warning
     For `table` of 2-d, the first dimension is action and the second dimension is state.
@@ -47,5 +48,5 @@ function RLBase.update!(Q::TabularApproximator{2}, correction::Pair{Int,Vector{F
     end
 end
 
-RLBase.ApproximatorStyle(::TabularApproximator{1}) = VApproximator()
-RLBase.ApproximatorStyle(::TabularApproximator{2}) = QApproximator()
+ApproximatorStyle(::TabularApproximator{1}) = V_APPROXIMATOR
+ApproximatorStyle(::TabularApproximator{2}) = Q_APPROXIMATOR

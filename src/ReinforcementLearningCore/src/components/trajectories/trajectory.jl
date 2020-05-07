@@ -13,7 +13,7 @@ end
 "A helper function to access inner fields"
 Base.getindex(t::Trajectory, s::Symbol) = getproperty(t.trajectories, s)
 
-RLBase.get_trace(t::Trajectory, s::Symbol) = t[s]
+get_trace(t::Trajectory, s::Symbol) = t[s]
 
 function Base.push!(t::Trajectory, kv::Pair{Symbol})
     k, v = kv
