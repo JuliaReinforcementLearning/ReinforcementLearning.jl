@@ -53,7 +53,7 @@ function AtariEnv(;
 )
     frame_skip > 0 || throw(ArgumentError("frame_skip must be greater than 0!"))
     name in getROMList() ||
-    throw(ArgumentError("unknown ROM name! run `getROMList()` to see all the game names."))
+        throw(ArgumentError("unknown ROM name! run `getROMList()` to see all the game names."))
 
     if isnothing(seed)
         seed = (MersenneTwister(), 0)

@@ -30,17 +30,17 @@ function OpenSpielEnv(name; seed = nothing, observation_type = nothing, kwargs..
     has_info_state = provides_information_state_tensor(game_type)
     has_obs_state = provides_observation_tensor(game_type)
     has_info_state ||
-    has_obs_state ||
-    @error "the environment neither provides information tensor nor provides observation tensor"
+        has_obs_state ||
+        @error "the environment neither provides information tensor nor provides observation tensor"
     if isnothing(observation_type)
         observation_type = has_info_state ? :information : :observation
     end
     if observation_type == :observation
         has_obs_state ||
-        @error "the environment doesn't support observation_type of $observation_type"
+            @error "the environment doesn't support observation_type of $observation_type"
     elseif observation_type == :information
         has_info_state ||
-        @error "the environment doesn't support observation_type of $observation_type"
+            @error "the environment doesn't support observation_type of $observation_type"
     else
         @error "unknown observation_type $observation_type"
     end
@@ -72,7 +72,8 @@ function OpenSpielEnv(name; seed = nothing, observation_type = nothing, kwargs..
     env
 end
 
-Base.copy(env::OpenSpielEnv{O,D,S,G,R}) where {O,D,S,G,R} = OpenSpielEnv{O,D,S,G,R}(copy(env.state), env.game, env.rng)
+Base.copy(env::OpenSpielEnv{O,D,S,G,R}) where {O,D,S,G,R} =
+    OpenSpielEnv{O,D,S,G,R}(copy(env.state), env.game, env.rng)
 Base.show(io::IO, env::OpenSpielEnv) = show(io, env.state)
 
 RLBase.DynamicStyle(env::OpenSpielEnv{O,D}) where {O,D} = D
@@ -118,7 +119,8 @@ struct OpenSpielObs{O,D,S}
     player::Int32
 end
 
-RLBase.observe(env::OpenSpielEnv{O,D,S}, player) where {O,D,S} = OpenSpielObs{O,D,S}(env.state, player)
+RLBase.observe(env::OpenSpielEnv{O,D,S}, player) where {O,D,S} =
+    OpenSpielObs{O,D,S}(env.state, player)
 
 RLBase.get_action_space(env::OpenSpielEnv) =
     DiscreteSpace(0:num_distinct_actions(env.game)-1)

@@ -119,7 +119,8 @@ function (env::CartPoleEnv)(a)
     env.state[4] += env.params.tau * thetaacc
     env.done =
         abs(env.state[1]) > env.params.xthreshold ||
-        abs(env.state[3]) > env.params.thetathreshold || env.t > env.params.max_steps
+        abs(env.state[3]) > env.params.thetathreshold ||
+        env.t > env.params.max_steps
     nothing
 end
 
