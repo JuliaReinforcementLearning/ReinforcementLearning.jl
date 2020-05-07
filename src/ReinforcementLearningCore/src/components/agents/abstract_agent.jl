@@ -66,3 +66,8 @@ const POST_ACT_STAGE = PostActStage()
 
 (agent::AbstractAgent)(obs) = agent(PRE_ACT_STAGE, obs)
 function (agent::AbstractAgent)(stage::AbstractStage, obs) end
+
+struct Training{T<:AbstractStage} end
+Training(s::T) where {T<:AbstractStage} = Training{T}()
+struct Testing{T<:AbstractStage} end
+Testing(s::T) where {T<:AbstractStage} = Testing{T}()

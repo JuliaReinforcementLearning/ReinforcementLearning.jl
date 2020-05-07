@@ -1,5 +1,7 @@
 export AbstractLearner, extract_experience
 
+using Flux
+
 """
     (learner::AbstractLearner)(obs)
 
@@ -25,3 +27,6 @@ function extract_experience end
     get_priority(p::AbstractLearner, experience)
 """
 function RLBase.get_priority(p::AbstractLearner, experience) end
+
+# avoid fallback silently
+Flux.testmode!(::AbstractLearner, mode=false) = @error "someone forgets to implement this method!!!"

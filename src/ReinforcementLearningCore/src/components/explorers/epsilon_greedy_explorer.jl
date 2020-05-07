@@ -2,6 +2,7 @@ export EpsilonGreedyExplorer, GreedyExplorer
 
 using Random
 using Distributions: Categorical
+using Flux
 
 """
     EpsilonGreedyExplorer{T}(;kwargs...)
@@ -23,6 +24,7 @@ Two kinds of epsilon-decreasing strategy are implmented here (`linear` and `exp`
 - `ϵ_stable::Float64`: the epsilon after `warmup_steps + decay_steps`.
 - `is_break_tie=false`: randomly select an action of the same maximum values if set to `true`.
 - `seed=nothing`: set the seed of internal RNG.
+- `is_training=true`, in training mode, `step` will not be updated. And the `ϵ` will be set to 0.
 
 # Example
 
@@ -45,6 +47,7 @@ mutable struct EpsilonGreedyExplorer{Kind,IsBreakTie,R} <: AbstractExplorer
     decay_steps::Int
     step::Int
     rng::R
+    is_training::Bool
 end
 
 function EpsilonGreedyExplorer(;
@@ -55,6 +58,7 @@ function EpsilonGreedyExplorer(;
     decay_steps = 0,
     step = 1,
     is_break_tie = false,
+    is_training = true,
     seed = nothing,
 )
     rng = MersenneTwister(seed)
@@ -65,8 +69,11 @@ function EpsilonGreedyExplorer(;
         decay_steps,
         step,
         rng,
+        is_training
     )
 end
+
+Flux.testmode!(p::EpsilonGreedyExplorer, mode=true) = p.is_training = !mode
 
 EpsilonGreedyExplorer(ϵ; kwargs...) = EpsilonGreedyExplorer(; ϵ_stable = ϵ, kwargs...)
 
@@ -91,7 +98,7 @@ function get_ϵ(s::EpsilonGreedyExplorer{:exp}, step)
     end
 end
 
-get_ϵ(s::EpsilonGreedyExplorer) = get_ϵ(s, s.step)
+get_ϵ(s::EpsilonGreedyExplorer) = s.is_training ? get_ϵ(s, s.step) : 0.
 
 """
     (s::EpsilonGreedyExplorer)(values; step) where T
@@ -105,26 +112,26 @@ get_ϵ(s::EpsilonGreedyExplorer) = get_ϵ(s, s.step)
 """
 function (s::EpsilonGreedyExplorer{<:Any,true})(values)
     ϵ = get_ϵ(s)
-    s.step += 1
+    s.is_training && (s.step += 1)
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values)[2]) : rand(s.rng, 1:length(values))
 end
 
 function (s::EpsilonGreedyExplorer{<:Any,false})(values)
     ϵ = get_ϵ(s)
-    s.step += 1
+    s.is_training && (s.step += 1)
     rand(s.rng) >= ϵ ? findmax(values)[2] : rand(s.rng, 1:length(values))
 end
 
 function (s::EpsilonGreedyExplorer{<:Any,true})(values, mask)
     ϵ = get_ϵ(s)
-    s.step += 1
+    s.is_training && (s.step += 1)
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values, mask)[2]) :
     rand(s.rng, findall(mask))
 end
 
 function (s::EpsilonGreedyExplorer{<:Any,false})(values, mask)
     ϵ = get_ϵ(s)
-    s.step += 1
+    s.is_training && (s.step += 1)
     rand(s.rng) >= ϵ ? findmax(values, mask)[2] : rand(s.rng, findall(mask))
 end
 

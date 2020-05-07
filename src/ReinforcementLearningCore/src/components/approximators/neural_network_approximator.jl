@@ -31,6 +31,8 @@ RLBase.update!(app::NeuralNetworkApproximator, gs) =
 Base.copyto!(dest::NeuralNetworkApproximator, src::NeuralNetworkApproximator) =
     Flux.loadparams!(dest.model, params(src))
 
+Flux.testmode!(app::NeuralNetworkApproximator, mode=true) = testmode!(app.model, mode)
+
 #####
 # ActorCritic
 #####
@@ -52,4 +54,9 @@ Flux.@functor ActorCritic
 function RLBase.update!(app::ActorCritic, gs)
     update!(app.actor, gs)
     update!(app.critic, gs)
+end
+
+function Flux.testmode!(app::ActorCritic, mode=true)
+    testmode!(app.actor, mode)
+    testmode!(app.critic, mode)
 end

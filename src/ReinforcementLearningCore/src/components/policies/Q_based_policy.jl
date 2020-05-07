@@ -1,6 +1,7 @@
 export QBasedPolicy
 
 using MacroTools: @forward
+using Flux
 
 """
     QBasedPolicy(;learner::Q, explorer::S)
@@ -25,3 +26,8 @@ RLBase.get_prob(p::QBasedPolicy, obs, ::FullActionSet) =
     get_prob(p.explorer, p.learner(obs), get_legal_actions_mask(obs))
 
 @forward QBasedPolicy.learner RLBase.get_priority, RLBase.update!
+
+function Flux.testmode!(p::QBasedPolicy, mode=true)
+    testmode!(p.learner, mode)
+    testmode!(p.explorer, mode)
+end

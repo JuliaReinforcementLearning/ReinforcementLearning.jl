@@ -1,13 +1,17 @@
 export UCBExplorer
 
 using Random
+using Flux
 
-mutable struct UCBExplorer{R<:AbstractRNG} <: AbstractExplorer
+Base.@kwdef mutable struct UCBExplorer{R<:AbstractRNG} <: AbstractExplorer
     c::Float64
     actioncounts::Vector{Float64}
     step::Int
     rng::R
+    is_training::Bool = true
 end
+
+Flux.testmode!(p::UCBExplorer, mode=true) = p.is_training = !mode
 
 """
     UCBExplorer(na; c=2.0, ϵ=1e-10, step=1, seed=nothing)
@@ -17,9 +21,10 @@ end
 - `t` is used to store current time step.
 - `c` is used to control the degree of exploration.
 - `seed`, set the seed of inner RNG.
+- `is_training=true`, in training mode, time step and counter will not be updated.
 """
-UCBExplorer(na; c = 2.0, ϵ = 1e-10, step = 1, seed = nothing) =
-    UCBExplorer(c, fill(ϵ, na), 1, MersenneTwister(seed))
+UCBExplorer(na; c = 2.0, ϵ = 1e-10, step = 1, seed = nothing, is_training=true) =
+    UCBExplorer(c, fill(ϵ, na), 1, MersenneTwister(seed), is_training)
 
 @doc raw"""
     (ucb::UCBExplorer)(values::AbstractArray)
@@ -37,7 +42,9 @@ See more details at Section (2.7) on Page 35 of the book *Sutton, Richard S., an
 """ function (p::UCBExplorer)(values::AbstractArray)
     v, inds = find_all_max(@. values + p.c * sqrt(log(p.step + 1) / p.actioncounts))
     action = sample(p.rng, inds)
-    p.actioncounts[action] += 1
-    p.step += 1
+    if p.is_training
+        p.actioncounts[action] += 1
+        p.step += 1
+    end
     action
 end
