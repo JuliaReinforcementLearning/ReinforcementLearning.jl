@@ -1,7 +1,7 @@
 export EpsilonGreedyExplorer, GreedyExplorer
 
 using Random
-using Distributions:Categorical
+using Distributions: Categorical
 
 """
     EpsilonGreedyExplorer{T}(;kwargs...)
@@ -206,7 +206,8 @@ function RLBase.get_prob(s::GreedyExplorer, values)
     Categorical(prob)
 end
 
-RLBase.get_prob(s::GreedyExplorer, values, action::Integer) = findmax(values)[2] == action ? 1.0 : 0.0
+RLBase.get_prob(s::GreedyExplorer, values, action::Integer) =
+    findmax(values)[2] == action ? 1.0 : 0.0
 
 function RLBase.get_prob(s::GreedyExplorer, values, mask)
     prob = zeros(length(values))

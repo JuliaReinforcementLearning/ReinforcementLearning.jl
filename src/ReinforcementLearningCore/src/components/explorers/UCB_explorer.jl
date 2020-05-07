@@ -18,7 +18,8 @@ end
 - `c` is used to control the degree of exploration.
 - `seed`, set the seed of inner RNG.
 """
-UCBExplorer(na; c = 2.0, ϵ = 1e-10, step = 1, seed=nothing) = UCBExplorer(c, fill(ϵ, na), 1, MersenneTwister(seed))
+UCBExplorer(na; c = 2.0, ϵ = 1e-10, step = 1, seed = nothing) =
+    UCBExplorer(c, fill(ϵ, na), 1, MersenneTwister(seed))
 
 @doc raw"""
     (ucb::UCBExplorer)(values::AbstractArray)

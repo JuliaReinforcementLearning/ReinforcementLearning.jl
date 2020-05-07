@@ -95,8 +95,8 @@ function find_all_max(x)
 end
 
 function find_all_max(x, mask::AbstractVector{Bool})
-    v = maximum(view(x,mask))
-    v, [k for (m, k) in zip(mask, keys(x)) if m && x[k]==v]
+    v = maximum(view(x, mask))
+    v, [k for (m, k) in zip(mask, keys(x)) if m && x[k] == v]
 end
 
 # !!! watch https://github.com/JuliaLang/julia/pull/35316#issuecomment-622629895
@@ -104,7 +104,8 @@ Base.findmax(f, domain) = mapfoldl(x -> (f(x), x), _rf_findmax, domain)
 _rf_findmax((fm, m), (fx, x)) = isless(fm, fx) ? (fx, x) : (fm, m)
 
 # !!! type piracy
-Base.findmax(A::AbstractVector, mask::AbstractVector{Bool}) = findmax(i -> A[i], view(keys(A), mask))
+Base.findmax(A::AbstractVector, mask::AbstractVector{Bool}) =
+    findmax(i -> A[i], view(keys(A), mask))
 
 function logitcrossentropy_unreduced(logŷ::AbstractVecOrMat, y::AbstractVecOrMat)
     return vec(-sum(y .* logsoftmax(logŷ), dims = 1))

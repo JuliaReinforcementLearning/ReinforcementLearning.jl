@@ -1,9 +1,5 @@
 export AbstractApproximator,
-    ApproximatorStyle,
-    Q_APPROXIMATOR,
-    QApproximator,
-    V_APPROXIMATOR,
-    VApproximator
+    ApproximatorStyle, Q_APPROXIMATOR, QApproximator, V_APPROXIMATOR, VApproximator
 
 """
     (app::AbstractApproximator)(obs)

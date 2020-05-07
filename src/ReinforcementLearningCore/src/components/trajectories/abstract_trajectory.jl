@@ -55,7 +55,8 @@ get_trace(t::AbstractTrajectory{names}) where {names} =
 Base.length(t::AbstractTrajectory) = maximum(length(x) for x in get_trace(t))
 Base.size(t::AbstractTrajectory) = (length(t),)
 Base.lastindex(t::AbstractTrajectory) = length(t)
-Base.getindex(t::AbstractTrajectory{names,types}, i::Int) where {names,types} = NamedTuple{names,types}(Tuple(x[i] for x in get_trace(t)))
+Base.getindex(t::AbstractTrajectory{names,types}, i::Int) where {names,types} =
+    NamedTuple{names,types}(Tuple(x[i] for x in get_trace(t)))
 
 Base.isempty(t::AbstractTrajectory) = all(isempty(t) for t in get_trace(t))
 
