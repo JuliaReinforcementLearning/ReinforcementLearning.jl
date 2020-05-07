@@ -1,7 +1,7 @@
 name = "ReinforcementLearningEnvironments"
 uuid = "25e41dd2-4622-11e9-1641-f1adca772921"
 authors = ["Jun Tian <juti@microsoft.com>"]
-version = "0.2.3"
+version = "0.2.4"
 
 [deps]
 GR = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
@@ -12,7 +12,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
 GR = "0.46, 0.47, 0.48"
-ReinforcementLearningBase = "0.6"
+ReinforcementLearningBase = "0.7"
 Requires = "1.0"
 StatsBase = "0.32"
 julia = "1.3"

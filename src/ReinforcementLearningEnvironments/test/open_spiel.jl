@@ -26,9 +26,7 @@
         get_reward(obs_1)
         get_state(obs_0)
         get_state(obs_1)
-        get_invalid_action(obs_0)
 
-        Random.seed!(env, 456)
         reset!(env)
 
         while true
