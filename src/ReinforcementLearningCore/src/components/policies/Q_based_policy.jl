@@ -2,6 +2,7 @@ export QBasedPolicy
 
 using MacroTools: @forward
 using Flux
+using Setfield
 
 """
     QBasedPolicy(;learner::Q, explorer::S)
@@ -13,6 +14,8 @@ Base.@kwdef struct QBasedPolicy{Q<:AbstractLearner,E<:AbstractExplorer} <: Abstr
     learner::Q
     explorer::E
 end
+
+Flux.functor(x::QBasedPolicy) = (learner = x.learner,), y -> @set x.learner = y.learner
 
 (π::QBasedPolicy)(obs) = π(obs, ActionStyle(obs))
 (π::QBasedPolicy)(obs, ::MinimalActionSet) = obs |> π.learner |> π.explorer

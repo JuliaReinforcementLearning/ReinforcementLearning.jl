@@ -6,7 +6,9 @@ export AbstractHook,
     TotalRewardPerEpisode,
     TotalBatchRewardPerEpisode,
     CumulativeReward,
-    TimePerStep
+    TimePerStep,
+    DoEveryNEpisode,
+    DoEveryNStep
 
 """
 A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
@@ -211,4 +213,42 @@ TimePerStep(; max_steps = 100) =
 function (hook::TimePerStep)(::PostActStage, agent, env, obs)
     push!(hook.times, (time_ns() - hook.t) / 1e9)
     hook.t = time_ns()
+end
+
+"""
+    DoEveryNStep(f; n=1, t=0)
+
+Execute `f(agent, env, obs)` every `n` step.
+`t` is a counter of steps.
+"""
+Base.@kwdef mutable struct DoEveryNStep{F} <: AbstractHook
+    f::F
+    n::Int = 1
+    t::Int = 0
+end
+
+function (hook::DoEveryNStep)(::PostActStage, agent, env, obs)
+    hook.t += 1
+    if hook.t % hook.n == 0
+        hook.f(agent, env, obs)
+    end
+end
+
+"""
+    DoEveryNEpisode(f; n=1, t=0)
+
+Execute `f(agent, env, obs)` every `n` episode.
+`t` is a counter of steps.
+"""
+Base.@kwdef mutable struct DoEveryNEpisode{F} <: AbstractHook
+    f::F
+    n::Int = 1
+    t::Int = 0
+end
+
+function (hook::DoEveryNEpisode)(::PostEpisodeStage, agent, env, obs)
+    hook.t += 1
+    if hook.t % hook.n == 0
+        hook.f(agent, env, obs)
+    end
 end

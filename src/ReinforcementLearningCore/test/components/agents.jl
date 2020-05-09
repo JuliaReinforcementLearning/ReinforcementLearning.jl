@@ -21,4 +21,12 @@
     @test get_trace(agent.trajectory, :terminal) == [get_terminal(obs2)]
     @test get_trace(agent.trajectory, :next_state) == [get_state(obs2)]
     @test get_trace(agent.trajectory, :next_action) == [dummy_action]
+
+    @testset "loading/saving Agent" begin
+        mktempdir() do dir
+            RLCore.save(dir, agent)
+            @test length(readdir(dir)) != 0
+            agent = Agent(dir)
+        end
+    end
 end
