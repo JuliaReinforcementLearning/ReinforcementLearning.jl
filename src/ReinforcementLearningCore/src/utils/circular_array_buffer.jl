@@ -162,7 +162,7 @@ end
 
 `update!` the last frame of `cb` with data.
 """
-function RLBase.update!(cb::CircularArrayBuffer{T,N}, data::AbstractArray{T}) where {T,N}
+function RLBase.update!(cb::CircularArrayBuffer{T,N}, data::AbstractArray) where {T,N}
     select_last_dim(cb.buffer, _buffer_frame(cb, cb.length)) .= data
     cb
 end
