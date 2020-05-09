@@ -7,6 +7,7 @@
 **Implemented enhancements:**
 
 - Add checkpoints [\#36](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/36)
+- Add built-in support for TensorBoard [\#35](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/35)
 - A2C [\#32](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/32)
 
 **Fixed bugs:**
@@ -26,6 +27,7 @@
 - add documentation stage in travis [\#57](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/57) ([findmyway](https://github.com/findmyway))
 - CompatHelper: add new compat entry for "Reexport" at version "0.2" [\#56](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/56) ([github-actions[bot]](https://github.com/apps/github-actions))
 - add compat [\#55](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/55) ([findmyway](https://github.com/findmyway))
+- clean up code [\#54](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/54) ([findmyway](https://github.com/findmyway))
 
 ## [v0.4.0-beta](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/v0.4.0-beta) (2020-02-09)
 
@@ -43,7 +45,6 @@
 
 **Merged pull requests:**
 
-- clean up code [\#54](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/54) ([findmyway](https://github.com/findmyway))
 - Install TagBot as a GitHub Action [\#53](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/53) ([JuliaTagBot](https://github.com/JuliaTagBot))
 - update benchmark for circular\_array\_buffer [\#50](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/50) ([findmyway](https://github.com/findmyway))
 - update dependencies and docs [\#49](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/49) ([findmyway](https://github.com/findmyway))
