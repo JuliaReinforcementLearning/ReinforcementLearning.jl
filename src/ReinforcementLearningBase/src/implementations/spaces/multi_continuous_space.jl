@@ -21,12 +21,12 @@ Similar to [`ContinuousSpace`](@ref), but scaled to multi-dimension.
 """
 MultiContinuousSpace(low, high) = MultiContinuousSpace(promote(low, high)...)
 
-Base.eltype(::MultiContinuousSpace{T}) where {T} = T
+Base.eltype(::MultiContinuousSpace{T}) where {T} = eltype(T)
 Base.in(xs, s::MultiContinuousSpace) =
     size(xs) == size(s.low) && all(map((l, x, h) -> l <= x <= h, s.low, xs, s.high))
 
 Base.length(s::MultiContinuousSpace) = error("MultiContinuousSpace is uncountable")
 
-function Random.rand(rng::AbstractRNG, s::MultiContinuousSpace)
-    (s.high .- s.low) .* rand(rng, size(s.low)...) .+ s.low
+function Random.rand(rng::AbstractRNG, s::MultiContinuousSpace{T}) where T
+    (s.high .- s.low) .* rand(rng, eltype(T), size(s.low)...) .+ s.low
 end
