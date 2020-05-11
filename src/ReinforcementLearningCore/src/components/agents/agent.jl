@@ -1,4 +1,4 @@
-export Agent
+export Agent, @agent_str
 
 using Flux
 using BSON
@@ -26,6 +26,9 @@ Base.@kwdef mutable struct Agent{P<:AbstractPolicy,T<:AbstractTrajectory,R} <: A
     is_training::Bool = true
 end
 
+# avoid polluting trajectory
+(agent::Agent)(obs) = agent.policy(obs)
+
 Flux.functor(x::Agent) = (policy = x.policy,), y -> @set x.policy = y.policy
 
 function FileIO.save(dir::String, agent::Agent)
@@ -44,6 +47,10 @@ function FileIO.save(dir::String, agent::Agent)
         BSON.@save joinpath(dir, "is_training.bson") is_training
     end
     @info "finished saving agent in $t seconds"
+end
+
+macro agent_str(dir)
+    Agent(dir)
 end
 
 "remember to call `gpu` if necessary"

@@ -227,10 +227,12 @@ Base.@kwdef mutable struct DoEveryNStep{F} <: AbstractHook
     t::Int = 0
 end
 
+DoEveryNStep(f, n=1, t=0) = DoEveryNStep(f, n, t)
+
 function (hook::DoEveryNStep)(::PostActStage, agent, env, obs)
     hook.t += 1
     if hook.t % hook.n == 0
-        hook.f(agent, env, obs)
+        hook.f(hook.t, agent, env, obs)
     end
 end
 
@@ -246,9 +248,11 @@ Base.@kwdef mutable struct DoEveryNEpisode{F} <: AbstractHook
     t::Int = 0
 end
 
+DoEveryNEpisode(f, n=1, t=0) = DoEveryNEpisode(f, n, t)
+
 function (hook::DoEveryNEpisode)(::PostEpisodeStage, agent, env, obs)
     hook.t += 1
     if hook.t % hook.n == 0
-        hook.f(agent, env, obs)
+        hook.f(hook.t, agent, env, obs)
     end
 end
