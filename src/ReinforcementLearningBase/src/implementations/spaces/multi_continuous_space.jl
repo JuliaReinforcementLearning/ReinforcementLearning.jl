@@ -21,7 +21,7 @@ Similar to [`ContinuousSpace`](@ref), but scaled to multi-dimension.
 """
 MultiContinuousSpace(low, high) = MultiContinuousSpace(promote(low, high)...)
 
-Base.eltype(::MultiContinuousSpace{T}) where {T} = eltype(T)
+Base.eltype(::MultiContinuousSpace{T}) where {T} = T
 Base.in(xs, s::MultiContinuousSpace) =
     size(xs) == size(s.low) && all(map((l, x, h) -> l <= x <= h, s.low, xs, s.high))
 
