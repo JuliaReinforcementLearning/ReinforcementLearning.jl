@@ -46,6 +46,9 @@ function (p::StackFrames{T,N})(state::AbstractArray) where {T,N}
 end
 
 # !!! side effect?
-function Base.push!(cb::CircularArrayBuffer{T,N}, stacked_data::CircularArrayBuffer{T,N}) where {T,N}
+function Base.push!(
+    cb::CircularArrayBuffer{T,N},
+    stacked_data::CircularArrayBuffer{T,N},
+) where {T,N}
     push!(cb, select_last_frame(stacked_data))
 end
