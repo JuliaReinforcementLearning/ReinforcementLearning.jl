@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- Automatic JuliaFormatter.jl run [\#44](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/44) ([github-actions[bot]](https://github.com/apps/github-actions))
 - fix sampling from MultiContinuousSpace [\#43](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/43) ([jbrea](https://github.com/jbrea))
 
 ## [v0.7.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.0) (2020-05-06)
