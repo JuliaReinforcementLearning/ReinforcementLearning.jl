@@ -26,7 +26,7 @@
         mktempdir() do dir
             RLCore.save(dir, agent)
             @test length(readdir(dir)) != 0
-            agent = Agent(dir)
+            agent = RLCore.load(dir, Agent)
         end
     end
 end

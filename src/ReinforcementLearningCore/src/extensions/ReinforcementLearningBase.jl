@@ -1,5 +1,3 @@
-export @policy_str
-
 using CuArrays
 using Distributions: pdf
 using Random
@@ -15,13 +13,12 @@ Random.rand(s::MultiContinuousSpace{<:CuArray}) = rand(CuArrays.CURAND.generator
 Flux.testmode!(p::AbstractPolicy, mode = true) =
     @error "someone forgets to implement this method!!!"
 
-macro policy_str(path)
-    load_policy(path)
+function save(f::String, p::AbstractPolicy)
+    policy = cpu(p)
+    BSON.@save f policy
 end
 
-function load_policy(path)
-    if isdir(path)
-        path = joinpath(path, "policy.bson")
-    end
-    BSON.load(path)[:policy]
+function load(f::String, ::Type{<:AbstractPolicy})
+    BSON.@load f policy
+    gpu(policy)
 end
