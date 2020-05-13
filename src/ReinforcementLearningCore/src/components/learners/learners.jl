@@ -28,4 +28,5 @@ function extract_experience end
 """
 function RLBase.get_priority(p::AbstractLearner, experience) end
 
-Flux.testmode!(learner::AbstractLearner, mode=true) = Flux.testmode!(learner.approximator, mode)
+Flux.testmode!(learner::AbstractLearner, mode = true) =
+    Flux.testmode!(learner.approximator, mode)
