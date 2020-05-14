@@ -10,7 +10,7 @@ using Setfield
 Use a Q-`learner` to generate estimations of action values.
 Then an `explorer` is applied on the estimations to select an action.
 """
-Base.@kwdef struct QBasedPolicy{Q<:AbstractLearner,E<:AbstractExplorer} <: AbstractPolicy
+Base.@kwdef mutable struct QBasedPolicy{Q<:AbstractLearner,E<:AbstractExplorer} <: AbstractPolicy
     learner::Q
     explorer::E
 end

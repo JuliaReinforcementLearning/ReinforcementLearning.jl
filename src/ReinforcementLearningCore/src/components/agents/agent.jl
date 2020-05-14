@@ -30,13 +30,17 @@ end
 
 Flux.functor(x::Agent) = (policy = x.policy,), y -> @set x.policy = y.policy
 
-function save(dir::String, agent::Agent)
+function save(dir::String, agent::Agent;is_save_trajectory=true)
     mkpath(dir)
     @info "saving agent to $dir ..."
 
     t = @elapsed begin
         save(joinpath(dir, "policy.bson"), agent.policy)
-        JLD.save(joinpath(dir, "trajectory.jld"), "trajectory", agent.trajectory)
+        if is_save_trajectory
+            JLD.save(joinpath(dir, "trajectory.jld"), "trajectory", agent.trajectory)
+        else
+            @warn "trajectory is skipped since you set `is_save_trajectory` to false"
+        end
         BSON.bson(
             joinpath(dir, "agent_meta.bson"),
             Dict(
