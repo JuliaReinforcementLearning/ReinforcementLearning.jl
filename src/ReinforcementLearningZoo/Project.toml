@@ -1,20 +1,27 @@
 name = "ReinforcementLearningZoo"
 uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
+BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 ReinforcementLearningBase = "e575027e-6cd6-5018-9292-cdc6200d2b44"
 ReinforcementLearningCore = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
+Requires = "ae029012-a4dd-5104-9daa-d747884805df"
+Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+TensorBoardLogger = "899adc3e-224a-11e9-021f-63837185c80f"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 Flux = "0.10"
-ReinforcementLearningBase = "0.6"
-ReinforcementLearningCore = "0.2"
+ReinforcementLearningBase = "0.7"
+ReinforcementLearningCore = "0.3"
 StatsBase = "0.32"
 Zygote = "0.4"
 julia = "1.3"

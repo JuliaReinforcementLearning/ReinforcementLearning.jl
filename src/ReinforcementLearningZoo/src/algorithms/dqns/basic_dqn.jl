@@ -20,13 +20,14 @@ You can start from this implementation to understand how everything is organized
 - `min_replay_history::Int=32`: number of transitions that should be experienced before updating the `approximator`.
 - `seed=nothing`.
 """
-struct BasicDQNLearner{Q,F,R} <: AbstractLearner
+mutable struct BasicDQNLearner{Q,F,R} <: AbstractLearner
     approximator::Q
     loss_func::F
     γ::Float32
     batch_size::Int
     min_replay_history::Int
     rng::R
+    loss::Float32
 end
 
 (learner::BasicDQNLearner)(obs) =
@@ -51,10 +52,18 @@ function BasicDQNLearner(;
         batch_size,
         min_replay_history,
         rng,
+        0.
     )
 end
 
-function RLBase.update!(learner::BasicDQNLearner, batch)
+function RLBase.update!(learner::BasicDQNLearner, t::AbstractTrajectory)
+    length(t) < learner.min_replay_history && return
+
+    inds = rand(learner.rng, 1:length(t), learner.batch_size)
+    batch = map(get_trace(t, :state, :action, :reward, :terminal, :next_state)) do x
+        consecutive_view(x, inds)
+    end
+
     Q, γ, loss_func, batch_size =
         learner.approximator, learner.γ, learner.loss_func, learner.batch_size
     s, r, t, s′ = map(
@@ -64,25 +73,15 @@ function RLBase.update!(learner::BasicDQNLearner, batch)
     a = CartesianIndex.(batch.action, 1:batch_size)
 
     gs = gradient(params(Q)) do
-        q = batch_estimate(Q, s)[a]
-        q′ = vec(maximum(batch_estimate(Q, s′); dims = 1))
+        q = Q(s)[a]
+        q′ = vec(maximum(Q(s′); dims = 1))
         G = r .+ γ .* (1 .- t) .* q′
-        loss_func(G, q)
+        loss = loss_func(G, q)
+        ignore() do
+            learner.loss = loss
+        end
+        loss
     end
 
     update!(Q, gs)
-end
-
-function RLBase.extract_experience(
-    t::CircularCompactSARTSATrajectory,
-    learner::BasicDQNLearner,
-)
-    if length(t) > learner.min_replay_history
-        inds = rand(learner.rng, 1:length(t), learner.batch_size)
-        map(get_trace(t, :state, :action, :reward, :terminal, :next_state)) do x
-            consecutive_view(x, inds)
-        end
-    else
-        nothing
-    end
 end

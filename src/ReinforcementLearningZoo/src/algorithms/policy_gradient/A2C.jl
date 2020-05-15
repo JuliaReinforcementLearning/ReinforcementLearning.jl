@@ -1,35 +1,19 @@
-export A2CLearner, ActorCritic
+export A2CLearner
 
 using Flux
-
-"""
-    ActorCritic(actor, critic)
-
-The `actor` part must return a **normalized** vector representing the action values,
-and the `critic` part must return a state value.
-"""
-Base.@kwdef struct ActorCritic{A,C}
-    actor::A
-    critic::C
-end
-
-Flux.@functor ActorCritic
-
-(m::ActorCritic)(s::AbstractArray, ::Val{:Q}) = m.actor(s)
-(m::ActorCritic)(s::AbstractArray, ::Val{:V}) = m.critic(s)
 
 """
     A2CLearner(;kwargs...)
 
 # Keyword arguments
 
-- `approximator`, an [`ActorCritic`](@ref) based [`NeuralNetworkApproximator`](@ref)
+- `approximator`::[`ActorCritic`](@ref)
 - `γ::Float32`, reward discount rate.
 - `actor_loss_weight::Float32`
 - `critic_loss_weight::Float32`
 - `entropy_loss_weight::Float32`
 """
-Base.@kwdef struct A2CLearner{A} <: AbstractLearner
+Base.@kwdef struct A2CLearner{A<:ActorCritic} <: AbstractLearner
     approximator::A
     γ::Float32
     actor_loss_weight::Float32
@@ -37,19 +21,23 @@ Base.@kwdef struct A2CLearner{A} <: AbstractLearner
     entropy_loss_weight::Float32
 end
 
-(learner::A2CLearner)(obs::BatchObs) =
-    learner.approximator(
-        send_to_device(device(learner.approximator), get_state(obs)),
-        Val(:Q),
-    ) |> send_to_host
+(learner::A2CLearner)(obs::BatchObs) = learner.approximator.actor(send_to_device(device(learner.approximator), get_state(obs))) |> send_to_host
 
-function RLBase.update!(learner::A2CLearner, experience)
+function RLBase.update!(learner::A2CLearner, t::AbstractTrajectory)
+    isfull(t) || return
+
+    states = get_trace(t, :state)
+    actions = get_trace(t, :action)
+    rewards = get_trace(t, :reward)
+    terminals = get_trace(t, :terminal)
+    next_state = select_last_frame(get_trace(t, :next_state))
+
     AC = learner.approximator
     γ = learner.γ
     w₁ = learner.actor_loss_weight
     w₂ = learner.critic_loss_weight
     w₃ = learner.entropy_loss_weight
-    states, actions, rewards, terminals, next_state = experience
+
     states = send_to_device(device(AC), states)
     next_state = send_to_device(device(AC), next_state)
 
@@ -57,7 +45,7 @@ function RLBase.update!(learner::A2CLearner, experience)
     actions = flatten_batch(actions)
     actions = CartesianIndex.(actions, 1:length(actions))
 
-    next_state_values = AC(next_state, Val(:V))
+    next_state_values = AC.critic(next_state)
     gains = discount_rewards(
         rewards,
         γ;
@@ -68,10 +56,10 @@ function RLBase.update!(learner::A2CLearner, experience)
     gains = send_to_device(device(AC), gains)
 
     gs = gradient(Flux.params(AC)) do
-        probs = AC(states_flattened, Val(:Q))
+        probs = AC.actor(states_flattened)
         log_probs = log.(probs)
         log_probs_select = log_probs[actions]
-        values = AC(states_flattened, Val(:V))
+        values = AC.critic(states_flattened)
         advantage = vec(gains) .- vec(values)
         actor_loss = -mean(log_probs_select .* Zygote.dropgrad(advantage))
         critic_loss = mean(advantage .^ 2)
@@ -80,20 +68,6 @@ function RLBase.update!(learner::A2CLearner, experience)
         loss
     end
     update!(AC, gs)
-end
-
-function RLBase.extract_experience(t::CircularCompactSARTSATrajectory, learner::A2CLearner)
-    if isfull(t)
-        (
-            states = get_trace(t, :state),
-            actions = get_trace(t, :action),
-            rewards = get_trace(t, :reward),
-            terminals = get_trace(t, :terminal),
-            next_state = select_last_frame(get_trace(t, :next_state)),
-        )
-    else
-        nothing
-    end
 end
 
 function (agent::Agent{<:QBasedPolicy{<:A2CLearner},<:CircularCompactSARTSATrajectory})(
