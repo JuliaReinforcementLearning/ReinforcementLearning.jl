@@ -79,7 +79,7 @@ function PrioritizedDQNLearner(;
         update_step,
         default_priority,
         rng,
-        0.f0
+        0.f0,
     )
 end
 
@@ -90,9 +90,11 @@ end
     if `!isnothing(stack_size)`.
 """
 (learner::PrioritizedDQNLearner)(obs) =
-    obs |> get_state |>
+    obs |>
+    get_state |>
     x ->
-        send_to_device(device(learner.approximator), x) |> learner.approximator |>
+        send_to_device(device(learner.approximator), x) |>
+        learner.approximator |>
         send_to_host
 
 function RLBase.update!(learner::PrioritizedDQNLearner, batch)
@@ -155,8 +157,7 @@ function extract_experience(t::AbstractTrajectory, learner::PrioritizedDQNLearne
     actions = consecutive_view(get_trace(t, :action), inds)
     next_states = consecutive_view(get_trace(t, :state), inds .+ h; n_stack = s)
     consecutive_rewards = consecutive_view(get_trace(t, :reward), inds; n_horizon = h)
-    consecutive_terminals =
-        consecutive_view(get_trace(t, :terminal), inds; n_horizon = h)
+    consecutive_terminals = consecutive_view(get_trace(t, :terminal), inds; n_horizon = h)
     rewards, terminals = zeros(Float32, n), fill(false, n)
 
     rewards = discount_rewards_reduced(

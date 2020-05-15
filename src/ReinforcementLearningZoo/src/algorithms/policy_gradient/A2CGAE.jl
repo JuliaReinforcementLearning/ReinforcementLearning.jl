@@ -21,7 +21,11 @@ Base.@kwdef struct A2CGAELearner{A<:ActorCritic} <: AbstractLearner
     entropy_loss_weight::Float32
 end
 
-(learner::A2CGAELearner)(obs::BatchObs) = learner.approximator.actor(send_to_device(device(learner.approximator), get_state(obs))) |> send_to_host
+(learner::A2CGAELearner)(obs::BatchObs) =
+    learner.approximator.actor(send_to_device(
+        device(learner.approximator),
+        get_state(obs),
+    )) |> send_to_host
 
 function RLBase.update!(learner::A2CGAELearner, t::AbstractTrajectory)
     isfull(t) || return

@@ -31,9 +31,11 @@ mutable struct BasicDQNLearner{Q,F,R} <: AbstractLearner
 end
 
 (learner::BasicDQNLearner)(obs) =
-    obs |> get_state |>
+    obs |>
+    get_state |>
     x ->
-        send_to_device(device(learner.approximator), x) |> learner.approximator |>
+        send_to_device(device(learner.approximator), x) |>
+        learner.approximator |>
         send_to_host
 
 function BasicDQNLearner(;
@@ -52,7 +54,7 @@ function BasicDQNLearner(;
         batch_size,
         min_replay_history,
         rng,
-        0.
+        0.0,
     )
 end
 

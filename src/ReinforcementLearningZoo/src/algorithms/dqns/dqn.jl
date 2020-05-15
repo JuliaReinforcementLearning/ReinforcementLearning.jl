@@ -71,12 +71,13 @@ function DQNLearner(;
         target_update_freq,
         update_step,
         rng,
-        0.f0
+        0.f0,
     )
 end
 
 
-Flux.functor(x::DQNLearner) = (Q = x.approximator, Qₜ = x.target_approximator), y -> begin
+Flux.functor(x::DQNLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
+y -> begin
     x = @set x.approximator = y.Q
     x = @set x.target_approximator = y.Qₜ
     x
@@ -91,11 +92,13 @@ end
 (learner::DQNLearner)(obs) =
     obs |>
     get_state |>
-    x -> Flux.unsqueeze(x, ndims(x)+1) |>
-    x -> send_to_device(device(learner.approximator), x) |>
-    learner.approximator |>
-    send_to_host |>
-    Flux.squeezebatch
+    x ->
+        Flux.unsqueeze(x, ndims(x) + 1) |>
+        x ->
+            send_to_device(device(learner.approximator), x) |>
+            learner.approximator |>
+            send_to_host |>
+            Flux.squeezebatch
 
 function RLBase.update!(learner::DQNLearner, t::AbstractTrajectory)
     length(t) < learner.min_replay_history && return
@@ -148,8 +151,7 @@ function extract_experience(t::AbstractTrajectory, learner::DQNLearner)
     actions = consecutive_view(get_trace(t, :action), inds)
     next_states = consecutive_view(get_trace(t, :state), inds .+ h; n_stack = s)
     consecutive_rewards = consecutive_view(get_trace(t, :reward), inds; n_horizon = h)
-    consecutive_terminals =
-        consecutive_view(get_trace(t, :terminal), inds; n_horizon = h)
+    consecutive_terminals = consecutive_view(get_trace(t, :terminal), inds; n_horizon = h)
     rewards, terminals = zeros(Float32, n), fill(false, n)
 
     # make sure that we only consider experiences in current episode

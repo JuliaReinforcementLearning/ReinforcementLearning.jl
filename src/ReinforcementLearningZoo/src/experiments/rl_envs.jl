@@ -9,37 +9,43 @@ using BSON
 using TensorBoardLogger
 using Logging
 
-function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:BasicDQN}, ::Val{:CartPole}, ::Nothing; save_dir=nothing)
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:BasicDQN},
+    ::Val{:CartPole},
+    ::Nothing;
+    save_dir = nothing,
+)
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyymmddHHMMSS")
         save_dir = joinpath(pwd(), "checkpoints", "juliarl_BasicDQN_CartPole_$(t)")
     end
 
-    lg=TBLogger(joinpath(save_dir, "tb_log"), min_level=Logging.Info)
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
 
-    env = CartPoleEnv(; T = Float32  , seed = 11  )
+    env = CartPoleEnv(; T = Float32, seed = 11)
     ns, na = length(rand(get_observation_space(env))), length(get_action_space(env))
     agent = Agent(
         policy = QBasedPolicy(
             learner = BasicDQNLearner(
                 approximator = NeuralNetworkApproximator(
                     model = Chain(
-                        Dense(ns, 128, relu; initW = seed_glorot_uniform( seed = 17 )),
-                        Dense(128, 128, relu; initW = seed_glorot_uniform( seed = 23 )),
-                        Dense(128, na; initW = seed_glorot_uniform( seed = 39 )),
+                        Dense(ns, 128, relu; initW = seed_glorot_uniform(seed = 17)),
+                        Dense(128, 128, relu; initW = seed_glorot_uniform(seed = 23)),
+                        Dense(128, na; initW = seed_glorot_uniform(seed = 39)),
                     ) |> cpu,
                     optimizer = ADAM(),
                 ),
                 batch_size = 32,
                 min_replay_history = 100,
                 loss_func = huber_loss,
-                 seed = 22, 
+                seed = 22,
             ),
             explorer = EpsilonGreedyExplorer(
                 kind = :exp,
                 ϵ_stable = 0.01,
                 decay_steps = 500,
-                 seed = 33, 
+                seed = 33,
             ),
         ),
         trajectory = CircularCompactSARTSATrajectory(
@@ -58,14 +64,14 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:BasicDQN}, ::Val{:CartPole}, 
         time_per_step,
         DoEveryNStep() do t, agent, env, obs
             with_logger(lg) do
-                @info "training" loss=agent.policy.learner.loss
+                @info "training" loss = agent.policy.learner.loss
             end
         end,
         DoEveryNStep(10000) do t, agent, env, obs
             RLCore.save(save_dir, agent)
             BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
-        end
-        )
+        end,
+    )
 
     description = """
     This experiment uses three dense layers to approximate the Q value.
@@ -83,15 +89,21 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:BasicDQN}, ::Val{:CartPole}, 
     Experiment(agent, env, stop_condition, hook, description)
 end
 
-function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:DQN}, ::Val{:CartPole}, ::Nothing; save_dir=nothing)
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:DQN},
+    ::Val{:CartPole},
+    ::Nothing;
+    save_dir = nothing,
+)
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyymmddHHMMSS")
         save_dir = joinpath(pwd(), "checkpoints", "juliarl_BasicDQN_CartPole_$(t)")
     end
 
-    lg=TBLogger(joinpath(save_dir, "tb_log"), min_level=Logging.Info)
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
 
-    env = CartPoleEnv(; T = Float32  , seed = 11  )
+    env = CartPoleEnv(; T = Float32, seed = 11)
     ns, na = length(rand(get_observation_space(env))), length(get_action_space(env))
 
     agent = Agent(
@@ -146,15 +158,15 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:DQN}, ::Val{:CartPole}, ::Not
         DoEveryNStep() do t, agent, env, obs
             if agent.policy.learner.update_step % agent.policy.learner.update_freq == 0
                 with_logger(lg) do
-                    @info "training" loss=agent.policy.learner.loss
+                    @info "training" loss = agent.policy.learner.loss
                 end
             end
         end,
         DoEveryNStep(10000) do t, agent, env, obs
             RLCore.save(save_dir, agent)
             BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
-        end
-        )
+        end,
+    )
 
     description = """
     This experiment uses the `DQNLearner` method with three dense layers to approximate the Q value.
@@ -173,15 +185,21 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:DQN}, ::Val{:CartPole}, ::Not
     Experiment(agent, env, stop_condition, hook, description)
 end
 
-function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:PrioritizedDQN}, ::Val{:CartPole}, ::Nothing; save_dir=nothing)
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:PrioritizedDQN},
+    ::Val{:CartPole},
+    ::Nothing;
+    save_dir = nothing,
+)
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyymmddHHMMSS")
         save_dir = joinpath(pwd(), "checkpoints", "juliarl_BasicDQN_CartPole_$(t)")
     end
 
-    lg=TBLogger(joinpath(save_dir, "tb_log"), min_level=Logging.Info)
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
 
-    env = CartPoleEnv(; T = Float32  , seed = 11  )
+    env = CartPoleEnv(; T = Float32, seed = 11)
     ns, na = length(rand(get_observation_space(env))), length(get_action_space(env))
 
     agent = Agent(
@@ -236,15 +254,15 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:PrioritizedDQN}, ::Val{:CartP
         DoEveryNStep() do t, agent, env, obs
             if agent.policy.learner.update_step % agent.policy.learner.update_freq == 0
                 with_logger(lg) do
-                    @info "training" loss=agent.policy.learner.loss
+                    @info "training" loss = agent.policy.learner.loss
                 end
             end
         end,
         DoEveryNStep(10000) do t, agent, env, obs
             RLCore.save(save_dir, agent)
             BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
-        end
-        )
+        end,
+    )
 
     description = """
     This experiment uses the `PrioritizedDQNLearner` method with three dense layers to approximate the Q value.
@@ -263,15 +281,21 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:PrioritizedDQN}, ::Val{:CartP
     Experiment(agent, env, stop_condition, hook, description)
 end
 
-function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:Rainbow}, ::Val{:CartPole}, ::Nothing; save_dir=nothing)
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:Rainbow},
+    ::Val{:CartPole},
+    ::Nothing;
+    save_dir = nothing,
+)
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyymmddHHMMSS")
         save_dir = joinpath(pwd(), "checkpoints", "juliarl_BasicDQN_CartPole_$(t)")
     end
 
-    lg=TBLogger(joinpath(save_dir, "tb_log"), min_level=Logging.Info)
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
 
-    env = CartPoleEnv(; T = Float32  , seed = 11  )
+    env = CartPoleEnv(; T = Float32, seed = 11)
     ns, na = length(rand(get_observation_space(env))), length(get_action_space(env))
 
     n_atoms = 51
@@ -332,15 +356,15 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:Rainbow}, ::Val{:CartPole}, :
         DoEveryNStep() do t, agent, env, obs
             if agent.policy.learner.update_step % agent.policy.learner.update_freq == 0
                 with_logger(lg) do
-                    @info "training" loss=agent.policy.learner.loss
+                    @info "training" loss = agent.policy.learner.loss
                 end
             end
         end,
         DoEveryNStep(10000) do t, agent, env, obs
             RLCore.save(save_dir, agent)
             BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
-        end
-        )
+        end,
+    )
 
     description = """
     This experiment uses the `RainbowLearner` method with three dense layers to approximate the distributed Q value.
@@ -359,7 +383,13 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:Rainbow}, ::Val{:CartPole}, :
     Experiment(agent, env, stop_condition, hook, description)
 end
 
-function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:A2C}, ::Val{:CartPole}, ::Nothing; save_dir=nothing)
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:A2C},
+    ::Val{:CartPole},
+    ::Nothing;
+    save_dir = nothing,
+)
     N_ENV = 16
     UPDATE_FREQ = 10
     env = MultiThreadEnv([CartPoleEnv(; T = Float32, seed = i) for i in 1:N_ENV])
@@ -375,14 +405,14 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:A2C}, ::Val{:CartPole}, ::Not
                             Dense(256, na; initW = seed_glorot_uniform(seed = 23)),
                             softmax,
                         ),
-                        optimizer = ADAM(1e-3)
+                        optimizer = ADAM(1e-3),
                     ),
                     critic = NeuralNetworkApproximator(
                         model = Chain(
                             Dense(ns, 256, relu; initW = seed_glorot_uniform(seed = 29)),
                             Dense(256, 1; initW = seed_glorot_uniform(seed = 29)),
                         ),
-                        optimizer = ADAM(1e-3)
+                        optimizer = ADAM(1e-3),
                     ),
                 ) |> cpu,
                 γ = 0.99f0,
@@ -405,7 +435,7 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:A2C}, ::Val{:CartPole}, ::Not
             terminal_type = Bool,
             terminal_size = (N_ENV,),
         ),
-    );
+    )
 
 
     hook = TotalBatchRewardPerEpisode(N_ENV)
@@ -413,7 +443,13 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:A2C}, ::Val{:CartPole}, ::Not
     Experiment(agent, env, stop_condition, hook, "# A2C with CartPole")
 end
 
-function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:A2CGAE}, ::Val{:CartPole}, ::Nothing; save_dir=nothing)
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:A2CGAE},
+    ::Val{:CartPole},
+    ::Nothing;
+    save_dir = nothing,
+)
     N_ENV = 16
     UPDATE_FREQ = 10
     env = MultiThreadEnv([CartPoleEnv(; T = Float32, seed = i) for i in 1:N_ENV])
@@ -429,14 +465,14 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:A2CGAE}, ::Val{:CartPole}, ::
                             Dense(256, na; initW = seed_glorot_uniform(seed = 23)),
                             softmax,
                         ),
-                        optimizer = ADAM(1e-3)
+                        optimizer = ADAM(1e-3),
                     ),
                     critic = NeuralNetworkApproximator(
                         model = Chain(
                             Dense(ns, 256, relu; initW = seed_glorot_uniform(seed = 29)),
                             Dense(256, 1; initW = seed_glorot_uniform(seed = 29)),
                         ),
-                        optimizer = ADAM(1e-3)
+                        optimizer = ADAM(1e-3),
                     ),
                 ) |> cpu,
                 γ = 0.99f0,
@@ -461,5 +497,11 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:A2CGAE}, ::Val{:CartPole}, ::
             terminal_size = (N_ENV,),
         ),
     )
-    Experiment(agent, env, StopAfterStep(100000), TotalBatchRewardPerEpisode(N_ENV), "# A2CGAE with CartPole")
+    Experiment(
+        agent,
+        env,
+        StopAfterStep(100000),
+        TotalBatchRewardPerEpisode(N_ENV),
+        "# A2CGAE with CartPole",
+    )
 end
