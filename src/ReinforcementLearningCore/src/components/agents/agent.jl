@@ -30,7 +30,7 @@ end
 
 Flux.functor(x::Agent) = (policy = x.policy,), y -> @set x.policy = y.policy
 
-function save(dir::String, agent::Agent;is_save_trajectory=true)
+function save(dir::String, agent::Agent; is_save_trajectory = true)
     mkpath(dir)
     @info "saving agent to $dir ..."
 
