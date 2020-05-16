@@ -83,6 +83,14 @@ function PrioritizedDQNLearner(;
     )
 end
 
+
+Flux.functor(x::PrioritizedDQNLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
+y -> begin
+    x = @set x.approximator = y.Q
+    x = @set x.target_approximator = y.Qₜ
+    x
+end
+
 """
 
 !!! note

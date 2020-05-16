@@ -5,8 +5,11 @@ using ReinforcementLearningCore
 using ReinforcementLearningEnvironments
 using Flux
 using Statistics
+using Random
 
 @testset "ReinforcementLearningZoo.jl" begin
+
+@testset "training" begin
     mktempdir() do dir
         for method in (:BasicDQN, :DQN, :PrioritizedDQN, :Rainbow)
             res = run(Experiment(
@@ -25,4 +28,15 @@ using Statistics
             @info "stats for $method" avg_reward = mean(Iterators.flatten(res.hook.rewards))
         end
     end
+end
+
+@testset "run pretrained models" begin
+    for x in ("JuliaRL_BasicDQN_CartPole",)
+        e = Experiment(x)
+        e.agent.policy = load_policy(x)
+        Flux.testmode!(e.agent)
+        run(e.agent, e.env, StopAfterEpisode(1),e.hook)
+        @info "result of evaluating pretrained model: $x for once:" reward=e.hook[1].rewards[end]
+    end
+end
 end

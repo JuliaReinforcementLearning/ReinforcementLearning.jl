@@ -2,7 +2,6 @@ export DQNLearner
 
 using Random
 using Flux
-using Setfield: @set
 
 """
     DQNLearner(;kwargs...)

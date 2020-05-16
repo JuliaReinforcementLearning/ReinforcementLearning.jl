@@ -18,7 +18,7 @@ function RLCore.Experiment(
 )
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyymmddHHMMSS")
-        save_dir = joinpath(pwd(), "checkpoints", "juliarl_BasicDQN_CartPole_$(t)")
+        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_BasicDQN_CartPole_$(t)")
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)

@@ -30,6 +30,12 @@ mutable struct BasicDQNLearner{Q,F,R} <: AbstractLearner
     loss::Float32
 end
 
+Flux.functor(x::BasicDQNLearner) = (Q = x.approximator,),
+y -> begin
+    x = @set x.approximator = y.Q
+    x
+end
+
 (learner::BasicDQNLearner)(obs) =
     obs |>
     get_state |>

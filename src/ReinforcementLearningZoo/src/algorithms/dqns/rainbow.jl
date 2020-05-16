@@ -61,6 +61,14 @@ mutable struct RainbowLearner{
     loss::Float32
 end
 
+Flux.functor(x::RainbowLearner) = (Q = x.approximator, Qₜ = x.target_approximator, S = x.support),
+y -> begin
+    x = @set x.approximator = y.Q
+    x = @set x.target_approximator = y.Qₜ
+    x = @set x.support = y.S
+    x
+end
+
 function RainbowLearner(;
     approximator,
     target_approximator,
