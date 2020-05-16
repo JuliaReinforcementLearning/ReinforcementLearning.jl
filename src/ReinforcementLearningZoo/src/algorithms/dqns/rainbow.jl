@@ -111,7 +111,7 @@ end
 
 function (learner::RainbowLearner)(obs)
     state = send_to_device(device(learner.approximator), get_state(obs))
-    state = Flux.unsqueeze(state, ndims(state)+1)
+    state = Flux.unsqueeze(state, ndims(state) + 1)
     logits = learner.approximator(state)
     q = learner.support .* softmax(reshape(logits, :, learner.n_actions))
     # probs = vec(sum(q, dims=1)) .+ legal_action
