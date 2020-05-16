@@ -92,12 +92,14 @@ end
 (learner::PrioritizedDQNLearner)(obs) =
     obs |>
     get_state |>
+    x -> Flux.unsqueeze(x, ndims(x) + 1) |>
     x ->
         send_to_device(device(learner.approximator), x) |>
         learner.approximator |>
-        send_to_host
+        send_to_host |>
+        Flux.squeezebatch
 
-function RLBase.update!(learner::PrioritizedDQNLearner, batch)
+function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
     Q, Qₜ, γ, loss_func, update_horizon, batch_size = learner.approximator,
     learner.target_approximator,
     learner.γ,
@@ -196,7 +198,7 @@ function (
         <:CircularCompactPSARTSATrajectory,
     }
 )(
-    ::PostActStage,
+    ::RLCore.Training{PostActStage},
     obs,
 )
     push!(

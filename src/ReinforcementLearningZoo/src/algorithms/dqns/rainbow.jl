@@ -111,16 +111,14 @@ end
 
 function (learner::RainbowLearner)(obs)
     state = send_to_device(device(learner.approximator), get_state(obs))
+    state = Flux.unsqueeze(state, ndims(state)+1)
     logits = learner.approximator(state)
     q = learner.support .* softmax(reshape(logits, :, learner.n_actions))
     # probs = vec(sum(q, dims=1)) .+ legal_action
     vec(sum(q, dims = 1)) |> send_to_host
 end
 
-function RLBase.update!(learner::RainbowLearner, batch)
-    learner.update_step += 1
-    learner.update_step % learner.update_freq == 0 || return nothing
-
+function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
     Q, Qₜ, γ, loss_func, n_atoms, n_actions, support, delta_z, update_horizon, batch_size =
         learner.approximator,
         learner.target_approximator,
@@ -269,7 +267,7 @@ end
 function (
     agent::Agent{<:QBasedPolicy{<:RainbowLearner},<:CircularCompactPSARTSATrajectory}
 )(
-    ::PostActStage,
+    ::RLCore.Training{PostActStage},
     obs,
 )
     push!(
