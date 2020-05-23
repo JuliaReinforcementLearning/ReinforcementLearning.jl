@@ -4,11 +4,13 @@ using Random
 using Flux
 using Zygote
 using StatsBase: mean
+using LinearAlgebra: dot
 
 """
     PrioritizedDQNLearner(;kwargs...)
 
 See paper: [Prioritized Experience Replay](https://arxiv.org/abs/1511.05952)
+And also https://danieltakeshi.github.io/2019/07/14/per/
 
 # Keywords
 
@@ -44,6 +46,7 @@ mutable struct PrioritizedDQNLearner{
     target_update_freq::Int
     update_step::Int
     default_priority::Float32
+    β_priority::Float32
     rng::R
     loss::Float32
 end
@@ -61,6 +64,7 @@ function PrioritizedDQNLearner(;
     target_update_freq::Int = 100,
     update_step::Int = 0,
     default_priority::Float32 = 100f0,
+    β_priority::Float32=0.5f0,
     seed = nothing,
 ) where {Tq,Tt,Tf}
     copyto!(approximator, target_approximator)
@@ -78,6 +82,7 @@ function PrioritizedDQNLearner(;
         target_update_freq,
         update_step,
         default_priority,
+        β_priority,
         rng,
         0.f0,
     )
@@ -109,9 +114,10 @@ end
             Flux.squeezebatch
 
 function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
-    Q, Qₜ, γ, loss_func, update_horizon, batch_size = learner.approximator,
+    Q, Qₜ, γ, β, loss_func, update_horizon, batch_size = learner.approximator,
     learner.target_approximator,
     learner.γ,
+    learner.β_priority,
     learner.loss_func,
     learner.update_horizon,
     learner.batch_size
@@ -121,7 +127,9 @@ function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
     )
     actions = CartesianIndex.(batch.actions, 1:batch_size)
 
-    priorities = send_to_device(device(Q), Vector{Float32}())
+    updated_priorities = Vector{Float32}(undef, batch_size)
+    weights = 1f0 ./ ((batch.priorities .+ 1f-10) .^ β)
+    weights ./= maximum(weights)
 
     gs = gradient(params(Q)) do
         q = Q(states)[actions]
@@ -129,9 +137,9 @@ function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
         G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
 
         batch_losses = loss_func(G, q)
-        priorities = (Zygote.dropgrad(batch_losses) .+ 1f-10)
-        loss = mean(batch_losses)
+        loss = dot(vec(weights), vec(batch_losses))
         ignore() do
+            updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10).^β))
             learner.loss = loss
         end
         loss
@@ -143,7 +151,7 @@ function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
         copyto!(Qₜ, Q)
     end
 
-    send_to_host(priorities)
+    updated_priorities
 end
 
 function extract_experience(t::AbstractTrajectory, learner::PrioritizedDQNLearner)
@@ -154,6 +162,7 @@ function extract_experience(t::AbstractTrajectory, learner::PrioritizedDQNLearne
 
     # 1. sample indices based on priority
     inds = Vector{Int}(undef, n)
+    priorities = Vector{Float32}(undef, n)
     valid_ind_range = isnothing(s) ? (1:(length(t)-h)) : (s:(length(t)-h))
     for i in 1:n
         ind, p = sample(learner.rng, get_trace(t, :priority))
@@ -161,6 +170,7 @@ function extract_experience(t::AbstractTrajectory, learner::PrioritizedDQNLearne
             ind, p = sample(learner.rng, get_trace(t, :priority))
         end
         inds[i] = ind
+        priorities[i] = p
     end
 
     # 2. extract SARTS
@@ -186,6 +196,7 @@ function extract_experience(t::AbstractTrajectory, learner::PrioritizedDQNLearne
         rewards = rewards,
         terminals = terminals,
         next_states = next_states,
+        priorities = priorities
     )
 end
 

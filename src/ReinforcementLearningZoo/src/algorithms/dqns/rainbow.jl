@@ -4,6 +4,7 @@ using Flux
 using Zygote
 using StatsBase
 using Random
+using LinearAlgebra: dot
 
 """
     RainbowLearner(;kwargs...)
@@ -25,10 +26,9 @@ See paper: [Rainbow: Combining Improvements in Deep Reinforcement Learning](http
 - `update_freq::Int=4`: the frequency of updating the `approximator`.
 - `target_update_freq::Int=500`: the frequency of syncing `target_approximator`.
 - `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
-- `default_priority::Float64=100.`: the default priority for newly added transitions.
+- `default_priority::Float32=1.0f2.`: the default priority for newly added transitions. It must be `>= 1`.
 - `n_atoms::Int=51`: the number of buckets of the value function distribution.
 - `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
-- `default_priority::Float64=100.`: the default priority for newly added transitions.
 - `seed = nothing`
 """
 mutable struct RainbowLearner{
@@ -56,7 +56,8 @@ mutable struct RainbowLearner{
     update_freq::Int
     target_update_freq::Int
     update_step::Int
-    default_priority::Float64
+    default_priority::Float32
+    β_priority::Float32
     rng::R
     loss::Float32
 end
@@ -87,9 +88,11 @@ function RainbowLearner(;
     update_freq = 1,
     target_update_freq = 500,
     update_step = 0,
-    default_priority = 100.0,
+    default_priority = 1.0f2,
+    β_priority = 0.5f0,
     seed = nothing,
 )
+    default_priority >= 1.0f0 || error("default value must be >= 1.0f0")
     copyto!(approximator, target_approximator)  # force sync
     support = send_to_device(device(approximator), support)
     rng = MersenneTwister(seed)
@@ -112,6 +115,7 @@ function RainbowLearner(;
         target_update_freq,
         update_step,
         default_priority,
+        β_priority,
         rng,
         0.f0,
     )
@@ -127,10 +131,11 @@ function (learner::RainbowLearner)(obs)
 end
 
 function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
-    Q, Qₜ, γ, loss_func, n_atoms, n_actions, support, delta_z, update_horizon, batch_size =
+    Q, Qₜ, γ, β, loss_func, n_atoms, n_actions, support, delta_z, update_horizon, batch_size =
         learner.approximator,
         learner.target_approximator,
         learner.γ,
+        learner.β_priority,
         learner.loss_func,
         learner.n_atoms,
         learner.n_actions,
@@ -148,8 +153,6 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
         reshape(rewards, 1, :) .+
         (reshape(support, :, 1) * reshape((γ^update_horizon) .* (1 .- terminals), 1, :))
 
-    updated_priorities = send_to_device(device(Q), Vector{Float32}())
-
     next_logits = Qₜ(next_states)
     next_probs = reshape(softmax(reshape(next_logits, n_atoms, :)), n_atoms, n_actions, :)
     next_q = reshape(sum(support .* next_probs, dims = 1), n_actions, :)
@@ -165,19 +168,17 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
         learner.Vₘₐₓ,
     )
 
+    updated_priorities = Vector{Float32}(undef, batch_size)
+    weights = 1f0 ./ ((batch.priorities .+ 1f-10) .^ β)
+    weights ./= maximum(weights)
+
     gs = gradient(Flux.params(Q)) do
         logits = reshape(Q(states), n_atoms, n_actions, :)
         select_logits = logits[:, actions]
         batch_losses = loss_func(select_logits, target_distribution)
-
-        normalized_target_priorities = ignore() do
-            updated_priorities = vec(clamp.(sqrt.(batch_losses .+ 1f-10), 1.f0, 1.f2))
-            target_priorities = 1.0f0 ./ sqrt.(updated_priorities .+ 1f-10)
-            target_priorities ./ maximum(target_priorities)
-        end
-
-        loss = mean(Zygote.dropgrad(normalized_target_priorities) .* batch_losses)
+        loss = dot(vec(weights), vec(batch_losses))
         ignore() do
+            updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10).^β))
             learner.loss = loss
         end
         loss
@@ -189,7 +190,7 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
         copyto!(Qₜ, Q)
     end
 
-    updated_priorities |> send_to_host
+    updated_priorities
 end
 
 @inline function select_best_probs(probs, q)
@@ -225,6 +226,7 @@ function extract_experience(t::AbstractTrajectory, learner::RainbowLearner)
 
     # 1. sample indices based on priority
     inds = Vector{Int}(undef, n)
+    priorities = Vector{Float32}(undef, n)
     valid_ind_range = isnothing(s) ? (1:(length(t)-h)) : (s:(length(t)-h))
     for i in 1:n
         ind, p = sample(learner.rng, get_trace(t, :priority))
@@ -232,6 +234,7 @@ function extract_experience(t::AbstractTrajectory, learner::RainbowLearner)
             ind, p = sample(learner.rng, get_trace(t, :priority))
         end
         inds[i] = ind
+        priorities[i] = p
     end
 
     # 2. extract SARTS
@@ -257,6 +260,7 @@ function extract_experience(t::AbstractTrajectory, learner::RainbowLearner)
         rewards = rewards,
         terminals = terminals,
         next_states = next_states,
+        priorities = priorities,
     )
 end
 
