@@ -83,7 +83,7 @@ function AtariEnv(;
     screens =
         (fill(typemin(Cuchar), observation_size), fill(typemin(Cuchar), observation_size))
 
-    AtariEnv{grayscale_obs,terminal_on_life_loss,grayscale_obs ? 2 : 3,typeof(seed[1])}(
+    env = AtariEnv{grayscale_obs,terminal_on_life_loss,grayscale_obs ? 2 : 3,typeof(seed[1])}(
         ale,
         screens,
         actions,
@@ -95,6 +95,10 @@ function AtariEnv(;
         lives(ale),
         seed[1],
     )
+    finalizer(env) do x
+        ALE_del(x.ale)
+    end
+    env
 end
 
 update_screen!(env::AtariEnv{true}, screen) =
