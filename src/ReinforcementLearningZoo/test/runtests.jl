@@ -11,7 +11,7 @@ using Random
 
 @testset "training" begin
     mktempdir() do dir
-        for method in (:BasicDQN, :DQN, :PrioritizedDQN, :Rainbow)
+        for method in (:BasicDQN, :DQN, :PrioritizedDQN, :Rainbow, :IQN,)
             res = run(Experiment(
                 Val(:JuliaRL),
                 Val(method),
