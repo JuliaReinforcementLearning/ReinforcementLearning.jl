@@ -186,10 +186,6 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
 
     update!(Q, gs)
 
-    if learner.update_step % learner.target_update_freq == 0
-        copyto!(Qₜ, Q)
-    end
-
     updated_priorities
 end
 
@@ -269,6 +265,9 @@ function RLBase.update!(p::QBasedPolicy{<:RainbowLearner}, t::AbstractTrajectory
     length(t) < learner.min_replay_history && return
 
     learner.update_step += 1
+    if learner.update_step % learner.target_update_freq == 0
+        copyto!(learner.target_approximator, learner.approximator)
+    end
     learner.update_step % learner.update_freq == 0 || return
 
     inds, experience = extract_experience(t, p.learner)
