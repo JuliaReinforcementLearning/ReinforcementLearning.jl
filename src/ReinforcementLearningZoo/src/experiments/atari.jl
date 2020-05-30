@@ -48,9 +48,9 @@ function RLCore.Experiment(
 
     N_FRAMES = 4
     STATE_SIZE = (84, 84)
-    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;seed=nothing)
+    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;#= seed=nothing =#)
     N_ACTIONS = length(get_action_space(env))
-    init = seed_glorot_uniform()#= seed=341 =#
+    init = seed_glorot_uniform(#= seed=341 =#)
 
     create_model() =
         Chain(
@@ -123,7 +123,7 @@ function RLCore.Experiment(
             h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 agent,
-                atari_env_factory(name, STATE_SIZE, N_FRAMES;seed=nothing),
+                atari_env_factory(name, STATE_SIZE, N_FRAMES;#= seed=nothing =#),
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )
@@ -193,10 +193,10 @@ function RLCore.Experiment(
 
     N_FRAMES = 4
     STATE_SIZE = (84, 84)
-    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;seed=(135, 246))  # TODO: testing, remove later
+    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;#= seed=(135, 246) =# )
     N_ACTIONS = length(get_action_space(env))
     N_ATOMS = 51
-    init = seed_glorot_uniform(seed=341)  # TODO: testing, remove later
+    init = seed_glorot_uniform(#= seed=341 =#)
 
     create_model() =
         Chain(
@@ -229,14 +229,14 @@ function RLCore.Experiment(
                 min_replay_history = 20_000,
                 loss_func = logitcrossentropy_unreduced,
                 target_update_freq = 8_000,
-                seed=89,
+                # seed=89,
             ),
             explorer = EpsilonGreedyExplorer(
                 ϵ_init = 1.0,
                 ϵ_stable = 0.01,
                 decay_steps = 250_000,
                 kind = :linear,
-                seed=97,
+                # seed=97,
             ),
         ),
         trajectory = CircularCompactPSARTSATrajectory(
@@ -276,7 +276,7 @@ function RLCore.Experiment(
             h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 agent,
-                atari_env_factory(name, STATE_SIZE, N_FRAMES;seed=nothing),
+                atari_env_factory(name, STATE_SIZE, N_FRAMES;#= seed=nothing =#),
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )
@@ -347,11 +347,11 @@ function RLCore.Experiment(
     STATE_SIZE = (84, 84)
     MAX_STEPS_PER_EPISODE = 27_000
 
-    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;seed=(135, 246))  # TODO: testing, remove later
+    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;#= seed=(135, 246) =#)
     N_ACTIONS = length(get_action_space(env))
     Nₑₘ = 64
 
-    init = seed_glorot_uniform(seed=341)  # TODO: testing, remove later
+    init = seed_glorot_uniform(#= seed=341 =#)
 
     create_model() = ImplicitQunatileNet(
         ψ = Chain(
@@ -389,15 +389,15 @@ function RLCore.Experiment(
                 update_freq=4,
                 target_update_freq=8_000,
                 default_priority=1.0f2,
-                seed=105,  # TODO: testing, remove later
-                device_seed=237,  # TODO: testing, remove later
+                # seed=105,
+                # device_seed=237,
             ),
             explorer = EpsilonGreedyExplorer(
                 ϵ_init = 1.0,
                 ϵ_stable = 0.01,
                 decay_steps = 250_000,
                 kind = :linear,
-                seed=99,
+                # seed=99,
             ),
         ),
         trajectory = CircularCompactSARTSATrajectory(
@@ -437,7 +437,7 @@ function RLCore.Experiment(
             h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 agent,
-                atari_env_factory(name, STATE_SIZE, N_FRAMES;seed=nothing),  # !!! do not set seed when evaluating
+                atari_env_factory(name, STATE_SIZE, N_FRAMES;#= seed=nothing =#),
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )
