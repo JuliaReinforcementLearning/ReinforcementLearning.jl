@@ -2,7 +2,7 @@ export load_policy
 
 using Pkg.Artifacts
 
-function load_policy(s::String, T=AbstractPolicy)
+function load_policy(s::String, T = AbstractPolicy)
     if isfile(s)
         RLCore.load(s, T)
     elseif isdir(s)

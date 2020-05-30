@@ -10,7 +10,7 @@ using TensorBoardLogger
 using Logging
 using Statistics
 
-function atari_env_factory(name, state_size, n_frames; seed=nothing)
+function atari_env_factory(name, state_size, n_frames; seed = nothing)
     WrappedEnv(
         env = AtariEnv(;
             name = string(name),
@@ -22,7 +22,7 @@ function atari_env_factory(name, state_size, n_frames; seed=nothing)
             max_num_frames_per_episode = n_frames * 27_000,
             color_averaging = false,
             full_action_space = false,
-            seed=seed
+            seed = seed,
         ),
         preprocessor = ComposedPreprocessor(
             ResizeImage(state_size...),  # this implementation is different from cv2.resize https://github.com/google/dopamine/blob/e7d780d7c80954b7c396d984325002d60557f7d1/dopamine/discrete_domains/atari_lib.py#L629
@@ -48,9 +48,9 @@ function RLCore.Experiment(
 
     N_FRAMES = 4
     STATE_SIZE = (84, 84)
-    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;#= seed=nothing =#)
+    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;)#= seed=nothing =#
     N_ACTIONS = length(get_action_space(env))
-    init = seed_glorot_uniform(#= seed=341 =#)
+    init = seed_glorot_uniform()#= seed=341 =#
 
     create_model() =
         Chain(
@@ -123,7 +123,7 @@ function RLCore.Experiment(
             h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 agent,
-                atari_env_factory(name, STATE_SIZE, N_FRAMES;#= seed=nothing =#),
+                atari_env_factory(name, STATE_SIZE, N_FRAMES;),#= seed=nothing =#
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )
@@ -193,10 +193,10 @@ function RLCore.Experiment(
 
     N_FRAMES = 4
     STATE_SIZE = (84, 84)
-    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;#= seed=(135, 246) =# )
+    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;)#= seed=(135, 246) =#
     N_ACTIONS = length(get_action_space(env))
     N_ATOMS = 51
-    init = seed_glorot_uniform(#= seed=341 =#)
+    init = seed_glorot_uniform()#= seed=341 =#
 
     create_model() =
         Chain(
@@ -264,7 +264,8 @@ function RLCore.Experiment(
         end,
         DoEveryNEpisode() do t, agent, env, obs
             with_logger(lg) do
-                @info "training" reward = total_reward_per_episode.rewards[end] episode_length = steps_per_episode.steps[end] log_step_increment = 0
+                @info "training" reward = total_reward_per_episode.rewards[end] episode_length =
+                    steps_per_episode.steps[end] log_step_increment = 0
             end
         end,
         DoEveryNStep(EVALUATION_FREQ) do t, agent, env, obs
@@ -276,7 +277,7 @@ function RLCore.Experiment(
             h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 agent,
-                atari_env_factory(name, STATE_SIZE, N_FRAMES;#= seed=nothing =#),
+                atari_env_factory(name, STATE_SIZE, N_FRAMES;),#= seed=nothing =#
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )
@@ -347,26 +348,24 @@ function RLCore.Experiment(
     STATE_SIZE = (84, 84)
     MAX_STEPS_PER_EPISODE = 27_000
 
-    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;#= seed=(135, 246) =#)
+    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;)#= seed=(135, 246) =#
     N_ACTIONS = length(get_action_space(env))
     Nₑₘ = 64
 
-    init = seed_glorot_uniform(#= seed=341 =#)
+    init = seed_glorot_uniform()#= seed=341 =#
 
-    create_model() = ImplicitQunatileNet(
-        ψ = Chain(
-            x -> x ./ 255,
-            CrossCor((8, 8), N_FRAMES => 32, relu; stride = 4, pad = 2, init = init),
-            CrossCor((4, 4), 32 => 64, relu; stride = 2, pad = 2, init = init),
-            CrossCor((3, 3), 64 => 64, relu; stride = 1, pad = 1, init = init),
-            x -> reshape(x, :, size(x)[end]),
-        ),
-        ϕ = Dense(Nₑₘ, 11 * 11 * 64, relu),
-        header = Chain(
-            Dense(11 * 11 * 64, 512, relu),
-            Dense(512, N_ACTIONS),
-        )
-    ) |> gpu
+    create_model() =
+        ImplicitQunatileNet(
+            ψ = Chain(
+                x -> x ./ 255,
+                CrossCor((8, 8), N_FRAMES => 32, relu; stride = 4, pad = 2, init = init),
+                CrossCor((4, 4), 32 => 64, relu; stride = 2, pad = 2, init = init),
+                CrossCor((3, 3), 64 => 64, relu; stride = 1, pad = 1, init = init),
+                x -> reshape(x, :, size(x)[end]),
+            ),
+            ϕ = Dense(Nₑₘ, 11 * 11 * 64, relu),
+            header = Chain(Dense(11 * 11 * 64, 512, relu), Dense(512, N_ACTIONS)),
+        ) |> gpu
 
     agent = Agent(
         policy = QBasedPolicy(
@@ -376,19 +375,19 @@ function RLCore.Experiment(
                     optimizer = ADAM(0.00005),  # epsilon is not set here
                 ),
                 target_approximator = NeuralNetworkApproximator(model = create_model()),
-                κ=1.0f0,
-                N=64,
-                N′=64,
-                Nₑₘ=Nₑₘ,
-                K=32,
-                γ=0.99f0,
-                stack_size=4,
-                batch_size=32,
-                update_horizon=3,
-                min_replay_history=20_000,
-                update_freq=4,
-                target_update_freq=8_000,
-                default_priority=1.0f2,
+                κ = 1.0f0,
+                N = 64,
+                N′ = 64,
+                Nₑₘ = Nₑₘ,
+                K = 32,
+                γ = 0.99f0,
+                stack_size = 4,
+                batch_size = 32,
+                update_horizon = 3,
+                min_replay_history = 20_000,
+                update_freq = 4,
+                target_update_freq = 8_000,
+                default_priority = 1.0f2,
                 # seed=105,
                 # device_seed=237,
             ),
@@ -425,7 +424,8 @@ function RLCore.Experiment(
         end,
         DoEveryNEpisode() do t, agent, env, obs
             with_logger(lg) do
-                @info "training" reward = total_reward_per_episode.rewards[end] episode_length = steps_per_episode.steps[end] log_step_increment = 0
+                @info "training" reward = total_reward_per_episode.rewards[end] episode_length =
+                    steps_per_episode.steps[end] log_step_increment = 0
             end
         end,
         DoEveryNStep(EVALUATION_FREQ) do t, agent, env, obs
@@ -437,7 +437,7 @@ function RLCore.Experiment(
             h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 agent,
-                atari_env_factory(name, STATE_SIZE, N_FRAMES;#= seed=nothing =#),
+                atari_env_factory(name, STATE_SIZE, N_FRAMES;),#= seed=nothing =#
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )

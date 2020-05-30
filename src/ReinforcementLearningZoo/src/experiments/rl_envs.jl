@@ -405,48 +405,49 @@ function RLCore.Experiment(
     n_hidden = 64
     κ = 1.0f0
 
-    nn_creator() = ImplicitQunatileNet(
-        ψ=Dense(ns, n_hidden, relu; initW = init),
-        ϕ = Dense(Nₑₘ, n_hidden, relu;initW=init),
-        header=Dense(n_hidden, na;initW=init)
-    ) |> cpu
+    nn_creator() =
+        ImplicitQunatileNet(
+            ψ = Dense(ns, n_hidden, relu; initW = init),
+            ϕ = Dense(Nₑₘ, n_hidden, relu; initW = init),
+            header = Dense(n_hidden, na; initW = init),
+        ) |> cpu
 
-    
+
     agent = Agent(
-        policy=QBasedPolicy(
-            learner=IQNLearner(
+        policy = QBasedPolicy(
+            learner = IQNLearner(
                 approximator = NeuralNetworkApproximator(
                     model = nn_creator(),
-                    optimizer=ADAM(0.001)
+                    optimizer = ADAM(0.001),
                 ),
-                target_approximator = NeuralNetworkApproximator(model=nn_creator()),
-                κ=κ,
-                N=8,
-                N′=8,
-                Nₑₘ=Nₑₘ,
-                K=32,
-                γ=0.99f0,
-                stack_size=nothing,
-                batch_size=32,
-                update_horizon=1,
-                min_replay_history=100,
-                update_freq=1,
-                target_update_freq=100,
-                default_priority=1.0f2,
-                seed=123,
-                device_seed=321,
+                target_approximator = NeuralNetworkApproximator(model = nn_creator()),
+                κ = κ,
+                N = 8,
+                N′ = 8,
+                Nₑₘ = Nₑₘ,
+                K = 32,
+                γ = 0.99f0,
+                stack_size = nothing,
+                batch_size = 32,
+                update_horizon = 1,
+                min_replay_history = 100,
+                update_freq = 1,
+                target_update_freq = 100,
+                default_priority = 1.0f2,
+                seed = 123,
+                device_seed = 321,
             ),
-            explorer=EpsilonGreedyExplorer(
+            explorer = EpsilonGreedyExplorer(
                 kind = :exp,
                 ϵ_stable = 0.01,
                 decay_steps = 500,
                 seed = 33,
             ),
         ),
-        trajectory= CircularCompactPSARTSATrajectory(
-                capacity = 1000,
-                state_type = Float32,
-                state_size = (ns,),
+        trajectory = CircularCompactPSARTSATrajectory(
+            capacity = 1000,
+            state_type = Float32,
+            state_size = (ns,),
         ),
     )
 

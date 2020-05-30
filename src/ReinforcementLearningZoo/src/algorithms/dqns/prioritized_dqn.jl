@@ -64,7 +64,7 @@ function PrioritizedDQNLearner(;
     target_update_freq::Int = 100,
     update_step::Int = 0,
     default_priority::Float32 = 100f0,
-    β_priority::Float32=0.5f0,
+    β_priority::Float32 = 0.5f0,
     seed = nothing,
 ) where {Tq,Tt,Tf}
     copyto!(approximator, target_approximator)
@@ -141,7 +141,7 @@ function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
         batch_losses = loss_func(G, q)
         loss = dot(vec(weights), vec(batch_losses)) / batch_size
         ignore() do
-            updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10).^β))
+            updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10) .^ β))
             learner.loss = loss
         end
         loss

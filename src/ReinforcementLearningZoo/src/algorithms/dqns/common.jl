@@ -2,7 +2,7 @@
 # some common components for Prioritized Experience Replay based methods
 #####
 
-const PERLearners = Union{PrioritizedDQNLearner, RainbowLearner, IQNLearner}
+const PERLearners = Union{PrioritizedDQNLearner,RainbowLearner,IQNLearner}
 
 function extract_experience(t::AbstractTrajectory, learner::PERLearners)
     s = learner.stack_size
@@ -51,7 +51,7 @@ function extract_experience(t::AbstractTrajectory, learner::PERLearners)
         rewards = rewards,
         terminals = terminals,
         next_states = next_states,
-        priorities = priorities
+        priorities = priorities,
     )
 end
 
@@ -77,12 +77,7 @@ function RLBase.update!(p::QBasedPolicy{<:PERLearners}, t::AbstractTrajectory)
     end
 end
 
-function (
-    agent::Agent{
-        <:QBasedPolicy{<:PERLearners},
-        <:CircularCompactPSARTSATrajectory,
-    }
-)(
+function (agent::Agent{<:QBasedPolicy{<:PERLearners},<:CircularCompactPSARTSATrajectory})(
     ::RLCore.Training{PostActStage},
     obs,
 )

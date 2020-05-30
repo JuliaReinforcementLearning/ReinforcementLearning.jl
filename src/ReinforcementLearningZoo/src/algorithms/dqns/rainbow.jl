@@ -62,13 +62,14 @@ mutable struct RainbowLearner{
     loss::Float32
 end
 
-Flux.functor(x::RainbowLearner) = (Q = x.approximator, Qₜ = x.target_approximator, S = x.support),
-y -> begin
-    x = @set x.approximator = y.Q
-    x = @set x.target_approximator = y.Qₜ
-    x = @set x.support = y.S
-    x
-end
+Flux.functor(x::RainbowLearner) =
+    (Q = x.approximator, Qₜ = x.target_approximator, S = x.support),
+    y -> begin
+        x = @set x.approximator = y.Q
+        x = @set x.target_approximator = y.Qₜ
+        x = @set x.support = y.S
+        x
+    end
 
 function RainbowLearner(;
     approximator,
@@ -131,18 +132,27 @@ function (learner::RainbowLearner)(obs)
 end
 
 function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
-    Q, Qₜ, γ, β, loss_func, n_atoms, n_actions, support, delta_z, update_horizon, batch_size =
-        learner.approximator,
-        learner.target_approximator,
-        learner.γ,
-        learner.β_priority,
-        learner.loss_func,
-        learner.n_atoms,
-        learner.n_actions,
-        learner.support,
-        learner.delta_z,
-        learner.update_horizon,
-        learner.batch_size
+    Q,
+    Qₜ,
+    γ,
+    β,
+    loss_func,
+    n_atoms,
+    n_actions,
+    support,
+    delta_z,
+    update_horizon,
+    batch_size = learner.approximator,
+    learner.target_approximator,
+    learner.γ,
+    learner.β_priority,
+    learner.loss_func,
+    learner.n_atoms,
+    learner.n_actions,
+    learner.support,
+    learner.delta_z,
+    learner.update_horizon,
+    learner.batch_size
 
     D = device(Q)
     states, rewards, terminals, next_states = map(
@@ -180,7 +190,7 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
         batch_losses = loss_func(select_logits, target_distribution)
         loss = dot(vec(weights), vec(batch_losses)) / batch_size
         ignore() do
-            updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10).^β))
+            updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10) .^ β))
             learner.loss = loss
         end
         loss
@@ -215,4 +225,3 @@ function project_distribution(supports, weights, target_support, delta_z, vmin, 
         ) .* reshape(weights, n_atoms, 1, batch_size)
     reshape(sum(projection, dims = 1), n_atoms, batch_size)
 end
-
