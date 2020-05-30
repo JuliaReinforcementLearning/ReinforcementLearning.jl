@@ -97,7 +97,7 @@ function IQNLearner(;
     rng=MersenneTwister(seed)
     if device(approximator) === Val(:gpu)
         device_rng = CuArrays.CURAND.RNG()
-        Random.seed!(device_rng, device_seed)
+        Random.seed!(device_rng, device_seed)  # https://github.com/JuliaGPU/CuArrays.jl/commit/43c12485182a6a7425c1fda0d2f66cc0eae8a2bf
     else
         device_rng = rng
     end
@@ -163,9 +163,13 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
     τₑₘ = embed(τ,Nₑₘ)
     a = CartesianIndex.(repeat(batch.actions, inner=N), 1:(N*batch_size))
 
-    updated_priorities = Vector{Float32}(undef, batch_size)
-    weights = 1f0 ./ ((batch.priorities .+ 1f-10) .^ β)
-    weights ./= maximum(weights)
+    is_use_PER = !isnothing(batch.priorities)  # is use Prioritized Experience Replay
+    if is_use_PER
+        updated_priorities = Vector{Float32}(undef, batch_size)
+        weights = 1f0 ./ ((batch.priorities .+ 1f-10) .^ β)
+        weights ./= maximum(weights)
+        weights = send_to_device(D, weights)
+    end
 
     gs= Zygote.gradient(Flux.params(Z)) do
         z = flatten_batch(Z(s, τₑₘ))
@@ -182,10 +186,10 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
         raw_loss = abs.(reshape(τ,1,N,batch_size) .- Zygote.dropgrad(TD_error .< 0)) .* huber_loss ./ κ
         loss_per_quantile = reshape(sum(raw_loss;dims=1), N ,batch_size)
         loss_per_element = mean(loss_per_quantile;dims=1)  # use as priorities
-        loss = dot(vec(weights), vec(loss_per_element))
+        loss = is_use_PER ? dot(vec(weights), vec(loss_per_element)) / batch_size : mean(loss_per_element)
         ignore() do
-            @assert all(loss_per_element .>= 0)
-            updated_priorities .= send_to_host(vec((loss_per_element .+ 1f-10).^β))
+            # @assert all(loss_per_element .>= 0)
+            is_use_PER && (updated_priorities .= send_to_host(vec((loss_per_element .+ 1f-10).^β)))
             learner.loss = loss
         end
         loss
@@ -193,5 +197,5 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
     
     update!(Z, gs)
 
-    updated_priorities
+    is_use_PER ? updated_priorities : nothing
 end

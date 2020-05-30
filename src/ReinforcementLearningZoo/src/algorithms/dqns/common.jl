@@ -11,16 +11,21 @@ function extract_experience(t::AbstractTrajectory, learner::PERLearners)
     γ = learner.γ
 
     # 1. sample indices based on priority
-    inds = Vector{Int}(undef, n)
-    priorities = Vector{Float32}(undef, n)
     valid_ind_range = isnothing(s) ? (1:(length(t)-h)) : (s:(length(t)-h))
-    for i in 1:n
-        ind, p = sample(learner.rng, get_trace(t, :priority))
-        while ind ∉ valid_ind_range
+    if t isa CircularCompactPSARTSATrajectory
+        inds = Vector{Int}(undef, n)
+        priorities = Vector{Float32}(undef, n)
+        for i in 1:n
             ind, p = sample(learner.rng, get_trace(t, :priority))
+            while ind ∉ valid_ind_range
+                ind, p = sample(learner.rng, get_trace(t, :priority))
+            end
+            inds[i] = ind
+            priorities[i] = p
         end
-        inds[i] = ind
-        priorities[i] = p
+    else
+        inds = rand(learner.rng, valid_ind_range, n)
+        priorities = nothing
     end
 
     # 2. extract SARTS
@@ -63,8 +68,13 @@ function RLBase.update!(p::QBasedPolicy{<:PERLearners}, t::AbstractTrajectory)
     learner.update_step % learner.update_freq == 0 || return
 
     inds, experience = extract_experience(t, p.learner)
-    priorities = update!(p.learner, experience)
-    get_trace(t, :priority)[inds] .= priorities
+
+    if t isa CircularCompactPSARTSATrajectory
+        priorities = update!(p.learner, experience)
+        get_trace(t, :priority)[inds] .= priorities
+    else
+        update!(p.learner, experience)
+    end
 end
 
 function (
