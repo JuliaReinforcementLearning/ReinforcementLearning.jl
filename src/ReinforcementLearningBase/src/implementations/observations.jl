@@ -74,7 +74,7 @@ function get_state(obs::BatchObs)
     m, n = length(first_state), length(obs)
     state = similar(first_state, size(first_state)..., n)
     for i in 1:n
-        state[m*(i-1)+1:m*i] .= get_state(obs[i])
+        state[m*(i-1)+1:m*i] .= get_state(obs[i]) |> vec
     end
     state
 end
