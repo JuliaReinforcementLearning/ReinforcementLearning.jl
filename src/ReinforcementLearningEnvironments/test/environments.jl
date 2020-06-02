@@ -38,6 +38,7 @@
         :(POMDPEnv(TigerPOMDP())),
         :(MountainCarEnv()),
         :(ContinuousMountainCarEnv()),
+        :(AcrobotEnv()),
         :(PendulumEnv()),
         :(PendulumNonInteractiveEnv()),
         (:(AtariEnv(; name = $x)) for x in atari_env_names)...,

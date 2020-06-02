@@ -30,7 +30,7 @@ end
 
 mutable struct AcrobotEnv{T,R<:AbstractRNG} <: AbstractEnv
     params::AcrobotEnvParams{T}
-    action_space::DiscreteSpace{UnitRange{Int64}}
+    action_space::DiscreteSpace{UnitRange{Int}}
     observation_space::MultiContinuousSpace{Vector{T}}
     state::Vector{T}
     action::Int
@@ -106,7 +106,7 @@ function AcrobotEnv(;
         DiscreteSpace(3),
         MultiContinuousSpace(-high, high),
         zeros(T, 4),
-        2,
+        0,
         false,
         0,
         MersenneTwister(seed),
@@ -157,8 +157,8 @@ function (env::AcrobotEnv{T})(a) where {T <: Number}
     # wrap the solution
     ns[1] = wrap(ns[1], -π, π)
     ns[2] = wrap(ns[2], -π, π)
-    ns[3] = clamp(ns[3], -env.params.max_vel_a, env.params.max_vel_a)
-    ns[4] = clamp(ns[4], -env.params.max_vel_b, env.params.max_vel_b)
+    ns[3] = bound(ns[3], -env.params.max_vel_a, env.params.max_vel_a)
+    ns[4] = bound(ns[4], -env.params.max_vel_b, env.params.max_vel_b)
     env.state = ns
     # termination criterion
     env.done = (-cos(ns[1]) - cos(ns[2] + ns[1]) > 1.) ||
@@ -191,24 +191,25 @@ function dsdt(du, s_augmented, env::AcrobotEnv, t)
     ddtheta2 = 0.
 
     # governing equations
-    d1 = (m1 * lc1 ^ 2 + m2 *
-        (l1 ^ 2 + lc2 ^ 2 + 2 * l1 * lc2 * cos(theta2)) + I1 + I2)
+    d1 = (m1 * lc1 ^ 2 + m2 * 
+    (l1 ^ 2 + lc2 ^ 2 + 2 * l1 * lc2 * cos(theta2)) + I1 + I2)
     d2 = m2 * (lc2 ^ 2 + l1 * lc2 * cos(theta2)) + I2
-    phi2 = m2 * lc2 * g * cos(theta1 + theta2 - π / 2)
-    phi1 =  (- m2 * l1 * lc2 * dtheta2 ^ 2 * sin(theta2) 
-            - 2 * m2 * l1 * lc2 * dtheta2 * dtheta1 * sin(theta2) 
-            + m1 * lc1 + m2 * l1 * g * cos(theta1 - π / 2) + phi2)
+    phi2 = m2 * lc2 * g * cos(theta1 + theta2 - pi / 2.)
+    phi1 = (- m2 * l1 * lc2 * dtheta2 ^ 2 * sin(theta2)
+        - 2 * m2 * l1 * lc2 * dtheta2 * dtheta1 * sin(theta2)
+        + (m1 * lc1 + m2 * l1) * g * cos(theta1 - pi / 2) + phi2)
     if env.book_or_nips == "nips"
         # the following line is consistent with the description in the
         # paper
-        ddtheta2 = ((a + d2 / d1 * phi1 - phi2) / 
+        ddtheta2 = ((a + d2 / d1 * phi1 - phi2) /
             (m2 * lc2 ^ 2 + I2 - d2 ^ 2 / d1))
     elseif env.book_or_nips == "book"
-        # the following line is consistent with the java implementation and the book
-        ddtheta2 = ((a + d2 / d1 * phi1 - m2 * l1 * lc2 * dtheta1 ^ 2 * sin(theta2) - phi2) / 
-            (m2 * lc2 ^ 2 + I2 - d2 ^ 2 / d1))
-    end
+        # the following line is consistent with the java implementation and the
+        # book
+        ddtheta2 = ((a + d2 / d1 * phi1 - m2 * l1 * lc2 * dtheta1 ^ 2 * sin(theta2) - phi2) 
+            / (m2 * lc2 ^ 2 + I2 - d2 ^ 2 / d1))
     ddtheta1 = -(d2 * ddtheta2 + phi1) / d1
+    end
     
     # return the values
     du[1] = dtheta1
@@ -241,4 +242,17 @@ function wrap(x, m, M)
         x = x + diff
     end
     return x
+end
+
+function bound(x, m, M)
+    """Either have m as scalar, so bound(x,m,M) which returns m <= x <= M *OR*
+    have m as length 2 vector, bound(x,m, <IGNORED>) returns m[0] <= x <= m[1].
+    Args:
+        x: scalar
+    Returns:
+        x: scalar, bound between min (m) and Max (M)
+    """
+
+    # bound x between min (m) and Max (M)
+    return min(max(x, m), M)
 end
