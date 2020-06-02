@@ -68,7 +68,7 @@ function MountainCarEnv(; T = Float64, continuous = false, seed = nothing, kwarg
     if continuous
         params = MountainCarEnvParams(; goal_pos = 0.45, power = 0.0015, T = T, kwargs...)
     else
-        params = MountainCarEnvParams(; T=T, kwargs...)
+        params = MountainCarEnvParams(; T = T, kwargs...)
     end
     env = MountainCarEnv(
         params,
