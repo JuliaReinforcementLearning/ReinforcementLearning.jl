@@ -38,23 +38,19 @@ Flux.testmode!(app::NeuralNetworkApproximator, mode = true) = testmode!(app.mode
 #####
 
 """
-    ActorCritic(actor, critic)
+    ActorCritic(;actor, critic, optimizer=ADAM())
 
-The `actor` part must return a **normalized** vector representing the action values, and the `critic` part must return a state value.
-
-TODO: remove the **normalized** restriction!!!
+The `actor` part must return logits (*Do not use softmax in the last layer!*), and the `critic` part must return a state value.
 """
-Base.@kwdef struct ActorCritic{A,C}
+Base.@kwdef struct ActorCritic{A,C,O}
     actor::A
     critic::C
+    optimizer::O = ADAM()
 end
 
-Flux.@functor ActorCritic
+Flux.functor(x::ActorCritic) = (actor = x.actor, critic = x.critic), y -> ActorCritic(y.actor, y.critic, x.optimizer)
 
-function RLBase.update!(app::ActorCritic, gs)
-    update!(app.actor, gs)
-    update!(app.critic, gs)
-end
+RLBase.update!(app::ActorCritic, gs) = Flux.Optimise.update!(app.optimizer, params(app), gs)
 
 function Flux.testmode!(app::ActorCritic, mode = true)
     testmode!(app.actor, mode)

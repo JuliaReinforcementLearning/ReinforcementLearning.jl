@@ -118,9 +118,9 @@ Similar to [`huber_loss`](@ref), but it doesn't do the `mean` operation in the l
 """
 function huber_loss_unreduced(labels, predictions; δ = 1.0f0)
     abs_error = abs.(predictions .- labels)
-    quadratic = min.(abs_error, 1.0f0)  # quadratic = min.(abs_error, δ)
+    quadratic = min.(abs_error, δ)
     linear = abs_error .- quadratic
-    0.5f0 .* quadratic .* quadratic .+ linear  # 0.5f0 .* quadratic .* quadratic .+ δ .* linear
+    0.5f0 .* quadratic .* quadratic .+ δ .* linear
 end
 
 """

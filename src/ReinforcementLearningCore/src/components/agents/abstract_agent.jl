@@ -11,7 +11,9 @@ export AbstractAgent,
     PRE_EPISODE_STAGE,
     POST_EPISODE_STAGE,
     PRE_ACT_STAGE,
-    POST_ACT_STAGE
+    POST_ACT_STAGE,
+    Training,
+    Testing
 
 """
     (agent::AbstractAgent)(obs) = agent(PRE_ACT_STAGE, obs) -> action

@@ -2,6 +2,7 @@ export WeightedExplorer
 
 using Random
 using StatsBase: sample, Weights
+using Flux: softmax
 
 """
     WeightedExplorer(;is_normalized::Bool)
@@ -20,5 +21,7 @@ end
 
 (s::WeightedExplorer{true})(values::AbstractVector{T}) where {T} =
     sample(s.rng, Weights(values, one(T)))
-(s::WeightedExplorer{false})(values::AbstractVector) =
-    sample(s.rng, Weights(values, sum(values)))
+
+# ??? add a softmax layer here?
+(s::WeightedExplorer{false})(values::AbstractVector{T}) where {T} =
+    sample(s.rng, Weights(softmax(values), one(T)))

@@ -6,6 +6,7 @@ using StatsBase
 using Distributions: probs
 using ReinforcementLearningEnvironments
 using Flux
+using Zygote
 using CUDAapi
 
 if has_cuda()
@@ -16,4 +17,5 @@ end
     include("core/core.jl")
     include("components/components.jl")
     include("utils/utils.jl")
+    include("extensions.jl")
 end

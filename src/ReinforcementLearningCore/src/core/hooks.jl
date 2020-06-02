@@ -5,6 +5,7 @@ export AbstractHook,
     RewardsPerEpisode,
     TotalRewardPerEpisode,
     TotalBatchRewardPerEpisode,
+    BatchStepsPerEpisode,
     CumulativeReward,
     TimePerStep,
     DoEveryNEpisode,
@@ -173,6 +174,27 @@ function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env, obs::Bat
     end
 end
 
+struct BatchStepsPerEpisode <: AbstractHook
+    steps::Vector{Vector{Int}}
+    step::Vector{Int}
+end
+
+function BatchStepsPerEpisode(batch_size::Int; tag = "TRAINING")
+    BatchStepsPerEpisode(
+        [Int[] for _ in 1:batch_size],
+        zeros(Int, batch_size)
+    )
+end
+
+function (hook::BatchStepsPerEpisode)(::PostActStage, agent, env, obs::BatchObs)
+    for i in 1:length(obs)
+        hook.step[i] += 1
+        if get_terminal(obs[i])
+            push!(hook.steps[i], hook.step[i])
+            hook.step[i] = 0
+        end
+    end
+end
 #####
 # CumulativeReward
 #####

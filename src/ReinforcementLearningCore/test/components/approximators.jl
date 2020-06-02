@@ -29,15 +29,14 @@
 
     @testset "ActorCritic" begin
         ac_cpu = ActorCritic(
-            actor = NeuralNetworkApproximator(model = Dense(3, 2), optimizer = ADAM()),
-            critic = NeuralNetworkApproximator(model = Dense(3, 1), optimizer = RMSProp()),
+            actor = NeuralNetworkApproximator(model = Dense(3, 2)),
+            critic = NeuralNetworkApproximator(model = Dense(3, 1)),
         )
 
         ac = ac_cpu |> gpu
 
         # make sure optimizer is not changed
-        @test ac_cpu.actor.optimizer === ac.actor.optimizer
-        @test ac_cpu.critic.optimizer === ac.critic.optimizer
+        @test ac_cpu.optimizer === ac.optimizer
 
         D = ac.actor.model |> gpu |> device
         @test D === device(ac) === device(ac.actor) == device(ac.critic)

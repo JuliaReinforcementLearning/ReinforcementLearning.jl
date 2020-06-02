@@ -1,4 +1,4 @@
-export @experiment_cmd, Experiment
+export @experiment_cmd, @E_cmd, Experiment
 
 using BSON
 using Markdown
@@ -12,6 +12,11 @@ Base.@kwdef mutable struct Experiment
 end
 
 macro experiment_cmd(s)
+    Experiment(s)
+end
+
+# alias for experiment_cmd
+macro E_cmd(s)
     Experiment(s)
 end
 

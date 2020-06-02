@@ -20,5 +20,5 @@ end
 
 function load(f::String, ::Type{<:AbstractPolicy})
     BSON.@load f policy
-    gpu(policy)
+    policy
 end
