@@ -50,15 +50,15 @@ Base.show(io::IO, env::CartPoleEnv{T}) where {T} =
 """
 function CartPoleEnv(;
     T = Float64,
-    gravity = T(9.8),
-    masscart = T(1.0),
-    masspole = T(0.1),
-    halflength = T(0.5),
-    forcemag = T(10.0),
+    gravity = 9.8,
+    masscart = 1.0,
+    masspole = 0.1,
+    halflength = 0.5,
+    forcemag = 10.0,
     max_steps = 200,
     seed = nothing,
 )
-    params = CartPoleEnvParams(
+    params = CartPoleEnvParams{T}(
         gravity,
         masscart,
         masspole,
@@ -66,9 +66,9 @@ function CartPoleEnv(;
         halflength,
         masspole * halflength,
         forcemag,
-        T(0.02),
-        T(2 * 12 * π / 360),
-        T(2.4),
+        0.02,
+        2 * 12 * π / 360,
+        2.4,
         max_steps,
     )
     high = [2 * params.xthreshold, T(1e38), 2 * params.thetathreshold, T(1e38)]
