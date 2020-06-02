@@ -2,7 +2,20 @@
 
 ## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/HEAD)
 
-[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.7.0...HEAD)
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.7.1...HEAD)
+
+**Closed issues:**
+
+- Observe, observation, state [\#45](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/issues/45)
+
+**Merged pull requests:**
+
+- deprecate get\_observation\_space [\#47](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/47) ([findmyway](https://github.com/findmyway))
+- Fix dimension error when getting a high dimensional state from BatchObs  [\#46](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/46) ([findmyway](https://github.com/findmyway))
+
+## [v0.7.1](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.1) (2020-05-11)
+
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.7.0...v0.7.1)
 
 **Merged pull requests:**
 
@@ -68,6 +81,7 @@
 **Merged pull requests:**
 
 - add batch\_estimate for approximator [\#25](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/25) ([findmyway](https://github.com/findmyway))
+- Allow converting Set to DiscreteSpace [\#22](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/22) ([findmyway](https://github.com/findmyway))
 
 ## [v0.6.1](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.6.1) (2020-02-20)
 
@@ -77,7 +91,6 @@
 
 - Add invalid action [\#24](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/24) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#23](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/23) ([github-actions[bot]](https://github.com/apps/github-actions))
-- Allow converting Set to DiscreteSpace [\#22](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/22) ([findmyway](https://github.com/findmyway))
 
 ## [v0.6.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.6.0) (2020-02-17)
 
