@@ -119,7 +119,6 @@ function AcrobotEnv(;
 end
 
 acrobot_observation(s) = [cos(s[1]), sin(s[1]), cos(s[2]), sin(s[2]), s[3], s[4]]
-angle_normalize(x) = ((x + pi) % (2 * pi)) - pi
 
 RLBase.observe(env::AcrobotEnv) =
     (reward = env.reward, state = acrobot_observation(env.state), terminal = env.done)
