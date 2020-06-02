@@ -20,6 +20,7 @@ By default, only some basic environments are installed. If you want to use some 
 
 ### Built-in Environments
 
+- AcrobotEnv
 - CartPoleEnv
 - MountainCarEnv
 - ContinuousMountainCarEnv
