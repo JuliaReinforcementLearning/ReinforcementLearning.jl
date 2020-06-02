@@ -211,10 +211,20 @@ ActionStyle(
 """
 @interface get_action_space(env::AbstractEnv) = env.action_space
 
+@deprecate get_observation_space(env::AbstractEnv) get_state_space(env::AbstractEnv)
+
 """
-    get_observation_space(env::AbstractEnv) -> AbstractSpace
+    get_state_space(env::AbstractEnv) -> AbstractSpace
 """
-@interface get_observation_space(env::AbstractEnv) = env.observation_space
+function get_state_space(env::T) where {T<:AbstractEnv}
+    if hasfield(T, :observation_space)
+        env.observation_space
+    elseif hasfield(T, :state_space)
+        env.state_space
+    else
+        @error "method not defined"
+    end
+end
 
 @interface get_current_player(env::AbstractEnv)
 
