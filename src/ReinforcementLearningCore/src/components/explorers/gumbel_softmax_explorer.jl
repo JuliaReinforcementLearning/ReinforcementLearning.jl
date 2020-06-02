@@ -7,9 +7,9 @@ struct GumbelSoftmaxExplorer <: AbstractExplorer
     rng::AbstractRNG
 end
 
-GumbelSoftmaxExplorer(;seed=nothing) = GumbelSoftmaxExplorer(MersenneTwister(seed))
+GumbelSoftmaxExplorer(; seed = nothing) = GumbelSoftmaxExplorer(MersenneTwister(seed))
 
-function (p::GumbelSoftmaxExplorer)(v::AbstractVector{T}) where T
+function (p::GumbelSoftmaxExplorer)(v::AbstractVector{T}) where {T}
     logits = logsoftmax(v)
     u = rand(p.rng, T, length(logits))
     argmax(logits .- log.(-log.(u)))

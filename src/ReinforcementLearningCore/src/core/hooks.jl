@@ -180,10 +180,7 @@ struct BatchStepsPerEpisode <: AbstractHook
 end
 
 function BatchStepsPerEpisode(batch_size::Int; tag = "TRAINING")
-    BatchStepsPerEpisode(
-        [Int[] for _ in 1:batch_size],
-        zeros(Int, batch_size)
-    )
+    BatchStepsPerEpisode([Int[] for _ in 1:batch_size], zeros(Int, batch_size))
 end
 
 function (hook::BatchStepsPerEpisode)(::PostActStage, agent, env, obs::BatchObs)

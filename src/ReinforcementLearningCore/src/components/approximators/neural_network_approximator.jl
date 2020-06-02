@@ -48,7 +48,8 @@ Base.@kwdef struct ActorCritic{A,C,O}
     optimizer::O = ADAM()
 end
 
-Flux.functor(x::ActorCritic) = (actor = x.actor, critic = x.critic), y -> ActorCritic(y.actor, y.critic, x.optimizer)
+Flux.functor(x::ActorCritic) =
+    (actor = x.actor, critic = x.critic), y -> ActorCritic(y.actor, y.critic, x.optimizer)
 
 RLBase.update!(app::ActorCritic, gs) = Flux.Optimise.update!(app.optimizer, params(app), gs)
 

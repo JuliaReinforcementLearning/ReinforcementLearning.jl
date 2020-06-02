@@ -4,7 +4,8 @@ using Zygote
 
 Zygote.@adjoint argmax(xs; dims = :) = argmax(xs; dims = dims), _ -> nothing
 
-global_norm(gs::Zygote.Grads, ps::Zygote.Params) = sqrt(sum(mapreduce(x->x^2, +, gs[p]) for p in ps))
+global_norm(gs::Zygote.Grads, ps::Zygote.Params) =
+    sqrt(sum(mapreduce(x -> x^2, +, gs[p]) for p in ps))
 
 function clip_by_global_norm!(gs::Zygote.Grads, ps::Zygote.Params, clip_norm::Float32)
     gn = global_norm(gs, ps)
