@@ -12,13 +12,19 @@ using Flux
 - `critic_loss_weight::Float32`
 - `entropy_loss_weight::Float32`
 """
-Base.@kwdef struct A2CGAELearner{A<:ActorCritic} <: AbstractLearner
+Base.@kwdef mutable struct A2CGAELearner{A<:ActorCritic} <: AbstractLearner
     approximator::A
     γ::Float32
     λ::Float32
+    max_grad_norm::Union{Nothing,Float32} = nothing
+    norm::Float32=0.f0
     actor_loss_weight::Float32
     critic_loss_weight::Float32
     entropy_loss_weight::Float32
+    actor_loss::Float32=0.f0
+    critic_loss::Float32=0.f0
+    entropy_loss::Float32=0.f0
+    loss::Float32=0.f0
 end
 
 (learner::A2CGAELearner)(obs::BatchObs) =
@@ -72,23 +78,36 @@ function RLBase.update!(learner::A2CGAELearner, t::AbstractTrajectory)
     advantages = flatten_batch(advantages)
     advantages = send_to_device(device(AC), advantages)
 
-    gs = gradient(Flux.params(AC)) do
-        probs = AC.actor(states_flattened)
-        log_probs = log.(probs)
+    ps = Flux.params(AC)
+    gs = gradient(ps) do
+        logits = AC.actor(states_flattened)
+        probs = softmax(logits)
+        log_probs = logsoftmax(logits)
         log_probs_select = log_probs[actions]
         values = AC.critic(states_flattened)
         advantage = vec(gains) .- vec(values)
         actor_loss = -mean(log_probs_select .* advantages)
         critic_loss = mean(advantage .^ 2)
-        entropy_loss = sum(probs .* log_probs) * 1 // size(probs, 2)
+        entropy_loss = -sum(probs .* log_probs) * 1 // size(probs, 2)
         loss = w₁ * actor_loss + w₂ * critic_loss - w₃ * entropy_loss
+        ignore() do
+            learner.actor_loss = actor_loss
+            learner.critic_loss = critic_loss
+            learner.entropy_loss = entropy_loss
+            learner.loss = loss
+        end
         loss
     end
+
+    if !isnothing(learner.max_grad_norm)
+        learner.norm = clip_by_global_norm!(gs, ps, learner.max_grad_norm)
+    end
+
     update!(AC, gs)
 end
 
 function (agent::Agent{<:QBasedPolicy{<:A2CGAELearner},<:CircularCompactSARTSATrajectory})(
-    ::PreActStage,
+    ::Training{PreActStage},
     obs,
 )
     action = agent.policy(obs)

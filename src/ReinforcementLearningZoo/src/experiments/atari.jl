@@ -489,3 +489,286 @@ function RLCore.Experiment(
 
     Experiment(agent, env, stop_condition, hook, description)
 end
+
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:A2C},
+    ::Val{:Atari},
+    name::AbstractString;
+    save_dir = nothing,
+)
+    if isnothing(save_dir)
+        t = Dates.format(now(), "yyyymmddHHMMSS")
+        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_A2C_Atari_$(name)_$(t)")
+    end
+
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
+
+    N_ENV = 16
+    UPDATE_FREQ = 5
+    N_FRAMES = 4
+    STATE_SIZE = (84, 84)
+    env = MultiThreadEnv([atari_env_factory(name, STATE_SIZE, N_FRAMES; #= seed = i =#) for i in 1:N_ENV])
+    N_ACTIONS = length(get_action_space(env[1]))
+
+    init = seed_glorot_uniform(#= seed=341 =#)
+
+    # share model
+    model = Chain(
+        x -> x ./ 255,
+        CrossCor((8, 8), N_FRAMES => 32, relu; stride = 4, pad = 2, init = init),
+        CrossCor((4, 4), 32 => 64, relu; stride = 2, pad = 2, init = init),
+        CrossCor((3, 3), 64 => 64, relu; stride = 1, pad = 1, init = init),
+        x -> reshape(x, :, size(x)[end]),
+        Dense(11 * 11 * 64, 512, relu),
+    )
+
+    agent = Agent(
+        policy = QBasedPolicy(
+            learner = A2CLearner(
+                approximator = ActorCritic(
+                    actor = Chain(
+                        model,
+                        Dense(512, N_ACTIONS; initW = init),
+                    ),
+                    critic = Chain(
+                        model,
+                        Dense(512, 1; initW = init),
+                    ),
+                    optimizer = RMSProp(7e-4, 0.99),
+                ) |> gpu,
+                γ = 0.99f0,
+                max_grad_norm = 0.5f0,
+                actor_loss_weight = 1.0f0,
+                critic_loss_weight = 0.25f0,
+                entropy_loss_weight = 0.01f0,
+            ),
+            explorer = BatchExplorer(GumbelSoftmaxExplorer(;#= seed = s=#)),
+        ),
+        trajectory = CircularCompactSARTSATrajectory(;
+            capacity = UPDATE_FREQ,
+            state_type = Float32,
+            state_size = (STATE_SIZE..., N_FRAMES, N_ENV),
+            action_type = Int,
+            action_size = (N_ENV,),
+            reward_type = Float32,
+            reward_size = (N_ENV,),
+            terminal_type = Bool,
+            terminal_size = (N_ENV,),
+        ),
+    )
+
+    N_TRAINING_STEPS = 10_000_000
+    EVALUATION_FREQ = 100_000
+    N_CHECKPOINTS = 3
+    stop_condition = StopAfterStep(N_TRAINING_STEPS)
+
+    total_batch_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
+    batch_steps_per_episode = BatchStepsPerEpisode(N_ENV)
+    evaluation_result = []
+
+    hook = ComposedHook(
+        total_batch_reward_per_episode,
+        batch_steps_per_episode,
+        DoEveryNStep(UPDATE_FREQ) do t, agent, env, obs
+            learner = agent.policy.learner
+            with_logger(lg) do
+                @info "training" loss = learner.loss actor_loss = learner.actor_loss critic_loss = learner.critic_loss entropy_loss = learner.entropy_loss norm = learner.norm log_step_increment = UPDATE_FREQ
+            end
+        end,
+        DoEveryNStep() do t, agent, env, obs
+            with_logger(lg) do
+                rewards = [total_batch_reward_per_episode.rewards[i][end] for i in 1:length(obs) if get_terminal(obs[i])]
+                if length(rewards) > 0
+                    @info "training" rewards = mean(rewards) log_step_increment = 0
+                end
+                steps = [batch_steps_per_episode.steps[i][end] for i in 1:length(obs) if get_terminal(obs[i])]
+                if length(steps) > 0
+                    @info "training" steps = mean(steps) log_step_increment = 0
+                end
+            end
+        end,
+        DoEveryNStep(EVALUATION_FREQ) do t, agent, env, obs
+            @info "evaluating agent at $t step..."
+            flush(stdout)
+            Flux.testmode!(agent)
+            h = TotalBatchRewardPerEpisode(N_ENV)
+            s = @elapsed run(
+                agent,
+                MultiThreadEnv([atari_env_factory(name, STATE_SIZE, N_FRAMES;) for i in 1:N_ENV]),
+                StopAfterStep(27_000; is_show_progress = false),
+                h,
+            )
+            res = (
+                avg_score = mean(Iterators.flatten(h.rewards)),
+            )
+            push!(evaluation_result, res)
+            Flux.trainmode!(agent)
+            @info "finished evaluating agent in $s seconds" avg_score = res.avg_score
+            with_logger(lg) do
+                @info "evaluating" avg_score = res.avg_score log_step_increment = 0
+            end
+            flush(stdout)
+
+            RLCore.save(joinpath(save_dir, string(t)), agent;)
+            BSON.@save joinpath(save_dir, string(t), "stats.bson") total_batch_reward_per_episode evaluation_result
+
+            # only keep recent 3 checkpoints
+            old_checkpoint_folder =
+                joinpath(save_dir, string(t - EVALUATION_FREQ * N_CHECKPOINTS))
+            if isdir(old_checkpoint_folder)
+                rm(old_checkpoint_folder; force = true, recursive = true)
+            end
+        end
+    )
+
+    description = """
+    # Play Atari($name) with A2C
+
+    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
+    """
+
+    Experiment(agent, env, stop_condition, hook, description)
+end
+
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:A2CGAE},
+    ::Val{:Atari},
+    name::AbstractString;
+    save_dir = nothing,
+)
+    if isnothing(save_dir)
+        t = Dates.format(now(), "yyyymmddHHMMSS")
+        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_A2CGAE_Atari_$(name)_$(t)")
+    end
+
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
+
+    N_ENV = 16
+    UPDATE_FREQ = 32
+    N_FRAMES = 4
+    STATE_SIZE = (84, 84)
+    env = MultiThreadEnv([atari_env_factory(name, STATE_SIZE, N_FRAMES; #= seed = i =#) for i in 1:N_ENV])
+    N_ACTIONS = length(get_action_space(env[1]))
+
+    init = seed_glorot_uniform(#= seed=341 =#)
+
+    # share model
+    model = Chain(
+        x -> x ./ 255,
+        CrossCor((8, 8), N_FRAMES => 32, relu; stride = 4, pad = 2, init = init),
+        CrossCor((4, 4), 32 => 64, relu; stride = 2, pad = 2, init = init),
+        CrossCor((3, 3), 64 => 64, relu; stride = 1, pad = 1, init = init),
+        x -> reshape(x, :, size(x)[end]),
+        Dense(11 * 11 * 64, 512, relu),
+    )
+
+    agent = Agent(
+        policy = QBasedPolicy(
+            learner = A2CGAELearner(
+                approximator = ActorCritic(
+                    actor = Chain(
+                        model,
+                        Dense(512, N_ACTIONS; initW = init),
+                    ),
+                    critic = Chain(
+                        model,
+                        Dense(512, 1; initW = init),
+                    ),
+                    optimizer = RMSProp(7e-4, 0.99),
+                ) |> gpu,
+                γ = 0.99f0,
+                λ = 0.95f0,
+                max_grad_norm = 0.5f0,
+                actor_loss_weight = 1.0f0,
+                critic_loss_weight = 0.25f0,
+                entropy_loss_weight = 0.01f0,
+            ),
+            explorer = BatchExplorer(GumbelSoftmaxExplorer(;#= seed = s=#)),
+        ),
+        trajectory = CircularCompactSARTSATrajectory(;
+            capacity = UPDATE_FREQ,
+            state_type = Float32,
+            state_size = (STATE_SIZE..., N_FRAMES, N_ENV),
+            action_type = Int,
+            action_size = (N_ENV,),
+            reward_type = Float32,
+            reward_size = (N_ENV,),
+            terminal_type = Bool,
+            terminal_size = (N_ENV,),
+        ),
+    )
+
+    N_TRAINING_STEPS = 10_000_000
+    EVALUATION_FREQ = 100_000
+    N_CHECKPOINTS = 3
+    stop_condition = StopAfterStep(N_TRAINING_STEPS)
+
+    total_batch_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
+    batch_steps_per_episode = BatchStepsPerEpisode(N_ENV)
+    evaluation_result = []
+
+    hook = ComposedHook(
+        total_batch_reward_per_episode,
+        batch_steps_per_episode,
+        DoEveryNStep(UPDATE_FREQ) do t, agent, env, obs
+            learner = agent.policy.learner
+            with_logger(lg) do
+                @info "training" loss = learner.loss actor_loss = learner.actor_loss critic_loss = learner.critic_loss entropy_loss = learner.entropy_loss norm = learner.norm log_step_increment = UPDATE_FREQ
+            end
+        end,
+        DoEveryNStep() do t, agent, env, obs
+            with_logger(lg) do
+                rewards = [total_batch_reward_per_episode.rewards[i][end] for i in 1:length(obs) if get_terminal(obs[i])]
+                if length(rewards) > 0
+                    @info "training" rewards = mean(rewards) log_step_increment = 0
+                end
+                steps = [batch_steps_per_episode.steps[i][end] for i in 1:length(obs) if get_terminal(obs[i])]
+                if length(steps) > 0
+                    @info "training" steps = mean(steps) log_step_increment = 0
+                end
+            end
+        end,
+        DoEveryNStep(EVALUATION_FREQ) do t, agent, env, obs
+            @info "evaluating agent at $t step..."
+            flush(stdout)
+            Flux.testmode!(agent)
+            h = TotalBatchRewardPerEpisode(N_ENV)
+            s = @elapsed run(
+                agent,
+                MultiThreadEnv([atari_env_factory(name, STATE_SIZE, N_FRAMES;) for i in 1:N_ENV]),
+                StopAfterStep(27_000; is_show_progress = false),
+                h,
+            )
+            res = (
+                avg_score = mean(Iterators.flatten(h.rewards)),
+            )
+            push!(evaluation_result, res)
+            Flux.trainmode!(agent)
+            @info "finished evaluating agent in $s seconds" avg_score = res.avg_score
+            with_logger(lg) do
+                @info "evaluating" avg_score = res.avg_score log_step_increment = 0
+            end
+            flush(stdout)
+
+            RLCore.save(joinpath(save_dir, string(t)), agent;)
+            BSON.@save joinpath(save_dir, string(t), "stats.bson") total_batch_reward_per_episode evaluation_result
+
+            # only keep recent 3 checkpoints
+            old_checkpoint_folder =
+                joinpath(save_dir, string(t - EVALUATION_FREQ * N_CHECKPOINTS))
+            if isdir(old_checkpoint_folder)
+                rm(old_checkpoint_folder; force = true, recursive = true)
+            end
+        end
+    )
+
+    description = """
+    # Play Atari($name) with A2CGAE
+
+    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
+    """
+
+    Experiment(agent, env, stop_condition, hook, description)
+end

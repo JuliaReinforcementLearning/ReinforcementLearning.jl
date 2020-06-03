@@ -13,12 +13,18 @@ using Flux
 - `critic_loss_weight::Float32`
 - `entropy_loss_weight::Float32`
 """
-Base.@kwdef struct A2CLearner{A<:ActorCritic} <: AbstractLearner
+Base.@kwdef mutable struct A2CLearner{A<:ActorCritic} <: AbstractLearner
     approximator::A
     γ::Float32
+    max_grad_norm::Union{Nothing,Float32} = nothing
+    norm::Float32=0.f0
     actor_loss_weight::Float32
     critic_loss_weight::Float32
     entropy_loss_weight::Float32
+    actor_loss::Float32=0.f0
+    critic_loss::Float32=0.f0
+    entropy_loss::Float32=0.f0
+    loss::Float32=0.f0
 end
 
 (learner::A2CLearner)(obs::BatchObs) =
@@ -26,6 +32,13 @@ end
         device(learner.approximator),
         get_state(obs),
     )) |> send_to_host
+
+function (learner::A2CLearner)(obs)
+    s = get_state(obs)
+    s = Flux.unsqueeze(s, ndims(s) + 1)
+    s = send_to_device(device(learner.approximator), s)
+    learner.approximator.actor(s) |> vec |> send_to_host
+end
 
 function RLBase.update!(learner::A2CLearner, t::AbstractTrajectory)
     isfull(t) || return
@@ -59,23 +72,34 @@ function RLBase.update!(learner::A2CLearner, t::AbstractTrajectory)
     )
     gains = send_to_device(device(AC), gains)
 
-    gs = gradient(Flux.params(AC)) do
-        probs = AC.actor(states_flattened)
-        log_probs = log.(probs)
+    ps = Flux.params(AC)
+    gs = gradient(ps) do
+        logits = AC.actor(states_flattened)
+        probs = softmax(logits)
+        log_probs = logsoftmax(logits)
         log_probs_select = log_probs[actions]
         values = AC.critic(states_flattened)
         advantage = vec(gains) .- vec(values)
         actor_loss = -mean(log_probs_select .* Zygote.dropgrad(advantage))
         critic_loss = mean(advantage .^ 2)
-        entropy_loss = sum(probs .* log_probs) * 1 // size(probs, 2)
+        entropy_loss = -sum(probs .* log_probs) * 1 // size(probs, 2)
         loss = w₁ * actor_loss + w₂ * critic_loss - w₃ * entropy_loss
+        ignore() do
+            learner.actor_loss = actor_loss
+            learner.critic_loss = critic_loss
+            learner.entropy_loss = entropy_loss
+            learner.loss = loss
+        end
         loss
+    end
+    if !isnothing(learner.max_grad_norm)
+        learner.norm = clip_by_global_norm!(gs, ps, learner.max_grad_norm)
     end
     update!(AC, gs)
 end
 
 function (agent::Agent{<:QBasedPolicy{<:A2CLearner},<:CircularCompactSARTSATrajectory})(
-    ::PreActStage,
+    ::Training{PreActStage},
     obs,
 )
     action = agent.policy(obs)
