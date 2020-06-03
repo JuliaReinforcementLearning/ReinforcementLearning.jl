@@ -158,7 +158,7 @@ function Base.empty!(cb::CircularArrayBuffer)
 end
 
 """
-    update!(cb::CircularArrayBuffer{T,N}, data::AbstractArray{T})
+    update!(cb::CircularArrayBuffer{T,N}, data::AbstractArray)
 
 `update!` the last frame of `cb` with data.
 """
