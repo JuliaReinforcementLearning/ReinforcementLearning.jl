@@ -599,3 +599,66 @@ function RLCore.Experiment(
         "# A2CGAE with CartPole",
     )
 end
+
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:DDPG},
+    ::Val{:Pendulum},
+    ::Nothing;
+)
+    inner_env=PendulumEnv(T=Float32,seed=9231)
+    action_space = get_action_space(inner_env)
+    low = action_space.low
+    high = action_space.high
+    ns = length(rand(get_observation_space(inner_env)))
+
+    env = WrappedEnv(;
+        env = inner_env,
+        postprocessor = ((x,),) -> (low + (x + 1) * 0.5 * (high - low),) # rescale [-1, 1] -> (low, high)
+    );
+
+    init = seed_glorot_uniform(seed = 17)
+
+    create_actor() = Chain(
+        Dense(ns, 256, relu; initW = init),
+        Dense(256, 256, relu; initW = init),
+        Dense(256, 1, tanh; initW = init),
+    )
+
+    create_critic() = Chain(
+        Dense(ns+1, 256, relu; initW = init),
+        Dense(256, 256, relu; initW = init),
+        Dense(256, 1; initW = init),
+    )
+
+    agent=Agent(
+        policy=DDPGPolicy(
+            behavior_actor = NeuralNetworkApproximator(model = create_actor(), optimizer = ADAM()),
+            behavior_critic = NeuralNetworkApproximator(model = create_critic(), optimizer = ADAM()),
+            target_actor = NeuralNetworkApproximator(model = create_actor(), optimizer = ADAM()),
+            target_critic = NeuralNetworkApproximator(model = create_critic(), optimizer = ADAM()),
+            γ=0.99f0,
+            ρ=0.995f0,
+            batch_size=64,
+            start_steps=1000,
+            start_policy=RandomPolicy(ContinuousSpace(-1.0, 1.0); seed=923),
+            update_after=1000,
+            update_every=1,
+            act_limit=1.0,
+            act_noise=0.1,
+            seed=131
+            ),
+        trajectory=CircularCompactSARTSATrajectory(
+            capacity = 10000,
+            state_type = Float32,
+            state_size = (ns,),
+            action_type = Float32
+        )
+    )
+
+    description = """
+    # Play Pendulum with DDPG
+    """
+
+    Experiment(agent, env, StopAfterStep(10000), TotalRewardPerEpisode(), description)
+end

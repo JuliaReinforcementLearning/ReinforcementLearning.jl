@@ -28,6 +28,9 @@ using Random
                 @info "stats for $method" avg_reward =
                     mean(Iterators.flatten(res.hook.rewards))
             end
+
+            res = run(E`JuliaRL_DDPG_Pendulum`)
+            @info "stats for DDPG Pendulum" avg_reward = mean(res.hook.rewards)
         end
     end
 
