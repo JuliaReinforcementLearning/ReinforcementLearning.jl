@@ -509,8 +509,8 @@ function RLCore.Experiment(
                         Dense(256, na; initW = seed_glorot_uniform(seed = 23)),
                     ),
                     critic = Chain(
-                            Dense(ns, 256, relu; initW = seed_glorot_uniform(seed = 29)),
-                            Dense(256, 1; initW = seed_glorot_uniform(seed = 29)),
+                        Dense(ns, 256, relu; initW = seed_glorot_uniform(seed = 29)),
+                        Dense(256, 1; initW = seed_glorot_uniform(seed = 29)),
                     ),
                     optimizer = ADAM(1e-3),
                 ) |> cpu,
@@ -519,7 +519,7 @@ function RLCore.Experiment(
                 critic_loss_weight = 0.5f0,
                 entropy_loss_weight = 0.001f0,
             ),
-            explorer = BatchExplorer(GumbelSoftmaxExplorer(#= seed = nothing =#)),
+            explorer = BatchExplorer(GumbelSoftmaxExplorer()),#= seed = nothing =#
         ),
         trajectory = CircularCompactSARTSATrajectory(;
             capacity = UPDATE_FREQ,
@@ -577,7 +577,7 @@ function RLCore.Experiment(
                 critic_loss_weight = 0.5f0,
                 entropy_loss_weight = 0.001f0,
             ),
-            explorer = BatchExplorer(GumbelSoftmaxExplorer(; #= seed = nothing =#)),
+            explorer = BatchExplorer(GumbelSoftmaxExplorer(;)), #= seed = nothing =#
         ),
         trajectory = CircularCompactSARTSATrajectory(;
             capacity = UPDATE_FREQ,

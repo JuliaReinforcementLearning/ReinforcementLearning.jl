@@ -17,14 +17,14 @@ Base.@kwdef mutable struct A2CLearner{A<:ActorCritic} <: AbstractLearner
     approximator::A
     γ::Float32
     max_grad_norm::Union{Nothing,Float32} = nothing
-    norm::Float32=0.f0
+    norm::Float32 = 0.f0
     actor_loss_weight::Float32
     critic_loss_weight::Float32
     entropy_loss_weight::Float32
-    actor_loss::Float32=0.f0
-    critic_loss::Float32=0.f0
-    entropy_loss::Float32=0.f0
-    loss::Float32=0.f0
+    actor_loss::Float32 = 0.f0
+    critic_loss::Float32 = 0.f0
+    entropy_loss::Float32 = 0.f0
+    loss::Float32 = 0.f0
 end
 
 (learner::A2CLearner)(obs::BatchObs) =

@@ -508,10 +508,10 @@ function RLCore.Experiment(
     UPDATE_FREQ = 5
     N_FRAMES = 4
     STATE_SIZE = (84, 84)
-    env = MultiThreadEnv([atari_env_factory(name, STATE_SIZE, N_FRAMES; #= seed = i =#) for i in 1:N_ENV])
+    env = MultiThreadEnv([atari_env_factory(name, STATE_SIZE, N_FRAMES;) for i in 1:N_ENV]) #= seed = i =#
     N_ACTIONS = length(get_action_space(env[1]))
 
-    init = seed_glorot_uniform(#= seed=341 =#)
+    init = seed_glorot_uniform()#= seed=341 =#
 
     # share model
     model = Chain(
@@ -527,14 +527,8 @@ function RLCore.Experiment(
         policy = QBasedPolicy(
             learner = A2CLearner(
                 approximator = ActorCritic(
-                    actor = Chain(
-                        model,
-                        Dense(512, N_ACTIONS; initW = init),
-                    ),
-                    critic = Chain(
-                        model,
-                        Dense(512, 1; initW = init),
-                    ),
+                    actor = Chain(model, Dense(512, N_ACTIONS; initW = init)),
+                    critic = Chain(model, Dense(512, 1; initW = init)),
                     optimizer = RMSProp(7e-4, 0.99),
                 ) |> gpu,
                 γ = 0.99f0,
@@ -543,7 +537,7 @@ function RLCore.Experiment(
                 critic_loss_weight = 0.25f0,
                 entropy_loss_weight = 0.01f0,
             ),
-            explorer = BatchExplorer(GumbelSoftmaxExplorer(;#= seed = s=#)),
+            explorer = BatchExplorer(GumbelSoftmaxExplorer(;)),#= seed = s=#
         ),
         trajectory = CircularCompactSARTSATrajectory(;
             capacity = UPDATE_FREQ,
@@ -573,16 +567,24 @@ function RLCore.Experiment(
         DoEveryNStep(UPDATE_FREQ) do t, agent, env, obs
             learner = agent.policy.learner
             with_logger(lg) do
-                @info "training" loss = learner.loss actor_loss = learner.actor_loss critic_loss = learner.critic_loss entropy_loss = learner.entropy_loss norm = learner.norm log_step_increment = UPDATE_FREQ
+                @info "training" loss = learner.loss actor_loss = learner.actor_loss critic_loss =
+                    learner.critic_loss entropy_loss = learner.entropy_loss norm =
+                    learner.norm log_step_increment = UPDATE_FREQ
             end
         end,
         DoEveryNStep() do t, agent, env, obs
             with_logger(lg) do
-                rewards = [total_batch_reward_per_episode.rewards[i][end] for i in 1:length(obs) if get_terminal(obs[i])]
+                rewards = [
+                    total_batch_reward_per_episode.rewards[i][end]
+                    for i in 1:length(obs) if get_terminal(obs[i])
+                ]
                 if length(rewards) > 0
                     @info "training" rewards = mean(rewards) log_step_increment = 0
                 end
-                steps = [batch_steps_per_episode.steps[i][end] for i in 1:length(obs) if get_terminal(obs[i])]
+                steps = [
+                    batch_steps_per_episode.steps[i][end]
+                    for i in 1:length(obs) if get_terminal(obs[i])
+                ]
                 if length(steps) > 0
                     @info "training" steps = mean(steps) log_step_increment = 0
                 end
@@ -595,13 +597,13 @@ function RLCore.Experiment(
             h = TotalBatchRewardPerEpisode(N_ENV)
             s = @elapsed run(
                 agent,
-                MultiThreadEnv([atari_env_factory(name, STATE_SIZE, N_FRAMES;) for i in 1:N_ENV]),
+                MultiThreadEnv([
+                    atari_env_factory(name, STATE_SIZE, N_FRAMES;) for i in 1:N_ENV
+                ]),
                 StopAfterStep(27_000; is_show_progress = false),
                 h,
             )
-            res = (
-                avg_score = mean(Iterators.flatten(h.rewards)),
-            )
+            res = (avg_score = mean(Iterators.flatten(h.rewards)),)
             push!(evaluation_result, res)
             Flux.trainmode!(agent)
             @info "finished evaluating agent in $s seconds" avg_score = res.avg_score
@@ -619,7 +621,7 @@ function RLCore.Experiment(
             if isdir(old_checkpoint_folder)
                 rm(old_checkpoint_folder; force = true, recursive = true)
             end
-        end
+        end,
     )
 
     description = """
@@ -649,10 +651,10 @@ function RLCore.Experiment(
     UPDATE_FREQ = 32
     N_FRAMES = 4
     STATE_SIZE = (84, 84)
-    env = MultiThreadEnv([atari_env_factory(name, STATE_SIZE, N_FRAMES; #= seed = i =#) for i in 1:N_ENV])
+    env = MultiThreadEnv([atari_env_factory(name, STATE_SIZE, N_FRAMES;) for i in 1:N_ENV]) #= seed = i =#
     N_ACTIONS = length(get_action_space(env[1]))
 
-    init = seed_glorot_uniform(#= seed=341 =#)
+    init = seed_glorot_uniform()#= seed=341 =#
 
     # share model
     model = Chain(
@@ -668,14 +670,8 @@ function RLCore.Experiment(
         policy = QBasedPolicy(
             learner = A2CGAELearner(
                 approximator = ActorCritic(
-                    actor = Chain(
-                        model,
-                        Dense(512, N_ACTIONS; initW = init),
-                    ),
-                    critic = Chain(
-                        model,
-                        Dense(512, 1; initW = init),
-                    ),
+                    actor = Chain(model, Dense(512, N_ACTIONS; initW = init)),
+                    critic = Chain(model, Dense(512, 1; initW = init)),
                     optimizer = RMSProp(7e-4, 0.99),
                 ) |> gpu,
                 γ = 0.99f0,
@@ -685,7 +681,7 @@ function RLCore.Experiment(
                 critic_loss_weight = 0.25f0,
                 entropy_loss_weight = 0.01f0,
             ),
-            explorer = BatchExplorer(GumbelSoftmaxExplorer(;#= seed = s=#)),
+            explorer = BatchExplorer(GumbelSoftmaxExplorer(;)),#= seed = s=#
         ),
         trajectory = CircularCompactSARTSATrajectory(;
             capacity = UPDATE_FREQ,
@@ -715,16 +711,24 @@ function RLCore.Experiment(
         DoEveryNStep(UPDATE_FREQ) do t, agent, env, obs
             learner = agent.policy.learner
             with_logger(lg) do
-                @info "training" loss = learner.loss actor_loss = learner.actor_loss critic_loss = learner.critic_loss entropy_loss = learner.entropy_loss norm = learner.norm log_step_increment = UPDATE_FREQ
+                @info "training" loss = learner.loss actor_loss = learner.actor_loss critic_loss =
+                    learner.critic_loss entropy_loss = learner.entropy_loss norm =
+                    learner.norm log_step_increment = UPDATE_FREQ
             end
         end,
         DoEveryNStep() do t, agent, env, obs
             with_logger(lg) do
-                rewards = [total_batch_reward_per_episode.rewards[i][end] for i in 1:length(obs) if get_terminal(obs[i])]
+                rewards = [
+                    total_batch_reward_per_episode.rewards[i][end]
+                    for i in 1:length(obs) if get_terminal(obs[i])
+                ]
                 if length(rewards) > 0
                     @info "training" rewards = mean(rewards) log_step_increment = 0
                 end
-                steps = [batch_steps_per_episode.steps[i][end] for i in 1:length(obs) if get_terminal(obs[i])]
+                steps = [
+                    batch_steps_per_episode.steps[i][end]
+                    for i in 1:length(obs) if get_terminal(obs[i])
+                ]
                 if length(steps) > 0
                     @info "training" steps = mean(steps) log_step_increment = 0
                 end
@@ -737,13 +741,13 @@ function RLCore.Experiment(
             h = TotalBatchRewardPerEpisode(N_ENV)
             s = @elapsed run(
                 agent,
-                MultiThreadEnv([atari_env_factory(name, STATE_SIZE, N_FRAMES;) for i in 1:N_ENV]),
+                MultiThreadEnv([
+                    atari_env_factory(name, STATE_SIZE, N_FRAMES;) for i in 1:N_ENV
+                ]),
                 StopAfterStep(27_000; is_show_progress = false),
                 h,
             )
-            res = (
-                avg_score = mean(Iterators.flatten(h.rewards)),
-            )
+            res = (avg_score = mean(Iterators.flatten(h.rewards)),)
             push!(evaluation_result, res)
             Flux.trainmode!(agent)
             @info "finished evaluating agent in $s seconds" avg_score = res.avg_score
@@ -761,7 +765,7 @@ function RLCore.Experiment(
             if isdir(old_checkpoint_folder)
                 rm(old_checkpoint_folder; force = true, recursive = true)
             end
-        end
+        end,
     )
 
     description = """
