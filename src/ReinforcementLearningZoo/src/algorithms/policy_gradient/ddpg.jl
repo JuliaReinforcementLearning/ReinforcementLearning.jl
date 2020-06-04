@@ -9,7 +9,8 @@ mutable struct DDPGPolicy{
     TA<:NeuralNetworkApproximator,
     TC<:NeuralNetworkApproximator,
     P,
-    R<:AbstractRNG} <: AbstractPolicy
+    R<:AbstractRNG,
+} <: AbstractPolicy
 
     behavior_actor::BA
     behavior_critic::BC
@@ -29,21 +30,21 @@ mutable struct DDPGPolicy{
 end
 
 function DDPGPolicy(;
-        behavior_actor,
-        behavior_critic,
-        target_actor,
-        target_critic,
-        start_policy,
-        γ=0.99f0,
-        ρ=0.995f0,
-        batch_size=32,
-        start_steps=10000,
-        update_after=1000,
-        update_every=50,
-        act_limit=1.0,
-        act_noise=0.1,
-        step=0,
-        seed=nothing
+    behavior_actor,
+    behavior_critic,
+    target_actor,
+    target_critic,
+    start_policy,
+    γ = 0.99f0,
+    ρ = 0.995f0,
+    batch_size = 32,
+    start_steps = 10000,
+    update_after = 1000,
+    update_every = 50,
+    act_limit = 1.0,
+    act_noise = 0.1,
+    step = 0,
+    seed = nothing,
 )
     rng = MersenneTwister(seed)
     copyto!(behavior_actor, target_actor)  # force sync
@@ -63,19 +64,19 @@ function DDPGPolicy(;
         act_limit,
         act_noise,
         step,
-        rng
+        rng,
     )
 end
 
 function (p::DDPGPolicy)(obs)
     p.step += 1
-    
+
     if p.step <= p.start_steps
         p.start_policy(obs)
     else
         D = device(p.behavior_actor)
         s = get_state(obs)
-        s = Flux.unsqueeze(s, ndims(s)+1)
+        s = Flux.unsqueeze(s, ndims(s) + 1)
         action = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
         clamp(action[] + randn(p.rng) * p.act_noise, -p.act_limit, p.act_limit)
     end
@@ -84,10 +85,10 @@ end
 function RLBase.update!(p::DDPGPolicy, t::CircularCompactSARTSATrajectory)
     length(t) > p.update_after || return
     p.step % p.update_every == 0 || return
-    
+
     inds = rand(p.rng, 1:(length(t)-1), p.batch_size)
     SARTS = (:state, :action, :reward, :terminal, :next_state)
-    s, a, r, t, s′= map(x -> select_last_dim(get_trace(t, x), inds), SARTS)
+    s, a, r, t, s′ = map(x -> select_last_dim(get_trace(t, x), inds), SARTS)
 
     A = p.behavior_actor
     C = p.behavior_critic
@@ -97,13 +98,13 @@ function RLBase.update!(p::DDPGPolicy, t::CircularCompactSARTSATrajectory)
     γ = p.γ
     ρ = p.ρ
 
-    
+
     # !!! we have several assumptions here, need revisit when we have more complex environments
     # state is vector
     # action is scalar
     a′ = Aₜ(s′)
     qₜ = Cₜ(vcat(s′, a′)) |> vec
-    y = r .+ γ.*(1 .- t) .* qₜ
+    y = r .+ γ .* (1 .- t) .* qₜ
     a = Flux.unsqueeze(a, 1)
 
     gs1 = gradient(Flux.params(C)) do
@@ -112,15 +113,15 @@ function RLBase.update!(p::DDPGPolicy, t::CircularCompactSARTSATrajectory)
     end
 
     update!(C, gs1)
- 
+
     gs2 = gradient(Flux.params(A)) do
         -mean(C(vcat(s, A(s))))
     end
-    
+
     update!(A, gs2)
-    
+
     # polyak averaging
-    for (dest, src) in zip(Flux.params([Aₜ, Cₜ]), Flux.params([A,C]))
-        dest .= ρ .* dest  .+ (1-ρ) .* src
+    for (dest, src) in zip(Flux.params([Aₜ, Cₜ]), Flux.params([A, C]))
+        dest .= ρ .* dest .+ (1 - ρ) .* src
     end
 end
