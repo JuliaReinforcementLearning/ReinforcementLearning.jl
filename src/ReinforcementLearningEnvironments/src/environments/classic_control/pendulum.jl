@@ -12,19 +12,21 @@ struct PendulumEnvParams{T}
     max_steps::Int
 end
 
-mutable struct PendulumEnv{T,R<:AbstractRNG} <: AbstractEnv
+mutable struct PendulumEnv{A,T,R<:AbstractRNG} <: AbstractEnv
     params::PendulumEnvParams{T}
-    action_space::ContinuousSpace
+    action_space::A
     observation_space::MultiContinuousSpace{Vector{T}}
     state::Vector{T}
     done::Bool
     t::Int
     rng::R
     reward::T
+    n_actions::Int
+    action::Union{Int,AbstractFloat}
 end
 
 """
-    PwendulumEnv(;kwargs...)
+    PendulumEnv(;kwargs...)
 
 # Keyword arguments
 
@@ -36,6 +38,8 @@ end
 - `l = T(1)`
 - `dt = T(0.05)`
 - `max_steps = 200`
+- `continuous::Bool = true`
+- `n_actions::Int = 3`
 - `seed = nothing`
 """
 function PendulumEnv(;
@@ -47,18 +51,23 @@ function PendulumEnv(;
     l = T(1),
     dt = T(0.05),
     max_steps = 200,
+    continuous::Bool = true,
+    n_actions::Int = 3,
     seed = nothing,
 )
     high = T.([1, 1, max_speed])
+    action_space = continuous ? ContinuousSpace(-2.0, 2.0) : DiscreteSpace(n_actions)
     env = PendulumEnv(
         PendulumEnvParams(max_speed, max_torque, g, m, l, dt, max_steps),
-        ContinuousSpace(-2.0, 2.0),
+        action_space,
         MultiContinuousSpace(-high, high),
         zeros(T, 2),
         false,
         0,
         MersenneTwister(seed),
         zero(T),
+        n_actions,
+        rand(action_space),
     )
     reset!(env)
     env
@@ -67,20 +76,34 @@ end
 Random.seed!(env::PendulumEnv, seed) = Random.seed!(env.rng, seed)
 
 pendulum_observation(s) = [cos(s[1]), sin(s[1]), s[2]]
-angle_normalize(x) = ((x + pi) % (2 * pi)) - pi
+angle_normalize(x) = Base.mod((x + Base.π), (2 * Base.π)) - Base.π
 
 RLBase.observe(env::PendulumEnv) =
     (reward = env.reward, state = pendulum_observation(env.state), terminal = env.done)
 
-function RLBase.reset!(env::PendulumEnv{T}) where {T}
-    env.state[:] = 2 * rand(env.rng, T, 2) .- 1
+function RLBase.reset!(env::PendulumEnv{A,T}) where {A,T}
+    env.state[1] = 2*π*(rand(env.rng, T) .- 1)
+    env.state[2] = 2*(rand(env.rng, T) .- 1)
     env.t = 0
     env.done = false
     env.reward = zero(T)
     nothing
 end
 
-function (env::PendulumEnv)(a)
+function (env::PendulumEnv{<:ContinuousSpace})(a::AbstractFloat)
+    @assert a in env.action_space
+    env.action = a
+    _step!(env, a)
+end
+
+function (env::PendulumEnv{<:DiscreteSpace})(a::Int)
+    @assert a in env.action_space
+    env.action = a
+    float_a = (4 / (env.n_actions - 1)) * (a - (env.n_actions - 1) / 2 - 1)
+    _step!(env, float_a)
+end
+
+function _step!(env::PendulumEnv, a)
     env.t += 1
     th, thdot = env.state
     a = clamp(a, -env.params.max_torque, env.params.max_torque)

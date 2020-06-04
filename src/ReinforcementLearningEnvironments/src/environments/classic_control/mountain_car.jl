@@ -41,7 +41,7 @@ mutable struct MountainCarEnv{A,T,R<:AbstractRNG} <: AbstractEnv
     action_space::A
     observation_space::MultiContinuousSpace{Vector{T}}
     state::Vector{T}
-    action::Int
+    action::Union{Int,AbstractFloat}
     done::Bool
     t::Int
     rng::R
@@ -70,15 +70,16 @@ function MountainCarEnv(; T = Float64, continuous = false, seed = nothing, kwarg
     else
         params = MountainCarEnvParams(; T = T, kwargs...)
     end
+    action_space = continuous ? ContinuousSpace(-T(1.0), T(1.0)) : DiscreteSpace(3)
     env = MountainCarEnv(
         params,
-        continuous ? ContinuousSpace(-T(1.0), T(1.0)) : DiscreteSpace(3),
+        action_space,
         MultiContinuousSpace(
             [params.min_pos, -params.max_speed],
             [params.max_pos, params.max_speed],
         ),
         zeros(T, 2),
-        1,
+        rand(action_space),
         false,
         0,
         MersenneTwister(seed),
@@ -102,11 +103,19 @@ function RLBase.reset!(env::MountainCarEnv{A,T}) where {A,T}
     nothing
 end
 
-(env::MountainCarEnv{<:ContinuousSpace})(a) = _interact!(env, min(max(a, -1, 1)))
+function (env::MountainCarEnv{<:ContinuousSpace})(a::AbstractFloat)
+    @assert a in env.action_space
+    env.action = a
+    _step!(env, a)
+end
 
-(env::MountainCarEnv{<:DiscreteSpace})(a) = _interact!(env, a - 2)
+function (env::MountainCarEnv{<:DiscreteSpace})(a::Int)
+    @assert a in env.action_space
+    env.action = a
+    _step!(env, a - 2)
+end
 
-function _interact!(env::MountainCarEnv, force)
+function _step!(env::MountainCarEnv, force)
     env.t += 1
     x, v = env.state
     v += force * env.params.power + cos(3 * x) * (-env.params.gravity)

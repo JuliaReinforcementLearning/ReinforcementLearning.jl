@@ -10,7 +10,7 @@ struct CartPoleEnvParams{T}
     halflength::T
     polemasslength::T
     forcemag::T
-    tau::T
+    dt::T
     thetathreshold::T
     xthreshold::T
     max_steps::Int
@@ -46,6 +46,7 @@ Base.show(io::IO, env::CartPoleEnv{T}) where {T} =
 - `halflength = T(0.5)`
 - `forcemag = T(10.0)`
 - `max_steps = 200`
+- 'dt = 0.02'
 - `seed = nothing`
 """
 function CartPoleEnv(;
@@ -56,6 +57,7 @@ function CartPoleEnv(;
     halflength = 0.5,
     forcemag = 10.0,
     max_steps = 200,
+    dt = 0.02,
     seed = nothing,
 )
     params = CartPoleEnvParams{T}(
@@ -66,7 +68,7 @@ function CartPoleEnv(;
         halflength,
         masspole * halflength,
         forcemag,
-        0.02,
+        dt,
         2 * 12 * π / 360,
         2.4,
         max_steps,
@@ -100,6 +102,7 @@ RLBase.observe(env::CartPoleEnv{T}) where {T} =
     (reward = env.done ? zero(T) : one(T), terminal = env.done, state = env.state)
 
 function (env::CartPoleEnv)(a)
+    @assert a in (1, 2)
     env.action = a
     env.t += 1
     force = a == 2 ? env.params.forcemag : -env.params.forcemag
@@ -113,10 +116,10 @@ function (env::CartPoleEnv)(a)
             (4 / 3 - env.params.masspole * costheta^2 / env.params.totalmass)
         )
     xacc = tmp - env.params.polemasslength * thetaacc * costheta / env.params.totalmass
-    env.state[1] += env.params.tau * xdot
-    env.state[2] += env.params.tau * xacc
-    env.state[3] += env.params.tau * thetadot
-    env.state[4] += env.params.tau * thetaacc
+    env.state[1] += env.params.dt * xdot
+    env.state[2] += env.params.dt * xacc
+    env.state[3] += env.params.dt * thetadot
+    env.state[4] += env.params.dt * thetaacc
     env.done =
         abs(env.state[1]) > env.params.xthreshold ||
         abs(env.state[3]) > env.params.thetathreshold ||
