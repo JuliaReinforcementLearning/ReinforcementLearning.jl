@@ -820,12 +820,12 @@ function RLCore.Experiment(
                     critic = Chain(model, Dense(512, 1; initW = init)),
                     optimizer = ADAM(INIT_LEARNING_RATE),  # decrease learning rate with a hook
                 ) |> gpu,
-                γ=0.99f0,
-                λ=0.98f0,
-                clip_range=INIT_CLIP_RANGE,  # decrease with a hook
-                max_grad_norm=1.0f0,
-                n_microbatches=4,
-                n_epochs=4,
+                γ = 0.99f0,
+                λ = 0.98f0,
+                clip_range = INIT_CLIP_RANGE,  # decrease with a hook
+                max_grad_norm = 1.0f0,
+                n_microbatches = 4,
+                n_epochs = 4,
                 actor_loss_weight = 1.0f0,
                 critic_loss_weight = 1.0f0,
                 entropy_loss_weight = 0.01f0,
@@ -838,8 +838,8 @@ function RLCore.Experiment(
             state_size = (STATE_SIZE..., N_FRAMES, N_ENV),
             action_type = Int,
             action_size = (N_ENV,),
-            action_log_prob_type=Float32,
-            action_log_prob_size=(N_ENV,),
+            action_log_prob_type = Float32,
+            action_log_prob_size = (N_ENV,),
             reward_type = Float32,
             reward_size = (N_ENV,),
             terminal_type = Bool,
@@ -862,12 +862,16 @@ function RLCore.Experiment(
         DoEveryNStep(UPDATE_FREQ) do t, agent, env, obs
             learner = agent.policy.learner
             with_logger(lg) do
-                @info "training" loss = mean(learner.loss) actor_loss = mean(learner.actor_loss) critic_loss = mean(learner.critic_loss) entropy_loss = mean(learner.entropy_loss) norm = mean(learner.norm) log_step_increment = UPDATE_FREQ
+                @info "training" loss = mean(learner.loss) actor_loss =
+                    mean(learner.actor_loss) critic_loss = mean(learner.critic_loss) entropy_loss =
+                    mean(learner.entropy_loss) norm = mean(learner.norm) log_step_increment =
+                    UPDATE_FREQ
             end
         end,
         DoEveryNStep(UPDATE_FREQ) do t, agent, env, obs
             decay = (N_TRAINING_STEPS - t) / N_TRAINING_STEPS
-            agent.policy.learner.approximator.optimizer.eta = INIT_LEARNING_RATE * decay
+            agent.policy.learner.approximator.optimizer.eta =
+                INIT_LEARNING_RATE * decay
             agent.policy.learner.clip_range = INIT_CLIP_RANGE * Float32(decay)
         end,
         DoEveryNStep() do t, agent, env, obs
