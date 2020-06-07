@@ -68,6 +68,7 @@ function DDPGPolicy(;
     )
 end
 
+# TODO: handle Training/Testing mode
 function (p::DDPGPolicy)(obs)
     p.step += 1
 

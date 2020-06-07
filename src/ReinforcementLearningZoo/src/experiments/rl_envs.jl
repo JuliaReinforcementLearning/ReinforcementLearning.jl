@@ -669,3 +669,63 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:DDPG}, ::Val{:Pendulum}, ::No
 
     Experiment(agent, env, StopAfterStep(10000), TotalRewardPerEpisode(), description)
 end
+
+function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:PPO}, ::Val{:CartPole}, ::Nothing;)
+    N_ENV = 8
+    UPDATE_FREQ = 16
+    env = MultiThreadEnv([CartPoleEnv(; T = Float32, seed = i) for i in 1:N_ENV])
+    ns, na = length(rand(get_observation_space(env[1]))), length(get_action_space(env[1]))
+    RLBase.reset!(env, is_force = true)
+    agent = Agent(
+        policy = QBasedPolicy(
+            learner = PPOLearner(
+                approximator = ActorCritic(
+                    actor = NeuralNetworkApproximator(
+                        model = Chain(
+                            Dense(ns, 256, relu; initW = seed_glorot_uniform(seed = 17)),
+                            Dense(256, na; initW = seed_glorot_uniform(seed = 23)),
+                        ),
+                        optimizer = ADAM(1e-3),
+                    ),
+                    critic = NeuralNetworkApproximator(
+                        model = Chain(
+                            Dense(ns, 256, relu; initW = seed_glorot_uniform(seed = 29)),
+                            Dense(256, 1; initW = seed_glorot_uniform(seed = 29)),
+                        ),
+                        optimizer = ADAM(1e-3),
+                    ),
+                ) |> cpu,
+                γ = 0.99f0,
+                λ = 0.95f0,
+                clip_range=0.1f0,
+                max_grad_norm=0.5f0,
+                n_epochs = 4,
+                n_microbatches=4,
+                actor_loss_weight = 1.0f0,
+                critic_loss_weight = 0.5f0,
+                entropy_loss_weight = 0.001f0,
+            ),
+            explorer = BatchExplorer(GumbelSoftmaxExplorer(;seed=1)),
+        ),
+        trajectory = PPOTrajectory(
+            ;capacity=32,
+            state_type=Float32,
+            state_size=(ns, N_ENV),
+            action_type=Int,
+            action_size=(N_ENV,),
+            action_log_prob_type=Float32,
+            action_log_prob_size=(N_ENV,),
+            reward_type=Float32,
+            reward_size=(N_ENV,),
+            terminal_type=Bool,
+            terminal_size=(N_ENV,)
+        ),
+    )
+    Experiment(
+        agent,
+        env,
+        StopAfterStep(100000),
+        TotalBatchRewardPerEpisode(N_ENV),
+        "# PPO with CartPole",
+    )
+end

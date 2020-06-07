@@ -23,7 +23,7 @@ using Random
                     1 / mean(res.hook[2].times)
             end
 
-            for method in (:A2C, :A2CGAE)
+            for method in (:A2C, :A2CGAE, :PPO)
                 res = run(Experiment(Val(:JuliaRL), Val(method), Val(:CartPole), nothing))
                 @info "stats for $method" avg_reward =
                     mean(Iterators.flatten(res.hook.rewards))
