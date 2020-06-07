@@ -18,11 +18,11 @@ seed_glorot_normal(; seed = nothing) =
 # https://github.com/FluxML/Flux.jl/pull/1171/
 # https://www.tensorflow.org/api_docs/python/tf/keras/initializers/Orthogonal
 function orthogonal_matrix(rng::AbstractRNG, nrow, ncol)
-  shape = reverse(minmax(nrow, ncol))
-  a = randn(rng, Float32, shape)
-  q, r = qr(a)
-  q = Matrix(q) * diagm(sign.(diag(r)))
-  nrow < ncol ? permutedims(q) : q
+    shape = reverse(minmax(nrow, ncol))
+    a = randn(rng, Float32, shape)
+    q, r = qr(a)
+    q = Matrix(q) * diagm(sign.(diag(r)))
+    nrow < ncol ? permutedims(q) : q
 end
 
 function orthogonal(rng::AbstractRNG, d1, rest_dims...)
@@ -32,4 +32,4 @@ end
 
 orthogonal(dims...) = orthogonal(Random.GLOBAL_RNG, dims...)
 
-seed_orthogonal(;seed = nothing) = (dims...) -> orthogonal(MersenneTwister(seed), dims...)
+seed_orthogonal(; seed = nothing) = (dims...) -> orthogonal(MersenneTwister(seed), dims...)
