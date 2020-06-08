@@ -24,6 +24,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 BSON = "0.2"
+CuArrays = "2.2"
 Flux = "0.10"
 MacroTools = "0.5"
 ReinforcementLearningBase = "0.7"
