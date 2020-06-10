@@ -6,7 +6,8 @@ function GymEnv(name::String)
         error("Cannot import module 'gym'.\n\nIf you did not yet install it, try running\n`ReinforcementLearningEnvironments.install_gym()`\n")
     end
     gym = pyimport("gym")
-    pyenv = try gym.make(name)
+    pyenv = try
+        gym.make(name)
     catch e
         error("Gym environment $name not found.\n\nRun `ReinforcementLearningEnvironments.list_gym_env_names()` to find supported environments.\n")
     end
@@ -113,7 +114,7 @@ end
 """
 function install_gym(; packages = ["gym", "pybullet"])
     # Use eventual proxy info
-    proxy_arg=String[]
+    proxy_arg = String[]
     if haskey(ENV, "http_proxy")
         push!(proxy_arg, "--proxy")
         push!(proxy_arg, ENV["http_proxy"])

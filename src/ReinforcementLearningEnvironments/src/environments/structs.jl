@@ -50,4 +50,3 @@ struct OpenSpielObs{O,D,S}
     state::S
     player::Int32
 end
-

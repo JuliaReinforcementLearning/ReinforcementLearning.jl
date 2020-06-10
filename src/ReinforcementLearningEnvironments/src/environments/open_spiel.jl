@@ -1,9 +1,26 @@
-import .OpenSpiel: load_game, get_type, provides_information_state_tensor,
-provides_observation_tensor, dynamics, new_initial_state, chance_mode,
-is_chance_node, information_state_tensor, information_state_tensor_size,
-num_distinct_actions, num_players, apply_action, current_player, player_reward,
-legal_actions, legal_actions_mask, rewards, history, observation_tensor_size,
-observation_tensor, chance_outcomes
+import .OpenSpiel:
+    load_game,
+    get_type,
+    provides_information_state_tensor,
+    provides_observation_tensor,
+    dynamics,
+    new_initial_state,
+    chance_mode,
+    is_chance_node,
+    information_state_tensor,
+    information_state_tensor_size,
+    num_distinct_actions,
+    num_players,
+    apply_action,
+    current_player,
+    player_reward,
+    legal_actions,
+    legal_actions_mask,
+    rewards,
+    history,
+    observation_tensor_size,
+    observation_tensor,
+    chance_outcomes
 using StatsBase: sample, weights
 
 
