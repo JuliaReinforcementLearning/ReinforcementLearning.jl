@@ -1,5 +1,3 @@
-using Random
-
 export MountainCarEnv, ContinuousMountainCarEnv
 
 struct MountainCarEnvParams{T}
@@ -36,12 +34,12 @@ function MountainCarEnvParams(;
     )
 end
 
-mutable struct MountainCarEnv{A,T,R<:AbstractRNG} <: AbstractEnv
+mutable struct MountainCarEnv{A,T,ACT,R<:AbstractRNG} <: AbstractEnv
     params::MountainCarEnvParams{T}
     action_space::A
     observation_space::MultiContinuousSpace{Vector{T}}
     state::Vector{T}
-    action::Union{Int,AbstractFloat}
+    action::ACT
     done::Bool
     t::Int
     rng::R

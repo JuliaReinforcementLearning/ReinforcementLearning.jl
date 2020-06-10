@@ -1,5 +1,3 @@
-using Random
-
 export PendulumEnv
 
 struct PendulumEnvParams{T}
@@ -12,7 +10,7 @@ struct PendulumEnvParams{T}
     max_steps::Int
 end
 
-mutable struct PendulumEnv{A,T,R<:AbstractRNG} <: AbstractEnv
+mutable struct PendulumEnv{A,T,ACT,R<:AbstractRNG} <: AbstractEnv
     params::PendulumEnvParams{T}
     action_space::A
     observation_space::MultiContinuousSpace{Vector{T}}
@@ -22,7 +20,7 @@ mutable struct PendulumEnv{A,T,R<:AbstractRNG} <: AbstractEnv
     rng::R
     reward::T
     n_actions::Int
-    action::Union{Int,AbstractFloat}
+    action::ACT
 end
 
 """

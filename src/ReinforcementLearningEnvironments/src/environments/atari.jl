@@ -1,22 +1,5 @@
-module AtariWrapper
+using .ArcadeLearningEnvironment
 
-using ArcadeLearningEnvironment, GR, Random
-using ReinforcementLearningBase
-
-export AtariEnv
-
-mutable struct AtariEnv{IsGrayScale,TerminalOnLifeLoss,N,S<:AbstractRNG} <: AbstractEnv
-    ale::Ptr{Nothing}
-    screens::Tuple{Array{UInt8,N},Array{UInt8,N}}  # for max-pooling
-    actions::Vector{Int64}
-    action_space::DiscreteSpace{UnitRange{Int}}
-    observation_space::MultiDiscreteSpace{Array{UInt8,N}}
-    noopmax::Int
-    frame_skip::Int
-    reward::Float32
-    lives::Int
-    seed::S
-end
 
 """
     AtariEnv(;kwargs...)
@@ -27,7 +10,7 @@ TODO: support seed! in single/multi thread
 
 # Keywords
 
-- `name::String="pong"`: name of the Atari environments. Use `getROMList` to show all supported environments.
+- `name::String="pong"`: name of the Atari environments. Use `ReinforcementLearningEnvironments.list_atari_rom_names()` to show all supported environments.
 - `grayscale_obs::Bool=true`:if `true`, then gray scale observation is returned, otherwise, RGB observation is returned.
 - `noop_max::Int=30`: max number of no-ops.
 - `frame_skip::Int=4`: the frequency at which the agent experiences the game.
@@ -39,6 +22,7 @@ TODO: support seed! in single/multi thread
 
 See also the [python implementation](https://github.com/openai/gym/blob/c072172d64bdcd74313d97395436c592dc836d5c/gym/wrappers/atari_preprocessing.py#L8-L36)
 """
+AtariEnv(name; kwargs...) = AtariEnv(; name = name, kwargs...)
 function AtariEnv(;
     name = "pong",
     grayscale_obs = true,
@@ -53,7 +37,7 @@ function AtariEnv(;
 )
     frame_skip > 0 || throw(ArgumentError("frame_skip must be greater than 0!"))
     name in getROMList() ||
-        throw(ArgumentError("unknown ROM name! run `getROMList()` to see all the game names."))
+        throw(ArgumentError("unknown ROM name.\n\nRun `ReinforcementLearningEnvironments.list_atari_rom_names()` to see all the game names."))
 
     if isnothing(seed)
         seed = (MersenneTwister(), 0)
@@ -148,11 +132,10 @@ function RLBase.reset!(env::AtariEnv)
 end
 
 
-imshowgrey(x::Array{UInt8,2}) = imshowgrey(x[:], size(x))
-imshowgrey(x::Array{UInt8,1}, dims) = imshow(reshape(x, dims), colormap = 2)
-imshowcolor(x::Array{UInt8,3}) = imshowcolor(x[:], size(x))
-
-function imshowcolor(x::Array{UInt8,1}, dims)
+imshowgrey(x::AbstractArray{UInt8,2}) = imshowgrey(reshape(x, :), size(x))
+imshowgrey(x::AbstractArray{UInt8,1}, dims) = imshow(reshape(x, dims), colormap = 2)
+imshowcolor(x::AbstractArray{UInt8,3}) = imshowcolor(reshape(x, :), size(x))
+function imshowcolor(x::AbstractArray{UInt8,1}, dims)
     clearws()
     setviewport(0, dims[1] / dims[2], 0, 1)
     setwindow(0, 1, 0, 1)
@@ -171,8 +154,3 @@ function RLBase.render(env::AtariEnv)
 end
 
 list_atari_rom_names() = getROMList()
-
-end
-
-using .AtariWrapper
-export AtariEnv

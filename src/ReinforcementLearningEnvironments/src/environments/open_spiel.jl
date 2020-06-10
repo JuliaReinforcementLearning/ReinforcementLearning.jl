@@ -1,26 +1,18 @@
-module OpenSpielWrapper
-
-export OpenSpielEnv
-
-using ReinforcementLearningBase
-using OpenSpiel
-using Random
+import .OpenSpiel: load_game, get_type, provides_information_state_tensor,
+provides_observation_tensor, dynamics, new_initial_state, chance_mode,
+is_chance_node, information_state_tensor, information_state_tensor_size,
+num_distinct_actions, num_players, apply_action, current_player, player_reward,
+legal_actions, legal_actions_mask, rewards, history, observation_tensor_size,
+observation_tensor, chance_outcomes
 using StatsBase: sample, weights
 
-abstract type AbstractObservationType end
-
-mutable struct OpenSpielEnv{O,D,S,G,R} <: AbstractEnv
-    state::S
-    game::G
-    rng::R
-end
 
 """
     OpenSpielEnv(name; observation_type=nothing, kwargs...)
 
 # Arguments
 
-- `name`::`String`, you can call `resigtered_names()` to see all the supported names. Note that the name can contains parameters, like `"goofspiel(imp_info=True,num_cards=4,points_order=descending)"`. Because the parameters part is parsed by the backend C++ code, the bool variable must be `True` or `False` (instead of `true` or `false`). Another approach is to just specify parameters in `kwargs` in the Julia style.
+- `name`::`String`, you can call `ReinforcementLearningEnvironments.OpenSpiel.registered_names()` to see all the supported names. Note that the name can contains parameters, like `"goofspiel(imp_info=True,num_cards=4,points_order=descending)"`. Because the parameters part is parsed by the backend C++ code, the bool variable must be `True` or `False` (instead of `true` or `false`). Another approach is to just specify parameters in `kwargs` in the Julia style.
 - `observation_type`::`Union{Symbol,Nothing}`, Supported values are [`:information`](https://github.com/deepmind/open_spiel/blob/1ad92a54f3b800394b2bc7f178ccdff62d8369e1/open_spiel/spiel.h#L342-L367), [`:observation`](https://github.com/deepmind/open_spiel/blob/1ad92a54f3b800394b2bc7f178ccdff62d8369e1/open_spiel/spiel.h#L397-L408) or `nothing`. The default value is `nothing`, which means `:information` if the game ` provides_information_state_tensor`. If not, it means `:observation`.
 """
 function OpenSpielEnv(name; seed = nothing, observation_type = nothing, kwargs...)
@@ -114,11 +106,6 @@ end
 (env::OpenSpielEnv)(::Simultaneous, player, action) =
     @error "Simultaneous environments can not take in the actions from players seperately"
 
-struct OpenSpielObs{O,D,S}
-    state::S
-    player::Int32
-end
-
 RLBase.observe(env::OpenSpielEnv{O,D,S}, player) where {O,D,S} =
     OpenSpielObs{O,D,S}(env.state, player)
 
@@ -161,8 +148,3 @@ RLBase.get_state(obs::OpenSpielObs{:observation}) =
 
 RLBase.get_history(obs::OpenSpielObs) = history(obs.state)
 RLBase.get_history(env::OpenSpielEnv) = history(env.state)
-
-end
-
-using .OpenSpielWrapper
-export OpenSpielEnv

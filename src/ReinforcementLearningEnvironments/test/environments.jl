@@ -19,7 +19,7 @@
         end
     end
 
-    gym_env_names = ReinforcementLearningEnvironments.GymWrapper.list_gym_env_names(
+    gym_env_names = ReinforcementLearningEnvironments.list_gym_env_names(
         modules = [
             "gym.envs.algorithmic",
             "gym.envs.classic_control",
@@ -30,7 +30,7 @@
 
     gym_env_names = filter(x -> x != "KellyCoinflipGeneralized-v0", gym_env_names)  # not sure why this env has outliers
 
-    atari_env_names = ReinforcementLearningEnvironments.AtariWrapper.list_atari_rom_names()
+    atari_env_names = ReinforcementLearningEnvironments.list_atari_rom_names()
     atari_env_names = filter(x -> x != "defender", atari_env_names)
 
     for env_exp in [

@@ -1,22 +1,15 @@
-module GymWrapper
-
-using ReinforcementLearningBase
-using PyCall
-
-export GymEnv
+using .PyCall
 
 # TODO: support `seed`
-
-struct GymEnv{T,Ta<:AbstractSpace,To<:AbstractSpace} <: AbstractEnv
-    pyenv::PyObject
-    observation_space::To
-    action_space::Ta
-    state::PyObject
-end
-
 function GymEnv(name::String)
+    if !PyCall.pyexists("gym")
+        error("Cannot import module 'gym'.\n\nIf you did not yet install it, try running\n`ReinforcementLearningEnvironments.install_gym()`\n")
+    end
     gym = pyimport("gym")
-    pyenv = gym.make(name)
+    pyenv = try gym.make(name)
+    catch e
+        error("Gym environment $name not found.\n\nRun `ReinforcementLearningEnvironments.list_gym_env_names()` to find supported environments.\n")
+    end
     obs_space = convert(AbstractSpace, pyenv.observation_space)
     act_space = convert(AbstractSpace, pyenv.action_space)
     obs_type = if obs_space isa Union{MultiContinuousSpace,MultiDiscreteSpace}
@@ -32,7 +25,7 @@ function GymEnv(name::String)
     else
         error("don't know how to get the observation type from observation space of $obs_space")
     end
-    env = GymEnv{obs_type,typeof(act_space),typeof(obs_space)}(
+    env = GymEnv{obs_type,typeof(act_space),typeof(obs_space),typeof(pyenv)}(
         pyenv,
         obs_space,
         act_space,
@@ -115,7 +108,25 @@ function list_gym_env_names(;
     [x.id for x in gym.envs.registry.all() if split(x.entry_point, ':')[1] in modules]
 end
 
+"""
+    install_gym(; packages = ["gym", "pybullet"])
+"""
+function install_gym(; packages = ["gym", "pybullet"])
+    # Use eventual proxy info
+    proxy_arg=String[]
+    if haskey(ENV, "http_proxy")
+        push!(proxy_arg, "--proxy")
+        push!(proxy_arg, ENV["http_proxy"])
+    end
+    # Import pip
+    if !PyCall.pyexists("pip")
+        # If it is not found, install it
+        println("Pip not found on your system. Downloading it.")
+        get_pip = joinpath(dirname(@__FILE__), "get-pip.py")
+        download("https://bootstrap.pypa.io/get-pip.py", get_pip)
+        run(`$(PyCall.python) $(proxy_arg) $get_pip --user`)
+    end
+    println("Installing required python packages using pip")
+    run(`$(PyCall.python) $(proxy_arg) -m pip install --user --upgrade pip setuptools`)
+    run(`$(PyCall.python) $(proxy_arg) -m pip install --user $(packages)`)
 end
-
-using .GymWrapper
-export GymEnv

@@ -1,5 +1,3 @@
-using Random
-
 export PendulumNonInteractiveEnv
 
 struct PendulumNonInteractiveEnvParams{Fl<:AbstractFloat}

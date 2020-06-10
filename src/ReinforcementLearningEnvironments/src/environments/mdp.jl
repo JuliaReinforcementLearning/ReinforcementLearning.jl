@@ -1,25 +1,10 @@
-module POMDPWrapper
-
-export POMDPEnv
-
-using ReinforcementLearningBase
-using POMDPs
-using Random
+using .POMDPs
 
 RLBase.get_action_space(m::Union{<:POMDP,<:MDP}) = convert(AbstractSpace, actions(m))
 
 #####
 # POMDPEnv
 #####
-
-mutable struct POMDPEnv{M<:POMDP,S,O,I,R,RNG<:AbstractRNG} <: AbstractEnv
-    model::M
-    state::S
-    observation::O
-    info::I
-    reward::R
-    rng::RNG
-end
 
 Random.seed!(env::POMDPEnv, seed) = Random.seed!(env.rng, seed)
 
@@ -77,14 +62,6 @@ RLBase.get_action_space(env::POMDPEnv) = get_action_space(env.model)
 # MDPEnv
 #####
 
-mutable struct MDPEnv{M<:MDP,S,I,R,RNG<:AbstractRNG} <: AbstractEnv
-    model::M
-    state::S
-    info::I
-    reward::R
-    rng::RNG
-end
-
 Random.seed!(env::MDPEnv, seed) = seed!(env.rng, seed)
 
 function MDPEnv(model::MDP; seed = nothing)
@@ -132,8 +109,3 @@ end
 
 RLBase.get_observation_space(env::MDPEnv) = get_observation_space(env.model)
 RLBase.get_action_space(env::MDPEnv) = get_action_space(env.model)
-
-end
-
-using .POMDPWrapper
-export POMDPEnv

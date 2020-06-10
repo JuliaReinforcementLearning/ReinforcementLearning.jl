@@ -1,5 +1,4 @@
-using Random
-using OrdinaryDiffEq
+import OrdinaryDiffEq
 
 export AcrobotEnv
 
@@ -146,8 +145,8 @@ function (env::AcrobotEnv{T})(a) where {T<:Number}
     # augmented state for derivative function
     s_augmented = [env.state..., torque]
 
-    ode = ODEProblem(dsdt, s_augmented, (0.0, env.params.dt), env)
-    ns = solve(ode, RK4())
+    ode = OrdinaryDiffEq.ODEProblem(dsdt, s_augmented, (0.0, env.params.dt), env)
+    ns = OrdinaryDiffEq.solve(ode, OrdinaryDiffEq.RK4())
     # only care about final timestep of integration returned by integrator
     ns = ns.u[end]
     ns = ns[1:4]  # omit action

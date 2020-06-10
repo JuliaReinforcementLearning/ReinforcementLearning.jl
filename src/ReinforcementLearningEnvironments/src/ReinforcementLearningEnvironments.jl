@@ -1,15 +1,18 @@
 module ReinforcementLearningEnvironments
 
 using ReinforcementLearningBase
-
-export RLEnvs
-const RLEnvs = ReinforcementLearningEnvironments
-
+using Random
+using GR
 using Requires
+
+const RLEnvs = ReinforcementLearningEnvironments
+export RLEnvs
+
 
 # built-in environments
 include("environments/non_interactive/non_interactive.jl")
 include("environments/classic_control/classic_control.jl")
+include("environments/structs.jl")
 
 # dynamic loading environments
 function __init__()
