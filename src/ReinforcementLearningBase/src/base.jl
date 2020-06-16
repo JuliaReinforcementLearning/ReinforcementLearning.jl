@@ -1,3 +1,8 @@
+"""
+    run(π, env::AbstractEnv)
+
+Run the policy `π` in `env` until the end.
+"""
 Base.run(π, env::AbstractEnv) = run(π, env, DynamicStyle(env))
 
 function Base.run(π, env::AbstractEnv, ::Sequential)

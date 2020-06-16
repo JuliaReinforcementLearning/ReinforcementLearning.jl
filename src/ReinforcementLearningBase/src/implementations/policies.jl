@@ -5,7 +5,7 @@ using Random
 """
     RandomPolicy(action_space, rng)
 
-Randomly return a valid action.
+Construct a random policy with actions in `action_space`.
 """
 struct RandomPolicy{S<:AbstractSpace,R<:AbstractRNG} <: AbstractPolicy
     action_space::S

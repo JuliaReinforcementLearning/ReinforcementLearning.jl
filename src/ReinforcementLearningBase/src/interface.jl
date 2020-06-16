@@ -129,7 +129,8 @@ abstract type AbstractInformationStyle end
 "The inner state of some players' observations may be different"
 @interface const IMPERFECT_INFORMATION = ImperfectInformation()
 
-@interface InformationStyle(env::AbstractEnv)
+"Specify if the `env` is [PERFECT_INFORMATION](@ref) or [IMPERFECT_INFORMATION](@ref)"
+@interface InformationStyle(env::AbstractEnv) = PERFECT_INFORMATION
 
 #####
 ### RewardStyle
@@ -145,6 +146,9 @@ abstract type AbstractRewardStyle end
 
 "Only get reward at the end of environment"
 @interface const TERMINAL_REWARD = TerminalReward()
+
+"Specify whether we can get reward after each step or only at the end of an game. Possible values are [STEP_REWARD](@ref) or [TERMINAL_REWARD](@ref)"
+@interface RewardStyle(env::AbstractEnv) = STEP_REWARD
 
 #####
 ### UtilityStyle
@@ -169,6 +173,17 @@ abstract type AbstractUtilityStyle end
 "Every player gets the same reward"
 @interface const IDENTICAL_REWARD = IdenticalUtility()
 
+"""
+    UtilityStyle(env::AbstractEnv)
+
+Specify the utility style in multi-agent environments.
+Possible values are:
+
+- [ZERO_SUM](@ref)
+- [CONSTANT_SUM](@ref)
+- [GENERAL_SUM](@ref)
+- [IDENTICAL_REWARD](@ref)
+"""
 @interface UtilityStyle(env::AbstractEnv)
 
 #####
@@ -247,8 +262,10 @@ Usually used in multi-agent environments.
 "Reset the internal state of an environment"
 @interface reset!(env::AbstractEnv)
 
+"Set the seed of internal rng"
 @interface Random.seed!(env::AbstractEnv, seed)
 
+"Make an independent copy of `env`"
 @interface Base.copy(env::AbstractEnv)
 
 "Get all actions in each ply"
