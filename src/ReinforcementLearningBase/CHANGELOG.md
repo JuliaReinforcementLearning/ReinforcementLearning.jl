@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/HEAD)
+
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.7.2...HEAD)
+
+**Merged pull requests:**
+
+- update docs [\#49](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/49) ([findmyway](https://github.com/findmyway))
+
 ## [v0.7.2](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.2) (2020-06-02)
 
 [Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.7.1...v0.7.2)
