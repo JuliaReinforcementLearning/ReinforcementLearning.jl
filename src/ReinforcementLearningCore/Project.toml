@@ -25,7 +25,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
-Adapt = "1"
+Adapt = "1, 2"
 BSON = "0.2"
 CUDAapi = "3, 4"
 CuArrays = "1.7, 2"
