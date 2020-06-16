@@ -313,17 +313,17 @@ get_legal_actions(obs::NamedTuple{(:reward, :terminal, :state, :legal_actions)})
     obs.legal_actions
 
 """
-    get_terminal(obs) -> bool
+    get_terminal(obs)
 """
 @interface get_terminal(obs) = obs.terminal
 
 """
-    get_reward(obs) -> Number
+    get_reward(obs)
 """
 @interface get_reward(obs) = obs.reward
 
 """
-    get_state(obs) -> Array
+    get_state(obs)
 """
 @interface get_state(obs) = obs.state
 
