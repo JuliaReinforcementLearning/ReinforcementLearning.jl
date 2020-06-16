@@ -179,6 +179,11 @@ struct BatchStepsPerEpisode <: AbstractHook
     step::Vector{Int}
 end
 
+"""
+    BatchStepsPerEpisode(batch_size::Int; tag = "TRAINING")
+
+Similar to [`StepsPerEpisode`](@ref), but only work for [`BatchObs`](@ref)
+"""
 function BatchStepsPerEpisode(batch_size::Int; tag = "TRAINING")
     BatchStepsPerEpisode([Int[] for _ in 1:batch_size], zeros(Int, batch_size))
 end
@@ -192,6 +197,7 @@ function (hook::BatchStepsPerEpisode)(::PostActStage, agent, env, obs::BatchObs)
         end
     end
 end
+
 #####
 # CumulativeReward
 #####
