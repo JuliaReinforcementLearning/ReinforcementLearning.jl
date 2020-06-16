@@ -29,6 +29,27 @@ mutable struct DDPGPolicy{
     rng::R
 end
 
+"""
+    DDPGPolicy(;kwargs...)
+
+# Keyword arguments
+
+- `behavior_actor`,
+- `behavior_critic`,
+- `target_actor`,
+- `target_critic`,
+- `start_policy`,
+- `γ = 0.99f0`,
+- `ρ = 0.995f0`,
+- `batch_size = 32`,
+- `start_steps = 10000`,
+- `update_after = 1000`,
+- `update_every = 50`,
+- `act_limit = 1.0`,
+- `act_noise = 0.1`,
+- `step = 0`,
+- `seed = nothing`,
+"""
 function DDPGPolicy(;
     behavior_actor,
     behavior_critic,

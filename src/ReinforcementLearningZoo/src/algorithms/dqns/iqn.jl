@@ -1,4 +1,4 @@
-export IQNLearner, ImplicitQunatileNet
+export IQNLearner, ImplicitQuantileNet
 
 using Flux
 using CuArrays
@@ -8,7 +8,7 @@ using Statistics: mean
 using LinearAlgebra: dot
 
 """
-    ImplicitQunatileNet(;ψ, ϕ, header)
+    ImplicitQuantileNet(;ψ, ϕ, header)
 
 ```
         quantiles (n_action, n_quantiles, batch_size)
@@ -21,15 +21,15 @@ feature ↱  ⨀   ↰ transformed embedding
        s        τ
 ```
 """
-Base.@kwdef struct ImplicitQunatileNet{A,B,C}
+Base.@kwdef struct ImplicitQuantileNet{A,B,C}
     ψ::A
     ϕ::B
     header::C
 end
 
-Flux.@functor ImplicitQunatileNet
+Flux.@functor ImplicitQuantileNet
 
-function (net::ImplicitQunatileNet)(s, emb)
+function (net::ImplicitQuantileNet)(s, emb)
     features = net.ψ(s)  # (n_feature, batch_size)
     emb_aligned = net.ϕ(emb)  # (n_feature, N * batch_size)
     merged =
@@ -39,6 +39,32 @@ function (net::ImplicitQunatileNet)(s, emb)
     reshape(quantiles, :, size(merged, 2), size(merged, 3))  # (n_action, N, batch_size)
 end
 
+"""
+    IQNLearner(;kwargs)
+
+See [paper](https://arxiv.org/abs/1806.06923)
+
+# Keyworkd arugments
+- `approximator`, a [`ImplicitQuantileNet`](@ref)
+- `target_approximator`, a [`ImplicitQuantileNet`](@ref), must have the same structure as `approximator`
+- `κ = 1.0f0`,
+- `N = 32`,
+- `N′ = 32`,
+- `Nₑₘ = 64`,
+- `K = 32`,
+- `γ = 0.99f0`,
+- `stack_size = 4`,
+- `batch_size = 32`,
+- `update_horizon = 1`,
+- `min_replay_history = 20000`,
+- `update_freq = 4`,
+- `target_update_freq = 8000`,
+- `update_step = 0`,
+- `default_priority = 1.0f2`,
+- `β_priority = 0.5f0`,
+- `seed = nothing`,
+- `device_seed = nothing`,
+"""
 mutable struct IQNLearner{A,T,R,D} <: AbstractLearner
     approximator::A
     target_approximator::T

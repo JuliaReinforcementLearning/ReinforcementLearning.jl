@@ -406,7 +406,7 @@ function RLCore.Experiment(
     κ = 1.0f0
 
     nn_creator() =
-        ImplicitQunatileNet(
+        ImplicitQuantileNet(
             ψ = Dense(ns, n_hidden, relu; initW = init),
             ϕ = Dense(Nₑₘ, n_hidden, relu; initW = init),
             header = Dense(n_hidden, na; initW = init),
@@ -472,7 +472,7 @@ function RLCore.Experiment(
     )
 
     description = """
-    This experiment uses the `IQNLearner` method with a `ImplicitQunatileNet`.
+    This experiment uses the `IQNLearner` method with a `ImplicitQuantileNet`.
     The testing environment is CartPoleEnv.
 
     Agent and statistic info will be saved to: `$save_dir`

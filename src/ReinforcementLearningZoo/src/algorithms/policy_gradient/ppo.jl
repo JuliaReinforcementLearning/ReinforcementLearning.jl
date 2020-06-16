@@ -4,6 +4,23 @@ using Random
 
 export PPOLearner
 
+"""
+    PPOLearner(;kwargs)
+
+# Keyword arguments
+
+- `approximator`,
+- `γ = 0.99f0`,
+- `λ = 0.95f0`,
+- `clip_range = 0.2f0`,
+- `max_grad_norm = 0.5f0`,
+- `n_microbatches = 4`,
+- `n_epochs = 4`,
+- `actor_loss_weight = 1.0f0`,
+- `critic_loss_weight = 0.5f0`,
+- `entropy_loss_weight = 0.01f0`,
+- `seed = nothing`,
+"""
 mutable struct PPOLearner{A<:ActorCritic,R} <: AbstractLearner
     approximator::A
     γ::Float32

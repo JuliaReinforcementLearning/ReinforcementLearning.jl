@@ -355,7 +355,7 @@ function RLCore.Experiment(
     init = seed_glorot_uniform()#= seed=341 =#
 
     create_model() =
-        ImplicitQunatileNet(
+        ImplicitQuantileNet(
             ψ = Chain(
                 x -> x ./ 255,
                 CrossCor((8, 8), N_FRAMES => 32, relu; stride = 4, pad = 2, init = init),
