@@ -23,3 +23,7 @@ jobs:
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
         - julia --project=docs/ docs/make.jl
       after_success: skip
+      
+## uncomment the following lines to override the default test script
+script:
+ - travis_wait 30 julia --color=yes -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.test()'
