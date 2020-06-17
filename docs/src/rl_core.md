@@ -10,7 +10,7 @@ The most important function in RLCore is `run(agent, env, stop_condition, hook)`
 In practice, it will be dispatched to different implementations based on the type
 of `agent` and `env`. For a `stop_condition`, it can be arbitrary function which
 accepts `agent, env, obs` as arguments and return a `Bool` value indicates whether
-to stop or not. For a `hook`, it can should be instances of [`AbstractHook`](@ref).
+to stop or not.
 
 ### Stop Conditions
 
@@ -28,10 +28,14 @@ AbstractHook
 EmptyHook
 ComposedHook
 StepsPerEpisode
+BatchStepsPerEpisode
 RewardsPerEpisode
 TotalRewardPerEpisode
+TotalBatchRewardPerEpisode
 CumulativeReward
 TimePerStep
+DoEveryNStep
+DoEveryNEpisode
 ```
 
 ## Agents
@@ -46,9 +50,22 @@ DynaAgent
 ```@docs
 OffPolicy
 QBasedPolicy
-RandomPolicy
 VBasedPolicy
-WeightedRandomPolicy
+```
+
+## Learners
+
+```@docs
+AbstractLearner 
+```
+
+## Approximators
+
+```@docs
+AbstractApproximator
+TabularApproximator
+NeuralNetworkApproximator
+ActorCritic
 ```
 
 ## Trajectories
@@ -66,28 +83,17 @@ CircularCompactPSARTSATrajectory
 ## Preprocessors
 
 ```@docs
-ComposedPreprocessor
-CloneStatePreprocessor
-```
-
-## Learners
-
-```@docs
-DoubleLearner
-```
-
-## Approximators
-
-```@docs
-TabularApproximator
-NeuralNetworkApproximator
+ResizeImage
+StackFrames
 ```
 
 ## Explorers
 
 ```@docs
+BatchExplorer
 EpsilonGreedyExplorer
 UCBExplorer
+GumbelSoftmaxExplorer
 WeightedExplorer
 ```
 
@@ -96,6 +102,7 @@ WeightedExplorer
 ```@docs
 huber_loss
 huber_loss_unreduced
+generalized_advantage_estimation
 CircularArrayBuffer
 device
 SumTree

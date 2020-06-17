@@ -7,4 +7,10 @@ BasicDQNLearner
 DQNLearner
 PrioritizedDQNLearner
 RainbowLearner
+IQNLearner
+ImplicitQuantileNet
+A2CLearner
+A2CGAELearner
+DDPGPolicy
+PPOLearner
 ```
