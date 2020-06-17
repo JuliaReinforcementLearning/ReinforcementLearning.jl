@@ -21,8 +21,10 @@ julia> env = AtariEnv()
 The warning above can be safely ignored. Especially notice that you need to execute `using ReinforcementLearning.ReinforcementLearningEnvironments`.
 
 ```@docs
+AcrobotEnv
 CartPoleEnv
 MountainCarEnv
+ContinuousMountainCarEnv
 PendulumEnv
 PendulumNonInteractiveEnv
 ```

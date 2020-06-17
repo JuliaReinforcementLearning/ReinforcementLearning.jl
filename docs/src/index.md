@@ -65,3 +65,15 @@ This package can be installed from the package manager in Julia's REPL:
 
 !!! note
     [ReinforcementLearningAnIntroduction.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl) contains some traditional reinforcement algorithms and it is not registered yet. So it is not included in [ReinforcementLearning.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl). The reason to do so is to ease the burden of maintainance.
+
+## Resources
+
+- [Get Started in 3 lines!](http://juliareinforcementlearning.github.io/get_started)
+- [Guide](http://juliareinforcementlearning.github.io/guide)
+- Blog
+  - [An Introduction to ReinforcementLearning.jl: Design, Implementation & Thoughts](http://juliareinforcementlearning.github.io/blog)
+- Manual
+  - [ReinforcementLearningBase.jl](@ref)
+  - [ReinforcementLearningCore.jl](@ref)
+  - [ReinforcementLearningEnvironments.jl](@ref)
+  - [ReinforcementLearningZoo.jl](@ref)
