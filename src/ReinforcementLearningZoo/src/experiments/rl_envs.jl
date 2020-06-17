@@ -3,7 +3,7 @@ export Experiment
 using Dates
 using ReinforcementLearningBase
 using ReinforcementLearningCore
-using ReinforcementLearningEnvironments
+using .ReinforcementLearningEnvironments
 using Flux
 using BSON
 using TensorBoardLogger

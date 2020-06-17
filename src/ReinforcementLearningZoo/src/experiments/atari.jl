@@ -1,9 +1,9 @@
 export Experiment
 
-using ArcadeLearningEnvironment
+using .ArcadeLearningEnvironment
 using Dates
 using ReinforcementLearningCore
-using ReinforcementLearningEnvironments
+using .ReinforcementLearningEnvironments
 using Flux
 using BSON
 using TensorBoardLogger
