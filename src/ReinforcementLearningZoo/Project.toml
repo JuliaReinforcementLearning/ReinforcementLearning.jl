@@ -1,7 +1,7 @@
 name = "ReinforcementLearningZoo"
 uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
-version = "0.1.3"
+version = "0.1.2"
 
 [deps]
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
