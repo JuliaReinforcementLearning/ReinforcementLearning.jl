@@ -25,16 +25,12 @@ makedocs(
     linkcheck = !("skiplinks" in ARGS),
     pages = [
         "Home" => "index.md",
-        "A Quick Example" => "a_quick_example.md",
-        "Overview" => "overview.md",
         "Manual" => [
             "RLBase" => "rl_base.md",
             "RLCore" => "rl_core.md",
             "RLEnvs" => "rl_envs.md",
             "RLZoo" => "rl_zoo.md",
         ],
-        "Tips for Developers" => "tips_for_developers.md",
-        "Experiments" => ["Play Atari Games with DQN" => "experiments/atari_dqn.md"],
     ],
 )
 
