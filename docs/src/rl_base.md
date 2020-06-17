@@ -92,7 +92,7 @@ DictSpace
 
 ## Utils
 
-```
+```@docs
 Base.run(π, env::AbstractEnv)
 RandomPolicy
 StateOverriddenObs
