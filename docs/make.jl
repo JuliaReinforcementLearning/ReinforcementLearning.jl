@@ -85,7 +85,11 @@ makedocs(
         prettyurls = true,
         analytics = "UA-149861753-1",
         canonical = "https://juliareinforcementlearning.github.io/ReinforcementLearning.jl/latest/",
-        assets = ["assets/favicon.ico", "assets/custom.css", asset("https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css")],
+        assets = [
+            "assets/favicon.ico",
+            "assets/custom.css",
+            asset("https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"),
+        ],
     ),
     sitename = "ReinforcementLearning.jl",
     linkcheck = !("skiplinks" in ARGS),
