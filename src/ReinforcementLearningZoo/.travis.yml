@@ -12,3 +12,7 @@ jobs:
   allow_failures:
     - julia: nightly
   fast_finish: true
+
+## uncomment the following lines to override the default test script
+script:
+ - travis_wait 30 julia --color=yes -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.test()'
