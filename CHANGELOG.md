@@ -22,6 +22,8 @@
 
 **Merged pull requests:**
 
+- Automatic JuliaFormatter.jl run [\#69](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/69) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Update doc [\#61](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/61) ([findmyway](https://github.com/findmyway))
 - Fix link in docs/src/index.md [\#60](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/60) ([amanbh](https://github.com/amanbh))
 - Add doc in travis [\#58](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/58) ([findmyway](https://github.com/findmyway))
 - add documentation stage in travis [\#57](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/57) ([findmyway](https://github.com/findmyway))
