@@ -17,6 +17,18 @@ Our design principles are:
 - **Easy experimentation**: Make it easy for new users to run benchmark experiments, compare different algorithms, evaluate and diagnose agents.
 - **Reproducibility**: Facilitate reproducibility from traditional tabular methods to modern deep reinforcement learning algorithms.
 
+## Get Started
+
+```julia
+julia> ] add ReinforcementLearning
+
+julia> using ReinforcementLearning
+
+julia> run(E`JuliaRL_BasicDQN_CartPole`);
+```
+
+Check out the [get started](https://juliareinforcementlearning.org/get_started/) page for more detailed explanation!
+
 ## Project Structure
 
 `ReinforcementLearning.jl` itself is just a wrapper around several other packages inside the [JuliaReinforcementLearning](https://github.com/JuliaReinforcementLearning) org. The relationship between different packages is described below:
@@ -56,36 +68,3 @@ Our design principles are:
 +-------------------------------------------------------------------------------------------+
 </pre>
 
-## Installation
-
-This package can be installed from the package manager in Julia's REPL:
-
-```
-] add ReinforcementLearning
-```
-
-## A Quick Example
-
-```julia
-using ReinforcementLearning
-using StatsBase:mean
-
-env = CartPoleEnv(;T=Float32, seed=123)
-
-agent = Agent(
-    policy = RandomPolicy(env;seed=456),
-    trajectory = CircularCompactSARTSATrajectory(; capacity=3, state_type=Float32, state_size = (4,)),
-)
-
-hook = ComposedHook(TotalRewardPerEpisode(), TimePerStep())
-
-run(agent, env, StopAfterEpisode(10_000), hook)
-
-@info "stats for random policy" avg_reward = mean(hook[1].rewards) avg_fps = 1 / mean(hook[2].times)
-
-# ┌ Info: stats for random policy
-# │   avg_reward = 21.0591
-# └   avg_fps = 1.6062450808744398e6
-```
-
-See also [here](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/a_quick_example/) for detailed explanation.
