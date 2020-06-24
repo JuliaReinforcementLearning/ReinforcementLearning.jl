@@ -157,7 +157,7 @@ function RLCore.Experiment(
     stop_condition = StopAfterStep(N_TRAINING_STEPS)
 
     description = """
-    This experiment uses alomost the same config in [dopamine](https://github.com/google/dopamine/blob/master/dopamine/agents/dqn/configs/dqn.gin). But do notice that there are some minor differences:
+    This experiment uses almost the same config in [dopamine](https://github.com/google/dopamine/blob/master/dopamine/agents/dqn/configs/dqn.gin). But do notice that there are some minor differences:
 
     - The RMSProp in Flux do not support center option (also the epsilon is not the same).
     - The image resize method used here is provided by ImageTransformers, which is not the same with the one in cv2.

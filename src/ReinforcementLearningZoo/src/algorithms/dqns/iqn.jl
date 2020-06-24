@@ -160,7 +160,7 @@ function (learner::IQNLearner)(obs)
     τ = rand(learner.device_rng, Float32, learner.K, 1)
     τₑₘ = embed(τ, learner.Nₑₘ)
     quantiles = learner.approximator(state, τₑₘ)
-    vec(sum(quantiles; dims = 2)) |> send_to_host
+    vec(mean(quantiles; dims = 2)) |> send_to_host
 end
 
 embed(x, Nₑₘ) = cos.(Float32(π) .* (1:Nₑₘ) .* reshape(x, 1, :))
@@ -184,9 +184,10 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
     τ′ = rand(learner.device_rng, Float32, N′, batch_size)  # TODO: support β distribution
     τₑₘ′ = embed(τ′, Nₑₘ)
     zₜ = Zₜ(s′, τₑₘ′)
-    aₜ = argmax(zₜ; dims = 1)   # risk-sensitive
-    qₜ = reshape(zₜ[aₜ], N′, batch_size)  # view?
-    target = reshape(r, 1, batch_size) .+ reshape(1 .- t, 1, batch_size) .* qₜ  # reshape to allow broadcast
+    aₜ = argmax(mean(zₜ, dims = 2), dims = 1)
+    aₜ = aₜ .+ typeof(aₜ)(CartesianIndices((0, 0:N′-1, 0)))
+    qₜ = reshape(zₜ[aₜ], :, batch_size)
+    target = reshape(r, 1, batch_size) .+ learner.γ * reshape(1 .- t, 1, batch_size) .* qₜ  # reshape to allow broadcast
 
     τ = rand(learner.device_rng, Float32, N, batch_size)
     τₑₘ = embed(τ, Nₑₘ)
