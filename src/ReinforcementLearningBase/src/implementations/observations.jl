@@ -79,7 +79,7 @@ function get_state(obs::BatchObs)
     state
 end
 
-struct RewardOverriddenObs{O, R}
+struct RewardOverriddenObs{O,R}
     obs::O
     reward::R
 end
