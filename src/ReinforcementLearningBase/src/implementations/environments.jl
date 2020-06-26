@@ -69,7 +69,7 @@ struct ComposedPreprocessor{T} <: AbstractPreprocessor
     preprocessors::T
 end
 
-ComposedPreprocessor(p::AbstractPreprocessor...) = ComposedPreprocessor(p)
+ComposedPreprocessor(p...) = ComposedPreprocessor(p)
 (p::ComposedPreprocessor)(obs) = reduce((x, f) -> f(x), p.preprocessors, init = obs)
 
 #####

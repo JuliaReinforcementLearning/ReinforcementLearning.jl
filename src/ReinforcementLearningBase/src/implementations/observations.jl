@@ -1,4 +1,4 @@
-export StateOverriddenObs, BatchObs
+export StateOverriddenObs, BatchObs, RewardOverriddenObs
 
 using MacroTools: @forward
 
@@ -78,3 +78,16 @@ function get_state(obs::BatchObs)
     end
     state
 end
+
+struct RewardOverriddenObs{O, R}
+    obs::O
+    reward::R
+end
+
+@forward RewardOverriddenObs.obs ActionStyle,
+get_legal_actions,
+get_legal_actions_mask,
+get_terminal,
+get_state
+
+get_reward(obs::RewardOverriddenObs) = obs.reward
