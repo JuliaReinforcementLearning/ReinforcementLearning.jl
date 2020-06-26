@@ -10,7 +10,7 @@ using TensorBoardLogger
 using Logging
 using Statistics
 
-function atari_env_factory(name, state_size, n_frames; seed = nothing)
+function atari_env_factory(name, state_size, n_frames, max_episode_steps=100_000; seed = nothing)
     WrappedEnv(
         env = AtariEnv(;
             name = string(name),
@@ -19,7 +19,7 @@ function atari_env_factory(name, state_size, n_frames; seed = nothing)
             frame_skip = 4,
             terminal_on_life_loss = false,
             repeat_action_probability = 0.25,
-            max_num_frames_per_episode = n_frames * 27_000,
+            max_num_frames_per_episode = n_frames * max_episode_steps,
             color_averaging = false,
             full_action_space = false,
             seed = seed,
@@ -96,6 +96,7 @@ function RLCore.Experiment(
 
     evaluation_result = []
     EVALUATION_FREQ = 250_000
+    MAX_EPISODE_STEPS_EVAL = 27_000
     N_CHECKPOINTS = 3
 
     total_reward_per_episode = TotalRewardPerEpisode()
@@ -123,7 +124,7 @@ function RLCore.Experiment(
             h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 agent,
-                atari_env_factory(name, STATE_SIZE, N_FRAMES;),#= seed=nothing =#
+                atari_env_factory(name, STATE_SIZE, N_FRAMES, MAX_EPISODE_STEPS_EVAL;),#= seed=nothing =#
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )
@@ -248,6 +249,7 @@ function RLCore.Experiment(
 
     evaluation_result = []
     EVALUATION_FREQ = 250_000
+    MAX_EPISODE_STEPS_EVAL = 27_000
     N_CHECKPOINTS = 3
 
     total_reward_per_episode = TotalRewardPerEpisode()
@@ -277,7 +279,7 @@ function RLCore.Experiment(
             h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 agent,
-                atari_env_factory(name, STATE_SIZE, N_FRAMES;),#= seed=nothing =#
+                atari_env_factory(name, STATE_SIZE, N_FRAMES, MAX_EPISODE_STEPS_EVAL;),#= seed=nothing =#
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )
@@ -408,6 +410,7 @@ function RLCore.Experiment(
 
     evaluation_result = []
     EVALUATION_FREQ = 250_000
+    MAX_EPISODE_STEPS_EVAL = 27_000
     N_CHECKPOINTS = 3
 
     total_reward_per_episode = TotalRewardPerEpisode()
@@ -437,7 +440,7 @@ function RLCore.Experiment(
             h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 agent,
-                atari_env_factory(name, STATE_SIZE, N_FRAMES;),#= seed=nothing =#
+                atari_env_factory(name, STATE_SIZE, N_FRAMES, MAX_EPISODE_STEPS_EVAL;),#= seed=nothing =#
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )
@@ -554,6 +557,7 @@ function RLCore.Experiment(
 
     N_TRAINING_STEPS = 10_000_000
     EVALUATION_FREQ = 100_000
+    MAX_EPISODE_STEPS_EVAL = 27_000
     N_CHECKPOINTS = 3
     stop_condition = StopAfterStep(N_TRAINING_STEPS)
 
@@ -598,7 +602,7 @@ function RLCore.Experiment(
             s = @elapsed run(
                 agent,
                 MultiThreadEnv([
-                    atari_env_factory(name, STATE_SIZE, N_FRAMES;) for i in 1:N_ENV
+                    atari_env_factory(name, STATE_SIZE, N_FRAMES, MAX_EPISODE_STEPS_EVAL;) for i in 1:N_ENV
                 ]),
                 StopAfterStep(27_000; is_show_progress = false),
                 h,
@@ -698,6 +702,7 @@ function RLCore.Experiment(
 
     N_TRAINING_STEPS = 10_000_000
     EVALUATION_FREQ = 100_000
+    MAX_EPISODE_STEPS_EVAL = 27_000
     N_CHECKPOINTS = 3
     stop_condition = StopAfterStep(N_TRAINING_STEPS)
 
@@ -742,7 +747,7 @@ function RLCore.Experiment(
             s = @elapsed run(
                 agent,
                 MultiThreadEnv([
-                    atari_env_factory(name, STATE_SIZE, N_FRAMES;) for i in 1:N_ENV
+                    atari_env_factory(name, STATE_SIZE, N_FRAMES, MAX_EPISODE_STEPS_EVAL;) for i in 1:N_ENV
                 ]),
                 StopAfterStep(27_000; is_show_progress = false),
                 h,
@@ -849,6 +854,7 @@ function RLCore.Experiment(
 
     N_TRAINING_STEPS = 10_000_000
     EVALUATION_FREQ = 100_000
+    MAX_EPISODE_STEPS_EVAL = 27_000
     N_CHECKPOINTS = 3
     stop_condition = StopAfterStep(N_TRAINING_STEPS)
 
@@ -900,7 +906,7 @@ function RLCore.Experiment(
             s = @elapsed run(
                 agent,
                 MultiThreadEnv([
-                    atari_env_factory(name, STATE_SIZE, N_FRAMES;) for i in 1:4
+                    atari_env_factory(name, STATE_SIZE, N_FRAMES, MAX_EPISODE_STEPS_EVAL;) for i in 1:4
                 ]),
                 StopAfterStep(27_000; is_show_progress = false),
                 h,

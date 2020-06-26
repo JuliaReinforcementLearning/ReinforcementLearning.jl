@@ -67,6 +67,11 @@ function RLCore.Experiment(
                 @info "training" loss = agent.policy.learner.loss
             end
         end,
+        DoEveryNEpisode() do t, agent, env, obs
+            with_logger(lg) do
+                @info "training" reward = total_reward_per_episode.rewards[end]
+            end
+        end,
         DoEveryNStep(10000) do t, agent, env, obs
             RLCore.save(save_dir, agent)
             BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
