@@ -10,6 +10,8 @@ using TensorBoardLogger
 using Logging
 using Statistics
 
+clip_reward(obs) = RewardOverriddenObs(obs, clamp(get_reward(obs), -1, 1))
+
 function atari_env_factory(name, state_size, n_frames, max_episode_steps=100_000; seed = nothing)
     WrappedEnv(
         env = AtariEnv(;
@@ -27,6 +29,7 @@ function atari_env_factory(name, state_size, n_frames, max_episode_steps=100_000
         preprocessor = ComposedPreprocessor(
             ResizeImage(state_size...),  # this implementation is different from cv2.resize https://github.com/google/dopamine/blob/e7d780d7c80954b7c396d984325002d60557f7d1/dopamine/discrete_domains/atari_lib.py#L629
             StackFrames(state_size..., n_frames),
+            clip_reward,
         ),
     )
 end
