@@ -4,6 +4,10 @@
 
 [Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/compare/v0.5.0...HEAD)
 
+**Closed issues:**
+
+- Failed to precompile ReinforcementLearning [\#71](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/71)
+
 **Merged pull requests:**
 
 - Update README.md & website link [\#70](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/70) ([findmyway](https://github.com/findmyway))
