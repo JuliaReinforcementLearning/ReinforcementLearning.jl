@@ -29,11 +29,11 @@ using Random
                     Val(method),
                     Val(:MountainCar),
                     nothing;
-                    save_dir = joinpath(dir, string(method))
+                    save_dir = joinpath(dir, string(method)),
                 ))
                 @info "stats for $method" avg_reward = mean(res.hook[1].rewards) avg_fps =
                     1 / mean(res.hook[2].times)
-            end        
+            end
 
             for method in (:A2C, :A2CGAE, :PPO)
                 res = run(Experiment(Val(:JuliaRL), Val(method), Val(:CartPole), nothing))

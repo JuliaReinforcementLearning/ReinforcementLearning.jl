@@ -12,7 +12,13 @@ using Statistics
 
 clip_reward(obs) = RewardOverriddenObs(obs, clamp(get_reward(obs), -1, 1))
 
-function atari_env_factory(name, state_size, n_frames, max_episode_steps=100_000; seed = nothing)
+function atari_env_factory(
+    name,
+    state_size,
+    n_frames,
+    max_episode_steps = 100_000;
+    seed = nothing,
+)
     WrappedEnv(
         env = AtariEnv(;
             name = string(name),
