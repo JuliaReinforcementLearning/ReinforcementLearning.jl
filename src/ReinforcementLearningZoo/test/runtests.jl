@@ -23,6 +23,18 @@ using Random
                     1 / mean(res.hook[2].times)
             end
 
+            for method in (:BasicDQN, :DQN)
+                res = run(Experiment(
+                    Val(:JuliaRL),
+                    Val(method),
+                    Val(:MountainCar),
+                    nothing;
+                    save_dir = joinpath(dir, string(method))
+                ))
+                @info "stats for $method" avg_reward = mean(res.hook[1].rewards) avg_fps =
+                    1 / mean(res.hook[2].times)
+            end        
+
             for method in (:A2C, :A2CGAE, :PPO)
                 res = run(Experiment(Val(:JuliaRL), Val(method), Val(:CartPole), nothing))
                 @info "stats for $method" avg_reward =

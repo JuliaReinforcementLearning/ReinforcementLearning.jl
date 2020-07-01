@@ -734,3 +734,184 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:PPO}, ::Val{:CartPole}, ::Not
         "# PPO with CartPole",
     )
 end
+
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:BasicDQN},
+    ::Val{:MountainCar},
+    ::Nothing;
+    save_dir = nothing,
+)
+    if isnothing(save_dir)
+        t = Dates.format(now(), "yyyymmddHHMMSS")
+        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_BasicDQN_MountainCar_$(t)")
+    end
+
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
+
+    env = MountainCarEnv(; T = Float32, max_steps = 5000, seed = 11)
+    ns, na = length(rand(get_observation_space(env))), length(get_action_space(env))
+    agent = Agent(
+        policy = QBasedPolicy(
+            learner = BasicDQNLearner(
+                approximator = NeuralNetworkApproximator(
+                    model = Chain(
+                        Dense(ns, 64, relu; initW = seed_glorot_uniform(seed = 17)),
+                        Dense(64, 64, relu; initW = seed_glorot_uniform(seed = 23)),
+                        Dense(64, na; initW = seed_glorot_uniform(seed = 39)),
+                    ) |> cpu,
+                    optimizer = ADAM(),
+                ),
+                batch_size = 32,
+                min_replay_history = 100,
+                loss_func = huber_loss,
+                seed = 22,
+            ),
+            explorer = EpsilonGreedyExplorer(
+                kind = :exp,
+                ϵ_stable = 0.01,
+                decay_steps = 500,
+                seed = 33,
+            ),
+        ),
+        trajectory = CircularCompactSARTSATrajectory(
+            capacity = 50000,
+            state_type = Float32,
+            state_size = (ns,),
+        ),
+    )
+
+    stop_condition = StopAfterStep(40000)
+
+    total_reward_per_episode = TotalRewardPerEpisode()
+    time_per_step = TimePerStep()
+    hook = ComposedHook(
+        total_reward_per_episode,
+        time_per_step,
+        DoEveryNStep() do t, agent, env, obs
+            with_logger(lg) do
+                @info "training" loss = agent.policy.learner.loss
+            end
+        end,
+        DoEveryNEpisode() do t, agent, env, obs
+            with_logger(lg) do
+                @info "training" reward = total_reward_per_episode.rewards[end]
+            end
+        end,
+        DoEveryNStep(10000) do t, agent, env, obs
+            RLCore.save(save_dir, agent)
+            BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
+        end,
+    )
+
+    description = """
+    This experiment uses three dense layers to approximate the Q value.
+    The testing environment is MountainCarEnv.
+
+    Agent and statistic info will be saved to: `$save_dir`
+    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
+    To load the agent and statistic info:
+    ```
+    agent = RLCore.load("$save_dir", Agent)
+    BSON.@load joinpath("$save_dir", "stats.bson") total_reward_per_episode time_per_step
+    ```
+    """
+
+    Experiment(agent, env, stop_condition, hook, description)
+end
+
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:DQN},
+    ::Val{:MountainCar},
+    ::Nothing;
+    save_dir = nothing,
+)
+    if isnothing(save_dir)
+        t = Dates.format(now(), "yyyymmddHHMMSS")
+        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_DQN_MountainCar_$(t)")
+    end
+
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
+
+    env = MountainCarEnv(; T = Float32, max_steps = 5000, seed = 11)
+    ns, na = length(rand(get_observation_space(env))), length(get_action_space(env))
+
+    agent = Agent(
+        policy = QBasedPolicy(
+            learner = DQNLearner(
+                approximator = NeuralNetworkApproximator(
+                    model = Chain(
+                        Dense(ns, 64, relu; initW = seed_glorot_uniform(seed = 17)),
+                        Dense(64, 64, relu; initW = seed_glorot_uniform(seed = 23)),
+                        Dense(64, na; initW = seed_glorot_uniform(seed = 39)),
+                    ) |> cpu,
+                    optimizer = ADAM(),
+                ),
+                target_approximator = NeuralNetworkApproximator(
+                    model = Chain(
+                        Dense(ns, 64, relu; initW = seed_glorot_uniform(seed = 17)),
+                        Dense(64, 64, relu; initW = seed_glorot_uniform(seed = 23)),
+                        Dense(64, na; initW = seed_glorot_uniform(seed = 39)),
+                    ) |> cpu,
+                    optimizer = ADAM(),
+                ),
+                loss_func = huber_loss,
+                stack_size = nothing,
+                batch_size = 32,
+                update_horizon = 1,
+                min_replay_history = 100,
+                update_freq = 1,
+                target_update_freq = 100,
+                seed = 22,
+            ),
+            explorer = EpsilonGreedyExplorer(
+                kind = :exp,
+                ϵ_stable = 0.01,
+                decay_steps = 500,
+                seed = 33,
+            ),
+        ),
+        trajectory = CircularCompactSARTSATrajectory(
+            capacity = 50000,
+            state_type = Float32,
+            state_size = (ns,),
+        ),
+    )
+
+    stop_condition = StopAfterStep(40_000)
+
+    total_reward_per_episode = TotalRewardPerEpisode()
+    time_per_step = TimePerStep()
+    hook = ComposedHook(
+        total_reward_per_episode,
+        time_per_step,
+        DoEveryNStep() do t, agent, env, obs
+            if agent.policy.learner.update_step % agent.policy.learner.update_freq == 0
+                with_logger(lg) do
+                    @info "training" loss = agent.policy.learner.loss
+                end
+            end
+        end,
+        DoEveryNStep(10000) do t, agent, env, obs
+            RLCore.save(save_dir, agent)
+            BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
+        end,
+    )
+
+    description = """
+    This experiment uses the `DQNLearner` method with three dense layers to approximate the Q value.
+    The testing environment is MountainCarEnv.
+
+    Agent and statistic info will be saved to: `$save_dir`
+    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
+    To load the agent and statistic info:
+
+    ```
+    agent = RLCore.load("$save_dir", Agent)
+    BSON.@load joinpath("$save_dir", "stats.bson") total_reward_per_episode time_per_step
+    ```
+    """
+
+    Experiment(agent, env, stop_condition, hook, description)
+end
