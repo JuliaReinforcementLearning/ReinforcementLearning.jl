@@ -188,7 +188,7 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
         logits = reshape(Q(states), n_atoms, n_actions, :)
         select_logits = logits[:, actions]
         batch_losses = loss_func(select_logits, target_distribution)
-        loss = dot(vec(weights), vec(batch_losses)) / batch_size
+        loss = dot(vec(weights), vec(batch_losses)) * 1 // batch_size
         ignore() do
             updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10) .^ β))
             learner.loss = loss

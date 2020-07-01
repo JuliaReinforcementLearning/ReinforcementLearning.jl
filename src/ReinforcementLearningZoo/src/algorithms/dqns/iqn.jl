@@ -218,7 +218,7 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
             huber_loss ./ κ
         loss_per_quantile = reshape(sum(raw_loss; dims = 1), N, batch_size)
         loss_per_element = mean(loss_per_quantile; dims = 1)  # use as priorities
-        loss = is_use_PER ? dot(vec(weights), vec(loss_per_element)) / batch_size :
+        loss = is_use_PER ? dot(vec(weights), vec(loss_per_element)) * 1 // batch_size :
                 mean(loss_per_element)
         ignore() do
             # @assert all(loss_per_element .>= 0)

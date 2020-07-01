@@ -620,15 +620,15 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:DDPG}, ::Val{:Pendulum}, ::No
     init = seed_glorot_uniform(seed = 17)
 
     create_actor() = Chain(
-        Dense(ns, 256, relu; initW = init),
-        Dense(256, 256, relu; initW = init),
-        Dense(256, 1, tanh; initW = init),
+        Dense(ns, 30, relu; initW = init),
+        Dense(30, 30, relu; initW = init),
+        Dense(30, 1, tanh; initW = init),
     )
 
     create_critic() = Chain(
-        Dense(ns + 1, 256, relu; initW = init),
-        Dense(256, 256, relu; initW = init),
-        Dense(256, 1; initW = init),
+        Dense(ns + 1, 30, relu; initW = init),
+        Dense(30, 30, relu; initW = init),
+        Dense(30, 1; initW = init),
     )
 
     agent = Agent(
