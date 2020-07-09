@@ -34,6 +34,9 @@ const top_nav = """
         <a class="nav-link" href="/guide/">Guide</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" href="/contribute/">Contribute</a>
+        </li>
+        <li class="nav-item">
         <a class="nav-link" href="/blog/">Blog</a>
         </li>
         <li class="nav-item">
