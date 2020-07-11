@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- warning and error [\#73](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/73)
 - depends on HDF5? [\#72](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/72)
 - Failed to precompile ReinforcementLearning [\#71](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/71)
 
