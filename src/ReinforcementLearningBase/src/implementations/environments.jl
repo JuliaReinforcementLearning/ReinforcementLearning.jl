@@ -252,5 +252,6 @@ Base.summary(
         StateOverriddenEnv,
         RewardOverriddenEnv,
         ActionTransformedEnv,
+        StateCachedEnv,
     },
 } = print(io, T.name)
