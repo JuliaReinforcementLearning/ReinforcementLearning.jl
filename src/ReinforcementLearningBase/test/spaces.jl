@@ -82,18 +82,18 @@
     end
 
     @testset "TupleSpace and DictSpace" begin
-        s = TupleSpace(
+        s = TupleSpace([
             DiscreteSpace(3),
             ContinuousSpace(0.0, 1.0),
-            TupleSpace(DiscreteSpace(3), ContinuousSpace(0.0, 1.0)), # recursive
+            TupleSpace([DiscreteSpace(3), ContinuousSpace(0.0, 1.0)]), # recursive
             DictSpace(
                 :a => MultiDiscreteSpace([2.0, 4.0]),
-                :b => TupleSpace(
+                :b => TupleSpace([
                     MultiContinuousSpace([-1, -2], [2.5, 3.5]),
                     MultiDiscreteSpace([3, 2]),
-                ),
+                ]),
             ), # combined spaces
-        )
+        ])
 
         test_samples(s)
     end

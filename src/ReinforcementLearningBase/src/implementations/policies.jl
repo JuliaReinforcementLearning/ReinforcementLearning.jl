@@ -3,71 +3,59 @@ export RandomPolicy
 using Random
 
 """
-    RandomPolicy(action_space, rng)
+    RandomPolicy(action_space, rng=Random.GLOBAL_RNG)
 
 Construct a random policy with actions in `action_space`.
+If `action_space` is `nothing` then the `legal_actions` at runtime
+will be used to randomly sample a valid action.
 """
-struct RandomPolicy{S<:AbstractSpace,R<:AbstractRNG} <: AbstractPolicy
+struct RandomPolicy{S,R<:AbstractRNG} <: AbstractPolicy
     action_space::S
     rng::R
 end
 
-Base.show(io::IO, p::RandomPolicy) = print(io, "RandomPolicy($(p.action_space))")
-
 Random.seed!(p::RandomPolicy, seed) = Random.seed!(p.rng, seed)
 
-"""
-    RandomPolicy(action_space; seed=nothing)
-"""
-RandomPolicy(s; seed = nothing) = RandomPolicy(s, MersenneTwister(seed))
+RandomPolicy(; rng = Random.GLOBAL_RNG) = RandomPolicy(nothing, rng)
+RandomPolicy(s; rng=Random.GLOBAL_RNG) = RandomPolicy(s, rng)
 
 """
-    RandomPolicy(env::AbstractEnv; seed=nothing)
+    RandomPolicy(env::AbstractEnv; rng=Random.GLOBAL_RNG)
+
+If `env` is of [`FULL_ACTION_SET`](@ref), then action is randomly chosen at runtime
+in `get_actions(env)`. Otherwise, the `env` is supposed to be of [`MINIMAL_ACTION_SET`](@ref).
+The `get_actions(env)` is supposed to be static and will only be used to initialize
+the random policy for once.
 """
-RandomPolicy(env::AbstractEnv; seed = nothing) =
-    RandomPolicy(get_action_space(env), MersenneTwister(seed))
+RandomPolicy(env::AbstractEnv; rng=Random.GLOBAL_RNG) = RandomPolicy(ActionStyle(env), env, rng)
+RandomPolicy(::MinimalActionSet, env::AbstractEnv, rng) = RandomPolicy(get_actions(env), rng)
+RandomPolicy(::FullActionSet, env::AbstractEnv, rng) = RandomPolicy(nothing, rng)
 
-(p::RandomPolicy)(obs) = p(obs, ActionStyle(obs))
-
-function (p::RandomPolicy)(obs, ::FullActionSet)
-    legal_actions = get_legal_actions(obs)
-    if length(legal_actions) == 0
-        # in this case, we return an random action instead of throwing error
-        rand(p.rng, p.action_space)
-    else
-        rand(p.rng, legal_actions)
-    end
-end
-
-(p::RandomPolicy)(obs, ::MinimalActionSet) = rand(p.rng, p.action_space)
-(p::RandomPolicy)(obs::BatchObs, ::MinimalActionSet) =
-    [rand(p.rng, p.action_space) for _ in 1:length(obs)]
-
-get_prob(p::RandomPolicy, obs) = get_prob(p, obs, ActionStyle(obs))
+(p::RandomPolicy{Nothing})(env) = rand(p.rng, get_legal_actions(env))
+(p::RandomPolicy)(env) = rand(p.rng, p.action_space)
+(p::RandomPolicy)(env::MultiThreadEnv) = [p(x) for x in env]
 
 # TODO: TBD
 # Ideally we should return a Categorical distribution.
 # But this means we need to introduce an extra dependency of Distributions
-get_prob(p::RandomPolicy, obs, ::MinimalActionSet) =
-    fill(1 / length(p.action_space), length(p.action_space))
+# watch https://github.com/JuliaStats/Distributions.jl/issues/1139
+get_prob(p::RandomPolicy, env) = fill(1 / length(p.action_space), length(p.action_space))
 
-function get_prob(p::RandomPolicy, obs, ::FullActionSet)
-    mask = get_legal_actions_mask(obs)
+function get_prob(p::RandomPolicy{Nothing}, env)
+    mask = get_legal_actions_mask(env)
     n = sum(mask)
     prob = zeros(length(mask))
     prob[mask] .= 1 / n
     prob
 end
 
-get_prob(p::RandomPolicy, obs, a) = get_prob(p, obs, a, ActionStyle(obs))
+get_prob(p::RandomPolicy, env, a) = 1 / length(p.action_space)
 
-get_prob(p::RandomPolicy, obs, a, ::MinimalActionSet) = 1 / length(p.action_space)
-
-function get_prob(p::RandomPolicy, obs, a, ::FullActionSet)
-    legal_actions = get_legal_actions(obs)
+function get_prob(p::RandomPolicy{Nothing}, env, a)
+    legal_actions = get_legal_actions(env)
     if a in legal_actions
-        1 / length(legal_actions)
+        1. / length(legal_actions)
     else
-        0
+        0.
     end
 end

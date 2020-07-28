@@ -1,8 +1,9 @@
 @testset "base" begin
-    env = LotteryEnv(; seed = 222)
-    action_space = get_action_space(env)
-    policy = RandomPolicy(env; seed = 123)
+    env = LotteryEnv()
+    Random.seed!(env, 123)
+    policy = RandomPolicy(env)
+    Random.seed!(policy, 111)
     reset!(env)
     run(policy, env)
-    @test get_terminal(observe(env))
+    @test get_terminal(env)
 end
