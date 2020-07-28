@@ -245,10 +245,12 @@ end
 Base.summary(
     io::IO,
     env::T,
-) where {T<:Union{
-    SubjectiveEnv,
-    MultiThreadEnv,
-    StateOverriddenEnv,
-    RewardOverriddenEnv,
-    ActionTransformedEnv,
-}} = print(io, T.name)
+) where {
+    T<:Union{
+        SubjectiveEnv,
+        MultiThreadEnv,
+        StateOverriddenEnv,
+        RewardOverriddenEnv,
+        ActionTransformedEnv,
+    },
+} = print(io, T.name)
