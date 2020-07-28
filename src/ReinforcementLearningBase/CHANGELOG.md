@@ -4,8 +4,14 @@
 
 [Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.7.3...HEAD)
 
+**Closed issues:**
+
+- Make RandomPolicy to support legal\_actions of type AbstractSpace [\#52](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/issues/52)
+- Working with states that are not arrays. [\#48](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/issues/48)
+
 **Merged pull requests:**
 
+- Unify APIs [\#55](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/55) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#51](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/51) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [v0.7.3](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.3) (2020-06-26)
@@ -37,7 +43,6 @@
 **Merged pull requests:**
 
 - Automatic JuliaFormatter.jl run [\#44](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/44) ([github-actions[bot]](https://github.com/apps/github-actions))
-- fix sampling from MultiContinuousSpace [\#43](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/43) ([jbrea](https://github.com/jbrea))
 
 ## [v0.7.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.0) (2020-05-06)
 
@@ -57,6 +62,7 @@
 
 **Merged pull requests:**
 
+- fix sampling from MultiContinuousSpace [\#43](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/43) ([jbrea](https://github.com/jbrea))
 - Automatic JuliaFormatter.jl run [\#37](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/37) ([github-actions[bot]](https://github.com/apps/github-actions))
 - update WrappedEnv to support postprocessor [\#36](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/36) ([findmyway](https://github.com/findmyway))
 - keep pop! always return element [\#35](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/35) ([findmyway](https://github.com/findmyway))
