@@ -11,6 +11,7 @@
 
 **Merged pull requests:**
 
+- Automatic JuliaFormatter.jl run [\#59](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/59) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Automatic JuliaFormatter.jl run [\#57](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/57) ([github-actions[bot]](https://github.com/apps/github-actions))
 - CompatHelper: add new compat entry for "AbstractTrees" at version "0.3" [\#56](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/56) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Unify APIs [\#55](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/55) ([findmyway](https://github.com/findmyway))
