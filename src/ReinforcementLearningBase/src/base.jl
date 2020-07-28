@@ -59,6 +59,3 @@ function Base.show(io::IO, t::MIME"text/markdown", env::AbstractEnv)
     $(get_terminal(env) ? "Yes" : "No")
     """))
 end
-
-Base.summary(io::IO, env::AbstractEnv) =
-    print(io, "$(get_name(env)): $(join([f(env) for f in get_env_traits()], ","))")

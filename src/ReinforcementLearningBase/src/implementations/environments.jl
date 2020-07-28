@@ -241,17 +241,3 @@ for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     end
 end
 =#
-
-Base.summary(
-    io::IO,
-    env::T,
-) where {
-    T<:Union{
-        SubjectiveEnv,
-        MultiThreadEnv,
-        StateOverriddenEnv,
-        RewardOverriddenEnv,
-        ActionTransformedEnv,
-        StateCachedEnv,
-    },
-} = print(io, T.name)
