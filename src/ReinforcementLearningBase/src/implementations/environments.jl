@@ -1,4 +1,9 @@
-export SubjectiveEnv, MultiThreadEnv, StateOverriddenEnv, RewardOverriddenEnv, ActionTransformedEnv, StateCachedEnv
+export SubjectiveEnv,
+    MultiThreadEnv,
+    StateOverriddenEnv,
+    RewardOverriddenEnv,
+    ActionTransformedEnv,
+    StateCachedEnv
 
 using MacroTools: @forward
 using Random
@@ -14,40 +19,41 @@ struct SubjectiveEnv{E<:AbstractEnv,P} <: AbstractEnv
     player::P
 end
 
-(env::SubjectiveEnv)(action;kwargs...) = env.env(action, env.player;kwargs...)
+(env::SubjectiveEnv)(action; kwargs...) = env.env(action, env.player; kwargs...)
 
 # partial constructor to allow chaining
 SubjectiveEnv(player) = env -> SubjectiveEnv(env, player)
 
 for f in ENV_API
-    @eval $f(x::SubjectiveEnv, args...;kwargs...) = $f(x.env, args...;kwargs...)
+    @eval $f(x::SubjectiveEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
 end
 
 for f in MULTI_AGENT_ENV_API
-    @eval $f(x::SubjectiveEnv, args...;kwargs...) = $f(x.env, x.player, args...;kwargs...)
+    @eval $f(x::SubjectiveEnv, args...; kwargs...) = $f(x.env, x.player, args...; kwargs...)
 end
 
 #####
 # StateOverriddenEnv
 #####
 
-struct StateOverriddenEnv{P, E<:AbstractEnv} <: AbstractEnv
+struct StateOverriddenEnv{P,E<:AbstractEnv} <: AbstractEnv
     processors::P
     env::E
 end
 
-(env::StateOverriddenEnv)(args...;kwargs...) = env.env(args...;kwargs...)
+(env::StateOverriddenEnv)(args...; kwargs...) = env.env(args...; kwargs...)
 
 # partial constructor to allow chaining
 StateOverriddenEnv(processors...) = env -> StateOverriddenEnv(processors, env)
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     if f != :get_state
-        @eval $f(x::StateOverriddenEnv, args...;kwargs...) = $f(x.env, args...;kwargs...)
+        @eval $f(x::StateOverriddenEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
     end
 end
 
-get_state(env::StateOverriddenEnv, args...;kwargs...) = foldl(|>, env.processors; init=get_state(env.env, args...;kwargs...))
+get_state(env::StateOverriddenEnv, args...; kwargs...) =
+    foldl(|>, env.processors; init = get_state(env.env, args...; kwargs...))
 
 #####
 # StateCachedEnv
@@ -64,12 +70,12 @@ end
 
 StateCachedEnv(env) = StateCachedEnv(get_state(env), env, true)
 
-function (env::StateCachedEnv)(args...;kwargs...)
-    env.env(args...;kwargs...)
+function (env::StateCachedEnv)(args...; kwargs...)
+    env.env(args...; kwargs...)
     env.is_state_cached = false
 end
 
-function get_state(env::StateCachedEnv, args...;kwargs...)
+function get_state(env::StateCachedEnv, args...; kwargs...)
     if env.is_state_cached
         env.s
     else
@@ -81,7 +87,7 @@ end
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     if f != :get_state
-        @eval $f(x::StateCachedEnv, args...;kwargs...) = $f(x.env, args...;kwargs...)
+        @eval $f(x::StateCachedEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
     end
 end
 
@@ -89,29 +95,30 @@ end
 # RewardOverriddenEnv
 #####
 
-struct RewardOverriddenEnv{P, E<:AbstractEnv} <: AbstractEnv
+struct RewardOverriddenEnv{P,E<:AbstractEnv} <: AbstractEnv
     processors::P
     env::E
 end
 
-(env::RewardOverriddenEnv)(args...;kwargs...) = env.env(args...;kwargs...)
+(env::RewardOverriddenEnv)(args...; kwargs...) = env.env(args...; kwargs...)
 
 # partial constructor to allow chaining
 RewardOverriddenEnv(processors...) = env -> RewardOverriddenEnv(processors, env)
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     if f != :get_reward
-        @eval $f(x::RewardOverriddenEnv, args...;kwargs...) = $f(x.env, args...;kwargs...)
+        @eval $f(x::RewardOverriddenEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
     end
 end
 
-get_reward(env::RewardOverriddenEnv, args...;kwargs...) = foldl(|>, env.processors; init=get_reward(env.env, args...;kwargs...))
+get_reward(env::RewardOverriddenEnv, args...; kwargs...) =
+    foldl(|>, env.processors; init = get_reward(env.env, args...; kwargs...))
 
 #####
 # ActionTransformedEnv
 #####
 
-struct ActionTransformedEnv{P, E<:AbstractEnv} <: AbstractEnv
+struct ActionTransformedEnv{P,E<:AbstractEnv} <: AbstractEnv
     processors::P
     env::E
 end
@@ -120,10 +127,11 @@ end
 ActionTransformedEnv(processors...) = env -> ActionTransformedEnv(processors, env)
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
-    @eval $f(x::ActionTransformedEnv, args...;kwargs...) = $f(x.env, args...;kwargs...)
+    @eval $f(x::ActionTransformedEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
 end
 
-(env::ActionTransformedEnv)(action, args...;kwargs...) = env.env(foldl(|>, env.processors;init=action), args...;kwargs...)
+(env::ActionTransformedEnv)(action, args...; kwargs...) =
+    env.env(foldl(|>, env.processors; init = action), args...; kwargs...)
 
 #####
 # MultiThreadEnv
@@ -171,21 +179,27 @@ end
 const MULTI_THREAD_ENV_CACHE = IdDict{AbstractEnv,Dict{Symbol,Array}}()
 
 # TODO:using https://github.com/oxinabox/AutoPreallocation.jl ?
-for f in (:get_state, :get_terminal, :get_reward, :get_legal_actions, :get_legal_actions_mask)
-    @eval function $f(env::MultiThreadEnv, args...;kwargs...)
-        sample = $f(env[1], args...;kwargs...)
+for f in
+    (:get_state, :get_terminal, :get_reward, :get_legal_actions, :get_legal_actions_mask)
+    @eval function $f(env::MultiThreadEnv, args...; kwargs...)
+        sample = $f(env[1], args...; kwargs...)
         m, n = length(sample), length(env)
-        env_cache = get!(MULTI_THREAD_ENV_CACHE, env, Dict{Symbol, Array}())
-        cache = get!(env_cache, Symbol($f, args, kwargs), Array{eltype(sample)}(undef, size(sample)..., n))
+        env_cache = get!(MULTI_THREAD_ENV_CACHE, env, Dict{Symbol,Array}())
+        cache = get!(
+            env_cache,
+            Symbol($f, args, kwargs),
+            Array{eltype(sample)}(undef, size(sample)..., n),
+        )
         selectdim(cache, ndims(cache), 1) .= sample
         for i in 2:n
-            selectdim(cache, ndims(cache), i) .= $f(env[i], args...;kwargs...)
+            selectdim(cache, ndims(cache), i) .= $f(env[i], args...; kwargs...)
         end
         cache
     end
 end
 
-get_actions(env::MultiThreadEnv, args...;kwargs...) = TupleSpace([get_actions(x, args...;kwargs...) for x in env.envs])
+get_actions(env::MultiThreadEnv, args...; kwargs...) =
+    TupleSpace([get_actions(x, args...; kwargs...) for x in env.envs])
 get_current_player(env::MultiThreadEnv) = [get_current_player(x) for x in env.envs]
 
 function Base.show(io::IO, t::MIME"text/markdown", env::MultiThreadEnv)
@@ -228,4 +242,13 @@ for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
 end
 =#
 
-Base.summary(io::IO, env::T) where T<:Union{SubjectiveEnv, MultiThreadEnv, StateOverriddenEnv, RewardOverriddenEnv, ActionTransformedEnv} = print(io, T.name)
+Base.summary(
+    io::IO,
+    env::T,
+) where {T<:Union{
+    SubjectiveEnv,
+    MultiThreadEnv,
+    StateOverriddenEnv,
+    RewardOverriddenEnv,
+    ActionTransformedEnv,
+}} = print(io, T.name)

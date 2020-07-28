@@ -34,7 +34,8 @@ function get_env_traits()
     [eval(x) for x in RLBase.ENV_API if endswith(String(x), "Style")]
 end
 
-Base.show(io::IO, t::MIME"text/plain", env::AbstractEnv) = show(io, MIME"text/markdown"(), env)
+Base.show(io::IO, t::MIME"text/plain", env::AbstractEnv) =
+    show(io, MIME"text/markdown"(), env)
 
 function Base.show(io::IO, t::MIME"text/markdown", env::AbstractEnv)
     show(io, t, Markdown.parse("""
@@ -59,4 +60,5 @@ function Base.show(io::IO, t::MIME"text/markdown", env::AbstractEnv)
     """))
 end
 
-Base.summary(io::IO, env::AbstractEnv) = print(io, "$(get_name(env)): $(join([f(env) for f in get_env_traits()], ","))")
+Base.summary(io::IO, env::AbstractEnv) =
+    print(io, "$(get_name(env)): $(join([f(env) for f in get_env_traits()], ","))")

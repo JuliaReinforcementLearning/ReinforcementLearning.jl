@@ -17,7 +17,7 @@ end
 Random.seed!(p::RandomPolicy, seed) = Random.seed!(p.rng, seed)
 
 RandomPolicy(; rng = Random.GLOBAL_RNG) = RandomPolicy(nothing, rng)
-RandomPolicy(s; rng=Random.GLOBAL_RNG) = RandomPolicy(s, rng)
+RandomPolicy(s; rng = Random.GLOBAL_RNG) = RandomPolicy(s, rng)
 
 """
     RandomPolicy(env::AbstractEnv; rng=Random.GLOBAL_RNG)
@@ -27,8 +27,10 @@ in `get_actions(env)`. Otherwise, the `env` is supposed to be of [`MINIMAL_ACTIO
 The `get_actions(env)` is supposed to be static and will only be used to initialize
 the random policy for once.
 """
-RandomPolicy(env::AbstractEnv; rng=Random.GLOBAL_RNG) = RandomPolicy(ActionStyle(env), env, rng)
-RandomPolicy(::MinimalActionSet, env::AbstractEnv, rng) = RandomPolicy(get_actions(env), rng)
+RandomPolicy(env::AbstractEnv; rng = Random.GLOBAL_RNG) =
+    RandomPolicy(ActionStyle(env), env, rng)
+RandomPolicy(::MinimalActionSet, env::AbstractEnv, rng) =
+    RandomPolicy(get_actions(env), rng)
 RandomPolicy(::FullActionSet, env::AbstractEnv, rng) = RandomPolicy(nothing, rng)
 
 (p::RandomPolicy{Nothing})(env) = rand(p.rng, get_legal_actions(env))
@@ -54,8 +56,8 @@ get_prob(p::RandomPolicy, env, a) = 1 / length(p.action_space)
 function get_prob(p::RandomPolicy{Nothing}, env, a)
     legal_actions = get_legal_actions(env)
     if a in legal_actions
-        1. / length(legal_actions)
+        1.0 / length(legal_actions)
     else
-        0.
+        0.0
     end
 end

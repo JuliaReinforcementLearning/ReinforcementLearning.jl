@@ -262,7 +262,7 @@ By default the [`MINIMAL_ACTION_SET`](@ref) is returned.
 
 const DEFAULT_PLAYER = :DEFAULT_PLAYER
 
-@api (env::AbstractEnv)(action, player=get_current_player(env))
+@api (env::AbstractEnv)(action, player = get_current_player(env))
 
 "Make an independent copy of `env`"
 @api copy(env::AbstractEnv) = deepcopy(env)
@@ -276,21 +276,24 @@ const DEFAULT_PLAYER = :DEFAULT_PLAYER
 Get all available actions from environment.
 See also: [`get_legal_actions`](@ref)
 """
-@multi_agent_env_api get_actions(env::AbstractEnv, player=get_current_player(env))
+@multi_agent_env_api get_actions(env::AbstractEnv, player = get_current_player(env))
 
 """
     get_legal_actions(env, player=get_current_player(env))
 
 Only valid for environments of [`FULL_ACTION_SET`](@ref).
 """
-@multi_agent_env_api get_legal_actions(env::AbstractEnv, player=get_current_player(env))
+@multi_agent_env_api get_legal_actions(env::AbstractEnv, player = get_current_player(env))
 
 """
     get_legal_actions_mask(env, player=get_current_player(env)) -> AbstractArray{Bool}
 
 Required for environments of [`FULL_ACTION_SET`](@ref).
 """
-@multi_agent_env_api get_legal_actions_mask(env::AbstractEnv, player=get_current_player(env))
+@multi_agent_env_api get_legal_actions_mask(
+    env::AbstractEnv,
+    player = get_current_player(env),
+)
 
 """
     get_state(env, player=get_current_player(env)) -> state
@@ -301,7 +304,8 @@ If `state` is not an `AbstractArray`, to use it in neural network algorithms,
 a `convert(AbstractArray, state)` should be provided.
 To get the string representation, a `convert(String, state)` should also be provided.
 """
-@multi_agent_env_api get_state(env::AbstractEnv, player=get_current_player(env)) = env.state
+@multi_agent_env_api get_state(env::AbstractEnv, player = get_current_player(env)) =
+    env.state
 
 """
     get_current_player(env)
@@ -340,7 +344,7 @@ Used in imperfect multi-agent environments.
 @env_api get_num_players(env::AbstractEnv) = get_num_players(NumAgentStyle(env))
 
 get_num_players(::SingleAgent) = 1
-get_num_players(::MultiAgent{N}) where N = N
+get_num_players(::MultiAgent{N}) where {N} = N
 
 "Reset the internal state of an environment"
 @env_api reset!(env::AbstractEnv)
@@ -349,17 +353,19 @@ get_num_players(::MultiAgent{N}) where N = N
 @env_api seed!(env::AbstractEnv, seed)
 
 "Get all actions in each ply"
-@multi_agent_env_api get_history(env::AbstractEnv, player=get_current_player(env))
+@multi_agent_env_api get_history(env::AbstractEnv, player = get_current_player(env))
 
 """
     get_terminal(env, player=get_current_player(env))
 """
-@multi_agent_env_api get_terminal(env::AbstractEnv, player=get_current_player(env)) = env.terminal
+@multi_agent_env_api get_terminal(env::AbstractEnv, player = get_current_player(env)) =
+    env.terminal
 
 """
     get_reward(env, player=get_current_player(env))
 """
-@multi_agent_env_api get_reward(env::AbstractEnv, player=get_current_player(env)) = env.reward
+@multi_agent_env_api get_reward(env::AbstractEnv, player = get_current_player(env)) =
+    env.reward
 
 """
     get_prob(env, player=get_chance_player(env))
@@ -367,7 +373,7 @@ get_num_players(::MultiAgent{N}) where N = N
 Only valid for environments of [`EXPLICIT_STOCHASTIC`](@ref) style.
 Here `player` must be a chance player.
 """
-@multi_agent_env_api get_prob(env::AbstractEnv, player=get_chance_player(env))
+@multi_agent_env_api get_prob(env::AbstractEnv, player = get_chance_player(env))
 
 """
     child(env::AbstractEnv, action)
@@ -382,7 +388,8 @@ end
 
 @env_api has_children(env::AbstractEnv) = !get_terminal(env)
 
-@env_api children(env::AbstractEnv) = (child(env, action) for action in get_legal_actions(env))
+@env_api children(env::AbstractEnv) =
+    (child(env, action) for action in get_legal_actions(env))
 
 #####
 ## Space
