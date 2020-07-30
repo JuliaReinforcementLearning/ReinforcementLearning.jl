@@ -11,6 +11,7 @@
 
 **Merged pull requests:**
 
+- fix \#48 [\#64](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/64) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#63](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/63) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Add random start policy [\#62](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/62) ([findmyway](https://github.com/findmyway))
 - Minor fix [\#61](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/61) ([findmyway](https://github.com/findmyway))
@@ -20,6 +21,7 @@
 - CompatHelper: add new compat entry for "AbstractTrees" at version "0.3" [\#56](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/56) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Unify APIs [\#55](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/55) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#51](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/51) ([github-actions[bot]](https://github.com/apps/github-actions))
+- add RewardOverriddenObs [\#50](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/50) ([findmyway](https://github.com/findmyway))
 
 ## [v0.7.3](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.3) (2020-06-26)
 
@@ -27,7 +29,6 @@
 
 **Merged pull requests:**
 
-- add RewardOverriddenObs [\#50](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/50) ([findmyway](https://github.com/findmyway))
 - update docs [\#49](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/49) ([findmyway](https://github.com/findmyway))
 
 ## [v0.7.2](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.2) (2020-06-02)
@@ -51,7 +52,6 @@
 
 - Automatic JuliaFormatter.jl run [\#44](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/44) ([github-actions[bot]](https://github.com/apps/github-actions))
 - fix sampling from MultiContinuousSpace [\#43](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/43) ([jbrea](https://github.com/jbrea))
-- keep pop! always return element [\#35](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/35) ([findmyway](https://github.com/findmyway))
 
 ## [v0.7.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.0) (2020-05-06)
 
@@ -73,6 +73,7 @@
 
 - Automatic JuliaFormatter.jl run [\#37](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/37) ([github-actions[bot]](https://github.com/apps/github-actions))
 - update WrappedEnv to support postprocessor [\#36](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/36) ([findmyway](https://github.com/findmyway))
+- keep pop! always return element [\#35](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/35) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#34](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/34) ([github-actions[bot]](https://github.com/apps/github-actions))
 - keep dependency concise [\#33](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/33) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#32](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/32) ([github-actions[bot]](https://github.com/apps/github-actions))
