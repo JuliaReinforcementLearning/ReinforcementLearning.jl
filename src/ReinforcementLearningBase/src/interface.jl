@@ -296,16 +296,13 @@ Required for environments of [`FULL_ACTION_SET`](@ref).
 )
 
 """
-    get_state(env, player=get_current_player(env)) -> state
+    get_state([t::Type], env, player=get_current_player(env)) -> state
 
-The state can be of any type. Usually it's an `AbstractArray`.
-See also https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/issues/48
-If `state` is not an `AbstractArray`, to use it in neural network algorithms,
-a `convert(AbstractArray, state)` should be provided.
-To get the string representation, a `convert(String, state)` should also be provided.
+The state can be of any type. However, most neural network based algorithms assume it's an `AbstractArray`.
+For environments with many different states provided (inner state, information state, etc),
+users need to provide `t::Type` to declare which kind of state they want.
 """
-@multi_agent_env_api get_state(env::AbstractEnv, player = get_current_player(env)) =
-    env.state
+@multi_agent_env_api get_state(env::AbstractEnv, player=get_current_player(env))
 
 """
     get_current_player(env)
