@@ -150,7 +150,7 @@ end
 
 MultiThreadEnv(f, n) = MultiThreadEnv([f() for _ in 1:n])
 
-@forward MultiThreadEnv.envs Base.getindex, Base.length, Base.setindex!
+@forward MultiThreadEnv.envs Base.getindex, Base.length, Base.setindex!, Base.iterate
 
 function (env::MultiThreadEnv)(actions)
     @sync for i in 1:length(env)
@@ -199,7 +199,7 @@ for f in
 end
 
 get_actions(env::MultiThreadEnv, args...; kwargs...) =
-    TupleSpace([get_actions(x, args...; kwargs...) for x in env.envs])
+    VectSpace([get_actions(x, args...; kwargs...) for x in env.envs])
 get_current_player(env::MultiThreadEnv) = [get_current_player(x) for x in env.envs]
 
 function Base.show(io::IO, t::MIME"text/markdown", env::MultiThreadEnv)
