@@ -51,7 +51,8 @@ function get_prob(p::RandomPolicy{Nothing}, env)
 end
 
 get_prob(p::RandomPolicy, env, a) = 1 / length(p.action_space)
-get_prob(p::RandomPolicy{<:VectSpace}, env::MultiThreadEnv, a) = [1/length(x) for x in p.action_space.data]
+get_prob(p::RandomPolicy{<:VectSpace}, env::MultiThreadEnv, a) =
+    [1 / length(x) for x in p.action_space.data]
 
 function get_prob(p::RandomPolicy{Nothing}, env, a)
     legal_actions = get_legal_actions(env)
