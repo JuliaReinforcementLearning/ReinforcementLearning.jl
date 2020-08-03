@@ -12,6 +12,7 @@
 
 **Merged pull requests:**
 
+- Automatic JuliaFormatter.jl run [\#65](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/65) ([github-actions[bot]](https://github.com/apps/github-actions))
 - fix \#48 [\#64](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/64) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#63](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/63) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Add random start policy [\#62](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/62) ([findmyway](https://github.com/findmyway))
