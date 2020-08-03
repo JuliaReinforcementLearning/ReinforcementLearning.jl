@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- `env\(action\)` feels a little awkward [\#66](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/issues/66)
 - Make RandomPolicy to support legal\_actions of type AbstractSpace [\#52](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/issues/52)
 - Working with states that are not arrays. [\#48](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/issues/48)
 
@@ -17,11 +18,11 @@
 - Minor fix [\#61](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/61) ([findmyway](https://github.com/findmyway))
 - add summary for StateCachedEnv [\#60](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/60) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#59](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/59) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Support common rl interface [\#58](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/58) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#57](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/57) ([github-actions[bot]](https://github.com/apps/github-actions))
 - CompatHelper: add new compat entry for "AbstractTrees" at version "0.3" [\#56](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/56) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Unify APIs [\#55](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/55) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#51](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/51) ([github-actions[bot]](https://github.com/apps/github-actions))
-- add RewardOverriddenObs [\#50](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/50) ([findmyway](https://github.com/findmyway))
 
 ## [v0.7.3](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.3) (2020-06-26)
 
@@ -29,6 +30,7 @@
 
 **Merged pull requests:**
 
+- add RewardOverriddenObs [\#50](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/50) ([findmyway](https://github.com/findmyway))
 - update docs [\#49](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/49) ([findmyway](https://github.com/findmyway))
 
 ## [v0.7.2](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.2) (2020-06-02)
