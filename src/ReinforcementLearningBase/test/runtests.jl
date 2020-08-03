@@ -1,6 +1,6 @@
 using ReinforcementLearningBase
 using Test
-import ReinforcementLearningBase:CRL
+import ReinforcementLearningBase: CRL
 import ReinforcementLearningBase.CRL
 
 include("lottery_env.jl")

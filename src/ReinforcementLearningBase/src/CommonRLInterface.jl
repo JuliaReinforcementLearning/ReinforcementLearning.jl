@@ -18,7 +18,7 @@ struct CommonRLZeroSumEnv{T<:AbstractEnv} <: CRL.AbstractZeroSumEnv
     env::T
 end
 
-const CommonRLEnvs = Union{CommonRLEnv, CommonRLMarkovEnv, CommonRLZeroSumEnv}
+const CommonRLEnvs = Union{CommonRLEnv,CommonRLMarkovEnv,CommonRLZeroSumEnv}
 
 function Base.convert(::Type{CRL.AbstractEnv}, env::AbstractEnv)
     if get_num_players(env) == 1
@@ -37,7 +37,8 @@ CRL.@provide CRL.reset!(env::CommonRLEnvs) = reset!(env.env)
 CRL.@provide CRL.actions(env::CommonRLEnvs) = get_actions(env.env)
 CRL.@provide CRL.observe(env::CommonRLEnvs) = get_state(env.env)
 CRL.state(env::CommonRLEnvs) = get_state(env.env)
-CRL.provided(::typeof(CRL.state), env::CommonRLEnvs) = InformationStyle(env.env) === PERFECT_INFORMATION
+CRL.provided(::typeof(CRL.state), env::CommonRLEnvs) =
+    InformationStyle(env.env) === PERFECT_INFORMATION
 CRL.@provide CRL.terminated(env::CommonRLEnvs) = get_terminal(env.env)
 CRL.@provide CRL.player(env::CommonRLEnvs) = get_current_player(env.env)
 CRL.@provide CRL.clone(env::CommonRLEnvs) = CommonRLEnv(copy(env.env))
@@ -48,16 +49,18 @@ CRL.@provide function CRL.act!(env::CommonRLEnvs, a)
 end
 
 CRL.valid_actions(x::CommonRLEnvs) = get_legal_actions(x.env)
-CRL.provided(::typeof(CRL.valid_actions), env::CommonRLEnvs) = ActionStyle(env.env) === FullActionSet()
+CRL.provided(::typeof(CRL.valid_actions), env::CommonRLEnvs) =
+    ActionStyle(env.env) === FullActionSet()
 
 CRL.valid_action_mask(x::CommonRLEnvs) = get_legal_actions_mask(x.env)
-CRL.provided(::typeof(CRL.valid_action_mask), env::CommonRLEnvs) = ActionStyle(env.env) === FullActionSet()
+CRL.provided(::typeof(CRL.valid_action_mask), env::CommonRLEnvs) =
+    ActionStyle(env.env) === FullActionSet()
 
 #####
 # RLBaseEnv
 #####
 
-mutable struct RLBaseEnv{T<:CRL.AbstractEnv, R} <: AbstractEnv
+mutable struct RLBaseEnv{T<:CRL.AbstractEnv,R} <: AbstractEnv
     env::T
     r::R
 end
@@ -76,7 +79,8 @@ reset!(env::RLBaseEnv) = CRL.reset!(env.env)
 (env::RLBaseEnv)(a) = env.r = CRL.act!(env.env, a)
 Base.copy(env::CommonRLEnv) = RLBaseEnv(CRL.clone(env.env), env.r)
 
-ActionStyle(env::RLBaseEnv) = CRL.provided(CRL.valid_actions, env.env) ? FullActionSet() : MinimalActionSet()
+ActionStyle(env::RLBaseEnv) =
+    CRL.provided(CRL.valid_actions, env.env) ? FullActionSet() : MinimalActionSet()
 UtilityStyle(env::RLBaseEnv) = GENERAL_SUM
 UtilityStyle(env::RLBaseEnv{<:CRL.AbstractZeroSumEnv}) = ZERO_SUM
 InformationStyle(env::RLBaseEnv) = IMPERFECT_INFORMATION
