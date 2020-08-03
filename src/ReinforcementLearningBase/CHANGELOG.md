@@ -12,6 +12,8 @@
 
 **Merged pull requests:**
 
+- Automatic JuliaFormatter.jl run [\#68](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/68) ([github-actions[bot]](https://github.com/apps/github-actions))
+- CompatHelper: add new compat entry for "CommonRLInterface" at version "0.2" [\#67](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/67) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Automatic JuliaFormatter.jl run [\#65](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/65) ([github-actions[bot]](https://github.com/apps/github-actions))
 - fix \#48 [\#64](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/64) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#63](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/63) ([github-actions[bot]](https://github.com/apps/github-actions))
@@ -31,7 +33,6 @@
 
 **Merged pull requests:**
 
-- add RewardOverriddenObs [\#50](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/50) ([findmyway](https://github.com/findmyway))
 - update docs [\#49](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/49) ([findmyway](https://github.com/findmyway))
 
 ## [v0.7.2](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.2) (2020-06-02)
@@ -59,10 +60,6 @@
 ## [v0.7.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.0) (2020-05-06)
 
 [Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.6.6...v0.7.0)
-
-**Merged pull requests:**
-
-- Automatic JuliaFormatter.jl run [\#42](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/42) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [v0.6.6](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.6.6) (2020-05-06)
 
