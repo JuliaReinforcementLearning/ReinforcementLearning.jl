@@ -12,6 +12,7 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
 AbstractTrees = "0.3"
+CommonRLInterface = "0.2"
 MacroTools = "0.5"
 julia = "1.3"
 
