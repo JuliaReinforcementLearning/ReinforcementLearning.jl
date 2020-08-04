@@ -23,8 +23,8 @@ Flux.testmode!(p::UCBExplorer, mode = true) = p.is_training = !mode
 - `seed`, set the seed of inner RNG.
 - `is_training=true`, in training mode, time step and counter will not be updated.
 """
-UCBExplorer(na; c = 2.0, ϵ = 1e-10, step = 1, seed = nothing, is_training = true) =
-    UCBExplorer(c, fill(ϵ, na), 1, MersenneTwister(seed), is_training)
+UCBExplorer(na; c = 2.0, ϵ = 1e-10, step = 1, rng = Random.GLOBAL_RNG, is_training = true) =
+    UCBExplorer(c, fill(ϵ, na), 1, rng, is_training)
 
 @doc raw"""
     (ucb::UCBExplorer)(values::AbstractArray)

@@ -35,7 +35,7 @@ get_role(agent::DynaAgent) = agent.role
 
 function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
     ::PreEpisodeStage,
-    obs,
+    env,
 )
     empty!(agent.trajectory)
     nothing
@@ -43,10 +43,10 @@ end
 
 function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
     ::PreActStage,
-    obs,
+    env,
 )
-    action = agent.policy(obs)
-    push!(agent.trajectory; state = get_state(obs), action = action)
+    action = agent.policy(env)
+    push!(agent.trajectory; state = get_state(env), action = action)
     update!(agent.model, agent.trajectory, agent.policy)  # model learning
     update!(agent.policy, agent.trajectory)  # direct learning
     update!(agent.policy, agent.model, agent.trajectory, agent.plan_step)  # policy learning
@@ -55,18 +55,18 @@ end
 
 function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
     ::PostActStage,
-    obs,
+    env,
 )
-    push!(agent.trajectory; reward = get_reward(obs), terminal = get_terminal(obs))
+    push!(agent.trajectory; reward = get_reward(env), terminal = get_terminal(env))
     nothing
 end
 
 function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
     ::PostEpisodeStage,
-    obs,
+    env,
 )
-    action = agent.policy(obs)
-    push!(agent.trajectory; state = get_state(obs), action = action)
+    action = agent.policy(env)
+    push!(agent.trajectory; state = get_state(env), action = action)
     update!(agent.model, agent.trajectory, agent.policy)  # model learning
     update!(agent.policy, agent.trajectory)  # direct learning
     update!(agent.policy, agent.model, agent.trajectory, agent.plan_step)  # policy learning

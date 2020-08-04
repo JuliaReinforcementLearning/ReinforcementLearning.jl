@@ -1,9 +1,10 @@
 import Base: run
 
-run(agent, env::AbstractEnv, args...) = run(DynamicStyle(env), agent, env, args...)
+run(agent, env::AbstractEnv, args...) = run(DynamicStyle(env), NumAgentStyle(env), agent, env, args...)
 
 function run(
     ::Sequential,
+    ::SingleAgent,
     agent::AbstractAgent,
     env::AbstractEnv,
     stop_condition,
@@ -11,34 +12,31 @@ function run(
 )
 
     reset!(env)
-    obs = observe(env)
-    agent(PRE_EPISODE_STAGE, obs)
-    hook(PRE_EPISODE_STAGE, agent, env, obs)
-    action = agent(PRE_ACT_STAGE, obs)
-    hook(PRE_ACT_STAGE, agent, env, obs, action)
+    agent(PRE_EPISODE_STAGE, env)
+    hook(PRE_EPISODE_STAGE, agent, env)
+    action = agent(PRE_ACT_STAGE, env)
+    hook(PRE_ACT_STAGE, agent, env, action)
 
     while true
         env(action)
-        obs = observe(env)
-        agent(POST_ACT_STAGE, obs)
-        hook(POST_ACT_STAGE, agent, env, obs)
+        agent(POST_ACT_STAGE, env)
+        hook(POST_ACT_STAGE, agent, env)
 
-        if get_terminal(obs)
-            agent(POST_EPISODE_STAGE, obs)  # let the agent see the last observation
-            hook(POST_EPISODE_STAGE, agent, env, obs)
+        if get_terminal(env)
+            agent(POST_EPISODE_STAGE, env)  # let the agent see the last observation
+            hook(POST_EPISODE_STAGE, agent, env)
 
-            stop_condition(agent, env, obs) && break
+            stop_condition(agent, env) && break
 
             reset!(env)
-            obs = observe(env)
-            agent(PRE_EPISODE_STAGE, obs)
-            hook(PRE_EPISODE_STAGE, agent, env, obs)
-            action = agent(PRE_ACT_STAGE, obs)
-            hook(PRE_ACT_STAGE, agent, env, obs, action)
+            agent(PRE_EPISODE_STAGE, env)
+            hook(PRE_EPISODE_STAGE, agent, env)
+            action = agent(PRE_ACT_STAGE, env)
+            hook(PRE_ACT_STAGE, agent, env, action)
         else
-            stop_condition(agent, env, obs) && break
-            action = agent(PRE_ACT_STAGE, obs)
-            hook(PRE_ACT_STAGE, agent, env, obs, action)
+            stop_condition(agent, env) && break
+            action = agent(PRE_ACT_STAGE, env)
+            hook(PRE_ACT_STAGE, agent, env, action)
         end
     end
     hook
@@ -46,6 +44,7 @@ end
 
 function run(
     ::Sequential,
+    ::SingleAgent,
     agent::AbstractAgent,
     env::MultiThreadEnv,
     stop_condition,
@@ -54,17 +53,15 @@ function run(
 
     while true
         reset!(env)
-        obs = observe(env)
-        action = agent(PRE_ACT_STAGE, obs)
-        hook(PRE_ACT_STAGE, agent, env, obs, action)
+        action = agent(PRE_ACT_STAGE, env)
+        hook(PRE_ACT_STAGE, agent, env, action)
 
         env(action)
-        obs = observe(env)
-        agent(POST_ACT_STAGE, obs)
-        hook(POST_ACT_STAGE, agent, env, obs)
+        agent(POST_ACT_STAGE, env)
+        hook(POST_ACT_STAGE, agent, env)
 
-        if stop_condition(agent, env, obs)
-            agent(PRE_ACT_STAGE, obs)  # let the agent see the last observation
+        if stop_condition(agent, env)
+            agent(PRE_ACT_STAGE, env)  # let the agent see the last observation
             break
         end
     end
@@ -73,22 +70,23 @@ end
 
 function run(
     ::Sequential,
+    ::MultiAgent,
     agents::Tuple{Vararg{<:AbstractAgent}},
     env::AbstractEnv,
     stop_condition,
     hooks = [EmptyHook() for _ in agents],
 )
-    reset!(env)
-    observations = [observe(env, get_role(agent)) for agent in agents]
+    @assert length(agents) == get_num_players(env)
 
-    valid_action = rand(get_action_space(env))  # init with a dummy value
+    reset!(env)
+    valid_action = rand(get_actions(env))  # init with a dummy value
 
     # async here?
-    for (agent, obs, hook) in zip(agents, observations, hooks)
-        agent(PRE_EPISODE_STAGE, obs)
-        hook(PRE_EPISODE_STAGE, agent, env, obs)
-        action = agent(PRE_ACT_STAGE, obs)
-        hook(PRE_ACT_STAGE, agent, env, obs, action)
+    for (agent, hook) in zip(agents, hooks)
+        agent(PRE_EPISODE_STAGE, SubjectiveEnv(env, get_role(agent)))
+        hook(PRE_EPISODE_STAGE, agent, env)
+        action = agent(PRE_ACT_STAGE, SubjectiveEnv(env, get_role(agent)))
+        hook(PRE_ACT_STAGE, agent, env, action)
         # for Sequential environments, only one action is valid
         if get_current_player(env) == get_role(agent)
             valid_action = action
@@ -98,41 +96,35 @@ function run(
     while true
         env(valid_action)
 
-        observations = [observe(env, get_role(agent)) for agent in agents]
-
-        for (agent, obs, hook) in zip(agents, observations, hooks)
-            agent(POST_ACT_STAGE, obs)
-            hook(POST_ACT_STAGE, agent, env, obs)
+        for (agent, hook) in zip(agents, hooks)
+            agent(POST_ACT_STAGE, SubjectiveEnv(env, get_role(agent)))
+            hook(POST_ACT_STAGE, agent, env)
         end
 
-        if get_terminal(observations[1])
-            for (agent, obs, hook) in zip(agents, observations, hooks)
-                agent(POST_EPISODE_STAGE, obs)
-                hook(POST_EPISODE_STAGE, agent, env, obs)
+        if get_terminal(env)
+            for (agent, hook) in zip(agents, hooks)
+                agent(POST_EPISODE_STAGE, SubjectiveEnv(env, get_role(agent)))
+                hook(POST_EPISODE_STAGE, agent, env)
             end
 
-            stop_condition(agents, env, observations) && break
-
+            stop_condition(agents, env) && break
             reset!(env)
-
-            observations = [observe(env, get_role(agent)) for agent in agents]
-
             # async here?
-            for (agent, obs, hook) in zip(agents, observations, hooks)
-                agent(PRE_EPISODE_STAGE, obs)
-                hook(PRE_EPISODE_STAGE, agent, env, obs)
-                action = agent(PRE_ACT_STAGE, obs)
-                hook(PRE_ACT_STAGE, agent, env, obs, action)
+            for (agent, hook) in zip(agents, hooks)
+                agent(PRE_EPISODE_STAGE, SubjectiveEnv(env, get_role(agent)))
+                hook(PRE_EPISODE_STAGE, agent, env)
+                action = agent(PRE_ACT_STAGE, SubjectiveEnv(env, get_role(agent)))
+                hook(PRE_ACT_STAGE, agent, env, action)
                 # for Sequential environments, only one action is valid
                 if get_current_player(env) == get_role(agent)
                     valid_action = action
                 end
             end
         else
-            stop_condition(agents, env, observations) && break
-            for (agent, obs, hook) in zip(agents, observations, hooks)
-                action = agent(PRE_ACT_STAGE, obs)
-                hook(PRE_ACT_STAGE, agent, env, obs, action)
+            stop_condition(agents, env) && break
+            for (agent, hook) in zip(agents, hooks)
+                action = agent(PRE_ACT_STAGE, SubjectiveEnv(env, get_role(agent)))
+                hook(PRE_ACT_STAGE, agent, env, action)
                 # for Sequential environments, only one action is valid
                 if get_current_player(env) == get_role(agent)
                     valid_action = action

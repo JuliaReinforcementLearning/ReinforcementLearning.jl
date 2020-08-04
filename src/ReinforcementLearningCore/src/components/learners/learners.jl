@@ -3,13 +3,13 @@ export AbstractLearner, extract_experience
 using Flux
 
 """
-    (learner::AbstractLearner)(obs)
+    (learner::AbstractLearner)(env)
 
 A learner is usually used to estimate state values, state-action values or distributional values based on experiences.
 """
 abstract type AbstractLearner end
 
-function (learner::AbstractLearner)(obs) end
+function (learner::AbstractLearner)(env) end
 
 """
     get_priority(p::AbstractLearner, experience)

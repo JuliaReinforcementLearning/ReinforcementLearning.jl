@@ -6,6 +6,7 @@ const CircularTrajectory = Trajectory{
     NamedTuple{names,trace_types},
 } where {names,types,trace_types<:Tuple{Vararg{<:CircularArrayBuffer}}}
 
+
 """
     CircularTrajectory(; capacity, trace_name=eltype=>size...)
 

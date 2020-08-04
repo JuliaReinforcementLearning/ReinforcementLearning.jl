@@ -7,7 +7,7 @@ struct GumbelSoftmaxExplorer <: AbstractExplorer
     rng::AbstractRNG
 end
 
-GumbelSoftmaxExplorer(; seed = nothing) = GumbelSoftmaxExplorer(MersenneTwister(seed))
+GumbelSoftmaxExplorer(; rng = Random.GLOBAL_RNG) = GumbelSoftmaxExplorer(rng)
 
 function (p::GumbelSoftmaxExplorer)(v::AbstractVector{T}) where {T}
     logits = logsoftmax(v)

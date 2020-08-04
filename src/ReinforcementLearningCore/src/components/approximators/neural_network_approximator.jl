@@ -10,11 +10,11 @@ Use a DNN model for value estimation.
 # Keyword arguments
 
 - `model`, a Flux based DNN model.
-- `optimizer=Descent()`
+- `optimizer=nothing`
 """
 Base.@kwdef struct NeuralNetworkApproximator{M,O} <: AbstractApproximator
     model::M
-    optimizer::O = Descent()
+    optimizer::O = nothing
 end
 
 (app::NeuralNetworkApproximator)(x) = app.model(x)
@@ -42,7 +42,7 @@ Flux.testmode!(app::NeuralNetworkApproximator, mode = true) = testmode!(app.mode
 
 The `actor` part must return logits (*Do not use softmax in the last layer!*), and the `critic` part must return a state value.
 """
-Base.@kwdef struct ActorCritic{A,C,O}
+Base.@kwdef struct ActorCritic{A,C,O} <: AbstractApproximator
     actor::A
     critic::C
     optimizer::O = ADAM()

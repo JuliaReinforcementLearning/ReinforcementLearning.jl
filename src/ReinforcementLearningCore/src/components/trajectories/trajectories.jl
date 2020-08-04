@@ -1,4 +1,5 @@
 include("abstract_trajectory.jl")
+include("dummy_trajectory.jl")
 include("trajectory.jl")
 include("vectorial_trajectory.jl")
 include("circular_trajectory.jl")

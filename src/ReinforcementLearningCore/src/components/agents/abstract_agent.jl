@@ -16,8 +16,8 @@ export AbstractAgent,
     Testing
 
 """
-    (agent::AbstractAgent)(obs) = agent(PRE_ACT_STAGE, obs) -> action
-    (agent::AbstractAgent)(stage::AbstractStage, obs)
+    (agent::AbstractAgent)(env) = agent(PRE_ACT_STAGE, env) -> action
+    (agent::AbstractAgent)(stage::AbstractStage, env)
 
 Similar to [`AbstractPolicy`](@ref), an agent is also a functional object which takes in an observation and returns an action.
 The main difference is that, we divide an experiment into the following stages:
@@ -43,7 +43,7 @@ PRE_EXPERIMENT_STAGE  |            PRE_ACT_STAGE    POST_ACT_STAGE              
          |            |                  |                |                       |          |           
          v            |        +-----+   v   +-------+    v   +-----+             |          v           
          --------------------->+ env +------>+ agent +------->+ env +---> ... ------->......             
-                      |  ^     +-----+  obs  +-------+ action +-----+          ^  |                      
+                      |  ^     +-----+       +-------+ action +-----+          ^  |                      
                       |  |                                                     |  |                      
                       |  +--PRE_EPISODE_STAGE            POST_EPISODE_STAGE----+  |                      
                       |                                                           |                      
@@ -66,10 +66,12 @@ const POST_EPISODE_STAGE = PostEpisodeStage()
 const PRE_ACT_STAGE = PreActStage()
 const POST_ACT_STAGE = PostActStage()
 
-(agent::AbstractAgent)(obs) = agent(PRE_ACT_STAGE, obs)
-function (agent::AbstractAgent)(stage::AbstractStage, obs) end
+(agent::AbstractAgent)(env) = agent(PRE_ACT_STAGE, env)
+function (agent::AbstractAgent)(stage::AbstractStage, env) end
 
 struct Training{T<:AbstractStage} end
 Training(s::T) where {T<:AbstractStage} = Training{T}()
 struct Testing{T<:AbstractStage} end
 Testing(s::T) where {T<:AbstractStage} = Testing{T}()
+
+Base.show(io::IO, agent::AbstractAgent) = AbstractTrees.print_tree(io, StructTree(agent),get(io, :max_depth, 10))

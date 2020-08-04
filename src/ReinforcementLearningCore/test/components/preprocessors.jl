@@ -1,9 +1,9 @@
 @testset "preprocessors" begin
 
     @testset "ResizeImage" begin
-        obs = (state = ones(4, 4),)
+        state = ones(4, 4)
         p = ResizeImage(2, 2)
-        @test get_state(p(obs)) == ones(2, 2)
+        @test p(state) == ones(2, 2)
     end
 
     @testset "StackFrames" begin
@@ -11,12 +11,11 @@
         p = StackFrames(2, 2, 3)
 
         for i in 1:3
-            obs = (state = A * i,)
-            p(obs)
+            p(A * i)
         end
 
-        obs = (state = A * 4,)
-        @test get_state(p(obs)) == reshape(repeat([2, 3, 4]; inner = 4), 2, 2, :)
+        state = A * 4
+        @test p(state) == reshape(repeat([2, 3, 4]; inner = 4), 2, 2, :)
 
     end
 

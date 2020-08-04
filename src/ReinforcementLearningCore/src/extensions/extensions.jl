@@ -1,4 +1,4 @@
 include("Flux.jl")
-include("CuArrays.jl")
+include("CUDA.jl")
 include("Zygote.jl")
 include("ReinforcementLearningBase.jl")

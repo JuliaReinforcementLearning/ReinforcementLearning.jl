@@ -1,5 +1,5 @@
-using GPUArrays, CuArrays, FillArrays
-using CuArrays: threadIdx, blockIdx, blockDim
+using CUDA, FillArrays
+using CUDA: threadIdx, blockIdx, blockDim
 
 #####
 # Cartesian indexing of CuArray
@@ -16,8 +16,8 @@ function Base.getindex(xs::CuArray{T,N}, indices::CuArray{CartesianIndex{N}}) wh
         num_blocks = ceil(Int, n / num_threads)
 
         function kernel(
-            ys::CuArrays.CuDeviceArray{T},
-            xs::CuArrays.CuDeviceArray{T},
+            ys::CUDA.CuDeviceArray{T},
+            xs::CUDA.CuDeviceArray{T},
             indices,
         )
             i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
@@ -30,7 +30,7 @@ function Base.getindex(xs::CuArray{T,N}, indices::CuArray{CartesianIndex{N}}) wh
             return
         end
 
-        CuArrays.@cuda blocks = num_blocks threads = num_threads kernel(ys, xs, indices)
+        CUDA.@cuda blocks = num_blocks threads = num_threads kernel(ys, xs, indices)
     end
 
     return ys
@@ -48,7 +48,7 @@ function Base.setindex!(
         num_threads = min(n, 256)
         num_blocks = ceil(Int, n / num_threads)
 
-        function kernel(xs::CuArrays.CuDeviceArray{T}, indices, v)
+        function kernel(xs::CUDA.CuDeviceArray{T}, indices, v)
             i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
 
             if i <= length(indices)
@@ -59,7 +59,7 @@ function Base.setindex!(
             return
         end
 
-        CuArrays.@cuda blocks = num_blocks threads = num_threads kernel(xs, indices, v)
+        CUDA.@cuda blocks = num_blocks threads = num_threads kernel(xs, indices, v)
     end
     return v
 end
@@ -75,7 +75,7 @@ function Base.setindex!(
         num_threads = min(n, 256)
         num_blocks = ceil(Int, n / num_threads)
 
-        function kernel(xs::CuArrays.CuDeviceArray{T}, indices, v)
+        function kernel(xs::CUDA.CuDeviceArray{T}, indices, v)
             i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
 
             if i <= length(indices)
@@ -86,7 +86,7 @@ function Base.setindex!(
             return
         end
 
-        CuArrays.@cuda blocks = num_blocks threads = num_threads kernel(xs, indices, v)
+        CUDA.@cuda blocks = num_blocks threads = num_threads kernel(xs, indices, v)
     end
     return v
 end

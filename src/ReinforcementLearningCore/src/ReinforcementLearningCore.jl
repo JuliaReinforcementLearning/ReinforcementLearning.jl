@@ -11,8 +11,8 @@ provides some standard and reusable components defined by [**RLBase**](https://g
 
 export RLCore
 
-include("extensions/extensions.jl")
 include("utils/utils.jl")
+include("extensions/extensions.jl")
 include("components/components.jl")
 include("core/core.jl")
 

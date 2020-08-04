@@ -1,5 +1,5 @@
 @testset "simple workflow" begin
-    env = WrappedEnv(CloneStatePreprocessor(), CartPoleEnv{Float32}())
+    env = CartPoleEnv{Float32}() |> StateOverriddenEnv(deepcopy)
     agent = Agent(;
         policy = RandomPolicy(env),
         trajectory = VectorialCompactSARTSATrajectory(; state_type = Vector{Float32}),

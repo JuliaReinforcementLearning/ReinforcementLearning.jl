@@ -1,4 +1,4 @@
-include("preprocessors.jl")
+include("processors.jl")
 include("trajectories/trajectories.jl")
 include("approximators/approximators.jl")
 include("explorers/explorers.jl")

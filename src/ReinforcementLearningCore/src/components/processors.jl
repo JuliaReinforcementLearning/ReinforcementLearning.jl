@@ -9,7 +9,7 @@ using ImageTransformations: imresize!
 
 Using BSpline method to resize the `state` field of an observation to size of `img` (or `dims`).
 """
-struct ResizeImage{T,N} <: AbstractPreprocessor
+struct ResizeImage{T,N}
     img::Array{T,N}
 end
 
@@ -26,7 +26,7 @@ end
 
 Use a pre-initialized [`CircularArrayBuffer`](@ref) to store the latest several states specified by `d`. Before processing any observation, the buffer is filled with `zero{T}`.
 """
-struct StackFrames{T,N} <: AbstractPreprocessor
+struct StackFrames{T,N}
     buffer::CircularArrayBuffer{T,N}
 end
 

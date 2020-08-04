@@ -8,7 +8,7 @@ using MacroTools: @forward
 # Key words & Fields
 
 - `learner`::[`AbstractLearner`](@ref), learn how to estimate state values.
-- `mapping`, a customized function `(obs, learner) -> action_values`
+- `mapping`, a customized function `(env, learner) -> action_values`
 - `explorer`::[`AbstractExplorer`](@ref), decide which action to take based on action values.
 """
 Base.@kwdef struct VBasedPolicy{L<:AbstractLearner,M,E<:AbstractExplorer} <: AbstractPolicy
@@ -17,31 +17,31 @@ Base.@kwdef struct VBasedPolicy{L<:AbstractLearner,M,E<:AbstractExplorer} <: Abs
     explorer::E = GreedyExplorer()
 end
 
-(p::VBasedPolicy)(obs) = p(obs, ActionStyle(obs))
+(p::VBasedPolicy)(env) = p(env, ActionStyle(env))
 
-(p::VBasedPolicy)(obs, ::MinimalActionSet) = p.mapping(obs, p.learner) |> p.explorer
+(p::VBasedPolicy)(env, ::MinimalActionSet) = p.mapping(env, p.learner) |> p.explorer
 
-function (p::VBasedPolicy)(obs, ::FullActionSet)
-    action_values = p.mapping(obs, p.learner)
-    p.explorer(action_values, get_legal_actions_mask(obs))
+function (p::VBasedPolicy)(env, ::FullActionSet)
+    action_values = p.mapping(env, p.learner)
+    p.explorer(action_values, get_legal_actions_mask(env))
 end
 
-RLBase.get_prob(p::VBasedPolicy, obs, action::Integer) =
-    get_prob(p, obs, ActionStyle(obs), action)
+RLBase.get_prob(p::VBasedPolicy, env, action::Integer) =
+    get_prob(p, env, ActionStyle(env), action)
 
-RLBase.get_prob(p::VBasedPolicy, obs, ::MinimalActionSet) =
-    get_prob(p.explorer, p.mapping(obs, p.learner))
-RLBase.get_prob(p::VBasedPolicy, obs, ::MinimalActionSet, action) =
-    get_prob(p.explorer, p.mapping(obs, p.learner), action)
+RLBase.get_prob(p::VBasedPolicy, env, ::MinimalActionSet) =
+    get_prob(p.explorer, p.mapping(env, p.learner))
+RLBase.get_prob(p::VBasedPolicy, env, ::MinimalActionSet, action) =
+    get_prob(p.explorer, p.mapping(env, p.learner), action)
 
-function RLBase.get_prob(p::VBasedPolicy, obs, ::FullActionSet)
-    action_values = p.mapping(obs, p.learner)
-    get_prob(p.explorer, action_values, get_legal_actions_mask(obs))
+function RLBase.get_prob(p::VBasedPolicy, env, ::FullActionSet)
+    action_values = p.mapping(env, p.learner)
+    get_prob(p.explorer, action_values, get_legal_actions_mask(env))
 end
 
-function RLBase.get_prob(p::VBasedPolicy, obs, ::FullActionSet, action)
-    action_values = p.mapping(obs, p.learner)
-    get_prob(p.explorer, action_values, get_legal_actions_mask(obs), action)
+function RLBase.get_prob(p::VBasedPolicy, env, ::FullActionSet, action)
+    action_values = p.mapping(env, p.learner)
+    get_prob(p.explorer, action_values, get_legal_actions_mask(env), action)
 end
 
 @forward VBasedPolicy.learner RLBase.get_priority, RLBase.update!

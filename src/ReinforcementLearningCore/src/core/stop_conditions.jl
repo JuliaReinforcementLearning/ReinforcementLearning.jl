@@ -29,7 +29,7 @@ end
 # StopAfterStep
 #####
 """
-    StopAfterStep(step; cur = 1, is_show_progress = true, tag = "TRAINING")
+    StopAfterStep(step; cur = 1, is_show_progress = true)
 
 Return `true` after being called `step` times.
 """
@@ -37,17 +37,16 @@ mutable struct StopAfterStep{Tl}
     step::Int
     cur::Int
     progress::Tl
-    tag::String
 end
 
-function StopAfterStep(step; cur = 1, is_show_progress = true, tag = "TRAINING")
+function StopAfterStep(step; cur = 1, is_show_progress = true)
     if is_show_progress
-        progress = Progress(step)
+        progress = Progress(step, 1)
         ProgressMeter.update!(progress, cur)
     else
         progress = nothing
     end
-    StopAfterStep(step, cur, progress, tag)
+    StopAfterStep(step, cur, progress)
 end
 
 function (s::StopAfterStep)(args...)
@@ -69,7 +68,7 @@ end
 #####
 
 """
-    StopAfterEpisode(episode; cur = 0, is_show_progress = true, tag = "TRAINING")
+    StopAfterEpisode(episode; cur = 0, is_show_progress = true)
 
 Return `true` after being called `episode`. If `is_show_progress` is `true`, the `ProgressMeter` will be used to show progress.
 """
@@ -77,29 +76,22 @@ mutable struct StopAfterEpisode{Tl}
     episode::Int
     cur::Int
     progress::Tl
-    tag::String
 end
 
-function StopAfterEpisode(episode; cur = 0, is_show_progress = true, tag = "TRAINING")
+function StopAfterEpisode(episode; cur = 0, is_show_progress = true)
     if is_show_progress
-        progress = Progress(episode)
+        progress = Progress(episode, 1)
         ProgressMeter.update!(progress, cur)
     else
         progress = nothing
     end
-    StopAfterEpisode(episode, cur, progress, tag)
+    StopAfterEpisode(episode, cur, progress)
 end
 
-function (s::StopAfterEpisode)(agent, env, obs)
-    @debug s.tag EPISODE = s.cur
-
-    is_terminal = get_num_players(env) == 1 ? get_terminal(obs) : get_terminal(obs[1])
-
-    if is_terminal
+function (s::StopAfterEpisode)(agent, env)
+    if get_terminal(env)
         s.cur += 1
         if !isnothing(s.progress)
-            # https://github.com/timholy/ProgressMeter.jl/pull/131
-            # next!(s.progress; showvalues = [(Symbol(s.tag, "/", :EPISODE), s.cur)])
             next!(s.progress;)
         end
     end
@@ -107,8 +99,7 @@ function (s::StopAfterEpisode)(agent, env, obs)
     s.cur >= s.episode
 end
 
-(s::StopAfterEpisode)(agent, env::MultiThreadEnv, obs::BatchObs) =
-    @error "MultiThreadEnv is not supported!"
+(s::StopAfterEpisode)(agent, env::MultiThreadEnv) = @error "MultiThreadEnv is not supported!"
 
 #####
 # StopWhenDone
@@ -117,8 +108,8 @@ end
 """
     StopWhenDone()
 
-Return `true` if the `terminal` field of an observation is `true`.
+Return `true` if the environment is terminated.
 """
 struct StopWhenDone end
 
-(s::StopWhenDone)(agent, env, obs) = get_terminal(obs)
+(s::StopWhenDone)(agent, env) = get_terminal(env)

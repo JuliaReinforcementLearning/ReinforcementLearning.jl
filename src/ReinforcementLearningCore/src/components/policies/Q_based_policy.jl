@@ -18,16 +18,16 @@ end
 
 Flux.functor(x::QBasedPolicy) = (learner = x.learner,), y -> @set x.learner = y.learner
 
-(π::QBasedPolicy)(obs) = π(obs, ActionStyle(obs))
-(π::QBasedPolicy)(obs, ::MinimalActionSet) = obs |> π.learner |> π.explorer
-(π::QBasedPolicy)(obs, ::FullActionSet) =
-    π.explorer(π.learner(obs), get_legal_actions_mask(obs))
+(π::QBasedPolicy)(env) = π(env, ActionStyle(env))
+(π::QBasedPolicy)(env, ::MinimalActionSet) = env |> π.learner |> π.explorer
+(π::QBasedPolicy)(env, ::FullActionSet) =
+    π.explorer(π.learner(env), get_legal_actions_mask(env))
 
-RLBase.get_prob(p::QBasedPolicy, obs) = get_prob(p, obs, ActionStyle(obs))
-RLBase.get_prob(p::QBasedPolicy, obs, ::MinimalActionSet) =
-    get_prob(p.explorer, p.learner(obs))
-RLBase.get_prob(p::QBasedPolicy, obs, ::FullActionSet) =
-    get_prob(p.explorer, p.learner(obs), get_legal_actions_mask(obs))
+RLBase.get_prob(p::QBasedPolicy, env) = get_prob(p, env, ActionStyle(env))
+RLBase.get_prob(p::QBasedPolicy, env, ::MinimalActionSet) =
+    get_prob(p.explorer, p.learner(env))
+RLBase.get_prob(p::QBasedPolicy, env, ::FullActionSet) =
+    get_prob(p.explorer, p.learner(env), get_legal_actions_mask(env))
 
 @forward QBasedPolicy.learner RLBase.get_priority, RLBase.update!
 

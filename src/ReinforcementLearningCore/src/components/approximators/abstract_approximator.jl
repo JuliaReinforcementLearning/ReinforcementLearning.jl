@@ -2,7 +2,7 @@ export AbstractApproximator,
     ApproximatorStyle, Q_APPROXIMATOR, QApproximator, V_APPROXIMATOR, VApproximator
 
 """
-    (app::AbstractApproximator)(obs)
+    (app::AbstractApproximator)(env)
 
 An approximator is a functional object for value estimation.
 It serves as a black box to provides an abstraction over different 

@@ -14,8 +14,7 @@ struct WeightedExplorer{T,R<:AbstractRNG} <: AbstractExplorer
     rng::R
 end
 
-function WeightedExplorer(; is_normalized::Bool = false, seed = nothing)
-    rng = MersenneTwister(seed)
+function WeightedExplorer(; is_normalized::Bool = false, rng = Random.GLOBAL_RNG)
     WeightedExplorer{is_normalized,typeof(rng)}(rng)
 end
 

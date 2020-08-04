@@ -90,3 +90,10 @@ end
 function Base.pop!(t::AbstractTrajectory, s::Symbol...)
     NamedTuple{s}(pop!(t, x) for x in s)
 end
+
+function AbstractTrees.children(t::StructTree{<:AbstractTrajectory})
+    traces = get_trace(t.x)
+    Tuple(k => StructTree(v) for (k,v) in pairs(traces))
+end
+
+Base.summary(io::IO, t::T) where {T<:AbstractTrajectory} = print(io, "$(length(t))-element $(T.name)")
