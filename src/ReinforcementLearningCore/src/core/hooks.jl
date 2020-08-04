@@ -82,11 +82,7 @@ end
 
 (hook::StepsPerEpisode)(::PostActStage, args...) = hook.count += 1
 
-function (hook::StepsPerEpisode)(
-    ::Union{PostEpisodeStage,PostExperimentStage},
-    agent,
-    env
-)
+function (hook::StepsPerEpisode)(::Union{PostEpisodeStage,PostExperimentStage}, agent, env)
     push!(hook.steps, hook.count)
     hook.count = 0
 end
@@ -170,7 +166,11 @@ function TotalBatchRewardPerEpisode(batch_size::Int)
     TotalBatchRewardPerEpisode([Float64[] for _ in 1:batch_size], zeros(batch_size))
 end
 
-function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env::MultiThreadEnv{T}) where T
+function (hook::TotalBatchRewardPerEpisode)(
+    ::PostActStage,
+    agent,
+    env::MultiThreadEnv{T},
+) where {T}
     for i in 1:length(env)
         if T <: RewardOverriddenEnv
             hook.reward[i] += get_reward(env[i].env)
@@ -224,7 +224,7 @@ Base.@kwdef struct CumulativeReward <: AbstractHook
     rewards::Vector{Float64} = [0.0]
 end
 
-function (hook::CumulativeReward)(::PostActStage, agent, env::T) where T
+function (hook::CumulativeReward)(::PostActStage, agent, env::T) where {T}
     if T <: RewardOverriddenEnv
         r = get_reward(env.env)
     else

@@ -99,7 +99,8 @@ function (s::StopAfterEpisode)(agent, env)
     s.cur >= s.episode
 end
 
-(s::StopAfterEpisode)(agent, env::MultiThreadEnv) = @error "MultiThreadEnv is not supported!"
+(s::StopAfterEpisode)(agent, env::MultiThreadEnv) =
+    @error "MultiThreadEnv is not supported!"
 
 #####
 # StopWhenDone

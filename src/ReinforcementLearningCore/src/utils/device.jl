@@ -5,7 +5,7 @@ using CUDA
 using Adapt
 using Random
 
-import CUDA:device
+import CUDA: device
 
 send_to_host(x) = send_to_device(Val(:cpu), x)
 send_to_device(::Val{:cpu}, x) = x  # cpu(x) is not very efficient! So by default we do nothing here.

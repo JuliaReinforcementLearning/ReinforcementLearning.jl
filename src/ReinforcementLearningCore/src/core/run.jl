@@ -1,6 +1,7 @@
 import Base: run
 
-run(agent, env::AbstractEnv, args...) = run(DynamicStyle(env), NumAgentStyle(env), agent, env, args...)
+run(agent, env::AbstractEnv, args...) =
+    run(DynamicStyle(env), NumAgentStyle(env), agent, env, args...)
 
 function run(
     ::Sequential,

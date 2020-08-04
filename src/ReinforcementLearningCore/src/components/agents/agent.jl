@@ -79,8 +79,9 @@ end
 # DummyTrajectory
 #####
 
-(agent::Agent{<:AbstractPolicy, <:DummyTrajectory})(stage::AbstractStage, env) = nothing
-(agent::Agent{<:AbstractPolicy, <:DummyTrajectory})(stage::PreActStage, env) = agent.policy(env)
+(agent::Agent{<:AbstractPolicy,<:DummyTrajectory})(stage::AbstractStage, env) = nothing
+(agent::Agent{<:AbstractPolicy,<:DummyTrajectory})(stage::PreActStage, env) =
+    agent.policy(env)
 
 #####
 # EpisodicCompactSARTSATrajectory

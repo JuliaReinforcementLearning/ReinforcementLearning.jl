@@ -15,11 +15,7 @@ function Base.getindex(xs::CuArray{T,N}, indices::CuArray{CartesianIndex{N}}) wh
         num_threads = min(n, 256)
         num_blocks = ceil(Int, n / num_threads)
 
-        function kernel(
-            ys::CUDA.CuDeviceArray{T},
-            xs::CUDA.CuDeviceArray{T},
-            indices,
-        )
+        function kernel(ys::CUDA.CuDeviceArray{T}, xs::CUDA.CuDeviceArray{T}, indices)
             i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
 
             if i <= length(ys)

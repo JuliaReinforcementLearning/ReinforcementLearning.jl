@@ -93,7 +93,8 @@ end
 
 function AbstractTrees.children(t::StructTree{<:AbstractTrajectory})
     traces = get_trace(t.x)
-    Tuple(k => StructTree(v) for (k,v) in pairs(traces))
+    Tuple(k => StructTree(v) for (k, v) in pairs(traces))
 end
 
-Base.summary(io::IO, t::T) where {T<:AbstractTrajectory} = print(io, "$(length(t))-element $(T.name)")
+Base.summary(io::IO, t::T) where {T<:AbstractTrajectory} =
+    print(io, "$(length(t))-element $(T.name)")

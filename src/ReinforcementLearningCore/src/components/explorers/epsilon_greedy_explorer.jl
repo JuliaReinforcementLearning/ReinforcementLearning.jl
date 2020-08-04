@@ -59,7 +59,7 @@ function EpsilonGreedyExplorer(;
     step = 1,
     is_break_tie = false,
     is_training = true,
-    rng = Random.GLOBAL_RNG
+    rng = Random.GLOBAL_RNG,
 )
     EpsilonGreedyExplorer{kind,is_break_tie,typeof(rng)}(
         ϵ_stable,
