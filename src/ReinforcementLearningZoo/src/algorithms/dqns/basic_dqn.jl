@@ -49,7 +49,7 @@ function BasicDQNLearner(;
     γ = 0.99f0,
     batch_size = 32,
     min_replay_history = 32,
-    rng = Random.GLOBAL_RNG
+    rng = Random.GLOBAL_RNG,
 ) where {Q,F}
     BasicDQNLearner{Q,F,typeof(rng)}(
         approximator,

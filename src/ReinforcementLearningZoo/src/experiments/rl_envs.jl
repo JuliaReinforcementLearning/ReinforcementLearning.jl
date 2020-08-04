@@ -16,7 +16,7 @@ function RLCore.Experiment(
     ::Val{:CartPole},
     ::Nothing;
     save_dir = nothing,
-    seed=123
+    seed = 123,
 )
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
@@ -26,7 +26,7 @@ function RLCore.Experiment(
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = MersenneTwister(seed)
 
-    env = CartPoleEnv(; T = Float32, rng=rng)
+    env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
     agent = Agent(
         policy = QBasedPolicy(
@@ -42,13 +42,13 @@ function RLCore.Experiment(
                 batch_size = 32,
                 min_replay_history = 100,
                 loss_func = huber_loss,
-                rng = rng
+                rng = rng,
             ),
             explorer = EpsilonGreedyExplorer(
                 kind = :exp,
                 ϵ_stable = 0.01,
                 decay_steps = 500,
-                rng = rng
+                rng = rng,
             ),
         ),
         trajectory = CircularCompactSARTSATrajectory(
@@ -103,7 +103,7 @@ function RLCore.Experiment(
     ::Val{:CartPole},
     ::Nothing;
     save_dir = nothing,
-    seed=123
+    seed = 123,
 )
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
@@ -113,7 +113,7 @@ function RLCore.Experiment(
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = MersenneTwister(seed)
 
-    env = CartPoleEnv(; T = Float32, rng=rng)
+    env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
 
     agent = Agent(
@@ -141,13 +141,13 @@ function RLCore.Experiment(
                 min_replay_history = 100,
                 update_freq = 1,
                 target_update_freq = 100,
-                rng=rng,
+                rng = rng,
             ),
             explorer = EpsilonGreedyExplorer(
                 kind = :exp,
                 ϵ_stable = 0.01,
                 decay_steps = 500,
-                rng=rng,
+                rng = rng,
             ),
         ),
         trajectory = CircularCompactSARTSATrajectory(
@@ -200,7 +200,7 @@ function RLCore.Experiment(
     ::Val{:CartPole},
     ::Nothing;
     save_dir = nothing,
-    seed=123
+    seed = 123,
 )
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
@@ -210,7 +210,7 @@ function RLCore.Experiment(
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = MersenneTwister(seed)
 
-    env = CartPoleEnv(; T = Float32, rng=rng)
+    env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
 
     agent = Agent(
@@ -239,13 +239,13 @@ function RLCore.Experiment(
                 min_replay_history = 100,
                 update_freq = 1,
                 target_update_freq = 100,
-                rng=rng,
+                rng = rng,
             ),
             explorer = EpsilonGreedyExplorer(
                 kind = :exp,
                 ϵ_stable = 0.01,
                 decay_steps = 500,
-                rng=rng,
+                rng = rng,
             ),
         ),
         trajectory = CircularCompactPSARTSATrajectory(
@@ -298,7 +298,7 @@ function RLCore.Experiment(
     ::Val{:CartPole},
     ::Nothing;
     save_dir = nothing,
-   seed=123
+    seed = 123,
 )
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
@@ -308,7 +308,7 @@ function RLCore.Experiment(
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = MersenneTwister(seed)
 
-    env = CartPoleEnv(; T = Float32, rng=rng)
+    env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
 
     n_atoms = 51
@@ -343,13 +343,13 @@ function RLCore.Experiment(
                 min_replay_history = 100,
                 loss_func = logitcrossentropy_unreduced,
                 target_update_freq = 100,
-                rng=rng,
+                rng = rng,
             ),
             explorer = EpsilonGreedyExplorer(
                 kind = :exp,
                 ϵ_stable = 0.01,
                 decay_steps = 500,
-                rng=rng,
+                rng = rng,
             ),
         ),
         trajectory = CircularCompactPSARTSATrajectory(
@@ -402,7 +402,7 @@ function RLCore.Experiment(
     ::Val{:CartPole},
     ::Nothing;
     save_dir = nothing,
-   seed=123
+    seed = 123,
 )
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
@@ -412,7 +412,7 @@ function RLCore.Experiment(
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = MersenneTwister(seed)
 
-    env = CartPoleEnv(; T = Float32, rng=rng)
+    env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
 
     init = glorot_uniform(rng)
@@ -449,14 +449,14 @@ function RLCore.Experiment(
                 update_freq = 1,
                 target_update_freq = 100,
                 default_priority = 1.0f2,
-                rng=rng,
-                device_rng=rng,
+                rng = rng,
+                device_rng = rng,
             ),
             explorer = EpsilonGreedyExplorer(
                 kind = :exp,
                 ϵ_stable = 0.01,
                 decay_steps = 500,
-                rng=rng,
+                rng = rng,
             ),
         ),
         trajectory = CircularCompactPSARTSATrajectory(
@@ -509,12 +509,14 @@ function RLCore.Experiment(
     ::Val{:CartPole},
     ::Nothing;
     save_dir = nothing,
-   seed=123
+    seed = 123,
 )
     rng = MersenneTwister(seed)
     N_ENV = 16
     UPDATE_FREQ = 10
-    env = MultiThreadEnv([CartPoleEnv(; T = Float32, rng=MersenneTwister(hash(seed+i))) for i in 1:N_ENV])
+    env = MultiThreadEnv([
+        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i in 1:N_ENV
+    ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
     agent = Agent(
@@ -563,12 +565,14 @@ function RLCore.Experiment(
     ::Val{:CartPole},
     ::Nothing;
     save_dir = nothing,
-   seed=123
+    seed = 123,
 )
     rng = MersenneTwister(seed)
     N_ENV = 16
     UPDATE_FREQ = 10
-    env = MultiThreadEnv([CartPoleEnv(; T = Float32, rng=MersenneTwister(hash(seed+i))) for i in 1:N_ENV])
+    env = MultiThreadEnv([
+        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i in 1:N_ENV
+    ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
     agent = Agent(
@@ -619,9 +623,15 @@ function RLCore.Experiment(
     )
 end
 
-function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:DDPG}, ::Val{:Pendulum}, ::Nothing;seed=123)
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:DDPG},
+    ::Val{:Pendulum},
+    ::Nothing;
+    seed = 123,
+)
     rng = MersenneTwister(seed)
-    inner_env = PendulumEnv(T = Float32, rng=rng)
+    inner_env = PendulumEnv(T = Float32, rng = rng)
     action_space = get_actions(inner_env)
     low = action_space.low
     high = action_space.high
@@ -664,12 +674,12 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:DDPG}, ::Val{:Pendulum}, ::No
             ρ = 0.995f0,
             batch_size = 64,
             start_steps = 1000,
-            start_policy = RandomPolicy(ContinuousSpace(-1.0, 1.0); rng=rng),
+            start_policy = RandomPolicy(ContinuousSpace(-1.0, 1.0); rng = rng),
             update_after = 1000,
             update_every = 1,
             act_limit = 1.0,
             act_noise = 0.1,
-            rng=rng,
+            rng = rng,
         ),
         trajectory = CircularCompactSARTSATrajectory(
             capacity = 10000,
@@ -686,11 +696,19 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:DDPG}, ::Val{:Pendulum}, ::No
     Experiment(agent, env, StopAfterStep(10000), TotalRewardPerEpisode(), description)
 end
 
-function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:PPO}, ::Val{:CartPole}, ::Nothing;seed=123)
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:PPO},
+    ::Val{:CartPole},
+    ::Nothing;
+    seed = 123,
+)
     rng = MersenneTwister(seed)
     N_ENV = 8
     UPDATE_FREQ = 16
-    env = MultiThreadEnv([CartPoleEnv(; T = Float32, rng=MersenneTwister(hash(seed+i))) for i in 1:N_ENV])
+    env = MultiThreadEnv([
+        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i in 1:N_ENV
+    ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
     agent = Agent(
@@ -722,7 +740,7 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:PPO}, ::Val{:CartPole}, ::Not
                 critic_loss_weight = 0.5f0,
                 entropy_loss_weight = 0.001f0,
             ),
-            explorer = BatchExplorer(GumbelSoftmaxExplorer(; rng=rng)),
+            explorer = BatchExplorer(GumbelSoftmaxExplorer(; rng = rng)),
         ),
         trajectory = PPOTrajectory(;
             capacity = 32,
@@ -753,7 +771,7 @@ function RLCore.Experiment(
     ::Val{:MountainCar},
     ::Nothing;
     save_dir = nothing,
-   seed=123
+    seed = 123,
 )
     rng = MersenneTwister(seed)
     if isnothing(save_dir)
@@ -763,7 +781,7 @@ function RLCore.Experiment(
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
 
-    env = MountainCarEnv(; T = Float32, max_steps = 5000, rng=rng)
+    env = MountainCarEnv(; T = Float32, max_steps = 5000, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
     agent = Agent(
         policy = QBasedPolicy(
@@ -779,13 +797,13 @@ function RLCore.Experiment(
                 batch_size = 32,
                 min_replay_history = 100,
                 loss_func = huber_loss,
-                rng=rng,
+                rng = rng,
             ),
             explorer = EpsilonGreedyExplorer(
                 kind = :exp,
                 ϵ_stable = 0.01,
                 decay_steps = 500,
-                rng=rng,
+                rng = rng,
             ),
         ),
         trajectory = CircularCompactSARTSATrajectory(
@@ -840,7 +858,7 @@ function RLCore.Experiment(
     ::Val{:MountainCar},
     ::Nothing;
     save_dir = nothing,
-   seed=123
+    seed = 123,
 )
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
@@ -850,7 +868,7 @@ function RLCore.Experiment(
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = MersenneTwister(seed)
 
-    env = MountainCarEnv(; T = Float32, max_steps = 5000, rng=rng)
+    env = MountainCarEnv(; T = Float32, max_steps = 5000, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
 
     agent = Agent(
@@ -879,13 +897,13 @@ function RLCore.Experiment(
                 min_replay_history = 100,
                 update_freq = 1,
                 target_update_freq = 100,
-                rng=rng,
+                rng = rng,
             ),
             explorer = EpsilonGreedyExplorer(
                 kind = :exp,
                 ϵ_stable = 0.01,
                 decay_steps = 500,
-                rng=rng,
+                rng = rng,
             ),
         ),
         trajectory = CircularCompactSARTSATrajectory(

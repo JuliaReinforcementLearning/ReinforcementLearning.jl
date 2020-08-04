@@ -186,10 +186,7 @@ function (p::RandomStartPolicy{<:QBasedPolicy{<:PPOLearner}})(env::MultiThreadEn
     end
 end
 
-function (agent::Agent{<:AbstractPolicy,<:PPOTrajectory})(
-    ::Training{PreActStage},
-    env,
-)
+function (agent::Agent{<:AbstractPolicy,<:PPOTrajectory})(::Training{PreActStage}, env)
     action, action_log_prob = agent.policy(env)
     state = get_state(env)
     push!(
@@ -214,17 +211,11 @@ function (agent::Agent{<:AbstractPolicy,<:PPOTrajectory})(
     action
 end
 
-function (agent::Agent{<:AbstractPolicy,<:PPOTrajectory})(
-    ::Training{PostActStage},
-    env,
-)
+function (agent::Agent{<:AbstractPolicy,<:PPOTrajectory})(::Training{PostActStage}, env)
     push!(agent.trajectory; reward = get_reward(env), terminal = get_terminal(env))
     nothing
 end
 
-function (agent::Agent{<:AbstractPolicy,<:PPOTrajectory})(
-    ::Testing{PreActStage},
-    env,
-)
+function (agent::Agent{<:AbstractPolicy,<:PPOTrajectory})(::Testing{PreActStage}, env)
     agent.policy(env)[1]  # ignore the log_prob of action
 end

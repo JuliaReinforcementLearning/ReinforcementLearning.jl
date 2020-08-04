@@ -17,7 +17,7 @@ function atari_env_factory(
     n_frames,
     max_episode_steps = 100_000;
     seed = nothing,
-    repeat_action_probability = 0.25
+    repeat_action_probability = 0.25,
 )
     AtariEnv(;
         name = string(name),
@@ -29,16 +29,14 @@ function atari_env_factory(
         max_num_frames_per_episode = n_frames * max_episode_steps,
         color_averaging = false,
         full_action_space = false,
-        seed = seed
+        seed = seed,
     ) |>
     StateOverriddenEnv(
         ResizeImage(state_size...),  # this implementation is different from cv2.resize https://github.com/google/dopamine/blob/e7d780d7c80954b7c396d984325002d60557f7d1/dopamine/discrete_domains/atari_lib.py#L629
         StackFrames(state_size..., n_frames),
     ) |>
     StateCachedEnv |>
-    RewardOverriddenEnv(
-        r -> clamp(r, -1, 1)
-    )
+    RewardOverriddenEnv(r -> clamp(r, -1, 1))
 end
 
 
@@ -62,7 +60,7 @@ function RLCore.Experiment(
 
     N_FRAMES = 4
     STATE_SIZE = (84, 84)
-    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;seed=hash(seed+1))
+    env = atari_env_factory(name, STATE_SIZE, N_FRAMES; seed = hash(seed + 1))
     N_ACTIONS = length(get_actions(env))
     init = glorot_uniform(rng)
 
@@ -93,14 +91,14 @@ function RLCore.Experiment(
                 min_replay_history = 20_000,
                 loss_func = huber_loss,
                 target_update_freq = 8_000,
-                rng = rng
+                rng = rng,
             ),
             explorer = EpsilonGreedyExplorer(
                 ϵ_init = 1.0,
                 ϵ_stable = 0.01,
                 decay_steps = 250_000,
                 kind = :linear,
-                rng = rng
+                rng = rng,
             ),
         ),
         trajectory = CircularCompactSARTSATrajectory(
@@ -129,7 +127,8 @@ function RLCore.Experiment(
         end,
         DoEveryNEpisode() do t, agent, env
             with_logger(lg) do
-                @info "training" episode_length=steps_per_episode.steps[end]  reward = total_reward_per_episode.rewards[end] log_step_increment = 0
+                @info "training" episode_length = steps_per_episode.steps[end] reward =
+                    total_reward_per_episode.rewards[end] log_step_increment = 0
             end
         end,
         DoEveryNStep(EVALUATION_FREQ) do t, agent, env
@@ -137,11 +136,17 @@ function RLCore.Experiment(
             flush(stdout)
             Flux.testmode!(agent)
             old_explorer = agent.policy.explorer
-            agent.policy.explorer = EpsilonGreedyExplorer(0.001; rng=rng)  # set evaluation epsilon
+            agent.policy.explorer = EpsilonGreedyExplorer(0.001; rng = rng)  # set evaluation epsilon
             h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 agent,
-                atari_env_factory(name, STATE_SIZE, N_FRAMES, MAX_EPISODE_STEPS_EVAL;seed=hash(seed+t)),
+                atari_env_factory(
+                    name,
+                    STATE_SIZE,
+                    N_FRAMES,
+                    MAX_EPISODE_STEPS_EVAL;
+                    seed = hash(seed + t),
+                ),
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )
@@ -200,7 +205,7 @@ function RLCore.Experiment(
     ::Val{:Atari},
     name::AbstractString;
     save_dir = nothing,
-    seed = 123
+    seed = 123,
 )
     @warn "Currently setting the `seed` will not guarantee the reproducibility. The instability seems to be caused by the `CrossCor` layer when calculating gradient."
     rng = MersenneTwister(seed)
@@ -213,7 +218,7 @@ function RLCore.Experiment(
 
     N_FRAMES = 4
     STATE_SIZE = (84, 84)
-    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;seed=hash(seed+1))
+    env = atari_env_factory(name, STATE_SIZE, N_FRAMES; seed = hash(seed + 1))
     N_ACTIONS = length(get_actions(env))
     N_ATOMS = 51
     init = glorot_uniform(rng)
@@ -249,14 +254,14 @@ function RLCore.Experiment(
                 min_replay_history = 20_000,
                 loss_func = logitcrossentropy_unreduced,
                 target_update_freq = 8_000,
-                rng = rng
+                rng = rng,
             ),
             explorer = EpsilonGreedyExplorer(
                 ϵ_init = 1.0,
                 ϵ_stable = 0.01,
                 decay_steps = 250_000,
                 kind = :linear,
-                rng = rng
+                rng = rng,
             ),
         ),
         trajectory = CircularCompactPSARTSATrajectory(
@@ -294,11 +299,17 @@ function RLCore.Experiment(
             flush(stdout)
             Flux.testmode!(agent)
             old_explorer = agent.policy.explorer
-            agent.policy.explorer = EpsilonGreedyExplorer(0.001;rng=rng)  # set evaluation epsilon
+            agent.policy.explorer = EpsilonGreedyExplorer(0.001; rng = rng)  # set evaluation epsilon
             h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 agent,
-                atari_env_factory(name, STATE_SIZE, N_FRAMES, MAX_EPISODE_STEPS_EVAL;seed=hash(seed+t)),
+                atari_env_factory(
+                    name,
+                    STATE_SIZE,
+                    N_FRAMES,
+                    MAX_EPISODE_STEPS_EVAL;
+                    seed = hash(seed + t),
+                ),
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )
@@ -357,12 +368,12 @@ function RLCore.Experiment(
     ::Val{:Atari},
     name::AbstractString;
     save_dir = nothing,
-    seed = 123
+    seed = 123,
 )
     @warn "Currently setting the `seed` will not guarantee the reproducibility. The instability seems to be caused by the `CrossCor` layer when calculating gradient."
     rng = MersenneTwister(seed)
     device_rng = CUDA.CURAND.RNG()
-    Random.seed!(device_rng, hash(seed+1))
+    Random.seed!(device_rng, hash(seed + 1))
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
         save_dir = joinpath(pwd(), "checkpoints", "Dopamine_IQN_Atari_$(name)_$(t)")
@@ -374,7 +385,7 @@ function RLCore.Experiment(
     STATE_SIZE = (84, 84)
     MAX_STEPS_PER_EPISODE = 27_000
 
-    env = atari_env_factory(name, STATE_SIZE, N_FRAMES;seed=hash(seed+2))
+    env = atari_env_factory(name, STATE_SIZE, N_FRAMES; seed = hash(seed + 2))
     N_ACTIONS = length(get_actions(env))
     Nₑₘ = 64
 
@@ -389,8 +400,11 @@ function RLCore.Experiment(
                 CrossCor((3, 3), 64 => 64, relu; stride = 1, pad = 1, init = init),
                 x -> reshape(x, :, size(x)[end]),
             ),
-            ϕ = Dense(Nₑₘ, 11 * 11 * 64, relu;initW=init),
-            header = Chain(Dense(11 * 11 * 64, 512, relu;initW=init), Dense(512, N_ACTIONS;initW=init)),
+            ϕ = Dense(Nₑₘ, 11 * 11 * 64, relu; initW = init),
+            header = Chain(
+                Dense(11 * 11 * 64, 512, relu; initW = init),
+                Dense(512, N_ACTIONS; initW = init),
+            ),
         ) |> gpu
 
     agent = Agent(
@@ -415,14 +429,14 @@ function RLCore.Experiment(
                 target_update_freq = 8_000,
                 default_priority = 1.0f2,
                 rng = rng,
-                device_rng = device_rng
+                device_rng = device_rng,
             ),
             explorer = EpsilonGreedyExplorer(
                 ϵ_init = 1.0,
                 ϵ_stable = 0.01,
                 decay_steps = 250_000,
                 kind = :linear,
-                rng = rng
+                rng = rng,
             ),
         ),
         trajectory = CircularCompactSARTSATrajectory(
@@ -460,11 +474,17 @@ function RLCore.Experiment(
             flush(stdout)
             Flux.testmode!(agent)
             old_explorer = agent.policy.explorer
-            agent.policy.explorer = EpsilonGreedyExplorer(0.001;rng=rng)  # set evaluation epsilon
+            agent.policy.explorer = EpsilonGreedyExplorer(0.001; rng = rng)  # set evaluation epsilon
             h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 agent,
-                atari_env_factory(name, STATE_SIZE, N_FRAMES, MAX_EPISODE_STEPS_EVAL;seed=hash(seed+t)),
+                atari_env_factory(
+                    name,
+                    STATE_SIZE,
+                    N_FRAMES,
+                    MAX_EPISODE_STEPS_EVAL;
+                    seed = hash(seed + t),
+                ),
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )
@@ -538,7 +558,15 @@ function RLCore.Experiment(
     UPDATE_FREQ = 5
     N_FRAMES = 4
     STATE_SIZE = (80, 104)
-    env = MultiThreadEnv([atari_env_factory(name, STATE_SIZE, N_FRAMES;repeat_action_probability=0,seed=hash(seed+i)) for i in 1:N_ENV])
+    env = MultiThreadEnv([
+        atari_env_factory(
+            name,
+            STATE_SIZE,
+            N_FRAMES;
+            repeat_action_probability = 0,
+            seed = hash(seed + i),
+        ) for i in 1:N_ENV
+    ])
     N_ACTIONS = length(get_actions(env[1]))
 
     init = orthogonal(rng)
@@ -549,13 +577,13 @@ function RLCore.Experiment(
         CrossCor((8, 8), N_FRAMES => 32, relu; stride = 4, pad = 0, init = init),
         CrossCor((4, 4), 32 => 64, relu; stride = 2, pad = 1, init = init),
         x -> reshape(x, :, size(x)[end]),
-        Dense(6912, 512, relu;initW=init),
+        Dense(6912, 512, relu; initW = init),
     )
 
     agent = Agent(
         policy = RandomStartPolicy(
             num_rand_start = 1000,
-            random_policy = RandomPolicy(get_actions(env);rng=rng),
+            random_policy = RandomPolicy(get_actions(env); rng = rng),
             policy = QBasedPolicy(
                 learner = A2CLearner(
                     approximator = ActorCritic(
@@ -569,7 +597,7 @@ function RLCore.Experiment(
                     critic_loss_weight = 0.25f0,
                     entropy_loss_weight = 0.01f0,
                 ),
-                explorer = BatchExplorer(GumbelSoftmaxExplorer(;rng=rng)),
+                explorer = BatchExplorer(GumbelSoftmaxExplorer(; rng = rng)),
             ),
         ),
         trajectory = CircularCompactSARTSATrajectory(;
@@ -632,7 +660,14 @@ function RLCore.Experiment(
             s = @elapsed run(
                 agent,
                 MultiThreadEnv([
-                    atari_env_factory(name, STATE_SIZE, N_FRAMES, MAX_EPISODE_STEPS_EVAL;repeat_action_probability=0,seed=hash(seed+t+i)) for i in 1:N_ENV
+                    atari_env_factory(
+                        name,
+                        STATE_SIZE,
+                        N_FRAMES,
+                        MAX_EPISODE_STEPS_EVAL;
+                        repeat_action_probability = 0,
+                        seed = hash(seed + t + i),
+                    ) for i in 1:N_ENV
                 ]),
                 StopAfterStep(27_000; is_show_progress = false),
                 h,
@@ -675,7 +710,7 @@ function RLCore.Experiment(
     ::Val{:Atari},
     name::AbstractString;
     save_dir = nothing,
-    seed=123
+    seed = 123,
 )
     @warn "Currently setting the `seed` will not guarantee the reproducibility. The instability seems to be caused by the `CrossCor` layer when calculating gradient."
     rng = MersenneTwister(seed)
@@ -690,7 +725,15 @@ function RLCore.Experiment(
     UPDATE_FREQ = 64
     N_FRAMES = 4
     STATE_SIZE = (80, 104)
-    env = MultiThreadEnv([atari_env_factory(name, STATE_SIZE, N_FRAMES;repeat_action_probability=0, seed=seed+i) for i in 1:N_ENV])
+    env = MultiThreadEnv([
+        atari_env_factory(
+            name,
+            STATE_SIZE,
+            N_FRAMES;
+            repeat_action_probability = 0,
+            seed = seed + i,
+        ) for i in 1:N_ENV
+    ])
     N_ACTIONS = length(get_actions(env[1]))
     INIT_CLIP_RANGE = 0.1f0
     INIT_LEARNING_RATE = 1e-3
@@ -703,13 +746,13 @@ function RLCore.Experiment(
         CrossCor((8, 8), N_FRAMES => 32, relu; stride = 4, pad = 0, init = init),
         CrossCor((4, 4), 32 => 64, relu; stride = 2, pad = 1, init = init),
         x -> reshape(x, :, size(x)[end]),
-        Dense(6912, 512, relu;initW=init),
+        Dense(6912, 512, relu; initW = init),
     )
 
     agent = Agent(
         policy = RandomStartPolicy(
             num_rand_start = 1000,
-            random_policy = RandomPolicy(get_actions(env);rng=rng),
+            random_policy = RandomPolicy(get_actions(env); rng = rng),
             policy = QBasedPolicy(
                 learner = PPOLearner(
                     approximator = ActorCritic(
@@ -726,9 +769,9 @@ function RLCore.Experiment(
                     actor_loss_weight = 1.0f0,
                     critic_loss_weight = 0.5f0,
                     entropy_loss_weight = 0.01f0,
-                    rng = rng
+                    rng = rng,
                 ),
-                explorer = BatchExplorer(GumbelSoftmaxExplorer(;rng=rng)),
+                explorer = BatchExplorer(GumbelSoftmaxExplorer(; rng = rng)),
             ),
         ),
         trajectory = PPOTrajectory(;
@@ -801,7 +844,14 @@ function RLCore.Experiment(
             s = @elapsed run(
                 agent,
                 MultiThreadEnv([
-                    atari_env_factory(name, STATE_SIZE, N_FRAMES, MAX_EPISODE_STEPS_EVAL;repeat_action_probability=0, seed=seed+t+i) for i in 1:4
+                    atari_env_factory(
+                        name,
+                        STATE_SIZE,
+                        N_FRAMES,
+                        MAX_EPISODE_STEPS_EVAL;
+                        repeat_action_probability = 0,
+                        seed = seed + t + i,
+                    ) for i in 1:4
                 ]),
                 StopAfterStep(27_000; is_show_progress = false),
                 h,
