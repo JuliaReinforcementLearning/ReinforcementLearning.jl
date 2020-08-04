@@ -38,7 +38,7 @@ Some built-in experiments are exported to help new users to easily run benchmark
 - ``E`JuliaRL_Rainbow_CartPole` ``
 - ``E`JuliaRL_IQN_CartPole` ``
 - ``E`JuliaRL_A2C_CartPole` ``
-- ``E`JuliaRL_A2CGAE_CartPole` ``
+- ``E`JuliaRL_A2CGAE_CartPole` `` (Thanks to [@sriram13m](https://github.com/sriram13m))
 - ``E`JuliaRL_PPO_CartPole` ``
 - ``E`JuliaRL_DDPG_Pendulum` ``
 - ``E`JuliaRL_BasicDQN_MountainCar` `` (Thanks to [@felixchalumeau](https://github.com/felixchalumeau))
