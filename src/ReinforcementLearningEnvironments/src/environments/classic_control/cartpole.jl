@@ -45,7 +45,7 @@ Base.show(io::IO, env::CartPoleEnv{T}) where {T} =
 - `forcemag = T(10.0)`
 - `max_steps = 200`
 - 'dt = 0.02'
-- `seed = nothing`
+- `rng = Random.GLOBAL_RNG`
 """
 function CartPoleEnv(;
     T = Float64,
@@ -56,7 +56,7 @@ function CartPoleEnv(;
     forcemag = 10.0,
     max_steps = 200,
     dt = 0.02,
-    seed = nothing,
+    rng = Random.GLOBAL_RNG,
 )
     params = CartPoleEnvParams{T}(
         gravity,
@@ -80,7 +80,7 @@ function CartPoleEnv(;
         2,
         false,
         0,
-        MersenneTwister(seed),
+        rng,
     )
     reset!(cp)
     cp
@@ -96,8 +96,10 @@ function RLBase.reset!(env::CartPoleEnv{T}) where {T<:Number}
     nothing
 end
 
-RLBase.observe(env::CartPoleEnv{T}) where {T} =
-    (reward = env.done ? zero(T) : one(T), terminal = env.done, state = env.state)
+RLBase.get_actions(env::CartPoleEnv) = env.action_space
+RLBase.get_reward(env::CartPoleEnv{T}) where {T} = env.done ? zero(T) : one(T)
+RLBase.get_terminal(env::CartPoleEnv) = env.done
+RLBase.get_state(env::CartPoleEnv) = env.state
 
 function (env::CartPoleEnv)(a)
     @assert a in (1, 2)
@@ -136,7 +138,7 @@ function plotendofepisode(x, y, d)
     end
     return nothing
 end
-function RLBase.render(env::CartPoleEnv)
+function Base.display(env::CartPoleEnv)
     s, a, d = env.state, env.action, env.done
     x, xdot, theta, thetadot = s
     l = 2 * env.params.halflength

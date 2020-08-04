@@ -52,7 +52,7 @@ end
 
 - `T = Float64`
 - `continuous = false`
-- `seed = nothing`
+- `rng = Random.GLOBAL_RNG`
 - `min_pos = -1.2`
 - `max_pos = 0.6`
 - `max_speed = 0.07`
@@ -62,7 +62,7 @@ end
 - `power = 0.001`
 - `gravity = 0.0025`
 """
-function MountainCarEnv(; T = Float64, continuous = false, seed = nothing, kwargs...)
+function MountainCarEnv(; T = Float64, continuous = false, rng = Random.GLOBAL_RNG, kwargs...)
     if continuous
         params = MountainCarEnvParams(; goal_pos = 0.45, power = 0.0015, T = T, kwargs...)
     else
@@ -80,7 +80,7 @@ function MountainCarEnv(; T = Float64, continuous = false, seed = nothing, kwarg
         rand(action_space),
         false,
         0,
-        MersenneTwister(seed),
+        rng,
     )
     reset!(env)
     env
@@ -90,8 +90,10 @@ ContinuousMountainCarEnv(; kwargs...) = MountainCarEnv(; continuous = true, kwar
 
 Random.seed!(env::MountainCarEnv, seed) = Random.seed!(env.rng, seed)
 
-RLBase.observe(env::MountainCarEnv) =
-    (reward = env.done ? 0.0 : -1.0, terminal = env.done, state = env.state)
+RLBase.get_actions(env::MountainCarEnv) = env.action_space
+RLBase.get_reward(env::MountainCarEnv{A,T}) where {A, T} = env.done ? zero(T) : -one(T)
+RLBase.get_terminal(env::MountainCarEnv) = env.done
+RLBase.get_state(env::MountainCarEnv) = env.state
 
 function RLBase.reset!(env::MountainCarEnv{A,T}) where {A,T}
     env.state[1] = 0.2 * rand(env.rng, T) - 0.6
@@ -135,7 +137,7 @@ end
 height(xs) = sin(3 * xs) * 0.45 + 0.55
 rotate(xs, ys, θ) = xs * cos(θ) - ys * sin(θ), ys * cos(θ) + xs * sin(θ)
 translate(xs, ys, t) = xs .+ t[1], ys .+ t[2]
-function RLBase.render(env::MountainCarEnv)
+function Base.display(env::MountainCarEnv)
     s = env.state
     d = env.done
     clearws()

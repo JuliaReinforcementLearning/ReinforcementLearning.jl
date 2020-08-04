@@ -6,8 +6,6 @@ using .ArcadeLearningEnvironment
 
 This implementation follows the guidelines in [Revisiting the Arcade Learning Environment: Evaluation Protocols and Open Problems for General Agents](https://arxiv.org/abs/1709.06009)
 
-TODO: support seed! in single/multi thread
-
 # Keywords
 
 - `name::String="pong"`: name of the Atari environments. Use `ReinforcementLearningEnvironments.list_atari_rom_names()` to show all supported environments.
@@ -19,6 +17,8 @@ TODO: support seed! in single/multi thread
 - `color_averaging::Bool=false`: whether to perform phosphor averaging or not.
 - `max_num_frames_per_episode::Int=0`
 - `full_action_space::Bool=false`: by default, only use minimal action set. If `true`, one need to call `legal_actions` to get the valid action set. TODO
+- `seed::Int` is used to set the initial seed of the underlying C environment and the rng used by the this wrapper environment to initialize the number of no-op steps at the beginning of each episode.
+- `log_level::Symbol`, `:info`, `:warning` or `:error`. Default value is `:error`.
 
 See also the [python implementation](https://github.com/openai/gym/blob/c072172d64bdcd74313d97395436c592dc836d5c/gym/wrappers/atari_preprocessing.py#L8-L36)
 """
@@ -34,25 +34,24 @@ function AtariEnv(;
     max_num_frames_per_episode = 0,
     full_action_space = false,
     seed = nothing,
+    log_level = :error
 )
     frame_skip > 0 || throw(ArgumentError("frame_skip must be greater than 0!"))
     name in getROMList() ||
         throw(ArgumentError("unknown ROM name.\n\nRun `ReinforcementLearningEnvironments.list_atari_rom_names()` to see all the game names."))
 
-    if isnothing(seed)
-        seed = (MersenneTwister(), 0)
-    elseif seed isa Tuple{Int,Int}
-        seed = (MersenneTwister(seed[1]), seed[2])
-    else
-        @error "You must specify two seeds, one for Julia wrapper, one for internal C implementation" # ??? maybe auto generate two seed from one
-    end
-
     ale = ALE_new()
-    setInt(ale, "random_seed", seed[2])
+    if isnothing(seed)
+        rng = Random.GLOBAL_RNG
+    else
+        setInt(ale, "random_seed", Int32(seed % typemax(Int32)))
+        rng = MersenneTwister(hash(seed+1))
+    end
     setInt(ale, "frame_skip", Int32(1))  # !!! do not use internal frame_skip here, we need to apply max-pooling for the latest two frames, so we need to manually implement the mechanism.
     setInt(ale, "max_num_frames_per_episode", max_num_frames_per_episode)
     setFloat(ale, "repeat_action_probability", Float32(repeat_action_probability))
     setBool(ale, "color_averaging", color_averaging)
+    setLoggerMode!(log_level)
     loadROM(ale, name)
 
     observation_size = grayscale_obs ? (getScreenWidth(ale), getScreenHeight(ale)) :
@@ -68,8 +67,9 @@ function AtariEnv(;
         (fill(typemin(Cuchar), observation_size), fill(typemin(Cuchar), observation_size))
 
     env =
-        AtariEnv{grayscale_obs,terminal_on_life_loss,grayscale_obs ? 2 : 3,typeof(seed[1])}(
+        AtariEnv{grayscale_obs,terminal_on_life_loss,grayscale_obs ? 2 : 3,typeof(rng)}(
             ale,
+            name,
             screens,
             actions,
             action_space,
@@ -78,7 +78,7 @@ function AtariEnv(;
             frame_skip,
             0.0f0,
             lives(ale),
-            seed[1],
+            rng,
         )
     finalizer(env) do x
         ALE_del(x.ale)
@@ -117,12 +117,15 @@ end
 is_terminal(env::AtariEnv{<:Any,true}) = game_over(env.ale) || (lives(env.ale) < env.lives)
 is_terminal(env::AtariEnv{<:Any,false}) = game_over(env.ale)
 
-RLBase.observe(env::AtariEnv) =
-    (reward = env.reward, terminal = is_terminal(env), state = env.screens[1])
+RLBase.get_name(env::AtariEnv) = "AtariEnv($(env.name))"
+RLBase.get_actions(env::AtariEnv) = env.action_space
+RLBase.get_reward(env::AtariEnv) = env.reward
+RLBase.get_terminal(env::AtariEnv) = is_terminal(env)
+RLBase.get_state(env::AtariEnv) = env.screens[1]
 
 function RLBase.reset!(env::AtariEnv)
     reset_game(env.ale)
-    for _ in 1:rand(env.seed, 0:env.noopmax)
+    for _ in 1:rand(env.rng, 0:env.noopmax)
         act(env.ale, Int32(0))
     end
     update_screen!(env, env.screens[1])  # no need to update env.screens[2]
@@ -148,7 +151,7 @@ function imshowcolor(x::AbstractArray{UInt8,1}, dims)
     updatews()
 end
 
-function RLBase.render(env::AtariEnv)
+function Base.display(env::AtariEnv)
     x = getScreenRGB(env.ale)
     imshowcolor(x, (Int(getScreenWidth(env.ale)), Int(getScreenHeight(env.ale))))
 end

@@ -38,7 +38,7 @@ end
 - `max_steps = 200`
 - `continuous::Bool = true`
 - `n_actions::Int = 3`
-- `seed = nothing`
+- `rng = Random.GLOBAL_RNG`
 """
 function PendulumEnv(;
     T = Float64,
@@ -51,7 +51,7 @@ function PendulumEnv(;
     max_steps = 200,
     continuous::Bool = true,
     n_actions::Int = 3,
-    seed = nothing,
+    rng = Random.GLOBAL_RNG
 )
     high = T.([1, 1, max_speed])
     action_space = continuous ? ContinuousSpace(-2.0, 2.0) : DiscreteSpace(n_actions)
@@ -62,7 +62,7 @@ function PendulumEnv(;
         zeros(T, 2),
         false,
         0,
-        MersenneTwister(seed),
+        rng,
         zero(T),
         n_actions,
         rand(action_space),
@@ -76,8 +76,10 @@ Random.seed!(env::PendulumEnv, seed) = Random.seed!(env.rng, seed)
 pendulum_observation(s) = [cos(s[1]), sin(s[1]), s[2]]
 angle_normalize(x) = Base.mod((x + Base.π), (2 * Base.π)) - Base.π
 
-RLBase.observe(env::PendulumEnv) =
-    (reward = env.reward, state = pendulum_observation(env.state), terminal = env.done)
+RLBase.get_actions(env::PendulumEnv) = env.action_space
+RLBase.get_reward(env::PendulumEnv) = env.reward
+RLBase.get_terminal(env::PendulumEnv) = env.done
+RLBase.get_state(env::PendulumEnv) = pendulum_observation(env.state)
 
 function RLBase.reset!(env::PendulumEnv{A,T}) where {A,T}
     env.state[1] = 2 * π * (rand(env.rng, T) .- 1)

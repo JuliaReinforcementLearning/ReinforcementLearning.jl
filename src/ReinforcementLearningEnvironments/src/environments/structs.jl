@@ -8,6 +8,7 @@ export GymEnv
 
 mutable struct AtariEnv{IsGrayScale,TerminalOnLifeLoss,N,S<:AbstractRNG} <: AbstractEnv
     ale::Ptr{Nothing}
+    name::String
     screens::Tuple{Array{UInt8,N},Array{UInt8,N}}  # for max-pooling
     actions::Vector{Int}
     action_space::DiscreteSpace{UnitRange{Int}}
@@ -16,37 +17,30 @@ mutable struct AtariEnv{IsGrayScale,TerminalOnLifeLoss,N,S<:AbstractRNG} <: Abst
     frame_skip::Int
     reward::Float32
     lives::Int
-    seed::S
+    rng::S
 end
 export AtariEnv
 
-mutable struct POMDPEnv{M,S,O,I,R,RNG<:AbstractRNG} <: AbstractEnv
+mutable struct POMDPEnv{M,S,A,O,R} <: AbstractEnv
     model::M
     state::S
+    action::A
     observation::O
-    info::I
-    reward::R
-    rng::RNG
+    rng::R
 end
 export POMDPEnv
 
-mutable struct MDPEnv{M,S,I,R,RNG<:AbstractRNG} <: AbstractEnv
+mutable struct MDPEnv{M,S,A,R} <: AbstractEnv
     model::M
     state::S
-    info::I
-    reward::R
-    rng::RNG
+    action::A
+    rng::R
 end
 export MDPEnv
 
-mutable struct OpenSpielEnv{O,D,S,G,R} <: AbstractEnv
-    state::S
+mutable struct OpenSpielEnv{S,T,ST,G,R} <: AbstractEnv
+    state::ST
     game::G
     rng::R
 end
 export OpenSpielEnv
-
-struct OpenSpielObs{O,D,S}
-    state::S
-    player::Int32
-end

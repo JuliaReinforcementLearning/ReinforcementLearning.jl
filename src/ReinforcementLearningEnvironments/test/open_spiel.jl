@@ -5,34 +5,31 @@
         "kuhn_poker",
         "goofspiel(imp_info=True,num_cards=4,points_order=descending)",
     ]
-        env = OpenSpielEnv(name, seed = 123)
+        @info "testing OpenSpiel: $name"
+        env = OpenSpielEnv(name)
         get_current_player(env)
-        get_num_players(env)
-        get_observation_space(env)
-        get_action_space(env)
+        get_actions(env)
         DynamicStyle(env)
 
-        obs = observe(env)
-        obs_0 = observe(env, 0)
-        obs_1 = observe(env, 1)
-        ActionStyle(obs_0)
-        get_legal_actions_mask(obs_0)
-        get_legal_actions_mask(obs_1)
-        get_legal_actions(obs_0)
-        get_legal_actions(obs_1)
-        get_terminal(obs_0)
-        get_terminal(obs_1)
-        get_reward(obs_0)
-        get_reward(obs_1)
-        get_state(obs_0)
-        get_state(obs_1)
+        env_0 = SubjectiveEnv(env, 0)
+        env_1 = SubjectiveEnv(env, 1)
+        ActionStyle(env_0)
+        get_legal_actions_mask(env_0)
+        get_legal_actions_mask(env_1)
+        get_legal_actions(env_0)
+        get_legal_actions(env_1)
+        get_terminal(env_0)
+        get_terminal(env_1)
+        get_reward(env_0)
+        get_reward(env_1)
+        get_state(env_0)
+        get_state(env_1)
 
         reset!(env)
 
         while true
-            obs = observe(env)
-            get_terminal(obs) && break
-            action = rand(get_legal_actions(obs))
+            get_terminal(env) && break
+            action = rand(get_legal_actions(env))
             env(action)
         end
         @test true

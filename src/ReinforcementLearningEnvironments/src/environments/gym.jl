@@ -19,7 +19,7 @@ function GymEnv(name::String)
         Float64
     elseif obs_space isa DiscreteSpace
         Int
-    elseif obs_space isa TupleSpace
+    elseif obs_space isa VectSpace
         PyVector
     elseif obs_space isa DictSpace
         PyDict
@@ -37,6 +37,7 @@ function GymEnv(name::String)
 end
 
 function (env::GymEnv{T})(action) where {T}
+    env.action_space isa VectSpace && (action = Tuple(action))  # ??? maybe add another TupleSpace
     pycall!(env.state, env.pyenv.step, PyObject, action)
     nothing
 end
@@ -46,21 +47,36 @@ function RLBase.reset!(env::GymEnv)
     nothing
 end
 
-function RLBase.observe(env::GymEnv{T}) where {T}
+RLBase.get_actions(env::GymEnv) = env.action_space
+
+function RLBase.get_reward(env::GymEnv{T}) where {T}
     if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type)
         obs, reward, isdone, info = convert(Tuple{T,Float64,Bool,PyDict}, env.state)
-        (reward = reward, terminal = isdone, state = obs)
+        reward
     else
-        # env has just been reseted
-        (
-            reward = 0.0,  # dummy
-            terminal = false,
-            state = convert(T, env.state),
-        )
+        0.0
     end
 end
 
-RLBase.render(env::GymEnv) = env.pyenv.render()
+function RLBase.get_terminal(env::GymEnv{T}) where {T}
+    if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type)
+        obs, reward, isdone, info = convert(Tuple{T,Float64,Bool,PyDict}, env.state)
+        isdone
+    else
+        false
+    end
+end
+
+function RLBase.get_state(env::GymEnv{T}) where {T}
+    if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type)
+        obs, reward, isdone, info = convert(Tuple{T,Float64,Bool,PyDict}, env.state)
+        obs
+    else
+        state = convert(T, env.state)
+    end
+end
+
+Base.display(env::GymEnv) = env.pyenv.render()
 
 ###
 ### utils
@@ -80,7 +96,7 @@ function Base.convert(::Type{AbstractSpace}, s::PyObject)
             s.nvec .- one(eltype(s.nvec)),
         )
     elseif spacetype == "Tuple"
-        TupleSpace((convert(AbstractSpace, x) for x in s.spaces)...)
+        VectSpace([convert(AbstractSpace, x) for x in s.spaces])
     elseif spacetype == "Dict"
         DictSpace((k => convert(AbstractSpace, v) for (k, v) in s.spaces)...)
     else

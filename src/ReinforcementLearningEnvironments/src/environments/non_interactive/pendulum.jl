@@ -24,8 +24,6 @@ mutable struct PendulumNonInteractiveEnv{
     R<:AbstractRNG,
 } <: NonInteractiveEnv
     parameters::PendulumNonInteractiveEnvParams{Fl}
-    action_space::EmptySpace
-    observation_space::MultiContinuousSpace{VFl}
     state::VFl
     done::Bool
     t::Int
@@ -43,7 +41,7 @@ end
 - `mass = 1.0`
 - `step_size = 0.01`
 - `maximum_time = 10.0`
-- `seed = nothing`
+- `rng = Random.GLOBAL_RNG`
 """
 function PendulumNonInteractiveEnv(;
     float_type = Float64,
@@ -52,7 +50,7 @@ function PendulumNonInteractiveEnv(;
     mass = 1.0,
     step_size = 0.01,
     maximum_time = 10.0,
-    seed = nothing,
+    rng = Random.GLOBAL_RNG,
 )
     parameters = PendulumNonInteractiveEnvParams{float_type}(
         gravity,
@@ -61,18 +59,12 @@ function PendulumNonInteractiveEnv(;
         step_size,
         maximum_time,
     )
-    observation_constraints_lower = [float_type(0), typemin(float_type)]
-    observation_constraints_upper = [float_type(2 * pi), typemax(float_type)]
-    observation_space =
-        MultiContinuousSpace(observation_constraints_lower, observation_constraints_upper)
     env = PendulumNonInteractiveEnv(
         parameters,
-        EmptySpace(),
-        observation_space,
         zeros(float_type, 2),
         false,
         0,
-        MersenneTwister(seed),
+        rng,
     )
     reset!(env)
     env
@@ -80,9 +72,9 @@ end
 
 Random.seed!(env::PendulumNonInteractiveEnv, seed) = Random.seed!(env.rng, seed)
 
-function RLBase.observe(env::PendulumNonInteractiveEnv)
-    (reward = 0, terminal = env.done, state = env.state)
-end
+RLBase.get_reward(env::PendulumNonInteractiveEnv) = 0
+RLBase.get_terminal(env::PendulumNonInteractiveEnv) = env.done
+RLBase.get_state(env::PendulumNonInteractiveEnv) = env.state
 
 function RLBase.reset!(env::PendulumNonInteractiveEnv{Fl}) where {Fl}
     env.state .= (Fl(2 * pi) * rand(env.rng, Fl), randn(env.rng, Fl))

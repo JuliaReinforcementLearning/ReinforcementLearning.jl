@@ -78,7 +78,7 @@ function AcrobotEnv(;
     g = T(9.8),
     dt = T(0.2),
     max_steps = 200,
-    seed = nothing,
+    rng = Random.GLOBAL_RNG,
     book_or_nips = "book",
     avail_torque = [T(-1.0), T(0.0), T(1.0)],
 )
@@ -108,7 +108,7 @@ function AcrobotEnv(;
         0,
         false,
         0,
-        MersenneTwister(seed),
+        rng,
         T(0.0),
         book_or_nips,
         [T(-1.0), T(0.0), T(1.0)],
@@ -119,8 +119,10 @@ end
 
 acrobot_observation(s) = [cos(s[1]), sin(s[1]), cos(s[2]), sin(s[2]), s[3], s[4]]
 
-RLBase.observe(env::AcrobotEnv) =
-    (reward = env.reward, state = acrobot_observation(env.state), terminal = env.done)
+RLBase.get_actions(env::AcrobotEnv) = env.action_space
+RLBase.get_terminal(env::AcrobotEnv) = env.done
+RLBase.get_state(env::AcrobotEnv) = acrobot_observation(env.state)
+RLBase.get_reward(env::AcrobotEnv) = env.reward
 
 function RLBase.reset!(env::AcrobotEnv{T}) where {T<:Number}
     env.state[:] = T(0.1) * rand(env.rng, T, 4) .- T(0.05)

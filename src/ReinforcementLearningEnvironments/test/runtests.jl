@@ -8,8 +8,6 @@ using POMDPModels
 using OpenSpiel
 using Random
 
-RLBase.get_observation_space(m::TigerPOMDP) = DiscreteSpace((false, true))
-
 @testset "ReinforcementLearningEnvironments" begin
 
     include("environments.jl")

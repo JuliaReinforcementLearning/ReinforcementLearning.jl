@@ -25,15 +25,16 @@ By default, only some basic environments are installed. If you want to use some 
 - MountainCarEnv
 - ContinuousMountainCarEnv
 - PendulumEnv
+- PendulumNonInteractiveEnv
 
 ### 3-rd Party Environments
 
 | Environment Name | Dependent Package Name | Description |
 | :--- | :--- | :--- |
-| `AtariEnv` | [ArcadeLearningEnvironment.jl](https://github.com/JuliaReinforcementLearning/ArcadeLearningEnvironment.jl) | Tested only on Linux|
-| `ViZDoomEnv` | [ViZDoom.jl](https://github.com/JuliaReinforcementLearning/ViZDoom.jl) | Currently only a basic environment is supported. (By calling `basic_ViZDoom_env()`)|
-| `GymEnv` | [PyCall.jl](https://github.com/JuliaPy/PyCall.jl) | Tested only on Linux |
-| `MDPEnv`,`POMDPEnv`| [POMDPs.jl](https://github.com/JuliaPOMDP/POMDPs.jl)| The `get_observation_space` method is undefined|
+| `AtariEnv` | [ArcadeLearningEnvironment.jl](https://github.com/JuliaReinforcementLearning/ArcadeLearningEnvironment.jl) | |
+| `ViZDoomEnv` | [ViZDoom.jl](https://github.com/JuliaReinforcementLearning/ViZDoom.jl) | Broken [help wanted](https://github.com/JuliaReinforcementLearning/ViZDoom.jl/issues/7) |
+| `GymEnv` | [PyCall.jl](https://github.com/JuliaPy/PyCall.jl) | |
+| `MDPEnv`,`POMDPEnv`| [POMDPs.jl](https://github.com/JuliaPOMDP/POMDPs.jl)| Tested with `POMDPs.jl@v0.9`|
 | `OpenSpielEnv` | [OpenSpiel.jl](https://github.com/JuliaReinforcementLearning/OpenSpiel.jl) | |
 
 ## Usage
@@ -44,15 +45,52 @@ julia> using ReinforcementLearningEnvironments
 julia> using ReinforcementLearningBase
 
 julia> env = CartPoleEnv()
-CartPoleEnv{Float64}(gravity=9.8,masscart=1.0,masspole=0.1,totalmass=1.1,halflength=0.5,polemasslength=0.05,forcemag=10.0,tau=0.02,thetathreshold=0.20943951023931953,xthreshold=2.4,max_steps=200)
+# CartPoleEnv
 
-julia> action_space = get_action_space(env)
+## Traits
+
+| Trait Type       |                Value |
+|:---------------- | --------------------:|
+| NumAgentStyle    |        SingleAgent() |
+| DynamicStyle     |         Sequential() |
+| InformationStyle | PerfectInformation() |
+| ChanceStyle      |      Deterministic() |
+| RewardStyle      |         StepReward() |
+| UtilityStyle     |         GeneralSum() |
+| ActionStyle      |   MinimalActionSet() |
+
+## Actions
+
+DiscreteSpace{UnitRange{Int64}}(1:2)
+
+## Players
+
+  * `DEFAULT_PLAYER`
+
+## Current Player
+
+`DEFAULT_PLAYER`
+
+## Is Environment Terminated?
+
+No
+
+julia> get_state(env)
+4-element Array{Float64,1}:
+  0.02688439956517477
+ -0.0003235577964125977
+  0.019563124862911535
+ -0.01897808522860225
+
+julia> actions = get_actions(env)
 DiscreteSpace{UnitRange{Int64}}(1:2)
 
 julia> while true
-           action = rand(action_space)
-           env(action)
-           obs = observe(env)
-           get_terminal(obs) && break
+           env(rand(actions))
+           get_terminal(env) && break
        end
 ```
+
+## Application
+
+Checkout [atari.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl/blob/master/src/experiments/atari.jl) for some more complicated cases on how to use these environments and the [wrappers](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/blob/master/src/implementations/environments.jl) provided in [ReinforcementLearningBase.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl).
