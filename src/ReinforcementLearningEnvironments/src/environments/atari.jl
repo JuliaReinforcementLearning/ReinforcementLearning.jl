@@ -34,7 +34,7 @@ function AtariEnv(;
     max_num_frames_per_episode = 0,
     full_action_space = false,
     seed = nothing,
-    log_level = :error
+    log_level = :error,
 )
     frame_skip > 0 || throw(ArgumentError("frame_skip must be greater than 0!"))
     name in getROMList() ||
@@ -45,7 +45,7 @@ function AtariEnv(;
         rng = Random.GLOBAL_RNG
     else
         setInt(ale, "random_seed", Int32(seed % typemax(Int32)))
-        rng = MersenneTwister(hash(seed+1))
+        rng = MersenneTwister(hash(seed + 1))
     end
     setInt(ale, "frame_skip", Int32(1))  # !!! do not use internal frame_skip here, we need to apply max-pooling for the latest two frames, so we need to manually implement the mechanism.
     setInt(ale, "max_num_frames_per_episode", max_num_frames_per_episode)
@@ -66,20 +66,19 @@ function AtariEnv(;
     screens =
         (fill(typemin(Cuchar), observation_size), fill(typemin(Cuchar), observation_size))
 
-    env =
-        AtariEnv{grayscale_obs,terminal_on_life_loss,grayscale_obs ? 2 : 3,typeof(rng)}(
-            ale,
-            name,
-            screens,
-            actions,
-            action_space,
-            observation_space,
-            noop_max,
-            frame_skip,
-            0.0f0,
-            lives(ale),
-            rng,
-        )
+    env = AtariEnv{grayscale_obs,terminal_on_life_loss,grayscale_obs ? 2 : 3,typeof(rng)}(
+        ale,
+        name,
+        screens,
+        actions,
+        action_space,
+        observation_space,
+        noop_max,
+        frame_skip,
+        0.0f0,
+        lives(ale),
+        rng,
+    )
     finalizer(env) do x
         ALE_del(x.ale)
     end

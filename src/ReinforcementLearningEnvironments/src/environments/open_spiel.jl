@@ -40,7 +40,13 @@ using StatsBase: sample, weights
 - `rng::AbstractRNG`, used to initial the `rng` for chance nodes. And the `rng` will only be used if the environment contains chance node, else it is set to `nothing`. To set the seed of inner environment, you may check the documentation of each specific game. Usually adding a keyword argument named `seed` should work.
 - `is_chance_agent_required::Bool=false`, by default, no chance agent is required. An internal `rng` will be used to automatically generate actions for chance node. If set to `true`, you need to feed the action of chance agent to environment explicitly. And the `seed` will be ignored.
 """
-function OpenSpielEnv(name; rng=Random.GLOBAL_RNG, state_type= nothing, is_chance_agent_required=false, kwargs...)
+function OpenSpielEnv(
+    name;
+    rng = Random.GLOBAL_RNG,
+    state_type = nothing,
+    is_chance_agent_required = false,
+    kwargs...,
+)
     game = load_game(name; kwargs...)
     game_type = get_type(game)
 
@@ -50,15 +56,13 @@ function OpenSpielEnv(name; rng=Random.GLOBAL_RNG, state_type= nothing, is_chanc
         has_obs_state ||
         @error "the environment neither provides information tensor nor provides observation tensor"
     if isnothing(state_type)
-        state_type= has_info_state ? :information : :observation
+        state_type = has_info_state ? :information : :observation
     end
 
-    if state_type== :observation
-        has_obs_state ||
-            @error "the environment doesn't support state_typeof $state_type"
-    elseif state_type== :information
-        has_info_state ||
-            @error "the environment doesn't support state_typeof $state_type"
+    if state_type == :observation
+        has_obs_state || @error "the environment doesn't support state_typeof $state_type"
+    elseif state_type == :information
+        has_info_state || @error "the environment doesn't support state_typeof $state_type"
     else
         @error "unknown state_type $state_type"
     end
@@ -73,17 +77,20 @@ function OpenSpielEnv(name; rng=Random.GLOBAL_RNG, state_type= nothing, is_chanc
         else
             RLBase.SAMPLED_STOCHASTIC
         end
-    else 
+    else
         RLBase.STOCHASTIC
     end
 
-    d = dynamics(game_type) == OpenSpiel.SEQUENTIAL ? RLBase.SEQUENTIAL : RLBase.SIMULTANEOUS
+    d = dynamics(game_type) == OpenSpiel.SEQUENTIAL ? RLBase.SEQUENTIAL :
+        RLBase.SIMULTANEOUS
 
-    i = information(game_type) == OpenSpiel.PERFECT_INFORMATION ? RLBase.PERFECT_INFORMATION : RLBase.IMPERFECT_INFORMATION
+    i = information(game_type) == OpenSpiel.PERFECT_INFORMATION ?
+        RLBase.PERFECT_INFORMATION : RLBase.IMPERFECT_INFORMATION
 
     n = MultiAgent(num_players(game))
 
-    r = reward_model(game_type) == OpenSpiel.REWARDS ? RLBase.STEP_REWARD : RLBase.TERMINAL_REWARD
+    r = reward_model(game_type) == OpenSpiel.REWARDS ? RLBase.STEP_REWARD :
+        RLBase.TERMINAL_REWARD
 
     u = if utility(game_type) == OpenSpiel.ZERO_SUM
         RLBase.ZERO_SUM
@@ -95,7 +102,8 @@ function OpenSpielEnv(name; rng=Random.GLOBAL_RNG, state_type= nothing, is_chanc
         RLBase.IDENTICAL_SUM
     end
 
-    env = OpenSpielEnv{state_type,Tuple{c, d, i, n, r, u}, typeof(state),typeof(game),typeof(rng)}(
+    env =
+        OpenSpielEnv{state_type,Tuple{c,d,i,n,r,u},typeof(state),typeof(game),typeof(rng)}(
             state,
             game,
             rng,
@@ -152,7 +160,8 @@ end
 RLBase.get_legal_actions(env::OpenSpielEnv, player) = legal_actions(env.state, player)
 
 function RLBase.get_legal_actions_mask(env::OpenSpielEnv, player)
-    n = player == convert(Int, OpenSpiel.CHANCE_PLAYER) ? max_chance_outcomes(env.game) : num_distinct_actions(env.game)
+    n = player == convert(Int, OpenSpiel.CHANCE_PLAYER) ? max_chance_outcomes(env.game) :
+        num_distinct_actions(env.game)
     mask = BitArray(undef, n)
     for a in legal_actions(env.state, player)
         mask[a+1] = true
@@ -163,7 +172,8 @@ end
 RLBase.get_terminal(env::OpenSpielEnv, player) = OpenSpiel.is_terminal(env.state)
 
 function RLBase.get_reward(env::OpenSpielEnv, player)
-    if DynamicStyle(env) === SIMULTANEOUS && player == convert(Int, OpenSpiel.SIMULTANEOUS_PLAYER)
+    if DynamicStyle(env) === SIMULTANEOUS &&
+       player == convert(Int, OpenSpiel.SIMULTANEOUS_PLAYER)
         rewards(env.state)
     else
         player_reward(env.state, player)

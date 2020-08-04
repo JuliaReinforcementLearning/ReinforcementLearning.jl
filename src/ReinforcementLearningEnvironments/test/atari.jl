@@ -65,8 +65,7 @@
 
     @testset "max_num_frames_per_episode" begin
         for i in 1:10
-            env =
-                AtariEnv(; name = "pong", max_num_frames_per_episode = i, seed = 456)
+            env = AtariEnv(; name = "pong", max_num_frames_per_episode = i, seed = 456)
             for _ in 1:i
                 env(1)
             end

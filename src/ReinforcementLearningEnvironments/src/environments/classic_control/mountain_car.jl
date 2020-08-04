@@ -62,7 +62,12 @@ end
 - `power = 0.001`
 - `gravity = 0.0025`
 """
-function MountainCarEnv(; T = Float64, continuous = false, rng = Random.GLOBAL_RNG, kwargs...)
+function MountainCarEnv(;
+    T = Float64,
+    continuous = false,
+    rng = Random.GLOBAL_RNG,
+    kwargs...,
+)
     if continuous
         params = MountainCarEnvParams(; goal_pos = 0.45, power = 0.0015, T = T, kwargs...)
     else
@@ -91,7 +96,7 @@ ContinuousMountainCarEnv(; kwargs...) = MountainCarEnv(; continuous = true, kwar
 Random.seed!(env::MountainCarEnv, seed) = Random.seed!(env.rng, seed)
 
 RLBase.get_actions(env::MountainCarEnv) = env.action_space
-RLBase.get_reward(env::MountainCarEnv{A,T}) where {A, T} = env.done ? zero(T) : -one(T)
+RLBase.get_reward(env::MountainCarEnv{A,T}) where {A,T} = env.done ? zero(T) : -one(T)
 RLBase.get_terminal(env::MountainCarEnv) = env.done
 RLBase.get_state(env::MountainCarEnv) = env.state
 

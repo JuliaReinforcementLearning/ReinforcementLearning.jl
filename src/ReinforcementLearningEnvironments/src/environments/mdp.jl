@@ -6,7 +6,7 @@ RLBase.get_actions(m::Union{<:POMDP,<:MDP}) = convert(AbstractSpace, actions(m))
 # POMDPEnv
 #####
 
-function POMDPEnv(model::M;rng=Random.GLOBAL_RNG) where M<:POMDP
+function POMDPEnv(model::M; rng = Random.GLOBAL_RNG) where {M<:POMDP}
     s = rand(rng, initialstate(model))
     a = rand(rng, actions(model))
     o = rand(rng, initialobs(model, s))
@@ -37,7 +37,7 @@ Random.seed!(env::POMDPEnv, seed) = seed!(env.rng, seed)
 # MDPEnv
 #####
 
-function MDPEnv(model::MDP; rng=Random.GLOBAL_RNG)
+function MDPEnv(model::MDP; rng = Random.GLOBAL_RNG)
     s = rand(rng, initialstate(model))
     a = rand(rng, actions(model))
     MDPEnv(model, s, a, rng)

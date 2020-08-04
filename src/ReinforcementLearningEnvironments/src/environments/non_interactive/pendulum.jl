@@ -59,13 +59,7 @@ function PendulumNonInteractiveEnv(;
         step_size,
         maximum_time,
     )
-    env = PendulumNonInteractiveEnv(
-        parameters,
-        zeros(float_type, 2),
-        false,
-        0,
-        rng,
-    )
+    env = PendulumNonInteractiveEnv(parameters, zeros(float_type, 2), false, 0, rng)
     reset!(env)
     env
 end

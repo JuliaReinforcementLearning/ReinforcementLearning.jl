@@ -51,7 +51,7 @@ function PendulumEnv(;
     max_steps = 200,
     continuous::Bool = true,
     n_actions::Int = 3,
-    rng = Random.GLOBAL_RNG
+    rng = Random.GLOBAL_RNG,
 )
     high = T.([1, 1, max_speed])
     action_space = continuous ? ContinuousSpace(-2.0, 2.0) : DiscreteSpace(n_actions)
