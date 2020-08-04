@@ -1,7 +1,7 @@
 export IQNLearner, ImplicitQuantileNet
 
 using Flux
-using CuArrays
+using CUDA
 using Random
 using Zygote
 using Statistics: mean
@@ -62,7 +62,7 @@ See [paper](https://arxiv.org/abs/1806.06923)
 - `update_step = 0`,
 - `default_priority = 1.0f2`,
 - `β_priority = 0.5f0`,
-- `seed = nothing`,
+- `rng = Random.GLOBAL_RNG`,
 - `device_seed = nothing`,
 """
 mutable struct IQNLearner{A,T,R,D} <: AbstractLearner
@@ -97,8 +97,8 @@ Flux.functor(x::IQNLearner) =
         x
     end
 
-Flux.gpu(rng::MersenneTwister) = CuArrays.CURAND.RNG()
-Flux.cpu(rng::CuArrays.CURAND.RNG) = MersenneTwister()
+Flux.gpu(rng::MersenneTwister) = CUDA.CURAND.RNG()
+Flux.cpu(rng::CUDA.CURAND.RNG) = MersenneTwister()
 
 function IQNLearner(;
     approximator,
@@ -118,17 +118,13 @@ function IQNLearner(;
     update_step = 0,
     default_priority = 1.0f2,
     β_priority = 0.5f0,
-    seed = nothing,
-    device_seed = nothing,
+    rng = Random.GLOBAL_RNG,
+    device_rng = CUDA.CURAND.RNG(),
     loss = 0.f0,
 )
     copyto!(approximator, target_approximator)  # force sync
-    rng = MersenneTwister(seed)
-    if device(approximator) === Val(:gpu)
-        device_rng = CuArrays.CURAND.RNG()
-        Random.seed!(device_rng, device_seed)  # https://github.com/JuliaGPU/CuArrays.jl/commit/43c12485182a6a7425c1fda0d2f66cc0eae8a2bf
-    else
-        device_rng = rng
+    if device(approximator) !== device(device_rng)
+        throw(ArgumentError("device of `approximator` doesn't match with the device of `device_rng`: $(device(approximator)) !== $(device_rng)"))
     end
     IQNLearner(
         approximator,
@@ -154,8 +150,8 @@ function IQNLearner(;
     )
 end
 
-function (learner::IQNLearner)(obs)
-    state = send_to_device(device(learner.approximator), get_state(obs))
+function (learner::IQNLearner)(env)
+    state = send_to_device(device(learner.approximator), get_state(env))
     state = Flux.unsqueeze(state, ndims(state) + 1)
     τ = rand(learner.device_rng, Float32, learner.K, 1)
     τₑₘ = embed(τ, learner.Nₑₘ)

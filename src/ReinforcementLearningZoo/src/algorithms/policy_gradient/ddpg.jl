@@ -48,7 +48,7 @@ end
 - `act_limit = 1.0`,
 - `act_noise = 0.1`,
 - `step = 0`,
-- `seed = nothing`,
+- `rng = Random.GLOBAL_RNG`,
 """
 function DDPGPolicy(;
     behavior_actor,
@@ -65,9 +65,8 @@ function DDPGPolicy(;
     act_limit = 1.0,
     act_noise = 0.1,
     step = 0,
-    seed = nothing,
+    rng = Random.GLOBAL_RNG,
 )
-    rng = MersenneTwister(seed)
     copyto!(behavior_actor, target_actor)  # force sync
     copyto!(behavior_critic, target_critic)  # force sync
     DDPGPolicy(
@@ -90,14 +89,14 @@ function DDPGPolicy(;
 end
 
 # TODO: handle Training/Testing mode
-function (p::DDPGPolicy)(obs)
+function (p::DDPGPolicy)(env)
     p.step += 1
 
     if p.step <= p.start_steps
-        p.start_policy(obs)
+        p.start_policy(env)
     else
         D = device(p.behavior_actor)
-        s = get_state(obs)
+        s = get_state(env)
         s = Flux.unsqueeze(s, ndims(s) + 1)
         action = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
         clamp(action[] + randn(p.rng) * p.act_noise, -p.act_limit, p.act_limit)

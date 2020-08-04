@@ -1,11 +1,12 @@
 name = "ReinforcementLearningZoo"
 uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
-version = "0.1.4"
+version = "0.1.5"
 
 [deps]
+AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
-CuArrays = "3a865a2d-5b23-5a0f-bc46-62713ec82fae"
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -23,18 +24,19 @@ TensorBoardLogger = "899adc3e-224a-11e9-021f-63837185c80f"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
+AbstractTrees = "0.3"
 BSON = "0.2"
-CuArrays = "2.2"
-Flux = "0.10"
+CUDA = "1"
+Flux = "0.11"
 MacroTools = "0.5"
-ReinforcementLearningBase = "0.7"
-ReinforcementLearningCore = "0.3"
-Requires = "1.0"
-Setfield = "0.6"
+ReinforcementLearningBase = "0.8"
+ReinforcementLearningCore = "0.4"
+Requires = "1"
+Setfield = "0.6, 0.7"
 StatsBase = "0.32, 0.33"
 TensorBoardLogger = "0.1"
-Zygote = "0.4"
-julia = "1.3"
+Zygote = "0.5"
+julia = "1.4"
 
 [extras]
 ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"

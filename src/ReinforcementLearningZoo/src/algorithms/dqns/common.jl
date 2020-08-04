@@ -79,12 +79,12 @@ end
 
 function (agent::Agent{<:QBasedPolicy{<:PERLearners},<:CircularCompactPSARTSATrajectory})(
     ::RLCore.Training{PostActStage},
-    obs,
+    env,
 )
     push!(
         agent.trajectory;
-        reward = get_reward(obs),
-        terminal = get_terminal(obs),
+        reward = get_reward(env),
+        terminal = get_terminal(env),
         priority = agent.policy.learner.default_priority,
     )
     nothing

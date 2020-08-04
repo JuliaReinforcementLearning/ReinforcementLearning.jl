@@ -25,7 +25,7 @@ And also https://danieltakeshi.github.io/2019/07/14/per/
 - `target_update_freq::Int=100`: the frequency of syncing `target_approximator`.
 - `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
 - `default_priority::Float64=100.`: the default priority for newly added transitions.
-- `seed = nothing`
+- `rng = Random.GLOBAL_RNG`
 """
 mutable struct PrioritizedDQNLearner{
     Tq<:AbstractApproximator,
@@ -65,10 +65,9 @@ function PrioritizedDQNLearner(;
     update_step::Int = 0,
     default_priority::Float32 = 100f0,
     β_priority::Float32 = 0.5f0,
-    seed = nothing,
+    rng = Random.GLOBAL_RNG,
 ) where {Tq,Tt,Tf}
     copyto!(approximator, target_approximator)
-    rng = MersenneTwister(seed)
     PrioritizedDQNLearner(
         approximator,
         target_approximator,
@@ -102,8 +101,8 @@ end
     The state of the observation is assumed to have been stacked,
     if `!isnothing(stack_size)`.
 """
-(learner::PrioritizedDQNLearner)(obs) =
-    obs |>
+(learner::PrioritizedDQNLearner)(env) =
+    env |>
     get_state |>
     x ->
         Flux.unsqueeze(x, ndims(x) + 1) |>

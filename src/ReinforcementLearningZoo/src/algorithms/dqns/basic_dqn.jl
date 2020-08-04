@@ -18,7 +18,7 @@ You can start from this implementation to understand how everything is organized
 - `γ::Float32=0.99f0`: discount rate.
 - `batch_size::Int=32`
 - `min_replay_history::Int=32`: number of transitions that should be experienced before updating the `approximator`.
-- `seed=nothing`.
+- `rng=Random.GLOBAL_RNG`
 """
 mutable struct BasicDQNLearner{Q,F,R} <: AbstractLearner
     approximator::Q
@@ -35,8 +35,8 @@ Flux.functor(x::BasicDQNLearner) = (Q = x.approximator,), y -> begin
     x
 end
 
-(learner::BasicDQNLearner)(obs) =
-    obs |>
+(learner::BasicDQNLearner)(env) =
+    env |>
     get_state |>
     x ->
         send_to_device(device(learner.approximator), x) |>
@@ -49,9 +49,8 @@ function BasicDQNLearner(;
     γ = 0.99f0,
     batch_size = 32,
     min_replay_history = 32,
-    seed = nothing,
+    rng = Random.GLOBAL_RNG
 ) where {Q,F}
-    rng = MersenneTwister(seed)
     BasicDQNLearner{Q,F,typeof(rng)}(
         approximator,
         loss_func,

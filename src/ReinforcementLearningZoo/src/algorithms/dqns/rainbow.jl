@@ -29,7 +29,7 @@ See paper: [Rainbow: Combining Improvements in Deep Reinforcement Learning](http
 - `default_priority::Float32=1.0f2.`: the default priority for newly added transitions. It must be `>= 1`.
 - `n_atoms::Int=51`: the number of buckets of the value function distribution.
 - `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
-- `seed = nothing`
+- `rng = Random.GLOBAL_RNG`
 """
 mutable struct RainbowLearner{
     Tq<:AbstractApproximator,
@@ -91,12 +91,11 @@ function RainbowLearner(;
     update_step = 0,
     default_priority = 1.0f2,
     β_priority = 0.5f0,
-    seed = nothing,
+    rng = Random.GLOBAL_RNG,
 )
     default_priority >= 1.0f0 || error("default value must be >= 1.0f0")
     copyto!(approximator, target_approximator)  # force sync
     support = send_to_device(device(approximator), support)
-    rng = MersenneTwister(seed)
     RainbowLearner(
         approximator,
         target_approximator,
@@ -122,8 +121,8 @@ function RainbowLearner(;
     )
 end
 
-function (learner::RainbowLearner)(obs)
-    state = send_to_device(device(learner.approximator), get_state(obs))
+function (learner::RainbowLearner)(env)
+    state = send_to_device(device(learner.approximator), get_state(env))
     state = Flux.unsqueeze(state, ndims(state) + 1)
     logits = learner.approximator(state)
     q = learner.support .* softmax(reshape(logits, :, learner.n_actions))

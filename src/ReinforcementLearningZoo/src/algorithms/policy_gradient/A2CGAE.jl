@@ -27,10 +27,10 @@ Base.@kwdef mutable struct A2CGAELearner{A<:ActorCritic} <: AbstractLearner
     loss::Float32 = 0.f0
 end
 
-(learner::A2CGAELearner)(obs::BatchObs) =
+(learner::A2CGAELearner)(env::MultiThreadEnv) =
     learner.approximator.actor(send_to_device(
         device(learner.approximator),
-        get_state(obs),
+        get_state(env),
     )) |> send_to_host
 
 function RLBase.update!(learner::A2CGAELearner, t::AbstractTrajectory)
@@ -108,10 +108,10 @@ end
 
 function (agent::Agent{<:QBasedPolicy{<:A2CGAELearner},<:CircularCompactSARTSATrajectory})(
     ::Training{PreActStage},
-    obs,
+    env,
 )
-    action = agent.policy(obs)
-    state = get_state(obs)
+    action = agent.policy(env)
+    state = get_state(env)
     push!(agent.trajectory; state = state, action = action)
     update!(agent.policy, agent.trajectory)
 

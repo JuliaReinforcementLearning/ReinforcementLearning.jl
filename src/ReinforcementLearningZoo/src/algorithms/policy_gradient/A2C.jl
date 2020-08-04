@@ -27,14 +27,14 @@ Base.@kwdef mutable struct A2CLearner{A<:ActorCritic} <: AbstractLearner
     loss::Float32 = 0.f0
 end
 
-(learner::A2CLearner)(obs::BatchObs) =
+(learner::A2CLearner)(env::MultiThreadEnv) =
     learner.approximator.actor(send_to_device(
         device(learner.approximator),
-        get_state(obs),
+        get_state(env),
     )) |> send_to_host
 
-function (learner::A2CLearner)(obs)
-    s = get_state(obs)
+function (learner::A2CLearner)(env)
+    s = get_state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
     s = send_to_device(device(learner.approximator), s)
     learner.approximator.actor(s) |> vec |> send_to_host
@@ -100,10 +100,10 @@ end
 
 function (agent::Agent{<:QBasedPolicy{<:A2CLearner},<:CircularCompactSARTSATrajectory})(
     ::Training{PreActStage},
-    obs,
+    env,
 )
-    action = agent.policy(obs)
-    state = get_state(obs)
+    action = agent.policy(env)
+    state = get_state(env)
     push!(agent.trajectory; state = state, action = action)
     update!(agent.policy, agent.trajectory)
 
