@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/HEAD)
 
-[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/compare/v0.5.0...HEAD)
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/compare/v0.6.0...HEAD)
+
+**Closed issues:**
+
+- How to define a new environment? [\#64](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/64)
+
+## [v0.6.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/v0.6.0) (2020-08-05)
+
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/compare/v0.5.0...v0.6.0)
 
 **Closed issues:**
 
@@ -12,6 +20,7 @@
 
 **Merged pull requests:**
 
+- Update dependency [\#78](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/78) ([findmyway](https://github.com/findmyway))
 - Update README.md & website link [\#70](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/70) ([findmyway](https://github.com/findmyway))
 
 ## [v0.5.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/v0.5.0) (2020-06-20)
@@ -70,7 +79,6 @@
 - Refactor buffer [\#45](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/45) ([findmyway](https://github.com/findmyway))
 - export AbstractActionSelector and add more comments [\#42](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/42) ([findmyway](https://github.com/findmyway))
 - add docs [\#39](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/39) ([findmyway](https://github.com/findmyway))
-- Support both Knet and Flux\(with Zygote\) [\#38](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/38) ([findmyway](https://github.com/findmyway))
 - Switch Tracker.jl to Zygote.jl [\#37](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/37) ([findmyway](https://github.com/findmyway))
 
 ## [v0.4.0-alpha](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/v0.4.0-alpha) (2019-09-25)
@@ -89,6 +97,7 @@
 
 **Merged pull requests:**
 
+- Support both Knet and Flux\(with Zygote\) [\#38](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/38) ([findmyway](https://github.com/findmyway))
 - bugfix and api simplification [\#34](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/34) ([findmyway](https://github.com/findmyway))
 - use new api in ReinforcementLearningEnvironments.jl [\#33](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/33) ([findmyway](https://github.com/findmyway))
 - add rainbow [\#31](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/31) ([findmyway](https://github.com/findmyway))
