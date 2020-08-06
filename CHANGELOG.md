@@ -10,6 +10,7 @@
 
 **Closed issues:**
 
+- Question about AbstractEnv API [\#68](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/68)
 - How to define a new environment? [\#64](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/64)
 
 ## [v0.6.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/v0.6.0) (2020-08-05)
