@@ -4,6 +4,10 @@
 
 [Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/compare/v0.6.0...HEAD)
 
+**Implemented enhancements:**
+
+- Compatibility issue in ReinforcementLearning & Flux [\#74](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/74)
+
 **Closed issues:**
 
 - How to define a new environment? [\#64](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/64)
@@ -79,6 +83,7 @@
 - Refactor buffer [\#45](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/45) ([findmyway](https://github.com/findmyway))
 - export AbstractActionSelector and add more comments [\#42](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/42) ([findmyway](https://github.com/findmyway))
 - add docs [\#39](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/39) ([findmyway](https://github.com/findmyway))
+- Support both Knet and Flux\(with Zygote\) [\#38](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/38) ([findmyway](https://github.com/findmyway))
 - Switch Tracker.jl to Zygote.jl [\#37](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/37) ([findmyway](https://github.com/findmyway))
 
 ## [v0.4.0-alpha](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/v0.4.0-alpha) (2019-09-25)
@@ -97,7 +102,6 @@
 
 **Merged pull requests:**
 
-- Support both Knet and Flux\(with Zygote\) [\#38](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/38) ([findmyway](https://github.com/findmyway))
 - bugfix and api simplification [\#34](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/34) ([findmyway](https://github.com/findmyway))
 - use new api in ReinforcementLearningEnvironments.jl [\#33](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/33) ([findmyway](https://github.com/findmyway))
 - add rainbow [\#31](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/31) ([findmyway](https://github.com/findmyway))
