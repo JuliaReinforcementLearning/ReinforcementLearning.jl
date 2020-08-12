@@ -11,14 +11,14 @@ function extract_experience(t::AbstractTrajectory, learner::PERLearners)
     γ = learner.γ
 
     # 1. sample indices based on priority
-    valid_ind_range = isnothing(s) ? (1:(length(t)-h)) : (s:(length(t)-h))
+    valid_ind_range = isnothing(s) ? (1:(length(t[:terminal])-h)) : (s:(length(t[:terminal])-h))
     if t isa CircularCompactPSARTSATrajectory
         inds = Vector{Int}(undef, n)
         priorities = Vector{Float32}(undef, n)
         for i in 1:n
-            ind, p = sample(learner.rng, get_trace(t, :priority))
+            ind, p = sample(learner.rng, t[:priority])
             while ind ∉ valid_ind_range
-                ind, p = sample(learner.rng, get_trace(t, :priority))
+                ind, p = sample(learner.rng, t[:priority])
             end
             inds[i] = ind
             priorities[i] = p
@@ -29,11 +29,11 @@ function extract_experience(t::AbstractTrajectory, learner::PERLearners)
     end
 
     # 2. extract SARTS
-    states = consecutive_view(get_trace(t, :state), inds; n_stack = s)
-    actions = consecutive_view(get_trace(t, :action), inds)
-    next_states = consecutive_view(get_trace(t, :state), inds .+ h; n_stack = s)
-    consecutive_rewards = consecutive_view(get_trace(t, :reward), inds; n_horizon = h)
-    consecutive_terminals = consecutive_view(get_trace(t, :terminal), inds; n_horizon = h)
+    states = consecutive_view(t[:state], inds; n_stack = s)
+    actions = consecutive_view(t[:action], inds)
+    next_states = consecutive_view(t[:state], inds .+ h; n_stack = s)
+    consecutive_rewards = consecutive_view(t[:reward], inds; n_horizon = h)
+    consecutive_terminals = consecutive_view(t[:terminal], inds; n_horizon = h)
     rewards, terminals = zeros(Float32, n), fill(false, n)
 
     rewards = discount_rewards_reduced(
@@ -57,7 +57,7 @@ end
 
 function RLBase.update!(p::QBasedPolicy{<:PERLearners}, t::AbstractTrajectory)
     learner = p.learner
-    length(t) < learner.min_replay_history && return
+    length(t[:terminal]) < learner.min_replay_history && return
 
     learner.update_step += 1
 
@@ -71,7 +71,7 @@ function RLBase.update!(p::QBasedPolicy{<:PERLearners}, t::AbstractTrajectory)
 
     if t isa CircularCompactPSARTSATrajectory
         priorities = update!(p.learner, experience)
-        get_trace(t, :priority)[inds] .= priorities
+        t[:priority][inds] .= priorities
     else
         update!(p.learner, experience)
     end

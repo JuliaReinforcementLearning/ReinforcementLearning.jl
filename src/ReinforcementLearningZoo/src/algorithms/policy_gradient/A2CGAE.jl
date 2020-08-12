@@ -36,11 +36,11 @@ end
 function RLBase.update!(learner::A2CGAELearner, t::AbstractTrajectory)
     isfull(t) || return
 
-    states = get_trace(t, :state)
-    actions = get_trace(t, :action)
-    rewards = get_trace(t, :reward)
-    terminals = get_trace(t, :terminal)
-    rollout = t[:state]
+    states = t[:state]
+    actions = t[:action]
+    rewards = t[:reward]
+    terminals = t[:terminal]
+    rollout = t[:full_state]
 
     AC = learner.approximator
     γ = learner.γ

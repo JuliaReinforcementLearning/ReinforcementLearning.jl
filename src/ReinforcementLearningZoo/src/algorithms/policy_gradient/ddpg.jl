@@ -103,13 +103,16 @@ function (p::DDPGPolicy)(env)
     end
 end
 
-function RLBase.update!(p::DDPGPolicy, t::CircularCompactSARTSATrajectory)
-    length(t) > p.update_after || return
+function RLBase.update!(p::DDPGPolicy, traj::CircularCompactSARTSATrajectory)
+    length(traj[:terminal]) > p.update_after || return
     p.step % p.update_every == 0 || return
 
-    inds = rand(p.rng, 1:(length(t)-1), p.batch_size)
-    SARTS = (:state, :action, :reward, :terminal, :next_state)
-    s, a, r, t, s′ = map(x -> select_last_dim(get_trace(t, x), inds), SARTS)
+    inds = rand(p.rng, 1:(length(traj[:terminal])-1), p.batch_size)
+    s = select_last_dim(traj[:state], inds)
+    a = select_last_dim(traj[:action], inds)
+    r = select_last_dim(traj[:reward], inds)
+    t = select_last_dim(traj[:terminal], inds)
+    s′ = select_last_dim(traj[:next_state], inds)
 
     A = p.behavior_actor
     C = p.behavior_critic

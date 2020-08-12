@@ -90,12 +90,12 @@ end
 function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
     isfull(t) || return
 
-    states = get_trace(t, :state)
-    actions = get_trace(t, :action)
-    action_log_probs = get_trace(t, :action_log_prob)
-    rewards = get_trace(t, :reward)
-    terminals = get_trace(t, :terminal)
-    states_plus = t[:state]
+    states = t[:state]
+    actions = t[:action]
+    action_log_probs = t[:action_log_prob]
+    rewards = t[:reward]
+    terminals = t[:terminal]
+    states_plus = t[:full_state]
 
     rng = learner.rng
     AC = learner.approximator
@@ -126,7 +126,7 @@ function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
         rand_inds = shuffle!(rng, Vector(1:n_envs*n_rollout))
         for i in 1:n_microbatches
             inds = rand_inds[(i-1)*microbatch_size+1:i*microbatch_size]
-            s = send_to_device(D, select_last_dim(states_flatten, inds) |> copy)  # !!! must copy here
+            s = send_to_device(D, select_last_dim(states_flatten, inds))
             a = vec(actions)[inds]
             r = send_to_device(D, vec(returns)[inds])
             log_p = send_to_device(D, vec(action_log_probs)[inds])

@@ -99,7 +99,7 @@ end
             Flux.squeezebatch
 
 function RLBase.update!(learner::DQNLearner, t::AbstractTrajectory)
-    length(t) < learner.min_replay_history && return
+    length(t[:terminal]) < learner.min_replay_history && return
 
     learner.update_step += 1
 
@@ -144,13 +144,13 @@ function extract_experience(t::AbstractTrajectory, learner::DQNLearner)
     n = learner.batch_size
     γ = learner.γ
 
-    valid_ind_range = isnothing(s) ? (1:(length(t)-h)) : (s:(length(t)-h))
+    valid_ind_range = isnothing(s) ? (1:(length(t[:terminal])-h)) : (s:(length(t[:terminal])-h))
     inds = rand(learner.rng, valid_ind_range, n)
-    states = consecutive_view(get_trace(t, :state), inds; n_stack = s)
-    actions = consecutive_view(get_trace(t, :action), inds)
-    next_states = consecutive_view(get_trace(t, :state), inds .+ h; n_stack = s)
-    consecutive_rewards = consecutive_view(get_trace(t, :reward), inds; n_horizon = h)
-    consecutive_terminals = consecutive_view(get_trace(t, :terminal), inds; n_horizon = h)
+    states = consecutive_view(t[:state], inds; n_stack = s)
+    actions = consecutive_view(t[:action], inds)
+    next_states = consecutive_view(t[:state], inds .+ h; n_stack = s)
+    consecutive_rewards = consecutive_view(t[:reward], inds; n_horizon = h)
+    consecutive_terminals = consecutive_view(t[:terminal], inds; n_horizon = h)
     rewards, terminals = zeros(Float32, n), fill(false, n)
 
     # make sure that we only consider experiences in current episode

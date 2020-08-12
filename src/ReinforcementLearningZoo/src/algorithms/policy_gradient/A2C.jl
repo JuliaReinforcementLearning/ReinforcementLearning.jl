@@ -43,11 +43,11 @@ end
 function RLBase.update!(learner::A2CLearner, t::AbstractTrajectory)
     isfull(t) || return
 
-    states = get_trace(t, :state)
-    actions = get_trace(t, :action)
-    rewards = get_trace(t, :reward)
-    terminals = get_trace(t, :terminal)
-    next_state = select_last_frame(get_trace(t, :next_state))
+    states = t[:state]
+    actions = t[:action]
+    rewards = t[:reward]
+    terminals = t[:terminal]
+    next_state = select_last_frame(t[:next_state])
 
     AC = learner.approximator
     γ = learner.γ

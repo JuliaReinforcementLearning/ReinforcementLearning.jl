@@ -62,21 +62,24 @@ function BasicDQNLearner(;
     )
 end
 
-function RLBase.update!(learner::BasicDQNLearner, t::AbstractTrajectory)
-    length(t) < learner.min_replay_history && return
+function RLBase.update!(learner::BasicDQNLearner, T::AbstractTrajectory)
+    length(T[:terminal]) < learner.min_replay_history && return
 
-    inds = rand(learner.rng, 1:length(t), learner.batch_size)
-    batch = map(get_trace(t, :state, :action, :reward, :terminal, :next_state)) do x
-        consecutive_view(x, inds)
-    end
+    Q = learner.approximator
+    D = device(Q)
+    γ = learner.γ
+    loss_func = learner.loss_func
+    batch_size = learner.batch_size
 
-    Q, γ, loss_func, batch_size =
-        learner.approximator, learner.γ, learner.loss_func, learner.batch_size
-    s, r, t, s′ = map(
-        x -> send_to_device(device(Q), x),
-        (batch.state, batch.reward, batch.terminal, batch.next_state),
-    )
-    a = CartesianIndex.(batch.action, 1:batch_size)
+    inds = rand(learner.rng, 1:length(T[:terminal]), learner.batch_size)
+
+    s = send_to_device(D, consecutive_view(T[:state], inds))
+    a = consecutive_view(T[:action], inds)
+    r = send_to_device(D, consecutive_view(T[:reward], inds))
+    t = send_to_device(D, consecutive_view(T[:terminal], inds))
+    s′ = send_to_device(D, consecutive_view(T[:next_state], inds))
+
+    a = CartesianIndex.(a, 1:batch_size)
 
     gs = gradient(params(Q)) do
         q = Q(s)[a]
