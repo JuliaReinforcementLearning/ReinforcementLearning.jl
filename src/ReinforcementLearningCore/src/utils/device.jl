@@ -12,8 +12,11 @@ send_to_device(::Val{:cpu}, x) = x  # cpu(x) is not very efficient! So by defaul
 
 send_to_device(::Val{:cpu}, x::CuArray) = adapt(Array, x)
 send_to_device(::Val{:gpu}, x) = Flux.fmap(a -> adapt(CuArray{Float32}, a), x)
-send_to_device(::Val{:gpu}, x::SubArray{T,N,<:CircularArrayBuffer}) where {T,N} =
-    CuArray{T}(x)
+send_to_device(::Val{:gpu}, x::Union{
+    SubArray{<:Any,<:Any,<:CircularArrayBuffer},
+    Base.ReshapedArray{<:Any, <:Any, <:SubArray{<:Any, <:Any, <:CircularArrayBuffer}},
+    SubArray{<:Any,<:Any,<:Base.ReshapedArray{<:Any, <:Any, <:SubArray{<:Any, <:Any, <:CircularArrayBuffer}}}
+    }) = CuArray(x)
 
 """
     device(model)

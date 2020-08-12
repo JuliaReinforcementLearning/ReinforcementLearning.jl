@@ -2,7 +2,7 @@
     action_space = DiscreteSpace(3)
     agent = Agent(;
         policy = RandomPolicy(action_space),
-        trajectory = VectorialCompactSARTSATrajectory(),
+        trajectory = CircularCompactSARTSATrajectory(;capacity=10_000, state_type = Float32, state_size=(4,)),
     )
 
     @testset "loading/saving Agent" begin

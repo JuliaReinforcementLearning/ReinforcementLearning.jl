@@ -1,5 +1,7 @@
 export CircularArrayBuffer, capacity, isfull
 
+using ReinforcementLearningBase
+
 """
     CircularArrayBuffer{T}(d::Integer...) -> CircularArrayBuffer{T, N}
 

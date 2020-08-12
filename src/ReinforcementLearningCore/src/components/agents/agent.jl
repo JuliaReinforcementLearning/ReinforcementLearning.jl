@@ -20,7 +20,7 @@ Generally speaking, it does nothing but update the trajectory and policy appropr
 """
 Base.@kwdef mutable struct Agent{P<:AbstractPolicy,T<:AbstractTrajectory,R} <: AbstractAgent
     policy::P
-    trajectory::T = DummyTrajectory()
+    trajectory::T = DUMMY_TRAJECTORY
     role::R = RLBase.DEFAULT_PLAYER
     is_training::Bool = true
 end
@@ -84,144 +84,53 @@ end
     agent.policy(env)
 
 #####
+# default behavior
+#####
+
+function (agent::Agent)(::Training{PreEpisodeStage}, env)
+    if nframes(agent.trajectory[:full_state]) > 0
+        pop!(agent.trajectory, :full_state)
+    end
+    if nframes(agent.trajectory[:full_action]) > 0
+        pop!(agent.trajectory, :full_action)
+    end
+    if ActionStyle(env) === FULL_ACTION_SET && nframes(agent.trajectory[:full_legal_actions_mask]) > 0
+        pop!(agent.trajectory, :full_legal_actions_mask)
+    end
+end
+
+function (agent::Agent)(::Training{PreActStage}, env)
+    action = agent.policy(env)
+    push!(agent.trajectory; state = get_state(env), action = action)
+    if ActionStyle(env) === FULL_ACTION_SET
+        push!(agent.trajectory; legal_actions_mask=get_legal_actions_mask(env))
+    end
+    update!(agent.policy, agent.trajectory)
+    action
+end
+
+function (agent::Agent)(::Training{PostActStage}, env)
+    push!(agent.trajectory; reward = get_reward(env), terminal = get_terminal(env))
+    nothing
+end
+
+function (agent::Agent)(::Training{PostEpisodeStage}, env)
+    action = agent.policy(env)
+    push!(agent.trajectory; state = get_state(env), action = action)
+    if ActionStyle(env) === FULL_ACTION_SET
+        push!(agent.trajectory; legal_actions_mask=get_legal_actions_mask(env))
+    end
+    update!(agent.policy, agent.trajectory)
+    action
+end
+
+#####
 # EpisodicCompactSARTSATrajectory
 #####
-function (agent::Agent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
+function (agent::Agent{<:AbstractPolicy,<:EpisodicTrajectory})(
     ::Training{PreEpisodeStage},
     env,
 )
     empty!(agent.trajectory)
     nothing
-end
-
-function (agent::Agent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
-    ::Training{PreActStage},
-    env,
-)
-    action = agent.policy(env)
-    push!(agent.trajectory; state = get_state(env), action = action)
-    update!(agent.policy, agent.trajectory)
-    action
-end
-
-function (agent::Agent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
-    ::Training{PostActStage},
-    env,
-)
-    push!(agent.trajectory; reward = get_reward(env), terminal = get_terminal(env))
-    nothing
-end
-
-function (agent::Agent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
-    ::Training{PostEpisodeStage},
-    env,
-)
-    action = agent.policy(env)
-    push!(agent.trajectory; state = get_state(env), action = action)
-    update!(agent.policy, agent.trajectory)
-    action
-end
-
-#####
-# Union{CircularCompactSARTSATrajectory, CircularCompactPSARTSATrajectory}
-#####
-
-function (
-    agent::Agent{
-        <:AbstractPolicy,
-        <:Union{CircularCompactSARTSATrajectory,CircularCompactPSARTSATrajectory},
-    }
-)(
-    ::Training{PreEpisodeStage},
-    env,
-)
-    if length(agent.trajectory) > 0
-        pop!(agent.trajectory, :state, :action)
-    end
-    nothing
-end
-
-function (
-    agent::Agent{
-        <:AbstractPolicy,
-        <:Union{CircularCompactSARTSATrajectory,CircularCompactPSARTSATrajectory},
-    }
-)(
-    ::Training{PreActStage},
-    env,
-)
-    action = agent.policy(env)
-    push!(agent.trajectory; state = get_state(env), action = action)
-    update!(agent.policy, agent.trajectory)
-    action
-end
-
-function (
-    agent::Agent{
-        <:AbstractPolicy,
-        <:Union{CircularCompactSARTSATrajectory,CircularCompactPSARTSATrajectory},
-    }
-)(
-    ::Training{PostActStage},
-    env,
-)
-    push!(agent.trajectory; reward = get_reward(env), terminal = get_terminal(env))
-    nothing
-end
-
-function (
-    agent::Agent{
-        <:AbstractPolicy,
-        <:Union{CircularCompactSARTSATrajectory,CircularCompactPSARTSATrajectory},
-    }
-)(
-    ::Training{PostEpisodeStage},
-    env,
-)
-    action = agent.policy(env)
-    push!(agent.trajectory; state = get_state(env), action = action)
-    update!(agent.policy, agent.trajectory)
-    action
-end
-
-#####
-# VectorialCompactSARTSATrajectory
-#####
-
-function (agent::Agent{<:AbstractPolicy,<:VectorialCompactSARTSATrajectory})(
-    ::Training{PreEpisodeStage},
-    env,
-)
-    if length(agent.trajectory) > 0
-        pop!(agent.trajectory, :state, :action)
-    end
-    nothing
-end
-
-function (agent::Agent{<:AbstractPolicy,<:VectorialCompactSARTSATrajectory})(
-    ::Training{PreActStage},
-    env,
-)
-    action = agent.policy(env)
-    push!(agent.trajectory; state = get_state(env), action = action)
-    update!(agent.policy, agent.trajectory)
-    action
-end
-
-function (agent::Agent{<:AbstractPolicy,<:VectorialCompactSARTSATrajectory})(
-    ::Training{PostActStage},
-    env,
-)
-    push!(agent.trajectory; reward = get_reward(env), terminal = get_terminal(env))
-    nothing
-end
-
-function (agent::Agent{<:AbstractPolicy,<:VectorialCompactSARTSATrajectory})(
-    ::Training{PostEpisodeStage},
-    env,
-)
-    action = agent.policy(env)
-    push!(agent.trajectory; state = get_state(env), action = action)
-    update!(agent.policy, agent.trajectory)
-    action
 end

@@ -5,15 +5,6 @@ import Flux: glorot_uniform, glorot_normal
 using Random
 using LinearAlgebra
 
-# watch https://github.com/FluxML/Flux.jl/issues/1274
-glorot_uniform(rng::AbstractRNG, dims...) =
-    (rand(rng, Float32, dims...) .- 0.5f0) .* sqrt(24.0f0 / sum(Flux.nfan(dims...)))
-glorot_normal(rng::AbstractRNG, dims...) =
-    randn(rng, Float32, dims...) .* sqrt(2.0f0 / sum(Flux.nfan(dims...)))
-
-glorot_uniform(rng::AbstractRNG) = (dims...) -> glorot_uniform(rng, dims...)
-glorot_normal(rng::AbstractRNG) = (dims...) -> glorot_normal(rng, dims...)
-
 # https://github.com/FluxML/Flux.jl/pull/1171/
 # https://www.tensorflow.org/api_docs/python/tf/keras/initializers/Orthogonal
 function orthogonal_matrix(rng::AbstractRNG, nrow, ncol)

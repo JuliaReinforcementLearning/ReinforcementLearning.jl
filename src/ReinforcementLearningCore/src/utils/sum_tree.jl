@@ -63,7 +63,7 @@ mutable struct SumTree{T} <: AbstractArray{Int,1}
     length::Int
     nparents::Int
     tree::Vector{T}
-    SumTree(capacity::Int) = SumTree(Float64, capacity)
+    SumTree(capacity::Int) = SumTree(Float32, capacity)
     function SumTree(T, capacity)
         nparents = 2^ceil(Int, log2(capacity)) - 1
         new{T}(capacity, 1, 0, nparents, zeros(T, nparents + capacity))

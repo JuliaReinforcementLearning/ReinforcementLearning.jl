@@ -33,7 +33,7 @@ end
 
 get_role(agent::DynaAgent) = agent.role
 
-function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
+function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(
     ::PreEpisodeStage,
     env,
 )
@@ -41,7 +41,7 @@ function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
     nothing
 end
 
-function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
+function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(
     ::PreActStage,
     env,
 )
@@ -53,7 +53,7 @@ function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
     action
 end
 
-function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
+function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(
     ::PostActStage,
     env,
 )
@@ -61,7 +61,7 @@ function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
     nothing
 end
 
-function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicCompactSARTSATrajectory})(
+function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(
     ::PostEpisodeStage,
     env,
 )
