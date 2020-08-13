@@ -11,7 +11,8 @@ function extract_experience(t::AbstractTrajectory, learner::PERLearners)
     γ = learner.γ
 
     # 1. sample indices based on priority
-    valid_ind_range = isnothing(s) ? (1:(length(t[:terminal])-h)) : (s:(length(t[:terminal])-h))
+    valid_ind_range =
+        isnothing(s) ? (1:(length(t[:terminal])-h)) : (s:(length(t[:terminal])-h))
     if t isa CircularCompactPSARTSATrajectory
         inds = Vector{Int}(undef, n)
         priorities = Vector{Float32}(undef, n)

@@ -144,7 +144,8 @@ function extract_experience(t::AbstractTrajectory, learner::DQNLearner)
     n = learner.batch_size
     γ = learner.γ
 
-    valid_ind_range = isnothing(s) ? (1:(length(t[:terminal])-h)) : (s:(length(t[:terminal])-h))
+    valid_ind_range =
+        isnothing(s) ? (1:(length(t[:terminal])-h)) : (s:(length(t[:terminal])-h))
     inds = rand(learner.rng, valid_ind_range, n)
     states = consecutive_view(t[:state], inds; n_stack = s)
     actions = consecutive_view(t[:action], inds)
