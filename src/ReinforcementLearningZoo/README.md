@@ -49,10 +49,23 @@ Some built-in experiments are exported to help new users to easily run benchmark
 - ``E`rlpyt_A2C_Atari(pong)` ``
 - ``E`rlpyt_PPO_Atari(pong)` ``
 
-**Notes:**
+### Notes:
 
 - Experiments on `CartPole` usually run faster with CPU only due to the overhead of sending data between CPU and GPU.
 - It shouldn't surprise you that our experiments on `CartPole` are much faster than those written in Python. The secret is that our environment is written in Julia!
 - Remember to set `JULIA_NUM_THREADS` to enable multi-threading when using algorithms like `A2C` and `PPO`.
 - Experiments on `Atari` are only available when you have `ArcadeLearningEnvironment.jl` installed and `using ArcadeLearningEnvironment`.
+
+### Speed
+
 - Different configurations might affect the performance a lot. According to our tests, our implementations are generally comparable to those written in PyTorch or TensorFlow with the same configuration (sometimes we are significantly faster).
+
+The following data are collected from experiments on *Intel(R) Xeon(R) W-2123 CPU @ 3.60GHz* with a GPU card of *RTX 2080ti*.
+
+| Experiment | FPS | Notes |
+|:---------- |:----:| ----:|
+| ``E`Dopamine_DQN_Atari(pong)` `` | ~210 | Use the same config of [dqn.gin in google/dopamine](https://github.com/google/dopamine/blob/master/dopamine/agents/dqn/configs/dqn.gin)|
+| ``E`Dopamine_Rainbow_Atari(pong)` `` | ~171 | Use the same config of [rainbow.gin in google/dopamine](https://github.com/google/dopamine/blob/master/dopamine/agents/implicit_quantile/configs/rainbow.gin)|
+| ``E`Dopamine_IQN_Atari(pong)` `` | ~162 | Use the same config of [implicit_quantile.gin in google/dopamine](https://github.com/google/dopamine/blob/master/dopamine/agents/implicit_quantile/configs/implicit_quantile.gin)|
+|``E`rlpyt_A2C_Atari(pong)` ``| ~768 | Use the same default parameters of [A2C in rlpyt](https://github.com/astooke/rlpyt/blob/master/rlpyt/algos/pg/a2c.py) with **4 threads**|
+| ``E`rlpyt_PPO_Atari(pong)` `` | ~711 | Use the same default parameters of [PPO in rlpyt](https://github.com/astooke/rlpyt/blob/master/rlpyt/algos/pg/ppo.py) with **4 threads**|
