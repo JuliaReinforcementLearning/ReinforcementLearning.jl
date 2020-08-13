@@ -9,7 +9,7 @@ export Trajectory,
     CircularCompactSALRTSALTrajectory,
     CircularCompactPSALRTSALTrajectory
 
-using MacroTools:@forward
+using MacroTools: @forward
 
 #####
 # Trajectory
@@ -25,7 +25,7 @@ struct Trajectory{T} <: AbstractTrajectory
     traces::T
 end
 
-Trajectory(;kwargs...) = Trajectory(kwargs.data)
+Trajectory(; kwargs...) = Trajectory(kwargs.data)
 
 const DUMMY_TRAJECTORY = Trajectory()
 const DummyTrajectory = typeof(DUMMY_TRAJECTORY)
@@ -69,10 +69,10 @@ function SharedTrajectory(x, s::Symbol)
     SharedTrajectory(
         x,
         (;
-            s=>SharedTrajectoryMeta(1, -1),
-            Symbol(:next_, s)=>SharedTrajectoryMeta(2, 0),
-            Symbol(:full_, s) => SharedTrajectoryMeta(1,0)
-        )
+            s => SharedTrajectoryMeta(1, -1),
+            Symbol(:next_, s) => SharedTrajectoryMeta(2, 0),
+            Symbol(:full_, s) => SharedTrajectoryMeta(1, 0),
+        ),
     )
 end
 
@@ -89,7 +89,7 @@ Base.pop!(t::SharedTrajectory, s::Symbol) = pop!(t.x)
 
 function Base.pop!(t::SharedTrajectory)
     s = first(keys(t))
-    (;s => pop!(t.x))
+    (; s => pop!(t.x))
 end
 
 isfull(t::SharedTrajectory) = isfull(t.x)
@@ -105,15 +105,21 @@ Assuming that the `flag_trace` is in `traces` and it's an `AbstractVector{Bool}`
 meaning whether an environment reaches terminal or not. The last element in
 `flag_trace` will be used to determine whether the whole trace is full or not.
 """
-struct EpisodicTrajectory{T, flag_trace} <: AbstractTrajectory
+struct EpisodicTrajectory{T,flag_trace} <: AbstractTrajectory
     traces::T
 end
 
-EpisodicTrajectory(traces::T, flag_trace=:terminal) where T = EpisodicTrajectory{T, flag_trace}(traces)
+EpisodicTrajectory(traces::T, flag_trace = :terminal) where {T} =
+    EpisodicTrajectory{T,flag_trace}(traces)
 
-@forward EpisodicTrajectory.traces Base.keys, Base.haskey, Base.getindex, Base.push!, Base.pop!, Base.empty!
+@forward EpisodicTrajectory.traces Base.keys,
+Base.haskey,
+Base.getindex,
+Base.push!,
+Base.pop!,
+Base.empty!
 
-function isfull(t::EpisodicTrajectory{<:Any, F}) where F
+function isfull(t::EpisodicTrajectory{<:Any,F}) where {F}
     x = t.traces[F]
     (nframes(x) > 0) && select_last_frame(x)
 end
@@ -125,37 +131,40 @@ end
 """
     CombinedTrajectory(t1::AbstractTrajectory, t2::AbstractTrajectory)
 """
-struct CombinedTrajectory{T1, T2} <: AbstractTrajectory
+struct CombinedTrajectory{T1,T2} <: AbstractTrajectory
     t1::T1
     t2::T2
 end
 
 Base.haskey(t::CombinedTrajectory, s::Symbol) = haskey(t.t1, s) || haskey(t.t2, s)
-Base.getindex(t::CombinedTrajectory, s::Symbol) = if haskey(t.t1, s)
-    getindex(t.t1, s)
-elseif haskey(t.t2, s)
-    getindex(t.t2, s)
-else
-    throw(ArgumentError("unknown key: $s"))
-end
+Base.getindex(t::CombinedTrajectory, s::Symbol) =
+    if haskey(t.t1, s)
+        getindex(t.t1, s)
+    elseif haskey(t.t2, s)
+        getindex(t.t2, s)
+    else
+        throw(ArgumentError("unknown key: $s"))
+    end
 
 Base.keys(t::CombinedTrajectory) = (keys(t.t1)..., keys(t.t2)...)
 
-Base.push!(t::CombinedTrajectory, kv::Pair{Symbol}) = if haskey(t.t1, first(kv))
-    push!(t.t1, kv)
-elseif haskey(t.t2, first(kv))
-    push!(t.t2, kv)
-else
-    throw(ArgumentError("unknown kv: $kv"))
-end
+Base.push!(t::CombinedTrajectory, kv::Pair{Symbol}) =
+    if haskey(t.t1, first(kv))
+        push!(t.t1, kv)
+    elseif haskey(t.t2, first(kv))
+        push!(t.t2, kv)
+    else
+        throw(ArgumentError("unknown kv: $kv"))
+    end
 
-Base.pop!(t::CombinedTrajectory, s::Symbol) = if haskey(t.t1, s)
-    pop!(t.t1, s)
-elseif haskey(t.t2, s)
-    pop!(t.t2, s)
-else
-    throw(ArgumentError("unknown key: $s"))
-end
+Base.pop!(t::CombinedTrajectory, s::Symbol) =
+    if haskey(t.t1, s)
+        pop!(t.t1, s)
+    elseif haskey(t.t2, s)
+        pop!(t.t2, s)
+    else
+        throw(ArgumentError("unknown key: $s"))
+    end
 
 Base.pop!(t::CombinedTrajectory) = merge(pop!(t.t1), pop!(t.t2))
 
@@ -171,8 +180,14 @@ isfull(t::CombinedTrajectory) = isfull(t.t1) && isfull(t.t2)
 #####
 
 const CircularCompactSATrajectory = CombinedTrajectory{
-    <:SharedTrajectory{<:CircularArrayBuffer, <:NamedTuple{(:state, :next_state, :full_state)}},
-    <:SharedTrajectory{<:CircularArrayBuffer, <:NamedTuple{(:action, :next_action, :full_action)}},
+    <:SharedTrajectory{
+        <:CircularArrayBuffer,
+        <:NamedTuple{(:state, :next_state, :full_state)},
+    },
+    <:SharedTrajectory{
+        <:CircularArrayBuffer,
+        <:NamedTuple{(:action, :next_action, :full_action)},
+    },
 }
 
 function CircularCompactSATrajectory(;
@@ -184,11 +199,12 @@ function CircularCompactSATrajectory(;
 )
     CombinedTrajectory(
         SharedTrajectory(
-            CircularArrayBuffer{state_type}(state_size..., capacity+1),
-            :state),
+            CircularArrayBuffer{state_type}(state_size..., capacity + 1),
+            :state,
+        ),
         SharedTrajectory(
-            CircularArrayBuffer{action_type}(action_size..., capacity+1),
-            :action
+            CircularArrayBuffer{action_type}(action_size..., capacity + 1),
+            :action,
         ),
     )
 end
@@ -198,22 +214,30 @@ end
 #####
 
 const CircularCompactSALTrajectory = CombinedTrajectory{
-    <:SharedTrajectory{<:CircularArrayBuffer, <:NamedTuple{(:legal_actions_mask, :next_legal_actions_mask, :full_legal_actions_mask)}},
-    <:CircularCompactSATrajectory
+    <:SharedTrajectory{
+        <:CircularArrayBuffer,
+        <:NamedTuple{
+            (:legal_actions_mask, :next_legal_actions_mask, :full_legal_actions_mask),
+        },
+    },
+    <:CircularCompactSATrajectory,
 }
 
 function CircularCompactSALTrajectory(;
     capacity,
     legal_actions_mask_size,
-    legal_actions_mask_type=Bool,
-    kw...
+    legal_actions_mask_type = Bool,
+    kw...,
 )
     CombinedTrajectory(
         SharedTrajectory(
-            CircularArrayBuffer{legal_actions_mask_type}(legal_actions_mask_size..., capacity+1),
-            :legal_actions_mask
+            CircularArrayBuffer{legal_actions_mask_type}(
+                legal_actions_mask_size...,
+                capacity + 1,
+            ),
+            :legal_actions_mask,
         ),
-        CircularCompactSATrajectory(;capacity=capacity, kw...)
+        CircularCompactSATrajectory(; capacity = capacity, kw...),
     )
 end
 #####
@@ -221,8 +245,13 @@ end
 #####
 
 const CircularCompactSARTSATrajectory = CombinedTrajectory{
-    <:Trajectory{<:NamedTuple{(:reward, :terminal), <:Tuple{<:CircularArrayBuffer, <:CircularArrayBuffer}}},
-    <:CircularCompactSATrajectory
+    <:Trajectory{
+        <:NamedTuple{
+            (:reward, :terminal),
+            <:Tuple{<:CircularArrayBuffer,<:CircularArrayBuffer},
+        },
+    },
+    <:CircularCompactSATrajectory,
 }
 
 function CircularCompactSARTSATrajectory(;
@@ -231,14 +260,14 @@ function CircularCompactSARTSATrajectory(;
     reward_size = (),
     terminal_type = Bool,
     terminal_size = (),
-    kw...
+    kw...,
 )
     CombinedTrajectory(
         Trajectory(
-            reward=CircularArrayBuffer{reward_type}(reward_size..., capacity),
-            terminal=CircularArrayBuffer{terminal_type}(terminal_size..., capacity),
+            reward = CircularArrayBuffer{reward_type}(reward_size..., capacity),
+            terminal = CircularArrayBuffer{terminal_type}(terminal_size..., capacity),
         ),
-        CircularCompactSATrajectory(;capacity=capacity, kw...),
+        CircularCompactSATrajectory(; capacity = capacity, kw...),
     )
 end
 
@@ -247,8 +276,13 @@ end
 #####
 
 const CircularCompactSALRTSALTrajectory = CombinedTrajectory{
-    <:Trajectory{<:NamedTuple{(:reward, :terminal), <:Tuple{<:CircularArrayBuffer, <:CircularArrayBuffer}}},
-    <:CircularCompactSALTrajectory
+    <:Trajectory{
+        <:NamedTuple{
+            (:reward, :terminal),
+            <:Tuple{<:CircularArrayBuffer,<:CircularArrayBuffer},
+        },
+    },
+    <:CircularCompactSALTrajectory,
 }
 
 function CircularCompactSALRTSALTrajectory(;
@@ -257,14 +291,14 @@ function CircularCompactSALRTSALTrajectory(;
     reward_size = (),
     terminal_type = Bool,
     terminal_size = (),
-    kw...
-    )
+    kw...,
+)
     CombinedTrajectory(
         Trajectory(
-            reward=CircularArrayBuffer{reward_type}(reward_size..., capacity),
-            terminal=CircularArrayBuffer{terminal_type}(terminal_size..., capacity),
+            reward = CircularArrayBuffer{reward_type}(reward_size..., capacity),
+            terminal = CircularArrayBuffer{terminal_type}(terminal_size..., capacity),
         ),
-        CircularCompactSALTrajectory(;capacity=capacity, kw...),
+        CircularCompactSALTrajectory(; capacity = capacity, kw...),
     )
 end
 
@@ -273,26 +307,31 @@ end
 #####
 
 const CircularCompactPSARTSATrajectory = CombinedTrajectory{
-    <:Trajectory{<:NamedTuple{(:reward, :terminal,:priority), <:Tuple{<:CircularArrayBuffer, <:CircularArrayBuffer, <:SumTree}}},
-    <:CircularCompactSATrajectory
+    <:Trajectory{
+        <:NamedTuple{
+            (:reward, :terminal, :priority),
+            <:Tuple{<:CircularArrayBuffer,<:CircularArrayBuffer,<:SumTree},
+        },
+    },
+    <:CircularCompactSATrajectory,
 }
 
 function CircularCompactPSARTSATrajectory(;
     capacity,
-    priority_type=Float32,
+    priority_type = Float32,
     reward_type = Float32,
     reward_size = (),
     terminal_type = Bool,
     terminal_size = (),
-    kw...
+    kw...,
 )
     CombinedTrajectory(
         Trajectory(
-            reward=CircularArrayBuffer{reward_type}(reward_size..., capacity),
-            terminal=CircularArrayBuffer{terminal_type}(terminal_size..., capacity),
-            priority=SumTree(priority_type, capacity)
+            reward = CircularArrayBuffer{reward_type}(reward_size..., capacity),
+            terminal = CircularArrayBuffer{terminal_type}(terminal_size..., capacity),
+            priority = SumTree(priority_type, capacity),
         ),
-        CircularCompactSATrajectory(;capacity=capacity, kw...),
+        CircularCompactSATrajectory(; capacity = capacity, kw...),
     )
 end
 
@@ -301,25 +340,30 @@ end
 #####
 
 const CircularCompactPSALRTSALTrajectory = CombinedTrajectory{
-    <:Trajectory{<:NamedTuple{(:reward, :terminal,:priority), <:Tuple{<:CircularArrayBuffer, <:CircularArrayBuffer, <:SumTree}}},
-    <:CircularCompactSALTrajectory
+    <:Trajectory{
+        <:NamedTuple{
+            (:reward, :terminal, :priority),
+            <:Tuple{<:CircularArrayBuffer,<:CircularArrayBuffer,<:SumTree},
+        },
+    },
+    <:CircularCompactSALTrajectory,
 }
 
 function CircularCompactPSALRTSALTrajectory(;
     capacity,
-    priority_type=Float32,
+    priority_type = Float32,
     reward_type = Float32,
     reward_size = (),
     terminal_type = Bool,
     terminal_size = (),
-    kw...
+    kw...,
 )
     CombinedTrajectory(
         Trajectory(
-            reward=CircularArrayBuffer{reward_type}(reward_size..., capacity),
-            terminal=CircularArrayBuffer{terminal_type}(terminal_size..., capacity),
-            priority=SumTree(priority_type, capacity)
+            reward = CircularArrayBuffer{reward_type}(reward_size..., capacity),
+            terminal = CircularArrayBuffer{terminal_type}(terminal_size..., capacity),
+            priority = SumTree(priority_type, capacity),
         ),
-        CircularCompactSALTrajectory(;capacity=capacity, kw...),
+        CircularCompactSALTrajectory(; capacity = capacity, kw...),
     )
 end

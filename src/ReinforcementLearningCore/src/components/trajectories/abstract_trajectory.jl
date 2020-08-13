@@ -22,7 +22,7 @@ Optional Methods:
 """
 abstract type AbstractTrajectory end
 
-function Base.push!(t::AbstractTrajectory;kwargs...)
+function Base.push!(t::AbstractTrajectory; kwargs...)
     for kv in kwargs
         push!(t, kv)
     end

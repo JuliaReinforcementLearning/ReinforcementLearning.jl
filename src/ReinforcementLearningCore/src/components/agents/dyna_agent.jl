@@ -33,18 +33,12 @@ end
 
 get_role(agent::DynaAgent) = agent.role
 
-function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(
-    ::PreEpisodeStage,
-    env,
-)
+function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(::PreEpisodeStage, env)
     empty!(agent.trajectory)
     nothing
 end
 
-function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(
-    ::PreActStage,
-    env,
-)
+function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(::PreActStage, env)
     action = agent.policy(env)
     push!(agent.trajectory; state = get_state(env), action = action)
     update!(agent.model, agent.trajectory, agent.policy)  # model learning
@@ -53,18 +47,12 @@ function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(
     action
 end
 
-function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(
-    ::PostActStage,
-    env,
-)
+function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(::PostActStage, env)
     push!(agent.trajectory; reward = get_reward(env), terminal = get_terminal(env))
     nothing
 end
 
-function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(
-    ::PostEpisodeStage,
-    env,
-)
+function (agent::DynaAgent{<:AbstractPolicy,<:EpisodicTrajectory})(::PostEpisodeStage, env)
     action = agent.policy(env)
     push!(agent.trajectory; state = get_state(env), action = action)
     update!(agent.model, agent.trajectory, agent.policy)  # model learning
