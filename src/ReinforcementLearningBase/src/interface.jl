@@ -100,7 +100,8 @@ end
 """
     NumAgentStyle(env)
 """
-@env_api NumAgentStyle(env::AbstractEnv) = SINGLE_AGENT
+@env_api NumAgentStyle(env::T) where {T<:AbstractEnv} = NumAgentStyle(T)
+NumAgentStyle(env::Type{<:AbstractEnv}) = SINGLE_AGENT
 
 #####
 ### DynamicStyle
@@ -122,7 +123,8 @@ abstract type AbstractDynamicStyle <: AbstractEnvStyle end
 
 Determine whether the players can play simultaneously or not. Default value is [`SEQUENTIAL`](@ref)
 """
-@env_api DynamicStyle(env::AbstractEnv) = SEQUENTIAL
+@env_api DynamicStyle(env::T) where {T<:AbstractEnv} = DynamicStyle(T)
+DynamicStyle(::Type{<:AbstractEnv}) = SEQUENTIAL
 
 #####
 ### InformationStyle
@@ -145,7 +147,8 @@ abstract type AbstractInformationStyle <: AbstractEnvStyle end
 Specify whether the `env` is [PERFECT_INFORMATION](@ref) or [IMPERFECT_INFORMATION](@ref).
 Return [PERFECT_INFORMATION](@ref) by default.
 """
-@env_api InformationStyle(env::AbstractEnv) = PERFECT_INFORMATION
+@env_api InformationStyle(env::T) where {T<:AbstractEnv} = InformationStyle(T)
+InformationStyle(::Type{<:AbstractEnv}) = PERFECT_INFORMATION
 
 #####
 ### ChanceStyle
@@ -177,7 +180,8 @@ Usually only a dummy action is allowed in this case.
 """
     ChanceStyle(env) = DETERMINISTIC
 """
-@env_api ChanceStyle(env::AbstractEnv) = DETERMINISTIC
+@env_api ChanceStyle(env::T) where {T<:AbstractEnv} = ChanceStyle(T)
+ChanceStyle(::Type{<:AbstractEnv}) = DETERMINISTIC
 
 #####
 ### RewardStyle
@@ -195,7 +199,8 @@ abstract type AbstractRewardStyle <: AbstractEnvStyle end
 @api const TERMINAL_REWARD = TerminalReward()
 
 "Specify whether we can get reward after each step or only at the end of an game. Possible values are [STEP_REWARD](@ref) or [TERMINAL_REWARD](@ref)"
-@env_api RewardStyle(env::AbstractEnv) = STEP_REWARD
+@env_api RewardStyle(env::T) where {T<:AbstractEnv} = RewardStyle(T)
+RewardStyle(::Type{<:AbstractEnv}) = STEP_REWARD
 
 #####
 ### UtilityStyle
@@ -231,7 +236,8 @@ Possible values are:
 - [GENERAL_SUM](@ref)
 - [IDENTICAL_REWARD](@ref)
 """
-@env_api UtilityStyle(env::AbstractEnv) = GENERAL_SUM
+@env_api UtilityStyle(env::T) where {T<:AbstractEnv} = UtilityStyle(T)
+UtilityStyle(::Type{<:AbstractEnv}) = GENERAL_SUM
 
 #####
 ### ActionStyle
@@ -254,7 +260,8 @@ abstract type AbstractActionStyle <: AbstractEnvStyle end
 Specify whether the current state of `env` contains a full action set or a minimal action set.
 By default the [`MINIMAL_ACTION_SET`](@ref) is returned.
 """
-@env_api ActionStyle(env::AbstractEnv) = MINIMAL_ACTION_SET
+@env_api ActionStyle(env::T) where T<:AbstractEnv = ActionStyle(T)
+ActionStyle(::Type{<:AbstractEnv}) = MINIMAL_ACTION_SET
 
 #####
 # General
@@ -281,9 +288,11 @@ See also: [`get_legal_actions`](@ref)
 """
     get_legal_actions(env, player=get_current_player(env))
 
-Only valid for environments of [`FULL_ACTION_SET`](@ref).
+For environments of [`MINIMAL_ACTION_SET`](@ref), the result is the same with [`get_actions`](@ref).
 """
-@multi_agent_env_api get_legal_actions(env::AbstractEnv, player = get_current_player(env))
+@multi_agent_env_api get_legal_actions(env::AbstractEnv, player = get_current_player(env)) = get_legal_actions(ActionStyle(env), env, player)
+
+get_legal_actions(::MinimalActionSet, env, player) = get_actions(env)
 
 """
     get_legal_actions_mask(env, player=get_current_player(env)) -> AbstractArray{Bool}
@@ -377,16 +386,23 @@ Here `player` must be a chance player.
 
 Treat the `env` as a game tree. Create an independent child after applying `action`.
 """
-@env_api function child(env::AbstractEnv, action)
+@api function child(env::AbstractEnv, action)
     new_env = copy(env)
     new_env(action)
     new_env
 end
 
-@env_api has_children(env::AbstractEnv) = !get_terminal(env)
+@api has_children(env::AbstractEnv) = !get_terminal(env)
 
-@env_api children(env::AbstractEnv) =
+@api children(env::AbstractEnv) =
     (child(env, action) for action in get_legal_actions(env))
+
+@api function walk(f, env::AbstractEnv)
+    f(env)
+    for x in children(env)
+        walk(f, x)
+    end
+end
 
 #####
 ## Space

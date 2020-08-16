@@ -241,3 +241,9 @@ for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     end
 end
 =#
+
+for f in ENV_API
+    if endswith(String(f), "Style")
+        @eval $f(x::MultiThreadEnv{T}) where T =  $f(T)
+    end
+end
