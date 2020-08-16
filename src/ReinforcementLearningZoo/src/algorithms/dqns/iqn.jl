@@ -156,7 +156,11 @@ function (learner::IQNLearner)(env)
     τ = rand(learner.device_rng, Float32, learner.K, 1)
     τₑₘ = embed(τ, learner.Nₑₘ)
     quantiles = learner.approximator(state, τₑₘ)
-    vec(mean(quantiles; dims = 2)) |> send_to_host
+    probs = vec(mean(quantiles; dims = 2)) |> send_to_host
+    if ActionStyle(env) === FULL_ACTION_SET
+        probs .+= typemin(eltype(probs)) .* (1 .- get_legal_actions_mask(env))
+    end
+    probs
 end
 
 embed(x, Nₑₘ) = cos.(Float32(π) .* (1:Nₑₘ) .* reshape(x, 1, :))
@@ -180,7 +184,13 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
     τ′ = rand(learner.device_rng, Float32, N′, batch_size)  # TODO: support β distribution
     τₑₘ′ = embed(τ′, Nₑₘ)
     zₜ = Zₜ(s′, τₑₘ′)
-    aₜ = argmax(mean(zₜ, dims = 2), dims = 1)
+    avg_zₜ = mean(zₜ, dims = 2)
+
+    if !isnothing(batch.next_legal_actions_mask)
+        avg_zₜ .+= typemin(eltype(avg_zₜ)) .* (1 .- send_to_device(D, batch.next_legal_actions_mask))
+    end
+
+    aₜ = argmax(avg_zₜ, dims = 1)
     aₜ = aₜ .+ typeof(aₜ)(CartesianIndices((0, 0:N′-1, 0)))
     qₜ = reshape(zₜ[aₜ], :, batch_size)
     target = reshape(r, 1, batch_size) .+ learner.γ * reshape(1 .- t, 1, batch_size) .* qₜ  # reshape to allow broadcast
@@ -214,8 +224,7 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
             huber_loss ./ κ
         loss_per_quantile = reshape(sum(raw_loss; dims = 1), N, batch_size)
         loss_per_element = mean(loss_per_quantile; dims = 1)  # use as priorities
-        loss = is_use_PER ? dot(vec(weights), vec(loss_per_element)) * 1 // batch_size :
-                mean(loss_per_element)
+        loss = is_use_PER ? dot(vec(weights), vec(loss_per_element)) * 1 // batch_size : mean(loss_per_element)
         ignore() do
             # @assert all(loss_per_element .>= 0)
             is_use_PER && (

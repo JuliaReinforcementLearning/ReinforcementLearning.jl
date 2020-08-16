@@ -126,39 +126,33 @@ function (learner::RainbowLearner)(env)
     state = Flux.unsqueeze(state, ndims(state) + 1)
     logits = learner.approximator(state)
     q = learner.support .* softmax(reshape(logits, :, learner.n_actions))
-    # probs = vec(sum(q, dims=1)) .+ legal_action
-    vec(sum(q, dims = 1)) |> send_to_host
+    probs = vec(sum(q, dims = 1)) |> send_to_host
+    if ActionStyle(env) === FULL_ACTION_SET
+        probs .+= typemin(eltype(probs)) .* (1 .- get_legal_actions_mask(env))
+    end
+    probs
 end
 
 function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
-    Q,
-    Qₜ,
-    γ,
-    β,
-    loss_func,
-    n_atoms,
-    n_actions,
-    support,
-    delta_z,
-    update_horizon,
-    batch_size = learner.approximator,
-    learner.target_approximator,
-    learner.γ,
-    learner.β_priority,
-    learner.loss_func,
-    learner.n_atoms,
-    learner.n_actions,
-    learner.support,
-    learner.delta_z,
-    learner.update_horizon,
-    learner.batch_size
-
+    Q = learner.approximator
+    Qₜ = learner.target_approximator
+    γ = learner.γ
+    β = learner.β_priority
+    loss_func = learner.loss_func
+    n_atoms = learner.n_atoms
+    n_actions = learner.n_actions
+    support = learner.support
+    delta_z = learner.delta_z
+    update_horizon = learner.update_horizon
+    batch_size = learner.batch_size
     D = device(Q)
-    states, rewards, terminals, next_states = map(
-        x -> send_to_device(D, x),
-        (batch.states, batch.rewards, batch.terminals, batch.next_states),
-    )
+    states = send_to_device(D, batch.states)
+    rewards = send_to_device(D, batch.rewards)
+    terminals = send_to_device(D, batch.terminals)
+    next_states = send_to_device(D, batch.next_states)
+
     actions = CartesianIndex.(batch.actions, 1:batch_size)
+
     target_support =
         reshape(rewards, 1, :) .+
         (reshape(support, :, 1) * reshape((γ^update_horizon) .* (1 .- terminals), 1, :))
@@ -166,7 +160,9 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
     next_logits = Qₜ(next_states)
     next_probs = reshape(softmax(reshape(next_logits, n_atoms, :)), n_atoms, n_actions, :)
     next_q = reshape(sum(support .* next_probs, dims = 1), n_actions, :)
-    # next_q_argmax = argmax(cpu(next_q .+ next_legal_actions), dims=1)
+    if !isnothing(batch.next_legal_actions_mask)
+        next_q .+= typemin(eltype(next_q)) .* (1 .- send_to_device(D, batch.next_legal_actions_mask))
+    end
     next_prob_select = select_best_probs(next_probs, next_q)
 
     target_distribution = project_distribution(
@@ -178,18 +174,23 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
         learner.Vₘₐₓ,
     )
 
-    updated_priorities = Vector{Float32}(undef, batch_size)
-    weights = 1f0 ./ ((batch.priorities .+ 1f-10) .^ β)
-    weights ./= maximum(weights)
-    weights = send_to_device(D, weights)
+    is_use_PER = !isnothing(batch.priorities)  # is use Prioritized Experience Replay
+    if is_use_PER
+        updated_priorities = Vector{Float32}(undef, batch_size)
+        weights = 1f0 ./ ((batch.priorities .+ 1f-10) .^ β)
+        weights ./= maximum(weights)
+        weights = send_to_device(D, weights)
+    end
 
     gs = gradient(Flux.params(Q)) do
         logits = reshape(Q(states), n_atoms, n_actions, :)
         select_logits = logits[:, actions]
         batch_losses = loss_func(select_logits, target_distribution)
-        loss = dot(vec(weights), vec(batch_losses)) * 1 // batch_size
+        loss = is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1 // batch_size : mean(batch_losses)
         ignore() do
-            updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10) .^ β))
+            if is_use_PER
+                updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10) .^ β))
+            end
             learner.loss = loss
         end
         loss

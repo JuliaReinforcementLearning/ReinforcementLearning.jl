@@ -87,16 +87,20 @@ end
     The state of the observation is assumed to have been stacked,
     if `!isnothing(stack_size)`.
 """
-(learner::DQNLearner)(env) =
-    env |>
+function (learner::DQNLearner)(env)
+    probs = env |>
     get_state |>
-    x ->
-        Flux.unsqueeze(x, ndims(x) + 1) |>
-        x ->
-            send_to_device(device(learner.approximator), x) |>
-            learner.approximator |>
-            send_to_host |>
-            Flux.squeezebatch
+    x -> Flux.unsqueeze(x, ndims(x) + 1) |>
+    x -> send_to_device(device(learner.approximator), x) |>
+    learner.approximator |>
+    vec |>
+    send_to_host
+
+    if ActionStyle(env) === FULL_ACTION_SET
+        probs .+= typemin(eltype(probs)) .* (1 .- get_legal_actions_mask(env))
+    end
+    probs
+end
 
 function RLBase.update!(learner::DQNLearner, t::AbstractTrajectory)
     length(t[:terminal]) < learner.min_replay_history && return
@@ -124,10 +128,16 @@ function RLBase.update!(learner::DQNLearner, t::AbstractTrajectory)
     terminals = send_to_device(D, experience.terminals)
     next_states = send_to_device(D, experience.next_states)
 
+    target_q = Qₜ(next_states)
+    if haskey(t, :next_legal_actions_mask)
+        target_q .+= typemin(eltype(target_q)) .* (1 .- send_to_device(D, t[:next_legal_actions_mask]))
+    end
+
+    q′ = dropdims(maximum(target_q; dims = 1), dims = 1)
+    G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
+
     gs = gradient(params(Q)) do
         q = Q(states)[actions]
-        q′ = dropdims(maximum(Qₜ(next_states); dims = 1), dims = 1)
-        G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
         loss = loss_func(G, q)
         ignore() do
             learner.loss = loss
@@ -147,9 +157,20 @@ function extract_experience(t::AbstractTrajectory, learner::DQNLearner)
     valid_ind_range =
         isnothing(s) ? (1:(length(t[:terminal])-h)) : (s:(length(t[:terminal])-h))
     inds = rand(learner.rng, valid_ind_range, n)
+    next_inds = inds .+ h
+
     states = consecutive_view(t[:state], inds; n_stack = s)
     actions = consecutive_view(t[:action], inds)
-    next_states = consecutive_view(t[:state], inds .+ h; n_stack = s)
+    next_states = consecutive_view(t[:state], next_inds; n_stack = s)
+
+    if haskey(t, :legal_actions_mask)
+        legal_actions_mask = consecutive_view(t[:legal_actions_mask], inds)
+        next_legal_actions_mask = consecutive_view(t[:next_legal_actions_mask], next_inds)
+    else
+        legal_actions_mask = nothing
+        next_legal_actions_mask = nothing
+    end
+
     consecutive_rewards = consecutive_view(t[:reward], inds; n_horizon = h)
     consecutive_terminals = consecutive_view(t[:terminal], inds; n_horizon = h)
     rewards, terminals = zeros(Float32, n), fill(false, n)
@@ -167,9 +188,11 @@ function extract_experience(t::AbstractTrajectory, learner::DQNLearner)
     end
     (
         states = states,
+        legal_actions_mask = legal_actions_mask,
         actions = actions,
         rewards = rewards,
         terminals = terminals,
         next_states = next_states,
+        next_legal_actions_mask = next_legal_actions_mask,
     )
 end

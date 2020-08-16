@@ -74,17 +74,28 @@ function PPOLearner(;
     )
 end
 
-(learner::PPOLearner)(env::MultiThreadEnv) =
-    learner.approximator.actor(send_to_device(
+function (learner::PPOLearner)(env::MultiThreadEnv)
+    logits = learner.approximator.actor(send_to_device(
         device(learner.approximator),
         get_state(env),
     )) |> send_to_host
+
+    if ActionStyle(env[1]) === FULL_ACTION_SET
+        logits .+= typemin(eltype(logits)) .* (1 .- get_legal_actions_mask(env))
+    end
+    logits
+end
 
 function (learner::PPOLearner)(env)
     s = get_state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
     s = send_to_device(device(learner.approximator), s)
-    learner.approximator.actor(s) |> vec |> send_to_host
+    logits = learner.approximator.actor(s) |> vec |> send_to_host
+
+    if ActionStyle(env) === FULL_ACTION_SET
+        logits .+= typemin(eltype(logits)) .* (1 .- get_legal_actions_mask(env))
+    end
+    logits
 end
 
 function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
@@ -127,6 +138,9 @@ function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
         for i in 1:n_microbatches
             inds = rand_inds[(i-1)*microbatch_size+1:i*microbatch_size]
             s = send_to_device(D, select_last_dim(states_flatten, inds))
+            if haskey(t, :legal_actions_mask)
+                lam = send_to_device(D, select_last_dim(flatten_batch(t[:legal_actions_mask]), inds))
+            end
             a = vec(actions)[inds]
             r = send_to_device(D, vec(returns)[inds])
             log_p = send_to_device(D, vec(action_log_probs)[inds])
@@ -136,6 +150,9 @@ function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
             gs = gradient(ps) do
                 v′ = AC.critic(s) |> vec
                 logit′ = AC.actor(s)
+                if haskey(t, :legal_actions_mask)
+                    logit′ .+= typemin(eltype(logit′)) .* (1 .- lam)
+                end
                 p′ = softmax(logit′)
                 log_p′ = logsoftmax(logit′)
                 log_p′ₐ = log_p′[CartesianIndex.(a, 1:length(a))]

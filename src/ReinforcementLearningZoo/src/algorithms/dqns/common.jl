@@ -13,7 +13,7 @@ function extract_experience(t::AbstractTrajectory, learner::PERLearners)
     # 1. sample indices based on priority
     valid_ind_range =
         isnothing(s) ? (1:(length(t[:terminal])-h)) : (s:(length(t[:terminal])-h))
-    if t isa CircularCompactPSARTSATrajectory
+    if haskey(t, :priority)
         inds = Vector{Int}(undef, n)
         priorities = Vector{Float32}(undef, n)
         for i in 1:n
@@ -29,10 +29,21 @@ function extract_experience(t::AbstractTrajectory, learner::PERLearners)
         priorities = nothing
     end
 
+    next_inds = inds .+ h
+
     # 2. extract SARTS
     states = consecutive_view(t[:state], inds; n_stack = s)
     actions = consecutive_view(t[:action], inds)
-    next_states = consecutive_view(t[:state], inds .+ h; n_stack = s)
+    next_states = consecutive_view(t[:state], next_inds; n_stack = s)
+
+    if haskey(t, :legal_actions_mask)
+        legal_actions_mask = consecutive_view(t[:legal_actions_mask], inds)
+        next_legal_actions_mask = consecutive_view(t[:next_legal_actions_mask], inds)
+    else
+        legal_actions_mask = nothing
+        next_legal_actions_mask = nothing
+    end
+
     consecutive_rewards = consecutive_view(t[:reward], inds; n_horizon = h)
     consecutive_terminals = consecutive_view(t[:terminal], inds; n_horizon = h)
     rewards, terminals = zeros(Float32, n), fill(false, n)
@@ -48,10 +59,12 @@ function extract_experience(t::AbstractTrajectory, learner::PERLearners)
     inds,
     (
         states = states,
+        legal_actions_mask = legal_actions_mask,
         actions = actions,
         rewards = rewards,
         terminals = terminals,
         next_states = next_states,
+        next_legal_actions_mask = next_legal_actions_mask,
         priorities = priorities,
     )
 end
@@ -70,7 +83,7 @@ function RLBase.update!(p::QBasedPolicy{<:PERLearners}, t::AbstractTrajectory)
 
     inds, experience = extract_experience(t, p.learner)
 
-    if t isa CircularCompactPSARTSATrajectory
+    if haskey(t, :priority)
         priorities = update!(p.learner, experience)
         t[:priority][inds] .= priorities
     else
@@ -78,7 +91,7 @@ function RLBase.update!(p::QBasedPolicy{<:PERLearners}, t::AbstractTrajectory)
     end
 end
 
-function (agent::Agent{<:QBasedPolicy{<:PERLearners},<:CircularCompactPSARTSATrajectory})(
+function (agent::Agent{<:QBasedPolicy{<:PERLearners}})(
     ::RLCore.Training{PostActStage},
     env,
 )
@@ -86,7 +99,9 @@ function (agent::Agent{<:QBasedPolicy{<:PERLearners},<:CircularCompactPSARTSATra
         agent.trajectory;
         reward = get_reward(env),
         terminal = get_terminal(env),
-        priority = agent.policy.learner.default_priority,
     )
+    if haskey(agent.trajectory, :priority)
+        push!(agent.trajectory; priority = agent.policy.learner.default_priority)
+    end
     nothing
 end

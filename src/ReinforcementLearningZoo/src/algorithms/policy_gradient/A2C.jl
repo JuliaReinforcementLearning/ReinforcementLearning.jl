@@ -27,17 +27,28 @@ Base.@kwdef mutable struct A2CLearner{A<:ActorCritic} <: AbstractLearner
     loss::Float32 = 0.f0
 end
 
-(learner::A2CLearner)(env::MultiThreadEnv) =
-    learner.approximator.actor(send_to_device(
+function (learner::A2CLearner)(env::MultiThreadEnv)
+    logits = learner.approximator.actor(send_to_device(
         device(learner.approximator),
         get_state(env),
     )) |> send_to_host
+
+    if ActionStyle(env[1]) === FULL_ACTION_SET
+        logits .+= typemin(eltype(logits)) .* (1 .- get_legal_actions_mask(env))
+    end
+    logits
+end
 
 function (learner::A2CLearner)(env)
     s = get_state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
     s = send_to_device(device(learner.approximator), s)
-    learner.approximator.actor(s) |> vec |> send_to_host
+    logits = learner.approximator.actor(s) |> vec |> send_to_host
+
+    if ActionStyle(env) === FULL_ACTION_SET
+        logits .+= typemin(eltype(logits)) .* (1 .- get_legal_actions_mask(env))
+    end
+    logits
 end
 
 function RLBase.update!(learner::A2CLearner, t::AbstractTrajectory)
@@ -54,9 +65,9 @@ function RLBase.update!(learner::A2CLearner, t::AbstractTrajectory)
     w₁ = learner.actor_loss_weight
     w₂ = learner.critic_loss_weight
     w₃ = learner.entropy_loss_weight
-
-    states = send_to_device(device(AC), states)
-    next_state = send_to_device(device(AC), next_state)
+    D = device(AC)
+    states = send_to_device(D, states)
+    next_state = send_to_device(D, next_state)
 
     states_flattened = flatten_batch(states) # (state_size..., n_thread * update_step)
     actions = flatten_batch(actions)
@@ -70,11 +81,14 @@ function RLBase.update!(learner::A2CLearner, t::AbstractTrajectory)
         init = send_to_host(next_state_values),
         terminal = terminals,
     )
-    gains = send_to_device(device(AC), gains)
+    gains = send_to_device(D, gains)
 
     ps = Flux.params(AC)
     gs = gradient(ps) do
         logits = AC.actor(states_flattened)
+        if haskey(t, :legal_actions_mask)
+            logits .+= typemin(eltype(logits)) .* (1 .- flatten_batch(send_to_device(D, t[:legal_actions_mask])))
+        end
         probs = softmax(logits)
         log_probs = logsoftmax(logits)
         log_probs_select = log_probs[actions]

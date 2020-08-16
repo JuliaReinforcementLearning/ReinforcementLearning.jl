@@ -101,16 +101,20 @@ end
     The state of the observation is assumed to have been stacked,
     if `!isnothing(stack_size)`.
 """
-(learner::PrioritizedDQNLearner)(env) =
-    env |>
+function (learner::PrioritizedDQNLearner)(env)
+    probs = env |>
     get_state |>
-    x ->
-        Flux.unsqueeze(x, ndims(x) + 1) |>
-        x ->
-            send_to_device(device(learner.approximator), x) |>
-            learner.approximator |>
-            send_to_host |>
-            Flux.squeezebatch
+    x -> Flux.unsqueeze(x, ndims(x) + 1) |>
+    x -> send_to_device(device(learner.approximator), x) |>
+    learner.approximator |>
+    vec |>
+    send_to_host
+
+    if ActionStyle(env) === FULL_ACTION_SET
+        probs .+= typemin(eltype(probs)) .* (1 .- get_legal_actions_mask(env))
+    end
+    probs
+end
 
 function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
     Q, Qₜ, γ, β, loss_func, update_horizon, batch_size = learner.approximator,
@@ -132,11 +136,16 @@ function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
     weights ./= maximum(weights)
     weights = send_to_device(D, weights)
 
+    target_q = Qₜ(next_states)
+    if !isnothing(batch.next_legal_actions_mask)
+        target_q .+= typemin(eltype(target_q)) .* (1 .- send_to_device(D, batch.next_legal_actions_mask))
+    end
+
+    q′ = dropdims(maximum(target_q; dims = 1), dims = 1)
+    G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
+
     gs = gradient(params(Q)) do
         q = Q(states)[actions]
-        q′ = dropdims(maximum(Qₜ(next_states); dims = 1), dims = 1)
-        G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
-
         batch_losses = loss_func(G, q)
         loss = dot(vec(weights), vec(batch_losses)) * 1 // batch_size
         ignore() do
