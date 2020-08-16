@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/HEAD)
+## [v0.8.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.8.0) (2020-08-03)
 
-[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.7.3...HEAD)
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.7.3...v0.8.0)
 
 **Closed issues:**
 
@@ -26,6 +26,8 @@
 - CompatHelper: add new compat entry for "AbstractTrees" at version "0.3" [\#56](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/56) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Unify APIs [\#55](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/55) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#51](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/51) ([github-actions[bot]](https://github.com/apps/github-actions))
+- update docs [\#49](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/49) ([findmyway](https://github.com/findmyway))
+- Simplify APIs [\#41](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/41) ([findmyway](https://github.com/findmyway))
 
 ## [v0.7.3](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.3) (2020-06-26)
 
@@ -33,7 +35,7 @@
 
 **Merged pull requests:**
 
-- update docs [\#49](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/49) ([findmyway](https://github.com/findmyway))
+- add RewardOverriddenObs [\#50](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/50) ([findmyway](https://github.com/findmyway))
 
 ## [v0.7.2](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.2) (2020-06-02)
 
@@ -60,6 +62,10 @@
 ## [v0.7.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.0) (2020-05-06)
 
 [Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.6.6...v0.7.0)
+
+**Merged pull requests:**
+
+- Automatic JuliaFormatter.jl run [\#42](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/42) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [v0.6.6](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.6.6) (2020-05-06)
 
