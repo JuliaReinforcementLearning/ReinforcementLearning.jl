@@ -104,15 +104,18 @@ end
 Use a table to store action probabilities.
 """
 struct TabularRandomPolicy{S,T,R<:AbstractRNG} <: AbstractPolicy
-    table::Dict{S, Vector{T}}
+    table::Dict{S,Vector{T}}
     rng::R
 end
 
 Random.seed!(p::TabularRandomPolicy, seed) = Random.seed!(p.rng, seed)
 
-TabularRandomPolicy(;rng=Random.GLOBAL_RNG) = TabularRandomPolicy{Int, Float32}(;rng=rng)
-TabularRandomPolicy{S}(;rng=Random.GLOBAL_RNG) where {S} = TabularRandomPolicy{S, Float32}(;rng=rng)
-TabularRandomPolicy{S, T}(;rng=Random.GLOBAL_RNG) where {S,T} = TabularRandomPolicy(Dict{S,Vector{T}}(), rng)
+TabularRandomPolicy(; rng = Random.GLOBAL_RNG) =
+    TabularRandomPolicy{Int,Float32}(; rng = rng)
+TabularRandomPolicy{S}(; rng = Random.GLOBAL_RNG) where {S} =
+    TabularRandomPolicy{S,Float32}(; rng = rng)
+TabularRandomPolicy{S,T}(; rng = Random.GLOBAL_RNG) where {S,T} =
+    TabularRandomPolicy(Dict{S,Vector{T}}(), rng)
 
 (p::TabularRandomPolicy)(env::AbstractEnv) = _weighted_sample(p.rng, get_prob(p, env))
 
@@ -133,7 +136,8 @@ function get_prob(p::TabularRandomPolicy, env::AbstractEnv)
     end
 end
 
-update!(p::TabularRandomPolicy, experience::Pair{Int, <:AbstractVector}) = p.table[first(experience)] = last(experience)
+update!(p::TabularRandomPolicy, experience::Pair{Int,<:AbstractVector}) =
+    p.table[first(experience)] = last(experience)
 
 """
 Directly copied from [StatsBase.jl](https://github.com/JuliaStats/StatsBase.jl/blob/0ea8e798c3d19609ed33b11311de5a2bd6ee9fd0/src/sampling.jl#L499-L510) to avoid depending on the whole package.

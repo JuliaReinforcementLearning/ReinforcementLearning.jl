@@ -260,7 +260,7 @@ abstract type AbstractActionStyle <: AbstractEnvStyle end
 Specify whether the current state of `env` contains a full action set or a minimal action set.
 By default the [`MINIMAL_ACTION_SET`](@ref) is returned.
 """
-@env_api ActionStyle(env::T) where T<:AbstractEnv = ActionStyle(T)
+@env_api ActionStyle(env::T) where {T<:AbstractEnv} = ActionStyle(T)
 ActionStyle(::Type{<:AbstractEnv}) = MINIMAL_ACTION_SET
 
 #####
@@ -290,7 +290,8 @@ See also: [`get_legal_actions`](@ref)
 
 For environments of [`MINIMAL_ACTION_SET`](@ref), the result is the same with [`get_actions`](@ref).
 """
-@multi_agent_env_api get_legal_actions(env::AbstractEnv, player = get_current_player(env)) = get_legal_actions(ActionStyle(env), env, player)
+@multi_agent_env_api get_legal_actions(env::AbstractEnv, player = get_current_player(env)) =
+    get_legal_actions(ActionStyle(env), env, player)
 
 get_legal_actions(::MinimalActionSet, env, player) = get_actions(env)
 
@@ -394,8 +395,7 @@ end
 
 @api has_children(env::AbstractEnv) = !get_terminal(env)
 
-@api children(env::AbstractEnv) =
-    (child(env, action) for action in get_legal_actions(env))
+@api children(env::AbstractEnv) = (child(env, action) for action in get_legal_actions(env))
 
 @api function walk(f, env::AbstractEnv)
     f(env)

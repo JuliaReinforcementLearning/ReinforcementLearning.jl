@@ -244,6 +244,6 @@ end
 
 for f in ENV_API
     if endswith(String(f), "Style")
-        @eval $f(x::MultiThreadEnv{T}) where T =  $f(T)
+        @eval $f(x::MultiThreadEnv{T}) where {T} = $f(T)
     end
 end
