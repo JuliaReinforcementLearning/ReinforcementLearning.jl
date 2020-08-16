@@ -75,10 +75,11 @@ function PPOLearner(;
 end
 
 function (learner::PPOLearner)(env::MultiThreadEnv)
-    logits = learner.approximator.actor(send_to_device(
-        device(learner.approximator),
-        get_state(env),
-    )) |> send_to_host
+    logits =
+        learner.approximator.actor(send_to_device(
+            device(learner.approximator),
+            get_state(env),
+        )) |> send_to_host
 
     if ActionStyle(env[1]) === FULL_ACTION_SET
         logits .+= typemin(eltype(logits)) .* (1 .- get_legal_actions_mask(env))
@@ -139,7 +140,10 @@ function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
             inds = rand_inds[(i-1)*microbatch_size+1:i*microbatch_size]
             s = send_to_device(D, select_last_dim(states_flatten, inds))
             if haskey(t, :legal_actions_mask)
-                lam = send_to_device(D, select_last_dim(flatten_batch(t[:legal_actions_mask]), inds))
+                lam = send_to_device(
+                    D,
+                    select_last_dim(flatten_batch(t[:legal_actions_mask]), inds),
+                )
             end
             a = vec(actions)[inds]
             r = send_to_device(D, vec(returns)[inds])

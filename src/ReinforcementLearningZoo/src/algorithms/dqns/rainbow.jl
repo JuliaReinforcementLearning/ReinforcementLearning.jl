@@ -161,7 +161,9 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
     next_probs = reshape(softmax(reshape(next_logits, n_atoms, :)), n_atoms, n_actions, :)
     next_q = reshape(sum(support .* next_probs, dims = 1), n_actions, :)
     if !isnothing(batch.next_legal_actions_mask)
-        next_q .+= typemin(eltype(next_q)) .* (1 .- send_to_device(D, batch.next_legal_actions_mask))
+        next_q .+=
+            typemin(eltype(next_q)) .*
+            (1 .- send_to_device(D, batch.next_legal_actions_mask))
     end
     next_prob_select = select_best_probs(next_probs, next_q)
 
@@ -186,7 +188,8 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
         logits = reshape(Q(states), n_atoms, n_actions, :)
         select_logits = logits[:, actions]
         batch_losses = loss_func(select_logits, target_distribution)
-        loss = is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1 // batch_size : mean(batch_losses)
+        loss = is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1 // batch_size :
+                mean(batch_losses)
         ignore() do
             if is_use_PER
                 updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10) .^ β))

@@ -102,13 +102,16 @@ end
     if `!isnothing(stack_size)`.
 """
 function (learner::PrioritizedDQNLearner)(env)
-    probs = env |>
-    get_state |>
-    x -> Flux.unsqueeze(x, ndims(x) + 1) |>
-    x -> send_to_device(device(learner.approximator), x) |>
-    learner.approximator |>
-    vec |>
-    send_to_host
+    probs =
+        env |>
+        get_state |>
+        x ->
+            Flux.unsqueeze(x, ndims(x) + 1) |>
+            x ->
+                send_to_device(device(learner.approximator), x) |>
+                learner.approximator |>
+                vec |>
+                send_to_host
 
     if ActionStyle(env) === FULL_ACTION_SET
         probs .+= typemin(eltype(probs)) .* (1 .- get_legal_actions_mask(env))
@@ -138,7 +141,9 @@ function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
 
     target_q = Qₜ(next_states)
     if !isnothing(batch.next_legal_actions_mask)
-        target_q .+= typemin(eltype(target_q)) .* (1 .- send_to_device(D, batch.next_legal_actions_mask))
+        target_q .+=
+            typemin(eltype(target_q)) .*
+            (1 .- send_to_device(D, batch.next_legal_actions_mask))
     end
 
     q′ = dropdims(maximum(target_q; dims = 1), dims = 1)

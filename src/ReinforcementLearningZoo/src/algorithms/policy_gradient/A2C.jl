@@ -28,10 +28,11 @@ Base.@kwdef mutable struct A2CLearner{A<:ActorCritic} <: AbstractLearner
 end
 
 function (learner::A2CLearner)(env::MultiThreadEnv)
-    logits = learner.approximator.actor(send_to_device(
-        device(learner.approximator),
-        get_state(env),
-    )) |> send_to_host
+    logits =
+        learner.approximator.actor(send_to_device(
+            device(learner.approximator),
+            get_state(env),
+        )) |> send_to_host
 
     if ActionStyle(env[1]) === FULL_ACTION_SET
         logits .+= typemin(eltype(logits)) .* (1 .- get_legal_actions_mask(env))
@@ -87,7 +88,9 @@ function RLBase.update!(learner::A2CLearner, t::AbstractTrajectory)
     gs = gradient(ps) do
         logits = AC.actor(states_flattened)
         if haskey(t, :legal_actions_mask)
-            logits .+= typemin(eltype(logits)) .* (1 .- flatten_batch(send_to_device(D, t[:legal_actions_mask])))
+            logits .+=
+                typemin(eltype(logits)) .*
+                (1 .- flatten_batch(send_to_device(D, t[:legal_actions_mask])))
         end
         probs = softmax(logits)
         log_probs = logsoftmax(logits)

@@ -91,15 +91,8 @@ function RLBase.update!(p::QBasedPolicy{<:PERLearners}, t::AbstractTrajectory)
     end
 end
 
-function (agent::Agent{<:QBasedPolicy{<:PERLearners}})(
-    ::RLCore.Training{PostActStage},
-    env,
-)
-    push!(
-        agent.trajectory;
-        reward = get_reward(env),
-        terminal = get_terminal(env),
-    )
+function (agent::Agent{<:QBasedPolicy{<:PERLearners}})(::RLCore.Training{PostActStage}, env)
+    push!(agent.trajectory; reward = get_reward(env), terminal = get_terminal(env))
     if haskey(agent.trajectory, :priority)
         push!(agent.trajectory; priority = agent.policy.learner.default_priority)
     end
