@@ -954,3 +954,75 @@ function RLCore.Experiment(
 
     Experiment(agent, env, stop_condition, hook, description)
 end
+
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:SAC},
+    ::Val{:Pendulum},
+    ::Nothing;
+    seed = 123,
+)
+    rng = MersenneTwister(seed)
+    inner_env = PendulumEnv(T = Float32, rng = rng)
+    action_space = get_actions(inner_env)
+    low = action_space.low
+    high = action_space.high
+    ns = length(get_state(inner_env))
+
+    env = inner_env |> ActionTransformedEnv(x -> low + (x + 1) * 0.5 * (high - low))
+    init = glorot_uniform(rng)
+
+    create_policy_net() = NeuralNetworkApproximator(
+        model = SACPolicyNetwork(
+            Chain(Dense(ns, 30, relu), Dense(30, 30, relu)),
+            Chain(Dense(30, 1, initW = init)),
+            Chain(Dense(
+                30,
+                1,
+                x -> min(max(x, typeof(x)(-20)), typeof(x)(2)),
+                initW = init,
+            )),
+        ),
+        optimizer = ADAM(0.003),
+    )
+
+    create_q_net() = NeuralNetworkApproximator(
+        model = Chain(
+            Dense(ns + 1, 30, relu; initW = init),
+            Dense(30, 30, relu; initW = init),
+            Dense(30, 1; initW = init),
+        ),
+        optimizer = ADAM(0.003),
+    )
+
+    agent = Agent(
+        policy = SACPolicy(
+            policy = create_policy_net(),
+            qnetwork1 = create_q_net(),
+            qnetwork2 = create_q_net(),
+            target_qnetwork1 = create_q_net(),
+            target_qnetwork2 = create_q_net(),
+            γ = 0.99f0,
+            ρ = 0.995f0,
+            α = 0.2f0,
+            batch_size = 64,
+            start_steps = 1000,
+            start_policy = RandomPolicy(ContinuousSpace(-1.0, 1.0); rng = rng),
+            update_after = 1000,
+            update_every = 1,
+            rng = rng,
+        ),
+        trajectory = CircularCompactSARTSATrajectory(
+            capacity = 10000,
+            state_type = Float32,
+            state_size = (ns,),
+            action_type = Float32,
+        ),
+    )
+
+    description = """
+    # Play Pendulum with SAC
+    """
+
+    Experiment(agent, env, StopAfterStep(10000), TotalRewardPerEpisode(), description)
+end

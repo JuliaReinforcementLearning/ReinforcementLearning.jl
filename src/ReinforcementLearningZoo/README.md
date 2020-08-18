@@ -1,4 +1,4 @@
-<div align="center"> 
+<div align="center">
 <a href="https://en.wikipedia.org/wiki/Tangram"> <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Tangram-man.svg" width="200"> </a>
 <p> <a href="https://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast">"Make It Work Make It Right Make It Fast"</a></p>
 <p>― <a href="https://wiki.c2.com/?KentBeck">KentBeck</a></p>
@@ -23,6 +23,7 @@ This project aims to provide some implementations of the most typical reinforcem
 - A2C
 - PPO
 - DDPG
+- SAC
 
 If you are looking for tabular reinforcement learning algorithms, you may refer [ReinforcementLearningAnIntroduction.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl).
 
@@ -41,6 +42,7 @@ Some built-in experiments are exported to help new users to easily run benchmark
 - ``E`JuliaRL_A2CGAE_CartPole` `` (Thanks to [@sriram13m](https://github.com/sriram13m))
 - ``E`JuliaRL_PPO_CartPole` ``
 - ``E`JuliaRL_DDPG_Pendulum` ``
+- ``E`JuliaRL_SAC_Pendulum` `` (Thanks to [@rbange](https://github.com/rbange))
 - ``E`JuliaRL_BasicDQN_MountainCar` `` (Thanks to [@felixchalumeau](https://github.com/felixchalumeau))
 - ``E`JuliaRL_DQN_MountainCar` `` (Thanks to [@felixchalumeau](https://github.com/felixchalumeau))
 - ``E`Dopamine_DQN_Atari(pong)` ``
