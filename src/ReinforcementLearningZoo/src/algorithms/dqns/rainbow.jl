@@ -126,11 +126,7 @@ function (learner::RainbowLearner)(env)
     state = Flux.unsqueeze(state, ndims(state) + 1)
     logits = learner.approximator(state)
     q = learner.support .* softmax(reshape(logits, :, learner.n_actions))
-    probs = vec(sum(q, dims = 1)) |> send_to_host
-    if ActionStyle(env) === FULL_ACTION_SET
-        probs .+= typemin(eltype(probs)) .* (1 .- get_legal_actions_mask(env))
-    end
-    probs
+    vec(sum(q, dims = 1)) |> send_to_host
 end
 
 function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
@@ -161,9 +157,9 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
     next_probs = reshape(softmax(reshape(next_logits, n_atoms, :)), n_atoms, n_actions, :)
     next_q = reshape(sum(support .* next_probs, dims = 1), n_actions, :)
     if !isnothing(batch.next_legal_actions_mask)
-        next_q .+=
-            typemin(eltype(next_q)) .*
-            (1 .- send_to_device(D, batch.next_legal_actions_mask))
+        masked_value = fill(typemin(Float32), size(batch.next_legal_actions_mask))
+        masked_value[batch.next_legal_actions_mask] .= 0
+        next_q .+= send_to_device(D, masked_value)
     end
     next_prob_select = select_best_probs(next_probs, next_q)
 

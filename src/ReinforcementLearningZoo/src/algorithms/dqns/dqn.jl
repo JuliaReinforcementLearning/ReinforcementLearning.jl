@@ -88,21 +88,15 @@ end
     if `!isnothing(stack_size)`.
 """
 function (learner::DQNLearner)(env)
-    probs =
-        env |>
-        get_state |>
+    env |>
+    get_state |>
+    x ->
+        Flux.unsqueeze(x, ndims(x) + 1) |>
         x ->
-            Flux.unsqueeze(x, ndims(x) + 1) |>
-            x ->
-                send_to_device(device(learner.approximator), x) |>
-                learner.approximator |>
-                vec |>
-                send_to_host
-
-    if ActionStyle(env) === FULL_ACTION_SET
-        probs .+= typemin(eltype(probs)) .* (1 .- get_legal_actions_mask(env))
-    end
-    probs
+            send_to_device(device(learner.approximator), x) |>
+            learner.approximator |>
+            vec |>
+            send_to_host
 end
 
 function RLBase.update!(learner::DQNLearner, t::AbstractTrajectory)
@@ -133,9 +127,9 @@ function RLBase.update!(learner::DQNLearner, t::AbstractTrajectory)
 
     target_q = Qₜ(next_states)
     if haskey(t, :next_legal_actions_mask)
-        target_q .+=
-            typemin(eltype(target_q)) .*
-            (1 .- send_to_device(D, t[:next_legal_actions_mask]))
+        masked_value = fill(typemin(Float32), size(experience.next_legal_actions_mask))
+        masked_value[experience.next_legal_actions_mask] .= 0
+        target_q .+= send_to_device(D, masked_value)
     end
 
     q′ = dropdims(maximum(target_q; dims = 1), dims = 1)

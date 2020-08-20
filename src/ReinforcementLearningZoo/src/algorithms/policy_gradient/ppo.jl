@@ -75,28 +75,17 @@ function PPOLearner(;
 end
 
 function (learner::PPOLearner)(env::MultiThreadEnv)
-    logits =
-        learner.approximator.actor(send_to_device(
-            device(learner.approximator),
-            get_state(env),
-        )) |> send_to_host
-
-    if ActionStyle(env[1]) === FULL_ACTION_SET
-        logits .+= typemin(eltype(logits)) .* (1 .- get_legal_actions_mask(env))
-    end
-    logits
+    learner.approximator.actor(send_to_device(
+        device(learner.approximator),
+        get_state(env),
+    )) |> send_to_host
 end
 
 function (learner::PPOLearner)(env)
     s = get_state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
     s = send_to_device(device(learner.approximator), s)
-    logits = learner.approximator.actor(s) |> vec |> send_to_host
-
-    if ActionStyle(env) === FULL_ACTION_SET
-        logits .+= typemin(eltype(logits)) .* (1 .- get_legal_actions_mask(env))
-    end
-    logits
+    learner.approximator.actor(s) |> vec |> send_to_host
 end
 
 function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
@@ -154,9 +143,6 @@ function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
             gs = gradient(ps) do
                 v′ = AC.critic(s) |> vec
                 logit′ = AC.actor(s)
-                if haskey(t, :legal_actions_mask)
-                    logit′ .+= typemin(eltype(logit′)) .* (1 .- lam)
-                end
                 p′ = softmax(logit′)
                 log_p′ = logsoftmax(logit′)
                 log_p′ₐ = log_p′[CartesianIndex.(a, 1:length(a))]

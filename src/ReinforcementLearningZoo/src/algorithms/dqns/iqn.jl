@@ -156,11 +156,7 @@ function (learner::IQNLearner)(env)
     τ = rand(learner.device_rng, Float32, learner.K, 1)
     τₑₘ = embed(τ, learner.Nₑₘ)
     quantiles = learner.approximator(state, τₑₘ)
-    probs = vec(mean(quantiles; dims = 2)) |> send_to_host
-    if ActionStyle(env) === FULL_ACTION_SET
-        probs .+= typemin(eltype(probs)) .* (1 .- get_legal_actions_mask(env))
-    end
-    probs
+    vec(mean(quantiles; dims = 2)) |> send_to_host
 end
 
 embed(x, Nₑₘ) = cos.(Float32(π) .* (1:Nₑₘ) .* reshape(x, 1, :))
@@ -187,9 +183,9 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
     avg_zₜ = mean(zₜ, dims = 2)
 
     if !isnothing(batch.next_legal_actions_mask)
-        avg_zₜ .+=
-            typemin(eltype(avg_zₜ)) .*
-            (1 .- send_to_device(D, batch.next_legal_actions_mask))
+        masked_value = fill(typemin(Float32), size(batch.next_legal_actions_mask))
+        masked_value[batch.next_legal_actions_mask] .= 0
+        avg_zₜ .+= send_to_device(D, masked_value)
     end
 
     aₜ = argmax(avg_zₜ, dims = 1)
