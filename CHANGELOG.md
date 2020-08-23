@@ -10,6 +10,7 @@
 
 **Closed issues:**
 
+- ERROR: KeyError: key "ArnoldiMethod" not found  [\#79](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/79)
 - Question about AbstractEnv API [\#68](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/68)
 - How to define a new environment? [\#64](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/64)
 
