@@ -44,3 +44,11 @@ mutable struct OpenSpielEnv{S,T,ST,G,R} <: AbstractEnv
     rng::R
 end
 export OpenSpielEnv
+
+mutable struct SnakeGameEnv{A,N,G} <: AbstractEnv
+    game::G
+    latest_snakes_length::Vector{Int}
+    latest_actions::Vector{CartesianIndex{2}}
+    is_terminated::Bool
+end
+export SnakeGameEnv

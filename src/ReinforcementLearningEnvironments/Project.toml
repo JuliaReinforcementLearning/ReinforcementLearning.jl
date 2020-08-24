@@ -25,7 +25,8 @@ OpenSpiel = "ceb70bd2-fe3f-44f0-b81f-41608acaf2f2"
 POMDPModels = "355abbd5-f08e-5560-ac9e-8b5f2592a0ca"
 POMDPs = "a93abf59-7444-517b-a68a-c42f96afdd7d"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+SnakeGames = "34dccd9f-48d6-4445-aa0f-8c2e373b5429"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "ArcadeLearningEnvironment", "PyCall", "POMDPModels", "POMDPs", "OpenSpiel"]
+test = ["Test", "ArcadeLearningEnvironment", "PyCall", "POMDPModels", "POMDPs", "OpenSpiel", "SnakeGames"]

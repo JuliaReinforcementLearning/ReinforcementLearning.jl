@@ -36,6 +36,7 @@ By default, only some basic environments are installed. If you want to use some 
 | `GymEnv` | [PyCall.jl](https://github.com/JuliaPy/PyCall.jl) | |
 | `MDPEnv`,`POMDPEnv`| [POMDPs.jl](https://github.com/JuliaPOMDP/POMDPs.jl)| Tested with `POMDPs.jl@v0.9`|
 | `OpenSpielEnv` | [OpenSpiel.jl](https://github.com/JuliaReinforcementLearning/OpenSpiel.jl) | |
+| `SnakeGameEnv` | [SnakeGames.jl](https://github.com/JuliaReinforcementLearning/SnakeGames.jl) | `SingleAgent`/`Multi-Agent`, `FullActionSet`/`MinimalActionSet`|
 
 ## Usage
 

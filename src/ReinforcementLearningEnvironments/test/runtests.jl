@@ -6,6 +6,7 @@ using PyCall
 using POMDPs
 using POMDPModels
 using OpenSpiel
+using SnakeGames
 using Random
 
 @testset "ReinforcementLearningEnvironments" begin
