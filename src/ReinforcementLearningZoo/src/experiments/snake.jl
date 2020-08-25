@@ -8,16 +8,15 @@ function RLCore.Experiment(
 )
     rng = Random.MersenneTwister(seed)
 
-    SHAPE = (8,8)
-    inner_env = SnakeGameEnv(;action_style=FULL_ACTION_SET, shape=SHAPE, rng=rng)
+    SHAPE = (8, 8)
+    inner_env = SnakeGameEnv(; action_style = FULL_ACTION_SET, shape = SHAPE, rng = rng)
 
     board_size = size(get_state(inner_env))
     N_FRAMES = 4
 
-    env = inner_env |> 
-        StateOverriddenEnv(
-            StackFrames(board_size..., N_FRAMES),
-        ) |>
+    env =
+        inner_env |>
+        StateOverriddenEnv(StackFrames(board_size..., N_FRAMES),) |>
         StateCachedEnv
 
     N_ACTIONS = length(get_actions(env))
@@ -36,7 +35,14 @@ function RLCore.Experiment(
     create_model() =
         Chain(
             x -> reshape(x, SHAPE..., :, size(x, ndims(x))),
-            CrossCor((3, 3), board_size[end] * N_FRAMES => 16, relu; stride = 1, pad = 1, init = init),
+            CrossCor(
+                (3, 3),
+                board_size[end] * N_FRAMES => 16,
+                relu;
+                stride = 1,
+                pad = 1,
+                init = init,
+            ),
             CrossCor((3, 3), 16 => 32, relu; stride = 1, pad = 1, init = init),
             x -> reshape(x, :, size(x, ndims(x))),
             Dense(8 * 8 * 32, 256, relu; initW = init),
@@ -45,35 +51,35 @@ function RLCore.Experiment(
 
     agent = Agent(
         policy = QBasedPolicy(
-                learner = DQNLearner(
-                    approximator = NeuralNetworkApproximator(
-                        model = create_model(),
-                        optimizer = ADAM(0.001),
-                    ),
-                    target_approximator = NeuralNetworkApproximator(model = create_model()),
-                    update_freq = update_freq,
-                    γ = 0.99f0,
-                    update_horizon = 1,
-                    batch_size = 32,
-                    stack_size = nothing,
-                    min_replay_history = 20_000,
-                    loss_func = huber_loss,
-                    target_update_freq = 8_000,
-                    rng = rng,
+            learner = DQNLearner(
+                approximator = NeuralNetworkApproximator(
+                    model = create_model(),
+                    optimizer = ADAM(0.001),
                 ),
-                explorer = EpsilonGreedyExplorer(
-                    ϵ_init = 1.0,
-                    ϵ_stable = 0.01,
-                    decay_steps = 250_000,
-                    kind = :linear,
-                    rng = rng,
-                ),
+                target_approximator = NeuralNetworkApproximator(model = create_model()),
+                update_freq = update_freq,
+                γ = 0.99f0,
+                update_horizon = 1,
+                batch_size = 32,
+                stack_size = nothing,
+                min_replay_history = 20_000,
+                loss_func = huber_loss,
+                target_update_freq = 8_000,
+                rng = rng,
             ),
+            explorer = EpsilonGreedyExplorer(
+                ϵ_init = 1.0,
+                ϵ_stable = 0.01,
+                decay_steps = 250_000,
+                kind = :linear,
+                rng = rng,
+            ),
+        ),
         trajectory = CircularCompactSALRTSALTrajectory(
             capacity = 500_000,
             state_type = Float32,
             state_size = (board_size..., N_FRAMES),
-            legal_actions_mask_size=(N_ACTIONS,)
+            legal_actions_mask_size = (N_ACTIONS,),
         ),
     )
 
@@ -90,7 +96,8 @@ function RLCore.Experiment(
         steps_per_episode,
         DoEveryNStep(update_freq) do t, agent, env
             with_logger(lg) do
-                @info "training" loss = agent.policy.learner.loss log_step_increment = update_freq
+                @info "training" loss = agent.policy.learner.loss log_step_increment =
+                    update_freq
             end
         end,
         DoEveryNEpisode() do t, agent, env
