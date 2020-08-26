@@ -13,15 +13,14 @@ struct WeightedSoftmaxExplorer{R<:AbstractRNG} <: AbstractExplorer
     rng::R
 end
 
-function WeightedSoftmaxExplorer(;rng = Random.GLOBAL_RNG)
+function WeightedSoftmaxExplorer(; rng = Random.GLOBAL_RNG)
     WeightedSoftmaxExplorer(rng)
 end
 
 (s::WeightedSoftmaxExplorer)(values::AbstractVector{T}) where {T} =
     sample(s.rng, Weights(softmax(values), one(T)))
 
-function (s::WeightedSoftmaxExplorer)(values::AbstractVector{T}, mask) where T
+function (s::WeightedSoftmaxExplorer)(values::AbstractVector{T}, mask) where {T}
     values[.!mask] .= typemin(T)
     s(values)
 end
-

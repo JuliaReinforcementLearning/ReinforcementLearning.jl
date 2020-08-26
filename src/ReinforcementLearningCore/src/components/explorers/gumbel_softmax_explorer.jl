@@ -15,7 +15,10 @@ function (p::GumbelSoftmaxExplorer)(v::AbstractVector{T}) where {T}
     argmax(logits .- log.(-log.(u)))
 end
 
-function (p::GumbelSoftmaxExplorer)(v::AbstractVector{T}, mask::AbstractVector{Bool}) where {T}
+function (p::GumbelSoftmaxExplorer)(
+    v::AbstractVector{T},
+    mask::AbstractVector{Bool},
+) where {T}
     v[.!mask] .= typemin(T)
     p(v)
 end
