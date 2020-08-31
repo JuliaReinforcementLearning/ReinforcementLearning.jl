@@ -6,6 +6,8 @@
 
 **Merged pull requests:**
 
+- Automatic JuliaFormatter.jl run [\#75](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/75) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Define possible states [\#74](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/74) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#71](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/71) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Add tabular random policy [\#70](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/70) ([findmyway](https://github.com/findmyway))
 
@@ -35,7 +37,6 @@
 - CompatHelper: add new compat entry for "AbstractTrees" at version "0.3" [\#56](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/56) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Unify APIs [\#55](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/55) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#51](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/51) ([github-actions[bot]](https://github.com/apps/github-actions))
-- Automatic JuliaFormatter.jl run [\#44](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/44) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [v0.7.3](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.3) (2020-06-26)
 
@@ -65,6 +66,7 @@
 
 **Merged pull requests:**
 
+- Automatic JuliaFormatter.jl run [\#44](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/44) ([github-actions[bot]](https://github.com/apps/github-actions))
 - fix sampling from MultiContinuousSpace [\#43](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/43) ([jbrea](https://github.com/jbrea))
 
 ## [v0.7.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.0) (2020-05-06)
