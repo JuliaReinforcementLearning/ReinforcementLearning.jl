@@ -42,7 +42,9 @@ RandomPolicy(::FullActionSet, env::AbstractEnv, rng) = RandomPolicy(nothing, rng
 # watch https://github.com/JuliaStats/Distributions.jl/issues/1139
 get_prob(p::RandomPolicy, env) = fill(1 / length(p.action_space), length(p.action_space))
 
-function get_prob(p::RandomPolicy{Nothing}, env)
+get_prob(p::RandomPolicy{Nothing}, env) = get_prob(p, env, ChanceStyle(env))
+
+function get_prob(p::RandomPolicy{Nothing}, env, ::AbstractChanceStyle)
     mask = get_legal_actions_mask(env)
     n = sum(mask)
     prob = zeros(length(mask))
@@ -50,9 +52,19 @@ function get_prob(p::RandomPolicy{Nothing}, env)
     prob
 end
 
+function get_prob(p::RandomPolicy{Nothing}, env, ::ExplicitStochastic)
+    if get_current_player(env) == get_chance_player(env)
+        [x.prob for x::ActionProbPair in get_legal_actions(env)]
+    else
+        get_prob(p, env, DETERMINISTIC)
+    end
+end
+
 get_prob(p::RandomPolicy, env, a) = 1 / length(p.action_space)
 get_prob(p::RandomPolicy{<:VectSpace}, env::MultiThreadEnv, a) =
     [1 / length(x) for x in p.action_space.data]
+
+get_prob(p::RandomPolicy{Nothing}, env, a::ActionProbPair) = a.prob
 
 function get_prob(p::RandomPolicy{Nothing}, env, a)
     legal_actions = get_legal_actions(env)
@@ -92,64 +104,4 @@ for f in (:get_prob, :get_priority)
             $f(p.random_policy, args...)
         end
     end
-end
-
-#####
-# TabularRandomPolicy
-#####
-
-"""
-    TabularRandomPolicy(;table=Dict(), rng=Random.GLOBAL_RNG)
-
-Use a table to store action probabilities.
-"""
-struct TabularRandomPolicy{S,T,R<:AbstractRNG} <: AbstractPolicy
-    table::Dict{S,Vector{T}}
-    rng::R
-end
-
-Random.seed!(p::TabularRandomPolicy, seed) = Random.seed!(p.rng, seed)
-
-TabularRandomPolicy(; rng = Random.GLOBAL_RNG) =
-    TabularRandomPolicy{Int,Float32}(; rng = rng)
-TabularRandomPolicy{S}(; rng = Random.GLOBAL_RNG) where {S} =
-    TabularRandomPolicy{S,Float32}(; rng = rng)
-TabularRandomPolicy{S,T}(; rng = Random.GLOBAL_RNG) where {S,T} =
-    TabularRandomPolicy(Dict{S,Vector{T}}(), rng)
-
-(p::TabularRandomPolicy)(env::AbstractEnv) = _weighted_sample(p.rng, get_prob(p, env))
-
-function get_prob(p::TabularRandomPolicy, env::AbstractEnv)
-    s = get_state(env)
-    if haskey(p.table, s)
-        p.table[s]
-    elseif ActionStyle(env) === FULL_ACTION_SET
-        mask = get_legal_actions_mask(env)
-        prob = mask ./ sum(mask)
-        p.table[s] = prob
-        prob
-    elseif ActionStyle(env) === MINIMAL_ACTION_SET
-        n = length(get_actions(env))
-        prob = fill(1 / n, n)
-        p.table[s] = prob
-        prob
-    end
-end
-
-update!(p::TabularRandomPolicy, experience::Pair{Int,<:AbstractVector}) =
-    p.table[first(experience)] = last(experience)
-
-"""
-Directly copied from [StatsBase.jl](https://github.com/JuliaStats/StatsBase.jl/blob/0ea8e798c3d19609ed33b11311de5a2bd6ee9fd0/src/sampling.jl#L499-L510) to avoid depending on the whole package.
-"""
-function _weighted_sample(rng::AbstractRNG, wv)
-    t = rand(rng)
-    n = length(wv)
-    i = 1
-    cw = wv[1]
-    while cw < t && i < n
-        i += 1
-        @inbounds cw += wv[i]
-    end
-    return i
 end

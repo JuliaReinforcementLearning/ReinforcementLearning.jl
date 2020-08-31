@@ -1,4 +1,5 @@
-export DiscreteSpace
+export DiscreteSpace, ActionProbPair
+
 using Random
 
 """
@@ -61,3 +62,16 @@ Base.convert(
 ) = DiscreteSpace(s)
 
 Base.iterate(s::DiscreteSpace, args...) = iterate(s.span, args...)
+
+#####
+# ActionWithProb
+#####
+
+struct ActionProbPair{A,P}
+    action::A
+    prob::P
+end
+
+Random.rand(rng::AbstractRNG, s::AbstractVector{<:ActionProbPair}) = s[weighted_sample(rng, (x.prob for x in s))]
+
+(env::AbstractEnv)(a::ActionProbPair) = env(a.action)
