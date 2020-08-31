@@ -59,3 +59,23 @@ function Base.show(io::IO, t::MIME"text/markdown", env::AbstractEnv)
     $(get_terminal(env) ? "Yes" : "No")
     """))
 end
+
+#####
+# helper functions
+#####
+
+"""
+Directly copied from [StatsBase.jl](https://github.com/JuliaStats/StatsBase.jl/blob/0ea8e798c3d19609ed33b11311de5a2bd6ee9fd0/src/sampling.jl#L499-L510) to avoid depending on the whole package.
+
+Here we assume `wv` sum to `1`
+"""
+function weighted_sample(rng::AbstractRNG, wv)
+    t = rand(rng)
+    cw = zero(Base.first(wv))
+    for (i, w) in enumerate(wv)
+        cw += w
+        if cw >= t
+            return i
+        end
+    end
+end
