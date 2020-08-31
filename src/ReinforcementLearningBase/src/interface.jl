@@ -273,7 +273,7 @@ abstract type AbstractStateStyle{T} end
 @api struct Observation{T} <: AbstractStateStyle{T} end
 @api struct PartialObservation{T} <: AbstractStateStyle{T} end
 
-@env_api DefaultStateStyle(env::T) where T<:AbstractEnv = DefaultStateStyle(T)
+@env_api DefaultStateStyle(env::T) where {T<:AbstractEnv} = DefaultStateStyle(T)
 DefaultStateStyle(::Type{<:AbstractEnv}) = Observation{Array}()
 
 #####
@@ -326,7 +326,8 @@ For environments with many different states provided (inner state, information s
 users need to provide `t::Type` to declare which kind of state they want.
 """
 @multi_agent_env_api get_state(env::AbstractEnv) = get_state(env, DefaultStateStyle(env))
-get_state(env::AbstractEnv, ss::AbstractStateStyle) = get_state(env, ss, get_current_player(env))
+get_state(env::AbstractEnv, ss::AbstractStateStyle) =
+    get_state(env, ss, get_current_player(env))
 get_state(env::AbstractEnv, player) = get_state(env, DefaultStateStyle(env), player)
 
 """

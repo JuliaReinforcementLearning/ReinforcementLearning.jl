@@ -72,6 +72,7 @@ struct ActionProbPair{A,P}
     prob::P
 end
 
-Random.rand(rng::AbstractRNG, s::AbstractVector{<:ActionProbPair}) = s[weighted_sample(rng, (x.prob for x in s))]
+Random.rand(rng::AbstractRNG, s::AbstractVector{<:ActionProbPair}) =
+    s[weighted_sample(rng, (x.prob for x in s))]
 
 (env::AbstractEnv)(a::ActionProbPair) = env(a.action)

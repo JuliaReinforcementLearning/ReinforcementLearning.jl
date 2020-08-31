@@ -18,18 +18,21 @@ struct DefaultStateStyleEnv{S,E} <: AbstractEnv
     env::E
 end
 
-DefaultStateStyleEnv(s::AbstractStateStyle) = env -> DefaultStateStyleEnv{s, typeof(env)}(env)
-DefaultStateStyleEnv(env::E, s) where E = DefaultStateStyleEnv{s,E}(env)
+DefaultStateStyleEnv(s::AbstractStateStyle) =
+    env -> DefaultStateStyleEnv{s,typeof(env)}(env)
+DefaultStateStyleEnv(env::E, s) where {E} = DefaultStateStyleEnv{s,E}(env)
 
-get_state(env::DefaultStateStyleEnv{S}) where S = get_state(env.env, S)
-get_state(env::DefaultStateStyleEnv{S}, player) where S = get_state(env.env, S, player)
-get_state(env::DefaultStateStyleEnv, s::AbstractStateStyle, player) = get_state(env.env, s, player)
+get_state(env::DefaultStateStyleEnv{S}) where {S} = get_state(env.env, S)
+get_state(env::DefaultStateStyleEnv{S}, player) where {S} = get_state(env.env, S, player)
+get_state(env::DefaultStateStyleEnv, s::AbstractStateStyle, player) =
+    get_state(env.env, s, player)
 
-DefaultStateStyle(::DefaultStateStyleEnv{S}) where S = S
+DefaultStateStyle(::DefaultStateStyleEnv{S}) where {S} = S
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     if f ∉ (:get_state, :DefaultStateStyle)
-        @eval $f(x::DefaultStateStyleEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
+        @eval $f(x::DefaultStateStyleEnv, args...; kwargs...) =
+            $f(x.env, args...; kwargs...)
     end
 end
 
