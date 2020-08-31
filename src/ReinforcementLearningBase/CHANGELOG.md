@@ -4,8 +4,13 @@
 
 [Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.0...HEAD)
 
+**Closed issues:**
+
+- Define possible state types [\#69](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/issues/69)
+
 **Merged pull requests:**
 
+- remove TabularRandomPolicy in export [\#76](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/76) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#75](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/75) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Define possible states [\#74](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/74) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#71](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/71) ([github-actions[bot]](https://github.com/apps/github-actions))
@@ -109,7 +114,6 @@
 **Merged pull requests:**
 
 - Automatic JuliaFormatter.jl run [\#30](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/30) ([github-actions[bot]](https://github.com/apps/github-actions))
-- update doc [\#29](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/29) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#28](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/28) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [v0.6.3](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.6.3) (2020-02-26)
@@ -127,6 +131,7 @@
 
 **Merged pull requests:**
 
+- update doc [\#29](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/29) ([findmyway](https://github.com/findmyway))
 - add batch\_estimate for approximator [\#25](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/25) ([findmyway](https://github.com/findmyway))
 
 ## [v0.6.1](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.6.1) (2020-02-20)
