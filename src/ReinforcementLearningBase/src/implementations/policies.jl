@@ -1,4 +1,4 @@
-export RandomPolicy, RandomStartPolicy, TabularRandomPolicy
+export RandomPolicy, RandomStartPolicy
 
 using Random
 

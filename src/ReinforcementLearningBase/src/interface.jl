@@ -89,7 +89,7 @@ function MultiAgent(n::Integer)
     if n < 0
         throw(ArgumentError("number of agents must be > 1, get $n"))
     elseif n == 1
-        throw(ArgumentError("do you want mean SINGLE_AGENT?"))
+        throw(ArgumentError("do you mean `SINGLE_AGENT`?"))
     else
         MultiAgent{convert(Int, n)}()
     end
