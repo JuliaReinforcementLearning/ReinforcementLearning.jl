@@ -372,6 +372,8 @@ get_num_players(::MultiAgent{N}) where {N} = N
 "Reset the internal state of an environment"
 @env_api reset!(env::AbstractEnv)
 
+reset!(x) = nothing
+
 "Set the seed of internal rng"
 @env_api seed!(env::AbstractEnv, seed)
 

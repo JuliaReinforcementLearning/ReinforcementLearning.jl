@@ -73,13 +73,20 @@ end
 StateOverriddenEnv(processors...) = env -> StateOverriddenEnv(processors, env)
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
-    if f != :get_state
+    if f ∉ (:get_state, :reset!)
         @eval $f(x::StateOverriddenEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
     end
 end
 
 get_state(env::StateOverriddenEnv, args...; kwargs...) =
     foldl(|>, env.processors; init = get_state(env.env, args...; kwargs...))
+
+function reset!(env::StateOverriddenEnv, args...; kwargs...)
+    reset!(env.env, args..., kwargs...)
+    for p in env.processors
+        reset!(p)
+    end
+end
 
 #####
 # StateCachedEnv
