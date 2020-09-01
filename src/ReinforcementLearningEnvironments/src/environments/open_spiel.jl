@@ -101,12 +101,16 @@ function OpenSpielEnv(
         RLBase.IDENTICAL_SUM
     end
 
-    env =
-        OpenSpielEnv{Tuple{default_state_style,c,d,i,n,r,u},typeof(state),typeof(game),typeof(rng)}(
-            state,
-            game,
-            rng,
-        )
+    env = OpenSpielEnv{
+        Tuple{default_state_style,c,d,i,n,r,u},
+        typeof(state),
+        typeof(game),
+        typeof(rng),
+    }(
+        state,
+        game,
+        rng,
+    )
     reset!(env)
     env
 end
@@ -132,7 +136,13 @@ _sample_external_events!(::Nothing, state) = nothing
 
 function _sample_external_events!(rng::AbstractRNG, state)
     while is_chance_node(state)
-        apply_action(state, rand(rng, reinterpret(ActionProbPair{Int, Float64}, chance_outcomes(state))).action)
+        apply_action(
+            state,
+            rand(
+                rng,
+                reinterpret(ActionProbPair{Int,Float64}, chance_outcomes(state)),
+            ).action,
+        )
     end
 end
 
@@ -145,12 +155,13 @@ RLBase.get_current_player(env::OpenSpielEnv) = current_player(env.state)
 RLBase.get_chance_player(env::OpenSpielEnv) = convert(Int, OpenSpiel.CHANCE_PLAYER)
 RLBase.get_players(env::OpenSpielEnv) = get_players(env, ChanceStyle(env))
 RLBase.get_players(env::OpenSpielEnv, ::Any) = 0:(num_players(env.game)-1)
-RLBase.get_players(env::OpenSpielEnv, ::Union{ExplicitStochastic, SampledStochastic}) = (get_chance_player(env), 0:(num_players(env.game)-1)...)
+RLBase.get_players(env::OpenSpielEnv, ::Union{ExplicitStochastic,SampledStochastic}) =
+    (get_chance_player(env), 0:(num_players(env.game)-1)...)
 RLBase.get_num_players(env::OpenSpielEnv) = length(get_players(env))
 
 function RLBase.get_actions(env::OpenSpielEnv, player)
     if player == get_chance_player(env)
-        reinterpret(ActionProbPair{Int, Float64}, chance_outcomes(env.state))
+        reinterpret(ActionProbPair{Int,Float64}, chance_outcomes(env.state))
     else
         0:num_distinct_actions(env.game)-1
     end
@@ -158,14 +169,15 @@ end
 
 function RLBase.get_legal_actions(env::OpenSpielEnv, player)
     if player == get_chance_player(env)
-        reinterpret(ActionProbPair{Int, Float64}, chance_outcomes(env.state))
+        reinterpret(ActionProbPair{Int,Float64}, chance_outcomes(env.state))
     else
         legal_actions(env.state, player)
     end
 end
 
 function RLBase.get_legal_actions_mask(env::OpenSpielEnv, player)
-    n = player == get_chance_player(env) ? max_chance_outcomes(env.game) : num_distinct_actions(env.game)
+    n = player == get_chance_player(env) ? max_chance_outcomes(env.game) :
+        num_distinct_actions(env.game)
     mask = BitArray(undef, n)
     for a in legal_actions(env.state, player)
         mask[a+1] = true
@@ -194,10 +206,15 @@ function RLBase.get_reward(env::OpenSpielEnv, player)
     end
 end
 
-RLBase.get_state(env::OpenSpielEnv, player::Integer) = get_state(env, DefaultStateStyle(env), player)
-RLBase.get_state(env::OpenSpielEnv, ::RLBase.Information{String}, player) = information_state_string(env.state, player)
-RLBase.get_state(env::OpenSpielEnv, ::RLBase.Information{Array}, player) = information_state_tensor(env.state, player)
-RLBase.get_state(env::OpenSpielEnv, ::Observation{String}, player) = observation_string(env.state, player)
-RLBase.get_state(env::OpenSpielEnv, ::Observation{Array}, player) = observation_tensor(env.state, player)
+RLBase.get_state(env::OpenSpielEnv, player::Integer) =
+    get_state(env, DefaultStateStyle(env), player)
+RLBase.get_state(env::OpenSpielEnv, ::RLBase.Information{String}, player) =
+    information_state_string(env.state, player)
+RLBase.get_state(env::OpenSpielEnv, ::RLBase.Information{Array}, player) =
+    information_state_tensor(env.state, player)
+RLBase.get_state(env::OpenSpielEnv, ::Observation{String}, player) =
+    observation_string(env.state, player)
+RLBase.get_state(env::OpenSpielEnv, ::Observation{Array}, player) =
+    observation_tensor(env.state, player)
 
 RLBase.get_history(env::OpenSpielEnv) = history(env.state)
