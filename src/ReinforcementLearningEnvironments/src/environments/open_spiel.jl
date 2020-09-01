@@ -49,7 +49,7 @@ function OpenSpielEnv(
     is_chance_agent_required = false,
     kwargs...,
 )
-    game = load_game(name; kwargs...)
+    game = load_game(String(name); kwargs...)
     game_type = get_type(game)
 
     if isnothing(default_state_style)
