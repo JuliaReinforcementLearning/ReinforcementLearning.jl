@@ -19,7 +19,7 @@ end
 Flux.functor(x::QBasedPolicy) = (learner = x.learner,), y -> @set x.learner = y.learner
 
 (π::QBasedPolicy)(env) = π(env, ActionStyle(env))
-(π::QBasedPolicy)(env, ::MinimalActionSet) = get_actions(env)[envπ.learnerπ.explorer]
+(π::QBasedPolicy)(env, ::MinimalActionSet) = get_actions(env)[π.explorer(π.learner(env))]
 (π::QBasedPolicy)(env, ::FullActionSet) =
     get_actions(env)[π.explorer(π.learner(env), get_legal_actions_mask(env))]
 
