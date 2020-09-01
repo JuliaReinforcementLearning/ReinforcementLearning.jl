@@ -10,7 +10,7 @@ The minimax algorithm with [Alpha-beta pruning](https://en.wikipedia.org/wiki/Al
 Base.@kwdef mutable struct MinimaxPolicy{F} <: AbstractPolicy
     maximum_depth::Int = 30
     value_function::F = nothing
-    v::Float64 = 0.
+    v::Float64 = 0.0
 end
 
 (p::MinimaxPolicy)(env::AbstractEnv) = p(env, DynamicStyle(env), NumAgentStyle(env))
@@ -19,7 +19,14 @@ function (p::MinimaxPolicy)(env::AbstractEnv, ::Sequential, ::MultiAgent{2})
     if get_terminal(env)
         rand(get_actions(env))  # just a dummy action
     else
-        a, v = α_β_search(env, p.value_function, p.maximum_depth, -Inf, Inf, get_current_player(env))
+        a, v = α_β_search(
+            env,
+            p.value_function,
+            p.maximum_depth,
+            -Inf,
+            Inf,
+            get_current_player(env),
+        )
         p.v = v  # for debug only
         a
     end
@@ -36,7 +43,7 @@ function α_β_search(env::AbstractEnv, value_function, depth, α, β, maximizin
         v = -Inf
         for a in legal_actions
             node = child(env, a)
-            _, v_node = α_β_search(node, value_function, depth-1, α, β, maximizing_role)
+            _, v_node = α_β_search(node, value_function, depth - 1, α, β, maximizing_role)
             if v_node > v
                 v = v_node
                 best_action = a
@@ -51,7 +58,7 @@ function α_β_search(env::AbstractEnv, value_function, depth, α, β, maximizin
         v = Inf
         for a in legal_actions
             node = child(env, a)
-            _, v_node = α_β_search(node, value_function, depth-1, α, β, maximizing_role)
+            _, v_node = α_β_search(node, value_function, depth - 1, α, β, maximizing_role)
             if v_node < v
                 v = v_node
                 best_action = a

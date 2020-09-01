@@ -82,12 +82,12 @@ using OpenSpiel
     @testset "TabularCFR" begin
         e = E`JuliaRL_TabularCFR_OpenSpiel(kuhn_poker)`
         run(e)
-        @test isapprox(mean(e.hook[2].rewards), -1 / 18;atol=0.01)
-        @test isapprox(mean(e.hook[3].rewards), 1 / 18;atol=0.01)
+        @test isapprox(mean(e.hook[2].rewards), -1 / 18; atol = 0.01)
+        @test isapprox(mean(e.hook[3].rewards), 1 / 18; atol = 0.01)
 
         reset!(e.env)
         expected_values = Dict(expected_policy_values(e.agent, e.env))
-        @test isapprox(expected_values[get_role(e.agent[2])], -1/18; atol=0.01)
-        @test isapprox(expected_values[get_role(e.agent[3])], 1/18; atol=0.01)
+        @test isapprox(expected_values[get_role(e.agent[2])], -1 / 18; atol = 0.01)
+        @test isapprox(expected_values[get_role(e.agent[3])], 1 / 18; atol = 0.01)
     end
 end
