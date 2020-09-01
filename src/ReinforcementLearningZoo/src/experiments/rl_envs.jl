@@ -549,7 +549,7 @@ function RLCore.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000)
+    stop_condition = StopAfterStep(haskey(ENV, "CI") ? 10_000 : 100_000)
     total_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
     time_per_step = TimePerStep()
     hook = ComposedHook(
@@ -642,7 +642,7 @@ function RLCore.Experiment(
             terminal_size = (N_ENV,),
         ),
     )
-    stop_condition = StopAfterStep(10_000)
+    stop_condition = StopAfterStep(haskey(ENV, "CI") ? 10_000 : 100_000)
     total_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
     time_per_step = TimePerStep()
     hook = ComposedHook(
@@ -747,7 +747,7 @@ function RLCore.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10000)
+    stop_condition = StopAfterStep(10_000)
     total_reward_per_episode = TotalRewardPerEpisode()
     time_per_step = TimePerStep()
     hook = ComposedHook(
@@ -850,7 +850,7 @@ function RLCore.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000)
+    stop_condition = StopAfterStep(haskey(ENV, "CI") ? 10_000 : 100_000)
     total_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
     time_per_step = TimePerStep()
     hook = ComposedHook(

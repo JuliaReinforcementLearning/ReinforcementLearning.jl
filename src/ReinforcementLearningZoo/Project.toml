@@ -1,7 +1,7 @@
 name = "ReinforcementLearningZoo"
 uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
-version = "0.1.6"
+version = "0.1.7"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -32,7 +32,7 @@ Distributions = "0.23"
 Flux = "0.11"
 MacroTools = "0.5"
 ReinforcementLearningBase = "0.8"
-ReinforcementLearningCore = "0.4.1"
+ReinforcementLearningCore = "0.4.2"
 Requires = "1"
 Setfield = "0.6, 0.7"
 StatsBase = "0.32, 0.33"
@@ -41,8 +41,9 @@ Zygote = "0.5"
 julia = "1.4"
 
 [extras]
+OpenSpiel = "ceb70bd2-fe3f-44f0-b81f-41608acaf2f2"
 ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "ReinforcementLearningEnvironments"]
+test = ["Test", "ReinforcementLearningEnvironments", "OpenSpiel"]
