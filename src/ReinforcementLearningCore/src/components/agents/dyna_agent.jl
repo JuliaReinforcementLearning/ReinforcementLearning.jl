@@ -65,7 +65,7 @@ end
 RLBase.update!(model::AbstractEnvironmentModel, t::AbstractTrajectory, π::AbstractPolicy) =
     update!(model, t)
 
-function RLBase.update!(model::AbstractEnvironmentModel, buffer::AbstractTrajectory)
-    transitions = extract_experience(buffer, model)
-    isnothing(transitions) || update!(model, transitions)
-end
+# function RLBase.update!(model::AbstractEnvironmentModel, buffer::AbstractTrajectory)
+#     transitions = extract_experience(buffer, model)
+#     isnothing(transitions) || update!(model, transitions)
+# end
