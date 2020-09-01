@@ -5,6 +5,7 @@ using Flux
 using BSON
 using AbstractTrees
 
+RLBase.update!(p::RandomPolicy, x) = nothing
 
 Random.rand(s::MultiContinuousSpace{<:CuArray}) = rand(CUDA.CURAND.generator(), s)
 

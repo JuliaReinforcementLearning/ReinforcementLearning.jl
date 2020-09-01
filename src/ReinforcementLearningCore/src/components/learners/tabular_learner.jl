@@ -10,8 +10,8 @@ struct TabularLearner{S,T} <: AbstractPolicy
 end
 
 TabularLearner() = TabularLearner{Int,Float32}()
-TabularLearner{S}() = TabularLearner{S,Float32}()
-TabularLearner{S,T}() = TabularLearner(Dict{S,Vector{T}}())
+TabularLearner{S}() where S = TabularLearner{S,Float32}()
+TabularLearner{S,T}() where {S,T} = TabularLearner(Dict{S,Vector{T}}())
 
 function (p::TabularLearner)(env::AbstractEnv)
     s = get_state(env)
@@ -30,5 +30,5 @@ function (p::TabularLearner)(env::AbstractEnv)
     end
 end
 
-update!(p::TabularLearner, experience::Pair) = p.table[first(experience)] = last(experience)
+RLBase.update!(p::TabularLearner, experience::Pair) = p.table[first(experience)] = last(experience)
 
