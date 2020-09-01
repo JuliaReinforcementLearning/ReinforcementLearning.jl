@@ -129,17 +129,56 @@ Base.@kwdef mutable struct TotalRewardPerEpisode <: AbstractHook
     reward::Float64 = 0.0
 end
 
-(hook::TotalRewardPerEpisode)(s::AbstractStage, agent, env) = hook(s, agent, env, RewardStyle(env), NumAgentStyle(env))
+(hook::TotalRewardPerEpisode)(s::AbstractStage, agent, env) =
+    hook(s, agent, env, RewardStyle(env), NumAgentStyle(env))
 (hook::TotalRewardPerEpisode)(::AbstractStage, agent, env, ::Any, ::Any) = nothing
 
-(hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env, ::TerminalReward, ::SingleAgent) = push!(hook.rewards, get_reward(env))
-(hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env, ::TerminalReward, ::MultiAgent) = push!(hook.rewards, get_reward(env, get_role(agent)))
-(hook::TotalRewardPerEpisode)(::PostActStage, agent, env, ::StepReward, ::SingleAgent) = hook.reward += get_reward(env)
-(hook::TotalRewardPerEpisode)(::PostActStage, agent, env, ::StepReward, ::MultiAgent) = hook.reward += get_reward(env, get_role(agent))
-(hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env::RewardOverriddenEnv, ::TerminalReward, ::SingleAgent) = push!(hook.rewards, get_reward(env.env))
-(hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env::RewardOverriddenEnv, ::TerminalReward, ::MultiAgent) = push!(hook.rewards, get_reward(env.env, get_role(agent)))
-(hook::TotalRewardPerEpisode)(::PostActStage, agent, env::RewardOverriddenEnv, ::StepReward, ::SingleAgent) = hook.reward += get_reward(env.env)
-(hook::TotalRewardPerEpisode)(::PostActStage, agent, env::RewardOverriddenEnv, ::StepReward, ::MultiAgent) = hook.reward += get_reward(env.env, get_role(agent))
+(hook::TotalRewardPerEpisode)(
+    ::PostEpisodeStage,
+    agent,
+    env,
+    ::TerminalReward,
+    ::SingleAgent,
+) = push!(hook.rewards, get_reward(env))
+(hook::TotalRewardPerEpisode)(
+    ::PostEpisodeStage,
+    agent,
+    env,
+    ::TerminalReward,
+    ::MultiAgent,
+) = push!(hook.rewards, get_reward(env, get_role(agent)))
+(hook::TotalRewardPerEpisode)(::PostActStage, agent, env, ::StepReward, ::SingleAgent) =
+    hook.reward += get_reward(env)
+(hook::TotalRewardPerEpisode)(::PostActStage, agent, env, ::StepReward, ::MultiAgent) =
+    hook.reward += get_reward(env, get_role(agent))
+(hook::TotalRewardPerEpisode)(
+    ::PostEpisodeStage,
+    agent,
+    env::RewardOverriddenEnv,
+    ::TerminalReward,
+    ::SingleAgent,
+) = push!(hook.rewards, get_reward(env.env))
+(hook::TotalRewardPerEpisode)(
+    ::PostEpisodeStage,
+    agent,
+    env::RewardOverriddenEnv,
+    ::TerminalReward,
+    ::MultiAgent,
+) = push!(hook.rewards, get_reward(env.env, get_role(agent)))
+(hook::TotalRewardPerEpisode)(
+    ::PostActStage,
+    agent,
+    env::RewardOverriddenEnv,
+    ::StepReward,
+    ::SingleAgent,
+) = hook.reward += get_reward(env.env)
+(hook::TotalRewardPerEpisode)(
+    ::PostActStage,
+    agent,
+    env::RewardOverriddenEnv,
+    ::StepReward,
+    ::MultiAgent,
+) = hook.reward += get_reward(env.env, get_role(agent))
 
 function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env, ::StepReward, ::Any)
     push!(hook.rewards, hook.reward)

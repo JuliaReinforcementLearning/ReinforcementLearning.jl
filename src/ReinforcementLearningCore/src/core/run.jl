@@ -84,7 +84,7 @@ function run(
     hooks = Dict(get_role(agent) => hook for (agent, hook) in zip(agents, hooks))
     agents = Dict(get_role(agent) => agent for agent in agents)
     reset!(env)
-    
+
     agent = agents[get_current_player(env)]
     hook = hooks[get_current_player(env)]
 
@@ -138,11 +138,24 @@ end
 
 Calculate the expected return of each agent.
 """
-expected_policy_values(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv) = expected_policy_values(Dict(get_role(agent) => agent for agent in agents), env)
+expected_policy_values(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv) =
+    expected_policy_values(Dict(get_role(agent) => agent for agent in agents), env)
 
-expected_policy_values(agents::Dict, env::AbstractEnv) = expected_policy_values(agents, env, RewardStyle(env), ChanceStyle(env), DynamicStyle(env))
+expected_policy_values(agents::Dict, env::AbstractEnv) = expected_policy_values(
+    agents,
+    env,
+    RewardStyle(env),
+    ChanceStyle(env),
+    DynamicStyle(env),
+)
 
-function expected_policy_values(agents::Dict, env::AbstractEnv, ::TerminalReward, ::Union{ExplicitStochastic,Deterministic}, ::Sequential)
+function expected_policy_values(
+    agents::Dict,
+    env::AbstractEnv,
+    ::TerminalReward,
+    ::Union{ExplicitStochastic,Deterministic},
+    ::Sequential,
+)
     if get_terminal(env)
         [get_reward(env, get_role(agent)) for agent in values(agents)]
     elseif get_current_player(env) == get_chance_player(env)
