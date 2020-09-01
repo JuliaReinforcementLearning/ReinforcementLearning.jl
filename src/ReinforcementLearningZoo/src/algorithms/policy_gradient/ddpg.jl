@@ -27,6 +27,9 @@ mutable struct DDPGPolicy{
     act_noise::Float64
     step::Int
     rng::R
+    # for logging
+    actor_loss::Float32
+    critic_loss::Float32
 end
 
 """
@@ -85,6 +88,7 @@ function DDPGPolicy(;
         act_noise,
         step,
         rng,
+        0.f0,0.f0,
     )
 end
 
@@ -133,13 +137,21 @@ function RLBase.update!(p::DDPGPolicy, traj::CircularCompactSARTSATrajectory)
 
     gs1 = gradient(Flux.params(C)) do
         q = C(vcat(s, a)) |> vec
-        mean((y .- q) .^ 2)
+        loss = mean((y .- q) .^ 2)
+        ignore() do 
+            p.critic_loss = loss
+        end
+        loss
     end
 
     update!(C, gs1)
 
     gs2 = gradient(Flux.params(A)) do
-        -mean(C(vcat(s, A(s))))
+        loss = -mean(C(vcat(s, A(s))))
+        ignore() do 
+            p.actor_loss = loss
+        end
+        loss
     end
 
     update!(A, gs2)

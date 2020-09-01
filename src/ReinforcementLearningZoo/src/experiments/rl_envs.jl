@@ -10,6 +10,21 @@ using TensorBoardLogger
 using Logging
 using Random
 
+function Description(prelude::String, save_dir::String)
+    """
+    $prelude
+
+    Agent and statistic info will be saved to: `$save_dir`
+    You can also view the tensorboard logs with
+    `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
+    To load the agent and statistic info:
+    ```
+    agent = RLCore.load("$save_dir", Agent)
+    BSON.@load joinpath("$save_dir", "stats.bson") total_reward_per_episode time_per_step
+    ```
+"""
+end
+
 function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BasicDQN},
@@ -84,17 +99,9 @@ function RLCore.Experiment(
     description = """
     This experiment uses three dense layers to approximate the Q value.
     The testing environment is CartPoleEnv.
-
-    Agent and statistic info will be saved to: `$save_dir`
-    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
-    To load the agent and statistic info:
-    ```
-    agent = RLCore.load("$save_dir", Agent)
-    BSON.@load joinpath("$save_dir", "stats.bson") total_reward_per_episode time_per_step
-    ```
     """
 
-    Experiment(agent, env, stop_condition, hook, description)
+    Experiment(agent, env, stop_condition, hook, Description(description, save_dir))
 end
 
 function RLCore.Experiment(
@@ -171,6 +178,11 @@ function RLCore.Experiment(
                 end
             end
         end,
+        DoEveryNEpisode() do t, agent, env
+            with_logger(lg) do
+                @info "training" reward = total_reward_per_episode.rewards[end]
+            end
+        end,
         DoEveryNStep(10000) do t, agent, env
             RLCore.save(save_dir, agent)
             BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
@@ -180,18 +192,9 @@ function RLCore.Experiment(
     description = """
     This experiment uses the `DQNLearner` method with three dense layers to approximate the Q value.
     The testing environment is CartPoleEnv.
-
-    Agent and statistic info will be saved to: `$save_dir`
-    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
-    To load the agent and statistic info:
-
-    ```
-    agent = RLCore.load("$save_dir", Agent)
-    BSON.@load joinpath("$save_dir", "stats.bson") total_reward_per_episode time_per_step
-    ```
     """
 
-    Experiment(agent, env, stop_condition, hook, description)
+    Experiment(agent, env, stop_condition, hook, Description(description, save_dir))
 end
 
 function RLCore.Experiment(
@@ -269,6 +272,11 @@ function RLCore.Experiment(
                 end
             end
         end,
+        DoEveryNEpisode() do t, agent, env
+            with_logger(lg) do
+                @info "training" reward = total_reward_per_episode.rewards[end]
+            end
+        end,
         DoEveryNStep(10000) do t, agent, env
             RLCore.save(save_dir, agent)
             BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
@@ -278,18 +286,9 @@ function RLCore.Experiment(
     description = """
     This experiment uses the `PrioritizedDQNLearner` method with three dense layers to approximate the Q value.
     The testing environment is CartPoleEnv.
-
-    Agent and statistic info will be saved to: `$save_dir`
-    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
-    To load the agent and statistic info:
-
-    ```
-    agent = RLCore.load("$save_dir", Agent)
-    BSON.@load joinpath("$save_dir", "stats.bson") total_reward_per_episode time_per_step
-    ```
     """
 
-    Experiment(agent, env, stop_condition, hook, description)
+    Experiment(agent, env, stop_condition, hook, Description(description, save_dir))
 end
 
 function RLCore.Experiment(
@@ -373,6 +372,11 @@ function RLCore.Experiment(
                 end
             end
         end,
+        DoEveryNEpisode() do t, agent, env
+            with_logger(lg) do
+                @info "training" reward = total_reward_per_episode.rewards[end]
+            end
+        end,
         DoEveryNStep(10000) do t, agent, env
             RLCore.save(save_dir, agent)
             BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
@@ -382,18 +386,9 @@ function RLCore.Experiment(
     description = """
     This experiment uses the `RainbowLearner` method with three dense layers to approximate the distributed Q value.
     The testing environment is CartPoleEnv.
-
-    Agent and statistic info will be saved to: `$save_dir`
-    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
-    To load the agent and statistic info:
-
-    ```
-    agent = RLCore.load("$save_dir", Agent)
-    BSON.@load joinpath("$save_dir", "stats.bson") total_reward_per_episode time_per_step
-    ```
     """
 
-    Experiment(agent, env, stop_condition, hook, description)
+    Experiment(agent, env, stop_condition, hook, Description(description, save_dir))
 end
 
 function RLCore.Experiment(
@@ -426,7 +421,6 @@ function RLCore.Experiment(
             ϕ = Dense(Nₑₘ, n_hidden, relu; initW = init),
             header = Dense(n_hidden, na; initW = init),
         ) |> cpu
-
 
     agent = Agent(
         policy = QBasedPolicy(
@@ -480,6 +474,11 @@ function RLCore.Experiment(
                 end
             end
         end,
+        DoEveryNEpisode() do t, agent, env
+            with_logger(lg) do
+                @info "training" reward = total_reward_per_episode.rewards[end]
+            end
+        end,
         DoEveryNStep(10000) do t, agent, env
             RLCore.save(save_dir, agent)
             BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
@@ -489,18 +488,9 @@ function RLCore.Experiment(
     description = """
     This experiment uses the `IQNLearner` method with a `ImplicitQuantileNet`.
     The testing environment is CartPoleEnv.
-
-    Agent and statistic info will be saved to: `$save_dir`
-    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
-    To load the agent and statistic info:
-
-    ```
-    agent = RLCore.load("$save_dir", Agent)
-    BSON.@load joinpath("$save_dir", "stats.bson") total_reward_per_episode time_per_step
-    ```
     """
 
-    Experiment(agent, env, stop_condition, hook, description)
+    Experiment(agent, env, stop_condition, hook, Description(description, save_dir))
 end
 
 function RLCore.Experiment(
@@ -511,11 +501,17 @@ function RLCore.Experiment(
     save_dir = nothing,
     seed = 123,
 )
+    if isnothing(save_dir)
+        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
+        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_A2C_CartPole_$(t)")
+    end
+
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = MersenneTwister(seed)
     N_ENV = 16
     UPDATE_FREQ = 10
     env = MultiThreadEnv([
-        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i in 1:N_ENV
+        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i = 1:N_ENV
     ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
@@ -553,10 +549,36 @@ function RLCore.Experiment(
         ),
     )
 
-
-    hook = TotalBatchRewardPerEpisode(N_ENV)
-    stop_condition = StopAfterStep(100000)
-    Experiment(agent, env, stop_condition, hook, "# A2C with CartPole")
+    stop_condition = StopAfterStep(10_000)
+    total_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
+    time_per_step = TimePerStep()
+    hook = ComposedHook(
+        total_reward_per_episode,
+        time_per_step,
+        DoEveryNStep() do t, agent, env
+            with_logger(lg) do
+                @info(
+                    "training",
+                    actor_loss = agent.policy.learner.actor_loss,
+                    critic_loss = agent.policy.learner.critic_loss,
+                    entropy_loss = agent.policy.learner.entropy_loss,
+                    loss = agent.policy.learner.loss,
+                    reward = total_reward_per_episode.reward[end]
+                )
+            end
+        end,
+        DoEveryNStep(10000) do t, agent, env
+            RLCore.save(save_dir, agent)
+            BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
+        end,
+    )
+    Experiment(
+        agent,
+        env,
+        stop_condition,
+        hook,
+        Description("# A2C with CartPole", save_dir),
+    )
 end
 
 function RLCore.Experiment(
@@ -567,11 +589,17 @@ function RLCore.Experiment(
     save_dir = nothing,
     seed = 123,
 )
+    if isnothing(save_dir)
+        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
+        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_A2CGAE_CartPole_$(t)")
+    end
+
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = MersenneTwister(seed)
     N_ENV = 16
     UPDATE_FREQ = 10
     env = MultiThreadEnv([
-        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i in 1:N_ENV
+        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i = 1:N_ENV
     ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
@@ -614,12 +642,35 @@ function RLCore.Experiment(
             terminal_size = (N_ENV,),
         ),
     )
+    stop_condition = StopAfterStep(10_000)
+    total_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
+    time_per_step = TimePerStep()
+    hook = ComposedHook(
+        total_reward_per_episode,
+        time_per_step,
+        DoEveryNStep() do t, agent, env
+            with_logger(lg) do
+                @info(
+                    "training",
+                    actor_loss = agent.policy.learner.actor_loss,
+                    critic_loss = agent.policy.learner.critic_loss,
+                    entropy_loss = agent.policy.learner.entropy_loss,
+                    loss = agent.policy.learner.loss,
+                    reward = total_reward_per_episode.reward[end],
+                )
+            end
+        end,
+        DoEveryNStep(10000) do t, agent, env
+            RLCore.save(save_dir, agent)
+            BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
+        end,
+    )
     Experiment(
         agent,
         env,
-        StopAfterStep(100000),
-        TotalBatchRewardPerEpisode(N_ENV),
-        "# A2CGAE with CartPole",
+        stop_condition,
+        hook,
+        Description("# A2CGAE with CartPole", save_dir),
     )
 end
 
@@ -628,8 +679,15 @@ function RLCore.Experiment(
     ::Val{:DDPG},
     ::Val{:Pendulum},
     ::Nothing;
+    save_dir = nothing,
     seed = 123,
 )
+    if isnothing(save_dir)
+        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
+        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_DDPG_Pendulum_$(t)")
+    end
+
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = MersenneTwister(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
     action_space = get_actions(inner_env)
@@ -689,11 +747,39 @@ function RLCore.Experiment(
         ),
     )
 
-    description = """
-    # Play Pendulum with DDPG
-    """
+    stop_condition = StopAfterStep(10000)
+    total_reward_per_episode = TotalRewardPerEpisode()
+    time_per_step = TimePerStep()
+    hook = ComposedHook(
+        total_reward_per_episode,
+        time_per_step,
+        DoEveryNStep() do t, agent, env
+            with_logger(lg) do
+                @info(
+                    "training",
+                    actor_loss = agent.policy.actor_loss,
+                    critic_loss = agent.policy.critic_loss
+                )
+            end
+        end,
+        DoEveryNEpisode() do t, agent, env
+            with_logger(lg) do
+                @info "training" reward = total_reward_per_episode.rewards[end]
+            end
+        end,
+        DoEveryNStep(10000) do t, agent, env
+            RLCore.save(save_dir, agent)
+            BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
+        end,
+    )
 
-    Experiment(agent, env, StopAfterStep(10000), TotalRewardPerEpisode(), description)
+    Experiment(
+        agent,
+        env,
+        stop_condition,
+        hook,
+        Description("# Play Pendulum with DDPG", save_dir),
+    )
 end
 
 function RLCore.Experiment(
@@ -701,13 +787,20 @@ function RLCore.Experiment(
     ::Val{:PPO},
     ::Val{:CartPole},
     ::Nothing;
+    save_dir = nothing,
     seed = 123,
 )
+    if isnothing(save_dir)
+        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
+        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_PPO_CartPole_$(t)")
+    end
+
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = MersenneTwister(seed)
     N_ENV = 8
     UPDATE_FREQ = 16
     env = MultiThreadEnv([
-        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i in 1:N_ENV
+        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i = 1:N_ENV
     ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
@@ -756,12 +849,36 @@ function RLCore.Experiment(
             terminal_size = (N_ENV,),
         ),
     )
+
+    stop_condition = StopAfterStep(10_000)
+    total_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
+    time_per_step = TimePerStep()
+    hook = ComposedHook(
+        total_reward_per_episode,
+        time_per_step,
+        DoEveryNStep() do t, agent, env
+            with_logger(lg) do
+                @info(
+                    "training",
+                    actor_loss = agent.policy.learner.actor_loss[end, end],
+                    critic_loss = agent.policy.learner.critic_loss[end, end],
+                    loss = agent.policy.learner.loss[end, end],
+                    reward = total_reward_per_episode.reward[end]
+                )
+            end
+        end,
+        DoEveryNStep(10000) do t, agent, env
+            RLCore.save(save_dir, agent)
+            BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
+        end,
+    )
+
     Experiment(
         agent,
         env,
-        StopAfterStep(100000),
-        TotalBatchRewardPerEpisode(N_ENV),
-        "# PPO with CartPole",
+        stop_condition,
+        hook,
+        Description("# PPO with CartPole", save_dir),
     )
 end
 
@@ -813,7 +930,7 @@ function RLCore.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(40000)
+    stop_condition = StopAfterStep(70_000)
 
     total_reward_per_episode = TotalRewardPerEpisode()
     time_per_step = TimePerStep()
@@ -839,17 +956,9 @@ function RLCore.Experiment(
     description = """
     This experiment uses three dense layers to approximate the Q value.
     The testing environment is MountainCarEnv.
-
-    Agent and statistic info will be saved to: `$save_dir`
-    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
-    To load the agent and statistic info:
-    ```
-    agent = RLCore.load("$save_dir", Agent)
-    BSON.@load joinpath("$save_dir", "stats.bson") total_reward_per_episode time_per_step
-    ```
     """
 
-    Experiment(agent, env, stop_condition, hook, description)
+    Experiment(agent, env, stop_condition, hook, Description(description, save_dir))
 end
 
 function RLCore.Experiment(
@@ -941,18 +1050,9 @@ function RLCore.Experiment(
     description = """
     This experiment uses the `DQNLearner` method with three dense layers to approximate the Q value.
     The testing environment is MountainCarEnv.
-
-    Agent and statistic info will be saved to: `$save_dir`
-    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
-    To load the agent and statistic info:
-
-    ```
-    agent = RLCore.load("$save_dir", Agent)
-    BSON.@load joinpath("$save_dir", "stats.bson") total_reward_per_episode time_per_step
-    ```
     """
 
-    Experiment(agent, env, stop_condition, hook, description)
+    Experiment(agent, env, stop_condition, hook, Description(description, save_dir))
 end
 
 function RLCore.Experiment(
@@ -960,8 +1060,15 @@ function RLCore.Experiment(
     ::Val{:SAC},
     ::Val{:Pendulum},
     ::Nothing;
+    save_dir = nothing,
     seed = 123,
 )
+    if isnothing(save_dir)
+        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
+        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_SAC_Pendulum_$(t)")
+    end
+
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = MersenneTwister(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
     action_space = get_actions(inner_env)
@@ -1020,9 +1127,28 @@ function RLCore.Experiment(
         ),
     )
 
-    description = """
-    # Play Pendulum with SAC
-    """
+    stop_condition = StopAfterStep(10_000)
+    total_reward_per_episode = TotalRewardPerEpisode()
+    time_per_step = TimePerStep()
+    hook = ComposedHook(
+        total_reward_per_episode,
+        time_per_step,
+        DoEveryNEpisode() do t, agent, env
+            with_logger(lg) do
+                @info "training" reward = total_reward_per_episode.rewards[end]
+            end
+        end,
+        DoEveryNStep(10000) do t, agent, env
+            RLCore.save(save_dir, agent)
+            BSON.@save joinpath(save_dir, "stats.bson") total_reward_per_episode time_per_step
+        end,
+    )
 
-    Experiment(agent, env, StopAfterStep(10000), TotalRewardPerEpisode(), description)
+    Experiment(
+        agent,
+        env,
+        stop_condition,
+        hook,
+        Description("# Play Pendulum with SAC", save_dir),
+    )
 end
