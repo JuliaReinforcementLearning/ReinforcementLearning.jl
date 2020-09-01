@@ -41,5 +41,5 @@ RLBase.get_prob(s::WeightedExplorer{true}, values, mask) = values
 
 function RLBase.get_prob(s::WeightedExplorer{false}, values, mask)
     s = sum(@view(values[mask]))
-    map((v,m) -> m ? v/s : zero(v), values, mask)
+    map((v, m) -> m ? v / s : zero(v), values, mask)
 end

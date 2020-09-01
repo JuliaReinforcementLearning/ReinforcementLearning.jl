@@ -144,9 +144,21 @@ function expected_policy_values(agents::Tuple{Vararg{<:AbstractAgent}}, env::Abs
     Dict(zip(get_players(env), values))
 end
 
-expected_policy_values(agents::Dict, env::AbstractEnv) = expected_policy_values(agents, env, RewardStyle(env), ChanceStyle(env), DynamicStyle(env))
+expected_policy_values(agents::Dict, env::AbstractEnv) = expected_policy_values(
+    agents,
+    env,
+    RewardStyle(env),
+    ChanceStyle(env),
+    DynamicStyle(env),
+)
 
-function expected_policy_values(agents::Dict, env::AbstractEnv, ::TerminalReward, ::Union{ExplicitStochastic,Deterministic}, ::Sequential)
+function expected_policy_values(
+    agents::Dict,
+    env::AbstractEnv,
+    ::TerminalReward,
+    ::Union{ExplicitStochastic,Deterministic},
+    ::Sequential,
+)
     if get_terminal(env)
         [get_reward(env, get_role(agents[p])) for p in get_players(env)]
     elseif get_current_player(env) == get_chance_player(env)

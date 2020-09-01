@@ -19,8 +19,9 @@ end
 Flux.functor(x::QBasedPolicy) = (learner = x.learner,), y -> @set x.learner = y.learner
 
 (π::QBasedPolicy)(env) = π(env, ActionStyle(env))
-(π::QBasedPolicy)(env, ::MinimalActionSet) = get_actions(env)[env |> π.learner |> π.explorer]
-(π::QBasedPolicy)(env, ::FullActionSet) = get_actions(env)[π.explorer(π.learner(env), get_legal_actions_mask(env))]
+(π::QBasedPolicy)(env, ::MinimalActionSet) = get_actions(env)[envπ.learnerπ.explorer]
+(π::QBasedPolicy)(env, ::FullActionSet) =
+    get_actions(env)[π.explorer(π.learner(env), get_legal_actions_mask(env))]
 
 RLBase.get_prob(p::QBasedPolicy, env) = get_prob(p, env, ActionStyle(env))
 RLBase.get_prob(p::QBasedPolicy, env, ::MinimalActionSet) =
