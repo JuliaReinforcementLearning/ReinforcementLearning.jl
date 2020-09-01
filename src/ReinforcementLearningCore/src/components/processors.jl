@@ -53,7 +53,7 @@ function Base.push!(
     push!(cb, select_last_frame(stacked_data))
 end
 
-function RLBase.reset!(p::StackFrames{T}) where {T}
+function RLBase.reset!(p::StackFrames{T,N}) where {T,N}
     empty!(p.buffer)
     for _ in 1:capacity(p.buffer)
         push!(p.buffer, zeros(T, size(p.buffer)[1:N-1]))

@@ -5,7 +5,7 @@ export TabularLearner
 
 Use a `Dict{S,Vector{T}}` to store action probabilities.
 """
-struct TabularLearner{S,T} <: AbstractPolicy
+struct TabularLearner{S,T} <: AbstractLearner
     table::Dict{S,Vector{T}}
 end
 

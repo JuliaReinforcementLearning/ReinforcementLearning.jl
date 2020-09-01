@@ -138,26 +138,17 @@ end
 
 Calculate the expected return of each agent.
 """
-expected_policy_values(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv) =
-    expected_policy_values(Dict(get_role(agent) => agent for agent in agents), env)
+function expected_policy_values(agents::Tuple{Vararg{<:AbstractAgent}}, env::AbstractEnv)
+    agents = Dict(get_role(agent) => agent for agent in agents)
+    values = expected_policy_values(agents, env)
+    Dict(zip(get_players(env), values))
+end
 
-expected_policy_values(agents::Dict, env::AbstractEnv) = expected_policy_values(
-    agents,
-    env,
-    RewardStyle(env),
-    ChanceStyle(env),
-    DynamicStyle(env),
-)
+expected_policy_values(agents::Dict, env::AbstractEnv) = expected_policy_values(agents, env, RewardStyle(env), ChanceStyle(env), DynamicStyle(env))
 
-function expected_policy_values(
-    agents::Dict,
-    env::AbstractEnv,
-    ::TerminalReward,
-    ::Union{ExplicitStochastic,Deterministic},
-    ::Sequential,
-)
+function expected_policy_values(agents::Dict, env::AbstractEnv, ::TerminalReward, ::Union{ExplicitStochastic,Deterministic}, ::Sequential)
     if get_terminal(env)
-        [get_reward(env, get_role(agent)) for agent in values(agents)]
+        [get_reward(env, get_role(agents[p])) for p in get_players(env)]
     elseif get_current_player(env) == get_chance_player(env)
         vals = zeros(length(agents))
         for a::ActionProbPair in get_legal_actions(env)
