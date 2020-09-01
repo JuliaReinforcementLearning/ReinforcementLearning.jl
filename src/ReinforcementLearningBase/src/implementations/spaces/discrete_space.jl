@@ -62,6 +62,7 @@ Base.convert(
 ) = DiscreteSpace(s)
 
 Base.iterate(s::DiscreteSpace, args...) = iterate(s.span, args...)
+Base.getindex(s::DiscreteSpace, args...) = getindex(s.span, args...)
 
 #####
 # ActionWithProb
