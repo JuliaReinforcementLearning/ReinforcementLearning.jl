@@ -88,7 +88,8 @@ function DDPGPolicy(;
         act_noise,
         step,
         rng,
-        0.f0,0.f0,
+        0.f0,
+        0.f0,
     )
 end
 
@@ -138,7 +139,7 @@ function RLBase.update!(p::DDPGPolicy, traj::CircularCompactSARTSATrajectory)
     gs1 = gradient(Flux.params(C)) do
         q = C(vcat(s, a)) |> vec
         loss = mean((y .- q) .^ 2)
-        ignore() do 
+        ignore() do
             p.critic_loss = loss
         end
         loss
@@ -148,7 +149,7 @@ function RLBase.update!(p::DDPGPolicy, traj::CircularCompactSARTSATrajectory)
 
     gs2 = gradient(Flux.params(A)) do
         loss = -mean(C(vcat(s, A(s))))
-        ignore() do 
+        ignore() do
             p.actor_loss = loss
         end
         loss

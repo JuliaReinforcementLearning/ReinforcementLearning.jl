@@ -17,7 +17,7 @@ using Random
                     Val(method),
                     Val(:CartPole),
                     nothing;
-                    save_dir=joinpath(dir, "CartPole", string(method)),
+                    save_dir = joinpath(dir, "CartPole", string(method)),
                 ))
                 @info "stats for $method" avg_reward = mean(res.hook[1].rewards) avg_fps =
                     1 / mean(res.hook[2].times)
@@ -29,22 +29,32 @@ using Random
                     Val(method),
                     Val(:MountainCar),
                     nothing;
-                    save_dir=joinpath(dir, "MountainCar", string(method)),
+                    save_dir = joinpath(dir, "MountainCar", string(method)),
                 ))
                 @info "stats for $method" avg_reward = mean(res.hook[1].rewards) avg_fps =
                     1 / mean(res.hook[2].times)
             end
 
             for method in (:A2C, :A2CGAE, :PPO)
-                res = run(Experiment(Val(:JuliaRL), Val(method), Val(:CartPole), nothing;
-                    save_dir=joinpath(dir, "CartPole", string(method)),))
+                res = run(Experiment(
+                    Val(:JuliaRL),
+                    Val(method),
+                    Val(:CartPole),
+                    nothing;
+                    save_dir = joinpath(dir, "CartPole", string(method)),
+                ))
                 @info "stats for $method" avg_reward =
                     mean(Iterators.flatten(res.hook[1].rewards))
             end
 
             for method in (:DDPG, :SAC)
-                res = run(Experiment(Val(:JuliaRL), Val(method), Val(:Pendulum), nothing;
-                    save_dir=joinpath(dir, "Pendulum", string(method)),))
+                res = run(Experiment(
+                    Val(:JuliaRL),
+                    Val(method),
+                    Val(:Pendulum),
+                    nothing;
+                    save_dir = joinpath(dir, "Pendulum", string(method)),
+                ))
                 @info "stats for $method" avg_reward =
                     mean(Iterators.flatten(res.hook[1].rewards))
             end

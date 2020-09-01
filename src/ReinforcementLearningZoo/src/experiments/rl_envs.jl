@@ -511,7 +511,7 @@ function RLCore.Experiment(
     N_ENV = 16
     UPDATE_FREQ = 10
     env = MultiThreadEnv([
-        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i = 1:N_ENV
+        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i in 1:N_ENV
     ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
@@ -599,7 +599,7 @@ function RLCore.Experiment(
     N_ENV = 16
     UPDATE_FREQ = 10
     env = MultiThreadEnv([
-        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i = 1:N_ENV
+        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i in 1:N_ENV
     ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
@@ -800,7 +800,7 @@ function RLCore.Experiment(
     N_ENV = 8
     UPDATE_FREQ = 16
     env = MultiThreadEnv([
-        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i = 1:N_ENV
+        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i in 1:N_ENV
     ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
