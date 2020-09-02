@@ -185,29 +185,14 @@ isfull(t::CombinedTrajectory) = isfull(t.t1) && isfull(t.t2)
 #####
 
 const VectCompactSATrajectory = CombinedTrajectory{
-    <:SharedTrajectory{
-        <:Vector,
-        <:NamedTuple{(:state, :next_state, :full_state)},
-    },
-    <:SharedTrajectory{
-        <:Vector,
-        <:NamedTuple{(:action, :next_action, :full_action)},
-    }
+    <:SharedTrajectory{<:Vector,<:NamedTuple{(:state, :next_state, :full_state)}},
+    <:SharedTrajectory{<:Vector,<:NamedTuple{(:action, :next_action, :full_action)}},
 }
 
-function VectCompactSATrajectory(;
-    state_type = Int,
-    action_type = Int,
-    )
+function VectCompactSATrajectory(; state_type = Int, action_type = Int)
     CombinedTrajectory(
-        SharedTrajectory(
-            Vector{state_type}(),
-            :state,
-        ),
-        SharedTrajectory(
-            Vector{action_type}(),
-            :action,
-        ),
+        SharedTrajectory(Vector{state_type}(), :state),
+        SharedTrajectory(Vector{action_type}(), :action),
     )
 end
 
@@ -250,14 +235,8 @@ end
 #####
 
 const ElasticCompactSATrajectory = CombinedTrajectory{
-    <:SharedTrajectory{
-        <:ElasticArray,
-        <:NamedTuple{(:state, :next_state, :full_state)},
-    },
-    <:SharedTrajectory{
-        <:ElasticArray,
-        <:NamedTuple{(:action, :next_action, :full_action)},
-    },
+    <:SharedTrajectory{<:ElasticArray,<:NamedTuple{(:state, :next_state, :full_state)}},
+    <:SharedTrajectory{<:ElasticArray,<:NamedTuple{(:action, :next_action, :full_action)}},
 }
 
 function ElasticCompactSATrajectory(;
@@ -267,14 +246,8 @@ function ElasticCompactSATrajectory(;
     action_size = (),
 )
     CombinedTrajectory(
-        SharedTrajectory(
-            ElasticArray{state_type}(undef, state_size..., 0),
-            :state,
-        ),
-        SharedTrajectory(
-            ElasticArray{action_type}(undef, action_size..., 0),
-            :action,
-        ),
+        SharedTrajectory(ElasticArray{state_type}(undef, state_size..., 0), :state),
+        SharedTrajectory(ElasticArray{action_type}(undef, action_size..., 0), :action),
     )
 end
 
@@ -316,25 +289,13 @@ end
 #####
 
 const VectCompactSARTSATrajectory = CombinedTrajectory{
-    <:Trajectory{
-        <:NamedTuple{
-            (:reward, :terminal),
-            <:Tuple{<:Vector,<:Vector},
-        },
-    },
+    <:Trajectory{<:NamedTuple{(:reward, :terminal),<:Tuple{<:Vector,<:Vector}}},
     <:VectCompactSATrajectory,
 }
 
-function VectCompactSARTSATrajectory(;
-    reward_type = Float32,
-    terminal_type = Bool,
-    kw...,
-)
+function VectCompactSARTSATrajectory(; reward_type = Float32, terminal_type = Bool, kw...)
     CombinedTrajectory(
-        Trajectory(
-            reward = Vector{reward_type}(),
-            terminal = Vector{terminal_type}(),
-        ),
+        Trajectory(reward = Vector{reward_type}(), terminal = Vector{terminal_type}()),
         VectCompactSATrajectory(; kw...),
     )
 end
@@ -375,12 +336,7 @@ end
 #####
 
 const ElasticCompactSARTSATrajectory = CombinedTrajectory{
-    <:Trajectory{
-        <:NamedTuple{
-            (:reward, :terminal),
-            <:Tuple{<:ElasticArray,<:ElasticArray},
-        },
-    },
+    <:Trajectory{<:NamedTuple{(:reward, :terminal),<:Tuple{<:ElasticArray,<:ElasticArray}}},
     <:ElasticCompactSATrajectory,
 }
 

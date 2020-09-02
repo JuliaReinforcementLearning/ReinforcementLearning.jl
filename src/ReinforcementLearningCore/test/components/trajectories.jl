@@ -157,24 +157,35 @@
     end
 
     @testset "VectCompactSARTSATrajectory" begin
-        t = VectCompactSARTSATrajectory(;state_type=Vector{Float32}, action_type=Int, reward_type=Float32, terminal_type=Bool)
-        push!(t; state=Float32[1,1], action=1)
-        push!(t; reward=1f0, terminal=false, state=Float32[2,2], action=2)
-        push!(t; reward=2f0, terminal=true, state=Float32[3,3], action=3)
+        t = VectCompactSARTSATrajectory(;
+            state_type = Vector{Float32},
+            action_type = Int,
+            reward_type = Float32,
+            terminal_type = Bool,
+        )
+        push!(t; state = Float32[1, 1], action = 1)
+        push!(t; reward = 1f0, terminal = false, state = Float32[2, 2], action = 2)
+        push!(t; reward = 2f0, terminal = true, state = Float32[3, 3], action = 3)
 
-        @test t[:state] == [Float32[1,1], Float32[2,2]]
-        @test t[:action] == [1,2]
-        @test t[:reward] == [1f0,2f0]
-        @test t[:terminal] == [false,true]
-        @test t[:next_state] == [Float32[2,2], Float32[3,3]]
-        @test t[:next_action] == [2,3]
+        @test t[:state] == [Float32[1, 1], Float32[2, 2]]
+        @test t[:action] == [1, 2]
+        @test t[:reward] == [1f0, 2f0]
+        @test t[:terminal] == [false, true]
+        @test t[:next_state] == [Float32[2, 2], Float32[3, 3]]
+        @test t[:next_action] == [2, 3]
     end
 
     @testset "ElasticCompactSARTSATrajectory" begin
-        t = ElasticCompactSARTSATrajectory(;state_type=Float32, state_size=(2,), action_type=Int, reward_type=Float32, terminal_type=Bool)
-        push!(t; state=Float32[1,1], action=1)
-        push!(t; reward=1f0, terminal=false, state=Float32[2,2], action=2)
-        push!(t; reward=2f0, terminal=true, state=Float32[3,3], action=3)
+        t = ElasticCompactSARTSATrajectory(;
+            state_type = Float32,
+            state_size = (2,),
+            action_type = Int,
+            reward_type = Float32,
+            terminal_type = Bool,
+        )
+        push!(t; state = Float32[1, 1], action = 1)
+        push!(t; reward = 1f0, terminal = false, state = Float32[2, 2], action = 2)
+        push!(t; reward = 2f0, terminal = true, state = Float32[3, 3], action = 3)
 
         @test t[:state] == Float32[1 2; 1 2]
         @test t[:action] == [1, 2]
