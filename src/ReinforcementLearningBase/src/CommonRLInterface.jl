@@ -66,7 +66,7 @@ mutable struct RLBaseEnv{T<:CRL.AbstractEnv,R} <: AbstractEnv
 end
 
 Base.convert(::Type{AbstractEnv}, env::CRL.AbstractEnv) = convert(RLBaseEnv, env)
-Base.convert(::Type{RLBaseEnv}, env::CRL.AbstractEnv) = RLBaseEnv(env, 0.f0)  # can not determine reward ahead. Assume `Float32`.
+Base.convert(::Type{RLBaseEnv}, env::CRL.AbstractEnv) = RLBaseEnv(env, 0.0f0)  # can not determine reward ahead. Assume `Float32`.
 
 get_state(env::RLBaseEnv) = CRL.observe(env.env)
 get_actions(env::RLBaseEnv) = CRL.actions(env.env)
