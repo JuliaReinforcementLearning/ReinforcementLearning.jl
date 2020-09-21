@@ -69,7 +69,7 @@
         push!(t; state = 1, action = 1, legal_actions_mask = [false, false])
         push!(
             t;
-            reward = 0.f0,
+            reward = 0.0f0,
             terminal = false,
             priority = 100,
             state = 2,
@@ -80,7 +80,7 @@
         @test t[:state] == [1]
         @test t[:action] == [1]
         @test t[:legal_actions_mask] == [false false]'
-        @test t[:reward] == [0.f0]
+        @test t[:reward] == [0.0f0]
         @test t[:terminal] == [false]
         @test t[:priority] == [100]
         @test t[:next_state] == [2]
@@ -95,7 +95,7 @@
 
         push!(
             t;
-            reward = 1.f0,
+            reward = 1.0f0,
             terminal = true,
             priority = 200,
             state = 3,
@@ -109,7 +109,7 @@
             false false
             false true
         ]
-        @test t[:reward] == [0.f0, 1.f0]
+        @test t[:reward] == [0.0f0, 1.0f0]
         @test t[:terminal] == [false, true]
         @test t[:priority] == [100, 200]
         @test t[:next_state] == [2, 3]
@@ -130,7 +130,7 @@
         @test t[:state] == [1]
         @test t[:action] == [1]
         @test t[:legal_actions_mask] == [false false]'
-        @test t[:reward] == [0.f0]
+        @test t[:reward] == [0.0f0]
         @test t[:terminal] == [false]
         @test t[:priority] == [100]
         @test t[:next_state] == [2]
@@ -164,12 +164,12 @@
             terminal_type = Bool,
         )
         push!(t; state = Float32[1, 1], action = 1)
-        push!(t; reward = 1f0, terminal = false, state = Float32[2, 2], action = 2)
-        push!(t; reward = 2f0, terminal = true, state = Float32[3, 3], action = 3)
+        push!(t; reward = 1.0f0, terminal = false, state = Float32[2, 2], action = 2)
+        push!(t; reward = 2.0f0, terminal = true, state = Float32[3, 3], action = 3)
 
         @test t[:state] == [Float32[1, 1], Float32[2, 2]]
         @test t[:action] == [1, 2]
-        @test t[:reward] == [1f0, 2f0]
+        @test t[:reward] == [1.0f0, 2.0f0]
         @test t[:terminal] == [false, true]
         @test t[:next_state] == [Float32[2, 2], Float32[3, 3]]
         @test t[:next_action] == [2, 3]
@@ -184,21 +184,22 @@
             terminal_type = Bool,
         )
         push!(t; state = Float32[1, 1], action = 1)
-        push!(t; reward = 1f0, terminal = false, state = Float32[2, 2], action = 2)
-        push!(t; reward = 2f0, terminal = true, state = Float32[3, 3], action = 3)
+        push!(t; reward = 1.0f0, terminal = false, state = Float32[2, 2], action = 2)
+        push!(t; reward = 2.0f0, terminal = true, state = Float32[3, 3], action = 3)
 
         @test t[:state] == Float32[1 2; 1 2]
         @test t[:action] == [1, 2]
-        @test t[:reward] == [1f0, 2f0]
+        @test t[:reward] == [1.0f0, 2.0f0]
         @test t[:terminal] == [false, true]
         @test t[:next_state] == Float32[2 3; 2 3]
         @test t[:next_action] == [2, 3]
 
-        @test pop!(t) == (reward = 2.0f0, terminal = true, state = Float32[3.0, 3.0], action = 3)
-        push!(t; reward = 1f0, terminal = false, state = Float32[2, 2], action = 2)
+        @test pop!(t) ==
+              (reward = 2.0f0, terminal = true, state = Float32[3.0, 3.0], action = 3)
+        push!(t; reward = 1.0f0, terminal = false, state = Float32[2, 2], action = 2)
         @test t[:state] == Float32[1 2; 1 2]
         @test t[:action] == [1, 2]
-        @test t[:reward] == [1f0, 1f0]
+        @test t[:reward] == [1.0f0, 1.0f0]
         @test t[:terminal] == [false, false]
         @test t[:next_state] == Float32[2 2; 2 2]
         @test t[:next_action] == [2, 2]
