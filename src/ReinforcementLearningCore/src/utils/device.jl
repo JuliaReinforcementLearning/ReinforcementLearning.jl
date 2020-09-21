@@ -16,14 +16,13 @@ send_to_device(::Val{:gpu}, x) = Flux.fmap(a -> adapt(CuArray{Float32}, a), x)
 send_to_device(
     ::Val{:gpu},
     x::Union{
-        SubArray{<:Any,<:Any,<:CircularArrayBuffer},
+        SubArray{<:Any,<:Any,<:Union{CircularArrayBuffer, ElasticArray}},
         Base.ReshapedArray{<:Any,<:Any,<:SubArray{<:Any,<:Any,<:CircularArrayBuffer}},
         SubArray{
             <:Any,
             <:Any,
-            <:Base.ReshapedArray{<:Any,<:Any,<:SubArray{<:Any,<:Any,<:CircularArrayBuffer}},
+            <:Base.ReshapedArray{<:Any,<:Any,<:SubArray{<:Any,<:Any,<:Union{CircularArrayBuffer, ElasticArray}}},
         },
-        SubArray{<:Any,<:Any,<:ElasticArray,<:Any,<:Any},
         ElasticArray,
     },
 ) = CuArray(x)
