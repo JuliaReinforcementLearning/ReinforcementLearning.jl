@@ -48,7 +48,7 @@ using OpenSpiel
                     mean(Iterators.flatten(res.hook[1].rewards))
             end
 
-            for method in (:DDPG, :SAC)
+            for method in (:DDPG, :SAC, :TD3)
                 res = run(Experiment(
                     Val(:JuliaRL),
                     Val(method),

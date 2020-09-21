@@ -23,6 +23,7 @@ This project aims to provide some implementations of the most typical reinforcem
 - A2C
 - PPO
 - DDPG
+- TD3
 - SAC
 - CFR
 - Minimax
@@ -44,6 +45,7 @@ Some built-in experiments are exported to help new users to easily run benchmark
 - ``E`JuliaRL_A2CGAE_CartPole` `` (Thanks to [@sriram13m](https://github.com/sriram13m))
 - ``E`JuliaRL_PPO_CartPole` ``
 - ``E`JuliaRL_DDPG_Pendulum` ``
+- ``E`JuliaRL_TD3_Pendulum` `` (Thanks to [@rbange](https://github.com/rbange))
 - ``E`JuliaRL_SAC_Pendulum` `` (Thanks to [@rbange](https://github.com/rbange))
 - ``E`JuliaRL_BasicDQN_MountainCar` `` (Thanks to [@felixchalumeau](https://github.com/felixchalumeau))
 - ``E`JuliaRL_DQN_MountainCar` `` (Thanks to [@felixchalumeau](https://github.com/felixchalumeau))
