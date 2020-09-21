@@ -2,7 +2,23 @@
 
 ## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/HEAD)
 
-[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.0...HEAD)
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.2...HEAD)
+
+**Merged pull requests:**
+
+- Automatic JuliaFormatter.jl run [\#80](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/80) ([github-actions[bot]](https://github.com/apps/github-actions))
+
+## [v0.8.2](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.8.2) (2020-09-01)
+
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.1...v0.8.2)
+
+**Merged pull requests:**
+
+- Improve DiscreteSpace and VectSpace [\#79](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/79) ([findmyway](https://github.com/findmyway))
+
+## [v0.8.1](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.8.1) (2020-09-01)
+
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.0...v0.8.1)
 
 **Closed issues:**
 
@@ -11,6 +27,7 @@
 
 **Merged pull requests:**
 
+- add weighted\_sample [\#78](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/78) ([findmyway](https://github.com/findmyway))
 - Force reset! processors in StateOverriddenEnv [\#77](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/77) ([findmyway](https://github.com/findmyway))
 - remove TabularRandomPolicy in export [\#76](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/76) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#75](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/75) ([github-actions[bot]](https://github.com/apps/github-actions))
