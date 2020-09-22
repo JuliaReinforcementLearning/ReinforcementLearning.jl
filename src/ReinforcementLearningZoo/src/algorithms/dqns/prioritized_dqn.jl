@@ -63,7 +63,7 @@ function PrioritizedDQNLearner(;
     update_freq::Int = 1,
     target_update_freq::Int = 100,
     update_step::Int = 0,
-    default_priority::Float32 = 100f0,
+    default_priority::Float32 = 100.0f0,
     β_priority::Float32 = 0.5f0,
     rng = Random.GLOBAL_RNG,
 ) where {Tq,Tt,Tf}
@@ -83,7 +83,7 @@ function PrioritizedDQNLearner(;
         default_priority,
         β_priority,
         rng,
-        0.f0,
+        0.0f0,
     )
 end
 
@@ -129,7 +129,7 @@ function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
     actions = CartesianIndex.(batch.actions, 1:batch_size)
 
     updated_priorities = Vector{Float32}(undef, batch_size)
-    weights = 1f0 ./ ((batch.priorities .+ 1f-10) .^ β)
+    weights = 1.0f0 ./ ((batch.priorities .+ 1f-10) .^ β)
     weights ./= maximum(weights)
     weights = send_to_device(D, weights)
 
@@ -146,7 +146,7 @@ function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
     gs = gradient(params(Q)) do
         q = Q(states)[actions]
         batch_losses = loss_func(G, q)
-        loss = dot(vec(weights), vec(batch_losses)) * 1 // batch_size
+        loss = dot(vec(weights), vec(batch_losses)) * 1//batch_size
         ignore() do
             updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10) .^ β))
             learner.loss = loss

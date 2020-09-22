@@ -69,7 +69,7 @@ function DQNLearner(;
         target_update_freq,
         update_step,
         rng,
-        0.f0,
+        0.0f0,
     )
 end
 

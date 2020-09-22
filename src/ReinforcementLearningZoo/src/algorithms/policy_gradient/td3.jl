@@ -109,8 +109,8 @@ function TD3Policy(;
         step,
         rng,
         1, # keep track of numbers of replay
-        0.f0,
-        0.f0,
+        0.0f0,
+        0.0f0,
     )
 end
 
@@ -146,13 +146,14 @@ function RLBase.update!(p::TD3Policy, traj::CircularCompactSARTSATrajectory)
     # !!! we have several assumptions here, need revisit when we have more complex environments
     # state is vector
     # action is scalar
-    target_noise = clamp.(
-        randn(p.rng, Float32, 1, p.batch_size) .* p.target_act_noise,
-        -p.target_act_limit,
-        p.target_act_limit,
-    )
+    target_noise =
+        clamp.(
+            randn(p.rng, Float32, 1, p.batch_size) .* p.target_act_noise,
+            -p.target_act_limit,
+            p.target_act_limit,
+        )
     # add noise and clip to tanh bounds
-    a′ = clamp.(p.target_actor(s′) + target_noise, -1f0, 1f0)
+    a′ = clamp.(p.target_actor(s′) + target_noise, -1.0f0, 1.0f0)
 
     q_1′, q_2′ = p.target_critic(s′, a′)
     y = r .+ p.γ .* (1 .- t) .* (min.(q_1′, q_2′) |> vec)
@@ -179,7 +180,10 @@ function RLBase.update!(p::TD3Policy, traj::CircularCompactSARTSATrajectory)
         end
         update!(actor, gs2)
         # polyak averaging
-        for (dest, src) in zip(Flux.params([p.target_actor, p.target_critic]), Flux.params([actor, critic]))
+        for (dest, src) in zip(
+            Flux.params([p.target_actor, p.target_critic]),
+            Flux.params([actor, critic]),
+        )
             dest .= p.ρ .* dest .+ (1 - p.ρ) .* src
         end
         p.replay_counter = 1

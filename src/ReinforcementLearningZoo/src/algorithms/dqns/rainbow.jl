@@ -117,7 +117,7 @@ function RainbowLearner(;
         default_priority,
         β_priority,
         rng,
-        0.f0,
+        0.0f0,
     )
 end
 
@@ -175,7 +175,7 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
     is_use_PER = !isnothing(batch.priorities)  # is use Prioritized Experience Replay
     if is_use_PER
         updated_priorities = Vector{Float32}(undef, batch_size)
-        weights = 1f0 ./ ((batch.priorities .+ 1f-10) .^ β)
+        weights = 1.0f0 ./ ((batch.priorities .+ 1f-10) .^ β)
         weights ./= maximum(weights)
         weights = send_to_device(D, weights)
     end
@@ -184,8 +184,9 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
         logits = reshape(Q(states), n_atoms, n_actions, :)
         select_logits = logits[:, actions]
         batch_losses = loss_func(select_logits, target_distribution)
-        loss = is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1 // batch_size :
-                mean(batch_losses)
+        loss =
+            is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1//batch_size :
+            mean(batch_losses)
         ignore() do
             if is_use_PER
                 updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10) .^ β))

@@ -153,7 +153,7 @@ function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
 
                 actor_loss = -mean(min.(surr1, surr2))
                 critic_loss = mean((r .- v′) .^ 2)
-                entropy_loss = -sum(p′ .* log_p′) * 1 // size(p′, 2)
+                entropy_loss = -sum(p′ .* log_p′) * 1//size(p′, 2)
                 loss = w₁ * actor_loss + w₂ * critic_loss - w₃ * entropy_loss
 
                 ignore() do

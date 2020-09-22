@@ -104,7 +104,8 @@ function cfr!(nodes, env, player, reach_probs, chance_player_reach_prob, ratio)
             v = 0.0
             node = nodes[get_state(env)]
             legal_actions = get_legal_actions(env)
-            U = player == get_current_player(env) ?
+            U =
+                player == get_current_player(env) ?
                 Vector{Float64}(undef, length(legal_actions)) : nothing
 
             for (i, action) in enumerate(legal_actions)

@@ -17,14 +17,14 @@ Base.@kwdef mutable struct A2CLearner{A<:ActorCritic} <: AbstractLearner
     approximator::A
     γ::Float32
     max_grad_norm::Union{Nothing,Float32} = nothing
-    norm::Float32 = 0.f0
+    norm::Float32 = 0.0f0
     actor_loss_weight::Float32
     critic_loss_weight::Float32
     entropy_loss_weight::Float32
-    actor_loss::Float32 = 0.f0
-    critic_loss::Float32 = 0.f0
-    entropy_loss::Float32 = 0.f0
-    loss::Float32 = 0.f0
+    actor_loss::Float32 = 0.0f0
+    critic_loss::Float32 = 0.0f0
+    entropy_loss::Float32 = 0.0f0
+    loss::Float32 = 0.0f0
 end
 
 function (learner::A2CLearner)(env::MultiThreadEnv)
@@ -83,7 +83,7 @@ function RLBase.update!(learner::A2CLearner, t::AbstractTrajectory)
         advantage = vec(gains) .- vec(values)
         actor_loss = -mean(log_probs_select .* Zygote.dropgrad(advantage))
         critic_loss = mean(advantage .^ 2)
-        entropy_loss = -sum(probs .* log_probs) * 1 // size(probs, 2)
+        entropy_loss = -sum(probs .* log_probs) * 1//size(probs, 2)
         loss = w₁ * actor_loss + w₂ * critic_loss - w₃ * entropy_loss
         ignore() do
             learner.actor_loss = actor_loss

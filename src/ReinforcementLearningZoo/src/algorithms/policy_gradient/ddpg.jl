@@ -88,8 +88,8 @@ function DDPGPolicy(;
         act_noise,
         step,
         rng,
-        0.f0,
-        0.f0,
+        0.0f0,
+        0.0f0,
     )
 end
 

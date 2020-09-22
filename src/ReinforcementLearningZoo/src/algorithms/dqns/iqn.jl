@@ -120,7 +120,7 @@ function IQNLearner(;
     β_priority = 0.5f0,
     rng = Random.GLOBAL_RNG,
     device_rng = CUDA.CURAND.RNG(),
-    loss = 0.f0,
+    loss = 0.0f0,
 )
     copyto!(approximator, target_approximator)  # force sync
     if device(approximator) !== device(device_rng)
@@ -200,7 +200,7 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
     is_use_PER = !isnothing(batch.priorities)  # is use Prioritized Experience Replay
     if is_use_PER
         updated_priorities = Vector{Float32}(undef, batch_size)
-        weights = 1f0 ./ ((batch.priorities .+ 1f-10) .^ β)
+        weights = 1.0f0 ./ ((batch.priorities .+ 1f-10) .^ β)
         weights ./= maximum(weights)
         weights = send_to_device(D, weights)
     end
@@ -222,8 +222,9 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
             huber_loss ./ κ
         loss_per_quantile = reshape(sum(raw_loss; dims = 1), N, batch_size)
         loss_per_element = mean(loss_per_quantile; dims = 1)  # use as priorities
-        loss = is_use_PER ? dot(vec(weights), vec(loss_per_element)) * 1 // batch_size :
-                mean(loss_per_element)
+        loss =
+            is_use_PER ? dot(vec(weights), vec(loss_per_element)) * 1//batch_size :
+            mean(loss_per_element)
         ignore() do
             # @assert all(loss_per_element .>= 0)
             is_use_PER && (

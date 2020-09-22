@@ -126,7 +126,7 @@ function evaluate(p::SACPolicy, state)
     π_dist = Normal.(μ, exp.(log_σ))
     z = rand.(p.rng, π_dist)
     logp_π = sum(logpdf.(π_dist, z), dims = 1)
-    logp_π -= sum((2f0 .* (log(2f0) .- z - softplus.(-2f0 * z))), dims = 1)
+    logp_π -= sum((2.0f0 .* (log(2.0f0) .- z - softplus.(-2.0f0 * z))), dims = 1)
     return tanh.(z), logp_π
 end
 
