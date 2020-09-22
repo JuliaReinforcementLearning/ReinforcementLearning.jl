@@ -17,7 +17,12 @@ send_to_device(
     ::Val{:gpu},
     x::Union{
         SubArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
-        Base.ReshapedArray{<:Any,<:Any,<:SubArray{<:Any,<:Any,<:CircularArrayBuffer}},
+        Base.ReshapedArray{
+            <:Any,
+            <:Any,
+            <:SubArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
+        },
+        Base.ReshapedArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
         SubArray{
             <:Any,
             <:Any,
