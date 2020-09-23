@@ -25,7 +25,7 @@ This project aims to provide some implementations of the most typical reinforcem
 - DDPG
 - TD3
 - SAC
-- CFR
+- CFR/OS-MCCFR/ES-MCCFR
 - Minimax
 
 If you are looking for tabular reinforcement learning algorithms, you may refer [ReinforcementLearningAnIntroduction.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl).

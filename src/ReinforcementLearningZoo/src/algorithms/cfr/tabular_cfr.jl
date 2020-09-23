@@ -144,6 +144,8 @@ function cfr!(nodes, env, player, reach_probs, chance_player_reach_prob, ratio)
     end
 end
 
+regret_matching!(node::InfoStateNode) = regret_matching!(node.strategy, node.cumulative_regret)
+
 function regret_matching!(strategy, cumulative_regret)
     s = mapreduce(x -> max(0, x), +, cumulative_regret)
     if s > 0
@@ -155,6 +157,6 @@ end
 
 function update_strategy!(nodes)
     for node in values(nodes)
-        regret_matching!(node.strategy, node.cumulative_regret)
+        regret_matching!(node)
     end
 end
