@@ -54,7 +54,8 @@ function AtariEnv(;
     setLoggerMode!(log_level)
     loadROM(ale, name)
 
-    observation_size = grayscale_obs ? (getScreenWidth(ale), getScreenHeight(ale)) :
+    observation_size =
+        grayscale_obs ? (getScreenWidth(ale), getScreenHeight(ale)) :
         (3, getScreenWidth(ale), getScreenHeight(ale))  # !!! note the order
     observation_space = MultiDiscreteSpace(
         fill(typemin(Cuchar), observation_size),

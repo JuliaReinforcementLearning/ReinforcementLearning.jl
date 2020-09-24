@@ -80,15 +80,18 @@ function OpenSpielEnv(
         RLBase.STOCHASTIC
     end
 
-    d = dynamics(game_type) == OpenSpiel.SEQUENTIAL ? RLBase.SEQUENTIAL :
+    d =
+        dynamics(game_type) == OpenSpiel.SEQUENTIAL ? RLBase.SEQUENTIAL :
         RLBase.SIMULTANEOUS
 
-    i = information(game_type) == OpenSpiel.PERFECT_INFORMATION ?
+    i =
+        information(game_type) == OpenSpiel.PERFECT_INFORMATION ?
         RLBase.PERFECT_INFORMATION : RLBase.IMPERFECT_INFORMATION
 
     n = MultiAgent(num_players(game))
 
-    r = reward_model(game_type) == OpenSpiel.REWARDS ? RLBase.STEP_REWARD :
+    r =
+        reward_model(game_type) == OpenSpiel.REWARDS ? RLBase.STEP_REWARD :
         RLBase.TERMINAL_REWARD
 
     u = if utility(game_type) == OpenSpiel.ZERO_SUM
@@ -176,7 +179,8 @@ function RLBase.get_legal_actions(env::OpenSpielEnv, player)
 end
 
 function RLBase.get_legal_actions_mask(env::OpenSpielEnv, player)
-    n = player == get_chance_player(env) ? max_chance_outcomes(env.game) :
+    n =
+        player == get_chance_player(env) ? max_chance_outcomes(env.game) :
         num_distinct_actions(env.game)
     mask = BitArray(undef, n)
     for a in legal_actions(env.state, player)
