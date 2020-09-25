@@ -12,7 +12,7 @@ using OpenSpiel
 
     @testset "training" begin
         mktempdir() do dir
-            for method in (:BasicDQN, :DQN, :PrioritizedDQN, :Rainbow, :IQN)
+            for method in (:BasicDQN, :DQN, :PrioritizedDQN, :Rainbow, :IQN, :VPG)
                 res = run(Experiment(
                     Val(:JuliaRL),
                     Val(method),

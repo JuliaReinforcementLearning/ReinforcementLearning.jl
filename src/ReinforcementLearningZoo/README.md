@@ -15,7 +15,7 @@
 This project aims to provide some implementations of the most typical reinforcement learning algorithms.
 
 # Algorithms Implemented
-
+- VPG (Vanilla Policy Gradient, with a baseline)
 - DQN
 - Prioritized DQN
 - Rainbow
@@ -44,6 +44,9 @@ Some built-in experiments are exported to help new users to easily run benchmark
 - ``E`JuliaRL_A2C_CartPole` ``
 - ``E`JuliaRL_A2CGAE_CartPole` `` (Thanks to [@sriram13m](https://github.com/sriram13m))
 - ``E`JuliaRL_PPO_CartPole` ``
+- ``E`JuliaRL_VPG_CartPole` ``
+- ``E`JuliaRL_VPG_Pendulum` `` (continuous action space)
+- ``E`JuliaRL_VPG_PendulumD` `` (discrete action space)
 - ``E`JuliaRL_DDPG_Pendulum` ``
 - ``E`JuliaRL_TD3_Pendulum` `` (Thanks to [@rbange](https://github.com/rbange))
 - ``E`JuliaRL_SAC_Pendulum` `` (Thanks to [@rbange](https://github.com/rbange))
