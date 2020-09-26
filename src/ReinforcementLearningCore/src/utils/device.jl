@@ -13,28 +13,29 @@ send_to_device(::Val{:cpu}, x) = x  # cpu(x) is not very efficient! So by defaul
 
 send_to_device(::Val{:cpu}, x::CuArray) = adapt(Array, x)
 send_to_device(::Val{:gpu}, x) = Flux.fmap(a -> adapt(CuArray{Float32}, a), x)
-send_to_device(
-    ::Val{:gpu},
-    x::Union{
-        SubArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
-        Base.ReshapedArray{
-            <:Any,
-            <:Any,
-            <:SubArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
-        },
-        Base.ReshapedArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
-        SubArray{
-            <:Any,
-            <:Any,
-            <:Base.ReshapedArray{
-                <:Any,
-                <:Any,
-                <:SubArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
-            },
-        },
-        ElasticArray,
+
+const KnownArrayVariants = Union{
+    SubArray{<:Any,<:Any,<:Union{ReservoirArrayBuffer,CircularArrayBuffer,ElasticArray}},
+    Base.ReshapedArray{
+        <:Any,
+        <:Any,
+        <:SubArray{<:Any,<:Any,<:Union{ReservoirArrayBuffer,CircularArrayBuffer,ElasticArray}},
     },
-) = CuArray(x)
+    Base.ReshapedArray{<:Any,<:Any,<:Union{ReservoirArrayBuffer,CircularArrayBuffer,ElasticArray}},
+    SubArray{
+        <:Any,
+        <:Any,
+        <:Base.ReshapedArray{
+            <:Any,
+            <:Any,
+            <:SubArray{<:Any,<:Any,<:Union{ReservoirArrayBuffer,CircularArrayBuffer,ElasticArray}},
+        },
+    },
+}
+
+# https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl/issues/130
+send_to_device(::Val{:cpu}, x::KnownArrayVariants) = Array(x)
+send_to_device(::Val{:gpu}, x::Union{KnownArrayVariants, ElasticArray}) = CuArray(x)
 
 """
     device(model)
