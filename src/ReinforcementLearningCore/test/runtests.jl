@@ -3,7 +3,7 @@ using ReinforcementLearningCore
 using Random
 using Test
 using StatsBase
-using Distributions: probs
+using Distributions: probs, Normal, logpdf
 using ReinforcementLearningEnvironments
 using Flux
 using Zygote
