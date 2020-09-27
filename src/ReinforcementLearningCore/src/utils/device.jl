@@ -19,23 +19,35 @@ const KnownArrayVariants = Union{
     Base.ReshapedArray{
         <:Any,
         <:Any,
-        <:SubArray{<:Any,<:Any,<:Union{ReservoirArrayBuffer,CircularArrayBuffer,ElasticArray}},
+        <:SubArray{
+            <:Any,
+            <:Any,
+            <:Union{ReservoirArrayBuffer,CircularArrayBuffer,ElasticArray},
+        },
     },
-    Base.ReshapedArray{<:Any,<:Any,<:Union{ReservoirArrayBuffer,CircularArrayBuffer,ElasticArray}},
+    Base.ReshapedArray{
+        <:Any,
+        <:Any,
+        <:Union{ReservoirArrayBuffer,CircularArrayBuffer,ElasticArray},
+    },
     SubArray{
         <:Any,
         <:Any,
         <:Base.ReshapedArray{
             <:Any,
             <:Any,
-            <:SubArray{<:Any,<:Any,<:Union{ReservoirArrayBuffer,CircularArrayBuffer,ElasticArray}},
+            <:SubArray{
+                <:Any,
+                <:Any,
+                <:Union{ReservoirArrayBuffer,CircularArrayBuffer,ElasticArray},
+            },
         },
     },
 }
 
 # https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl/issues/130
 send_to_device(::Val{:cpu}, x::KnownArrayVariants) = Array(x)
-send_to_device(::Val{:gpu}, x::Union{KnownArrayVariants, ElasticArray}) = CuArray(x)
+send_to_device(::Val{:gpu}, x::Union{KnownArrayVariants,ElasticArray}) = CuArray(x)
 
 """
     device(model)
