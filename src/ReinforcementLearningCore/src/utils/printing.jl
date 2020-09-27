@@ -16,8 +16,10 @@ AT.children(
     t::StructTree{T},
 ) where {T<:Union{AbstractArray,MersenneTwister,ProgressMeter.Progress,Function}} = ()
 AT.children(t::Pair{Symbol,<:StructTree}) = children(last(t))
-AT.printnode(io::IO, t::StructTree{<:Union{Number,Symbol}}) = print(io, t.x)
+AT.children(t::StructTree{UnionAll}) = ()
 
+AT.printnode(io::IO, t::StructTree{<:Union{Number,Symbol}}) = print(io, t.x)
+AT.printnode(io::IO, t::StructTree{UnionAll}) = print(io, t.x)
 AT.printnode(io::IO, t::StructTree{T}) where {T} = print(io, T.name)
 AT.printnode(io::IO, t::StructTree{<:AbstractArray}) where {T} = summary(io, t.x)
 
