@@ -40,8 +40,8 @@ RandomPolicy(::FullActionSet, env::AbstractEnv, rng) = RandomPolicy(nothing, rng
 # Ideally we should return a Categorical distribution.
 # But this means we need to introduce an extra dependency of Distributions
 # watch https://github.com/JuliaStats/Distributions.jl/issues/1139
+get_prob(p::RandomPolicy, env::MultiThreadEnv) = [get_prob(p, x) for x in env]
 get_prob(p::RandomPolicy, env) = fill(1 / length(p.action_space), length(p.action_space))
-
 get_prob(p::RandomPolicy{Nothing}, env) = get_prob(p, env, ChanceStyle(env))
 
 function get_prob(p::RandomPolicy{Nothing}, env, ::AbstractChanceStyle)

@@ -11,6 +11,7 @@ Random.rand(rng::AbstractRNG, s::VectSpace) = [rand(rng, d) for d in s.data]
 
 Base.iterate(s::VectSpace, args...) = iterate(s.data, args...)
 Base.getindex(s::VectSpace, i::Int) = getindex(s.data, i)
+Base.length(s::VectSpace) = length(s.data)
 
 """
     getindex(s::VectSpace, I::Vector{Int})
