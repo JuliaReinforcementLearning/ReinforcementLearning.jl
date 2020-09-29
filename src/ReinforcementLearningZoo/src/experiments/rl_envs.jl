@@ -938,35 +938,32 @@ function RLCore.Experiment(
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
     agent = Agent(
-        policy = QBasedPolicy(
-            learner = PPOLearner(
-                approximator = ActorCritic(
-                    actor = NeuralNetworkApproximator(
-                        model = Chain(
-                            Dense(ns, 256, relu; initW = glorot_uniform(rng)),
-                            Dense(256, na; initW = glorot_uniform(rng)),
-                        ),
-                        optimizer = ADAM(1e-3),
+        policy = PPOPolicy(
+            approximator = ActorCritic(
+                actor = NeuralNetworkApproximator(
+                    model = Chain(
+                        Dense(ns, 256, relu; initW = glorot_uniform(rng)),
+                        Dense(256, na; initW = glorot_uniform(rng)),
                     ),
-                    critic = NeuralNetworkApproximator(
-                        model = Chain(
-                            Dense(ns, 256, relu; initW = glorot_uniform(rng)),
-                            Dense(256, 1; initW = glorot_uniform(rng)),
-                        ),
-                        optimizer = ADAM(1e-3),
+                    optimizer = ADAM(1e-3),
+                ),
+                critic = NeuralNetworkApproximator(
+                    model = Chain(
+                        Dense(ns, 256, relu; initW = glorot_uniform(rng)),
+                        Dense(256, 1; initW = glorot_uniform(rng)),
                     ),
-                ) |> cpu,
-                γ = 0.99f0,
-                λ = 0.95f0,
-                clip_range = 0.1f0,
-                max_grad_norm = 0.5f0,
-                n_epochs = 4,
-                n_microbatches = 4,
-                actor_loss_weight = 1.0f0,
-                critic_loss_weight = 0.5f0,
-                entropy_loss_weight = 0.001f0,
-            ),
-            explorer = BatchExplorer(GumbelSoftmaxExplorer(; rng = rng)),
+                    optimizer = ADAM(1e-3),
+                ),
+            ) |> cpu,
+            γ = 0.99f0,
+            λ = 0.95f0,
+            clip_range = 0.1f0,
+            max_grad_norm = 0.5f0,
+            n_epochs = 4,
+            n_microbatches = 4,
+            actor_loss_weight = 1.0f0,
+            critic_loss_weight = 0.5f0,
+            entropy_loss_weight = 0.001f0,
         ),
         trajectory = PPOTrajectory(;
             capacity = 32,
@@ -993,9 +990,9 @@ function RLCore.Experiment(
             with_logger(lg) do
                 @info(
                     "training",
-                    actor_loss = agent.policy.learner.actor_loss[end, end],
-                    critic_loss = agent.policy.learner.critic_loss[end, end],
-                    loss = agent.policy.learner.loss[end, end],
+                    actor_loss = agent.policy.actor_loss[end, end],
+                    critic_loss = agent.policy.critic_loss[end, end],
+                    loss = agent.policy.loss[end, end],
                 )
                 for i in 1:length(env)
                     if get_terminal(env[i])
@@ -1194,6 +1191,124 @@ function RLCore.Experiment(
     """
 
     Experiment(agent, env, stop_condition, hook, Description(description, save_dir))
+end
+
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:PPO},
+    ::Val{:Pendulum},
+    ::Nothing;
+    save_dir = nothing,
+    seed = 123,
+)
+    if isnothing(save_dir)
+        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
+        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_PPO_Pendulum_$(t)")
+    end
+
+    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
+    rng = MersenneTwister(seed)
+    inner_env = PendulumEnv(T = Float32, rng = rng)
+    action_space = get_actions(inner_env)
+    low = action_space.low
+    high = action_space.high
+    ns = length(get_state(inner_env))
+
+    N_ENV = 8
+    UPDATE_FREQ = 16
+    env = MultiThreadEnv([
+        PendulumEnv(T = Float32, rng = MersenneTwister(hash(seed + i))) |> ActionTransformedEnv(x -> clamp(x*2, low, high))
+        for i in 1:N_ENV
+    ])
+
+    init = glorot_uniform(rng)
+
+    agent = Agent(
+        policy = PPOPolicy(
+            approximator = ActorCritic(
+                actor = NeuralNetworkApproximator(
+                    model = GaussianNetwork(
+                        pre = Chain(
+                            Dense(ns, 64, relu; initW = glorot_uniform(rng)),
+                            Dense(64, 64, relu; initW = glorot_uniform(rng)),
+                        ),
+                        μ = Chain(
+                            Dense(64, 1, tanh; initW = glorot_uniform(rng)),
+                            vec,
+                        ),
+                        σ =Chain(
+                            Dense(64, 1; initW = glorot_uniform(rng)),
+                            vec,
+                        ),
+                    ),
+                    optimizer = ADAM(3e-4),
+                ),
+                critic = NeuralNetworkApproximator(
+                    model = Chain(
+                        Dense(ns, 64, relu; initW = glorot_uniform(rng)),
+                        Dense(64, 64, relu; initW = glorot_uniform(rng)),
+                        Dense(64, 1; initW = glorot_uniform(rng))
+                    ),
+                    optimizer = ADAM(3e-4),
+                ),
+            ) |> cpu,
+            γ = 0.99f0,
+            λ = 0.95f0,
+            clip_range = 0.2f0,
+            max_grad_norm = 0.5f0,
+            n_epochs = 10,
+            n_microbatches = 32,
+            actor_loss_weight = 1.0f0,
+            critic_loss_weight = 0.5f0,
+            entropy_loss_weight = 0.00f0,
+            dist=Normal,
+            rng=rng,
+        ),
+    trajectory = PPOTrajectory(;
+        capacity = 2048,
+        state_type = Float32,
+        state_size = (ns, N_ENV),
+        action_type = Float32,
+        action_size = (N_ENV,),
+        action_log_prob_type = Float32,
+        action_log_prob_size = (N_ENV,),
+        reward_type = Float32,
+        reward_size = (N_ENV,),
+        terminal_type = Bool,
+        terminal_size = (N_ENV,),
+    ),
+    )
+
+    stop_condition = StopAfterStep(500_000)
+    total_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
+    hook = ComposedHook(
+        total_reward_per_episode,
+        DoEveryNStep() do t, agent, env
+            with_logger(lg) do
+                @info(
+                    "training",
+                    actor_loss = agent.policy.actor_loss[end, end],
+                    critic_loss = agent.policy.critic_loss[end, end],
+                    loss = agent.policy.loss[end, end],
+                )
+                for i in 1:length(env)
+                    if get_terminal(env[i])
+                        @info "training" reward = total_reward_per_episode.rewards[i][end] log_step_increment =
+                            0
+                        break
+                    end
+                end
+            end
+        end,
+    )
+
+    Experiment(
+        agent,
+        env,
+        stop_condition,
+        hook,
+        Description("# Play Pendulum with PPO", save_dir),
+    )
 end
 
 function RLCore.Experiment(

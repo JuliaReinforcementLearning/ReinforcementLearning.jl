@@ -50,6 +50,7 @@ Some built-in experiments are exported to help new users to easily run benchmark
 - ``E`JuliaRL_DDPG_Pendulum` ``
 - ``E`JuliaRL_TD3_Pendulum` `` (Thanks to [@rbange](https://github.com/rbange))
 - ``E`JuliaRL_SAC_Pendulum` `` (Thanks to [@rbange](https://github.com/rbange))
+- ``E`JuliaRL_PPO_Pendulum` ``
 - ``E`JuliaRL_BasicDQN_MountainCar` `` (Thanks to [@felixchalumeau](https://github.com/felixchalumeau))
 - ``E`JuliaRL_DQN_MountainCar` `` (Thanks to [@felixchalumeau](https://github.com/felixchalumeau))
 - ``E`JuliaRL_Minimax_OpenSpiel(tic_tac_toe)` ``

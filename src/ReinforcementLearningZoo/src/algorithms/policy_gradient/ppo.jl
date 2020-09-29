@@ -1,11 +1,13 @@
 include("ppo_trajectory.jl")
 
 using Random
+using Distributions: Categorical, Normal, logpdf
+using StructArrays
 
-export PPOLearner
+export PPOPolicy
 
 """
-    PPOLearner(;kwargs)
+    PPOPolicy(;kwargs)
 
 # Keyword arguments
 
@@ -19,9 +21,13 @@ export PPOLearner
 - `actor_loss_weight = 1.0f0`,
 - `critic_loss_weight = 0.5f0`,
 - `entropy_loss_weight = 0.01f0`,
+- `dist = Categorical`,
 - `rng = Random.GLOBAL_RNG`,
+
+By default, `dist` is set to `Categorical`, which means it will only works
+on environments of discrete actions. To work with environments of
 """
-mutable struct PPOLearner{A<:ActorCritic,R} <: AbstractLearner
+mutable struct PPOPolicy{A<:ActorCritic,D,R} <: AbstractPolicy
     approximator::A
     γ::Float32
     λ::Float32
@@ -41,7 +47,7 @@ mutable struct PPOLearner{A<:ActorCritic,R} <: AbstractLearner
     loss::Matrix{Float32}
 end
 
-function PPOLearner(;
+function PPOPolicy(;
     approximator,
     γ = 0.99f0,
     λ = 0.95f0,
@@ -52,9 +58,10 @@ function PPOLearner(;
     actor_loss_weight = 1.0f0,
     critic_loss_weight = 0.5f0,
     entropy_loss_weight = 0.01f0,
+    dist = Categorical,
     rng = Random.GLOBAL_RNG,
 )
-    PPOLearner(
+    PPOPolicy{typeof(approximator),dist,typeof(rng)}(
         approximator,
         γ,
         λ,
@@ -74,21 +81,33 @@ function PPOLearner(;
     )
 end
 
-function (learner::PPOLearner)(env::MultiThreadEnv)
-    learner.approximator.actor(send_to_device(
-        device(learner.approximator),
-        get_state(env),
-    )) |> send_to_host
+function RLBase.get_prob(p::PPOPolicy{<:ActorCritic{<:NeuralNetworkApproximator{<:GaussianNetwork}}, Normal}, state::AbstractArray)
+    p.approximator.actor(send_to_device(
+        device(p.approximator),
+        state,
+    )) |> send_to_host |> StructArray{Normal}
 end
 
-function (learner::PPOLearner)(env)
+function RLBase.get_prob(p::PPOPolicy{<:ActorCritic, Categorical}, state::AbstractArray)
+    logits = p.approximator.actor(send_to_device(
+        device(p.approximator),
+        state,
+    )) |> softmax |> send_to_host
+    [Categorical(x;check_args=false) for x in eachcol(logits)]
+end
+
+RLBase.get_prob(p::PPOPolicy, env::MultiThreadEnv) = get_prob(p, get_state(env))
+
+function RLBase.get_prob(p::PPOPolicy, env::AbstractEnv)
     s = get_state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
-    s = send_to_device(device(learner.approximator), s)
-    learner.approximator.actor(s) |> vec |> send_to_host
+    get_prob(p, s)[1]
 end
 
-function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
+(p::PPOPolicy)(env::MultiThreadEnv) = rand.(p.rng, get_prob(p, env))
+(p::PPOPolicy)(env::AbstractEnv) = rand(p.rng, get_prob(p, env))
+
+function RLBase.update!(p::PPOPolicy, t::PPOTrajectory)
     isfull(t) || return
 
     states = t[:state]
@@ -98,16 +117,16 @@ function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
     terminals = t[:terminal]
     states_plus = t[:full_state]
 
-    rng = learner.rng
-    AC = learner.approximator
-    γ = learner.γ
-    λ = learner.λ
-    n_epochs = learner.n_epochs
-    n_microbatches = learner.n_microbatches
-    clip_range = learner.clip_range
-    w₁ = learner.actor_loss_weight
-    w₂ = learner.critic_loss_weight
-    w₃ = learner.entropy_loss_weight
+    rng = p.rng
+    AC = p.approximator
+    γ = p.γ
+    λ = p.λ
+    n_epochs = p.n_epochs
+    n_microbatches = p.n_microbatches
+    clip_range = p.clip_range
+    w₁ = p.actor_loss_weight
+    w₂ = p.critic_loss_weight
+    w₃ = p.entropy_loss_weight
     D = device(AC)
 
     n_envs, n_rollout = size(terminals)
@@ -142,10 +161,18 @@ function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
             ps = Flux.params(AC)
             gs = gradient(ps) do
                 v′ = AC.critic(s) |> vec
-                logit′ = AC.actor(s)
-                p′ = softmax(logit′)
-                log_p′ = logsoftmax(logit′)
-                log_p′ₐ = log_p′[CartesianIndex.(a, 1:length(a))]
+                if AC.actor isa NeuralNetworkApproximator{<:GaussianNetwork}
+                    μ, σ = AC.actor(s)
+                    log_p′ₐ = normlogpdf(μ, σ, a)
+                    entropy_loss = mean((log(2.0f0π)+1)/2 .+ log.(σ))
+                else
+                    # actor is assumed to return discrete logits
+                    logit′ = AC.actor(s)
+                    p′ = softmax(logit′)
+                    log_p′ = logsoftmax(logit′)
+                    log_p′ₐ = log_p′[CartesianIndex.(a, 1:length(a))]
+                    entropy_loss = -sum(p′ .* log_p′) * 1//size(p′, 2)
+                end
 
                 ratio = exp.(log_p′ₐ .- log_p)
                 surr1 = ratio .* adv
@@ -153,49 +180,44 @@ function RLBase.update!(learner::PPOLearner, t::PPOTrajectory)
 
                 actor_loss = -mean(min.(surr1, surr2))
                 critic_loss = mean((r .- v′) .^ 2)
-                entropy_loss = -sum(p′ .* log_p′) * 1//size(p′, 2)
                 loss = w₁ * actor_loss + w₂ * critic_loss - w₃ * entropy_loss
 
                 ignore() do
-                    learner.actor_loss[i, epoch] = actor_loss
-                    learner.critic_loss[i, epoch] = critic_loss
-                    learner.entropy_loss[i, epoch] = entropy_loss
-                    learner.loss[i, epoch] = loss
+                    p.actor_loss[i, epoch] = actor_loss
+                    p.critic_loss[i, epoch] = critic_loss
+                    p.entropy_loss[i, epoch] = entropy_loss
+                    p.loss[i, epoch] = loss
                 end
 
                 loss
             end
 
-            learner.norm[i, epoch] = clip_by_global_norm!(gs, ps, learner.max_grad_norm)
+            p.norm[i, epoch] = clip_by_global_norm!(gs, ps, p.max_grad_norm)
             update!(AC, gs)
         end
     end
 end
 
-function (π::QBasedPolicy{<:PPOLearner})(env::MultiThreadEnv)
-    action_values = π.learner(env)
-    logits = logsoftmax(action_values)
-    actions = π.explorer(action_values)
-    actions_log_prob = logits[CartesianIndex.(actions, 1:size(action_values, 2))]
-    actions, actions_log_prob
-end
-
-(π::QBasedPolicy{<:PPOLearner})(env) = env |> π.learner |> π.explorer
-
-function (p::RandomStartPolicy{<:QBasedPolicy{<:PPOLearner}})(env::MultiThreadEnv)
-    p.num_rand_start -= 1
-    if p.num_rand_start < 0
-        p.policy(env)
-    else
-        a = p.random_policy(env)
-        log_p = log.(get_prob(p.random_policy, env, a))
-        a, log_p
-    end
-end
-
-function (agent::Agent{<:AbstractPolicy,<:PPOTrajectory})(::Training{PreActStage}, env)
-    action, action_log_prob = agent.policy(env)
+function (agent::Agent{<:Union{PPOPolicy, RandomStartPolicy{<:PPOPolicy}}})(::Training{PreActStage}, env::MultiThreadEnv)
     state = get_state(env)
+    dist = get_prob(agent.policy, env)
+
+    # currently RandomPolicy returns a Matrix instead of a (vector of) distribution.
+    if dist isa Matrix{<:Number}
+        dist = [Categorical(x;check_args=false) for x in eachcol(dist)]
+    elseif dist isa Vector{<:Vector{<:Number}}
+        dist = [Categorical(x;check_args=false) for x in dist]
+    end
+
+    # !!! a little ugly
+    rng = if agent.policy isa PPOPolicy
+        agent.policy.rng
+    elseif agent.policy isa RandomStartPolicy
+        agent.policy.policy.rng
+    end
+
+    action = [rand(rng, d) for d in dist]
+    action_log_prob = [logpdf(d, a) for (d, a) in zip(dist, action)]
     push!(
         agent.trajectory;
         state = state,
@@ -216,13 +238,4 @@ function (agent::Agent{<:AbstractPolicy,<:PPOTrajectory})(::Training{PreActStage
     end
 
     action
-end
-
-function (agent::Agent{<:AbstractPolicy,<:PPOTrajectory})(::Training{PostActStage}, env)
-    push!(agent.trajectory; reward = get_reward(env), terminal = get_terminal(env))
-    nothing
-end
-
-function (agent::Agent{<:AbstractPolicy,<:PPOTrajectory})(::Testing{PreActStage}, env)
-    agent.policy(env)[1]  # ignore the log_prob of action
 end

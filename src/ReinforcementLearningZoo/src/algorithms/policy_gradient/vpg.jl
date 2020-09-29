@@ -6,12 +6,19 @@ using ReinforcementLearningCore
 
 export VPGPolicy, GaussianNetwork
 
-struct GaussianNetwork
-    pre::Chain
-    μ::Chain
-    σ::Chain
+"""
+    GaussianNetwork(;pre=identity, μ, σ)
+
+`σ` should return the log of std, `exp` will be applied to it automatically.
+"""
+Base.@kwdef struct GaussianNetwork{P,U,S}
+    pre::P = identity
+    μ::U
+    σ::S
 end
+
 Flux.@functor GaussianNetwork
+
 function (m::GaussianNetwork)(S)
     x = m.pre(S)
     m.μ(x), m.σ(x) .|> exp
