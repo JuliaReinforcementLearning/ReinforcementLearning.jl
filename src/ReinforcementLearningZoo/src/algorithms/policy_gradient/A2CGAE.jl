@@ -88,7 +88,7 @@ function RLBase.update!(learner::A2CGAELearner, t::AbstractTrajectory)
         advantage = vec(gains) .- vec(values)
         actor_loss = -mean(log_probs_select .* advantages)
         critic_loss = mean(advantage .^ 2)
-        entropy_loss = -sum(probs .* log_probs) * 1//size(probs, 2)
+        entropy_loss = -sum(probs .* log_probs) * 1 // size(probs, 2)
         loss = w₁ * actor_loss + w₂ * critic_loss - w₃ * entropy_loss
         ignore() do
             learner.actor_loss = actor_loss

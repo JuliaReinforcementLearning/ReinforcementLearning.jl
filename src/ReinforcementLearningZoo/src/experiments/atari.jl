@@ -802,16 +802,14 @@ function RLCore.Experiment(
         DoEveryNStep(UPDATE_FREQ) do t, agent, env
             p = agent.policy.policy
             with_logger(lg) do
-                @info "training" loss = mean(p.loss) actor_loss =
-                    mean(p.actor_loss) critic_loss = mean(p.critic_loss) entropy_loss =
-                    mean(p.entropy_loss) norm = mean(p.norm) log_step_increment =
-                    UPDATE_FREQ
+                @info "training" loss = mean(p.loss) actor_loss = mean(p.actor_loss) critic_loss =
+                    mean(p.critic_loss) entropy_loss = mean(p.entropy_loss) norm =
+                    mean(p.norm) log_step_increment = UPDATE_FREQ
             end
         end,
         DoEveryNStep(UPDATE_FREQ) do t, agent, env
             decay = (N_TRAINING_STEPS - t) / N_TRAINING_STEPS
-            agent.policy.policy.approximator.optimizer.eta =
-                INIT_LEARNING_RATE * decay
+            agent.policy.policy.approximator.optimizer.eta = INIT_LEARNING_RATE * decay
             agent.policy.policy.clip_range = INIT_CLIP_RANGE * Float32(decay)
         end,
         DoEveryNStep() do t, agent, env

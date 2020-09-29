@@ -20,12 +20,13 @@ end
 
 (p::ExternalSamplingMCCFRPolicy)(env::AbstractEnv) = p.behavior_policy(env)
 
-RLBase.get_prob(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv) = get_prob(p.behavior_policy, env)
+RLBase.get_prob(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv) =
+    get_prob(p.behavior_policy, env)
 
 function ExternalSamplingMCCFRPolicy(;
     env::AbstractEnv,
     n_iter::Int,
-    rng=Random.GLOBAL_RNG,
+    rng = Random.GLOBAL_RNG,
 )
     @assert NumAgentStyle(env) isa MultiAgent
     @assert DynamicStyle(env) === SEQUENTIAL

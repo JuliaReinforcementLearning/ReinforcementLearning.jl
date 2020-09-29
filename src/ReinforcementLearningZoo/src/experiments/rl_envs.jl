@@ -1217,8 +1217,8 @@ function RLCore.Experiment(
     N_ENV = 8
     UPDATE_FREQ = 16
     env = MultiThreadEnv([
-        PendulumEnv(T = Float32, rng = MersenneTwister(hash(seed + i))) |> ActionTransformedEnv(x -> clamp(x*2, low, high))
-        for i in 1:N_ENV
+        PendulumEnv(T = Float32, rng = MersenneTwister(hash(seed + i))) |>
+        ActionTransformedEnv(x -> clamp(x * 2, low, high)) for i in 1:N_ENV
     ])
 
     init = glorot_uniform(rng)
@@ -1232,14 +1232,8 @@ function RLCore.Experiment(
                             Dense(ns, 64, relu; initW = glorot_uniform(rng)),
                             Dense(64, 64, relu; initW = glorot_uniform(rng)),
                         ),
-                        μ = Chain(
-                            Dense(64, 1, tanh; initW = glorot_uniform(rng)),
-                            vec,
-                        ),
-                        σ =Chain(
-                            Dense(64, 1; initW = glorot_uniform(rng)),
-                            vec,
-                        ),
+                        μ = Chain(Dense(64, 1, tanh; initW = glorot_uniform(rng)), vec),
+                        σ = Chain(Dense(64, 1; initW = glorot_uniform(rng)), vec),
                     ),
                     optimizer = ADAM(3e-4),
                 ),
@@ -1247,7 +1241,7 @@ function RLCore.Experiment(
                     model = Chain(
                         Dense(ns, 64, relu; initW = glorot_uniform(rng)),
                         Dense(64, 64, relu; initW = glorot_uniform(rng)),
-                        Dense(64, 1; initW = glorot_uniform(rng))
+                        Dense(64, 1; initW = glorot_uniform(rng)),
                     ),
                     optimizer = ADAM(3e-4),
                 ),
@@ -1261,22 +1255,22 @@ function RLCore.Experiment(
             actor_loss_weight = 1.0f0,
             critic_loss_weight = 0.5f0,
             entropy_loss_weight = 0.00f0,
-            dist=Normal,
-            rng=rng,
+            dist = Normal,
+            rng = rng,
         ),
-    trajectory = PPOTrajectory(;
-        capacity = 2048,
-        state_type = Float32,
-        state_size = (ns, N_ENV),
-        action_type = Float32,
-        action_size = (N_ENV,),
-        action_log_prob_type = Float32,
-        action_log_prob_size = (N_ENV,),
-        reward_type = Float32,
-        reward_size = (N_ENV,),
-        terminal_type = Bool,
-        terminal_size = (N_ENV,),
-    ),
+        trajectory = PPOTrajectory(;
+            capacity = 2048,
+            state_type = Float32,
+            state_size = (ns, N_ENV),
+            action_type = Float32,
+            action_size = (N_ENV,),
+            action_log_prob_type = Float32,
+            action_log_prob_size = (N_ENV,),
+            reward_type = Float32,
+            reward_size = (N_ENV,),
+            terminal_type = Bool,
+            terminal_size = (N_ENV,),
+        ),
     )
 
     stop_condition = StopAfterStep(500_000)

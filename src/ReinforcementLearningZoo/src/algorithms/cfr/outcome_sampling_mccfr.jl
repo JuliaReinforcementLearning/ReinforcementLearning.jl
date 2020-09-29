@@ -20,13 +20,14 @@ end
 
 (p::OutcomeSamplingMCCFRPolicy)(env::AbstractEnv) = p.behavior_policy(env)
 
-RLBase.get_prob(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv) = get_prob(p.behavior_policy, env)
+RLBase.get_prob(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv) =
+    get_prob(p.behavior_policy, env)
 
 function OutcomeSamplingMCCFRPolicy(;
     env::AbstractEnv,
     n_iter::Int,
-    rng=Random.GLOBAL_RNG,
-    ϵ=0.6
+    rng = Random.GLOBAL_RNG,
+    ϵ = 0.6,
 )
     @assert NumAgentStyle(env) isa MultiAgent
     @assert DynamicStyle(env) === SEQUENTIAL
@@ -91,7 +92,7 @@ function outcome_sampling(env, i, nodes, ϵ, πᵢ, π₋ᵢ, s, rng)
             w = u * π₋ᵢ
             rI .+= w * πₜₐᵢₗ .* ((1:n .== aᵢ) .- σ[aᵢ])
         else
-            sI .+= π₋ᵢ / s  .* σ
+            sI .+= π₋ᵢ / s .* σ
         end
 
         u, πₜₐᵢₗ * σ[aᵢ]

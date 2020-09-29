@@ -81,19 +81,21 @@ function PPOPolicy(;
     )
 end
 
-function RLBase.get_prob(p::PPOPolicy{<:ActorCritic{<:NeuralNetworkApproximator{<:GaussianNetwork}}, Normal}, state::AbstractArray)
-    p.approximator.actor(send_to_device(
-        device(p.approximator),
-        state,
-    )) |> send_to_host |> StructArray{Normal}
+function RLBase.get_prob(
+    p::PPOPolicy{<:ActorCritic{<:NeuralNetworkApproximator{<:GaussianNetwork}},Normal},
+    state::AbstractArray,
+)
+    p.approximator.actor(send_to_device(device(p.approximator), state)) |>
+    send_to_host |>
+    StructArray{Normal}
 end
 
-function RLBase.get_prob(p::PPOPolicy{<:ActorCritic, Categorical}, state::AbstractArray)
-    logits = p.approximator.actor(send_to_device(
-        device(p.approximator),
-        state,
-    )) |> softmax |> send_to_host
-    [Categorical(x;check_args=false) for x in eachcol(logits)]
+function RLBase.get_prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArray)
+    logits =
+        p.approximator.actor(send_to_device(device(p.approximator), state)) |>
+        softmax |>
+        send_to_host
+    [Categorical(x; check_args = false) for x in eachcol(logits)]
 end
 
 RLBase.get_prob(p::PPOPolicy, env::MultiThreadEnv) = get_prob(p, get_state(env))
@@ -164,14 +166,14 @@ function RLBase.update!(p::PPOPolicy, t::PPOTrajectory)
                 if AC.actor isa NeuralNetworkApproximator{<:GaussianNetwork}
                     μ, σ = AC.actor(s)
                     log_p′ₐ = normlogpdf(μ, σ, a)
-                    entropy_loss = mean((log(2.0f0π)+1)/2 .+ log.(σ))
+                    entropy_loss = mean((log(2.0f0π) + 1) / 2 .+ log.(σ))
                 else
                     # actor is assumed to return discrete logits
                     logit′ = AC.actor(s)
                     p′ = softmax(logit′)
                     log_p′ = logsoftmax(logit′)
                     log_p′ₐ = log_p′[CartesianIndex.(a, 1:length(a))]
-                    entropy_loss = -sum(p′ .* log_p′) * 1//size(p′, 2)
+                    entropy_loss = -sum(p′ .* log_p′) * 1 // size(p′, 2)
                 end
 
                 ratio = exp.(log_p′ₐ .- log_p)
@@ -198,15 +200,18 @@ function RLBase.update!(p::PPOPolicy, t::PPOTrajectory)
     end
 end
 
-function (agent::Agent{<:Union{PPOPolicy, RandomStartPolicy{<:PPOPolicy}}})(::Training{PreActStage}, env::MultiThreadEnv)
+function (agent::Agent{<:Union{PPOPolicy,RandomStartPolicy{<:PPOPolicy}}})(
+    ::Training{PreActStage},
+    env::MultiThreadEnv,
+)
     state = get_state(env)
     dist = get_prob(agent.policy, env)
 
     # currently RandomPolicy returns a Matrix instead of a (vector of) distribution.
     if dist isa Matrix{<:Number}
-        dist = [Categorical(x;check_args=false) for x in eachcol(dist)]
+        dist = [Categorical(x; check_args = false) for x in eachcol(dist)]
     elseif dist isa Vector{<:Vector{<:Number}}
-        dist = [Categorical(x;check_args=false) for x in dist]
+        dist = [Categorical(x; check_args = false) for x in dist]
     end
 
     # !!! a little ugly

@@ -185,7 +185,7 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
         select_logits = logits[:, actions]
         batch_losses = loss_func(select_logits, target_distribution)
         loss =
-            is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1//batch_size :
+            is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1 // batch_size :
             mean(batch_losses)
         ignore() do
             if is_use_PER

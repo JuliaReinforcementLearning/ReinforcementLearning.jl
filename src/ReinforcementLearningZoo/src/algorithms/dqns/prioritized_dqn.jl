@@ -146,7 +146,7 @@ function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
     gs = gradient(params(Q)) do
         q = Q(states)[actions]
         batch_losses = loss_func(G, q)
-        loss = dot(vec(weights), vec(batch_losses)) * 1//batch_size
+        loss = dot(vec(weights), vec(batch_losses)) * 1 // batch_size
         ignore() do
             updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10) .^ β))
             learner.loss = loss
