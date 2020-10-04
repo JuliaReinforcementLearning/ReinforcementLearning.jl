@@ -5,7 +5,7 @@ function ground(args...)
     sethue("white")
 end
 
-video = Video(350, 450)
+video = Video(400, 450)
 
 U = 50
 
