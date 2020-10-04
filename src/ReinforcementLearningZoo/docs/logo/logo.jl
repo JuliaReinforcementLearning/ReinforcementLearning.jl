@@ -8,6 +8,7 @@ end
 video = Video(400, 450)
 
 U = 50
+SHIFT = Point(0, -1.7U)
 
 function tangram(obj)
     if obj == :triangle1
@@ -37,17 +38,17 @@ end
 javis(video, [
     BackgroundAction(1:400, ground),
     Action(1:400, (args...)->poly(tangram(:triangle1), :fill, close=true); subactions=[
-        SubAction(1:1, Translation(O, Point(0, -2U))),
+        SubAction(1:1, Translation(O, SHIFT)),
         SubAction(50:60, Translation(O, Point(0, 2U))),
         SubAction(60:70, Rotation(0., -π/2)),
         SubAction(70:80, Translation(O, Point(-2U, 0))),
         SubAction(80:90, Translation(O, Point(U, -U))),
     ]),
     Action(1:400, (args...)->poly(tangram(:triangle2), :fill, close=true); subactions=[
-        SubAction(1:1, Translation(O, Point(0, -2U))),
+        SubAction(1:1, Translation(O, SHIFT)),
     ]),
     Action(1:400, (args...)->poly(tangram(:triangle3), :fill, close=true); subactions=[
-        SubAction(1:1, Translation(O, Point(0, -2U))),
+        SubAction(1:1, Translation(O, SHIFT)),
         SubAction(1:1, Translation(O, Point(0, -2U))),
         SubAction(100:110, Translation(O, Point(-3U, 0))),
         SubAction(110:120, Rotation(0., -π/2)),
@@ -55,14 +56,14 @@ javis(video, [
         SubAction(130:140, Translation(O, Point(0, U))),
     ]),
     Action(1:400, (args...)->poly(tangram(:triangle5), :fill, close=true); subactions=[
-        SubAction(1:1, Translation(O, Point(0, -2U))),
+        SubAction(1:1, Translation(O, SHIFT)),
         SubAction(1:1, Translation(O, Point(U, 0))),
         SubAction(150:160, Translation(O, Point(0, 4.5*U))),
         SubAction(160:170, Rotation(0., -3π/4)),
         SubAction(170:180, Translation(O, Point(sqrt((2 - √2/2)^2 / 2) * U, - sqrt((2 - √2/2)^2 / 2) * U))),
     ]),
     Action(1:400, (args...)->poly(tangram(:parallelogram), :fill, close=true); subactions=[
-        SubAction(1:1, Translation(O, Point(0, -2U))),
+        SubAction(1:1, Translation(O, SHIFT)),
         SubAction(1:1, Translation(O, Point(-U, 0))),
         SubAction(200:210, Translation(O, Point(U, -U))),
         SubAction(210:220, Translation(O, Point(U, 0))),
@@ -71,7 +72,7 @@ javis(video, [
         SubAction(240:250, Translation(O, Point(0, U))),
     ]),
     Action(1:400, (args...)->poly(tangram(:triangle4), :fill, close=true);subactions=[
-        SubAction(1:1, Translation(O, Point(0, -2U))),
+        SubAction(1:1, Translation(O, SHIFT)),
         SubAction(250:260, Translation(O, Point(0, -U))),
         SubAction(260:270, Translation(O, Point(2U, 0))),
         SubAction(270:280, Rotation(0., -π/2)),
@@ -79,7 +80,7 @@ javis(video, [
         SubAction(290:300, Translation(O, Point(0.5*U, -0.5*U))),
     ]),
     Action(1:400, (args...)->poly(tangram(:box), :fill, close=true);subactions=[
-        SubAction(1:1, Translation(O, Point(0, -2U))),
+        SubAction(1:1, Translation(O, SHIFT)),
         SubAction(300:310, Translation(O, Point(-U, 0))),
         SubAction(310:320, Rotation(0., -π/6)),
     ]),
