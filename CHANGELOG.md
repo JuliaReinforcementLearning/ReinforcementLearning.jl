@@ -10,6 +10,7 @@
 
 **Closed issues:**
 
+- Seg fault on macbook pro [\#84](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/84)
 - "convert" warning [\#83](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/83)
 - I get NNlib error when trying to load a model [\#82](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/82)
 - ERROR: KeyError: key "ArnoldiMethod" not found  [\#79](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/79)
