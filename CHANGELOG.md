@@ -10,6 +10,7 @@
 
 **Closed issues:**
 
+- ACME RL lib by deepmind [\#85](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/85)
 - "convert" warning [\#83](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/83)
 - ERROR: KeyError: key "ArnoldiMethod" not found  [\#79](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/79)
 - Question about AbstractEnv API [\#68](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/68)
@@ -85,6 +86,7 @@
 - fix example in doc && update examples [\#46](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/46) ([findmyway](https://github.com/findmyway))
 - Refactor buffer [\#45](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/45) ([findmyway](https://github.com/findmyway))
 - export AbstractActionSelector and add more comments [\#42](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/42) ([findmyway](https://github.com/findmyway))
+- add docs [\#39](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/39) ([findmyway](https://github.com/findmyway))
 - Support both Knet and Flux\(with Zygote\) [\#38](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/38) ([findmyway](https://github.com/findmyway))
 - Switch Tracker.jl to Zygote.jl [\#37](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/37) ([findmyway](https://github.com/findmyway))
 
@@ -104,7 +106,6 @@
 
 **Merged pull requests:**
 
-- add docs [\#39](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/39) ([findmyway](https://github.com/findmyway))
 - bugfix and api simplification [\#34](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/34) ([findmyway](https://github.com/findmyway))
 - use new api in ReinforcementLearningEnvironments.jl [\#33](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/33) ([findmyway](https://github.com/findmyway))
 - add rainbow [\#31](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/31) ([findmyway](https://github.com/findmyway))
