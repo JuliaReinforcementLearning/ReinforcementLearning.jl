@@ -28,6 +28,7 @@ import .OpenSpiel:
     observation_string,
     chance_mode,
     chance_outcomes,
+    max_chance_outcomes,
     utility
 using StatsBase: sample, weights
 

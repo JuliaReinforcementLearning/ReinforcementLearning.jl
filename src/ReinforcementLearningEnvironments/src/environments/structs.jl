@@ -45,6 +45,10 @@ mutable struct OpenSpielEnv{T,ST,G,R} <: AbstractEnv
 end
 export OpenSpielEnv
 
+# ??? can we safely ignore the `game` field here
+Base.hash(e::OpenSpielEnv, h::UInt) = hash(e.state, h)
+Base.:(==)(e::OpenSpielEnv, ee::OpenSpielEnv) = e.state == ee.state
+
 mutable struct SnakeGameEnv{A,N,G} <: AbstractEnv
     game::G
     latest_snakes_length::Vector{Int}
