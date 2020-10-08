@@ -13,20 +13,20 @@ TabularLearner() = TabularLearner{Int,Float32}()
 TabularLearner{S}() where {S} = TabularLearner{S,Float32}()
 TabularLearner{S,T}() where {S,T} = TabularLearner(Dict{S,Vector{T}}())
 
-function (p::TabularLearner)(env::AbstractEnv)
-    s = get_state(env)
-    if haskey(p.table, s)
-        p.table[s]
-    elseif ActionStyle(env) === FULL_ACTION_SET
-        mask = get_legal_actions_mask(env)
-        prob = mask ./ sum(mask)
-        p.table[s] = prob
-        prob
-    elseif ActionStyle(env) === MINIMAL_ACTION_SET
-        n = length(get_actions(env))
-        prob = fill(1 / n, n)
-        p.table[s] = prob
-        prob
+(p::TabularLearner)(env::AbstractEnv) = p(ChanceStyle(env), env)
+
+function (p::TabularLearner)(::ExplicitStochastic, env::AbstractEnv)
+    if get_current_player(env) == get_chance_player(env)
+        [a.prob for a::ActionProbPair in get_actions(env)]
+    else
+        p(DETERMINISTIC, env)  # treat it just like a normal one
+    end
+end
+
+function (p::TabularLearner)(::RLBase.AbstractChanceStyle, env::AbstractEnv)
+    get!(p.table, get_state(env)) do 
+        n = length(get_legal_actions(env))
+        fill(1/n, n)
     end
 end
 

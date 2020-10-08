@@ -1,4 +1,4 @@
-export QBasedPolicy
+export QBasedPolicy, TabularRandomPolicy
 
 using MacroTools: @forward
 using Flux
@@ -34,4 +34,34 @@ RLBase.get_prob(p::QBasedPolicy, env, ::FullActionSet) =
 function Flux.testmode!(p::QBasedPolicy, mode = true)
     testmode!(p.learner, mode)
     testmode!(p.explorer, mode)
+end
+
+#####
+# TabularRandomPolicy
+#####
+
+const TabularRandomPolicy = QBasedPolicy{<:TabularLearner, <:WeightedExplorer}
+
+function TabularRandomPolicy(;rng=Random.GLOBAL_RNG, is_normalized=true, table=Dict{String,Vector{Float64}}())
+    QBasedPolicy(;
+        learner = TabularLearner(table),
+        explorer = WeightedExplorer(; is_normalized = is_normalized, rng = rng),
+    )
+end
+
+function (p::TabularRandomPolicy)(env::AbstractEnv)
+    if ChanceStyle(env) === EXPLICIT_STOCHASTIC
+        if get_current_player(env) == get_chance_player(env)
+            # this should be faster. we don't need to allocate memory to store the probability of chance node
+            return rand(p.explorer.rng, get_actions(env))
+        end
+    end
+    p(env, ActionStyle(env))  # fall back to general implementation above
+end
+
+function RLBase.get_prob(p::TabularRandomPolicy, env, ::FullActionSet)
+    m = get_legal_actions_mask(env)
+    prob = zeros(length(m))
+    prob[m] .= p.learner(env)
+    prob
 end
