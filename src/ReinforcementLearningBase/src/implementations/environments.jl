@@ -159,6 +159,8 @@ mutable struct MaxTimeoutEnv{E<:AbstractEnv} <: AbstractEnv
     current_t::Int
 end
 
+MaxTimeoutEnv(env::E, max_t::Int; current_t::Int = 1) where E<:AbstractEnv = MaxTimeoutEnv(E, max_t, current_t)
+
 function (env::MaxTimeoutEnv)(args...; kwargs...)
     env.env(args...; kwargs...)
     env.current_t = env.current_t + 1
