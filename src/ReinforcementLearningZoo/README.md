@@ -32,7 +32,7 @@ If you are looking for tabular reinforcement learning algorithms, you may refer 
 
 # Built-in Experiments
 
-Some built-in experiments are exported to help new users to easily run benchmarks with one line (for example, ``run(E`JuliaRL_BasicDQN_CartPole`)``). For experienced users, you are suggested to check [the source code](https://github.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl/tree/master/src/experiments) of those experiments and make changes as needed.
+Some built-in experiments are exported to help new users to easily run benchmarks with one line. For experienced users, you are suggested to check [the source code](https://github.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl/tree/master/src/experiments) of those experiments and make changes as needed.
 
 ## List of built-in experiments
 
@@ -61,6 +61,26 @@ Some built-in experiments are exported to help new users to easily run benchmark
 - ``E`Dopamine_IQN_Atari(pong)` ``
 - ``E`rlpyt_A2C_Atari(pong)` ``
 - ``E`rlpyt_PPO_Atari(pong)` ``
+
+## Run Experiments
+
+```julia
+julia> ] add ReinforcementLearningZoo
+
+julia> using ReinforcementLearningZoo
+
+julia> ] add ReinforcementLearningEnvironments
+
+julia> using ReinforcementLearningEnvironments
+
+julia> run(E`JuliaRL_BasicDQN_CartPole`)  # the CartPole environment is provided in ReinforcementLearningEnvironments, so we need to have it installed first
+
+julia> ] add ArcadeLearningEnvironment
+
+julia> using ArcadeLearningEnvironment
+
+julia> run(E`rlpyt_PPO_Atari(pong)`)  # the Atari environment is provided in ArcadeLearningEnvironment, so we need to install it first
+```
 
 ### Notes:
 
