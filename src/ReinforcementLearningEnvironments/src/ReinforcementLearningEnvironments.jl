@@ -12,6 +12,7 @@ export RLEnvs
 # built-in environments
 include("environments/non_interactive/non_interactive.jl")
 include("environments/classic_control/classic_control.jl")
+include("environments/toytext/blackjack.jl")
 include("environments/structs.jl")
 
 # dynamic loading environments
