@@ -26,7 +26,7 @@ Base.IndexStyle
 function Base.push!(b::ReservoirArrayBuffer{T,N}, x) where {T,N}
     b.n += 1
     if b.n <= b.capacity
-        append!(b.buffer, x)
+        push!(b.buffer, x)
     else
         i = rand(b.rng, 1:b.n)
         if i <= b.capacity
