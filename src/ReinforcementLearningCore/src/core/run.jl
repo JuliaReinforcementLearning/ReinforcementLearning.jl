@@ -2,10 +2,11 @@ export expected_policy_values
 
 import Base: run
 
-run(agent, env::AbstractEnv, args...) =
-    run(DynamicStyle(env), NumAgentStyle(env), agent, env, args...)
+run(agent, env::AbstractEnv, args...) = _run(agent, env, args...)
 
-function run(
+_run(agent, env, args...) = _run(DynamicStyle(env), NumAgentStyle(env), agent, env, args...)
+
+function _run(
     ::Sequential,
     ::SingleAgent,
     agent::AbstractAgent,
@@ -45,7 +46,7 @@ function run(
     hook
 end
 
-function run(
+function _run(
     ::Sequential,
     ::SingleAgent,
     agent::AbstractAgent,
@@ -71,7 +72,7 @@ function run(
     hook
 end
 
-function run(
+function _run(
     ::Sequential,
     ::MultiAgent,
     agents::Tuple{Vararg{<:AbstractAgent}},
