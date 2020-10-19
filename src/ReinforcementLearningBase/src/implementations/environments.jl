@@ -181,17 +181,33 @@ get_terminal(env::MaxTimeoutEnv) = (env.current_t > env.max_t) || get_terminal(e
 # ActionTransformedEnv
 #####
 
-struct ActionTransformedEnv{P,E<:AbstractEnv} <: AbstractEnv
+struct ActionTransformedEnv{P,M,E<:AbstractEnv} <: AbstractEnv
     processors::P
+    mapping::M
     env::E
 end
 
 # partial constructor to allow chaining
-ActionTransformedEnv(processors...) = env -> ActionTransformedEnv(processors, env)
+"""
+    ActionTransformedEnv(processors;mapping=identity)
+
+`mapping` will be applied to the result of `get_actions(env)`.
+`processors` will be applied to the `action` before sending it to the inner environment.
+The same effect like `env(action |> processors)`.
+"""
+ActionTransformedEnv(processors...;mapping=identity) = env -> ActionTransformedEnv(processors, mapping, env)
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
-    @eval $f(x::ActionTransformedEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
+    if f ∉ (:get_actions, :get_legal_actions)
+        @eval $f(x::ActionTransformedEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
+    end
 end
+
+get_actions(env::ActionTransformedEnv{<:Any, typeof(identity)}, args...) = get_actions(env.env, args...)
+get_legal_actions(env::ActionTransformedEnv{<:Any, typeof(identity)}, args...) = get_legal_actions(env.env, args...)
+
+get_actions(env::ActionTransformedEnv, args...) = map(env.mapping, get_actions(env.env, args...))
+get_legal_actions(env::ActionTransformedEnv, args...) = map(env.mapping, get_legal_actions(env.env, args...))
 
 (env::ActionTransformedEnv)(action, args...; kwargs...) =
     env.env(foldl(|>, env.processors; init = action), args...; kwargs...)
