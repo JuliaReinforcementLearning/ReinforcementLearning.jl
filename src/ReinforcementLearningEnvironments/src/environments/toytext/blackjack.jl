@@ -50,19 +50,31 @@ by Sutton and Barto.
 http://incompleteideas.net/book/the-book-2nd.html
 """
 
-function BlackjackEnv(;natural=false,rng = Random.GLOBAL_RNG)
+function BlackjackEnv(; natural = false, rng = Random.GLOBAL_RNG)
     # natural = flag to payout on a "natural" blackjack win, like casion rules
     action_space = DiscreteSpace(2)
-    low = [1,1,1]
-    high = [32,11,2]
+    low = [1, 1, 1]
+    high = [32, 11, 2]
     observation_space = MultiDiscreteSpace(low, high)
-    
-    bj = BlackjackEnv(action_space, observation_space, [], [], [0,0,0], 2, 0, false, false, rng)
+
+    bj = BlackjackEnv(
+        action_space,
+        observation_space,
+        [],
+        [],
+        [0, 0, 0],
+        2,
+        0,
+        false,
+        false,
+        rng,
+    )
     reset!(bj)
     bj
 end
 
-@inline _get_obs(env::BlackjackEnv) = [sum_hand(env.player), env.dealer[1], usable_ace(env.player)]
+@inline _get_obs(env::BlackjackEnv) =
+    [sum_hand(env.player), env.dealer[1], usable_ace(env.player)]
 
 function RLBase.reset!(env::BlackjackEnv)
     env.dealer = draw_hand(env.rng)
@@ -90,10 +102,10 @@ function (env::BlackjackEnv)(a)
         while sum_hand(env.dealer) < 17
             push!(env.dealer, draw_card(env.rng))
         end
-        env.reward = cmp(score(env.player),score(env.dealer))
+        env.reward = cmp(score(env.player), score(env.dealer))
         if env.natural && isnatural(env.player) && reward == 1
             reward = 1.5
-        end 
+        end
     end
     env.state = _get_obs(env)
     nothing
