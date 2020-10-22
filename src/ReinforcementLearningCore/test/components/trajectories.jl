@@ -210,16 +210,16 @@
 
     @testset "ReservoirTrajectory" begin
         # test length
-        t = ReservoirTrajectory(3, :a=>Array{Float64,2}, :b=>Bool)
-        push!(t;a=rand(2,3),b=rand(Bool))
+        t = ReservoirTrajectory(3, :a => Array{Float64,2}, :b => Bool)
+        push!(t; a = rand(2, 3), b = rand(Bool))
         @test length(t) == 1
-        push!(t;a=rand(2,3),b=rand(Bool))
+        push!(t; a = rand(2, 3), b = rand(Bool))
         @test length(t) == 2
-        push!(t;a=rand(2,3),b=rand(Bool))
+        push!(t; a = rand(2, 3), b = rand(Bool))
         @test length(t) == 3
 
         for _ in 1:100
-            push!(t;a=rand(2,3),b=rand(Bool))
+            push!(t; a = rand(2, 3), b = rand(Bool))
         end
 
         @test length(t) == 3
@@ -230,9 +230,9 @@
         k, n, N = 3, 10, 10000
         stats = Dict(i => 0 for i in 1:n)
         for _ in 1:N
-            t = ReservoirTrajectory(k, :a=>Array{Int, 2}, :b=>Int)
+            t = ReservoirTrajectory(k, :a => Array{Int,2}, :b => Int)
             for i in 1:n
-                push!(t;a=i .* ones(Int, 2, 3), b=i)
+                push!(t; a = i .* ones(Int, 2, 3), b = i)
             end
 
             for i in 1:length(t)
@@ -241,7 +241,7 @@
         end
 
         for v in values(stats)
-            @test isapprox(v/N, k/n;atol=0.03)
+            @test isapprox(v / N, k / n; atol = 0.03)
         end
     end
 end

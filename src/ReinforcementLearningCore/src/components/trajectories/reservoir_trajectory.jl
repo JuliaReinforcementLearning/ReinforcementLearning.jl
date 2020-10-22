@@ -3,7 +3,7 @@ export ReservoirTrajectory
 using MacroTools: @forward
 using Random
 
-mutable struct ReservoirTrajectory{B,R<:AbstractRNG}  <: AbstractTrajectory
+mutable struct ReservoirTrajectory{B,R<:AbstractRNG} <: AbstractTrajectory
     buffer::B
     n::Int
     capacity::Int
@@ -14,8 +14,13 @@ end
 
 Base.length(x::ReservoirTrajectory) = length(x.buffer[1])
 
-function ReservoirTrajectory(capacity, kw::Pair{Symbol, DataType}...;n=0, rng=Random.GLOBAL_RNG)
-    buffer = Trajectory(;(s => Vector{t}() for (s,t) in kw)...)
+function ReservoirTrajectory(
+    capacity,
+    kw::Pair{Symbol,DataType}...;
+    n = 0,
+    rng = Random.GLOBAL_RNG,
+)
+    buffer = Trajectory(; (s => Vector{t}() for (s, t) in kw)...)
     ReservoirTrajectory(buffer, n, capacity, rng)
 end
 
@@ -26,7 +31,7 @@ function Base.push!(b::ReservoirTrajectory; kw...)
     else
         i = rand(b.rng, 1:b.n)
         if i <= b.capacity
-            for (k,v) in kw
+            for (k, v) in kw
                 b.buffer[k][i] = v
             end
         end

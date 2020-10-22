@@ -19,28 +19,16 @@ const KnownArrayVariants = Union{
     Base.ReshapedArray{
         <:Any,
         <:Any,
-        <:SubArray{
-            <:Any,
-            <:Any,
-            <:Union{CircularArrayBuffer,ElasticArray},
-        },
+        <:SubArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
     },
-    Base.ReshapedArray{
-        <:Any,
-        <:Any,
-        <:Union{CircularArrayBuffer,ElasticArray},
-    },
+    Base.ReshapedArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
     SubArray{
         <:Any,
         <:Any,
         <:Base.ReshapedArray{
             <:Any,
             <:Any,
-            <:SubArray{
-                <:Any,
-                <:Any,
-                <:Union{CircularArrayBuffer,ElasticArray},
-            },
+            <:SubArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
         },
     },
 }
