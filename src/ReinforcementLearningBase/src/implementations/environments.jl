@@ -159,7 +159,8 @@ mutable struct MaxTimeoutEnv{E<:AbstractEnv} <: AbstractEnv
     current_t::Int
 end
 
-MaxTimeoutEnv(env::E, max_t::Int; current_t::Int = 1) where E<:AbstractEnv = MaxTimeoutEnv(E, max_t, current_t)
+MaxTimeoutEnv(env::E, max_t::Int; current_t::Int = 1) where {E<:AbstractEnv} =
+    MaxTimeoutEnv(E, max_t, current_t)
 
 function (env::MaxTimeoutEnv)(args...; kwargs...)
     env.env(args...; kwargs...)
@@ -195,19 +196,25 @@ end
 `processors` will be applied to the `action` before sending it to the inner environment.
 The same effect like `env(action |> processors)`.
 """
-ActionTransformedEnv(processors...;mapping=identity) = env -> ActionTransformedEnv(processors, mapping, env)
+ActionTransformedEnv(processors...; mapping = identity) =
+    env -> ActionTransformedEnv(processors, mapping, env)
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     if f ∉ (:get_actions, :get_legal_actions)
-        @eval $f(x::ActionTransformedEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
+        @eval $f(x::ActionTransformedEnv, args...; kwargs...) =
+            $f(x.env, args...; kwargs...)
     end
 end
 
-get_actions(env::ActionTransformedEnv{<:Any, typeof(identity)}, args...) = get_actions(env.env, args...)
-get_legal_actions(env::ActionTransformedEnv{<:Any, typeof(identity)}, args...) = get_legal_actions(env.env, args...)
+get_actions(env::ActionTransformedEnv{<:Any,typeof(identity)}, args...) =
+    get_actions(env.env, args...)
+get_legal_actions(env::ActionTransformedEnv{<:Any,typeof(identity)}, args...) =
+    get_legal_actions(env.env, args...)
 
-get_actions(env::ActionTransformedEnv, args...) = map(env.mapping, get_actions(env.env, args...))
-get_legal_actions(env::ActionTransformedEnv, args...) = map(env.mapping, get_legal_actions(env.env, args...))
+get_actions(env::ActionTransformedEnv, args...) =
+    map(env.mapping, get_actions(env.env, args...))
+get_legal_actions(env::ActionTransformedEnv, args...) =
+    map(env.mapping, get_legal_actions(env.env, args...))
 
 (env::ActionTransformedEnv)(action, args...; kwargs...) =
     env.env(foldl(|>, env.processors; init = action), args...; kwargs...)

@@ -46,7 +46,8 @@ Get the probability distribution of actions based on policy `π` given an `env`.
 
 Only valid for environments with discrete action space.
 """
-@api get_prob(π::AbstractPolicy, env, action) = get_prob(π, env)[findfirst(==(action), get_actions(env))]
+@api get_prob(π::AbstractPolicy, env, action) =
+    get_prob(π, env)[findfirst(==(action), get_actions(env))]
 
 """
     get_priority(π::AbstractPolicy, experience)
