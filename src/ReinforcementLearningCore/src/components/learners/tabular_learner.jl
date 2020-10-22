@@ -24,9 +24,9 @@ function (p::TabularLearner)(::ExplicitStochastic, env::AbstractEnv)
 end
 
 function (p::TabularLearner)(::RLBase.AbstractChanceStyle, env::AbstractEnv)
-    get!(p.table, get_state(env)) do 
+    get!(p.table, get_state(env)) do
         n = length(get_legal_actions(env))
-        fill(1/n, n)
+        fill(1 / n, n)
     end
 end
 

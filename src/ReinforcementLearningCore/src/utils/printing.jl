@@ -14,7 +14,9 @@ AT.children(t::StructTree{X}) where {X} =
     Tuple(f => StructTree(getfield(t.x, f)) for f in fieldnames(X))
 AT.children(
     t::StructTree{T},
-) where {T<:Union{AbstractArray, AbstractDict, MersenneTwister,ProgressMeter.Progress,Function}} = ()
+) where {
+    T<:Union{AbstractArray,AbstractDict,MersenneTwister,ProgressMeter.Progress,Function},
+} = ()
 AT.children(t::Pair{Symbol,<:StructTree}) = children(last(t))
 AT.children(t::StructTree{UnionAll}) = ()
 

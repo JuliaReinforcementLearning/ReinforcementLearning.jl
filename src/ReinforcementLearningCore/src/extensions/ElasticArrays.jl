@@ -1,7 +1,7 @@
 using ElasticArrays
 
 Base.push!(a::ElasticArray, x) = append!(a, x)
-Base.push!(a::ElasticArray{T,1}, x) where T = append!(a, [x])
+Base.push!(a::ElasticArray{T,1}, x) where {T} = append!(a, [x])
 Base.empty!(a::ElasticArray) = ElasticArrays.resize_lastdim!(a, 0)
 
 function Base.pop!(a::ElasticArray)
