@@ -2,10 +2,31 @@
 
 ## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/HEAD)
 
-[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.2...HEAD)
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.4...HEAD)
 
 **Merged pull requests:**
 
+- Enhance\_ActionTransformedEnv [\#88](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/88) ([findmyway](https://github.com/findmyway))
+- add current\_t kwarg for the \(full\) constructor [\#86](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/86) ([Sid-Bhatia-0](https://github.com/Sid-Bhatia-0))
+- add env that terminates after max threshold time [\#85](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/85) ([Sid-Bhatia-0](https://github.com/Sid-Bhatia-0))
+- add\_default\_implementation\_for\_get\_prob [\#84](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/84) ([findmyway](https://github.com/findmyway))
+- Automatic JuliaFormatter.jl run [\#83](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/83) ([github-actions[bot]](https://github.com/apps/github-actions))
+
+## [v0.8.4](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.8.4) (2020-09-28)
+
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.3...v0.8.4)
+
+**Merged pull requests:**
+
+- return correct probability with RandomPolicy and MultiThreadEnv [\#82](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/82) ([findmyway](https://github.com/findmyway))
+
+## [v0.8.3](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.8.3) (2020-09-27)
+
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.2...v0.8.3)
+
+**Merged pull requests:**
+
+- Add get\_prob for RandomPolicy [\#81](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/81) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#80](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/80) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [v0.8.2](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.8.2) (2020-09-01)
@@ -68,7 +89,6 @@
 
 **Merged pull requests:**
 
-- add RewardOverriddenObs [\#50](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/50) ([findmyway](https://github.com/findmyway))
 - update docs [\#49](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/49) ([findmyway](https://github.com/findmyway))
 
 ## [v0.7.2](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.2) (2020-06-02)
@@ -112,7 +132,6 @@
 **Merged pull requests:**
 
 - Automatic JuliaFormatter.jl run [\#37](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/37) ([github-actions[bot]](https://github.com/apps/github-actions))
-- update WrappedEnv to support postprocessor [\#36](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/36) ([findmyway](https://github.com/findmyway))
 - keep pop! always return element [\#35](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/35) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#34](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/34) ([github-actions[bot]](https://github.com/apps/github-actions))
 - keep dependency concise [\#33](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/33) ([findmyway](https://github.com/findmyway))
