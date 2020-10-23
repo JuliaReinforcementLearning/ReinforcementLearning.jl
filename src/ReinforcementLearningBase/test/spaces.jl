@@ -1,5 +1,6 @@
 @testset "Spaces" begin
-    function test_samples(s, n=100)
+
+    function test_samples(s, n = 100)
         for _ in 1:n
             @test rand(s) in s
         end
@@ -46,6 +47,7 @@
         @test !([4, 4, 4] in s)
         @test [3, 3, 3] in s
         @test !([5, 5, 5] in s)
+
 
         test_samples(s)
     end
@@ -95,4 +97,5 @@
 
         test_samples(s)
     end
+
 end

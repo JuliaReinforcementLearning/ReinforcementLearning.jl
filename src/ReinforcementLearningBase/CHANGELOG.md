@@ -2,17 +2,7 @@
 
 ## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/HEAD)
 
-[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.5...HEAD)
-
-**Merged pull requests:**
-
-- Automatic JuliaFormatter.jl run [\#93](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/93) ([github-actions[bot]](https://github.com/apps/github-actions))
-- Automatic JuliaFormatter.jl run [\#92](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/92) ([github-actions[bot]](https://github.com/apps/github-actions))
-- Automatic JuliaFormatter.jl run [\#91](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/91) ([github-actions[bot]](https://github.com/apps/github-actions))
-
-## [v0.8.5](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.8.5) (2020-10-22)
-
-[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.4...v0.8.5)
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.4...HEAD)
 
 **Merged pull requests:**
 
@@ -99,7 +89,6 @@
 
 **Merged pull requests:**
 
-- add RewardOverriddenObs [\#50](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/50) ([findmyway](https://github.com/findmyway))
 - update docs [\#49](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/49) ([findmyway](https://github.com/findmyway))
 
 ## [v0.7.2](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.2) (2020-06-02)
@@ -143,7 +132,6 @@
 **Merged pull requests:**
 
 - Automatic JuliaFormatter.jl run [\#37](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/37) ([github-actions[bot]](https://github.com/apps/github-actions))
-- update WrappedEnv to support postprocessor [\#36](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/36) ([findmyway](https://github.com/findmyway))
 - keep pop! always return element [\#35](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/35) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#34](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/34) ([github-actions[bot]](https://github.com/apps/github-actions))
 - keep dependency concise [\#33](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/33) ([findmyway](https://github.com/findmyway))

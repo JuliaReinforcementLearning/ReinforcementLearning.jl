@@ -19,24 +19,21 @@ struct DefaultStateStyleEnv{S,E} <: AbstractEnv
     env::E
 end
 
-function DefaultStateStyleEnv(s::AbstractStateStyle)
-    return env -> DefaultStateStyleEnv{s,typeof(env)}(env)
-end
+DefaultStateStyleEnv(s::AbstractStateStyle) =
+    env -> DefaultStateStyleEnv{s,typeof(env)}(env)
 DefaultStateStyleEnv(env::E, s) where {E} = DefaultStateStyleEnv{s,E}(env)
 
 get_state(env::DefaultStateStyleEnv{S}) where {S} = get_state(env.env, S)
 get_state(env::DefaultStateStyleEnv{S}, player) where {S} = get_state(env.env, S, player)
-function get_state(env::DefaultStateStyleEnv, s::AbstractStateStyle, player)
-    return get_state(env.env, s, player)
-end
+get_state(env::DefaultStateStyleEnv, s::AbstractStateStyle, player) =
+    get_state(env.env, s, player)
 
 DefaultStateStyle(::DefaultStateStyleEnv{S}) where {S} = S
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     if f ∉ (:get_state, :DefaultStateStyle)
-        @eval function $f(x::DefaultStateStyleEnv, args...; kwargs...)
-            return $f(x.env, args...; kwargs...)
-        end
+        @eval $f(x::DefaultStateStyleEnv, args...; kwargs...) =
+            $f(x.env, args...; kwargs...)
     end
 end
 
@@ -82,9 +79,8 @@ for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     end
 end
 
-function get_state(env::StateOverriddenEnv, args...; kwargs...)
-    return foldl(|>, env.processors; init=get_state(env.env, args...; kwargs...))
-end
+get_state(env::StateOverriddenEnv, args...; kwargs...) =
+    foldl(|>, env.processors; init = get_state(env.env, args...; kwargs...))
 
 function reset!(env::StateOverriddenEnv, args...; kwargs...)
     reset!(env.env, args..., kwargs...)
@@ -110,7 +106,7 @@ StateCachedEnv(env) = StateCachedEnv(get_state(env), env, true)
 
 function (env::StateCachedEnv)(args...; kwargs...)
     env.env(args...; kwargs...)
-    return env.is_state_cached = false
+    env.is_state_cached = false
 end
 
 function get_state(env::StateCachedEnv, args...; kwargs...)
@@ -149,9 +145,9 @@ for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     end
 end
 
-function get_reward(env::RewardOverriddenEnv, args...; kwargs...)
-    return foldl(|>, env.processors; init=get_reward(env.env, args...; kwargs...))
-end
+get_reward(env::RewardOverriddenEnv, args...; kwargs...) =
+    foldl(|>, env.processors; init = get_reward(env.env, args...; kwargs...))
+
 
 #####
 # MaxTimeoutEnv
@@ -163,17 +159,16 @@ mutable struct MaxTimeoutEnv{E<:AbstractEnv} <: AbstractEnv
     current_t::Int
 end
 
-function MaxTimeoutEnv(env::E, max_t::Int; current_t::Int=1) where {E<:AbstractEnv}
-    return MaxTimeoutEnv(E, max_t, current_t)
-end
+MaxTimeoutEnv(env::E, max_t::Int; current_t::Int = 1) where {E<:AbstractEnv} =
+    MaxTimeoutEnv(E, max_t, current_t)
 
 function (env::MaxTimeoutEnv)(args...; kwargs...)
     env.env(args...; kwargs...)
-    return env.current_t = env.current_t + 1
+    env.current_t = env.current_t + 1
 end
 
 # partial constructor to allow chaining
-MaxTimeoutEnv(max_t::Int; current_t::Int=1) = env -> MaxTimeoutEnv(env, max_t, current_t)
+MaxTimeoutEnv(max_t::Int; current_t::Int = 1) = env -> MaxTimeoutEnv(env, max_t, current_t)
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     if f != :get_terminal
@@ -201,35 +196,28 @@ end
 `processors` will be applied to the `action` before sending it to the inner environment.
 The same effect like `env(action |> processors)`.
 """
-function ActionTransformedEnv(processors...; mapping=identity)
-    return env -> ActionTransformedEnv(processors, mapping, env)
-end
+ActionTransformedEnv(processors...; mapping = identity) =
+    env -> ActionTransformedEnv(processors, mapping, env)
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     if f ∉ (:get_actions, :get_legal_actions)
-        @eval function $f(x::ActionTransformedEnv, args...; kwargs...)
-            return $f(x.env, args...; kwargs...)
-        end
+        @eval $f(x::ActionTransformedEnv, args...; kwargs...) =
+            $f(x.env, args...; kwargs...)
     end
 end
 
-function get_actions(env::ActionTransformedEnv{<:Any,typeof(identity)}, args...)
-    return get_actions(env.env, args...)
-end
-function get_legal_actions(env::ActionTransformedEnv{<:Any,typeof(identity)}, args...)
-    return get_legal_actions(env.env, args...)
-end
+get_actions(env::ActionTransformedEnv{<:Any,typeof(identity)}, args...) =
+    get_actions(env.env, args...)
+get_legal_actions(env::ActionTransformedEnv{<:Any,typeof(identity)}, args...) =
+    get_legal_actions(env.env, args...)
 
-function get_actions(env::ActionTransformedEnv, args...)
-    return map(env.mapping, get_actions(env.env, args...))
-end
-function get_legal_actions(env::ActionTransformedEnv, args...)
-    return map(env.mapping, get_legal_actions(env.env, args...))
-end
+get_actions(env::ActionTransformedEnv, args...) =
+    map(env.mapping, get_actions(env.env, args...))
+get_legal_actions(env::ActionTransformedEnv, args...) =
+    map(env.mapping, get_legal_actions(env.env, args...))
 
-function (env::ActionTransformedEnv)(action, args...; kwargs...)
-    return env.env(foldl(|>, env.processors; init=action), args...; kwargs...)
-end
+(env::ActionTransformedEnv)(action, args...; kwargs...) =
+    env.env(foldl(|>, env.processors; init = action), args...; kwargs...)
 
 #####
 # MultiThreadEnv
@@ -258,7 +246,7 @@ function (env::MultiThreadEnv)(actions)
     end
 end
 
-function reset!(env::MultiThreadEnv; is_force=false)
+function reset!(env::MultiThreadEnv; is_force = false)
     if is_force
         for i in 1:length(env)
             reset!(env[i])
@@ -292,44 +280,43 @@ for f in
         for i in 2:n
             selectdim(cache, ndims(cache), i) .= $f(env[i], args...; kwargs...)
         end
-        return cache
+        cache
     end
 end
 
-function get_actions(env::MultiThreadEnv, args...; kwargs...)
-    return VectSpace([get_actions(x, args...; kwargs...) for x in env.envs])
-end
+get_actions(env::MultiThreadEnv, args...; kwargs...) =
+    VectSpace([get_actions(x, args...; kwargs...) for x in env.envs])
 get_current_player(env::MultiThreadEnv) = [get_current_player(x) for x in env.envs]
 
 function Base.show(io::IO, t::MIME"text/markdown", env::MultiThreadEnv)
-    return show(io, t, Markdown.parse("""
-           # MultiThreadEnv
+    show(io, t, Markdown.parse("""
+    # MultiThreadEnv
 
-           ## Num of threads
+    ## Num of threads
 
-           $(Threads.nthreads())
+    $(Threads.nthreads())
 
-           ## Num of inner environments
+    ## Num of inner environments
 
-           $(length(env.envs)) replicates of `$(get_name(env.envs[1]))`
+    $(length(env.envs)) replicates of `$(get_name(env.envs[1]))`
 
-           ## Traits of inner environment
-           | Trait Type | Value |
-           |:---------- | ----- |
-           $(join(["|$(string(f))|$(f(env))|" for f in get_env_traits()], "\n"))
+    ## Traits of inner environment
+    | Trait Type | Value |
+    |:---------- | ----- |
+    $(join(["|$(string(f))|$(f(env))|" for f in get_env_traits()], "\n"))
 
-           ## Actions of inner environment
-           $(get_actions(env[1]))
+    ## Actions of inner environment
+    $(get_actions(env[1]))
 
-           ## Players
-           $(join(["- `$p`" for p in get_players(env.envs[1])], "\n"))
+    ## Players
+    $(join(["- `$p`" for p in get_players(env.envs[1])], "\n"))
 
-           ## Current Player
-           $(join(["`$x`" for x in get_current_player(env)], ","))
+    ## Current Player
+    $(join(["`$x`" for x in get_current_player(env)], ","))
 
-           ## Is Environment Terminated?
-           $(get_terminal(env))
-           """))
+    ## Is Environment Terminated?
+    $(get_terminal(env))
+    """))
 end
 
 # !!! some might not be meaningful, use with caution.

@@ -1,4 +1,4 @@
-using CommonRLInterface: CommonRLInterface
+import CommonRLInterface
 
 const CRL = CommonRLInterface
 
@@ -37,27 +37,24 @@ CRL.@provide CRL.reset!(env::CommonRLEnvs) = reset!(env.env)
 CRL.@provide CRL.actions(env::CommonRLEnvs) = get_actions(env.env)
 CRL.@provide CRL.observe(env::CommonRLEnvs) = get_state(env.env)
 CRL.state(env::CommonRLEnvs) = get_state(env.env)
-function CRL.provided(::typeof(CRL.state), env::CommonRLEnvs)
-    return InformationStyle(env.env) === PERFECT_INFORMATION
-end
+CRL.provided(::typeof(CRL.state), env::CommonRLEnvs) =
+    InformationStyle(env.env) === PERFECT_INFORMATION
 CRL.@provide CRL.terminated(env::CommonRLEnvs) = get_terminal(env.env)
 CRL.@provide CRL.player(env::CommonRLEnvs) = get_current_player(env.env)
 CRL.@provide CRL.clone(env::CommonRLEnvs) = CommonRLEnv(copy(env.env))
 
 CRL.@provide function CRL.act!(env::CommonRLEnvs, a)
     env.env(a)
-    return get_reward(env.env)
+    get_reward(env.env)
 end
 
 CRL.valid_actions(x::CommonRLEnvs) = get_legal_actions(x.env)
-function CRL.provided(::typeof(CRL.valid_actions), env::CommonRLEnvs)
-    return ActionStyle(env.env) === FullActionSet()
-end
+CRL.provided(::typeof(CRL.valid_actions), env::CommonRLEnvs) =
+    ActionStyle(env.env) === FullActionSet()
 
 CRL.valid_action_mask(x::CommonRLEnvs) = get_legal_actions_mask(x.env)
-function CRL.provided(::typeof(CRL.valid_action_mask), env::CommonRLEnvs)
-    return ActionStyle(env.env) === FullActionSet()
-end
+CRL.provided(::typeof(CRL.valid_action_mask), env::CommonRLEnvs) =
+    ActionStyle(env.env) === FullActionSet()
 
 #####
 # RLBaseEnv
@@ -82,9 +79,8 @@ reset!(env::RLBaseEnv) = CRL.reset!(env.env)
 (env::RLBaseEnv)(a) = env.r = CRL.act!(env.env, a)
 Base.copy(env::CommonRLEnv) = RLBaseEnv(CRL.clone(env.env), env.r)
 
-function ActionStyle(env::RLBaseEnv)
-    return CRL.provided(CRL.valid_actions, env.env) ? FullActionSet() : MinimalActionSet()
-end
+ActionStyle(env::RLBaseEnv) =
+    CRL.provided(CRL.valid_actions, env.env) ? FullActionSet() : MinimalActionSet()
 UtilityStyle(env::RLBaseEnv) = GENERAL_SUM
 UtilityStyle(env::RLBaseEnv{<:CRL.AbstractZeroSumEnv}) = ZERO_SUM
 InformationStyle(env::RLBaseEnv) = IMPERFECT_INFORMATION

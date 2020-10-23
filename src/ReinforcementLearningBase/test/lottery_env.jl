@@ -11,9 +11,9 @@ Here we use an example introduced in [Monte Carlo Tree Search: A Tutorial](https
 
 Assume you have \$10 in your pocket, and you are faced with the following three choices:
 
- 1. buy a PowerRich lottery ticket (win \$100M w.p. 0.01; nothing otherwise);
- 2. buy a MegaHaul lottery ticket (win \$1M w.p. 0.05; nothing otherwise);
- 3. do not buy a lottery ticket.
+1. buy a PowerRich lottery ticket (win \$100M w.p. 0.01; nothing otherwise);
+2. buy a MegaHaul lottery ticket (win \$1M w.p. 0.05; nothing otherwise);
+3. do not buy a lottery ticket.
 """
 mutable struct LotteryEnv{R<:AbstractRNG} <: AbstractEnv
     reward::Int
@@ -39,7 +39,7 @@ function (env::LotteryEnv)(action::Union{Symbol,Nothing})
     else
         env.reward = 0
     end
-    return env.terminal = true
+    env.terminal = true
 end
 
 RLBase.reset!(env::LotteryEnv) = env.terminal = false

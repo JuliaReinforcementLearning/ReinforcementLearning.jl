@@ -1,7 +1,8 @@
 @testset "Test convert between CommonRLEnv and RLBase" begin
+
     x = LotteryEnv()
-    y = CRL.clone(convert(CRL.AbstractEnv, x))
-    z = copy(convert(AbstractEnv, y))
+    y = convert(CRL.AbstractEnv, x) |> CRL.clone
+    z = convert(AbstractEnv, y) |> copy
 
     @test ActionStyle(z) === ActionStyle(x)
     @test CRL.provided(CRL.valid_actions, y) == true
@@ -38,4 +39,5 @@
     @test get_legal_actions_mask(x) == CRL.valid_action_mask(y) == get_legal_actions_mask(z)
     @test get_current_player(x) == CRL.player(y) == get_current_player(z)
     @test get_terminal(x) == CRL.terminated(y) == get_terminal(z)
+
 end

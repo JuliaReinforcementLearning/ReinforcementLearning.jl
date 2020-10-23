@@ -7,7 +7,7 @@ struct ContinuousSpace{T<:Number} <: AbstractSpace
     high::T
     function ContinuousSpace(low::T, high::T) where {T<:Number}
         low < high || throw(ArgumentError("$low must be less than $high"))
-        return new{T}(low, high)
+        new{T}(low, high)
     end
 end
 
@@ -21,8 +21,7 @@ ContinuousSpace(low, high) = ContinuousSpace(promote(low, high)...)
 Base.eltype(::ContinuousSpace{T}) where {T} = T
 Base.in(x, s::ContinuousSpace) = s.low <= x <= s.high
 
-function Random.rand(rng::AbstractRNG, s::ContinuousSpace{T}) where {T}
-    return rand(rng, T) * (s.high - s.low) + s.low
-end
+Random.rand(rng::AbstractRNG, s::ContinuousSpace{T}) where {T} =
+    rand(rng, T) * (s.high - s.low) + s.low
 
 Base.length(::ContinuousSpace) = throw(DomainError("ContinuousSpace is uncountable"))

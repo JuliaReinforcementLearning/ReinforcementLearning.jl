@@ -12,7 +12,7 @@ Julia. From the concept level, they can be organized in the following parts:
 import Base: copy, copyto!, length, in, eltype
 import Random: seed!, rand, AbstractRNG
 import AbstractTrees: children, has_children
-using Markdown: Markdown
+import Markdown
 
 #####
 # Policy
@@ -26,6 +26,7 @@ Policy is the most basic concept in reinforcement learning. A policy is a functi
 @api abstract type AbstractPolicy end
 @api (π::AbstractPolicy)(env)
 
+
 """
     update!(π::AbstractPolicy, experience)
 
@@ -36,7 +37,7 @@ Update the policy `π` with online/offline experience.
 """
     get_prob(π::AbstractPolicy, env)
 
-Get the probability distribution of actions based on policy `π` given an `env`.
+Get the probability distribution of actions based on policy `π` given an `env`. 
 """
 @api get_prob(π::AbstractPolicy, env)
 
@@ -45,9 +46,8 @@ Get the probability distribution of actions based on policy `π` given an `env`.
 
 Only valid for environments with discrete action space.
 """
-@api function get_prob(π::AbstractPolicy, env, action)
-    return get_prob(π, env)[findfirst(==(action), get_actions(env))]
-end
+@api get_prob(π::AbstractPolicy, env, action) =
+    get_prob(π, env)[findfirst(==(action), get_actions(env))]
 
 """
     get_priority(π::AbstractPolicy, experience)
@@ -113,14 +113,10 @@ abstract type AbstractDynamicStyle <: AbstractEnvStyle end
 @api struct Sequential <: AbstractDynamicStyle end
 @api struct Simultaneous <: AbstractDynamicStyle end
 
-"""
-Environment with the [`DynamicStyle`](@ref) of `SEQUENTIAL` must takes actions from different players one-by-one.
-"""
+"Environment with the [`DynamicStyle`](@ref) of `SEQUENTIAL` must takes actions from different players one-by-one."
 @api const SEQUENTIAL = Sequential()
 
-"""
-Environment with the [`DynamicStyle`](@ref) of `SIMULTANEOUS` must take in actions from some (or all) players at one time
-"""
+"Environment with the [`DynamicStyle`](@ref) of `SIMULTANEOUS` must take in actions from some (or all) players at one time"
 @api const SIMULTANEOUS = Simultaneous()
 
 """
@@ -140,14 +136,10 @@ abstract type AbstractInformationStyle <: AbstractEnvStyle end
 @api struct PerfectInformation <: AbstractInformationStyle end
 @api struct ImperfectInformation <: AbstractInformationStyle end
 
-"""
-All players observe the same state
-"""
+"All players observe the same state"
 @api const PERFECT_INFORMATION = PerfectInformation()
 
-"""
-The inner state of some players' observations may be different
-"""
+"The inner state of some players' observations may be different"
 @api const IMPERFECT_INFORMATION = ImperfectInformation()
 
 """
@@ -171,19 +163,13 @@ abstract type AbstractStochasticChanceStyle <: AbstractChanceStyle end
 @api struct ExplicitStochastic <: AbstractStochasticChanceStyle end
 @api struct SampledStochastic <: AbstractStochasticChanceStyle end
 
-"""
-No chance player in the environment. And the game is deterministic.
-"""
+"No chance player in the environment. And the game is deterministic."
 @api const DETERMINISTIC = Deterministic()
 
-"""
-No chance player in the environment. And the game is stochastic.
-"""
+"No chance player in the environment. And the game is stochastic."
 @api const STOCHASTIC = Stochastic()
 
-"""
-Environment contains chance player and the probability is known.
-"""
+"Environment contains chance player and the probability is known."
 @api const EXPLICIT_STOCHASTIC = ExplicitStochastic()
 
 """
@@ -207,19 +193,13 @@ abstract type AbstractRewardStyle <: AbstractEnvStyle end
 @api struct StepReward <: AbstractRewardStyle end
 @api struct TerminalReward <: AbstractRewardStyle end
 
-"""
-We can get reward after each step
-"""
+"We can get reward after each step"
 @api const STEP_REWARD = StepReward()
 
-"""
-Only get reward at the end of environment
-"""
+"Only get reward at the end of environment"
 @api const TERMINAL_REWARD = TerminalReward()
 
-"""
-Specify whether we can get reward after each step or only at the end of an game. Possible values are [STEP_REWARD](@ref) or [TERMINAL_REWARD](@ref)
-"""
+"Specify whether we can get reward after each step or only at the end of an game. Possible values are [STEP_REWARD](@ref) or [TERMINAL_REWARD](@ref)"
 @env_api RewardStyle(env::T) where {T<:AbstractEnv} = RewardStyle(T)
 RewardStyle(::Type{<:AbstractEnv}) = STEP_REWARD
 
@@ -234,24 +214,16 @@ abstract type AbstractUtilityStyle <: AbstractEnvStyle end
 @api struct GeneralSum <: AbstractUtilityStyle end
 @api struct IdenticalUtility <: AbstractUtilityStyle end
 
-"""
-Rewards of all players sum to 0
-"""
+"Rewards of all players sum to 0"
 @api const ZERO_SUM = ZeroSum()
 
-"""
-Rewards of all players sum to a constant
-"""
+"Rewards of all players sum to a constant"
 @api const CONSTANT_SUM = ConstantSum()
 
-"""
-Total rewards of all players may be different in each step
-"""
+"Total rewards of all players may be different in each step"
 @api const GENERAL_SUM = GeneralSum()
 
-"""
-Every player gets the same reward
-"""
+"Every player gets the same reward"
 @api const IDENTICAL_REWARD = IdenticalUtility()
 
 """
@@ -260,10 +232,10 @@ Every player gets the same reward
 Specify the utility style in multi-agent environments.
 Possible values are:
 
-  - [ZERO_SUM](@ref)
-  - [CONSTANT_SUM](@ref)
-  - [GENERAL_SUM](@ref)
-  - [IDENTICAL_REWARD](@ref)
+- [ZERO_SUM](@ref)
+- [CONSTANT_SUM](@ref)
+- [GENERAL_SUM](@ref)
+- [IDENTICAL_REWARD](@ref)
 """
 @env_api UtilityStyle(env::T) where {T<:AbstractEnv} = UtilityStyle(T)
 UtilityStyle(::Type{<:AbstractEnv}) = GENERAL_SUM
@@ -275,16 +247,12 @@ UtilityStyle(::Type{<:AbstractEnv}) = GENERAL_SUM
 abstract type AbstractActionStyle <: AbstractEnvStyle end
 @api struct FullActionSet <: AbstractActionStyle end
 
-"""
-The action space of the environment may contains illegal actions
-"""
+"The action space of the environment may contains illegal actions"
 @api const FULL_ACTION_SET = FullActionSet()
 
 @api struct MinimalActionSet <: AbstractActionStyle end
 
-"""
-All actions in the action space of the environment are legal
-"""
+"All actions in the action space of the environment are legal"
 @api const MINIMAL_ACTION_SET = MinimalActionSet()
 
 """
@@ -315,11 +283,9 @@ DefaultStateStyle(::Type{<:AbstractEnv}) = Observation{Array}()
 
 const DEFAULT_PLAYER = :DEFAULT_PLAYER
 
-@api (env::AbstractEnv)(action; player=get_current_player(env))
+@api (env::AbstractEnv)(action, player = get_current_player(env))
 
-"""
-Make an independent copy of `env`
-"""
+"Make an independent copy of `env`"
 @api copy(env::AbstractEnv) = deepcopy(env)
 @api copyto!(dest::AbstractEnv, src::AbstractEnv)
 
@@ -331,18 +297,15 @@ Make an independent copy of `env`
 Get all available actions from environment.
 See also: [`get_legal_actions`](@ref)
 """
-@multi_agent_env_api get_actions(env::AbstractEnv; player=get_current_player(env))
+@multi_agent_env_api get_actions(env::AbstractEnv, player = get_current_player(env))
 
 """
     get_legal_actions(env, player=get_current_player(env))
 
 For environments of [`MINIMAL_ACTION_SET`](@ref), the result is the same with [`get_actions`](@ref).
 """
-@multi_agent_env_api function get_legal_actions(
-    env::AbstractEnv, player=get_current_player(env)
-)
-    return get_legal_actions(ActionStyle(env), env, player)
-end
+@multi_agent_env_api get_legal_actions(env::AbstractEnv, player = get_current_player(env)) =
+    get_legal_actions(ActionStyle(env), env, player)
 
 get_legal_actions(::MinimalActionSet, env, player) = get_actions(env)
 
@@ -352,7 +315,8 @@ get_legal_actions(::MinimalActionSet, env, player) = get_actions(env)
 Required for environments of [`FULL_ACTION_SET`](@ref).
 """
 @multi_agent_env_api get_legal_actions_mask(
-    env::AbstractEnv; player=get_current_player(env)
+    env::AbstractEnv,
+    player = get_current_player(env),
 )
 
 """
@@ -363,9 +327,8 @@ For environments with many different states provided (inner state, information s
 users need to provide `t::Type` to declare which kind of state they want.
 """
 @multi_agent_env_api get_state(env::AbstractEnv) = get_state(env, DefaultStateStyle(env))
-function get_state(env::AbstractEnv, ss::AbstractStateStyle)
-    return get_state(env, ss, get_current_player(env))
-end
+get_state(env::AbstractEnv, ss::AbstractStateStyle) =
+    get_state(env, ss, get_current_player(env))
 get_state(env::AbstractEnv, player) = get_state(env, DefaultStateStyle(env), player)
 
 """
@@ -407,36 +370,28 @@ Used in imperfect multi-agent environments.
 get_num_players(::SingleAgent) = 1
 get_num_players(::MultiAgent{N}) where {N} = N
 
-"""
-Reset the internal state of an environment
-"""
+"Reset the internal state of an environment"
 @env_api reset!(env::AbstractEnv)
 
 reset!(x) = nothing
 
-"""
-Set the seed of internal rng
-"""
+"Set the seed of internal rng"
 @env_api seed!(env::AbstractEnv, seed)
 
-"""
-Get all actions in each ply
-"""
-@multi_agent_env_api get_history(env::AbstractEnv; player=get_current_player(env))
+"Get all actions in each ply"
+@multi_agent_env_api get_history(env::AbstractEnv, player = get_current_player(env))
 
 """
     get_terminal(env, player=get_current_player(env))
 """
-@multi_agent_env_api function get_terminal(env::AbstractEnv, player=get_current_player(env))
-    return env.terminal
-end
+@multi_agent_env_api get_terminal(env::AbstractEnv, player = get_current_player(env)) =
+    env.terminal
 
 """
     get_reward(env, player=get_current_player(env))
 """
-@multi_agent_env_api function get_reward(env::AbstractEnv, player=get_current_player(env))
-    return env.reward
-end
+@multi_agent_env_api get_reward(env::AbstractEnv, player = get_current_player(env)) =
+    env.reward
 
 """
     get_prob(env, player=get_chance_player(env))
@@ -444,7 +399,7 @@ end
 Only valid for environments of [`EXPLICIT_STOCHASTIC`](@ref) style.
 Here `player` must be a chance player.
 """
-@multi_agent_env_api get_prob(env::AbstractEnv; player=get_chance_player(env))
+@multi_agent_env_api get_prob(env::AbstractEnv, player = get_chance_player(env))
 
 """
     child(env::AbstractEnv, action)
@@ -454,7 +409,7 @@ Treat the `env` as a game tree. Create an independent child after applying `acti
 @api function child(env::AbstractEnv, action)
     new_env = copy(env)
     new_env(action)
-    return new_env
+    new_env
 end
 
 @api has_children(env::AbstractEnv) = !get_terminal(env)
@@ -481,10 +436,10 @@ end
 Describe the span of states and actions.
 Usually the following methods are implemented:
 
-  - `Base.length`
-  - `Base.in`
-  - `Random.rand`
-  - `Base.eltype`
+- `Base.length`
+- `Base.in`
+- `Random.rand`
+- `Base.eltype`
 """
 @api abstract type AbstractSpace end
 
@@ -501,12 +456,11 @@ Usually the following methods are implemented:
 Describe how to model a reinforcement learning environment.
 TODO: need more investigation
 Ref: https://bair.berkeley.edu/blog/2019/12/12/mbpo/
-
-  - Analytic gradient computation
-  - Sampling-based planning
-  - Model-based data generation
-  - Value-equivalence prediction
-    [Model-based Reinforcement Learning: A Survey.](https://arxiv.org/pdf/2006.16712.pdf)
-    [Tutorial on Model-Based Methods in Reinforcement Learning](https://sites.google.com/view/mbrl-tutorial)
+- Analytic gradient computation
+- Sampling-based planning
+- Model-based data generation
+- Value-equivalence prediction
+[Model-based Reinforcement Learning: A Survey.](https://arxiv.org/pdf/2006.16712.pdf)
+[Tutorial on Model-Based Methods in Reinforcement Learning](https://sites.google.com/view/mbrl-tutorial)
 """
 @api abstract type AbstractEnvironmentModel end

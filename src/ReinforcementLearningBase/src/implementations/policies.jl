@@ -16,8 +16,8 @@ end
 
 Random.seed!(p::RandomPolicy, seed) = Random.seed!(p.rng, seed)
 
-RandomPolicy(; rng=Random.GLOBAL_RNG) = RandomPolicy(nothing, rng)
-RandomPolicy(s; rng=Random.GLOBAL_RNG) = RandomPolicy(s, rng)
+RandomPolicy(; rng = Random.GLOBAL_RNG) = RandomPolicy(nothing, rng)
+RandomPolicy(s; rng = Random.GLOBAL_RNG) = RandomPolicy(s, rng)
 
 """
     RandomPolicy(env::AbstractEnv; rng=Random.GLOBAL_RNG)
@@ -27,12 +27,10 @@ in `get_actions(env)`. Otherwise, the `env` is supposed to be of [`MINIMAL_ACTIO
 The `get_actions(env)` is supposed to be static and will only be used to initialize
 the random policy for once.
 """
-function RandomPolicy(env::AbstractEnv; rng=Random.GLOBAL_RNG)
-    return RandomPolicy(ActionStyle(env), env, rng)
-end
-function RandomPolicy(::MinimalActionSet, env::AbstractEnv, rng)
-    return RandomPolicy(get_actions(env), rng)
-end
+RandomPolicy(env::AbstractEnv; rng = Random.GLOBAL_RNG) =
+    RandomPolicy(ActionStyle(env), env, rng)
+RandomPolicy(::MinimalActionSet, env::AbstractEnv, rng) =
+    RandomPolicy(get_actions(env), rng)
 RandomPolicy(::FullActionSet, env::AbstractEnv, rng) = RandomPolicy(nothing, rng)
 
 (p::RandomPolicy{Nothing})(env) = rand(p.rng, get_legal_actions(env))
@@ -42,9 +40,8 @@ RandomPolicy(::FullActionSet, env::AbstractEnv, rng) = RandomPolicy(nothing, rng
 # Ideally we should return a Categorical distribution.
 # But this means we need to introduce an extra dependency of Distributions
 # watch https://github.com/JuliaStats/Distributions.jl/issues/1139
-function get_prob(p::RandomPolicy{<:VectSpace}, env::MultiThreadEnv)
-    return [fill(1 / length(s), length(s)) for s in p.action_space]
-end
+get_prob(p::RandomPolicy{<:VectSpace}, env::MultiThreadEnv) =
+    [fill(1 / length(s), length(s)) for s in p.action_space]
 get_prob(p::RandomPolicy, env::MultiThreadEnv) = [get_prob(p, x) for x in env]
 get_prob(p::RandomPolicy, env) = fill(1 / length(p.action_space), length(p.action_space))
 get_prob(p::RandomPolicy{Nothing}, env) = get_prob(p, env, ChanceStyle(env))
@@ -54,7 +51,7 @@ function get_prob(p::RandomPolicy{Nothing}, env, ::AbstractChanceStyle)
     n = sum(mask)
     prob = zeros(length(mask))
     prob[mask] .= 1 / n
-    return prob
+    prob
 end
 
 function get_prob(p::RandomPolicy{Nothing}, env, ::ExplicitStochastic)
@@ -66,9 +63,8 @@ function get_prob(p::RandomPolicy{Nothing}, env, ::ExplicitStochastic)
 end
 
 get_prob(p::RandomPolicy, env, a) = 1 / length(p.action_space)
-function get_prob(p::RandomPolicy{<:VectSpace}, env::MultiThreadEnv, a)
-    return [1 / length(x) for x in p.action_space.data]
-end
+get_prob(p::RandomPolicy{<:VectSpace}, env::MultiThreadEnv, a) =
+    [1 / length(x) for x in p.action_space.data]
 
 get_prob(p::RandomPolicy{Nothing}, env, a::ActionProbPair) = a.prob
 
