@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- Automatic JuliaFormatter.jl run [\#93](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/93) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Automatic JuliaFormatter.jl run [\#92](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/92) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Automatic JuliaFormatter.jl run [\#91](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/91) ([github-actions[bot]](https://github.com/apps/github-actions))
 
