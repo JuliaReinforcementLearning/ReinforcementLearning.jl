@@ -20,5 +20,5 @@ Here `I` represents the index of action in each inner space inside `s`.
 """
 function Base.getindex(s::VectSpace, I::Vector{Int})
     @assert length(s.data) == length(I)
-    [getindex(d, i) for (d, i) in zip(s.data, I)]
+    return [getindex(d, i) for (d, i) in zip(s.data, I)]
 end

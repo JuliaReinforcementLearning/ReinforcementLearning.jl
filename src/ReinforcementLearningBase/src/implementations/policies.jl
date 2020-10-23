@@ -51,7 +51,7 @@ function get_prob(p::RandomPolicy{Nothing}, env, ::AbstractChanceStyle)
     n = sum(mask)
     prob = zeros(length(mask))
     prob[mask] .= 1 / n
-    prob
+    return prob
 end
 
 function get_prob(p::RandomPolicy{Nothing}, env, ::ExplicitStochastic)

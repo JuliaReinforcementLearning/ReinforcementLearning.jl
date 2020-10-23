@@ -106,7 +106,7 @@ StateCachedEnv(env) = StateCachedEnv(get_state(env), env, true)
 
 function (env::StateCachedEnv)(args...; kwargs...)
     env.env(args...; kwargs...)
-    env.is_state_cached = false
+    return env.is_state_cached = false
 end
 
 function get_state(env::StateCachedEnv, args...; kwargs...)
@@ -148,7 +148,6 @@ end
 get_reward(env::RewardOverriddenEnv, args...; kwargs...) =
     foldl(|>, env.processors; init = get_reward(env.env, args...; kwargs...))
 
-
 #####
 # MaxTimeoutEnv
 #####
@@ -164,7 +163,7 @@ MaxTimeoutEnv(env::E, max_t::Int; current_t::Int = 1) where {E<:AbstractEnv} =
 
 function (env::MaxTimeoutEnv)(args...; kwargs...)
     env.env(args...; kwargs...)
-    env.current_t = env.current_t + 1
+    return env.current_t = env.current_t + 1
 end
 
 # partial constructor to allow chaining
@@ -280,7 +279,7 @@ for f in
         for i in 2:n
             selectdim(cache, ndims(cache), i) .= $f(env[i], args...; kwargs...)
         end
-        cache
+        return cache
     end
 end
 
@@ -289,34 +288,34 @@ get_actions(env::MultiThreadEnv, args...; kwargs...) =
 get_current_player(env::MultiThreadEnv) = [get_current_player(x) for x in env.envs]
 
 function Base.show(io::IO, t::MIME"text/markdown", env::MultiThreadEnv)
-    show(io, t, Markdown.parse("""
-    # MultiThreadEnv
+    return show(io, t, Markdown.parse("""
+           # MultiThreadEnv
 
-    ## Num of threads
+           ## Num of threads
 
-    $(Threads.nthreads())
+           $(Threads.nthreads())
 
-    ## Num of inner environments
+           ## Num of inner environments
 
-    $(length(env.envs)) replicates of `$(get_name(env.envs[1]))`
+           $(length(env.envs)) replicates of `$(get_name(env.envs[1]))`
 
-    ## Traits of inner environment
-    | Trait Type | Value |
-    |:---------- | ----- |
-    $(join(["|$(string(f))|$(f(env))|" for f in get_env_traits()], "\n"))
+           ## Traits of inner environment
+           | Trait Type | Value |
+           |:---------- | ----- |
+           $(join(["|$(string(f))|$(f(env))|" for f in get_env_traits()], "\n"))
 
-    ## Actions of inner environment
-    $(get_actions(env[1]))
+           ## Actions of inner environment
+           $(get_actions(env[1]))
 
-    ## Players
-    $(join(["- `$p`" for p in get_players(env.envs[1])], "\n"))
+           ## Players
+           $(join(["- `$p`" for p in get_players(env.envs[1])], "\n"))
 
-    ## Current Player
-    $(join(["`$x`" for x in get_current_player(env)], ","))
+           ## Current Player
+           $(join(["`$x`" for x in get_current_player(env)], ","))
 
-    ## Is Environment Terminated?
-    $(get_terminal(env))
-    """))
+           ## Is Environment Terminated?
+           $(get_terminal(env))
+           """))
 end
 
 # !!! some might not be meaningful, use with caution.

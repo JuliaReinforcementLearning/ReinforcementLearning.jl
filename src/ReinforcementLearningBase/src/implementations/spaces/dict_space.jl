@@ -10,7 +10,7 @@ end
 function DictSpace(ps::Pair{<:Union{Symbol,AbstractString},<:AbstractSpace}...)
     data = Dict(ps)
     K, V = typeof(data).parameters
-    DictSpace{K,V}(Dict(ps))
+    return DictSpace{K,V}(Dict(ps))
 end
 
 Base.eltype(::DictSpace{K}) where {K} = Dict{K}

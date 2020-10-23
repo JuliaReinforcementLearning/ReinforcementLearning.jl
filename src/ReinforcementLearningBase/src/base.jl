@@ -31,33 +31,33 @@ end
 #####
 
 function get_env_traits()
-    [eval(x) for x in RLBase.ENV_API if endswith(String(x), "Style")]
+    return [eval(x) for x in RLBase.ENV_API if endswith(String(x), "Style")]
 end
 
 Base.show(io::IO, t::MIME"text/plain", env::AbstractEnv) =
     show(io, MIME"text/markdown"(), env)
 
 function Base.show(io::IO, t::MIME"text/markdown", env::AbstractEnv)
-    show(io, t, Markdown.parse("""
-    # $(get_name(env))
+    return show(io, t, Markdown.parse("""
+           # $(get_name(env))
 
-    ## Traits
-    | Trait Type | Value |
-    |:---------- | ----- |
-    $(join(["|$(string(f))|$(f(env))|" for f in get_env_traits()], "\n"))
+           ## Traits
+           | Trait Type | Value |
+           |:---------- | ----- |
+           $(join(["|$(string(f))|$(f(env))|" for f in get_env_traits()], "\n"))
 
-    ## Actions
-    $(get_actions(env))
+           ## Actions
+           $(get_actions(env))
 
-    ## Players
-    $(join(["- `$p`" for p in get_players(env)], "\n"))
+           ## Players
+           $(join(["- `$p`" for p in get_players(env)], "\n"))
 
-    ## Current Player
-    `$(get_current_player(env))`
+           ## Current Player
+           `$(get_current_player(env))`
 
-    ## Is Environment Terminated?
-    $(get_terminal(env) ? "Yes" : "No")
-    """))
+           ## Is Environment Terminated?
+           $(get_terminal(env) ? "Yes" : "No")
+           """))
 end
 
 #####

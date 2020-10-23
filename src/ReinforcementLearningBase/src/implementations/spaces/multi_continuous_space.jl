@@ -10,7 +10,7 @@ struct MultiContinuousSpace{T<:AbstractArray} <: AbstractSpace
             throw(ArgumentError("$(size(low)) != $(size(high)), size must match"))
         all(map((l, h) -> l <= h, low, high)) ||
             throw(ArgumentError("each element of $low must be ≤ than $high"))
-        new{T}(low, high)
+        return new{T}(low, high)
     end
 end
 
@@ -28,5 +28,5 @@ Base.in(xs, s::MultiContinuousSpace) =
 Base.length(s::MultiContinuousSpace) = error("MultiContinuousSpace is uncountable")
 
 function Random.rand(rng::AbstractRNG, s::MultiContinuousSpace{T}) where {T}
-    (s.high .- s.low) .* rand(rng, eltype(T), size(s.low)...) .+ s.low
+    return (s.high .- s.low) .* rand(rng, eltype(T), size(s.low)...) .+ s.low
 end

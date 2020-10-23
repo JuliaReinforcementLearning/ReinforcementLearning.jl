@@ -7,7 +7,7 @@ struct ContinuousSpace{T<:Number} <: AbstractSpace
     high::T
     function ContinuousSpace(low::T, high::T) where {T<:Number}
         low < high || throw(ArgumentError("$low must be less than $high"))
-        new{T}(low, high)
+        return new{T}(low, high)
     end
 end
 

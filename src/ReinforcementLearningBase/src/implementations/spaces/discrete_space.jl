@@ -10,22 +10,21 @@ The `span` can be of any iterators.
 # Example
 
 ```julia-repl
-julia> s = DiscreteSpace([1,2,3])
+julia > s = DiscreteSpace([1, 2, 3])
 DiscreteSpace{Array{Int64,1}}([1, 2, 3])
 
-julia> 0 ∉ s
+julia > 0 ∉ s
 true
 
-julia> 2 ∈ s
+julia > 2 ∈ s
 true
 
-julia> s = DiscreteSpace(Set([:a, :c, :a, :b]))
+julia > s = DiscreteSpace(Set([:a, :c, :a, :b]))
 DiscreteSpace{Set{Symbol}}(Set(Symbol[:a, :b, :c]))
 
-julia> s = DiscreteSpace(3)
+julia > s = DiscreteSpace(3)
 DiscreteSpace{UnitRange{Int64}}(1:3)
 ```
-
 """
 struct DiscreteSpace{T} <: AbstractSpace
     span::T
@@ -40,7 +39,7 @@ DiscreteSpace(high::T) where {T<:Integer} = DiscreteSpace(one(T), high)
 
 function DiscreteSpace(low::T, high::T) where {T<:Integer}
     high >= low || throw(ArgumentError("$high must be >= $low"))
-    DiscreteSpace(low:high)
+    return DiscreteSpace(low:high)
 end
 
 """

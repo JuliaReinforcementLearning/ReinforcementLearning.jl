@@ -45,7 +45,7 @@ CRL.@provide CRL.clone(env::CommonRLEnvs) = CommonRLEnv(copy(env.env))
 
 CRL.@provide function CRL.act!(env::CommonRLEnvs, a)
     env.env(a)
-    get_reward(env.env)
+    return get_reward(env.env)
 end
 
 CRL.valid_actions(x::CommonRLEnvs) = get_legal_actions(x.env)
