@@ -1,7 +1,7 @@
 @testset "Test convert between CommonRLEnv and RLBase" begin
     x = LotteryEnv()
-    y = convert(CRL.AbstractEnv, x) |> CRL.clone
-    z = convert(AbstractEnv, y) |> copy
+    y = CRL.clone(convert(CRL.AbstractEnv, x))
+    z = copy(convert(AbstractEnv, y))
 
     @test ActionStyle(z) === ActionStyle(x)
     @test CRL.provided(CRL.valid_actions, y) == true

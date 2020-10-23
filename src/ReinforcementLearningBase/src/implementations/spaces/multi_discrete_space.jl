@@ -22,12 +22,15 @@ end
 
 The `low` will fall back to `ones(eltype(T), size(high))`.
 """
-MultiDiscreteSpace(high::T) where {T<:AbstractArray} =
-    MultiDiscreteSpace(ones(eltype(T), size(high)), high)
+function MultiDiscreteSpace(high::T) where {T<:AbstractArray}
+    return MultiDiscreteSpace(ones(eltype(T), size(high)), high)
+end
 
 Base.length(s::MultiDiscreteSpace) = s.n
 Base.eltype(s::MultiDiscreteSpace{T}) where {T} = T
-Base.in(xs, s::MultiDiscreteSpace) =
-    size(xs) == size(s.low) && all(map((l, x, h) -> l <= x <= h, s.low, xs, s.high))
-Random.rand(rng::AbstractRNG, s::MultiDiscreteSpace) =
-    map((l, h) -> rand(rng, l:h), s.low, s.high)
+function Base.in(xs, s::MultiDiscreteSpace)
+    return size(xs) == size(s.low) && all(map((l, x, h) -> l <= x <= h, s.low, xs, s.high))
+end
+function Random.rand(rng::AbstractRNG, s::MultiDiscreteSpace)
+    return map((l, h) -> rand(rng, l:h), s.low, s.high)
+end

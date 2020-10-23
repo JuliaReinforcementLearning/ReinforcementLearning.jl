@@ -1,5 +1,5 @@
 @testset "Spaces" begin
-    function test_samples(s, n = 100)
+    function test_samples(s, n=100)
         for _ in 1:n
             @test rand(s) in s
         end

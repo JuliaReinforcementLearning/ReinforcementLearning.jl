@@ -12,7 +12,7 @@ Julia. From the concept level, they can be organized in the following parts:
 import Base: copy, copyto!, length, in, eltype
 import Random: seed!, rand, AbstractRNG
 import AbstractTrees: children, has_children
-import Markdown
+using Markdown: Markdown
 
 #####
 # Policy
@@ -45,8 +45,9 @@ Get the probability distribution of actions based on policy `π` given an `env`.
 
 Only valid for environments with discrete action space.
 """
-@api get_prob(π::AbstractPolicy, env, action) =
-    get_prob(π, env)[findfirst(==(action), get_actions(env))]
+@api function get_prob(π::AbstractPolicy, env, action)
+    return get_prob(π, env)[findfirst(==(action), get_actions(env))]
+end
 
 """
     get_priority(π::AbstractPolicy, experience)
@@ -314,7 +315,7 @@ DefaultStateStyle(::Type{<:AbstractEnv}) = Observation{Array}()
 
 const DEFAULT_PLAYER = :DEFAULT_PLAYER
 
-@api (env::AbstractEnv)(action, player = get_current_player(env))
+@api (env::AbstractEnv)(action; player=get_current_player(env))
 
 """
 Make an independent copy of `env`
@@ -330,15 +331,18 @@ Make an independent copy of `env`
 Get all available actions from environment.
 See also: [`get_legal_actions`](@ref)
 """
-@multi_agent_env_api get_actions(env::AbstractEnv, player = get_current_player(env))
+@multi_agent_env_api get_actions(env::AbstractEnv; player=get_current_player(env))
 
 """
     get_legal_actions(env, player=get_current_player(env))
 
 For environments of [`MINIMAL_ACTION_SET`](@ref), the result is the same with [`get_actions`](@ref).
 """
-@multi_agent_env_api get_legal_actions(env::AbstractEnv, player = get_current_player(env)) =
-    get_legal_actions(ActionStyle(env), env, player)
+@multi_agent_env_api function get_legal_actions(
+    env::AbstractEnv, player=get_current_player(env)
+)
+    return get_legal_actions(ActionStyle(env), env, player)
+end
 
 get_legal_actions(::MinimalActionSet, env, player) = get_actions(env)
 
@@ -348,8 +352,7 @@ get_legal_actions(::MinimalActionSet, env, player) = get_actions(env)
 Required for environments of [`FULL_ACTION_SET`](@ref).
 """
 @multi_agent_env_api get_legal_actions_mask(
-    env::AbstractEnv,
-    player = get_current_player(env),
+    env::AbstractEnv; player=get_current_player(env)
 )
 
 """
@@ -360,8 +363,9 @@ For environments with many different states provided (inner state, information s
 users need to provide `t::Type` to declare which kind of state they want.
 """
 @multi_agent_env_api get_state(env::AbstractEnv) = get_state(env, DefaultStateStyle(env))
-get_state(env::AbstractEnv, ss::AbstractStateStyle) =
-    get_state(env, ss, get_current_player(env))
+function get_state(env::AbstractEnv, ss::AbstractStateStyle)
+    return get_state(env, ss, get_current_player(env))
+end
 get_state(env::AbstractEnv, player) = get_state(env, DefaultStateStyle(env), player)
 
 """
@@ -418,19 +422,21 @@ Set the seed of internal rng
 """
 Get all actions in each ply
 """
-@multi_agent_env_api get_history(env::AbstractEnv, player = get_current_player(env))
+@multi_agent_env_api get_history(env::AbstractEnv; player=get_current_player(env))
 
 """
     get_terminal(env, player=get_current_player(env))
 """
-@multi_agent_env_api get_terminal(env::AbstractEnv, player = get_current_player(env)) =
-    env.terminal
+@multi_agent_env_api function get_terminal(env::AbstractEnv, player=get_current_player(env))
+    return env.terminal
+end
 
 """
     get_reward(env, player=get_current_player(env))
 """
-@multi_agent_env_api get_reward(env::AbstractEnv, player = get_current_player(env)) =
-    env.reward
+@multi_agent_env_api function get_reward(env::AbstractEnv, player=get_current_player(env))
+    return env.reward
+end
 
 """
     get_prob(env, player=get_chance_player(env))
@@ -438,7 +444,7 @@ Get all actions in each ply
 Only valid for environments of [`EXPLICIT_STOCHASTIC`](@ref) style.
 Here `player` must be a chance player.
 """
-@multi_agent_env_api get_prob(env::AbstractEnv, player = get_chance_player(env))
+@multi_agent_env_api get_prob(env::AbstractEnv; player=get_chance_player(env))
 
 """
     child(env::AbstractEnv, action)

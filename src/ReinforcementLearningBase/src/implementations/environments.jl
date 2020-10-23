@@ -19,21 +19,24 @@ struct DefaultStateStyleEnv{S,E} <: AbstractEnv
     env::E
 end
 
-DefaultStateStyleEnv(s::AbstractStateStyle) =
-    env -> DefaultStateStyleEnv{s,typeof(env)}(env)
+function DefaultStateStyleEnv(s::AbstractStateStyle)
+    return env -> DefaultStateStyleEnv{s,typeof(env)}(env)
+end
 DefaultStateStyleEnv(env::E, s) where {E} = DefaultStateStyleEnv{s,E}(env)
 
 get_state(env::DefaultStateStyleEnv{S}) where {S} = get_state(env.env, S)
 get_state(env::DefaultStateStyleEnv{S}, player) where {S} = get_state(env.env, S, player)
-get_state(env::DefaultStateStyleEnv, s::AbstractStateStyle, player) =
-    get_state(env.env, s, player)
+function get_state(env::DefaultStateStyleEnv, s::AbstractStateStyle, player)
+    return get_state(env.env, s, player)
+end
 
 DefaultStateStyle(::DefaultStateStyleEnv{S}) where {S} = S
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     if f ∉ (:get_state, :DefaultStateStyle)
-        @eval $f(x::DefaultStateStyleEnv, args...; kwargs...) =
-            $f(x.env, args...; kwargs...)
+        @eval function $f(x::DefaultStateStyleEnv, args...; kwargs...)
+            return $f(x.env, args...; kwargs...)
+        end
     end
 end
 
@@ -79,8 +82,9 @@ for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     end
 end
 
-get_state(env::StateOverriddenEnv, args...; kwargs...) =
-    foldl(|>, env.processors; init = get_state(env.env, args...; kwargs...))
+function get_state(env::StateOverriddenEnv, args...; kwargs...)
+    return foldl(|>, env.processors; init=get_state(env.env, args...; kwargs...))
+end
 
 function reset!(env::StateOverriddenEnv, args...; kwargs...)
     reset!(env.env, args..., kwargs...)
@@ -145,8 +149,9 @@ for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     end
 end
 
-get_reward(env::RewardOverriddenEnv, args...; kwargs...) =
-    foldl(|>, env.processors; init = get_reward(env.env, args...; kwargs...))
+function get_reward(env::RewardOverriddenEnv, args...; kwargs...)
+    return foldl(|>, env.processors; init=get_reward(env.env, args...; kwargs...))
+end
 
 #####
 # MaxTimeoutEnv
@@ -158,8 +163,9 @@ mutable struct MaxTimeoutEnv{E<:AbstractEnv} <: AbstractEnv
     current_t::Int
 end
 
-MaxTimeoutEnv(env::E, max_t::Int; current_t::Int = 1) where {E<:AbstractEnv} =
-    MaxTimeoutEnv(E, max_t, current_t)
+function MaxTimeoutEnv(env::E, max_t::Int; current_t::Int=1) where {E<:AbstractEnv}
+    return MaxTimeoutEnv(E, max_t, current_t)
+end
 
 function (env::MaxTimeoutEnv)(args...; kwargs...)
     env.env(args...; kwargs...)
@@ -167,7 +173,7 @@ function (env::MaxTimeoutEnv)(args...; kwargs...)
 end
 
 # partial constructor to allow chaining
-MaxTimeoutEnv(max_t::Int; current_t::Int = 1) = env -> MaxTimeoutEnv(env, max_t, current_t)
+MaxTimeoutEnv(max_t::Int; current_t::Int=1) = env -> MaxTimeoutEnv(env, max_t, current_t)
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     if f != :get_terminal
@@ -195,28 +201,35 @@ end
 `processors` will be applied to the `action` before sending it to the inner environment.
 The same effect like `env(action |> processors)`.
 """
-ActionTransformedEnv(processors...; mapping = identity) =
-    env -> ActionTransformedEnv(processors, mapping, env)
+function ActionTransformedEnv(processors...; mapping=identity)
+    return env -> ActionTransformedEnv(processors, mapping, env)
+end
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
     if f ∉ (:get_actions, :get_legal_actions)
-        @eval $f(x::ActionTransformedEnv, args...; kwargs...) =
-            $f(x.env, args...; kwargs...)
+        @eval function $f(x::ActionTransformedEnv, args...; kwargs...)
+            return $f(x.env, args...; kwargs...)
+        end
     end
 end
 
-get_actions(env::ActionTransformedEnv{<:Any,typeof(identity)}, args...) =
-    get_actions(env.env, args...)
-get_legal_actions(env::ActionTransformedEnv{<:Any,typeof(identity)}, args...) =
-    get_legal_actions(env.env, args...)
+function get_actions(env::ActionTransformedEnv{<:Any,typeof(identity)}, args...)
+    return get_actions(env.env, args...)
+end
+function get_legal_actions(env::ActionTransformedEnv{<:Any,typeof(identity)}, args...)
+    return get_legal_actions(env.env, args...)
+end
 
-get_actions(env::ActionTransformedEnv, args...) =
-    map(env.mapping, get_actions(env.env, args...))
-get_legal_actions(env::ActionTransformedEnv, args...) =
-    map(env.mapping, get_legal_actions(env.env, args...))
+function get_actions(env::ActionTransformedEnv, args...)
+    return map(env.mapping, get_actions(env.env, args...))
+end
+function get_legal_actions(env::ActionTransformedEnv, args...)
+    return map(env.mapping, get_legal_actions(env.env, args...))
+end
 
-(env::ActionTransformedEnv)(action, args...; kwargs...) =
-    env.env(foldl(|>, env.processors; init = action), args...; kwargs...)
+function (env::ActionTransformedEnv)(action, args...; kwargs...)
+    return env.env(foldl(|>, env.processors; init=action), args...; kwargs...)
+end
 
 #####
 # MultiThreadEnv
@@ -245,7 +258,7 @@ function (env::MultiThreadEnv)(actions)
     end
 end
 
-function reset!(env::MultiThreadEnv; is_force = false)
+function reset!(env::MultiThreadEnv; is_force=false)
     if is_force
         for i in 1:length(env)
             reset!(env[i])
@@ -283,8 +296,9 @@ for f in
     end
 end
 
-get_actions(env::MultiThreadEnv, args...; kwargs...) =
-    VectSpace([get_actions(x, args...; kwargs...) for x in env.envs])
+function get_actions(env::MultiThreadEnv, args...; kwargs...)
+    return VectSpace([get_actions(x, args...; kwargs...) for x in env.envs])
+end
 get_current_player(env::MultiThreadEnv) = [get_current_player(x) for x in env.envs]
 
 function Base.show(io::IO, t::MIME"text/markdown", env::MultiThreadEnv)

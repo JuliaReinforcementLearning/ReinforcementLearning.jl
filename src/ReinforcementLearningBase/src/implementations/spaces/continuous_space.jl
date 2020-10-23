@@ -21,7 +21,8 @@ ContinuousSpace(low, high) = ContinuousSpace(promote(low, high)...)
 Base.eltype(::ContinuousSpace{T}) where {T} = T
 Base.in(x, s::ContinuousSpace) = s.low <= x <= s.high
 
-Random.rand(rng::AbstractRNG, s::ContinuousSpace{T}) where {T} =
-    rand(rng, T) * (s.high - s.low) + s.low
+function Random.rand(rng::AbstractRNG, s::ContinuousSpace{T}) where {T}
+    return rand(rng, T) * (s.high - s.low) + s.low
+end
 
 Base.length(::ContinuousSpace) = throw(DomainError("ContinuousSpace is uncountable"))

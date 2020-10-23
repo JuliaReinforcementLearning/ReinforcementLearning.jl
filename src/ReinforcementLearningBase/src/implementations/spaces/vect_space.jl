@@ -5,8 +5,9 @@ struct VectSpace{T} <: AbstractSpace
 end
 
 Base.eltype(s::VectSpace) = Vector{eltype(s.data[1])}
-Base.in(xs, s::VectSpace) =
-    length(xs) == length(s.data) && all(x in d for (x, d) in zip(xs, s.data))
+function Base.in(xs, s::VectSpace)
+    return length(xs) == length(s.data) && all(x in d for (x, d) in zip(xs, s.data))
+end
 Random.rand(rng::AbstractRNG, s::VectSpace) = [rand(rng, d) for d in s.data]
 
 Base.iterate(s::VectSpace, args...) = iterate(s.data, args...)

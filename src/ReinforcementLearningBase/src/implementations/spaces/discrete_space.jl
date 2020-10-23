@@ -55,10 +55,11 @@ Random.rand(rng::AbstractRNG, s::DiscreteSpace) = rand(rng, s.span)
 
 Base.length(s::DiscreteSpace) = length(s.span)
 
-Base.convert(
-    ::Type{AbstractSpace},
-    s::Union{<:Integer,<:UnitRange,<:Vector,<:Tuple,<:Set},
-) = DiscreteSpace(s)
+function Base.convert(
+    ::Type{AbstractSpace}, s::Union{<:Integer,<:UnitRange,<:Vector,<:Tuple,<:Set}
+)
+    return DiscreteSpace(s)
+end
 
 Base.iterate(s::DiscreteSpace, args...) = iterate(s.span, args...)
 Base.getindex(s::DiscreteSpace, args...) = getindex(s.span, args...)
@@ -72,7 +73,8 @@ struct ActionProbPair{A,P}
     prob::P
 end
 
-Random.rand(rng::AbstractRNG, s::AbstractVector{<:ActionProbPair}) =
-    s[weighted_sample(rng, (x.prob for x in s))]
+function Random.rand(rng::AbstractRNG, s::AbstractVector{<:ActionProbPair})
+    return s[weighted_sample(rng, (x.prob for x in s))]
+end
 
 (env::AbstractEnv)(a::ActionProbPair) = env(a.action)

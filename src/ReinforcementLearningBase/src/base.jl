@@ -34,8 +34,9 @@ function get_env_traits()
     return [eval(x) for x in RLBase.ENV_API if endswith(String(x), "Style")]
 end
 
-Base.show(io::IO, t::MIME"text/plain", env::AbstractEnv) =
-    show(io, MIME"text/markdown"(), env)
+function Base.show(io::IO, t::MIME"text/plain", env::AbstractEnv)
+    return show(io, MIME"text/markdown"(), env)
+end
 
 function Base.show(io::IO, t::MIME"text/markdown", env::AbstractEnv)
     return show(io, t, Markdown.parse("""
