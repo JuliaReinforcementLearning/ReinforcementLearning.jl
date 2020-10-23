@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- Automatic JuliaFormatter.jl run [\#92](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/92) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Automatic JuliaFormatter.jl run [\#91](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/91) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [v0.8.5](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.8.5) (2020-10-22)
@@ -146,7 +147,6 @@
 - Automatic JuliaFormatter.jl run [\#34](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/34) ([github-actions[bot]](https://github.com/apps/github-actions))
 - keep dependency concise [\#33](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/33) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#32](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/32) ([github-actions[bot]](https://github.com/apps/github-actions))
-- Automatic JuliaFormatter.jl run [\#30](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/30) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [v0.6.5](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.6.5) (2020-03-05)
 
@@ -162,6 +162,7 @@
 
 **Merged pull requests:**
 
+- Automatic JuliaFormatter.jl run [\#30](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/30) ([github-actions[bot]](https://github.com/apps/github-actions))
 - update doc [\#29](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/29) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#28](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/28) ([github-actions[bot]](https://github.com/apps/github-actions))
 
