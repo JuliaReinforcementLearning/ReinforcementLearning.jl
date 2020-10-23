@@ -25,7 +25,7 @@ This project aims to provide some implementations of the most typical reinforcem
 - DDPG
 - TD3
 - SAC
-- CFR/OS-MCCFR/ES-MCCFR
+- CFR/OS-MCCFR/ES-MCCFR/DeepCFR
 - Minimax
 
 If you are looking for tabular reinforcement learning algorithms, you may refer [ReinforcementLearningAnIntroduction.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl).
@@ -55,6 +55,7 @@ Some built-in experiments are exported to help new users to easily run benchmark
 - ``E`JuliaRL_DQN_MountainCar` `` (Thanks to [@felixchalumeau](https://github.com/felixchalumeau))
 - ``E`JuliaRL_Minimax_OpenSpiel(tic_tac_toe)` ``
 - ``E`JuliaRL_TabularCFR_OpenSpiel(kuhn_poker)` ``
+- ``E`JuliaRL_DeepCFR_OpenSpiel(leduc_poker)` ``
 - ``E`JuliaRL_DQN_SnakeGame` ``
 - ``E`Dopamine_DQN_Atari(pong)` ``
 - ``E`Dopamine_Rainbow_Atari(pong)` ``

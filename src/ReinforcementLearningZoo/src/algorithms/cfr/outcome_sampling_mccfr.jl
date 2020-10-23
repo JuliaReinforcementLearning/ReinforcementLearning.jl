@@ -13,9 +13,11 @@ Ref:
 - [MONTE CARLO SAMPLING AND REGRET MINIMIZATION FOR EQUILIBRIUM COMPUTATION AND DECISION-MAKING IN LARGE EXTENSIVE FORM GAMES](http://mlanctot.info/files/papers/PhD_Thesis_MarcLanctot.pdf)
 - [Monte Carlo Sampling for Regret Minimization in Extensive Games](https://papers.nips.cc/paper/3713-monte-carlo-sampling-for-regret-minimization-in-extensive-games.pdf)
 """
-struct OutcomeSamplingMCCFRPolicy{S,T,R<:AbstractRNG} <: AbstractPolicy
+struct OutcomeSamplingMCCFRPolicy{S,B,R<:AbstractRNG} <: AbstractCFRPolicy
     nodes::Dict{S,InfoStateNode}
-    behavior_policy::QBasedPolicy{TabularLearner{S,T},WeightedExplorer{true,R}}
+    behavior_policy::B
+    ϵ::Float64
+    rng::R
 end
 
 (p::OutcomeSamplingMCCFRPolicy)(env::AbstractEnv) = p.behavior_policy(env)
@@ -24,40 +26,37 @@ RLBase.get_prob(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv) =
     get_prob(p.behavior_policy, env)
 
 function OutcomeSamplingMCCFRPolicy(;
-    env::AbstractEnv,
-    n_iter::Int,
+    state_type=String,
     rng = Random.GLOBAL_RNG,
     ϵ = 0.6,
 )
-    @assert NumAgentStyle(env) isa MultiAgent
-    @assert DynamicStyle(env) === SEQUENTIAL
-    @assert RewardStyle(env) === TERMINAL_REWARD
-    @assert ChanceStyle(env) === EXPLICIT_STOCHASTIC
-    @assert DefaultStateStyle(env) === Information{String}()
+    OutcomeSamplingMCCFRPolicy(
+        Dict{state_type, InfoStateNode}(),
+        TabularRandomPolicy(;rng=rng, table=Dict{state_type,Vector{Float64}}(), is_normalized=true),
+        ϵ,
+        rng,
+    )
+end
 
-    nodes = init_info_state_nodes(env)
-
-    for i in 1:n_iter
-        for p in get_players(env)
-            if p != get_chance_player(env)
-                outcome_sampling(copy(env), p, nodes, ϵ, 1.0, 1.0, 1.0, rng)
-            end
+"Run one interation"
+function RLBase.update!(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv)
+    for x in get_players(env)
+        if x != get_chance_player(env)
+            outcome_sampling(copy(env), x, p.nodes, p.ϵ, 1.0, 1.0, 1.0, p.rng)
         end
     end
+end
 
-    behavior_policy = QBasedPolicy(;
-        learner = TabularLearner{String}(),
-        explorer = WeightedExplorer(; is_normalized = true, rng = rng),
-    )
-
-    for (k, v) in nodes
+function RLBase.update!(p::OutcomeSamplingMCCFRPolicy)
+    for (k, v) in p.nodes
         s = sum(v.cumulative_strategy)
         if s != 0
-            update!(behavior_policy, k => v.cumulative_strategy ./ s)
+            update!(p.behavior_policy, k => v.cumulative_strategy ./ s)
+        else
+            # The TabularLearner will return uniform distribution by default. 
+            # So we do nothing here.
         end
     end
-
-    OutcomeSamplingMCCFRPolicy(nodes, behavior_policy)
 end
 
 function outcome_sampling(env, i, nodes, ϵ, πᵢ, π₋ᵢ, s, rng)
@@ -70,10 +69,11 @@ function outcome_sampling(env, i, nodes, ϵ, πᵢ, π₋ᵢ, s, rng)
         outcome_sampling(env, i, nodes, ϵ, πᵢ, π₋ᵢ, s, rng)
     else
         I = get_state(env)
-        node = nodes[I]
-        regret_matching!(node)
+        legal_actions = get_legal_actions(env)
+        n = length(legal_actions)
+        node = get!(nodes, I, InfoStateNode(n))
+        regret_matching!(node;is_reset_neg_regrets=false)
         σ, rI, sI = node.strategy, node.cumulative_regret, node.cumulative_strategy
-        n = length(node.strategy)
 
         if i == current_player
             aᵢ = rand(rng) >= ϵ ? sample(rng, Weights(σ, 1.0)) : rand(rng, 1:n)

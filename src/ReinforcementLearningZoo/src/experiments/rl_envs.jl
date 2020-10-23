@@ -40,7 +40,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
 
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
@@ -120,7 +120,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
 
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
@@ -214,7 +214,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
 
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
@@ -309,7 +309,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
 
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
@@ -410,7 +410,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
 
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
@@ -513,11 +513,11 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     N_ENV = 16
     UPDATE_FREQ = 10
     env = MultiThreadEnv([
-        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i in 1:N_ENV
+        CartPoleEnv(; T = Float32, rng = StableRNG(hash(seed + i))) for i in 1:N_ENV
     ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
@@ -607,11 +607,11 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     N_ENV = 16
     UPDATE_FREQ = 10
     env = MultiThreadEnv([
-        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i in 1:N_ENV
+        CartPoleEnv(; T = Float32, rng = StableRNG(hash(seed + i))) for i in 1:N_ENV
     ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
@@ -706,7 +706,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
     action_space = get_actions(inner_env)
     low = action_space.low
@@ -815,7 +815,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
     action_space = get_actions(inner_env)
     low = action_space.low
@@ -929,11 +929,11 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     N_ENV = 8
     UPDATE_FREQ = 16
     env = MultiThreadEnv([
-        CartPoleEnv(; T = Float32, rng = MersenneTwister(hash(seed + i))) for i in 1:N_ENV
+        CartPoleEnv(; T = Float32, rng = StableRNG(hash(seed + i))) for i in 1:N_ENV
     ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
@@ -1026,7 +1026,7 @@ function RLCore.Experiment(
     save_dir = nothing,
     seed = 123,
 )
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
         save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_BasicDQN_MountainCar_$(t)")
@@ -1112,7 +1112,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
 
     env = MountainCarEnv(; T = Float32, max_steps = 5000, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
@@ -1207,7 +1207,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
     action_space = get_actions(inner_env)
     low = action_space.low
@@ -1217,7 +1217,7 @@ function RLCore.Experiment(
     N_ENV = 8
     UPDATE_FREQ = 16
     env = MultiThreadEnv([
-        PendulumEnv(T = Float32, rng = MersenneTwister(hash(seed + i))) |>
+        PendulumEnv(T = Float32, rng = StableRNG(hash(seed + i))) |>
         ActionTransformedEnv(x -> clamp(x * 2, low, high)) for i in 1:N_ENV
     ])
 
@@ -1319,7 +1319,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
     action_space = get_actions(inner_env)
     low = action_space.low
@@ -1417,7 +1417,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(get_state(env)), length(get_actions(env))
 
@@ -1492,7 +1492,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     env = PendulumEnv(;
         T = Float32,
         rng = rng,
@@ -1580,7 +1580,7 @@ function RLCore.Experiment(
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
 
     inner_env = PendulumEnv(; T = Float32, rng = rng, max_steps = 100)
     high, low = get_actions(inner_env) |> x -> (x.low, x.high)

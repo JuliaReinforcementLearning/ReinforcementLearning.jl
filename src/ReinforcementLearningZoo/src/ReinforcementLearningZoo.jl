@@ -6,6 +6,7 @@ export RLZoo
 using ReinforcementLearningBase
 using ReinforcementLearningCore
 using Setfield: @set
+using StableRNGs
 
 include("patch.jl")
 include("algorithms/algorithms.jl")

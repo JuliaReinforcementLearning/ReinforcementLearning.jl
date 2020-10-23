@@ -6,7 +6,7 @@ function RLCore.Experiment(
     save_dir = nothing,
     seed = 123,
 )
-    rng = Random.MersenneTwister(seed)
+    rng = StableRNG(seed)
 
     SHAPE = (8, 8)
     inner_env = SnakeGameEnv(; action_style = FULL_ACTION_SET, shape = SHAPE, rng = rng)

@@ -50,7 +50,7 @@ function RLCore.Experiment(
 )
 
     @warn "Currently setting the `seed` will not guarantee the reproducibility. The instability seems to be caused by the `CrossCor` layer when calculating gradient."
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
         save_dir = joinpath(pwd(), "checkpoints", "dopamine_DQN_atari_$(name)_$(t)")
@@ -208,7 +208,7 @@ function RLCore.Experiment(
     seed = 123,
 )
     @warn "Currently setting the `seed` will not guarantee the reproducibility. The instability seems to be caused by the `CrossCor` layer when calculating gradient."
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
         save_dir = joinpath(pwd(), "checkpoints", "Dopamine_Rainbow_Atari_$(name)_$(t)")
@@ -371,7 +371,7 @@ function RLCore.Experiment(
     seed = 123,
 )
     @warn "Currently setting the `seed` will not guarantee the reproducibility. The instability seems to be caused by the `CrossCor` layer when calculating gradient."
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     device_rng = CUDA.CURAND.RNG()
     Random.seed!(device_rng, hash(seed + 1))
     if isnothing(save_dir)
@@ -546,7 +546,7 @@ function RLCore.Experiment(
     seed = 123,
 )
     @warn "Currently setting the `seed` will not guarantee the reproducibility. The instability seems to be caused by the `CrossCor` layer when calculating gradient."
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
         save_dir = joinpath(pwd(), "checkpoints", "rlpyt_A2C_Atari_$(name)_$(t)")
@@ -713,7 +713,7 @@ function RLCore.Experiment(
     seed = 123,
 )
     @warn "Currently setting the `seed` will not guarantee the reproducibility. The instability seems to be caused by the `CrossCor` layer when calculating gradient."
-    rng = MersenneTwister(seed)
+    rng = StableRNG(seed)
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
         save_dir = joinpath(pwd(), "checkpoints", "rlpyt_PPO_Atari_$(name)_$(t)")
