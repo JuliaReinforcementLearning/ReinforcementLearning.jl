@@ -159,7 +159,7 @@ Check out the [get started](https://juliareinforcementlearning.org/get_started/)
 |               |         |     <a href="https://github.com/JuliaPOMDP/POMDPs.jl">POMDPs.jl</a>                        |                          |
 |               |         |     <a href="https://github.com/JuliaPy/PyCall.jl">PyCall.jl</a>                        |                          |
 |               |         |     <a href="https://github.com/JuliaReinforcementLearning/ViZDoom.jl">ViZDoom.jl</a>                       |                          |
-|               |         |     Maze.jl(WIP)                     |                          |
+|               |         |     <a href="https://github.com/JuliaReinforcementLearning/GridWorlds.jl">GridWorlds.jl</a>                    |                          |
 |               |         +--------------------------------------+                          |
 |               |                                                                           |
 |               |         +------------------------------+                                  |
