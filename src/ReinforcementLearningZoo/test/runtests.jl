@@ -55,7 +55,7 @@ end
                     1 / mean(res.hook[2].times)
             end
 
-            for method in (:A2C, :A2CGAE, :PPO)
+            for method in (:A2C, :A2CGAE, :PPO, :MAC)
                 res = run(Experiment(
                     Val(:JuliaRL),
                     Val(method),
