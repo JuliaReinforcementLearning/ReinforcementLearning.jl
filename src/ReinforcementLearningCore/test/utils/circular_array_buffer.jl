@@ -1,5 +1,6 @@
 @testset "CircularArrayBuffer" begin
     A = ones(2, 2)
+    C = ones(Float32, 2, 2)
     @testset "1D Int" begin
         b = CircularArrayBuffer{Int}(3)
 
@@ -131,5 +132,51 @@
         @test b[:, :, end] == 5 * A
 
         @test b == reshape([c for x in 3:5 for c in x * A], 2, 2, 3)
+
+        push!(b, 6 * ones(Float32, 2, 2))
+        push!(b, 7 * ones(Int, 2, 2))
+        @test b == reshape([c for x in 5:7 for c in x * A], 2, 2, 3)
+    end
+
+    @testset "2D Float32" begin
+        b = CircularArrayBuffer{Float32}(2, 2, 3)
+
+        @test eltype(b) == Float32
+        @test capacity(b) == 3
+        @test isfull(b) == false
+        @test length(b) == 0
+        @test nframes(b) == 0
+        @test size(b) == (2, 2, 0)
+
+        for x in 1:3
+            push!(b, x * C)
+        end
+
+        @test capacity(b) == 3
+        @test isfull(b) == true
+        @test nframes(b) == 3
+        @test length(b) == 2 * 2 * 3
+        @test size(b) == (2, 2, 3)
+        for i in 1:3
+            @test b[:, :, i] == i * C
+        end
+        @test b[:, :, end] == 3 * C
+
+        for x in 4:5
+            push!(b, x * ones(Float32, 2, 2))  # collection is also OK
+        end
+
+        @test capacity(b) == 3
+        @test length(b) == 2 * 2 * 3
+        @test nframes(b) == 3
+        @test size(b) == (2, 2, 3)
+        @test b[:, :, 1] == 3 * C
+        @test b[:, :, end] == 5 * C
+
+        @test b == reshape([c for x in 3:5 for c in x * C], 2, 2, 3)
+
+        push!(b, 6 * ones(Float64, 2, 2))
+        push!(b, 7 * ones(Int, 2, 2))
+        @test b == reshape([c for x in 5:7 for c in x * C], 2, 2, 3)
     end
 end
