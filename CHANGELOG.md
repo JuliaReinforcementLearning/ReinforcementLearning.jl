@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/HEAD)
+## [v0.7.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/v0.7.0) (2020-10-23)
 
-[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/compare/v0.6.0...HEAD)
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/compare/v0.6.0...v0.7.0)
 
 **Implemented enhancements:**
 
