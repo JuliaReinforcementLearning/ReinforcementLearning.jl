@@ -1,0 +1,13 @@
+name = "DistributedReinforcementLearning"
+uuid = "4d01364a-afc1-4828-a15a-b5219e90899b"
+authors = ["Jun Tian <tianjun.cpp@gmail.com> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
