@@ -13,7 +13,7 @@ struct TabularApproximator{N,T<:AbstractArray} <: AbstractApproximator
     table::T
     function TabularApproximator(table::T) where {T<:AbstractArray}
         n = ndims(table)
-        n <= 2 || throw(ArgumentError("the dimention of table must be <= 2"))
+        n <= 2 || throw(ArgumentError("the dimension of table must be <= 2"))
         new{n,T}(table)
     end
 end

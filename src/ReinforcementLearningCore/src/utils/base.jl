@@ -73,18 +73,18 @@ consecutive_view(cb::AbstractArray, inds::Vector{Int}, n_stack::Int, ::Nothing) 
         cb,
         reshape([i for x in inds for i in x-n_stack+1:x], n_stack, length(inds)),
     )
-consecutive_view(cb::AbstractArray, inds::Vector{Int}, ::Nothing, n_horizeon::Int) =
+consecutive_view(cb::AbstractArray, inds::Vector{Int}, ::Nothing, n_horizon::Int) =
     select_last_dim(
         cb,
-        reshape([i for x in inds for i in x:x+n_horizeon-1], n_horizeon, length(inds)),
+        reshape([i for x in inds for i in x:x+n_horizon-1], n_horizon, length(inds)),
     )
-consecutive_view(cb::AbstractArray, inds::Vector{Int}, n_stack::Int, n_horizeon::Int) =
+consecutive_view(cb::AbstractArray, inds::Vector{Int}, n_stack::Int, n_horizon::Int) =
     select_last_dim(
         cb,
         reshape(
-            [j for x in inds for i in x:x+n_horizeon-1 for j in i-n_stack+1:i],
+            [j for x in inds for i in x:x+n_horizon-1 for j in i-n_stack+1:i],
             n_stack,
-            n_horizeon,
+            n_horizon,
             length(inds),
         ),
     )
