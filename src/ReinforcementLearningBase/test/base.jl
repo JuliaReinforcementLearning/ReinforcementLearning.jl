@@ -10,7 +10,7 @@
     discrete_env =
         env |> ActionTransformedEnv(
             a -> get_actions(env)[a];  # action index to action
-            mapping = x -> Dict(x => i for (i, a) in enumerate(get_actions(env)))[x], # arbitrary vector to DiscreteSpace
+            mapping = x -> Dict{Any,Int}(a => i for (i, a) in enumerate(get_actions(env)))[x], # arbitrary vector to DiscreteSpace
         )
     policy = RandomPolicy(discrete_env)
     reset!(discrete_env)
