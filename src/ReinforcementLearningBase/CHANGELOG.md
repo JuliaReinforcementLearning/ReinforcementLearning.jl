@@ -2,7 +2,20 @@
 
 ## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/HEAD)
 
-[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.4...HEAD)
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.5...HEAD)
+
+**Merged pull requests:**
+
+- Automatic JuliaFormatter.jl run [\#98](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/98) ([github-actions[bot]](https://github.com/apps/github-actions))
+- fix mapping function for ActionTransformedEnv test [\#97](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/97) ([Sid-Bhatia-0](https://github.com/Sid-Bhatia-0))
+- Revert auto format related changes [\#94](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/94) ([findmyway](https://github.com/findmyway))
+- Automatic JuliaFormatter.jl run [\#93](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/93) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Automatic JuliaFormatter.jl run [\#92](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/92) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Automatic JuliaFormatter.jl run [\#91](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/91) ([github-actions[bot]](https://github.com/apps/github-actions))
+
+## [v0.8.5](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.8.5) (2020-10-22)
+
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/compare/v0.8.4...v0.8.5)
 
 **Merged pull requests:**
 
@@ -89,6 +102,7 @@
 
 **Merged pull requests:**
 
+- add RewardOverriddenObs [\#50](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/50) ([findmyway](https://github.com/findmyway))
 - update docs [\#49](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/49) ([findmyway](https://github.com/findmyway))
 
 ## [v0.7.2](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.7.2) (2020-06-02)
@@ -132,6 +146,7 @@
 **Merged pull requests:**
 
 - Automatic JuliaFormatter.jl run [\#37](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/37) ([github-actions[bot]](https://github.com/apps/github-actions))
+- update WrappedEnv to support postprocessor [\#36](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/36) ([findmyway](https://github.com/findmyway))
 - keep pop! always return element [\#35](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/35) ([findmyway](https://github.com/findmyway))
 - Automatic JuliaFormatter.jl run [\#34](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/34) ([github-actions[bot]](https://github.com/apps/github-actions))
 - keep dependency concise [\#33](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/33) ([findmyway](https://github.com/findmyway))
@@ -163,6 +178,7 @@
 
 - Fix nothing not in EmptySpace. [\#27](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/27) ([aterenin](https://github.com/aterenin))
 - Add EmptySpace, for NonInteractiveEnv upstream [\#26](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/26) ([aterenin](https://github.com/aterenin))
+- Automatic JuliaFormatter.jl run [\#23](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/23) ([github-actions[bot]](https://github.com/apps/github-actions))
 
 ## [v0.6.2](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.6.2) (2020-02-23)
 
@@ -179,7 +195,6 @@
 **Merged pull requests:**
 
 - Add invalid action [\#24](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/24) ([findmyway](https://github.com/findmyway))
-- Automatic JuliaFormatter.jl run [\#23](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/23) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Allow converting Set to DiscreteSpace [\#22](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/pull/22) ([findmyway](https://github.com/findmyway))
 
 ## [v0.6.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/v0.6.0) (2020-02-17)
