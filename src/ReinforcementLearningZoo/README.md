@@ -67,15 +67,11 @@ Some built-in experiments are exported to help new users to easily run benchmark
 ## Run Experiments
 
 ```julia
-julia> ] add ReinforcementLearningZoo
+julia> ] add ReinforcementLearning
 
-julia> using ReinforcementLearningZoo
+julia> using ReinforcementLearning
 
-julia> ] add ReinforcementLearningEnvironments
-
-julia> using ReinforcementLearningEnvironments
-
-julia> run(E`JuliaRL_BasicDQN_CartPole`)  # the CartPole environment is provided in ReinforcementLearningEnvironments, so we need to have it installed first
+julia> run(E`JuliaRL_BasicDQN_CartPole`)
 
 julia> ] add ArcadeLearningEnvironment
 
