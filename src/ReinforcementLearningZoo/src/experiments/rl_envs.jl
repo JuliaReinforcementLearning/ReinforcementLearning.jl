@@ -824,7 +824,7 @@ function RLCore.Experiment(
     ])
     ns, na = length(get_state(env[1])), length(get_actions(env[1]))
     RLBase.reset!(env, is_force = true)
-    
+
     agent = Agent(
         policy = QBasedPolicy(
             learner = MACLearner(
@@ -834,7 +834,6 @@ function RLCore.Experiment(
                             Dense(ns, 30, relu; initW = glorot_uniform(rng)),
                             Dense(30, 30, relu; initW = glorot_uniform(rng)),
                             Dense(30, na; initW = glorot_uniform(rng)),
-
                         ),
                         optimizer = ADAM(1e-2),
                     ),
@@ -846,9 +845,8 @@ function RLCore.Experiment(
                         ),
                         optimizer = ADAM(3e-3),
                     ),
-                    ) |> cpu,
+                ) |> cpu,
                 γ = 0.99f0,
-
                 bootstrap = true,
             ),
             explorer = BatchExplorer(GumbelSoftmaxExplorer()),#= seed = nothing =#
@@ -865,7 +863,7 @@ function RLCore.Experiment(
             terminal_size = (N_ENV,),
         ),
     )
-   
+
     stop_condition = StopAfterStep(haskey(ENV, "CI") ? 10_000 : 100_000)
     total_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
     time_per_step = TimePerStep()
@@ -899,7 +897,7 @@ function RLCore.Experiment(
         stop_condition,
         hook,
         Description("# MAC with CartPole", save_dir),
-    ) 
+    )
 end
 
 function RLCore.Experiment(

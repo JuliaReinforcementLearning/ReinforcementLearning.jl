@@ -50,20 +50,25 @@ Some useful papers while implementing this algorithm:
 function TabularCFRPolicy(;
     is_reset_neg_regrets = true,
     is_linear_averaging = true,
-    weighted_averaging_delay=0,
+    weighted_averaging_delay = 0,
     is_alternating_update = true,
     state_type = String,
-    rng=Random.GLOBAL_RNG,
-    n_iteration=1)
+    rng = Random.GLOBAL_RNG,
+    n_iteration = 1,
+)
     TabularCFRPolicy(
-        Dict{state_type, InfoStateNode}(),
-        TabularRandomPolicy(;rng=rng, table=Dict{state_type,Vector{Float64}}(), is_normalized=true),
+        Dict{state_type,InfoStateNode}(),
+        TabularRandomPolicy(;
+            rng = rng,
+            table = Dict{state_type,Vector{Float64}}(),
+            is_normalized = true,
+        ),
         is_reset_neg_regrets,
         is_linear_averaging,
         weighted_averaging_delay,
         is_alternating_update,
         rng,
-        n_iteration
+        n_iteration,
     )
 end
 
@@ -108,7 +113,7 @@ w: weight
 v: counterfactual value **before weighted by opponent's reaching probability**
 V: a vector containing the `v` after taking each action with current information set. Used to calculate the **regret value**
 """
-function cfr!(nodes, env, p, w, π=Dict(x=>1.0 for x in get_players(env)))
+function cfr!(nodes, env, p, w, π = Dict(x => 1.0 for x in get_players(env)))
     if get_terminal(env)
         get_reward(env, p)
     else
@@ -151,13 +156,14 @@ end
 
 function regret_matching!(p::TabularCFRPolicy)
     for node in values(p.nodes)
-        regret_matching!(node;is_reset_neg_regrets=p.is_reset_neg_regrets)
+        regret_matching!(node; is_reset_neg_regrets = p.is_reset_neg_regrets)
     end
 end
 
-regret_matching!(node::InfoStateNode;kwargs...) = regret_matching!(node.strategy, node.cumulative_regret;kwargs...)
+regret_matching!(node::InfoStateNode; kwargs...) =
+    regret_matching!(node.strategy, node.cumulative_regret; kwargs...)
 
-function regret_matching!(strategy, cumulative_regret;is_reset_neg_regrets=true)
+function regret_matching!(strategy, cumulative_regret; is_reset_neg_regrets = true)
     if is_reset_neg_regrets
         for i in 1:length(cumulative_regret)
             if cumulative_regret[i] < 0

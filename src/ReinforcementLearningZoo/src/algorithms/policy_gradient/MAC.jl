@@ -10,7 +10,7 @@ using Flux
 -  `bootstrap::bool`, if false then Q function is approximated using monte carlo returns.
 """
 
-Base.@kwdef mutable struct MACLearner{A<:ActorCritic} <:AbstractLearner
+Base.@kwdef mutable struct MACLearner{A<:ActorCritic} <: AbstractLearner
     approximator::A
     γ::Float32
     max_grad_norm::Union{Nothing,Float32} = nothing
@@ -18,7 +18,7 @@ Base.@kwdef mutable struct MACLearner{A<:ActorCritic} <:AbstractLearner
     actor_loss::Float32 = 0.0f0
     critic_loss::Float32 = 0.0f0
     loss::Float32 = 0.0f0
-    bootstrap::Bool = true         
+    bootstrap::Bool = true
 end
 
 function (learner::MACLearner)(env::MultiThreadEnv)
@@ -37,28 +37,28 @@ end
 
 function RLBase.update!(learner::MACLearner, t::AbstractTrajectory)
     isfull(t) || return
-    
+
     states = t[:state]
     actions = t[:action]
     rewards = t[:reward]
     terminals = t[:terminal]
-    
+
     AC = learner.approximator
     γ = learner.γ
     D = device(AC)
-    
+
     states = send_to_device(D, states)
     states_flattened = flatten_batch(states) # (state_size..., n_thread * update_step)
-    
-    
+
+
     actions = flatten_batch(actions)
     actions = CartesianIndex.(actions, 1:length(actions))
-    
+
     if learner.bootstrap
         next_state = select_last_frame(t[:next_state])
-        next_state = send_to_device(D, next_state) 
+        next_state = send_to_device(D, next_state)
         next_state_values = AC.critic(next_state)
-    
+
         gains = discount_rewards(
             rewards,
             γ;
@@ -80,7 +80,7 @@ function RLBase.update!(learner::MACLearner, t::AbstractTrajectory)
     gs1 = gradient(ps1) do
         logits = AC.actor(states_flattened)
         probs = softmax(logits)
-        actor_loss = -mean(sum((probs .* Zygote.dropgrad(action_values)),dims=1))
+        actor_loss = -mean(sum((probs .* Zygote.dropgrad(action_values)), dims = 1))
         loss = actor_loss
         ignore() do
             learner.actor_loss = actor_loss
@@ -93,13 +93,19 @@ function RLBase.update!(learner::MACLearner, t::AbstractTrajectory)
     update!(AC.actor, gs1)
 
     ps2 = Flux.params(AC.critic)
-    gs2 = gradient(ps2) do        
+    gs2 = gradient(ps2) do
         if learner.bootstrap
-            critic_loss = mean((vec(gains) .- vec(action_values[actions])).^ 2)
+            critic_loss = mean((vec(gains) .- vec(action_values[actions])) .^ 2)
         else
             next_state_values = AC.critic(next_state_flattened)
-            target_action_values = vec(rewards_flattened) .+ γ*vec(Zygote.dropgrad(sum(next_state_values.*softmax(AC.actor(next_state_flattened)),dims=1)))
-            critic_loss = mean((vec(target_action_values) .- vec(action_values[actions])) .^ 2)
+            target_action_values =
+                vec(rewards_flattened) .+
+                γ * vec(Zygote.dropgrad(sum(
+                    next_state_values .* softmax(AC.actor(next_state_flattened)),
+                    dims = 1,
+                )))
+            critic_loss =
+                mean((vec(target_action_values) .- vec(action_values[actions])) .^ 2)
         end
 
         loss = critic_loss

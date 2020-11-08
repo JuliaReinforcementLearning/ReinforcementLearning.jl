@@ -25,14 +25,14 @@ end
 RLBase.get_prob(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv) =
     get_prob(p.behavior_policy, env)
 
-function OutcomeSamplingMCCFRPolicy(;
-    state_type=String,
-    rng = Random.GLOBAL_RNG,
-    ϵ = 0.6,
-)
+function OutcomeSamplingMCCFRPolicy(; state_type = String, rng = Random.GLOBAL_RNG, ϵ = 0.6)
     OutcomeSamplingMCCFRPolicy(
-        Dict{state_type, InfoStateNode}(),
-        TabularRandomPolicy(;rng=rng, table=Dict{state_type,Vector{Float64}}(), is_normalized=true),
+        Dict{state_type,InfoStateNode}(),
+        TabularRandomPolicy(;
+            rng = rng,
+            table = Dict{state_type,Vector{Float64}}(),
+            is_normalized = true,
+        ),
         ϵ,
         rng,
     )
@@ -72,7 +72,7 @@ function outcome_sampling(env, i, nodes, ϵ, πᵢ, π₋ᵢ, s, rng)
         legal_actions = get_legal_actions(env)
         n = length(legal_actions)
         node = get!(nodes, I, InfoStateNode(n))
-        regret_matching!(node;is_reset_neg_regrets=false)
+        regret_matching!(node; is_reset_neg_regrets = false)
         σ, rI, sI = node.strategy, node.cumulative_regret, node.cumulative_strategy
 
         if i == current_player

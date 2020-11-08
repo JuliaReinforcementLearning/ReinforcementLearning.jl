@@ -1,9 +1,9 @@
 export BestResponsePolicy
 
-using Flux:onehot
+using Flux: onehot
 
-struct BestResponsePolicy{E, S, A, X, P<:AbstractPolicy} <: AbstractCFRPolicy
-    cfr_reach_prob::Dict{S, Vector{Pair{E, Float64}}}
+struct BestResponsePolicy{E,S,A,X,P<:AbstractPolicy} <: AbstractCFRPolicy
+    cfr_reach_prob::Dict{S,Vector{Pair{E,Float64}}}
     best_response_action_cache::Dict{S,A}
     best_response_value_cache::Dict{E,Float64}
     best_responder::X
@@ -17,7 +17,13 @@ end
 - `env`, the environment to handle.
 - `best_responder`, the player to choose best response action.
 """
-function BestResponsePolicy(policy, env, best_responder; state_type=String, action_type=Int)
+function BestResponsePolicy(
+    policy,
+    env,
+    best_responder;
+    state_type = String,
+    action_type = Int,
+)
     # S = typeof(get_state(env))  # TODO: currently it will break the OpenSpielEnv. Can not get information set for chance player
     # A = eltype(get_actions(env))  # TODO: for chance players it will return ActionProbPair
     S = state_type
@@ -25,15 +31,15 @@ function BestResponsePolicy(policy, env, best_responder; state_type=String, acti
     E = typeof(env)
 
     p = BestResponsePolicy(
-        Dict{S, Vector{Pair{E, Float64}}}(),
-        Dict{S, A}(),
-        Dict{E, Float64}(),
+        Dict{S,Vector{Pair{E,Float64}}}(),
+        Dict{S,A}(),
+        Dict{E,Float64}(),
         best_responder,
-        policy
+        policy,
     )
 
     e = copy(env)
-    @assert e == env  "The copy method doesn't seem to be implemented for environment: $env"
+    @assert e == env "The copy method doesn't seem to be implemented for environment: $env"
     @assert hash(e) == hash(env) "The hash method doesn't seem to be implemented for environment: $env"
     RLBase.reset!(e)  # start from the root!
     init_cfr_reach_prob!(p, e)
@@ -48,7 +54,7 @@ function (p::BestResponsePolicy)(env::AbstractEnv)
     end
 end
 
-function init_cfr_reach_prob!(p, env, reach_prob=1.0)
+function init_cfr_reach_prob!(p, env, reach_prob = 1.0)
     if !get_terminal(env)
         if get_current_player(env) == p.best_responder
             push!(get!(p.cfr_reach_prob, get_state(env), []), env => reach_prob)
@@ -62,7 +68,11 @@ function init_cfr_reach_prob!(p, env, reach_prob=1.0)
             end
         else  # opponents
             for a in get_legal_actions(env)
-                init_cfr_reach_prob!(p, child(env, a), reach_prob * get_prob(p.policy, env, a))
+                init_cfr_reach_prob!(
+                    p,
+                    child(env, a),
+                    reach_prob * get_prob(p.policy, env, a),
+                )
             end
         end
     end
@@ -73,16 +83,16 @@ function best_response_value(p, env)
         if get_terminal(env)
             get_reward(env, p.best_responder)
         elseif get_current_player(env) == p.best_responder
-                a = best_response_action(p, env)
-                best_response_value(p, child(env, a))
+            a = best_response_action(p, env)
+            best_response_value(p, child(env, a))
         elseif get_current_player(env) == get_chance_player(env)
-            v = 0.
+            v = 0.0
             for a::ActionProbPair in get_actions(env)
                 v += a.prob * best_response_value(p, child(env, a))
             end
             v
         else
-            v = 0.
+            v = 0.0
             for a in get_legal_actions(env)
                 v += get_prob(p.policy, env, a) * best_response_value(p, child(env, a))
             end
