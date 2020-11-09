@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/HEAD)
+
+[Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/compare/v0.7.0...HEAD)
+
+**Closed issues:**
+
+- Docs build error [\#91](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/91)
+
 ## [v0.7.0](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/v0.7.0) (2020-10-23)
 
 [Full Changelog](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/compare/v0.6.0...v0.7.0)
