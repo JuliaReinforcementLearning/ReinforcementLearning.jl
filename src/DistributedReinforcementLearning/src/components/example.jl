@@ -14,141 +14,102 @@ send a batch to a optimizer.
 A optimizer updates its policy and broadcast the latest policy to workers periodically.
 =#
 
-using StatsBase
+using Flux
 
-K = 10
-TRUE_VALUES = rand(K)
-SZ = 100
-N_WORKER = 10
-ϵ = 0.1
-
-#####
-# Optimizer
-#####
-
-Base.@kwdef mutable struct Optimizer
-    total_rewards::Vector{Float64} = fill(0., K)
-    total_counts::Vector{Int} = ones(Int, K)
-    workers::Vector{Channel{Any}} = []
-    freq::Int = 10
-    n::Int = 0
+"""
+    UploadTrajectoryEveryNStep(;mailbox, n, sealer=deepcopy)
+"""
+Base.@kwdef mutable struct UploadTrajectoryEveryNStep{M,S} <: AbstractHook
+    mailbox::M
+    n::Int
+    t::Int = 0
+    sealer::S = deepcopy
 end
 
-struct SetWorkersMsg
-    workers::Vector{Channel{Any}}
-end
-
-(opt::Optimizer)(msg::SetWorkersMsg) = opt.workers = msg.workers
-
-struct BatchTrainingDataMsg
-    data::Vector{Pair{Int,Float64}}
-end
-
-struct SyncParamMsg
-    policy::Vector{Float64}
-end
-
-function (opt::Optimizer)(msg::BatchTrainingDataMsg)
-    for (a,r) in msg.data
-        opt.total_counts[a] += 1
-        opt.total_rewards[a] += r
-    end
-    opt.n += 1
-    if opt.n % opt.freq == 0
-        _, ind = findmax([r/c for (r, c) in zip(opt.total_rewards, opt.total_counts)])
-        policy = fill(ϵ/K, K)
-        policy[ind] += 1 - ϵ
-        for w in opt.workers
-            put!(w, SyncParamMsg(policy))
-        end
+function (hook::UploadTrajectoryEveryNStep)(::PostActStage, agent, env)
+    hook.t += 1
+    if hook.t % hook.n == 0
+        put!(hook.mailbox, InsertTrajectoryMsg(hook.sealer(agent.trajectory)))
     end
 end
 
-opt = Optimizer()
+struct LoadParamsHook <: AbstractHook
+    buffer::Channel{Any}
+end
 
-optimizer = Channel(SZ) do ch
-    while true
-        msg = take!(ch)
-        opt(msg)
-        yield()
+function (hook::LoadParamsHook)(::PostActStage, agent, env)
+    ps = nothing
+    while isready(hook.buffer)
+        ps = take!(hook.buffer)
     end
+    isnothing(ps) || Flux.loadparams!(agent.policy, ps)
 end
 
-#####
-# Trajectory
-#####
+env = CartPoleEnv(; T = Float32)
+ns, na = length(get_state(env)), length(get_actions(env))
 
-Base.@kwdef struct Trajectory
-    container::Vector{Pair{Int, Float64}} = []
-    batch_size::Int = 32
-    optimizer::Channel{Any} = optimizer
-end
+optimizer = actor(
+    Optimizer(;
+        policy=BasicDQNLearner(
+            approximator = NeuralNetworkApproximator(
+                model = Chain(
+                    Dense(ns, 128, relu; initW = glorot_uniform),
+                    Dense(128, 128, relu; initW = glorot_uniform),
+                    Dense(128, na; initW = glorot_uniform),
+                ) |> cpu,
+                optimizer = ADAM(),
+            ),
+            batch_size = 32,
+            min_replay_history = 100,
+            loss_func = huber_loss,
+        )
+    )
+)
 
-struct TransitionMsg
-    data::Pair{Int, Float64}
-end
+trajectory_proxy = actor(
+    TrajectoryProxy(
+        trajectory = VectSARTSATrajectory(;state_type=Any),
+        sampler = UniformBatchSampler(32),
+        inserter = NStepInserter(),
+    )
+)
 
-function (traj::Trajectory)(msg::TransitionMsg)
-    push!(traj.container, msg.data)
-    if length(traj.container) >= traj.batch_size
-        put!(traj.optimizer, BatchTrainingDataMsg(traj.container[:]))
-        empty!(traj.container)
+worker = actor(
+    Worker() do
+        Experiment(
+            Agent(
+                policy = StaticPolicy(
+                        QBasedPolicy(
+                        learner = BasicDQNLearner(
+                            approximator = NeuralNetworkApproximator(
+                                model = Chain(
+                                    Dense(ns, 128, relu; initW = glorot_uniform),
+                                    Dense(128, 128, relu; initW = glorot_uniform),
+                                    Dense(128, na; initW = glorot_uniform),
+                                ) |> cpu,
+                                optimizer = ADAM(),
+                            ),
+                            batch_size = 32,
+                            min_replay_history = 100,
+                            loss_func = huber_loss,
+                        ),
+                        explorer = EpsilonGreedyExplorer(
+                            kind = :exp,
+                            ϵ_stable = 0.01,
+                            decay_steps = 500,
+                        ),
+                    ),
+                ),
+                trajectory = CircularCompactSARTSATrajectory(
+                    capacity = 10,
+                    state_type = Float32,
+                    state_size = (ns,),
+                ),
+            ),
+            CartPoleEnv(; T = Float32),
+            StopSignal(),
+            UploadTrajectoryEveryNStep(mailbox=trajectory_proxy, n=11),
+            "experimenting..."
+            )
     end
-end
-
-traj = Trajectory()
-
-trajectory = Channel(SZ) do ch
-    while true
-        msg = take!(ch)
-        traj(msg)
-        yield()
-    end
-end
-
-#####
-# Worker
-#####
-
-mutable struct Worker
-    policy_buffer::Channel{Any}
-    is_terminate::Ref{Bool}
-
-    function Worker(traj; init_policy=fill(1/K, K), true_values=TRUE_VALUES)
-        policy_buffer = Channel(SZ)
-        is_terminate = Ref(false)
-        task = Threads.@spawn begin
-            policy = init_policy
-            while true
-                action = sample(Weights(policy, 1.0))
-                reward = true_values[action] + randn() * 0.1
-                put!(traj, TransitionMsg(action => reward))
-                is_terminate[] && break
-                while isready(policy_buffer)
-                    policy = take!(policy_buffer)
-                end
-                yield()
-            end
-        end
-        new(policy_buffer, is_terminate)
-    end
-end
-
-function (w::Worker)(msg::SyncParamMsg)
-    put!(w.policy_buffer, msg.policy)
-end
-
-workers = [
-    Channel(SZ) do ch
-        w = Worker(trajectory)
-
-        while true
-            msg = take!(ch)
-            w(msg)
-            yield()
-        end
-    end
-    for _ in 1:N_WORKER
-]
-
-put!(optimizer, SetWorkersMsg(workers))
+)

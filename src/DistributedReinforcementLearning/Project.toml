@@ -4,6 +4,9 @@ authors = ["Jun Tian <tianjun.cpp@gmail.com> and contributors"]
 version = "0.1.0"
 
 [deps]
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+ReinforcementLearning = "158674fc-8238-5cab-b5ba-03dfc80d1318"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
