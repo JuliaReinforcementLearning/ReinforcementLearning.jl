@@ -1,27 +1,21 @@
-export actor, Optimizer, TrajectoryProxy, Worker, InsertTrajectoryMsg, FetchParamMsg, BatchSampleMsg
+export actor,
+    Trainer,
+    TrajectoryManager,
+    Worker,
+    Orchestrator,
+    InsertSampleRateLimiter,
+    StartMsg,
+    StopMsg,
+    InsertTrajectoryMsg,
+    LoadParamMsg,
+    BatchDataMsg,
+    FetchParamMsg,
+    BatchSampleMsg
 
 using Distributed
-using ReinforcementLearning
+using ReinforcementLearningBase
+using ReinforcementLearningCore
 using Flux
-
-#=
-
-Basic Idea
-
-1. Create an Optimizer
-2. Create a TrajectoryProxy
-3. Create an Orchestrator to collect transitions.
-4. Use the Orchestrator above to initialize workers.
-5. Send a StartMsg to workers
-6. Create a new worker to evaluate the latest params in Optimizer.
-
-The Orchestrator controls the speed of:
-
-- Insert transitions into trajectory
-- Sample batches from trajectory
-- Fetch parameters from Optimizer to workers
-
-=#
 
 #####
 # Messages
@@ -30,91 +24,146 @@ The Orchestrator controls the speed of:
 abstract type AbstractMessage end
 
 struct StartMsg <: AbstractMessage
-    arg
+    args
     kwargs
+    StartMsg(args...;kwargs...) = new(args, kwargs)
 end
+
 
 struct StopMsg <: AbstractMessage end
 
-const MailBox = Channel{AbstractMessage}
-
-#####
-# Actor Model
-#  TODO: switch to https://github.com/pbayer/YAActL.jl
-#####
-
-function actor(x;sz=32)
-    RemoteChannel() do
-        Channel(sz;spawn=true) do ch
-            task_local_storage("MAILBOX", RemoteChannel(() -> ch))
-            while true
-                msg = take!(ch)
-                x(msg)
-                msg isa StopMsg && break
-            end
-        end
-    end
-end
-
-self() = task_local_storage("MAILBOX")
-
-#####
-# Optimizer
-#####
-
-Base.@kwdef struct Optimizer{P,S}
-    policy::P
-    sealer::S = deepcopy
+struct BatchSampleMsg <: AbstractMessage
+    from
 end
 
 struct BatchDataMsg{D} <: AbstractMessage
     data::D
 end
 
-(opt::Optimizer)(msg::BatchDataMsg) = update!(opt.policy, msg.data)
-
 Base.@kwdef struct FetchParamMsg <: AbstractMessage
-    from::MailBox = self()
+    from::RemoteChannel = self()
 end
 
 struct LoadParamMsg{P} <: AbstractMessage
     data::P
 end
 
-function (opt::Optimizer)(msg::FetchParamMsg)
-    ps = opt.sealer(params(opt.policy))
-    put!(msg.from, LoadParamMsg(ps))  # blocking?
+struct InsertTrajectoryMsg{B} <: AbstractMessage
+    data::B
+end
+
+Base.@kwdef struct ProxyMsg{M} <: AbstractMessage
+    to::RemoteChannel
+    msg::M
 end
 
 #####
-# TrajectoryProxy
+# Message Extensions
 #####
 
-Base.@kwdef struct TrajectoryProxy{T,S,I}
+(msg::StopMsg)(x) = nothing
+
+(msg::StopMsg)(x::StopSignal) = x[] = true
+
+function (msg::StopMsg)(x::ComposedStopCondition)
+    for s in x.stop_conditions
+        msg(s)
+    end
+end
+
+(msg::LoadParamMsg)(x) = nothing
+
+function (msg::LoadParamMsg)(x::ComposedHook)
+    for h in x.hooks
+        msg(h)
+    end
+end
+
+#####
+# Actor Model
+# Each actor is a RemoteChannel by default
+#  TODO: switch to https://github.com/JuliaActors/Actors.jl
+#####
+
+const DEFAULT_MAILBOX_SIZE = 32
+
+"""
+    actor(f;sz=DEFAULT_MAILBOX_SIZE)
+
+Create a task to handle messages one-by-one by calling `f(msg)`.
+A mailbox (`RemoteChannel`) is returned.
+"""
+function actor(f;sz=DEFAULT_MAILBOX_SIZE)
+    RemoteChannel() do
+        Channel(sz;spawn=true) do ch
+            task_local_storage("MAILBOX", RemoteChannel(() -> ch))
+            while true
+                msg = take!(ch)
+                f(msg)
+                msg isa StopMsg && break
+            end
+        end
+    end
+end
+
+"""
+    self()
+
+Get the mailbox in current task.
+"""
+self() = task_local_storage("MAILBOX")
+
+#####
+# Trainer
+#####
+
+"""
+    Trainer(;policy, sealer=deepcopy)
+
+A wrapper around `AbstractPolicy`, the `sealer` is used to create an immutable
+object from the inner parameters of `policy` when received a `FetchParamMsg`.
+"""
+Base.@kwdef struct Trainer{P,S}
+    policy::P
+    sealer::S = deepcopy
+end
+
+Trainer(p) = Trainer(;policy=p)
+
+function (trainer::Trainer)(msg::BatchDataMsg)
+    update!(trainer.policy, msg.data)
+end
+
+function (trainer::Trainer)(msg::FetchParamMsg)
+    ps = trainer.sealer(params(trainer.policy))
+    put!(msg.from, LoadParamMsg(ps))
+end
+
+#####
+# TrajectoryManager
+#####
+
+Base.@kwdef mutable struct TrajectoryManager{T,S,I}
     trajectory::T
     sampler::S
     inserter::I
 end
 
-struct InsertTrajectoryMsg{B} <: AbstractMessage
-    bulk::B
-end
+(t::TrajectoryManager)(msg::InsertTrajectoryMsg) = push!(t.trajectory, msg.data, t.inserter)
+(t::TrajectoryManager)(msg::ProxyMsg) = put!(msg.to, msg)
 
-(t::TrajectoryProxy)(msg::InsertTrajectoryMsg) = push!(t.trajectory, msg.bulk, t.inserter)
-
-struct BatchSampleMsg <: AbstractMessage
-    from
-end
-
-function (t::TrajectoryProxy)(msg::BatchSampleMsg)
-    s = sample(t.trajectory, t.sampler)
-    put!(msg.from, s)  # blocking?
+function (t::TrajectoryManager)(msg::BatchSampleMsg)
+    s = sample(t.trajectory, t.sampler)  # !!! sample must ensure no sharing data
+    put!(msg.from, BatchDataMsg(s))
 end
 
 #####
 # Worker
 #####
 
+"""
+    Worker(()->ex::Experiment)
+"""
 mutable struct Worker
     init::Any
     experiment::Experiment
@@ -127,23 +176,79 @@ function (w::Worker)(msg::StartMsg)
     w.task = Threads.@spawn run(w.experiment)
 end
 
-(w::Worker)(msg::StopMsg) = w.experiment.stop_condition(msg)
-(w::Worker)(msg::LoadParamMsg) = w.experiment.hook(msg)
+(w::Worker)(msg::StopMsg) = msg(w.experiment.stop_condition)
+(w::Worker)(msg::LoadParamMsg) = msg(w.experiment.hook)
+
+#####
+# WorkerProxy
+#####
+
+mutable struct WorkerProxy
+    is_fetch_msg_sent::Ref{Bool}
+    workers::Vector{<:RemoteChannel}
+    target::RemoteChannel
+    WorkerProxy(workers) = new(Ref(false), workers)
+end
+
+function (wp::WorkerProxy)(msg::StartMsg)
+    wp.target = msg.args[1]
+    for w in wp.workers
+        put!(w, StartMsg(self()))
+    end
+end
+
+(wp::WorkerProxy)(msg::InsertTrajectoryMsg) = put!(wp.target, msg)
+
+function (wp::WorkerProxy)(msg::FetchParamMsg)
+    if !wp.is_fetch_msg_sent[]
+        put!(wp.target, FetchParamMsg(self()))
+        wp.is_fetch_msg_sent[] = true 
+    end
+end
+
+function (wp::WorkerProxy)(msg::LoadParamMsg)
+    for w in wp.workers
+        put!(w, msg)
+    end
+    wp.is_fetch_msg_sent[] = false
+end
 
 #####
 # Orchestrator
 #####
 
-# optimizer = actor(Optimizer(RandomPolicy()))
-# trajectory = actor(TrajectoryProxy(CircularSARTSATrajectory()))
-# worker = actor() do
-#     Experiment(
-#         agent = Agent(
-#             policy=RandomPolicy(),
-#             trajectory = CircularSARTSATrajectory()
-#         ),
-#         env = CartPoleEnv()
-#         stop_condition = 
-#         hook = 
-#     )
-# end
+Base.@kwdef mutable struct InsertSampleRateLimiter
+    min_insert_before_sampling::Int = 100
+    n_sample::Int = 0
+    n_insert::Int = 0
+    n_load::Int = 0
+    sample_insert_ratio::Int = 1
+    sample_load_ratio::Int = 1
+end
+
+Base.@kwdef struct Orchestrator
+    trainer::RemoteChannel
+    trajectory_proxy::RemoteChannel
+    worker::RemoteChannel{Channel{Any}}
+    limiter::InsertSampleRateLimiter = InsertSampleRateLimiter()
+end
+
+function (orc::Orchestrator)(msg::StartMsg)
+    put!(orc.worker, StartMsg(self()))
+end
+
+function (orc::Orchestrator)(msg::InsertTrajectoryMsg)
+    L = orc.limiter
+    put!(orc.trajectory_proxy, msg)
+    L.n_insert += 1
+    if L.n_insert > L.min_size_to_sample
+        for i in 1:L.sample_insert_ratio
+            put!(orc.trajectory_proxy, BatchSampleMsg(orc.trainer))
+            L.n_sample += 1
+            if L.n_sample == (L.n_load + 1) * L.sample_load_ratio
+                put!(orc.trajectory_proxy, ProxyMsg(to=orc.trainer, msg=FetchParamMsg(orc.worker)))
+                L.n_load += 1
+            end
+        end
+    end
+end

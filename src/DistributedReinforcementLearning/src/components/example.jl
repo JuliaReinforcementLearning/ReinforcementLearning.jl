@@ -1,81 +1,89 @@
-#=
-
-Proof of Concept
-
-Here we solve the multi-arm bandit problem with the ϵ-greedy algorithm
-in a distributed manner.
-
-Each worker starts with a random policy. They collect actions and corresponding
-rewards and then forward them to a trajectory proxy.
-
-A trajectory stores transitions from works in a local buffer and periodically
-send a batch to a optimizer.
-
-A optimizer updates its policy and broadcast the latest policy to workers periodically.
-=#
-
-using Flux
-
-"""
-    UploadTrajectoryEveryNStep(;mailbox, n, sealer=deepcopy)
-"""
-Base.@kwdef mutable struct UploadTrajectoryEveryNStep{M,S} <: AbstractHook
-    mailbox::M
-    n::Int
-    t::Int = 0
-    sealer::S = deepcopy
-end
-
-function (hook::UploadTrajectoryEveryNStep)(::PostActStage, agent, env)
-    hook.t += 1
-    if hook.t % hook.n == 0
-        put!(hook.mailbox, InsertTrajectoryMsg(hook.sealer(agent.trajectory)))
-    end
-end
+using Distributed, ReinforcementLearningBase, ReinforcementLearningCore, ReinforcementLearningEnvironments, ReinforcementLearningZoo, DistributedReinforcementLearning, Flux
 
 struct LoadParamsHook <: AbstractHook
-    buffer::Channel{Any}
+    buffer::Channel
 end
 
 function (hook::LoadParamsHook)(::PostActStage, agent, env)
     ps = nothing
     while isready(hook.buffer)
-        ps = take!(hook.buffer)
+        ps = take!(hook.buffer).data
     end
-    isnothing(ps) || Flux.loadparams!(agent.policy, ps)
+    Flux.loadparams!(agent.policy, ps)
 end
+
+(msg::LoadParamMsg)(x::LoadParamsHook) = put!(x.buffer, msg)
+
+Base.@kwdef mutable struct BlockingLoadParamsHook <: AbstractHook
+    buffer::RemoteChannel
+    target::RemoteChannel
+    n::Int = 0
+    freq::Int = 1
+end
+
+(msg::LoadParamMsg)(x::BlockingLoadParamsHook) = put!(x.buffer, msg)
+
+function (hook::LoadParamsHook)(::PostActStage, agent, env)
+    hook.n += 1
+    if hook.n % hook.freq == 0
+        if isready(hook.buffer)
+            # some other workers have sent the request, so we just reuse it
+            while isready(hook.buffer)
+                ps = take!(hook.buffer).data
+            end
+            Flux.loadparams!(agent.policy, ps)
+        else
+            # blocking
+            put!(target, FetchParamMsg(hook.buffer))
+            ps = take!(hook.buffer).data
+            Flux.loadparams!(agent.policy, ps)
+        end
+    end
+end
+
+#####
+# Example
+#####
 
 env = CartPoleEnv(; T = Float32)
 ns, na = length(get_state(env)), length(get_actions(env))
 
-optimizer = actor(
-    Optimizer(;
-        policy=BasicDQNLearner(
-            approximator = NeuralNetworkApproximator(
-                model = Chain(
-                    Dense(ns, 128, relu; initW = glorot_uniform),
-                    Dense(128, 128, relu; initW = glorot_uniform),
-                    Dense(128, na; initW = glorot_uniform),
-                ) |> cpu,
-                optimizer = ADAM(),
-            ),
-            batch_size = 32,
-            min_replay_history = 100,
-            loss_func = huber_loss,
-        )
+_trainer = Trainer(;
+    policy=BasicDQNLearner(
+        approximator = NeuralNetworkApproximator(
+            model = Chain(
+                Dense(ns, 128, relu; initW = glorot_uniform),
+                Dense(128, 128, relu; initW = glorot_uniform),
+                Dense(128, na; initW = glorot_uniform),
+            ) |> cpu,
+            optimizer = ADAM(),
+        ),
+        loss_func = huber_loss,
     )
 )
 
-trajectory_proxy = actor(
-    TrajectoryProxy(
-        trajectory = VectSARTSATrajectory(;state_type=Any),
-        sampler = UniformBatchSampler(32),
-        inserter = NStepInserter(),
+trainer = actor(_trainer)
+
+_trajectory_proxy = TrajectoryManager(
+    trajectory = CircularSARTSATrajectory(;capacity=1_000, state_type=Any, ),
+    sampler = UniformBatchSampler(32),
+    inserter = NStepInserter(),
+)
+
+trajectory_proxy = actor(_trajectory_proxy)
+
+_orchestrator = Orchestrator(
+    trainer = trainer,
+    trajectory_proxy = trajectory_proxy,
+    limiter = InsertSampleRateLimiter(
+        ;min_size_to_sample=100,
+        sample_insert_ratio=1,
     )
 )
 
-worker = actor(
-    Worker() do
+orchestrator = actor(_orchestrator)
+
+_worker = Worker() do
         Experiment(
             Agent(
                 policy = StaticPolicy(
@@ -89,8 +97,6 @@ worker = actor(
                                 ) |> cpu,
                                 optimizer = ADAM(),
                             ),
-                            batch_size = 32,
-                            min_replay_history = 100,
                             loss_func = huber_loss,
                         ),
                         explorer = EpsilonGreedyExplorer(
@@ -101,15 +107,23 @@ worker = actor(
                     ),
                 ),
                 trajectory = CircularCompactSARTSATrajectory(
-                    capacity = 10,
+                    capacity = 1,
                     state_type = Float32,
                     state_size = (ns,),
                 ),
             ),
             CartPoleEnv(; T = Float32),
-            StopSignal(),
-            UploadTrajectoryEveryNStep(mailbox=trajectory_proxy, n=11),
+            ComposedStopCondition(
+                StopAfterStep(50_000),
+                StopSignal(),
+            ),
+            ComposedHook(
+                UploadTrajectoryEveryNStep(mailbox=orchestrator, n=1, sealer=x -> InsertTrajectoryMsg(deepcopy(x))),
+                LoadParamsHook(;to=trainer),
+                TotalRewardPerEpisode(),
+            ),
             "experimenting..."
             )
     end
-)
+
+worker = actor(_worker)
