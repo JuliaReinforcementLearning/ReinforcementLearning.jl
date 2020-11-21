@@ -77,6 +77,8 @@ function get_prob(p::RandomPolicy{Nothing}, env, a)
     end
 end
 
+update!(p::RandomPolicy, args...) = nothing
+
 #####
 # RandomStartPolicy
 #####
