@@ -171,12 +171,17 @@ end
 MaxTimeoutEnv(max_t::Int; current_t::Int = 1) = env -> MaxTimeoutEnv(env, max_t, current_t)
 
 for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
-    if f != :get_terminal
+    if f ∉ (:get_terminal, :reset!)
         @eval $f(x::MaxTimeoutEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
     end
 end
 
 get_terminal(env::MaxTimeoutEnv) = (env.current_t > env.max_t) || get_terminal(env.env)
+
+function reset!(env::MaxTimeoutEnv)
+    env.current_t = 1
+    reset!(env.env)
+end
 
 #####
 # ActionTransformedEnv
