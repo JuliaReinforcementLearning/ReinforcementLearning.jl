@@ -1,39 +1,23 @@
-export actor,
+export BatchSampleMsg,
+    BatchDataMsg,
+    FetchParamMsg,
+    LoadParamMsg,
+    InsertTrajectoryMsg,
     Trainer,
     TrajectoryManager,
     Worker,
+    WorkerProxy,
     Orchestrator,
-    InsertSampleRateLimiter,
-    StartMsg,
-    StopMsg,
-    InsertTrajectoryMsg,
-    LoadParamMsg,
-    BatchDataMsg,
-    FetchParamMsg,
-    BatchSampleMsg
+    InsertSampleLoadRateLimiter
 
-using Distributed
-using ReinforcementLearningBase
-using ReinforcementLearningCore
 using Flux
 
 #####
 # Messages
 #####
 
-abstract type AbstractMessage end
-
-struct StartMsg <: AbstractMessage
-    args
-    kwargs
-    StartMsg(args...;kwargs...) = new(args, kwargs)
-end
-
-
-struct StopMsg <: AbstractMessage end
-
 struct BatchSampleMsg <: AbstractMessage
-    from
+    from::RemoteChannel
 end
 
 struct BatchDataMsg{D} <: AbstractMessage
@@ -51,67 +35,6 @@ end
 struct InsertTrajectoryMsg{B} <: AbstractMessage
     data::B
 end
-
-Base.@kwdef struct ProxyMsg{M} <: AbstractMessage
-    to::RemoteChannel
-    msg::M
-end
-
-#####
-# Message Extensions
-#####
-
-(msg::StopMsg)(x) = nothing
-
-(msg::StopMsg)(x::StopSignal) = x[] = true
-
-function (msg::StopMsg)(x::ComposedStopCondition)
-    for s in x.stop_conditions
-        msg(s)
-    end
-end
-
-(msg::LoadParamMsg)(x) = nothing
-
-function (msg::LoadParamMsg)(x::ComposedHook)
-    for h in x.hooks
-        msg(h)
-    end
-end
-
-#####
-# Actor Model
-# Each actor is a RemoteChannel by default
-#  TODO: switch to https://github.com/JuliaActors/Actors.jl
-#####
-
-const DEFAULT_MAILBOX_SIZE = 32
-
-"""
-    actor(f;sz=DEFAULT_MAILBOX_SIZE)
-
-Create a task to handle messages one-by-one by calling `f(msg)`.
-A mailbox (`RemoteChannel`) is returned.
-"""
-function actor(f;sz=DEFAULT_MAILBOX_SIZE)
-    RemoteChannel() do
-        Channel(sz;spawn=true) do ch
-            task_local_storage("MAILBOX", RemoteChannel(() -> ch))
-            while true
-                msg = take!(ch)
-                f(msg)
-                msg isa StopMsg && break
-            end
-        end
-    end
-end
-
-"""
-    self()
-
-Get the mailbox in current task.
-"""
-self() = task_local_storage("MAILBOX")
 
 #####
 # Trainer
@@ -150,7 +73,6 @@ Base.@kwdef mutable struct TrajectoryManager{T,S,I}
 end
 
 (t::TrajectoryManager)(msg::InsertTrajectoryMsg) = push!(t.trajectory, msg.data, t.inserter)
-(t::TrajectoryManager)(msg::ProxyMsg) = put!(msg.to, msg)
 
 function (t::TrajectoryManager)(msg::BatchSampleMsg)
     s = sample(t.trajectory, t.sampler)  # !!! sample must ensure no sharing data
@@ -176,7 +98,11 @@ function (w::Worker)(msg::StartMsg)
     w.task = Threads.@spawn run(w.experiment)
 end
 
-(w::Worker)(msg::StopMsg) = msg(w.experiment.stop_condition)
+function (w::Worker)(msg::StopMsg)
+    msg(w.experiment.stop_condition)
+    wait(w.task)
+end
+
 (w::Worker)(msg::LoadParamMsg) = msg(w.experiment.hook)
 
 #####
@@ -199,7 +125,7 @@ end
 
 (wp::WorkerProxy)(msg::InsertTrajectoryMsg) = put!(wp.target, msg)
 
-function (wp::WorkerProxy)(msg::FetchParamMsg)
+function (wp::WorkerProxy)(::FetchParamMsg)
     if !wp.is_fetch_msg_sent[]
         put!(wp.target, FetchParamMsg(self()))
         wp.is_fetch_msg_sent[] = true 
@@ -217,7 +143,7 @@ end
 # Orchestrator
 #####
 
-Base.@kwdef mutable struct InsertSampleRateLimiter
+Base.@kwdef mutable struct InsertSampleLoadRateLimiter
     min_insert_before_sampling::Int = 100
     n_sample::Int = 0
     n_insert::Int = 0
@@ -230,7 +156,7 @@ Base.@kwdef struct Orchestrator
     trainer::RemoteChannel
     trajectory_proxy::RemoteChannel
     worker::RemoteChannel{Channel{Any}}
-    limiter::InsertSampleRateLimiter = InsertSampleRateLimiter()
+    limiter::InsertSampleLoadRateLimiter = InsertSampleLoadRateLimiter()
 end
 
 function (orc::Orchestrator)(msg::StartMsg)
