@@ -9,7 +9,8 @@ export AbstractHook,
     CumulativeReward,
     TimePerStep,
     DoEveryNEpisode,
-    DoEveryNStep
+    DoEveryNStep,
+    UploadTrajectoryEveryNStep
 
 """
 A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
@@ -335,5 +336,22 @@ function (hook::DoEveryNEpisode)(::PostEpisodeStage, agent, env)
     hook.t += 1
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
+    end
+end
+
+"""
+    UploadTrajectoryEveryNStep(;mailbox, n, sealer=deepcopy)
+"""
+Base.@kwdef mutable struct UploadTrajectoryEveryNStep{M,S} <: AbstractHook
+    mailbox::M
+    n::Int
+    t::Int = -1
+    sealer::S = deepcopy
+end
+
+function (hook::UploadTrajectoryEveryNStep)(::PostActStage, agent, env)
+    hook.t += 1
+    if hook.t > 0 && hook.t % hook.n == 0
+        put!(hook.mailbox, hook.sealer(agent.trajectory))
     end
 end
