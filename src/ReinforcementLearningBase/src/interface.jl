@@ -281,7 +281,14 @@ DefaultStateStyle(::Type{<:AbstractEnv}) = Observation{Array}()
 # General
 #####
 
-const DEFAULT_PLAYER = :DEFAULT_PLAYER
+struct DefaultPlayer end
+const DEFAULT_PLAYER = DefaultPlayer()
+
+struct ChancePlayer end
+const CHANCE_PLAYER = ChancePlayer()
+
+struct SimultaneousPlayer end
+const SIMULTANEOUS_PLAYER = SimultaneousPlayer()
 
 @api (env::AbstractEnv)(action, player = get_current_player(env))
 
