@@ -1,6 +1,15 @@
 using DistributedReinforcementLearning
 using Test
+using Distributed
+using ReinforcementLearningBase
+using ReinforcementLearningCore
+using ReinforcementLearningZoo
+using ReinforcementLearningEnvironments
+using Flux
 
 @testset "DistributedReinforcementLearning.jl" begin
-    # Write your tests here.
+
+include("actor.jl")
+include("core.jl")
+
 end
