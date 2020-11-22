@@ -1042,11 +1042,11 @@ function RLCore.Experiment(
                 actor = Chain(
                     Dense(ns, 256, relu; initW = glorot_uniform(rng)),
                     Dense(256, na; initW = glorot_uniform(rng)),
-                    ),
+                ),
                 critic = Chain(
                     Dense(ns, 256, relu; initW = glorot_uniform(rng)),
                     Dense(256, 1; initW = glorot_uniform(rng)),
-                    ),
+                ),
                 optimizer = ADAM(1e-3),
             ) |> cpu,
             γ = 0.99f0,
@@ -1327,12 +1327,12 @@ function RLCore.Experiment(
                     ),
                     μ = Chain(Dense(64, 1, tanh; initW = glorot_uniform(rng)), vec),
                     σ = Chain(Dense(64, 1; initW = glorot_uniform(rng)), vec),
-                    ),
+                ),
                 critic = Chain(
                     Dense(ns, 64, relu; initW = glorot_uniform(rng)),
                     Dense(64, 64, relu; initW = glorot_uniform(rng)),
                     Dense(64, 1; initW = glorot_uniform(rng)),
-                    ),
+                ),
                 optimizer = ADAM(3e-4),
             ) |> cpu,
             γ = 0.99f0,
