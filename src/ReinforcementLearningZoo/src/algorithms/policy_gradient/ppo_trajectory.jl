@@ -1,4 +1,4 @@
-export PPOTrajectory
+export PPOTrajectory, PPOActionMaskTrajectory
 
 using MacroTools
 
