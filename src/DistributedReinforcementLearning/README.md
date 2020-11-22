@@ -5,8 +5,8 @@
 
 <hr>
 <p align="center">
-  <a href="https://travis-ci.com/JuliaReinforcementLearning/DistributedReinforcementLearning.jl">
-  <img src="https://travis-ci.com/JuliaReinforcementLearning/DistributedReinforcementLearning.jl.svg?branch=master">
+  <a href="https://github.com/JuliaReinforcementLearning/DistributedReinforcementLearning.jl/actions?query=workflow%3ACI">
+  <img src="https://github.com/JuliaReinforcementLearning/DistributedReinforcementLearning.jl/workflows/CI/badge.svg">
   </a>
 </p>
 
