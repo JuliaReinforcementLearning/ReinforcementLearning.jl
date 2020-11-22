@@ -175,7 +175,7 @@ end
 
 @testset "Orchestrator" begin
     # TODO
-    # Add a integration test
+    # Add an integration test
 end
 
 end

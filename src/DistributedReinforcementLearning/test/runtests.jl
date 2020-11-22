@@ -1,5 +1,6 @@
 using DistributedReinforcementLearning
 using Test
+using Distributed
 using ReinforcementLearningBase
 using ReinforcementLearningCore
 using ReinforcementLearningZoo
@@ -10,6 +11,5 @@ using Flux
 
 include("actor.jl")
 include("core.jl")
-# include("example.jl")
 
 end
