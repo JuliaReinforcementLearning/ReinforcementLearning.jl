@@ -309,23 +309,26 @@ end
 const VectSARTSATrajectory = Trajectory{
     <:NamedTuple{
         (:state, :action, :reward, :terminal, :next_state, :next_action),
-        <:Tuple{<:Vector, <:Vector, <:Vector, <:Vector, <:Vector, <:Vector}}}
+        <:Tuple{<:Vector,<:Vector,<:Vector,<:Vector,<:Vector,<:Vector},
+    },
+}
 
-function VectSARTSATrajectory(
-    ;state_type = Int,
-    action_type=Int,
-    reward_type=Float32,
-    terminal_type=Bool,
-    next_state_type=state_type,
-    next_action_type=action_type)
-    Trajectory(
-        ;state=Vector{state_type}(),
-        action=Vector{action_type}(),
-        reward=Vector{reward_type}(),
-        terminal=Vector{terminal_type}(),
-        next_state=Vector{next_state_type}(),
-        next_action=Vector{next_action_type}(),
-        )
+function VectSARTSATrajectory(;
+    state_type = Int,
+    action_type = Int,
+    reward_type = Float32,
+    terminal_type = Bool,
+    next_state_type = state_type,
+    next_action_type = action_type,
+)
+    Trajectory(;
+        state = Vector{state_type}(),
+        action = Vector{action_type}(),
+        reward = Vector{reward_type}(),
+        terminal = Vector{terminal_type}(),
+        next_state = Vector{next_state_type}(),
+        next_action = Vector{next_action_type}(),
+    )
 end
 
 Base.length(t::VectSARTSATrajectory) = length(t[:state])
@@ -337,7 +340,16 @@ Base.length(t::VectSARTSATrajectory) = length(t[:state])
 const CircularSARTSATrajectory = Trajectory{
     <:NamedTuple{
         (:state, :action, :reward, :terminal, :next_state, :next_action),
-        <:Tuple{<:CircularArrayBuffer,<:CircularArrayBuffer,<:CircularArrayBuffer,<:CircularArrayBuffer,<:CircularArrayBuffer,<:CircularArrayBuffer}}}
+        <:Tuple{
+            <:CircularArrayBuffer,
+            <:CircularArrayBuffer,
+            <:CircularArrayBuffer,
+            <:CircularArrayBuffer,
+            <:CircularArrayBuffer,
+            <:CircularArrayBuffer,
+        },
+    },
+}
 
 function CircularSARTSATrajectory(;
     capacity,

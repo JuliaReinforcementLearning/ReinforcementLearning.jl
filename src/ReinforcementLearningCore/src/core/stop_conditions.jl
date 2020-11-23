@@ -17,7 +17,7 @@ struct ComposedStopCondition{S,T}
     stop_conditions::S
     reducer::T
     function ComposedStopCondition(stop_conditions...; reducer = any)
-        new{typeof(stop_conditions), typeof(reducer)}(stop_conditions, reducer)
+        new{typeof(stop_conditions),typeof(reducer)}(stop_conditions, reducer)
     end
 end
 
