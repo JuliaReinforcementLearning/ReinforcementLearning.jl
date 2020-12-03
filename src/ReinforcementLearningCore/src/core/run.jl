@@ -2,17 +2,23 @@ export expected_policy_values
 
 import Base: run
 
-run(agent, env::AbstractEnv, args...) = _run(agent, env, args...)
+function run(agent::Agent, env::AbstractEnv, stop_condition=StopAfterEpisode(1), hook=EmptyHook())
+    check(agent, env)
+    _run(agent, env, stop_condition, hook)
+end
 
-_run(agent, env, args...) = _run(DynamicStyle(env), NumAgentStyle(env), agent, env, args...)
+"Inject some customized checkings here by overwriting this function"
+function check(agent, env) end
+
+_run(agent, env, stop_condition, hook) = _run(DynamicStyle(env), NumAgentStyle(env), agent, env, stop_condition, hook)
 
 function _run(
     ::Sequential,
     ::SingleAgent,
-    agent::AbstractAgent,
+    agent::Agent,
     env::AbstractEnv,
     stop_condition,
-    hook::AbstractHook = EmptyHook(),
+    hook::AbstractHook,
 )
 
     while true # run episodes forever
@@ -41,7 +47,7 @@ end
 function _run(
     ::Sequential,
     ::SingleAgent,
-    agent::AbstractAgent,
+    agent::Agent,
     env::MultiThreadEnv,
     stop_condition,
     hook::AbstractHook = EmptyHook(),
@@ -67,7 +73,7 @@ end
 function _run(
     ::Sequential,
     ::MultiAgent,
-    agents::Tuple{Vararg{<:AbstractAgent}},
+    agents::Tuple{Vararg{<:Agent}},
     env::AbstractEnv,
     stop_condition,
     hooks = [EmptyHook() for _ in agents],

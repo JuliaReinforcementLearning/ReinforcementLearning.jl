@@ -2,7 +2,7 @@ export QBasedPolicy, TabularRandomPolicy
 
 using MacroTools: @forward
 using Flux
-using Setfield
+using Setfield: @set
 
 """
     QBasedPolicy(;learner::Q, explorer::S)
@@ -29,12 +29,9 @@ RLBase.get_prob(p::QBasedPolicy, env, ::MinimalActionSet) =
 RLBase.get_prob(p::QBasedPolicy, env, ::FullActionSet) =
     get_prob(p.explorer, p.learner(env), get_legal_actions_mask(env))
 
-@forward QBasedPolicy.learner RLBase.get_priority, RLBase.update!
+@forward QBasedPolicy.learner RLBase.get_priority
 
-function Flux.testmode!(p::QBasedPolicy, mode = true)
-    testmode!(p.learner, mode)
-    testmode!(p.explorer, mode)
-end
+RLBase.update!(p::QBasedPolicy, trajectory::AbstractTrajectory) = update!(p.learner, trajectory)
 
 #####
 # TabularRandomPolicy

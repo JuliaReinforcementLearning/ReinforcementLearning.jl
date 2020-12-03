@@ -21,5 +21,3 @@ Apply inner explorer to each column of `values`.
 
 (x::BatchExplorer)(v::AbstractVector) = x.explorer(v)
 (x::BatchExplorer)(v::AbstractVector, m::AbstractVector) = x.explorer(v, m)
-
-Flux.testmode!(x::BatchExplorer, mode = true) = testmode!(x.explorer, mode)

@@ -16,6 +16,4 @@ function (learner::AbstractLearner)(env) end
 """
 function RLBase.get_priority(p::AbstractLearner, experience) end
 
-# TODO: deprecate this default function
-Flux.testmode!(learner::AbstractLearner, mode = true) =
-    Flux.testmode!(learner.approximator, mode)
+Base.show(io::IO, p::AbstractLearner) = AbstractTrees.print_tree(io, StructTree(p), get(io, :max_depth, 10))

@@ -20,13 +20,6 @@
                 target_prob;
                 atol = 0.005,
             ))
-
-            testmode!(explorer)
-            @test explorer(values) == 3
-            @test isapprox(probs(get_prob(explorer, values)), [0, 0, 1, 0])
-            mask = Bool[1, 0, 0, 1]
-            @test explorer(values, mask) == 1
-            @test isapprox(probs(get_prob(explorer, values, mask)), [1, 0, 0, 0])
         end
 
         @testset "linear" begin

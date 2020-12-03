@@ -82,9 +82,6 @@
         x = rand(2, 3, 4)
         y = flatten_batch(x)
         @test size(y) == (2, 12)
-
-        z = unflatten_batch(y, 3, 4)
-        @test x == z
     end
 
     @testset "discount_rewards" begin

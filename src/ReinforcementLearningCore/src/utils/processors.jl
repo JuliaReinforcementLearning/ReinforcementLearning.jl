@@ -1,6 +1,9 @@
 export StackFrames, ResizeImage
 
 using ImageTransformations: imresize!
+import CircularArrayBuffers
+using CircularArrayBuffers:CircularArrayBuffer
+using MacroTools:@forward
 
 """
     ResizeImage(img::Array{T, N})
@@ -24,17 +27,21 @@ end
 """
     StackFrames(::Type{T}=Float32, d::Int...)
 
-Use a pre-initialized [`CircularArrayBuffer`](@ref) to store the latest several states specified by `d`. Before processing any observation, the buffer is filled with `zero{T}`.
+Use a pre-initialized [`CircularArrayBuffer`](@ref) to store the latest several states specified by `d`. Before processing any observation, the buffer is filled with `zero{T}
+by default.
 """
-struct StackFrames{T,N}
+struct StackFrames{T,N} <: AbstractArray{T,N}
     buffer::CircularArrayBuffer{T,N}
 end
+
+@forward StackFrames.buffer Base.size, Base.getindex
+Base.IndexStyle(x::StackFrames) = IndexStyle(x.buffer)
 
 StackFrames(d::Int...) = StackFrames(Float32, d...)
 
 function StackFrames(::Type{T}, d::Vararg{Int,N}) where {T,N}
     p = StackFrames(CircularArrayBuffer{T}(d...))
-    for _ in 1:capacity(p.buffer)
+    for _ in 1:CircularArrayBuffers.capacity(p.buffer)
         push!(p.buffer, zeros(T, size(p.buffer)[1:N-1]))
     end
     p
@@ -42,21 +49,14 @@ end
 
 function (p::StackFrames{T,N})(state::AbstractArray) where {T,N}
     push!(p.buffer, state)
-    p.buffer
+    p
 end
 
-# !!! side effect?
-function Base.push!(
-    cb::CircularArrayBuffer{T,N},
-    stacked_data::CircularArrayBuffer{T,N},
-) where {T,N}
-    push!(cb, select_last_frame(stacked_data))
+function Base.push!(cb::CircularArrayBuffer, p::StackFrames)
+    push!(cb, select_last_frame(p.buffer))
 end
 
 function RLBase.reset!(p::StackFrames{T,N}) where {T,N}
-    empty!(p.buffer)
-    for _ in 1:capacity(p.buffer)
-        push!(p.buffer, zeros(T, size(p.buffer)[1:N-1]))
-    end
+    fill!(p.buffer, zero(T))
     p
 end

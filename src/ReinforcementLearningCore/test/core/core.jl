@@ -2,13 +2,12 @@
     env = CartPoleEnv{Float32}() |> StateOverriddenEnv(deepcopy)
     agent = Agent(;
         policy = RandomPolicy(env),
-        trajectory = CircularCompactSARTSATrajectory(;
+        trajectory = CircularArraySARTTrajectory(;
             capacity = 10_000,
-            state_type = Float32,
-            state_size = (4,),
+            state = Vector{Float32} => (4,),
         ),
     )
-    N_EPISODE = 10000
+    N_EPISODE = 10_000
     hook = TotalRewardPerEpisode()
     run(agent, env, StopAfterEpisode(N_EPISODE), hook)
 

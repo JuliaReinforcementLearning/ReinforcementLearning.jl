@@ -1,41 +1,17 @@
 export device, send_to_host, send_to_device
 
-using ElasticArrays
 using Flux
 using CUDA
 using Adapt
 using Random
+using ElasticArrays
 
 import CUDA: device
 
 send_to_host(x) = send_to_device(Val(:cpu), x)
-send_to_device(::Val{:cpu}, x) = x  # cpu(x) is not very efficient! So by default we do nothing here.
 
-send_to_device(::Val{:cpu}, x::CuArray) = adapt(Array, x)
-send_to_device(::Val{:gpu}, x) = Flux.fmap(a -> adapt(CuArray{Float32}, a), x)
-
-const KnownArrayVariants = Union{
-    SubArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
-    Base.ReshapedArray{
-        <:Any,
-        <:Any,
-        <:SubArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
-    },
-    Base.ReshapedArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
-    SubArray{
-        <:Any,
-        <:Any,
-        <:Base.ReshapedArray{
-            <:Any,
-            <:Any,
-            <:SubArray{<:Any,<:Any,<:Union{CircularArrayBuffer,ElasticArray}},
-        },
-    },
-}
-
-# https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl/issues/130
-send_to_device(::Val{:cpu}, x::KnownArrayVariants) = Array(x)
-send_to_device(::Val{:gpu}, x::Union{KnownArrayVariants,ElasticArray}) = CuArray(x)
+send_to_device(::Val{:cpu}, m) = fmap(x -> adapt(Array, x), m)
+send_to_device(::Val{:gpu}, m) = fmap(CUDA.cu, m)
 
 """
     device(model)
@@ -50,6 +26,8 @@ device(::Array) = Val(:cpu)
 device(x::Tuple{}) = nothing
 device(x::NamedTuple{(),Tuple{}}) = nothing
 device(x::ElasticArray) = device(x.data)
+device(x::SubArray) = device(parent(x))
+device(x::Base.ReshapedArray) = device(parent(x))
 
 function device(x::Random.AbstractRNG)
     if x isa CUDA.CURAND.RNG
@@ -60,7 +38,7 @@ function device(x::Random.AbstractRNG)
 end
 
 function device(x::Union{Tuple,NamedTuple})
-    d1 = device(x[1])
+    d1 = device(first(x))
     if isnothing(d1)
         device(Base.tail(x))
     else

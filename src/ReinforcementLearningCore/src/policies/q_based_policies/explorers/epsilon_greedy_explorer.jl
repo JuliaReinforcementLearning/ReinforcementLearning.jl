@@ -72,8 +72,6 @@ function EpsilonGreedyExplorer(;
     )
 end
 
-Flux.testmode!(p::EpsilonGreedyExplorer, mode = true) = p.is_training = !mode
-
 EpsilonGreedyExplorer(ϵ; kwargs...) = EpsilonGreedyExplorer(; ϵ_stable = ϵ, kwargs...)
 
 function get_ϵ(s::EpsilonGreedyExplorer{:linear}, step)

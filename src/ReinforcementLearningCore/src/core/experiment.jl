@@ -1,14 +1,14 @@
 export @experiment_cmd, @E_cmd, Experiment
 
-using BSON
 using Markdown
+using Dates
 
 Base.@kwdef mutable struct Experiment
     agent::Any
     env::Any
     stop_condition::Any
     hook::Any
-    description::String
+    description::String = "Experiment created at $(now())"
 end
 
 function Base.show(io::IO, x::Experiment)

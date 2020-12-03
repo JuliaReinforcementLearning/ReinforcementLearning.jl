@@ -11,8 +11,6 @@ Base.@kwdef mutable struct UCBExplorer{R<:AbstractRNG} <: AbstractExplorer
     is_training::Bool = true
 end
 
-Flux.testmode!(p::UCBExplorer, mode = true) = p.is_training = !mode
-
 """
     UCBExplorer(na; c=2.0, ϵ=1e-10, step=1, seed=nothing)
 

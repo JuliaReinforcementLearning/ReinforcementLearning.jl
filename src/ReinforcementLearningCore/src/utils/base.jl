@@ -1,25 +1,18 @@
 export nframes,
-    frame_type,
     select_last_dim,
     select_last_frame,
     consecutive_view,
     find_all_max,
-    huber_loss,
-    huber_loss_unreduced,
     discount_rewards,
     discount_rewards!,
     discount_rewards_reduced,
     generalized_advantage_estimation,
     generalized_advantage_estimation!,
-    logitcrossentropy_unreduced,
-    flatten_batch,
-    unflatten_batch
+    flatten_batch
 
 using StatsBase
 
 nframes(a::AbstractArray{T,N}) where {T,N} = size(a, N)
-frame_type(::Array{T,N}) where {T,N} = Array{T,N - 1}
-frame_type(::Vector{T}) where {T} = T
 
 select_last_dim(xs::AbstractArray{T,N}, inds) where {T,N} =
     @views xs[ntuple(_ -> (:), N - 1)..., inds]
@@ -54,30 +47,80 @@ julia> flatten_batch(x)
  2  4  6  8  10  12
 ```
 """
-flatten_batch(x::AbstractArray) =
-    reshape(x, (size(x) |> reverse |> Base.tail |> Base.tail |> reverse)..., :)  # much faster than  `reshape(x, size(x)[1:end-2]..., :)`
+flatten_batch(x::AbstractArray) = reshape(x, size(x)[1:end-2]..., :)
 
-unflatten_batch(x::AbstractArray, i::Int...) =
-    reshape(x, (size(x) |> reverse |> Base.tail |> reverse)..., i...)
+"""
+    consecutive_view(x::AbstractArray, inds; n_stack = nothing, n_horizon = nothing)
 
+By default, it behaves the same with `select_last_dim(x, inds)`.
+If `n_stack` is set to an int, then for each frame specified by `inds`,
+the previous `n_stack` frames (including the current one) are concatenated as a new dimension.
+If `n_horizon` is set to an int, then for each frame specified by `inds`,
+the next `n_horizon` frames (including the current one) are concatenated as a new dimension.
+
+# Example
+
+```julia
+julia> x = collect(1:5)
+5-element Array{Int64,1}:
+ 1
+ 2
+ 3
+ 4
+ 5
+
+julia> consecutive_view(x, [2,4])  # just the same with `select_last_dim(x, [2,4])`
+2-element view(::Array{Int64,1}, [2, 4]) with eltype Int64:
+ 2
+ 4
+
+julia> consecutive_view(x, [2,4];n_stack = 2)
+2×2 view(::Array{Int64,1}, [1 3; 2 4]) with eltype Int64:
+ 1  3
+ 2  4
+
+julia> consecutive_view(x, [2,4];n_horizon = 2)
+2×2 view(::Array{Int64,1}, [2 4; 3 5]) with eltype Int64:
+ 2  4
+ 3  5
+
+julia> consecutive_view(x, [2,4];n_horizon = 2, n_stack=2)  # note the order here, first we stack, then we apply the horizon
+2×2×2 view(::Array{Int64,1}, [1 2; 2 3]
+
+[3 4; 4 5]) with eltype Int64:
+[:, :, 1] =
+ 1  2
+ 2  3
+
+[:, :, 2] =
+ 3  4
+ 4  5
+```
+
+See also [Frame Skipping and Preprocessing for Deep Q networks](https://danieltakeshi.github.io/2016/11/25/frame-skipping-and-preprocessing-for-deep-q-networks-on-atari-2600-games/)
+to gain a better understanding of state stacking and n-step learning.
+"""
 consecutive_view(
     cb::AbstractArray,
     inds::Vector{Int};
     n_stack = nothing,
     n_horizon = nothing,
 ) = consecutive_view(cb, inds, n_stack, n_horizon)
-consecutive_view(cb::AbstractArray, inds::Vector{Int}, ::Nothing, ::Nothing) =
-    select_last_dim(cb, inds)
+
+consecutive_view(cb::AbstractArray, inds::Vector{Int}, ::Nothing, ::Nothing) = select_last_dim(cb, inds)
+
 consecutive_view(cb::AbstractArray, inds::Vector{Int}, n_stack::Int, ::Nothing) =
     select_last_dim(
         cb,
         reshape([i for x in inds for i in x-n_stack+1:x], n_stack, length(inds)),
     )
+
 consecutive_view(cb::AbstractArray, inds::Vector{Int}, ::Nothing, n_horizon::Int) =
     select_last_dim(
         cb,
         reshape([i for x in inds for i in x:x+n_horizon-1], n_horizon, length(inds)),
     )
+
 consecutive_view(cb::AbstractArray, inds::Vector{Int}, n_stack::Int, n_horizon::Int) =
     select_last_dim(
         cb,
@@ -107,29 +150,6 @@ _rf_findmax((fm, m), (fx, x)) = isless(fm, fx) ? (fx, x) : (fm, m)
 Base.findmax(A::AbstractVector, mask::AbstractVector{Bool}) =
     findmax(i -> A[i], view(keys(A), mask))
 
-function logitcrossentropy_unreduced(logŷ::AbstractVecOrMat, y::AbstractVecOrMat)
-    return vec(-sum(y .* logsoftmax(logŷ), dims = 1))
-end
-
-"""
-    huber_loss_unreduced(labels, predictions; δ = 1.0f0)
-
-Similar to [`huber_loss`](@ref), but it doesn't do the `mean` operation in the last step.
-"""
-function huber_loss_unreduced(labels, predictions; δ = 1.0f0)
-    abs_error = abs.(predictions .- labels)
-    quadratic = min.(abs_error, δ)
-    linear = abs_error .- quadratic
-    0.5f0 .* quadratic .* quadratic .+ δ .* linear
-end
-
-"""
-    huber_loss(labels, predictions; δ = 1.0f0)
-
-See [Huber loss](https://en.wikipedia.org/wiki/Huber_loss)
-"""
-huber_loss(labels, predictions; δ = 1.0f0) =
-    huber_loss_unreduced(labels, predictions; δ = δ) |> mean
 
 const VectorOrMatrix = Union{AbstractMatrix,AbstractVector}
 

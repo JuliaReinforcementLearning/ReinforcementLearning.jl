@@ -6,12 +6,14 @@ version = "0.5.1"
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
-BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+CircularArrayBuffers = "9de3a189-e0c0-4e15-ba3b-b14b9fb0aec1"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 ElasticArrays = "fdbdab4c-e67f-52f5-8c3f-e7b388dad3d4"
 FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+Functors = "d9f16b24-f501-4c13-a1f2-28368ffc5196"
 GPUArrays = "0c68f7d7-f131-5f86-a1c3-88cf8149b2d7"
 ImageTransformations = "02fcd773-0e25-5acc-982a-7f6622650795"
 JLD = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
@@ -28,7 +30,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 [compat]
 AbstractTrees = "0.3"
 Adapt = "2"
-BSON = "0.2"
+CircularArrayBuffers = "0.1"
 CUDA = "1, 2.1"
 Distributions = "0.24"
 ElasticArrays = "1.2"
@@ -44,10 +46,3 @@ Setfield = "0.6, 0.7"
 StatsBase = "0.32, 0.33"
 Zygote = "0.5"
 julia = "1.4"
-
-[extras]
-ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test", "ReinforcementLearningEnvironments"]

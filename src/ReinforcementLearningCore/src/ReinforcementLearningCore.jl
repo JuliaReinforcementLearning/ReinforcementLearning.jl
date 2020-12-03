@@ -13,7 +13,7 @@ export RLCore
 
 include("utils/utils.jl")
 include("extensions/extensions.jl")
-include("components/components.jl")
+include("policies/policies.jl")
 include("core/core.jl")
 
 end # module

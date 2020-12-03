@@ -1,6 +1,7 @@
 export NeuralNetworkApproximator, ActorCritic
 
 using Flux
+import Functors: functor
 
 """
     NeuralNetworkApproximator(;kwargs)
@@ -19,8 +20,7 @@ end
 
 (app::NeuralNetworkApproximator)(x) = app.model(x)
 
-# !!! watch https://github.com/FluxML/Functors.jl/blob/master/src/functor.jl#L2
-Flux.functor(x::NeuralNetworkApproximator) =
+functor(x::NeuralNetworkApproximator) =
     (model = x.model,), y -> NeuralNetworkApproximator(y.model, x.optimizer)
 
 device(app::NeuralNetworkApproximator) = device(app.model)
@@ -30,8 +30,6 @@ RLBase.update!(app::NeuralNetworkApproximator, gs) =
 
 Base.copyto!(dest::NeuralNetworkApproximator, src::NeuralNetworkApproximator) =
     Flux.loadparams!(dest.model, params(src))
-
-Flux.testmode!(app::NeuralNetworkApproximator, mode = true) = testmode!(app.model, mode)
 
 #####
 # ActorCritic
@@ -48,12 +46,7 @@ Base.@kwdef struct ActorCritic{A,C,O} <: AbstractApproximator
     optimizer::O = ADAM()
 end
 
-Flux.functor(x::ActorCritic) =
+functor(x::ActorCritic) =
     (actor = x.actor, critic = x.critic), y -> ActorCritic(y.actor, y.critic, x.optimizer)
 
 RLBase.update!(app::ActorCritic, gs) = Flux.Optimise.update!(app.optimizer, params(app), gs)
-
-function Flux.testmode!(app::ActorCritic, mode = true)
-    testmode!(app.actor, mode)
-    testmode!(app.critic, mode)
-end
