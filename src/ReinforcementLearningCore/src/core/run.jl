@@ -2,7 +2,12 @@ export expected_policy_values
 
 import Base: run
 
-function run(agent::Agent, env::AbstractEnv, stop_condition=StopAfterEpisode(1), hook=EmptyHook())
+function run(
+    agent::Agent,
+    env::AbstractEnv,
+    stop_condition = StopAfterEpisode(1),
+    hook = EmptyHook(),
+)
     check(agent, env)
     _run(agent, env, stop_condition, hook)
 end
@@ -10,7 +15,8 @@ end
 "Inject some customized checkings here by overwriting this function"
 function check(agent, env) end
 
-_run(agent, env, stop_condition, hook) = _run(DynamicStyle(env), NumAgentStyle(env), agent, env, stop_condition, hook)
+_run(agent, env, stop_condition, hook) =
+    _run(DynamicStyle(env), NumAgentStyle(env), agent, env, stop_condition, hook)
 
 function _run(
     ::Sequential,

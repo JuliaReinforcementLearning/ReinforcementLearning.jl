@@ -2,8 +2,8 @@ export StackFrames, ResizeImage
 
 using ImageTransformations: imresize!
 import CircularArrayBuffers
-using CircularArrayBuffers:CircularArrayBuffer
-using MacroTools:@forward
+using CircularArrayBuffers: CircularArrayBuffer
+using MacroTools: @forward
 
 """
     ResizeImage(img::Array{T, N})

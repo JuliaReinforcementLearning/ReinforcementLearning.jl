@@ -1,6 +1,6 @@
 using AbstractTrees
 using Random
-using ProgressMeter:Progress
+using ProgressMeter: Progress
 
 const AT = AbstractTrees
 

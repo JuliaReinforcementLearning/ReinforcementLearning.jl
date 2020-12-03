@@ -16,4 +16,5 @@ function (learner::AbstractLearner)(env) end
 """
 function RLBase.get_priority(p::AbstractLearner, experience) end
 
-Base.show(io::IO, p::AbstractLearner) = AbstractTrees.print_tree(io, StructTree(p), get(io, :max_depth, 10))
+Base.show(io::IO, p::AbstractLearner) =
+    AbstractTrees.print_tree(io, StructTree(p), get(io, :max_depth, 10))

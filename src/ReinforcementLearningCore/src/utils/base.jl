@@ -107,7 +107,8 @@ consecutive_view(
     n_horizon = nothing,
 ) = consecutive_view(cb, inds, n_stack, n_horizon)
 
-consecutive_view(cb::AbstractArray, inds::Vector{Int}, ::Nothing, ::Nothing) = select_last_dim(cb, inds)
+consecutive_view(cb::AbstractArray, inds::Vector{Int}, ::Nothing, ::Nothing) =
+    select_last_dim(cb, inds)
 
 consecutive_view(cb::AbstractArray, inds::Vector{Int}, n_stack::Int, ::Nothing) =
     select_last_dim(

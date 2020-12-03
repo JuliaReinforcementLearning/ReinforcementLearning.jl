@@ -23,30 +23,30 @@
     @testset "CircularArraySARTTrajectory" begin
         t = CircularArraySARTTrajectory(;
             capacity = 3,
-            state = Vector{Int} => (4, ),
+            state = Vector{Int} => (4,),
             action = Int => (),
             reward = Float32 => (),
-            terminal = Bool => ()
+            terminal = Bool => (),
         )
 
         @test length(t) == 0
-        push!(t; state=ones(Int, 4), action = 1)
+        push!(t; state = ones(Int, 4), action = 1)
         @test length(t) == 0
-        push!(t; reward=1.f0, terminal=false, state=2 * ones(Int, 4), action = 2)
+        push!(t; reward = 1.0f0, terminal = false, state = 2 * ones(Int, 4), action = 2)
         @test length(t) == 1
 
-        @test t[:state] == hcat(ones(Int, 4), 2*ones(Int, 4))
+        @test t[:state] == hcat(ones(Int, 4), 2 * ones(Int, 4))
 
-        push!(t; reward=2.f0, terminal=false, state=3 * ones(Int, 4), action = 3)
+        push!(t; reward = 2.0f0, terminal = false, state = 3 * ones(Int, 4), action = 3)
         @test length(t) == 2
 
-        push!(t; reward=3.f0, terminal=false, state=4 * ones(Int, 4), action = 4)
+        push!(t; reward = 3.0f0, terminal = false, state = 4 * ones(Int, 4), action = 4)
         @test length(t) == 3
         @test t[:state] == [j for i in 1:4, j in 1:4]
         @test t[:reward] == [1, 2, 3]
 
         # test circle works as expected
-        push!(t; reward=4.f0, terminal=true, state=5 * ones(Int, 4), action = 5)
+        push!(t; reward = 4.0f0, terminal = true, state = 5 * ones(Int, 4), action = 5)
         @test length(t) == 3
         @test t[:state] == [j for i in 1:4, j in 2:5]
         @test t[:reward] == [2, 3, 4]

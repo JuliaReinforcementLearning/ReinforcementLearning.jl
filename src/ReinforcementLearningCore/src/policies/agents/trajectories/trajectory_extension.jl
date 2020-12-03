@@ -23,8 +23,8 @@ function Base.push!(
         for k in SART
             push!(t[k], select_last_dim(𝕥[k], i))
         end
-        push!(t[:next_state], select_last_dim(𝕥[:state], i+n))
-        push!(t[:next_action], select_last_dim(𝕥[:action], i+n))
+        push!(t[:next_state], select_last_dim(𝕥[:state], i + n))
+        push!(t[:next_action], select_last_dim(𝕥[:action], i + n))
     end
 end
 
@@ -61,14 +61,18 @@ function StatsBase.sample(rng::AbstractRNG, t::AbstractTrajectory, s::BatchSampl
     inds, select(inds, t, s)
 end
 
-function select(inds::Vector{Int}, t::CircularVectorSARTSATrajectory, s::BatchSampler{traces}) where traces
+function select(
+    inds::Vector{Int},
+    t::CircularVectorSARTSATrajectory,
+    s::BatchSampler{traces},
+) where {traces}
     NamedTuple{SARTSA}(Flux.batch(view(t[x], inds)) for x in traces)
 end
 
 function select(inds::Vector{Int}, t::CircularArraySARTTrajectory, s::BatchSampler{SARTS})
     NamedTuple{SARTS}((
         (convert(Array, consecutive_view(t[x], inds)) for x in SART)...,
-        convert(Array,consecutive_view(t[:state], inds.+1))
+        convert(Array, consecutive_view(t[:state], inds .+ 1)),
     ))
 end
 
@@ -88,7 +92,11 @@ function StatsBase.sample(rng::AbstractRNG, t::AbstractTrajectory, s::NStepBatch
     inds, select(inds, t, s)
 end
 
-function StatsBase.sample(rng::AbstractRNG, t::PrioritizedTrajectory{<:SumTree}, s::NStepBatchSampler)
+function StatsBase.sample(
+    rng::AbstractRNG,
+    t::PrioritizedTrajectory{<:SumTree},
+    s::NStepBatchSampler,
+)
     bz, sz = s.batch_size, s.stack_size
     inds = Vector{Int}(undef, bz)
     priorities = Vector{Float32}(undef, bz)
@@ -101,16 +109,20 @@ function StatsBase.sample(rng::AbstractRNG, t::PrioritizedTrajectory{<:SumTree},
         inds[i] = ind
         priorities[i] = p
     end
-    inds, (priority=priorities, select(inds, t.traj, s)...)
+    inds, (priority = priorities, select(inds, t.traj, s)...)
 end
 
-function select(inds::Vector{Int}, traj::CircularArraySARTTrajectory, s::NStepBatchSampler{traces}) where traces
+function select(
+    inds::Vector{Int},
+    traj::CircularArraySARTTrajectory,
+    s::NStepBatchSampler{traces},
+) where {traces}
     γ, n, bz, sz = s.γ, s.n, s.batch_size, s.stack_size
     next_inds = inds .+ n
 
-    s = convert(Array, consecutive_view(traj[:state], inds;n_stack = sz))
+    s = convert(Array, consecutive_view(traj[:state], inds; n_stack = sz))
     a = convert(Array, consecutive_view(traj[:action], inds))
-    s′ = convert(Array, consecutive_view(traj[:state], next_inds;n_stack = sz))
+    s′ = convert(Array, consecutive_view(traj[:state], next_inds; n_stack = sz))
 
     consecutive_rewards = consecutive_view(traj[:reward], inds; n_horizon = n)
     consecutive_terminals = consecutive_view(traj[:terminal], inds; n_horizon = n)

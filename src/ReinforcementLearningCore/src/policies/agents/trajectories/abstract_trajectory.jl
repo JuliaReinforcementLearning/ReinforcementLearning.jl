@@ -1,9 +1,4 @@
-export AbstractTrajectory,
-    SART,
-    SARTS,
-    SARTSA,
-    SLARTSL,
-    SLARTSLA
+export AbstractTrajectory, SART, SARTS, SARTSA, SLARTSL, SLARTSLA
 
 """
     AbstractTrajectory
@@ -38,8 +33,8 @@ function Base.empty!(t::AbstractTrajectory)
     end
 end
 
-function Base.push!(t::AbstractTrajectory;kwargs...)
-    for (k,v) in kwargs
+function Base.push!(t::AbstractTrajectory; kwargs...)
+    for (k, v) in kwargs
         push!(t[k], v)
     end
 end
@@ -65,5 +60,22 @@ end
 const SART = (:state, :action, :reward, :terminal)
 const SARTS = (:state, :action, :reward, :terminal, :next_state)
 const SARTSA = (:state, :action, :reward, :terminal, :next_state, :next_action)
-const SLARTSL = (:state, :legal_actions_mask, :action, :reward, :terminal, :next_state, :next_legal_actions_mask)
-const SLARTSLA = (:state, :legal_actions_mask, :action, :reward, :terminal, :next_state, :next_legal_actions_mask, :next_action)
+const SLARTSL = (
+    :state,
+    :legal_actions_mask,
+    :action,
+    :reward,
+    :terminal,
+    :next_state,
+    :next_legal_actions_mask,
+)
+const SLARTSLA = (
+    :state,
+    :legal_actions_mask,
+    :action,
+    :reward,
+    :terminal,
+    :next_state,
+    :next_legal_actions_mask,
+    :next_action,
+)

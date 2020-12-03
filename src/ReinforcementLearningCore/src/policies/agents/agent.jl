@@ -1,7 +1,6 @@
-export Agent,
-    get_role
+export Agent, get_role
 
-import Functors:functor
+import Functors: functor
 using Setfield: @set
 
 """
@@ -56,7 +55,13 @@ end
 
 ## update trajectory
 
-function RLBase.update!(trajectory::AbstractTrajectory, ::AbstractPolicy, ::AbstractEnv, ::PreEpisodeStage, ::AbstractMode)
+function RLBase.update!(
+    trajectory::AbstractTrajectory,
+    ::AbstractPolicy,
+    ::AbstractEnv,
+    ::PreEpisodeStage,
+    ::AbstractMode,
+)
     if length(trajectory) > 0
         pop!(trajectory[:state])
         pop!(trajectory[:action])
@@ -64,28 +69,60 @@ function RLBase.update!(trajectory::AbstractTrajectory, ::AbstractPolicy, ::Abst
     end
 end
 
-function RLBase.update!(trajectory::AbstractTrajectory, policy::AbstractPolicy, env::AbstractEnv, ::PostEpisodeStage, ::AbstractMode)
+function RLBase.update!(
+    trajectory::AbstractTrajectory,
+    policy::AbstractPolicy,
+    env::AbstractEnv,
+    ::PostEpisodeStage,
+    ::AbstractMode,
+)
     action = policy(env)
     push!(trajectory[:state], get_state(env))
     push!(trajectory[:action], action)
-    haskey(trajectory, :legal_actions_mask) && push!(trajectory[:legal_actions_mask], get_legal_actions_mask(env))
+    haskey(trajectory, :legal_actions_mask) &&
+        push!(trajectory[:legal_actions_mask], get_legal_actions_mask(env))
 end
 
-function RLBase.update!(trajectory::AbstractTrajectory, policy::AbstractPolicy, env::AbstractEnv, ::PreActStage, ::AbstractMode)
+function RLBase.update!(
+    trajectory::AbstractTrajectory,
+    policy::AbstractPolicy,
+    env::AbstractEnv,
+    ::PreActStage,
+    ::AbstractMode,
+)
     action = policy(env)
     push!(trajectory[:state], get_state(env))
     push!(trajectory[:action], action)
-    haskey(trajectory, :legal_actions_mask) && push!(trajectory[:legal_actions_mask], get_legal_actions_mask(env))
+    haskey(trajectory, :legal_actions_mask) &&
+        push!(trajectory[:legal_actions_mask], get_legal_actions_mask(env))
     action
 end
 
-function RLBase.update!(trajectory::AbstractTrajectory, ::AbstractPolicy, env::AbstractEnv, ::PostActStage, ::AbstractMode)
+function RLBase.update!(
+    trajectory::AbstractTrajectory,
+    ::AbstractPolicy,
+    env::AbstractEnv,
+    ::PostActStage,
+    ::AbstractMode,
+)
     push!(trajectory[:reward], get_reward(env))
     push!(trajectory[:terminal], get_terminal(env))
 end
 
 ## update policy
 
-RLBase.update!(::AbstractPolicy, ::AbstractTrajectory, ::AbstractEnv, ::AbstractStage, ::AbstractMode) = nothing
+RLBase.update!(
+    ::AbstractPolicy,
+    ::AbstractTrajectory,
+    ::AbstractEnv,
+    ::AbstractStage,
+    ::AbstractMode,
+) = nothing
 
-RLBase.update!(policy::AbstractPolicy, trajectory::AbstractTrajectory, ::AbstractEnv, ::PreActStage, ::AbstractMode) = update!(policy, trajectory)
+RLBase.update!(
+    policy::AbstractPolicy,
+    trajectory::AbstractTrajectory,
+    ::AbstractEnv,
+    ::PreActStage,
+    ::AbstractMode,
+) = update!(policy, trajectory)

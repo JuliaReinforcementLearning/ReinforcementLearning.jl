@@ -31,7 +31,8 @@ RLBase.get_prob(p::QBasedPolicy, env, ::FullActionSet) =
 
 @forward QBasedPolicy.learner RLBase.get_priority
 
-RLBase.update!(p::QBasedPolicy, trajectory::AbstractTrajectory) = update!(p.learner, trajectory)
+RLBase.update!(p::QBasedPolicy, trajectory::AbstractTrajectory) =
+    update!(p.learner, trajectory)
 
 #####
 # TabularRandomPolicy

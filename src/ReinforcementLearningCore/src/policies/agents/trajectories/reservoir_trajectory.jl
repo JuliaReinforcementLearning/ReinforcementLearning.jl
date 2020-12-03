@@ -14,13 +14,8 @@ end
 
 Base.length(x::ReservoirTrajectory) = length(x.buffer[1])
 
-function ReservoirTrajectory(
-    capacity;
-    n = 0,
-    rng = Random.GLOBAL_RNG,
-    kw...
-)
-    buffer = VectorTrajectory(;kw...)
+function ReservoirTrajectory(capacity; n = 0, rng = Random.GLOBAL_RNG, kw...)
+    buffer = VectorTrajectory(; kw...)
     ReservoirTrajectory(buffer, n, capacity, rng)
 end
 
