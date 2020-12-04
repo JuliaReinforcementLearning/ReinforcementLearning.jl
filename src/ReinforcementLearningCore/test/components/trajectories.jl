@@ -16,10 +16,6 @@
         @test t[:reward] == Bool[]
     end
 
-    @testset "DummyTrajectory" begin
-        @test keys(DUMMY_TRAJECTORY) == ()
-    end
-
     @testset "CircularArraySARTTrajectory" begin
         t = CircularArraySARTTrajectory(;
             capacity = 3,

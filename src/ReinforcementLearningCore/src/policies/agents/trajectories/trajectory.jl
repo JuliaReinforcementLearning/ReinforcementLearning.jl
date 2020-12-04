@@ -1,13 +1,14 @@
 export Trajectory,
     PrioritizedTrajectory,
-    DUMMY_TRAJECTORY,
-    DummyTrajectory,
     CircularArrayTrajectory,
     CircularVectorTrajectory,
     CircularArraySARTTrajectory,
+    CircularArraySLARTTrajectory,
     CircularVectorSARTTrajectory,
     CircularVectorSARTSATrajectory,
     CircularArrayPSARTTrajectory,
+    ElasticArrayTrajectory,
+    ElasticSARTTrajectory,
     VectorTrajectory
 
 using MacroTools: @forward
@@ -38,11 +39,6 @@ Base.merge(a::NamedTuple, b::Trajectory) = Trajectory(merge(a, b.traces))
 
 #####
 
-const DUMMY_TRAJECTORY = Trajectory()
-const DummyTrajectory = typeof(DUMMY_TRAJECTORY)
-
-#####
-
 function CircularArrayTrajectory(; capacity, kwargs...)
     Trajectory(map(kwargs.data) do x
         CircularArrayBuffer{eltype(first(x))}(last(x)..., capacity)
@@ -59,7 +55,7 @@ end
 
 const CircularArraySARTTrajectory = Trajectory{
     <:NamedTuple{
-        (:state, :action, :reward, :terminal),
+        SART,
         <:Tuple{
             <:CircularArrayBuffer,
             <:CircularArrayBuffer,
@@ -80,9 +76,9 @@ CircularArraySARTTrajectory(;
     CircularArrayTrajectory(; capacity = capacity, reward = reward, terminal = terminal),
 )
 
-const CircularArraySALRTTrajectory = Trajectory{
+const CircularArraySLARTTrajectory = Trajectory{
     <:NamedTuple{
-        (:state, :action, :legal_actions_mask, :reward, :terminal),
+        SLART,
         <:Tuple{
             <:CircularArrayBuffer,
             <:CircularArrayBuffer,
@@ -93,7 +89,7 @@ const CircularArraySALRTTrajectory = Trajectory{
     },
 }
 
-CircularArraySALRTTrajectory(;
+CircularArraySLARTTrajectory(;
     capacity::Int,
     state = Int => (),
     action = Int => (),
@@ -114,7 +110,7 @@ CircularArraySALRTTrajectory(;
 
 const CircularVectorSARTTrajectory = Trajectory{
     <:NamedTuple{
-        (:state, :action, :reward, :terminal),
+        SART,
         <:Tuple{
             <:CircularVectorBuffer,
             <:CircularVectorBuffer,
@@ -139,7 +135,7 @@ CircularVectorSARTTrajectory(;
 
 const CircularVectorSARTSATrajectory = Trajectory{
     <:NamedTuple{
-        (:state, :action, :reward, :terminal, :next_state, :next_action),
+        SARTSA,
         <:Tuple{
             <:CircularVectorBuffer,
             <:CircularVectorBuffer,
@@ -167,7 +163,7 @@ CircularVectorSARTSATrajectory(;
     terminal = terminal,
     next_state = next_state,
     next_action = next_action,
-),
+)
 
 #####
 
@@ -175,6 +171,22 @@ function ElasticArrayTrajectory(; kwargs...)
     Trajectory(map(kwargs.data) do x
         ElasticArray{eltype(first(x))}(undef, last(x)..., 0)
     end)
+end
+
+const ElasticSARTTrajectory = Trajectory{
+    <:NamedTuple{
+        SART,
+        <:Tuple{
+            <:ElasticArray,
+            <:ElasticArray,
+            <:ElasticArray,
+            <:ElasticArray,
+        },
+    },
+}
+
+function ElasticSARTTrajectory(;state=Int=>(),action=Int=>(),reward=Float32=>(),terminal=Bool=>())
+    ElasticArrayTrajectory(;state=state,action=action,reward=reward,terminal=terminal)
 end
 
 #####
@@ -218,7 +230,7 @@ CircularArrayPSARTTrajectory(; capacity, kwargs...) = PrioritizedTrajectory(
 #####
 
 function Base.length(
-    t::Union{<:CircularArraySARTTrajectory,<:CircularVectorSARTSATrajectory},
+    t::Union{CircularArraySARTTrajectory,CircularVectorSARTSATrajectory, ElasticSARTTrajectory},
 )
     x = t[:terminal]
     size(x, ndims(x))

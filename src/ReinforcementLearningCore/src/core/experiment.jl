@@ -4,7 +4,7 @@ using Markdown
 using Dates
 
 Base.@kwdef mutable struct Experiment
-    agent::Any
+    policy::Any
     env::Any
     stop_condition::Any
     hook::Any
@@ -39,6 +39,6 @@ end
 
 function Base.run(x::Experiment)
     display(Markdown.parse(x.description))
-    run(x.agent, x.env, x.stop_condition, x.hook)
+    run(x.policy, x.env, x.stop_condition, x.hook)
     x
 end

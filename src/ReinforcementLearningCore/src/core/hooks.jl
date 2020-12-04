@@ -81,6 +81,8 @@ Base.@kwdef mutable struct StepsPerEpisode <: AbstractHook
     count::Int = 0
 end
 
+Base.getindex(h::StepsPerEpisode) = h.steps
+
 (hook::StepsPerEpisode)(::PostActStage, args...) = hook.count += 1
 
 function (hook::StepsPerEpisode)(::Union{PostEpisodeStage,PostExperimentStage}, agent, env)
@@ -100,6 +102,8 @@ Store each reward of each step in every episode in the field of `rewards`.
 Base.@kwdef mutable struct RewardsPerEpisode <: AbstractHook
     rewards::Vector{Vector{Float64}} = Vector{Vector{Float64}}()
 end
+
+Base.getindex(h::RewardsPerEpisode) = h.rewards
 
 function (hook::RewardsPerEpisode)(::PreEpisodeStage, agent, env)
     push!(hook.rewards, [])
@@ -129,6 +133,8 @@ Base.@kwdef mutable struct TotalRewardPerEpisode <: AbstractHook
     rewards::Vector{Float64} = Float64[]
     reward::Float64 = 0.0
 end
+
+Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
 (hook::TotalRewardPerEpisode)(s::AbstractStage, agent, env) =
     hook(s, agent, env, RewardStyle(env), NumAgentStyle(env))
@@ -194,6 +200,8 @@ struct TotalBatchRewardPerEpisode <: AbstractHook
     reward::Vector{Float64}
 end
 
+Base.getindex(h::TotalBatchRewardPerEpisode) = h.rewards
+
 """
     TotalBatchRewardPerEpisode(batch_size::Int)
 
@@ -228,6 +236,8 @@ struct BatchStepsPerEpisode <: AbstractHook
     steps::Vector{Vector{Int}}
     step::Vector{Int}
 end
+
+Base.getindex(h::BatchStepsPerEpisode) = h.steps
 
 """
     BatchStepsPerEpisode(batch_size::Int; tag = "TRAINING")
@@ -264,6 +274,8 @@ Base.@kwdef struct CumulativeReward <: AbstractHook
     rewards::Vector{Float64} = [0.0]
 end
 
+Base.getindex(h::CumulativeReward) = h.rewards
+
 function (hook::CumulativeReward)(::PostActStage, agent, env::T) where {T}
     if T <: RewardOverriddenEnv
         r = get_reward(env.env)
@@ -288,6 +300,8 @@ mutable struct TimePerStep <: AbstractHook
     times::CircularArrayBuffer{Float64,1}
     t::UInt64
 end
+
+Base.getindex(h::TimePerStep) = h.times
 
 TimePerStep(; max_steps = 100) =
     TimePerStep(CircularArrayBuffer{Float64}(max_steps), time_ns())

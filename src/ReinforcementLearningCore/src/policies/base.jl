@@ -10,14 +10,7 @@ export AbstractStage,
     PRE_EPISODE_STAGE,
     POST_EPISODE_STAGE,
     PRE_ACT_STAGE,
-    POST_ACT_STAGE,
-    AbstractMode,
-    TrainMode,
-    TRAIN_MODE,
-    TestMode,
-    TEST_MODE,
-    EvalMode,
-    EVAL_MODE
+    POST_ACT_STAGE
 
 #####
 # Stage
@@ -43,17 +36,5 @@ const PRE_ACT_STAGE = PreActStage()
 struct PostActStage <: AbstractStage end
 const POST_ACT_STAGE = PostActStage()
 
-#####
-# Modes
-#####
-
-abstract type AbstractMode end
-
-struct TrainMode <: AbstractMode end
-const TRAIN_MODE = TrainMode()
-
-struct EvalMode <: AbstractMode end
-const EVAL_MODE = EvalMode()
-
-struct TestMode <: AbstractMode end
-const TEST_MODE = TestMode()
+(p::AbstractPolicy)(::AbstractStage, ::AbstractEnv) = nothing
+(p::AbstractPolicy)(::PreActStage, env::AbstractEnv) = p(env)
