@@ -68,15 +68,12 @@ See [paper](https://arxiv.org/abs/1806.06923)
 mutable struct IQNLearner{A,T,R,D} <: AbstractLearner
     approximator::A
     target_approximator::T
+    sampler::NStepBatchSampler
     κ::Float32
     N::Int
     N′::Int
     Nₑₘ::Int
     K::Int
-    γ::Float32
-    stack_size::Union{Nothing,Int}
-    batch_size::Int
-    update_horizon::Int
     min_replay_history::Int
     update_freq::Int
     target_update_freq::Int
@@ -96,9 +93,6 @@ Flux.functor(x::IQNLearner) =
         x = @set x.device_rng = y.device_rng
         x
     end
-
-Flux.gpu(rng::MersenneTwister) = CUDA.CURAND.RNG()
-Flux.cpu(rng::CUDA.CURAND.RNG) = MersenneTwister()
 
 function IQNLearner(;
     approximator,
@@ -120,24 +114,23 @@ function IQNLearner(;
     β_priority = 0.5f0,
     rng = Random.GLOBAL_RNG,
     device_rng = CUDA.CURAND.RNG(),
+    traces = SARTS,
     loss = 0.0f0,
 )
     copyto!(approximator, target_approximator)  # force sync
     if device(approximator) !== device(device_rng)
-        throw(ArgumentError("device of `approximator` doesn't match with the device of `device_rng`: $(device(approximator)) !== $(device_rng)"))
+        throw(ArgumentError("device of `approximator` doesn't match the device of `device_rng`: $(device(approximator)) !== $(device_rng)"))
     end
+    sampler = NStepBatchSampler{traces}(;γ=γ, n=update_horizon,stack_size=stack_size,batch_size=batch_size)
     IQNLearner(
         approximator,
         target_approximator,
+        sampler,
         κ,
         N,
         N′,
         Nₑₘ,
         K,
-        γ,
-        stack_size,
-        batch_size,
-        update_horizon,
         min_replay_history,
         update_freq,
         target_update_freq,
@@ -151,7 +144,7 @@ function IQNLearner(;
 end
 
 function (learner::IQNLearner)(env)
-    state = send_to_device(device(learner.approximator), get_state(env))
+    state = send_to_device(device(learner), get_state(env))
     state = Flux.unsqueeze(state, ndims(state) + 1)
     τ = rand(learner.device_rng, Float32, learner.K, 1)
     τₑₘ = embed(τ, learner.Nₑₘ)
@@ -169,20 +162,17 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
     Nₑₘ = learner.Nₑₘ
     κ = learner.κ
     β = learner.β_priority
-    batch_size = learner.batch_size
+    batch_size = learner.sampler.batch_size
 
     D = device(Z)
-    s, r, t, s′ = map(
-        x -> send_to_device(D, x),
-        (batch.states, batch.rewards, batch.terminals, batch.next_states),
-    )
+    s, r, t, s′ = (send_to_device(D, batch[x]) for x in (:state, :reward, :terminal, :next_state))
 
     τ′ = rand(learner.device_rng, Float32, N′, batch_size)  # TODO: support β distribution
     τₑₘ′ = embed(τ′, Nₑₘ)
     zₜ = Zₜ(s′, τₑₘ′)
     avg_zₜ = mean(zₜ, dims = 2)
 
-    if !isnothing(batch.next_legal_actions_mask)
+    if haskey(batch, :next_legal_actions_mask)
         masked_value = fill(typemin(Float32), size(batch.next_legal_actions_mask))
         masked_value[batch.next_legal_actions_mask] .= 0
         avg_zₜ .+= send_to_device(D, masked_value)
@@ -191,16 +181,16 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
     aₜ = argmax(avg_zₜ, dims = 1)
     aₜ = aₜ .+ typeof(aₜ)(CartesianIndices((0, 0:N′-1, 0)))
     qₜ = reshape(zₜ[aₜ], :, batch_size)
-    target = reshape(r, 1, batch_size) .+ learner.γ * reshape(1 .- t, 1, batch_size) .* qₜ  # reshape to allow broadcast
+    target = reshape(r, 1, batch_size) .+ learner.sampler.γ * reshape(1 .- t, 1, batch_size) .* qₜ  # reshape to allow broadcast
 
     τ = rand(learner.device_rng, Float32, N, batch_size)
     τₑₘ = embed(τ, Nₑₘ)
-    a = CartesianIndex.(repeat(batch.actions, inner = N), 1:(N*batch_size))
+    a = CartesianIndex.(repeat(batch.action, inner = N), 1:(N*batch_size))
 
-    is_use_PER = !isnothing(batch.priorities)  # is use Prioritized Experience Replay
+    is_use_PER = haskey(batch, :priority)  # is use Prioritized Experience Replay
     if is_use_PER
         updated_priorities = Vector{Float32}(undef, batch_size)
-        weights = 1.0f0 ./ ((batch.priorities .+ 1f-10) .^ β)
+        weights = 1.0f0 ./ ((batch.priority .+ 1f-10) .^ β)
         weights ./= maximum(weights)
         weights = send_to_device(D, weights)
     end

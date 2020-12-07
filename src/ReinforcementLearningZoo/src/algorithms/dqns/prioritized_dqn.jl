@@ -31,16 +31,12 @@ mutable struct PrioritizedDQNLearner{
     Tq<:AbstractApproximator,
     Tt<:AbstractApproximator,
     Tf,
-    S<:Union{Int,Nothing},
     R<:AbstractRNG,
 } <: AbstractLearner
     approximator::Tq
     target_approximator::Tt
     loss_func::Tf
-    stack_size::S
-    γ::Float32
-    batch_size::Int
-    update_horizon::Int
+    sampler::NStepBatchSampler
     min_replay_history::Int
     update_freq::Int
     target_update_freq::Int
@@ -48,6 +44,7 @@ mutable struct PrioritizedDQNLearner{
     default_priority::Float32
     β_priority::Float32
     rng::R
+    # for logging
     loss::Float32
 end
 
@@ -55,7 +52,7 @@ function PrioritizedDQNLearner(;
     approximator::Tq,
     target_approximator::Tt,
     loss_func::Tf,
-    stack_size::Union{Int,Nothing} = 4,
+    stack_size::Union{Int,Nothing} = nothing,
     γ::Float32 = 0.99f0,
     batch_size::Int = 32,
     update_horizon::Int = 1,
@@ -65,17 +62,16 @@ function PrioritizedDQNLearner(;
     update_step::Int = 0,
     default_priority::Float32 = 100.0f0,
     β_priority::Float32 = 0.5f0,
+    traces = SARTS,
     rng = Random.GLOBAL_RNG,
 ) where {Tq,Tt,Tf}
     copyto!(approximator, target_approximator)
+    sampler = NStepBatchSampler{traces}(;γ=γ, n=update_horizon,stack_size=stack_size,batch_size=batch_size)
     PrioritizedDQNLearner(
         approximator,
         target_approximator,
         loss_func,
-        stack_size,
-        γ,
-        batch_size,
-        update_horizon,
+        sampler,
         min_replay_history,
         update_freq,
         target_update_freq,
@@ -104,49 +100,44 @@ end
 function (learner::PrioritizedDQNLearner)(env)
     env |>
     get_state |>
-    x ->
-        Flux.unsqueeze(x, ndims(x) + 1) |>
-        x ->
-            send_to_device(device(learner.approximator), x) |>
-            learner.approximator |>
-            vec |>
-            send_to_host
+    x -> Flux.unsqueeze(x, ndims(x) + 1) |>
+    x -> send_to_device(device(learner), x) |>
+    learner.approximator |>
+    vec |>
+    send_to_host
 end
 
 function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
-    Q, Qₜ, γ, β, loss_func, update_horizon, batch_size = learner.approximator,
-    learner.target_approximator,
-    learner.γ,
-    learner.β_priority,
-    learner.loss_func,
-    learner.update_horizon,
-    learner.batch_size
+    Q = learner.approximator
+    Qₜ = learner.target_approximator
+    γ = learner.sampler.γ
+    β = learner.β_priority
+    loss_func = learner.loss_func
+    n = learner.sampler.n
+    batch_size = learner.sampler.batch_size
+
     D = device(Q)
-    states, rewards, terminals, next_states = map(
-        x -> send_to_device(D, x),
-        (batch.states, batch.rewards, batch.terminals, batch.next_states),
-    )
-    actions = CartesianIndex.(batch.actions, 1:batch_size)
+    s, a, r, t, s′ = (send_to_device(D,batch[x]) for x in SARTS)
+    a = CartesianIndex.(a, 1:batch_size)
 
     updated_priorities = Vector{Float32}(undef, batch_size)
-    weights = 1.0f0 ./ ((batch.priorities .+ 1f-10) .^ β)
-    weights ./= maximum(weights)
-    weights = send_to_device(D, weights)
+    w = 1.0f0 ./ ((batch.priority .+ 1f-10) .^ β)
+    w ./= maximum(w)
+    w = send_to_device(D, w)
 
-    target_q = Qₜ(next_states)
-    if !isnothing(batch.next_legal_actions_mask)
-        masked_value = fill(typemin(Float32), size(batch.next_legal_actions_mask))
-        masked_value[batch.next_legal_actions_mask] .= 0
-        target_q .+= send_to_device(D, masked_value)
+    target_q = Qₜ(s′)
+    if haskey(batch, :next_legal_actions_mask)
+        l′ = send_to_device(D, batch[:next_legal_actions_mask])
+        target_q .+= ifelse.(l′, 0.f0, typemin(Float32))
     end
 
     q′ = dropdims(maximum(target_q; dims = 1), dims = 1)
-    G = rewards .+ γ^update_horizon .* (1 .- terminals) .* q′
+    G = r .+ γ^n .* (1 .- t) .* q′
 
     gs = gradient(params(Q)) do
-        q = Q(states)[actions]
+        q = Q(s)[a]
         batch_losses = loss_func(G, q)
-        loss = dot(vec(weights), vec(batch_losses)) * 1 // batch_size
+        loss = dot(vec(w), vec(batch_losses)) * 1 // batch_size
         ignore() do
             updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10) .^ β))
             learner.loss = loss

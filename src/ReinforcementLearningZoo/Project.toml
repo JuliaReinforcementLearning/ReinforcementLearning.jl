@@ -7,6 +7,7 @@ version = "0.2.2"
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+CircularArrayBuffers = "9de3a189-e0c0-4e15-ba3b-b14b9fb0aec1"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
@@ -34,7 +35,7 @@ Distributions = "0.24"
 Flux = "0.11"
 MacroTools = "0.5"
 ReinforcementLearningBase = "0.8.4"
-ReinforcementLearningCore = "0.5"
+ReinforcementLearningCore = "0.6"
 Requires = "1"
 Setfield = "0.6, 0.7"
 StableRNGs = "1.0"
@@ -43,11 +44,3 @@ StructArrays = "0.4"
 TensorBoardLogger = "0.1"
 Zygote = "0.5"
 julia = "1.4"
-
-[extras]
-OpenSpiel = "ceb70bd2-fe3f-44f0-b81f-41608acaf2f2"
-ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test", "ReinforcementLearningEnvironments", "OpenSpiel"]

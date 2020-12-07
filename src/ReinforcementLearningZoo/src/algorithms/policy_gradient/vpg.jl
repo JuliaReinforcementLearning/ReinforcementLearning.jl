@@ -93,9 +93,20 @@ function (π::VPGPolicy)(env::MultiThreadEnv)
     # TODO: can PG support multi env? PG only get updated at the end of an episode.
 end
 
-function RLBase.update!(π::VPGPolicy, traj::ElasticCompactSARTSATrajectory)
-    (length(traj[:terminal]) > 0 && traj[:terminal][end]) || return
+function RLBase.update!(trajectory::ElasticSARTTrajectory, policy::VPGPolicy, env::AbstractEnv, ::PreActStage)
+    action = policy(env)
+    push!(trajectory[:state], get_state(env))
+    push!(trajectory[:action], action)
+    action
+end
 
+function RLBase.update!(t::ElasticSARTTrajectory, ::VPGPolicy, ::AbstractEnv, ::PreEpisodeStage)
+    empty!(t)
+end
+
+RLBase.update!(::VPGPolicy, ::ElasticSARTTrajectory, ::AbstractEnv, ::PreActStage) = nothing
+
+function RLBase.update!(π::VPGPolicy, traj::ElasticSARTTrajectory, ::AbstractEnv, ::PostEpisodeStage)
     model = π.approximator
     to_dev(x) = send_to_device(device(model), x)
 
@@ -143,5 +154,4 @@ function RLBase.update!(π::VPGPolicy, traj::ElasticCompactSARTSATrajectory)
         end
         update!(model, gs)
     end
-    empty!(traj)
 end

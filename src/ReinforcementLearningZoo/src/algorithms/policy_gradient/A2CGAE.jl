@@ -7,7 +7,7 @@ using Flux
 # Keyword arguments
 - `approximator`, an [`ActorCritic`](@ref) based [`NeuralNetworkApproximator`](@ref)
 - `γ::Float32`, reward discount rate.
-- 'λ::Float32', lambda for GAE-lambda
+- `λ::Float32`, lambda for GAE-lambda
 - `actor_loss_weight::Float32`
 - `critic_loss_weight::Float32`
 - `entropy_loss_weight::Float32`
@@ -17,66 +17,76 @@ Base.@kwdef mutable struct A2CGAELearner{A<:ActorCritic} <: AbstractLearner
     γ::Float32
     λ::Float32
     max_grad_norm::Union{Nothing,Float32} = nothing
-    norm::Float32 = 0.0f0
     actor_loss_weight::Float32
     critic_loss_weight::Float32
     entropy_loss_weight::Float32
+    update_freq::Int
+    update_step::Int = 0
+    # for logging
     actor_loss::Float32 = 0.0f0
     critic_loss::Float32 = 0.0f0
     entropy_loss::Float32 = 0.0f0
     loss::Float32 = 0.0f0
+    norm::Float32 = 0.0f0
 end
+
+Flux.functor(x::A2CGAELearner) = (app = x.approximator, ), y -> @set x.approximator = y.app
 
 (learner::A2CGAELearner)(env::MultiThreadEnv) =
     learner.approximator.actor(send_to_device(
-        device(learner.approximator),
+        device(learner),
         get_state(env),
     )) |> send_to_host
 
-function RLBase.update!(learner::A2CGAELearner, t::AbstractTrajectory)
-    isfull(t) || return
+function RLBase.update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
+    length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
+    learner.update_step += 1
+    if learner.update_step % learner.update_freq == 0
+        _update!(learner, t)
+    end
+end
 
-    states = t[:state]
-    actions = t[:action]
-    rewards = t[:reward]
-    terminals = t[:terminal]
-    rollout = t[:full_state]
+function _update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
+    n = length(t)
 
     AC = learner.approximator
+    to_device(x) = send_to_device(device(AC), x)
     γ = learner.γ
     λ = learner.λ
     w₁ = learner.actor_loss_weight
     w₂ = learner.critic_loss_weight
     w₃ = learner.entropy_loss_weight
 
-    states = send_to_device(device(AC), states)
-    rollout = flatten_batch(rollout)
-    rollout = send_to_device(device(AC), rollout)
+    # (state_size..., n_thread * update_step)
+    states_flattened = t[:state] |>
+        x -> select_last_dim(x, 1:n) |>
+        flatten_batch |>
+        to_device
 
-    states_flattened = flatten_batch(states) # (state_size..., n_thread * update_step)
-    actions = flatten_batch(actions)
-    actions = CartesianIndex.(actions, 1:length(actions))
+    actions = t[:action] |>
+        x -> select_last_dim(x, 1:n) |>
+        flatten_batch |>
+        a -> CartesianIndex.(a, 1:length(a))
 
-    rollout_values = AC.critic(rollout)
-    rollout_values = send_to_host(rollout_values)
-    rollout_values = reshape(
-        rollout_values,
-        size(states, ndims(states) - 1),
-        size(states, ndims(states)) + 1,
-    )
+    rollout_values = t[:state] |>
+        flatten_batch |>
+        to_device |>
+        AC.critic |>
+        x -> reshape(x, :, n+1) |>
+        send_to_host
+
     advantages = generalized_advantage_estimation(
-        rewards,
+        t[:reward],
         rollout_values,
         γ,
         λ;
         dims = 2,
-        terminal = terminals,
+        terminal = t[:terminal],
     )
 
-    gains = advantages + select_last_dim(rollout_values, 1:(nframes(rollout_values)-1))
-    gains = send_to_device(device(AC), gains)
-    advantages = flatten_batch(advantages)
-    advantages = send_to_device(device(AC), advantages)
+    gains = to_device(advantages + select_last_dim(rollout_values, 1:n))
+
+    advantages = advantages |> flatten_batch |> to_device
 
     ps = Flux.params(AC)
     gs = gradient(ps) do
@@ -104,22 +114,4 @@ function RLBase.update!(learner::A2CGAELearner, t::AbstractTrajectory)
     end
 
     update!(AC, gs)
-end
-
-function (agent::Agent{<:QBasedPolicy{<:A2CGAELearner},<:CircularCompactSARTSATrajectory})(
-    ::Training{PreActStage},
-    env,
-)
-    action = agent.policy(env)
-    state = get_state(env)
-    push!(agent.trajectory; state = state, action = action)
-    update!(agent.policy, agent.trajectory)
-
-    # the main difference is we'd like to flush the buffer after each update!
-    if isfull(agent.trajectory)
-        empty!(agent.trajectory)
-        push!(agent.trajectory; state = state, action = action)
-    end
-
-    action
 end

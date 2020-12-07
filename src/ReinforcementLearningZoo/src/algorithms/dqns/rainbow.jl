@@ -36,22 +36,18 @@ mutable struct RainbowLearner{
     Tt<:AbstractApproximator,
     Tf,
     Ts,
-    Tss<:Union{Int,Nothing},
     R<:AbstractRNG,
 } <: AbstractLearner
     approximator::Tq
     target_approximator::Tt
     loss_func::Tf
+    sampler::NStepBatchSampler
     Vₘₐₓ::Float32
     Vₘᵢₙ::Float32
     n_actions::Int
     n_atoms::Int
     support::Ts
-    stack_size::Tss
     delta_z::Float32
-    γ::Float32
-    batch_size::Int
-    update_horizon::Int
     min_replay_history::Int
     update_freq::Int
     target_update_freq::Int
@@ -91,25 +87,24 @@ function RainbowLearner(;
     update_step = 0,
     default_priority = 1.0f2,
     β_priority = 0.5f0,
+    traces = SARTS,
     rng = Random.GLOBAL_RNG,
 )
     default_priority >= 1.0f0 || error("default value must be >= 1.0f0")
     copyto!(approximator, target_approximator)  # force sync
     support = send_to_device(device(approximator), support)
+    sampler = NStepBatchSampler{traces}(;γ=γ, n=update_horizon,stack_size=stack_size,batch_size=batch_size)
     RainbowLearner(
         approximator,
         target_approximator,
         loss_func,
+        sampler,
         Vₘₐₓ,
         Vₘᵢₙ,
         n_actions,
         n_atoms,
         support,
-        stack_size,
         delta_z,
-        γ,
-        batch_size,
-        update_horizon,
         min_replay_history,
         update_freq,
         target_update_freq,
@@ -132,22 +127,22 @@ end
 function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
     Q = learner.approximator
     Qₜ = learner.target_approximator
-    γ = learner.γ
+    γ = learner.sampler.γ
     β = learner.β_priority
     loss_func = learner.loss_func
     n_atoms = learner.n_atoms
     n_actions = learner.n_actions
     support = learner.support
     delta_z = learner.delta_z
-    update_horizon = learner.update_horizon
-    batch_size = learner.batch_size
+    update_horizon = learner.sampler.n
+    batch_size = learner.sampler.batch_size
     D = device(Q)
-    states = send_to_device(D, batch.states)
-    rewards = send_to_device(D, batch.rewards)
-    terminals = send_to_device(D, batch.terminals)
-    next_states = send_to_device(D, batch.next_states)
+    states = send_to_device(D, batch.state)
+    rewards = send_to_device(D, batch.reward)
+    terminals = send_to_device(D, batch.terminal)
+    next_states = send_to_device(D, batch.next_state)
 
-    actions = CartesianIndex.(batch.actions, 1:batch_size)
+    actions = CartesianIndex.(batch.action, 1:batch_size)
 
     target_support =
         reshape(rewards, 1, :) .+
@@ -156,10 +151,9 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
     next_logits = Qₜ(next_states)
     next_probs = reshape(softmax(reshape(next_logits, n_atoms, :)), n_atoms, n_actions, :)
     next_q = reshape(sum(support .* next_probs, dims = 1), n_actions, :)
-    if !isnothing(batch.next_legal_actions_mask)
-        masked_value = fill(typemin(Float32), size(batch.next_legal_actions_mask))
-        masked_value[batch.next_legal_actions_mask] .= 0
-        next_q .+= send_to_device(D, masked_value)
+    if haskey(batch, :next_legal_actions_mask)
+        l′ = send_to_device(D, batch[:next_legal_actions_mask])
+        next_q .+= ifelse.(l′, 0.f0, typemin(Float32))
     end
     next_prob_select = select_best_probs(next_probs, next_q)
 
@@ -172,10 +166,10 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
         learner.Vₘₐₓ,
     )
 
-    is_use_PER = !isnothing(batch.priorities)  # is use Prioritized Experience Replay
+    is_use_PER = haskey(batch, :priority)  # is use Prioritized Experience Replay
     if is_use_PER
         updated_priorities = Vector{Float32}(undef, batch_size)
-        weights = 1.0f0 ./ ((batch.priorities .+ 1f-10) .^ β)
+        weights = 1.0f0 ./ ((batch.priority .+ 1f-10) .^ β)
         weights ./= maximum(weights)
         weights = send_to_device(D, weights)
     end
@@ -198,7 +192,7 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
 
     update!(Q, gs)
 
-    updated_priorities
+    is_use_PER ? updated_priorities : nothing
 end
 
 @inline function select_best_probs(probs, q)

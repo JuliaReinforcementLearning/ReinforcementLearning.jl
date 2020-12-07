@@ -32,6 +32,14 @@ mutable struct DDPGPolicy{
     critic_loss::Float32
 end
 
+Flux.functor(x::DDPGPolicy) = (ba = x.behavior_actor, bc=x.behavior_critic, ta=x.target_actor, tc=x.target_critic), y -> begin
+    x = @set x.behavior_actor = y.ba
+    x = @set x.behavior_critic = y.bc
+    x = @set x.target_actor = y.ta
+    x = @set x.target_critic = y.tc
+    x
+end
+
 """
     DDPGPolicy(;kwargs...)
 
@@ -108,16 +116,15 @@ function (p::DDPGPolicy)(env)
     end
 end
 
-function RLBase.update!(p::DDPGPolicy, traj::CircularCompactSARTSATrajectory)
-    length(traj[:terminal]) > p.update_after || return
+function RLBase.update!(p::DDPGPolicy, traj::CircularArraySARTTrajectory)
+    length(traj) > p.update_after || return
     p.step % p.update_every == 0 || return
+    inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
+    update!(p, batch)
+end
 
-    inds = rand(p.rng, 1:(length(traj[:terminal])-1), p.batch_size)
-    s = select_last_dim(traj[:state], inds)
-    a = select_last_dim(traj[:action], inds)
-    r = select_last_dim(traj[:reward], inds)
-    t = select_last_dim(traj[:terminal], inds)
-    s′ = select_last_dim(traj[:next_state], inds)
+function RLBase.update!(p::DDPGPolicy, batch::NamedTuple{SARTS})
+    s, a, r, t, s′ = send_to_device(device(p), batch)
 
     A = p.behavior_actor
     C = p.behavior_critic

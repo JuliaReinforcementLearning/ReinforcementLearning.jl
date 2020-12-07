@@ -130,16 +130,15 @@ function evaluate(p::SACPolicy, state)
     return tanh.(z), logp_π
 end
 
-function RLBase.update!(p::SACPolicy, traj::CircularCompactSARTSATrajectory)
-    length(traj[:terminal]) > p.update_after || return
+function RLBase.update!(p::SACPolicy, traj::CircularArraySARTTrajectory)
+    length(traj) > p.update_after || return
     p.step % p.update_every == 0 || return
+    inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
+    update!(p, batch)
+end
 
-    inds = rand(p.rng, 1:(length(traj[:terminal])-1), p.batch_size)
-    s = select_last_dim(traj[:state], inds)
-    a = select_last_dim(traj[:action], inds)
-    r = select_last_dim(traj[:reward], inds)
-    t = select_last_dim(traj[:terminal], inds)
-    s′ = select_last_dim(traj[:next_state], inds)
+function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
+    s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
 
     γ, ρ, α = p.γ, p.ρ, p.α
 
