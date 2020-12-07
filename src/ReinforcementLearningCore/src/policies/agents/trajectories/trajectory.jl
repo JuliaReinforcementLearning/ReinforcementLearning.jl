@@ -201,9 +201,9 @@ end
 
 #####
 
-Base.@kwdef struct PrioritizedTrajectory{P,T} <: AbstractTrajectory
-    priority::P
+Base.@kwdef struct PrioritizedTrajectory{T,P} <: AbstractTrajectory
     traj::T
+    priority::P
 end
 
 Base.keys(t::PrioritizedTrajectory) = (:priority, keys(t.traj)...)
@@ -221,8 +221,8 @@ const CircularArrayPSARTTrajectory =
     PrioritizedTrajectory{<:SumTree,<:CircularArraySARTTrajectory}
 
 CircularArrayPSARTTrajectory(; capacity, kwargs...) = PrioritizedTrajectory(
-    SumTree(capacity),
     CircularArraySARTTrajectory(; capacity = capacity, kwargs...),
+    SumTree(capacity),
 )
 
 #####

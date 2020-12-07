@@ -42,7 +42,7 @@ RLBase.update!(p::AbstractPolicy, t::AbstractTrajectory, ::AbstractEnv, ::PreAct
 RLBase.update!(::AbstractTrajectory, ::AbstractPolicy, ::AbstractEnv, ::AbstractStage) = nothing
 
 function RLBase.update!(
-    trajectory::CircularArraySARTTrajectory,
+    trajectory::Union{CircularArraySARTTrajectory, PrioritizedTrajectory{<:CircularArraySARTTrajectory}},
     ::AbstractPolicy,
     ::AbstractEnv,
     ::PreEpisodeStage,
@@ -54,7 +54,7 @@ function RLBase.update!(
 end
 
 function RLBase.update!(
-    trajectory::CircularArraySLARTTrajectory,
+    trajectory::Union{CircularArraySLARTTrajectory, PrioritizedTrajectory{<:CircularArraySLARTTrajectory}},
     ::AbstractPolicy,
     ::AbstractEnv,
     ::PreEpisodeStage,
@@ -67,7 +67,7 @@ function RLBase.update!(
 end
 
 function RLBase.update!(
-    trajectory::CircularArraySARTTrajectory,
+    trajectory::Union{CircularArraySARTTrajectory,PrioritizedTrajectory{<:CircularArraySARTTrajectory}},
     policy::AbstractPolicy,
     env::AbstractEnv,
     ::Union{PreActStage, PostEpisodeStage},
@@ -79,7 +79,7 @@ function RLBase.update!(
 end
 
 function RLBase.update!(
-    trajectory::CircularArraySLARTTrajectory,
+    trajectory::Union{CircularArraySLARTTrajectory,PrioritizedTrajectory{<:CircularArraySLARTTrajectory}},
     policy::AbstractPolicy,
     env::AbstractEnv,
     ::Union{PreActStage, PostEpisodeStage},

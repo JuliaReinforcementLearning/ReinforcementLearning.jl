@@ -88,13 +88,14 @@ Base.@kwdef struct NStepBatchSampler{traces} <: AbstractSampler{traces}
 end
 
 function StatsBase.sample(rng::AbstractRNG, t::AbstractTrajectory, s::NStepBatchSampler)
-    inds = rand(rng, 1:(length(t)-s.n+1), s.batch_size)
+    valid_range = isnothing(s.stack_size) ? (1:(length(t)-s.n+1)) : (s.stack_size:(length(t)-s.n+1))
+    inds = rand(rng, valid_range, s.batch_size)
     inds, select(inds, t, s)
 end
 
 function StatsBase.sample(
     rng::AbstractRNG,
-    t::PrioritizedTrajectory{<:SumTree},
+    t::PrioritizedTrajectory,
     s::NStepBatchSampler,
 )
     bz, sz = s.batch_size, s.stack_size

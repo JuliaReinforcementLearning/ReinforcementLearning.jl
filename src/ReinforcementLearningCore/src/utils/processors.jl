@@ -52,11 +52,16 @@ function (p::StackFrames{T,N})(state::AbstractArray) where {T,N}
     p
 end
 
-function Base.push!(cb::CircularArrayBuffer, p::StackFrames)
-    push!(cb, select_last_frame(p.buffer))
-end
-
 function RLBase.reset!(p::StackFrames{T,N}) where {T,N}
     fill!(p.buffer, zero(T))
     p
+end
+
+"""
+When pushing a `StackFrames` into a `CircularArrayBuffer` of the same dimension,
+only the latest frame is pushed. If the `StackFrames` is one dimension lower,
+then it is treated as a general `AbstractArray` and is pushed in as a frame.
+"""
+function Base.push!(cb::CircularArrayBuffer{T,N}, p::StackFrames{T,N}) where {T,N}
+    push!(cb, select_last_frame(p.buffer))
 end

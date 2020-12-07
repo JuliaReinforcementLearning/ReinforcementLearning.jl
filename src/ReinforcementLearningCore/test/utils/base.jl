@@ -52,7 +52,7 @@
     @testset "sum_tree" begin
         t = SumTree(8)
 
-        @test capacity(t) == 8
+        @test RLCore.capacity(t) == 8
 
         for i in 1:4
             push!(t, i)
@@ -74,7 +74,7 @@
         @test all([get(t, v)[1] == i for (i, v) in enumerate(0.5:1.0:8)])
 
         empty!(t)
-        @test capacity(t) == 8
+        @test RLCore.capacity(t) == 8
         @test length(t) == 0
     end
 

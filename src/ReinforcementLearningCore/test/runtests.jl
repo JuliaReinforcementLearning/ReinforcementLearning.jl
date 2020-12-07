@@ -1,3 +1,4 @@
+using CircularArrayBuffers
 using ReinforcementLearningBase
 using ReinforcementLearningCore
 using Random

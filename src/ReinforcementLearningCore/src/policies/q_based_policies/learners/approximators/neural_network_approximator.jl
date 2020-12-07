@@ -18,7 +18,9 @@ Base.@kwdef struct NeuralNetworkApproximator{M,O} <: AbstractApproximator
     optimizer::O = nothing
 end
 
-(app::NeuralNetworkApproximator)(x) = app.model(x)
+# some model may accept multiple inputs
+(app::NeuralNetworkApproximator)(args...; kwargs...) = app.model(args...; kwargs...)
+
 
 functor(x::NeuralNetworkApproximator) =
     (model = x.model,), y -> NeuralNetworkApproximator(y.model, x.optimizer)
