@@ -1,8 +1,5 @@
 export DQNLearner
 
-using Random
-using Flux
-
 mutable struct DQNLearner{
     Tq<:AbstractApproximator,
     Tt<:AbstractApproximator,

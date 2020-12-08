@@ -1,16 +1,6 @@
 using .ArcadeLearningEnvironment
 using .ReinforcementLearningEnvironments
 
-using Dates
-using ReinforcementLearningCore
-using Flux
-using BSON
-using TensorBoardLogger
-using Logging
-using Statistics
-using Random
-using Setfield:@set
-
 function atari_env_factory(
     name,
     state_size,

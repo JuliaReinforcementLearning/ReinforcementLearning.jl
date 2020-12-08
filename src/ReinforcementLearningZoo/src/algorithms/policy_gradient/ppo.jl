@@ -1,10 +1,5 @@
 export PPOPolicy, PPOTrajectory, MaskedPPOTrajectory
 
-using Random
-using Distributions: Categorical, Normal, logpdf
-using StructArrays
-using CircularArrayBuffers
-
 const PPOTrajectory = Trajectory{
     <:NamedTuple{
         (:action_log_prob, SART...),

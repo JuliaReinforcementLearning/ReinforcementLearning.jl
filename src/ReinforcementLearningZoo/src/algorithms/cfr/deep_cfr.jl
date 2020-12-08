@@ -1,7 +1,5 @@
 export DeepCFR
 
-using Statistics: mean
-using StatsBase
 
 """
     DeepCFR(;kwargs...)

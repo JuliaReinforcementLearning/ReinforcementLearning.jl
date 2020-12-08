@@ -1,7 +1,5 @@
 export MACLearner
 
-using Flux
-
 """
     MACLearner(;kwargs...)
 

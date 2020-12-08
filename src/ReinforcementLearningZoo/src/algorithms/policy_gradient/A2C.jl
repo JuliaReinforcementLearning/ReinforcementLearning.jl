@@ -1,8 +1,5 @@
 export A2CLearner
 
-using Flux
-using Setfield:@set
-
 """
     A2CLearner(;kwargs...)
 

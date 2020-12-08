@@ -1,12 +1,5 @@
 export IQNLearner, ImplicitQuantileNet
 
-using Flux
-using CUDA
-using Random
-using Zygote
-using Statistics: mean
-using LinearAlgebra: dot
-
 """
     ImplicitQuantileNet(;ψ, ϕ, header)
 

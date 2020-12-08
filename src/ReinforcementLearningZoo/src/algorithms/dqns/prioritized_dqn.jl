@@ -1,11 +1,5 @@
 export PrioritizedDQNLearner
 
-using Random
-using Flux
-using Zygote
-using StatsBase: mean
-using LinearAlgebra: dot
-
 """
     PrioritizedDQNLearner(;kwargs...)
 

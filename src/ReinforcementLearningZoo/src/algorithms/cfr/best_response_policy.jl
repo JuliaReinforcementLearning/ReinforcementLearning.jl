@@ -1,7 +1,5 @@
 export BestResponsePolicy
 
-using Flux: onehot
-
 struct BestResponsePolicy{E,S,A,X,P<:AbstractPolicy} <: AbstractCFRPolicy
     cfr_reach_prob::Dict{S,Vector{Pair{E,Float64}}}
     best_response_action_cache::Dict{S,A}

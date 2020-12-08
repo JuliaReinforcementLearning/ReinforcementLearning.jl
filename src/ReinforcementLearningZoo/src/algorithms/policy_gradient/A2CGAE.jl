@@ -1,7 +1,5 @@
 export A2CGAELearner
 
-using Flux
-
 """
     A2CGAELearner(;kwargs...)
 # Keyword arguments

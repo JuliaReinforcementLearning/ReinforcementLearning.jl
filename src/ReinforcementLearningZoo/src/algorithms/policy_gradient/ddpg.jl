@@ -1,8 +1,5 @@
 export DDPGPolicy
 
-using Random
-using Flux
-
 mutable struct DDPGPolicy{
     BA<:NeuralNetworkApproximator,
     BC<:NeuralNetworkApproximator,

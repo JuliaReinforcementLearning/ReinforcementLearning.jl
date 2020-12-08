@@ -1,11 +1,5 @@
 export RainbowLearner
 
-using Flux
-using Zygote
-using StatsBase
-using Random
-using LinearAlgebra: dot
-
 """
     RainbowLearner(;kwargs...)
 

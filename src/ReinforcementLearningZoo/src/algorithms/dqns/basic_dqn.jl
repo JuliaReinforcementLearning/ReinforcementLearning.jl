@@ -1,8 +1,5 @@
 export BasicDQNLearner
 
-using Random
-using Flux
-
 """
     BasicDQNLearner(;kwargs...)
 

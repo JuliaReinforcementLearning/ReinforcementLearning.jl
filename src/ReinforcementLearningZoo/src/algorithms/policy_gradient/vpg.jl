@@ -1,9 +1,3 @@
-using Flux: normalise
-using Random: shuffle
-
-using ReinforcementLearningBase
-using ReinforcementLearningCore
-
 export VPGPolicy, GaussianNetwork
 
 """

@@ -1,8 +1,5 @@
 export ExternalSamplingMCCFRPolicy
 
-using Random
-using StatsBase: sample, Weights
-
 """
     ExternalSamplingMCCFRPolicy
 

@@ -1,10 +1,5 @@
 export SACPolicy, SACPolicyNetwork
 
-using Random
-using Flux
-using Flux.Losses: mse
-using Distributions: Normal, logpdf
-
 # Define SAC Actor
 struct SACPolicyNetwork
     pre::Chain

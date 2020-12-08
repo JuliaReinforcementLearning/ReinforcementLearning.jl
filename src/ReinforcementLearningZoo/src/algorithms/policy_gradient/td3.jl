@@ -1,8 +1,5 @@
 export TD3Policy, TD3Critic
 
-using Random
-using Flux
-
 struct TD3Critic
     critic_1::Flux.Chain
     critic_2::Flux.Chain
