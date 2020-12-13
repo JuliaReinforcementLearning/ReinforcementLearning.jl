@@ -12,6 +12,7 @@ using CUDA
 
 @testset "ReinforcementLearningCore.jl" begin
     include("core/core.jl")
+    include("core/stop_conditions_test.jl")
     include("components/components.jl")
     include("utils/utils.jl")
     include("extensions.jl")

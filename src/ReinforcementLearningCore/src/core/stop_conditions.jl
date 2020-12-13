@@ -1,6 +1,12 @@
-export StopAfterStep, StopAfterEpisode, StopWhenDone, ComposedStopCondition, StopSignal
+export StopAfterStep,
+    StopAfterEpisode,
+    StopWhenDone,
+    ComposedStopCondition,
+    StopSignal,
+    StopAfterNoImprovement
 
 using ProgressMeter
+using CircularArrayBuffers: CircularArrayBuffer, isfull
 
 const update! = ReinforcementLearningBase.update!
 
@@ -101,6 +107,47 @@ end
 
 (s::StopAfterEpisode)(agent, env::MultiThreadEnv) =
     @error "MultiThreadEnv is not supported!"
+
+
+#####
+# StopAfterNoImprovement
+#####
+
+Base.@kwdef struct StopAfterNoImprovement{F,B<:CircularArrayBuffer,T<:Number}
+    fn::F
+    buffer::B
+    δ::T = 0.0
+end
+
+"""
+StopAfterNoImprovement()
+
+Stop training when a monitored metric has stopped improving.
+
+Parameters:
+
+fn: a closure, return a scalar value, which indicates the performance of the policy (the higher the better)
+e.g. 
+1. () -> get_reward(env)
+1. () -> total_reward_per_episode.reward
+
+patience: Number of epochs with no improvement after which training will be stopped.
+
+δ: Minimum change in the monitored quantity to qualify as an improvement, i.e. an absolute change of less than min_delta, will count as no improvement.
+
+Return `true` after the monitored metric has stopped improving.
+"""
+function StopAfterNoImprovement(fn, patience::Int, δ::T = 0.0f0) where {T<:Number}
+    StopAfterNoImprovement(fn = fn, buffer = CircularArrayBuffer{T}(1, patience), δ = δ)
+end
+
+function (s::StopAfterNoImprovement)(agent, env)::Bool
+    get_terminal(env) || return false # post episode stage
+    val = s.fn()
+    improved = isfull(s.buffer) ? all(s.buffer .< (val - s.δ)) : true
+    push!(s.buffer, val)
+    !improved
+end
 
 #####
 # StopWhenDone
