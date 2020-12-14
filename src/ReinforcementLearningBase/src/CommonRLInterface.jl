@@ -21,9 +21,9 @@ end
 const CommonRLEnvs = Union{CommonRLEnv,CommonRLMarkovEnv,CommonRLZeroSumEnv}
 
 function Base.convert(::Type{CRL.AbstractEnv}, env::AbstractEnv)
-    if get_num_players(env) == 1
+    if NumAgentStyle(env) === SINGLE_AGENT
         convert(CRL.AbstractMarkovEnv, env)
-    elseif get_num_players(env) == 2 && UtilityStyle(env) === ZERO_SUM
+    elseif NumAgentStyle(env) isa MultiAgent{2} && UtilityStyle(env) === ZERO_SUM
         convert(CRL.AbstractZeroSumEnv, env)
     else
         CommonRLEnv(env)
@@ -34,25 +34,25 @@ Base.convert(::Type{CRL.AbstractMarkovEnv}, env::AbstractEnv) = CommonRLMarkovEn
 Base.convert(::Type{CRL.AbstractZeroSumEnv}, env::AbstractEnv) = CommonRLZeroSumEnv(env)
 
 CRL.@provide CRL.reset!(env::CommonRLEnvs) = reset!(env.env)
-CRL.@provide CRL.actions(env::CommonRLEnvs) = get_actions(env.env)
-CRL.@provide CRL.observe(env::CommonRLEnvs) = get_state(env.env)
-CRL.state(env::CommonRLEnvs) = get_state(env.env)
+CRL.@provide CRL.actions(env::CommonRLEnvs) = action_space(env.env)
+CRL.@provide CRL.observe(env::CommonRLEnvs) = state(env.env)
+CRL.state(env::CommonRLEnvs) = state(env.env)
 CRL.provided(::typeof(CRL.state), env::CommonRLEnvs) =
     InformationStyle(env.env) === PERFECT_INFORMATION
-CRL.@provide CRL.terminated(env::CommonRLEnvs) = get_terminal(env.env)
-CRL.@provide CRL.player(env::CommonRLEnvs) = get_current_player(env.env)
+CRL.@provide CRL.terminated(env::CommonRLEnvs) = is_terminated(env.env)
+CRL.@provide CRL.player(env::CommonRLEnvs) = current_player(env.env)
 CRL.@provide CRL.clone(env::CommonRLEnvs) = CommonRLEnv(copy(env.env))
 
 CRL.@provide function CRL.act!(env::CommonRLEnvs, a)
     env.env(a)
-    get_reward(env.env)
+    reward(env.env)
 end
 
-CRL.valid_actions(x::CommonRLEnvs) = get_legal_actions(x.env)
+CRL.valid_actions(x::CommonRLEnvs) = legal_action_space(x.env)
 CRL.provided(::typeof(CRL.valid_actions), env::CommonRLEnvs) =
     ActionStyle(env.env) === FullActionSet()
 
-CRL.valid_action_mask(x::CommonRLEnvs) = get_legal_actions_mask(x.env)
+CRL.valid_action_mask(x::CommonRLEnvs) = legal_action_space_mask(x.env)
 CRL.provided(::typeof(CRL.valid_action_mask), env::CommonRLEnvs) =
     ActionStyle(env.env) === FullActionSet()
 
@@ -68,12 +68,12 @@ end
 Base.convert(::Type{AbstractEnv}, env::CRL.AbstractEnv) = convert(RLBaseEnv, env)
 Base.convert(::Type{RLBaseEnv}, env::CRL.AbstractEnv) = RLBaseEnv(env, 0.0f0)  # can not determine reward ahead. Assume `Float32`.
 
-get_state(env::RLBaseEnv) = CRL.observe(env.env)
-get_actions(env::RLBaseEnv) = CRL.actions(env.env)
-get_reward(env::RLBaseEnv) = env.r
-get_terminal(env::RLBaseEnv) = CRL.terminated(env.env)
-get_legal_actions(env::RLBaseEnv) = CRL.valid_actions(env.env)
-get_legal_actions_mask(env::RLBaseEnv) = CRL.valid_action_mask(env.env)
+state(env::RLBaseEnv) = CRL.observe(env.env)
+action_space(env::RLBaseEnv) = CRL.actions(env.env)
+reward(env::RLBaseEnv) = env.r
+is_terminated(env::RLBaseEnv) = CRL.terminated(env.env)
+legal_action_space(env::RLBaseEnv) = CRL.valid_actions(env.env)
+legal_action_space_mask(env::RLBaseEnv) = CRL.valid_action_mask(env.env)
 reset!(env::RLBaseEnv) = CRL.reset!(env.env)
 
 (env::RLBaseEnv)(a) = env.r = CRL.act!(env.env, a)
