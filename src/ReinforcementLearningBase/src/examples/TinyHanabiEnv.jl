@@ -1,7 +1,7 @@
 export TinyHanabiEnv
 
 const TINY_HANABI_REWARD_TABLE = begin
-    t = Array{Int, 4}(undef, 3, 3, 2, 2)
+    t = Array{Int,4}(undef, 3, 3, 2, 2)
     t[:, :, 1, 1] = [
         10 0 0
         4 8 4
@@ -26,7 +26,7 @@ const TINY_HANABI_REWARD_TABLE = begin
 end
 
 struct TinyHanabiEnv <: AbstractEnv
-    reward_table::Array{Int, 4}
+    reward_table::Array{Int,4}
     cards::Vector{Int}
     actions::Vector{Int}
 end
@@ -40,13 +40,14 @@ end
 
 players(env::TinyHanabiEnv) = 1:2
 
-current_player(env::TinyHanabiEnv) = if length(env.cards) < 2
-    CHANCE_PLAYER
-elseif length(env.actions) == 0
-    1
-else
-    2
-end
+current_player(env::TinyHanabiEnv) =
+    if length(env.cards) < 2
+        CHANCE_PLAYER
+    elseif length(env.actions) == 0
+        1
+    else
+        2
+    end
 
 (env::TinyHanabiEnv)(action, ::ChancePlayer) = push!(env.cards, action)
 (env::TinyHanabiEnv)(action, ::Int) = push!(env.actions, action)
@@ -64,26 +65,21 @@ function prob(env::TinyHanabiEnv, ::ChancePlayer)
         [0.5, 0.5]
     elseif length(env.cards) == 1
         p = ones(2)
-        p[env.cards[]] = 0.
+        p[env.cards[]] = 0.0
         p
     else
         @error "shouldn't reach here."
     end
 end
 
-state_space(env::TinyHanabiEnv, ::InformationSet, ::ChancePlayer) = ((0,), (0, 1), (0, 2), (0, 1, 2), (0, 2, 1)) # (chance_player_id(0), chance_player's actions...)
+state_space(env::TinyHanabiEnv, ::InformationSet, ::ChancePlayer) =
+    ((0,), (0, 1), (0, 2), (0, 1, 2), (0, 2, 1)) # (chance_player_id(0), chance_player's actions...)
 state(env::TinyHanabiEnv, ::InformationSet, ::ChancePlayer) = (0, env.cards...)
 
 function state_space(env::TinyHanabiEnv, ::InformationSet, p::Int)
     Tuple(
-        (p, c..., a...)
-        for p in 1:2
-        for c in ((), 1, 2)
-        for a in (
-            (),
-            1:3...,
-            ((i,j) for i in 1:3 for j in 1:3)...
-        )
+        (p, c..., a...) for p in 1:2 for c in ((), 1, 2)
+        for a in ((), 1:3..., ((i, j) for i in 1:3 for j in 1:3)...)
     )
 end
 
@@ -93,7 +89,8 @@ function state(env::TinyHanabiEnv, ::InformationSet, p::Int)
 end
 
 is_terminated(env::TinyHanabiEnv) = length(env.actions) == 2
-reward(env::TinyHanabiEnv, player) = is_terminated(env) ? env.reward_table[env.actions..., env.cards...] : 0
+reward(env::TinyHanabiEnv, player) =
+    is_terminated(env) ? env.reward_table[env.actions..., env.cards...] : 0
 
 (env::TinyHanabiEnv)(action::Int, ::ChancePlayer) = push!(env.cards, action)
 (env::TinyHanabiEnv)(action::Int, ::Int) = push!(env.actions, action)

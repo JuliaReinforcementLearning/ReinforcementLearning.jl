@@ -17,7 +17,7 @@ See [wiki](https://en.wikipedia.org/wiki/Pig_(dice_game)) for explanation of thi
 
 Here we use it to demonstrate how to write a game with more than 2 players.
 """
-PigEnv(;n_players=2) = PigEnv{n_players}(zeros(Int, n_players), 1, false, 0)
+PigEnv(; n_players = 2) = PigEnv{n_players}(zeros(Int, n_players), 1, false, 0)
 
 function reset!(env::PigEnv)
     fill!(env.scores, 0)
@@ -26,15 +26,17 @@ function reset!(env::PigEnv)
     env.tmp_score = 0
 end
 
-current_player(env::PigEnv) = env.is_chance_player_active ? CHANCE_PLAYER : env.current_player
+current_player(env::PigEnv) =
+    env.is_chance_player_active ? CHANCE_PLAYER : env.current_player
 players(env::PigEnv) = 1:length(env.scores)
 action_space(env::PigEnv, ::Int) = (:roll, :hold)
 action_space(env::PigEnv, ::ChancePlayer) = Base.OneTo(PIG_N_SIDES)
 
-prob(env::PigEnv, ::ChancePlayer) = fill(1/6, 6)  # TODO: uniform distribution, more memory efficient
+prob(env::PigEnv, ::ChancePlayer) = fill(1 / 6, 6)  # TODO: uniform distribution, more memory efficient
 
 state(env::PigEnv, ::Observation{Vector{Int}}, p) = env.scores
-state_space(env::PigEnv, ::Observation, p) = [0..(PIG_TARGET_SCORE+PIG_N_SIDES-1) for _ in env.scores]
+state_space(env::PigEnv, ::Observation, p) =
+    [0..(PIG_TARGET_SCORE + PIG_N_SIDES - 1) for _ in env.scores]
 
 is_terminated(env::PigEnv) = any(s >= PIG_TARGET_SCORE for s in env.scores)
 
@@ -75,7 +77,7 @@ function (env::PigEnv)(action, ::ChancePlayer)
     end
 end
 
-NumAgentStyle(::PigEnv{N}) where N = MultiAgent(N)
+NumAgentStyle(::PigEnv{N}) where {N} = MultiAgent(N)
 DynamicStyle(::PigEnv) = SEQUENTIAL
 ActionStyle(::PigEnv) = MINIMAL_ACTION_SET
 InformationStyle(::PigEnv) = PERFECT_INFORMATION

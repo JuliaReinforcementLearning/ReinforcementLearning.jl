@@ -13,7 +13,7 @@ to demonstrate how to write a [POMDP](https://en.wikipedia.org/wiki/Partially_ob
 """
 Base.@kwdef mutable struct TigerProblemEnv <: AbstractEnv
     obs_prob::Float64 = 0.85
-    action::Union{Nothing, Symbol} = nothing
+    action::Union{Nothing,Symbol} = nothing
     rng::AbstractRNG = Random.GLOBAL_RNG
     tiger_pos::Int = rand(rng, 1:2)
 end
@@ -27,7 +27,8 @@ action_space(::TigerProblemEnv) = (:listen, :open_left, :open_right)
 function reward(env::TigerProblemEnv)
     if env.action == :listen
         REWARD_OF_LISTEN
-    elseif (env.action == :open_left && env.tiger_pos == 1) || (env.action == :open_right && env.tiger_pos == 2)
+    elseif (env.action == :open_left && env.tiger_pos == 1) ||
+           (env.action == :open_right && env.tiger_pos == 2)
         REWARD_OF_TIGER
     else
         REWARD_OF_TREASURE

@@ -16,7 +16,7 @@ Compared to the [`MultiArmBanditsEnv`](@ref):
 Base.@kwdef mutable struct RandomWalk1D <: AbstractEnv
     rewards::Pair{Float64,Float64} = -1.0 => 1.0
     N::Int = 7
-    start_pos::Int = (N+1) ÷ 2
+    start_pos::Int = (N + 1) ÷ 2
     pos::Int = start_pos
 end
 
@@ -28,9 +28,9 @@ action_space(::RandomWalk1D) = Base.OneTo(length(ACTIONS_OF_RANDOMWALK1D))
 
 function (env::RandomWalk1D)(action::Symbol)
     if action == :left
-        env.pos = max(env.pos-1, 1)
+        env.pos = max(env.pos - 1, 1)
     elseif action == :right
-        env.pos = min(env.pos+1, env.N)
+        env.pos = min(env.pos + 1, env.N)
     else
         @error "invalid action: $action"
     end
@@ -47,7 +47,7 @@ function reward(env::RandomWalk1D)
     elseif env.pos == env.N
         last(env.rewards)
     else
-        0.
+        0.0
     end
 end
 

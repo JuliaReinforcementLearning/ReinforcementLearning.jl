@@ -20,15 +20,9 @@ This is a **one-shot** game. The environment terminates immediately after taking
 in an action. Here we use it to demonstrate how to write a customized
 environment with only minimal interfaces defined.
 """
-function MultiArmBanditsEnv(;true_reward=0., k = 10, rng=Random.GLOBAL_RNG)
+function MultiArmBanditsEnv(; true_reward = 0.0, k = 10, rng = Random.GLOBAL_RNG)
     true_values = true_reward .+ randn(rng, k)
-    MultiArmBanditsEnv(
-        true_reward,
-        true_values,
-        rng,
-        0.,
-        false
-    )
+    MultiArmBanditsEnv(true_reward, true_values, rng, 0.0, false)
 end
 
 """

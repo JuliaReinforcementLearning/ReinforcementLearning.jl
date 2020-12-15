@@ -1,13 +1,13 @@
 export MontyHallEnv
 
-const REWARD_OF_GOAT = 10.
-const REWARD_OF_CAR = 1_000.
+const REWARD_OF_GOAT = 10.0
+const REWARD_OF_CAR = 1_000.0
 
 mutable struct MontyHallEnv <: AbstractEnv
     doors::Vector{Symbol}
     rng::AbstractRNG
     guest_action::Union{Nothing,Int}
-    host_action::Union{Nothing, Int}
+    host_action::Union{Nothing,Int}
     reward::Union{Nothing,Float64}
 end
 
@@ -24,7 +24,7 @@ Quoted from [wiki](https://en.wikipedia.org/wiki/Monty_Hall_problem):
 
 Here we'll introduce the first environment which is of [`FULL_ACTION_SET`](@ref).
 """
-function MontyHallEnv(;rng=Random.GLOBAL_RNG)
+function MontyHallEnv(; rng = Random.GLOBAL_RNG)
     doors = fill(:goat, 3)
     doors[rand(rng, 1:3)] = :car
     MontyHallEnv(doors, rng, nothing, nothing, nothing)
@@ -94,7 +94,7 @@ function (env::MontyHallEnv)(action)
     end
 end
 
-reward(env::MontyHallEnv) = isnothing(env.reward) ? 0. : env.reward
+reward(env::MontyHallEnv) = isnothing(env.reward) ? 0.0 : env.reward
 
 is_terminated(env::MontyHallEnv) = !isnothing(env.reward)
 

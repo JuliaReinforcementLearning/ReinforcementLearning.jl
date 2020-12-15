@@ -404,7 +404,7 @@ Get the action distribution of chance player.
     Only valid for environments of [`EXPLICIT_STOCHASTIC`](@ref) style. The
     current player of `env` must be the chance player.
 """
-@env_api prob(env::AbstractEnv, player=chance_player(env))
+@env_api prob(env::AbstractEnv, player = chance_player(env))
 
 """
     action_space(env, player=current_player(env))
@@ -430,10 +430,7 @@ legal_action_space(::MinimalActionSet, env, player) = action_space(env)
 
 Required for environments of [`FULL_ACTION_SET`](@ref).
 """
-@multi_agent_env_api legal_action_space_mask(
-    env::AbstractEnv,
-    player = current_player(env),
-)
+@multi_agent_env_api legal_action_space_mask(env::AbstractEnv, player = current_player(env))
 
 """
     state(env, style=[DefaultStateStyle(env)], player=[current_player(env)])
@@ -452,8 +449,10 @@ state(env::AbstractEnv, player) = state(env, DefaultStateStyle(env), player)
     
 Describe all possible states.
 """
-@multi_agent_env_api state_space(env::AbstractEnv) = state_space(env, DefaultStateStyle(env))
-state_space(env::AbstractEnv, ss::AbstractStateStyle) = state_space(env, ss, current_player(env))
+@multi_agent_env_api state_space(env::AbstractEnv) =
+    state_space(env, DefaultStateStyle(env))
+state_space(env::AbstractEnv, ss::AbstractStateStyle) =
+    state_space(env, ss, current_player(env))
 state_space(env::AbstractEnv, player) = state_space(env, DefaultStateStyle(env), player)
 
 """

@@ -1,16 +1,16 @@
 export KuhnPokerEnv
 
 const KUHN_POKER_CARDS = (:J, :Q, :K)
-const KUHN_POKER_CARD_COMBINATIONS = ((:J, :Q), (:J, :K), (:Q, :J), (:Q, :K), (:K, :J), (:K, :Q))
+const KUHN_POKER_CARD_COMBINATIONS =
+    ((:J, :Q), (:J, :K), (:Q, :J), (:Q, :K), (:K, :J), (:K, :Q))
 const KUHN_POKER_ACTIONS = (:pass, :bet)
 const KUHN_POKER_STATES = (
     (),
     map(tuple, KUHN_POKER_CARDS)...,
     KUHN_POKER_CARD_COMBINATIONS...,
     (
-        (cards..., actions...)
-        for cards in ((), map(tuple, KUHN_POKER_CARDS)...)
-        for actions in (
+        (cards..., actions...) for cards in ((), map(tuple, KUHN_POKER_CARDS)...) for
+        actions in (
             (),
             (:bet,),
             (:bet, :bet),
@@ -21,7 +21,7 @@ const KUHN_POKER_STATES = (
             (:pass, :bet, :pass),
             (:pass, :bet, :bet),
         )
-    )...
+    )...,
 )
 
 """
@@ -34,28 +34,24 @@ const KUHN_POKER_REWARD_TABLE = Dict(
     (:Q, :K, :bet, :bet) => -2,
     (:K, :J, :bet, :bet) => 2,
     (:K, :Q, :bet, :bet) => 2,
-
     (:J, :Q, :bet, :pass) => 1,
     (:J, :K, :bet, :pass) => 1,
     (:Q, :J, :bet, :pass) => 1,
     (:Q, :K, :bet, :pass) => 1,
     (:K, :J, :bet, :pass) => 1,
     (:K, :Q, :bet, :pass) => 1,
-
     (:J, :Q, :pass, :pass) => -1,
     (:J, :K, :pass, :pass) => -1,
     (:Q, :J, :pass, :pass) => 1,
     (:Q, :K, :pass, :pass) => -1,
     (:K, :J, :pass, :pass) => 1,
     (:K, :Q, :pass, :pass) => 1,
-
     (:J, :Q, :pass, :bet, :pass) => -1,
     (:J, :K, :pass, :bet, :pass) => -1,
     (:Q, :J, :pass, :bet, :pass) => -1,
     (:Q, :K, :pass, :bet, :pass) => -1,
     (:K, :J, :pass, :bet, :pass) => -1,
     (:K, :Q, :pass, :bet, :pass) => -1,
-
     (:J, :Q, :pass, :bet, :bet) => -2,
     (:J, :K, :pass, :bet, :bet) => -2,
     (:Q, :J, :pass, :bet, :bet) => 2,
@@ -88,7 +84,9 @@ function reset!(env::KuhnPokerEnv)
     empty!(env.actions)
 end
 
-is_terminated(env::KuhnPokerEnv) = length(env.actions) == 2 && (env.actions[1] == :bet || env.actions[2] == :pass) || length(env.actions) == 3
+is_terminated(env::KuhnPokerEnv) =
+    length(env.actions) == 2 && (env.actions[1] == :bet || env.actions[2] == :pass) ||
+    length(env.actions) == 3
 players(env::KuhnPokerEnv) = 1:2
 
 function state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, p::Int)
@@ -99,13 +97,16 @@ function state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, p::In
     end
 end
 
-state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, ::ChancePlayer) = Tuple(env.cards)
-state_space(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, p) = KUHN_POKER_STATES
+state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, ::ChancePlayer) =
+    Tuple(env.cards)
+state_space(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, p) =
+    KUHN_POKER_STATES
 
 action_space(env::KuhnPokerEnv, ::Int) = Base.OneTo(length(KUHN_POKER_ACTIONS))
 action_space(env::KuhnPokerEnv, ::ChancePlayer) = Base.OneTo(length(KUHN_POKER_CARDS))
 
-legal_action_space(env::KuhnPokerEnv, p::ChancePlayer) = [x for x in action_space(env,p) if KUHN_POKER_CARDS[x] ∉ env.cards]
+legal_action_space(env::KuhnPokerEnv, p::ChancePlayer) =
+    [x for x in action_space(env, p) if KUHN_POKER_CARDS[x] ∉ env.cards]
 
 function legal_action_space_mask(env::KuhnPokerEnv, p::ChancePlayer)
     m = fill(true, 3)
@@ -115,9 +116,9 @@ end
 
 function prob(env::KuhnPokerEnv, ::ChancePlayer)
     if length(env.cards) == 0
-        fill(1/3, 3)
+        fill(1 / 3, 3)
     elseif length(env.cards) == 1
-        p = fill(1/2, 3)
+        p = fill(1 / 2, 3)
         p[env.cards[1]] = 0
     else
         @error "it's not chance player's turn!"
@@ -138,16 +139,17 @@ function reward(env::KuhnPokerEnv, p)
     end
 end
 
-current_player(env::KuhnPokerEnv) = if length(env.cards) < 2
-    CHANCE_PLAYER
-elseif length(env.actions) == 0
-    1
-elseif length(env.actions) == 1
-    2
-elseif length(env.actions) == 2
-    1
-else
-end
+current_player(env::KuhnPokerEnv) =
+    if length(env.cards) < 2
+        CHANCE_PLAYER
+    elseif length(env.actions) == 0
+        1
+    elseif length(env.actions) == 1
+        2
+    elseif length(env.actions) == 2
+        1
+    else
+    end
 
 NumAgentStyle(::KuhnPokerEnv) = MultiAgent(2)
 DynamicStyle(::KuhnPokerEnv) = SEQUENTIAL

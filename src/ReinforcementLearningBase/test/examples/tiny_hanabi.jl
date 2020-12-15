@@ -1,7 +1,7 @@
 @testset "TinayHanabiEnv" begin
 
-env = TinyHanabiEnv()
+    env = TinyHanabiEnv()
 
-RLBase.test_interfaces(env)
+    RLBase.test_interfaces(env)
 
 end

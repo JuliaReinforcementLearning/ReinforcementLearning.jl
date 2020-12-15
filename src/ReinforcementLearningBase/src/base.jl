@@ -6,7 +6,8 @@ function env_traits()
     [eval(x) for x in RLBase.ENV_API if endswith(String(x), "Style")]
 end
 
-Base.show(io::IO, t::MIME"text/plain", env::AbstractEnv) = show(io, MIME"text/markdown"(), env)
+Base.show(io::IO, t::MIME"text/plain", env::AbstractEnv) =
+    show(io, MIME"text/markdown"(), env)
 
 function Base.show(io::IO, t::MIME"text/markdown", env::AbstractEnv)
     show(io, t, Markdown.parse("""
@@ -62,7 +63,11 @@ function test_interfaces(env)
 
     rng = Random.MersenneTwister(666)
 
-    @info "testing $(nameof(env)), you need to manually check these traits to make sure they are implemented correctly!" NumAgentStyle(env) DynamicStyle(env) ActionStyle(env) InformationStyle(env) StateStyle(env) RewardStyle(env) UtilityStyle(env) ChanceStyle(env)
+    @info "testing $(nameof(env)), you need to manually check these traits to make sure they are implemented correctly!" NumAgentStyle(
+        env,
+    ) DynamicStyle(env) ActionStyle(env) InformationStyle(env) StateStyle(env) RewardStyle(
+        env,
+    ) UtilityStyle(env) ChanceStyle(env)
 
     reset!(env)
 
@@ -99,7 +104,7 @@ function test_interfaces(env)
 
     @testset "SingleAgent" begin
         if NumAgentStyle(env) === SINGLE_AGENT
-            total_reward = 0.
+            total_reward = 0.0
             while !is_terminated(env)
                 if StateStyle(env) isa Tuple
                     for ss in StateStyle(env)
@@ -111,7 +116,8 @@ function test_interfaces(env)
                 if ActionStyle(env) === MINIMAL_ACTION_SET
                     action_space(env) == legal_action_space
                 elseif ActionStyle(env) === FULL_ACTION_SET
-                    @test legal_action_space(env) == action_space(env)[legal_action_space_mask(env)]
+                    @test legal_action_space(env) ==
+                          action_space(env)[legal_action_space_mask(env)]
                 else
                     @error "TODO:"
                 end
@@ -133,7 +139,7 @@ function test_interfaces(env)
     @testset "MultiAgent" begin
         if NumAgentStyle(env) isa MultiAgent
             reset!(env)
-            rewards = [0. for p in players(env)]
+            rewards = [0.0 for p in players(env)]
             while !is_terminated(env)
                 if InformationStyle(env) === PERFECT_INFORMATION
                     for p in players(env)
@@ -142,7 +148,7 @@ function test_interfaces(env)
                 end
                 a = rand(rng, legal_action_space(env))
                 env(a)
-                for (i,p) in enumerate(players(env))
+                for (i, p) in enumerate(players(env))
                     @test state(env, p) ∈ state_space(env, p)
                     rewards[i] += reward(env, p)
                 end
@@ -158,7 +164,7 @@ function test_interfaces(env)
                 # @test isempty(legal_action_space(env, p))
             end
             if RewardStyle(env) === TERMINAL_REWARD
-                for (p,r) in zip(players(env), rewards)
+                for (p, r) in zip(players(env), rewards)
                     @test r == reward(env, p)
                 end
             end
@@ -207,10 +213,10 @@ function gen_traits_table(io, envs)
         print(io, "<th> $(i) </th>")
     end
 
-    for k in sort(collect(keys(trait_dict)), by=nameof)
+    for k in sort(collect(keys(trait_dict)), by = nameof)
         vs = trait_dict[k]
         print(io, "<tr> <th rowspan=\"$(length(vs))\"> $(nameof(k)) </th>")
-        for (i,v) in enumerate(vs)
+        for (i, v) in enumerate(vs)
             if i != 1
                 print(io, "<tr> ")
             end
@@ -239,7 +245,10 @@ function gen_traits_table(io, envs)
 
     print(io, "<ol>")
     for env in envs
-        println(io, "<li> <a href=\"https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/master/src/examples/$(nameof(env)).jl\"> $(nameof(env)) </a></li>")
+        println(
+            io,
+            "<li> <a href=\"https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/tree/master/src/examples/$(nameof(env)).jl\"> $(nameof(env)) </a></li>",
+        )
     end
     print(io, "</ol>")
 end

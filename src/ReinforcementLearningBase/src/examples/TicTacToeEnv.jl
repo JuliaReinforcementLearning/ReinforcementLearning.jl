@@ -16,33 +16,33 @@ You might be interested in this [blog](http://www.occasionalenthusiast.com/tag/t
 """
 mutable struct TicTacToeEnv <: AbstractEnv
     board::BitArray{3}
-    player::Union{Nought, Cross}
+    player::Union{Nought,Cross}
 end
 
 function TicTacToeEnv()
-    board = BitArray{3}(undef, 3,3,3)
+    board = BitArray{3}(undef, 3, 3, 3)
     fill!(board, false)
-    board[:,:,1] .= true
+    board[:, :, 1] .= true
     TicTacToeEnv(board, CROSS)
 end
 
 function reset!(env::TicTacToeEnv)
     fill!(env.board, false)
-    env.board[:,:,1] .= true
+    env.board[:, :, 1] .= true
     env.player = CROSS
 end
 
 struct TicTacToeInfo
     is_terminated::Bool
-    winner::Union{Nothing, Nought, Cross}
+    winner::Union{Nothing,Nought,Cross}
 end
 
 const TIC_TAC_TOE_STATE_INFO = Dict{
     TicTacToeEnv,
     NamedTuple{
         (:index, :is_terminated, :winner),
-        Tuple{Int, Bool, Union{Nothing, Nought, Cross}}
-    }
+        Tuple{Int,Bool,Union{Nothing,Nought,Cross}},
+    },
 }()
 
 Base.hash(env::TicTacToeEnv, h::UInt) = hash(env.board, h)
@@ -63,7 +63,7 @@ function legal_action_space_mask(env::TicTacToeEnv, p)
     end
 end
 
-(env::TicTacToeEnv)(action::Int) = env(CartesianIndices((3,3))[action])
+(env::TicTacToeEnv)(action::Int) = env(CartesianIndices((3, 3))[action])
 
 function (env::TicTacToeEnv)(action::CartesianIndex{2})
     env.board[action, 1] = false
@@ -77,7 +77,8 @@ players(env::TicTacToeEnv) = (CROSS, NOUGHT)
 state(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = env.board
 state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = fill(false..true, 3, 3, 3)
 state(env::TicTacToeEnv, ::Observation{Int}, p) = get_tic_tac_toe_state_info()[env].index
-state_space(env::TicTacToeEnv, ::Observation{Int}, p) = Base.OneTo(length(get_tic_tac_toe_state_info()))
+state_space(env::TicTacToeEnv, ::Observation{Int}, p) =
+    Base.OneTo(length(get_tic_tac_toe_state_info()))
 
 is_terminated(env::TicTacToeEnv) = get_tic_tac_toe_state_info()[env].is_terminated
 
@@ -100,14 +101,14 @@ function is_win(env::TicTacToeEnv, player)
     b = env.board
     p = Base.to_index(env, player)
     @inbounds begin
-        b[1,1,p] & b[1,2,p] & b[1,3,p] ||
-        b[2,1,p] & b[2,2,p] & b[2,3,p] ||
-        b[3,1,p] & b[3,2,p] & b[3,3,p] ||
-        b[1,1,p] & b[2,1,p] & b[3,1,p] ||
-        b[1,2,p] & b[2,2,p] & b[3,2,p] ||
-        b[1,3,p] & b[2,3,p] & b[3,3,p] ||
-        b[1,1,p] & b[2,2,p] & b[3,3,p] ||
-        b[1,3,p] & b[2,2,p] & b[3,1,p]
+        b[1, 1, p] & b[1, 2, p] & b[1, 3, p] ||
+            b[2, 1, p] & b[2, 2, p] & b[2, 3, p] ||
+            b[3, 1, p] & b[3, 2, p] & b[3, 3, p] ||
+            b[1, 1, p] & b[2, 1, p] & b[3, 1, p] ||
+            b[1, 2, p] & b[2, 2, p] & b[3, 2, p] ||
+            b[1, 3, p] & b[2, 3, p] & b[3, 3, p] ||
+            b[1, 1, p] & b[2, 2, p] & b[3, 3, p] ||
+            b[1, 3, p] & b[2, 2, p] & b[3, 1, p]
     end
 end
 
@@ -117,7 +118,8 @@ function get_tic_tac_toe_state_info()
         t = @elapsed begin
             n = 1
             root = TicTacToeEnv()
-            TIC_TAC_TOE_STATE_INFO[root] = (index=n, is_terminated=false, winner=nothing)
+            TIC_TAC_TOE_STATE_INFO[root] =
+                (index = n, is_terminated = false, winner = nothing)
             walk(root) do env
                 if !haskey(TIC_TAC_TOE_STATE_INFO, env)
                     n += 1
@@ -130,9 +132,9 @@ function get_tic_tac_toe_state_info()
                         nothing
                     end
                     TIC_TAC_TOE_STATE_INFO[env] = (
-                        index = n, 
+                        index = n,
                         is_terminated = !(has_empty_pos && isnothing(w)),
-                        winner = w
+                        winner = w,
                     )
                 end
             end
