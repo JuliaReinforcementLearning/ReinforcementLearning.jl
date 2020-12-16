@@ -3,7 +3,7 @@
     end_rewards = 3 => 5
     env = RandomWalk1D(; rewards = end_rewards)
 
-RLBase.test_interfaces!(env)
+    RLBase.test_interfaces!(env)
 
     rng = StableRNG(123)
     N = 50_000

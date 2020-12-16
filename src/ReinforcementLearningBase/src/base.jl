@@ -115,7 +115,7 @@ function test_interfaces!(env)
     @testset "SingleAgent" begin
         if NumAgentStyle(env) === SINGLE_AGENT
             reset!(env)
-            total_reward = 0.
+            total_reward = 0.0
             while !is_terminated(env)
                 if StateStyle(env) isa Tuple
                     for ss in StateStyle(env)
@@ -272,7 +272,7 @@ end
 
 using IntervalSets
 
-Random.rand(s::Union{Interval, Array{<:Interval}}) = rand(Random.GLOBAL_RNG, s)
+Random.rand(s::Union{Interval,Array{<:Interval}}) = rand(Random.GLOBAL_RNG, s)
 
 function Random.rand(rng::AbstractRNG, s::Interval)
     rand(rng) * (s.right - s.left) + s.left
@@ -292,7 +292,7 @@ struct WorldSpace{T} end
 
 WorldSpace() = WorldSpace{Any}()
 
-Base.in(x, ::WorldSpace{T}) where T = x isa T
+Base.in(x, ::WorldSpace{T}) where {T} = x isa T
 
 #####
 # ZeroTo
@@ -305,16 +305,16 @@ Similar to `Base.OneTo`. Useful when wrapping third-party environments.
 """
 struct ZeroTo{T<:Integer} <: AbstractUnitRange{T}
     stop::T
-    ZeroTo{T}(n) where {T<:Integer} = new(max(zero(T)-one(T),n))
+    ZeroTo{T}(n) where {T<:Integer} = new(max(zero(T) - one(T), n))
 end
 
 ZeroTo(n::T) where {T<:Integer} = ZeroTo{T}(n)
 
 Base.show(io::IO, r::ZeroTo) = print(io, "ZeroTo(", r.stop, ")")
-Base.length(r::ZeroTo{T}) where T = T(r.stop + one(r.stop))
-Base.first(r::ZeroTo{T}) where T = zero(r.stop)
+Base.length(r::ZeroTo{T}) where {T} = T(r.stop + one(r.stop))
+Base.first(r::ZeroTo{T}) where {T} = zero(r.stop)
 
-function getindex(v::ZeroTo{T}, i::Integer) where T
+function getindex(v::ZeroTo{T}, i::Integer) where {T}
     Base.@_inline_meta
     @boundscheck ((i >= 0) & (i <= v.stop)) || throw_boundserror(v, i)
     convert(T, i)
@@ -349,7 +349,8 @@ function weighted_sample(rng::AbstractRNG, wv)
     end
 end
 
-Random.rand(rng::AbstractRNG, s::AbstractVector{<:ActionProbPair}) = s[weighted_sample(rng, (x.prob for x in s))]
+Random.rand(rng::AbstractRNG, s::AbstractVector{<:ActionProbPair}) =
+    s[weighted_sample(rng, (x.prob for x in s))]
 
 (env::AbstractEnv)(a::ActionProbPair) = env(a.action)
 
@@ -368,15 +369,16 @@ end
 
 Random.rand(s::Space) = rand(Random.GLOBAL_RNG, s)
 
-Random.rand(rng::AbstractRNG, s::Space) = map(s.s) do x
-    rand(rng, x)
-end
+Random.rand(rng::AbstractRNG, s::Space) =
+    map(s.s) do x
+        rand(rng, x)
+    end
 
-Random.rand(rng::AbstractRNG, s::Space{<:Dict}) = Dict(k=>rand(rng,v) for (k,v) in s.s)
+Random.rand(rng::AbstractRNG, s::Space{<:Dict}) = Dict(k => rand(rng, v) for (k, v) in s.s)
 
 function Base.in(X, S::Space)
     if length(X) == length(S.s)
-        for (x,s) in zip(X, S.s)
+        for (x, s) in zip(X, S.s)
             if x ∉ s
                 return false
             end
