@@ -3,7 +3,7 @@
     rng = StableRNG(123)
     env = MontyHallEnv(; rng = rng)
 
-    RLBase.test_interfaces(env)
+RLBase.test_interfaces!(env)
 
     n_win_car = 0
     N = 50_000

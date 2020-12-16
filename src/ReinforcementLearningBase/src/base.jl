@@ -10,7 +10,7 @@ Base.show(io::IO, t::MIME"text/plain", env::AbstractEnv) =
     show(io, MIME"text/markdown"(), env)
 
 function Base.show(io::IO, t::MIME"text/markdown", env::AbstractEnv)
-    show(io, t, Markdown.parse("""
+    s = """
     # $(nameof(env))
 
     ## Traits
@@ -18,34 +18,48 @@ function Base.show(io::IO, t::MIME"text/markdown", env::AbstractEnv)
     |:---------- | ----- |
     $(join(["|$(string(f))|$(f(env))|" for f in env_traits()], "\n"))
 
-    ## Action Space
-    `$(action_space(env))`
+    ## Is Environment Terminated?
+    $(is_terminated(env) ? "Yes" : "No")
 
-    ## State Space
-    `$(state_space(env))`
+    """
 
-    """))
+    if get(io, :is_show_state_space, true)
+        s *= """
+        ## State Space
+        `$(state_space(env))`
 
-    if NumAgentStyle(env) !== SINGLE_AGENT
-        show(io, t, Markdown.parse("""
-            ## Players
-            $(join(["- `$p`" for p in players(env)], "\n"))
-
-            ## Current Player
-            `$(current_player(env))`
-            """))
+        """
     end
 
-    show(io, t, Markdown.parse("""
-        ## Is Environment Terminated?
-        $(is_terminated(env) ? "Yes" : "No")
+    if get(io, :is_show_action_space, true)
+        s *= """
+        ## Action Space
+        `$(action_space(env))`
 
+        """
+    end
+
+    if NumAgentStyle(env) !== SINGLE_AGENT
+        s *= """
+        ## Players
+        $(join(["- `$p`" for p in players(env)], "\n"))
+
+        ## Current Player
+        `$(current_player(env))`
+        """
+    end
+
+    if get(io, :is_show_state, true)
+        s *= """
         ## Current State
 
         ```
         $(state(env))
         ```
-        """))
+        """
+    end
+
+    show(io, t, Markdown.parse(s))
 end
 
 #####
@@ -58,9 +72,7 @@ using Test
 Call this function after writing your customized environment to make sure that
 all the necessary interfaces are implemented correctly and consistently.
 """
-function test_interfaces(env)
-    env = copy(env)  # make sure we don't touch the original environment
-
+function test_interfaces!(env)
     rng = Random.MersenneTwister(666)
 
     @info "testing $(nameof(env)), you need to manually check these traits to make sure they are implemented correctly!" NumAgentStyle(
@@ -69,42 +81,41 @@ function test_interfaces(env)
         env,
     ) UtilityStyle(env) ChanceStyle(env)
 
-    reset!(env)
-
     @testset "copy" begin
-        old_env = env
-        env = copy(env)
+        X = copy(env)
+        Y = copy(env)
+        reset!(X)
+        reset!(Y)
 
-        if ChanceStyle(env) ∉ (DETERMINISTIC, EXPLICIT_STOCHASTIC)
+        if ChanceStyle(Y) ∉ (DETERMINISTIC, EXPLICIT_STOCHASTIC)
             s = 888
-            Random.seed!(env, s)
-            Random.seed!(old_env, s)
+            Random.seed!(Y, s)
+            Random.seed!(X, s)
         end
 
-        @test env !== old_env
+        @test Y !== X
 
-        @test state(env) == state(old_env)
-        @test action_space(env) == action_space(old_env)
-        @test reward(env) == reward(old_env)
-        @test is_terminated(env) == is_terminated(old_env)
+        @test state(Y) == state(X)
+        @test action_space(Y) == action_space(X)
+        @test reward(Y) == reward(X)
+        @test is_terminated(Y) == is_terminated(X)
 
-        while !is_terminated(env)
-            A, A′ = legal_action_space(old_env), legal_action_space(env)
+        while !is_terminated(Y)
+            A, A′ = legal_action_space(X), legal_action_space(Y)
             @test A == A′
             a = rand(rng, A)
-            env(a)
-            old_env(a)
-            @test state(env) == state(old_env)
-            @test reward(env) == reward(old_env)
-            @test is_terminated(env) == is_terminated(old_env)
+            Y(a)
+            X(a)
+            @test state(Y) == state(X)
+            @test reward(Y) == reward(X)
+            @test is_terminated(Y) == is_terminated(X)
         end
     end
 
-    reset!(env)
-
     @testset "SingleAgent" begin
         if NumAgentStyle(env) === SINGLE_AGENT
-            total_reward = 0.0
+            reset!(env)
+            total_reward = 0.
             while !is_terminated(env)
                 if StateStyle(env) isa Tuple
                     for ss in StateStyle(env)
@@ -176,6 +187,8 @@ function test_interfaces(env)
             end
         end
     end
+
+    reset!(env)
 end
 
 #####
@@ -259,9 +272,130 @@ end
 
 using IntervalSets
 
+Random.rand(s::Union{Interval, Array{<:Interval}}) = rand(Random.GLOBAL_RNG, s)
+
+function Random.rand(rng::AbstractRNG, s::Interval)
+    rand(rng) * (s.right - s.left) + s.left
+end
+
+#####
+# WorldSpace
+#####
+
+export WorldSpace
+
 """
-watch https://github.com/JuliaMath/IntervalSets.jl/issues/66
+In some cases, we may not be interested in the action/state space.
+One can return `WorldSpace()` to keep the interface consistent.
 """
-function Base.in(x::AbstractArray, s::Array{<:Interval})
-    size(x) == size(s) && all(x .∈ s)
+struct WorldSpace{T} end
+
+WorldSpace() = WorldSpace{Any}()
+
+Base.in(x, ::WorldSpace{T}) where T = x isa T
+
+#####
+# ZeroTo
+#####
+
+export ZeroTo
+
+"""
+Similar to `Base.OneTo`. Useful when wrapping third-party environments.
+"""
+struct ZeroTo{T<:Integer} <: AbstractUnitRange{T}
+    stop::T
+    ZeroTo{T}(n) where {T<:Integer} = new(max(zero(T)-one(T),n))
+end
+
+ZeroTo(n::T) where {T<:Integer} = ZeroTo{T}(n)
+
+Base.show(io::IO, r::ZeroTo) = print(io, "ZeroTo(", r.stop, ")")
+Base.length(r::ZeroTo{T}) where T = T(r.stop + one(r.stop))
+Base.first(r::ZeroTo{T}) where T = zero(r.stop)
+
+function getindex(v::ZeroTo{T}, i::Integer) where T
+    Base.@_inline_meta
+    @boundscheck ((i >= 0) & (i <= v.stop)) || throw_boundserror(v, i)
+    convert(T, i)
+end
+
+#####
+# ActionProbPair
+#####
+
+export ActionProbPair
+
+"""
+Used in action space of chance player.
+"""
+struct ActionProbPair{A,P}
+    action::A
+    prob::P
+end
+
+"""
+Directly copied from [StatsBase.jl](https://github.com/JuliaStats/StatsBase.jl/blob/0ea8e798c3d19609ed33b11311de5a2bd6ee9fd0/src/sampling.jl#L499-L510) to avoid depending on the whole package.
+Here we assume `wv` sum to `1`
+"""
+function weighted_sample(rng::AbstractRNG, wv)
+    t = rand(rng)
+    cw = zero(Base.first(wv))
+    for (i, w) in enumerate(wv)
+        cw += w
+        if cw >= t
+            return i
+        end
+    end
+end
+
+Random.rand(rng::AbstractRNG, s::AbstractVector{<:ActionProbPair}) = s[weighted_sample(rng, (x.prob for x in s))]
+
+(env::AbstractEnv)(a::ActionProbPair) = env(a.action)
+
+#####
+# Space
+#####
+
+export Space
+
+"""
+A wrapper to treat each element as a sub-space which supports `Random.rand` and `Base.in`.
+"""
+struct Space{T}
+    s::T
+end
+
+Random.rand(s::Space) = rand(Random.GLOBAL_RNG, s)
+
+Random.rand(rng::AbstractRNG, s::Space) = map(s.s) do x
+    rand(rng, x)
+end
+
+Random.rand(rng::AbstractRNG, s::Space{<:Dict}) = Dict(k=>rand(rng,v) for (k,v) in s.s)
+
+function Base.in(X, S::Space)
+    if length(X) == length(S.s)
+        for (x,s) in zip(X, S.s)
+            if x ∉ s
+                return false
+            end
+        end
+        return true
+    else
+        return false
+    end
+end
+
+function Base.in(X::Dict, S::Space{<:Dict})
+    if keys(X) == keys(S.s)
+        for k in keys(X)
+            if X[k] ∉ S.s[k]
+                return false
+            end
+        end
+        return true
+    else
+        return false
+    end
 end

@@ -2,6 +2,6 @@
 
     env = TinyHanabiEnv()
 
-    RLBase.test_interfaces(env)
+RLBase.test_interfaces!(env)
 
 end

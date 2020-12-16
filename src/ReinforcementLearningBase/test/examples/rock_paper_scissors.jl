@@ -3,7 +3,7 @@
     rng = StableRNG(123)
     env = RockPaperScissorsEnv()
 
-    RLBase.test_interfaces(env)
+RLBase.test_interfaces!(env)
 
     rewards = [[], []]
     for _ in 1:50_000

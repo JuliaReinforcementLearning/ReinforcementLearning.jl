@@ -2,6 +2,6 @@
 
     env = KuhnPokerEnv()
 
-    RLBase.test_interfaces(env)
+RLBase.test_interfaces!(env)
 
 end

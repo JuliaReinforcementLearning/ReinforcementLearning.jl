@@ -168,13 +168,13 @@ abstract type AbstractInformationStyle <: AbstractEnvStyle end
 @api const IMPERFECT_INFORMATION = ImperfectInformation()
 
 """
-    InformationStyle(env) = PERFECT_INFORMATION
+    InformationStyle(env) = IMPERFECT_INFORMATION
 
 Distinguish environments between [`PERFECT_INFORMATION`](@ref) and
-[`IMPERFECT_INFORMATION`](@ref). [`PERFECT_INFORMATION`](@ref) is returned by default.
+[`IMPERFECT_INFORMATION`](@ref). [`IMPERFECT_INFORMATION`](@ref) is returned by default.
 """
 @env_api InformationStyle(env::T) where {T<:AbstractEnv} = InformationStyle(T)
-InformationStyle(::Type{<:AbstractEnv}) = PERFECT_INFORMATION
+InformationStyle(::Type{<:AbstractEnv}) = IMPERFECT_INFORMATION
 
 #####
 ### ChanceStyle
@@ -391,7 +391,12 @@ const SPECTOR = Spector()
 
 @api (env::AbstractEnv)(action, player = current_player(env))
 
-"Make an independent copy of `env`"
+"""
+Make an independent copy of `env`, 
+
+!!! note
+    rng (if `env` has) is also copied!
+"""
 @api copy(env::AbstractEnv) = deepcopy(env)
 @api copyto!(dest::AbstractEnv, src::AbstractEnv)
 

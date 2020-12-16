@@ -36,7 +36,7 @@ prob(env::PigEnv, ::ChancePlayer) = fill(1 / 6, 6)  # TODO: uniform distribution
 
 state(env::PigEnv, ::Observation{Vector{Int}}, p) = env.scores
 state_space(env::PigEnv, ::Observation, p) =
-    [0..(PIG_TARGET_SCORE + PIG_N_SIDES - 1) for _ in env.scores]
+    Space([0..(PIG_TARGET_SCORE + PIG_N_SIDES - 1) for _ in env.scores])
 
 is_terminated(env::PigEnv) = any(s >= PIG_TARGET_SCORE for s in env.scores)
 
