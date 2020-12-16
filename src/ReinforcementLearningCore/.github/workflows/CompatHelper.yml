@@ -1,18 +1,11 @@
 name: CompatHelper
-
 on:
   schedule:
     - cron: '00 00 * * *'
   workflow_dispatch:
-
 jobs:
   CompatHelper:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        julia-version: [1.2.0]
-        julia-arch: [x86]
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Pkg.add("CompatHelper")
         run: julia -e 'using Pkg; Pkg.add("CompatHelper")'
