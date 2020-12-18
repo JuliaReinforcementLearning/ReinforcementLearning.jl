@@ -34,15 +34,21 @@ function (agent::Agent)(stage::PreActStage, env::AbstractEnv)
     action
 end
 
-RLBase.update!(::AbstractPolicy, ::AbstractTrajectory, ::AbstractEnv, ::AbstractStage) = nothing
-RLBase.update!(p::AbstractPolicy, t::AbstractTrajectory, ::AbstractEnv, ::PreActStage) = update!(p, t)
+RLBase.update!(::AbstractPolicy, ::AbstractTrajectory, ::AbstractEnv, ::AbstractStage) =
+    nothing
+RLBase.update!(p::AbstractPolicy, t::AbstractTrajectory, ::AbstractEnv, ::PreActStage) =
+    update!(p, t)
 
 ## update trajectory
 
-RLBase.update!(::AbstractTrajectory, ::AbstractPolicy, ::AbstractEnv, ::AbstractStage) = nothing
+RLBase.update!(::AbstractTrajectory, ::AbstractPolicy, ::AbstractEnv, ::AbstractStage) =
+    nothing
 
 function RLBase.update!(
-    trajectory::Union{CircularArraySARTTrajectory, PrioritizedTrajectory{<:CircularArraySARTTrajectory}},
+    trajectory::Union{
+        CircularArraySARTTrajectory,
+        PrioritizedTrajectory{<:CircularArraySARTTrajectory},
+    },
     ::AbstractPolicy,
     ::AbstractEnv,
     ::PreEpisodeStage,
@@ -54,7 +60,10 @@ function RLBase.update!(
 end
 
 function RLBase.update!(
-    trajectory::Union{CircularArraySLARTTrajectory, PrioritizedTrajectory{<:CircularArraySLARTTrajectory}},
+    trajectory::Union{
+        CircularArraySLARTTrajectory,
+        PrioritizedTrajectory{<:CircularArraySLARTTrajectory},
+    },
     ::AbstractPolicy,
     ::AbstractEnv,
     ::PreEpisodeStage,
@@ -67,10 +76,13 @@ function RLBase.update!(
 end
 
 function RLBase.update!(
-    trajectory::Union{CircularArraySARTTrajectory,PrioritizedTrajectory{<:CircularArraySARTTrajectory}},
+    trajectory::Union{
+        CircularArraySARTTrajectory,
+        PrioritizedTrajectory{<:CircularArraySARTTrajectory},
+    },
     policy::AbstractPolicy,
     env::AbstractEnv,
-    ::Union{PreActStage, PostEpisodeStage},
+    ::Union{PreActStage,PostEpisodeStage},
 )
     action = policy(env)
     push!(trajectory[:state], get_state(env))
@@ -79,10 +91,13 @@ function RLBase.update!(
 end
 
 function RLBase.update!(
-    trajectory::Union{CircularArraySLARTTrajectory,PrioritizedTrajectory{<:CircularArraySLARTTrajectory}},
+    trajectory::Union{
+        CircularArraySLARTTrajectory,
+        PrioritizedTrajectory{<:CircularArraySLARTTrajectory},
+    },
     policy::AbstractPolicy,
     env::AbstractEnv,
-    ::Union{PreActStage, PostEpisodeStage},
+    ::Union{PreActStage,PostEpisodeStage},
 )
     action = policy(env)
     push!(trajectory[:state], get_state(env))
