@@ -174,19 +174,21 @@ function ElasticArrayTrajectory(; kwargs...)
 end
 
 const ElasticSARTTrajectory = Trajectory{
-    <:NamedTuple{
-        SART,
-        <:Tuple{
-            <:ElasticArray,
-            <:ElasticArray,
-            <:ElasticArray,
-            <:ElasticArray,
-        },
-    },
+    <:NamedTuple{SART,<:Tuple{<:ElasticArray,<:ElasticArray,<:ElasticArray,<:ElasticArray}},
 }
 
-function ElasticSARTTrajectory(;state=Int=>(),action=Int=>(),reward=Float32=>(),terminal=Bool=>())
-    ElasticArrayTrajectory(;state=state,action=action,reward=reward,terminal=terminal)
+function ElasticSARTTrajectory(;
+    state = Int => (),
+    action = Int => (),
+    reward = Float32 => (),
+    terminal = Bool => (),
+)
+    ElasticArrayTrajectory(;
+        state = state,
+        action = action,
+        reward = reward,
+        terminal = terminal,
+    )
 end
 
 #####
@@ -230,7 +232,11 @@ CircularArrayPSARTTrajectory(; capacity, kwargs...) = PrioritizedTrajectory(
 #####
 
 function Base.length(
-    t::Union{CircularArraySARTTrajectory,CircularVectorSARTSATrajectory, ElasticSARTTrajectory},
+    t::Union{
+        CircularArraySARTTrajectory,
+        CircularVectorSARTSATrajectory,
+        ElasticSARTTrajectory,
+    },
 )
     x = t[:terminal]
     size(x, ndims(x))
