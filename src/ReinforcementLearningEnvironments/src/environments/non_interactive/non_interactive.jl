@@ -2,6 +2,6 @@ export NonInteractiveEnv
 
 abstract type NonInteractiveEnv <: AbstractEnv end
 (env::NonInteractiveEnv)() = env(nothing)
-RLBase.get_actions(::NonInteractiveEnv) = EmptySpace()
+RLBase.action_space(::NonInteractiveEnv) = (nothing,)
 
 include("pendulum.jl")

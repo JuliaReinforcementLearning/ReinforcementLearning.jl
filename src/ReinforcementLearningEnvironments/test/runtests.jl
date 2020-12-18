@@ -3,15 +3,12 @@ using ReinforcementLearningBase
 using ReinforcementLearningEnvironments
 using ArcadeLearningEnvironment
 using PyCall
-using POMDPs
-using POMDPModels
 using OpenSpiel
 # using SnakeGames
 using Random
+using StableRNGs
+using Statistics
 
 @testset "ReinforcementLearningEnvironments" begin
-
-    include("environments.jl")
-    include("atari.jl")
-    include("open_spiel.jl")
+    include("environments/environments.jl")
 end

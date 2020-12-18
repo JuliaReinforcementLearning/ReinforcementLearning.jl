@@ -5,23 +5,23 @@ function GymEnv(name::String)
     if !PyCall.pyexists("gym")
         error("Cannot import module 'gym'.\n\nIf you did not yet install it, try running\n`ReinforcementLearningEnvironments.install_gym()`\n")
     end
-    gym = pyimport("gym")
+    gym = pyimport_conda("gym", "gym")
     pyenv = try
         gym.make(name)
     catch e
         error("Gym environment $name not found.\n\nRun `ReinforcementLearningEnvironments.list_gym_env_names()` to find supported environments.\n")
     end
-    obs_space = convert(AbstractSpace, pyenv.observation_space)
-    act_space = convert(AbstractSpace, pyenv.action_space)
-    obs_type = if obs_space isa Union{MultiContinuousSpace,MultiDiscreteSpace}
+    obs_space = space_transform(pyenv.observation_space)
+    act_space = space_transform(pyenv.action_space)
+    obs_type = if obs_space isa Space{<:Union{Array{<:Interval},Array{<:ZeroTo}}}
         PyArray
-    elseif obs_space isa ContinuousSpace
+    elseif obs_space isa Interval
         Float64
-    elseif obs_space isa DiscreteSpace
+    elseif obs_space isa ZeroTo
         Int
-    elseif obs_space isa VectSpace
+    elseif obs_space isa Space{<:Tuple}
         PyVector
-    elseif obs_space isa DictSpace
+    elseif obs_space isa Space{<:Dict}
         PyDict
     else
         error("don't know how to get the observation type from observation space of $obs_space")
@@ -36,8 +36,17 @@ function GymEnv(name::String)
     env
 end
 
+Base.nameof(env::GymEnv) = env.pyenv.__class__.__name__
+
+function Base.copy(env::GymEnv)
+    @warn "clone method is not exposed in GymEnv"
+    env
+end
+
 function (env::GymEnv{T})(action) where {T}
-    env.action_space isa VectSpace && (action = Tuple(action))  # ??? maybe add another TupleSpace
+    if env.action_space isa Tuple
+        action = Tuple(action)
+    end
     pycall!(env.state, env.pyenv.step, PyObject, action)
     nothing
 end
@@ -47,10 +56,11 @@ function RLBase.reset!(env::GymEnv)
     nothing
 end
 
-RLBase.get_actions(env::GymEnv) = env.action_space
+RLBase.action_space(env::GymEnv) = env.action_space
+RLBase.state_space(env::GymEnv) = env.observation_space
 
-function RLBase.get_reward(env::GymEnv{T}) where {T}
-    if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type)
+function RLBase.reward(env::GymEnv{T}) where {T}
+    if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type) && length(env.state) == 4
         obs, reward, isdone, info = convert(Tuple{T,Float64,Bool,PyDict}, env.state)
         reward
     else
@@ -58,8 +68,8 @@ function RLBase.get_reward(env::GymEnv{T}) where {T}
     end
 end
 
-function RLBase.get_terminal(env::GymEnv{T}) where {T}
-    if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type)
+function RLBase.is_terminated(env::GymEnv{T}) where {T}
+    if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type) && length(env.state) == 4
         obs, reward, isdone, info = convert(Tuple{T,Float64,Bool,PyDict}, env.state)
         isdone
     else
@@ -67,38 +77,36 @@ function RLBase.get_terminal(env::GymEnv{T}) where {T}
     end
 end
 
-function RLBase.get_state(env::GymEnv{T}) where {T}
-    if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type)
+function RLBase.state(env::GymEnv{T}) where {T}
+    if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type) && length(env.state) == 4
         obs, reward, isdone, info = convert(Tuple{T,Float64,Bool,PyDict}, env.state)
         obs
     else
-        state = convert(T, env.state)
+        convert(T, env.state)
     end
 end
 
-Base.display(env::GymEnv) = env.pyenv.render()
+Random.seed!(env::GymEnv, s) = env.pyenv.seed(s)
+
+# Base.display(env::GymEnv) = env.pyenv.render()
 
 ###
 ### utils
 ###
-
-function Base.convert(::Type{AbstractSpace}, s::PyObject)
+function space_transform(s::PyObject)
     spacetype = s.__class__.__name__
     if spacetype == "Box"
-        MultiContinuousSpace(s.low, s.high)
+        Space(ClosedInterval.(s.low,s.high))
     elseif spacetype == "Discrete"  # for GymEnv("CliffWalking-v0"), `s.n` is of type PyObject (numpy.int64)
-        DiscreteSpace(0, py"int($s.n)" - 1)  # for GymEnv("CliffWalking-v0"), `s.n` is of type PyObject (numpy.int64)
+        ZeroTo(py"int($s.n)" - 1)
     elseif spacetype == "MultiBinary"
-        MultiDiscreteSpace(zeros(Int8, s.n), ones(Int8, s.n))
+        Space(ZeroTo.(ones(Int8, s.n)))
     elseif spacetype == "MultiDiscrete"
-        MultiDiscreteSpace(
-            zeros(eltype(s.nvec), size(s.nvec)),
-            s.nvec .- one(eltype(s.nvec)),
-        )
+        Space(ZeroTo.(s.nvec .- one(eltype(s.nvec))))
     elseif spacetype == "Tuple"
-        VectSpace([convert(AbstractSpace, x) for x in s.spaces])
+        Space(Tuple(space_transform(x) for x in s.spaces))
     elseif spacetype == "Dict"
-        DictSpace((k => convert(AbstractSpace, v) for (k, v) in s.spaces)...)
+        Space(Dict((k => space_transform(v) for (k, v) in s.spaces)...))
     else
         error("Don't know how to convert Gym Space of class [$(spacetype)]")
     end

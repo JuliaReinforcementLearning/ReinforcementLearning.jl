@@ -39,12 +39,12 @@ end
 (env::SnakeGameEnv)(action::Int) = env([SNAKE_GAME_ACTIONS[action]])
 (env::SnakeGameEnv)(actions::Vector{Int}) = env(map(a -> SNAKE_GAME_ACTIONS[a], actions))
 
-RLBase.get_actions(env::SnakeGameEnv) = 1:4
-RLBase.get_state(env::SnakeGameEnv) = env.game.board
-RLBase.get_reward(env::SnakeGameEnv{<:Any,SINGLE_AGENT}) =
+RLBase.action_space(env::SnakeGameEnv) = 1:4
+RLBase.state(env::SnakeGameEnv) = env.game.board
+RLBase.reward(env::SnakeGameEnv{<:Any,SINGLE_AGENT}) =
     length(env.game.snakes[]) - env.latest_snakes_length[]
-RLBase.get_reward(env::SnakeGameEnv) = length.(env.game.snakes) .- env.latest_snakes_length
-RLBase.get_terminal(env::SnakeGameEnv) = env.is_terminated
+RLBase.reward(env::SnakeGameEnv) = length.(env.game.snakes) .- env.latest_snakes_length
+RLBase.is_terminated(env::SnakeGameEnv) = env.is_terminated
 
 RLBase.get_legal_actions(env::SnakeGameEnv{FULL_ACTION_SET,SINGLE_AGENT}) =
     findall(!=(-env.latest_actions[]), SNAKE_GAME_ACTIONS)
@@ -63,4 +63,4 @@ function RLBase.reset!(env::SnakeGameEnv)
     map!(length, env.latest_snakes_length, env.game.snakes)
 end
 
-Base.display(env::SnakeGameEnv) = display(env.game)
+Base.display(io::IO, m::MIME, env::SnakeGameEnv) = display(io, m, env.game)

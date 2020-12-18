@@ -21,17 +21,12 @@ Base.show(io::IO, params::CartPoleEnvParams) = print(
 
 mutable struct CartPoleEnv{T,R<:AbstractRNG} <: AbstractEnv
     params::CartPoleEnvParams{T}
-    action_space::DiscreteSpace{UnitRange{Int64}}
-    observation_space::MultiContinuousSpace{Vector{T}}
     state::Array{T,1}
     action::Int
     done::Bool
     t::Int
     rng::R
 end
-
-Base.show(io::IO, env::CartPoleEnv{T}) where {T} =
-    print(io, "CartPoleEnv{$T}($(env.params))")
 
 """
     CartPoleEnv(;kwargs...)
@@ -71,11 +66,9 @@ function CartPoleEnv(;
         2.4,
         max_steps,
     )
-    high = [2 * params.xthreshold, T(1e38), 2 * params.thetathreshold, T(1e38)]
+    high = 
     cp = CartPoleEnv(
         params,
-        DiscreteSpace(2),
-        MultiContinuousSpace(-high, high),
         zeros(T, 4),
         2,
         false,
@@ -96,10 +89,20 @@ function RLBase.reset!(env::CartPoleEnv{T}) where {T<:Number}
     nothing
 end
 
-RLBase.get_actions(env::CartPoleEnv) = env.action_space
-RLBase.get_reward(env::CartPoleEnv{T}) where {T} = env.done ? zero(T) : one(T)
-RLBase.get_terminal(env::CartPoleEnv) = env.done
-RLBase.get_state(env::CartPoleEnv) = env.state
+RLBase.action_space(env::CartPoleEnv) = Base.OneTo(2)
+
+RLBase.state_space(env::CartPoleEnv{T}) where T = Space(
+    ClosedInterval{T}[
+        (-2 * env.params.xthreshold)..(2 * env.params.xthreshold),
+        -1e38..1e38,
+        (-2 * env.params.thetathreshold)..(2 * env.params.thetathreshold),
+        -1e38..1e38
+    ]
+)
+
+RLBase.reward(env::CartPoleEnv{T}) where {T} = env.done ? zero(T) : one(T)
+RLBase.is_terminated(env::CartPoleEnv) = env.done
+RLBase.state(env::CartPoleEnv) = env.state
 
 function (env::CartPoleEnv)(a)
     @assert a in (1, 2)
@@ -138,7 +141,7 @@ function plotendofepisode(x, y, d)
     end
     return nothing
 end
-function Base.display(env::CartPoleEnv)
+function Base.show(io::IO, m::MIME"image/png", env::CartPoleEnv)
     s, a, d = env.state, env.action, env.done
     x, xdot, theta, thetadot = s
     l = 2 * env.params.halflength
@@ -153,5 +156,6 @@ function Base.display(env::CartPoleEnv)
     setlinecolorind(2)
     drawarrow(x + (a == 1) - 0.5, -.025, x + 1.4 * (a == 1) - 0.7, -.025)
     plotendofepisode(xthreshold - 0.2, l, d)
-    updatews()
+    p = updatews()
+    show(io, m, p)
 end

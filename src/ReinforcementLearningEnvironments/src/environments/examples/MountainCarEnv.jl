@@ -37,7 +37,7 @@ end
 mutable struct MountainCarEnv{A,T,ACT,R<:AbstractRNG} <: AbstractEnv
     params::MountainCarEnvParams{T}
     action_space::A
-    observation_space::MultiContinuousSpace{Vector{T}}
+    observation_space::Space{Vector{ClosedInterval{T}}}
     state::Vector{T}
     action::ACT
     done::Bool
@@ -73,14 +73,11 @@ function MountainCarEnv(;
     else
         params = MountainCarEnvParams(; T = T, kwargs...)
     end
-    action_space = continuous ? ContinuousSpace(-T(1.0), T(1.0)) : DiscreteSpace(3)
+    action_space = continuous ? ClosedInterval{T}(-1.0, 1.0) : Base.OneTo(3)
     env = MountainCarEnv(
         params,
         action_space,
-        MultiContinuousSpace(
-            [params.min_pos, -params.max_speed],
-            [params.max_pos, params.max_speed],
-        ),
+        Space([params.min_pos..params.max_pos, -params.max_speed..params.max_speed]),
         zeros(T, 2),
         rand(action_space),
         false,
@@ -95,10 +92,11 @@ ContinuousMountainCarEnv(; kwargs...) = MountainCarEnv(; continuous = true, kwar
 
 Random.seed!(env::MountainCarEnv, seed) = Random.seed!(env.rng, seed)
 
-RLBase.get_actions(env::MountainCarEnv) = env.action_space
-RLBase.get_reward(env::MountainCarEnv{A,T}) where {A,T} = env.done ? zero(T) : -one(T)
-RLBase.get_terminal(env::MountainCarEnv) = env.done
-RLBase.get_state(env::MountainCarEnv) = env.state
+RLBase.action_space(env::MountainCarEnv) = env.action_space
+RLBase.state_space(env::MountainCarEnv) = env.observation_space
+RLBase.reward(env::MountainCarEnv{A,T}) where {A,T} = env.done ? zero(T) : -one(T)
+RLBase.is_terminated(env::MountainCarEnv) = env.done
+RLBase.state(env::MountainCarEnv) = env.state
 
 function RLBase.reset!(env::MountainCarEnv{A,T}) where {A,T}
     env.state[1] = 0.2 * rand(env.rng, T) - 0.6
@@ -108,13 +106,13 @@ function RLBase.reset!(env::MountainCarEnv{A,T}) where {A,T}
     nothing
 end
 
-function (env::MountainCarEnv{<:ContinuousSpace})(a::AbstractFloat)
+function (env::MountainCarEnv{<:ClosedInterval})(a::AbstractFloat)
     @assert a in env.action_space
     env.action = a
     _step!(env, a)
 end
 
-function (env::MountainCarEnv{<:DiscreteSpace})(a::Int)
+function (env::MountainCarEnv{<:Base.OneTo{Int}})(a::Int)
     @assert a in env.action_space
     env.action = a
     _step!(env, a - 2)
@@ -142,7 +140,8 @@ end
 height(xs) = sin(3 * xs) * 0.45 + 0.55
 rotate(xs, ys, θ) = xs * cos(θ) - ys * sin(θ), ys * cos(θ) + xs * sin(θ)
 translate(xs, ys, t) = xs .+ t[1], ys .+ t[2]
-function Base.display(env::MountainCarEnv)
+
+function Base.display(io::IO, m::MIME"image/png", env::MountainCarEnv)
     s = env.state
     d = env.done
     clearws()
@@ -168,5 +167,6 @@ function Base.display(env::MountainCarEnv)
     xs, ys = translate(xs, ys, [x, height(x)])
     fillarea(xs, ys)
     plotendofepisode(env.params.max_pos + 0.1, 0, d)
-    updatews()
+    p = updatews()
+    show(io, m, p)
 end

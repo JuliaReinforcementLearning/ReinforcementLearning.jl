@@ -57,13 +57,15 @@ function AtariEnv(;
     observation_size =
         grayscale_obs ? (getScreenWidth(ale), getScreenHeight(ale)) :
         (3, getScreenWidth(ale), getScreenHeight(ale))  # !!! note the order
-    observation_space = MultiDiscreteSpace(
-        fill(typemin(Cuchar), observation_size),
-        fill(typemax(Cuchar), observation_size),
+    observation_space = Space(
+        ClosedInterval{Cuchar}.(
+            fill(typemin(Cuchar), observation_size),
+            fill(typemax(Cuchar), observation_size),
+        )
     )
 
     actions = full_action_space ? getLegalActionSet(ale) : getMinimalActionSet(ale)
-    action_space = DiscreteSpace(length(actions))
+    action_space = Base.OneTo(length(actions))
     screens =
         (fill(typemin(Cuchar), observation_size), fill(typemin(Cuchar), observation_size))
 
@@ -117,11 +119,21 @@ end
 is_terminal(env::AtariEnv{<:Any,true}) = game_over(env.ale) || (lives(env.ale) < env.lives)
 is_terminal(env::AtariEnv{<:Any,false}) = game_over(env.ale)
 
-RLBase.get_name(env::AtariEnv) = "AtariEnv($(env.name))"
-RLBase.get_actions(env::AtariEnv) = env.action_space
-RLBase.get_reward(env::AtariEnv) = env.reward
-RLBase.get_terminal(env::AtariEnv) = is_terminal(env)
-RLBase.get_state(env::AtariEnv) = env.screens[1]
+RLBase.nameof(env::AtariEnv) = "AtariEnv($(env.name))"
+RLBase.action_space(env::AtariEnv) = env.action_space
+RLBase.reward(env::AtariEnv) = env.reward
+RLBase.is_terminated(env::AtariEnv) = is_terminal(env)
+RLBase.state(env::AtariEnv) = env.screens[1]
+RLBase.state_space(env::AtariEnv) = env.observation_space
+
+function Random.seed!(env::AtariEnv, s)
+    @warn "seeding is not exposed in the atari env. so we just do nothing here"
+end
+
+function Base.copy(env::AtariEnv{G,T,N,S}) where {G,T,N,S}
+    @warn "currently cloneSystemState/cloneState has a bug"
+    env
+end
 
 function RLBase.reset!(env::AtariEnv)
     reset_game(env.ale)
@@ -151,9 +163,18 @@ function imshowcolor(x::AbstractArray{UInt8,1}, dims)
     updatews()
 end
 
-function Base.display(env::AtariEnv)
+function Base.show(io::IO, m::MIME"image/png", env::AtariEnv)
     x = getScreenRGB(env.ale)
-    imshowcolor(x, (Int(getScreenWidth(env.ale)), Int(getScreenHeight(env.ale))))
+    p=imshowcolor(x, (Int(getScreenWidth(env.ale)), Int(getScreenHeight(env.ale))))
+    show(io, m, p)
 end
+
+Base.show(io::IO, t::MIME"text/plain", env::AbstractEnv) = show(
+    IOContext(
+        io,
+        :is_show_state => false,
+        :is_show_state_space => false),
+    MIME"text/markdown"(),
+    env)
 
 list_atari_rom_names() = getROMList()

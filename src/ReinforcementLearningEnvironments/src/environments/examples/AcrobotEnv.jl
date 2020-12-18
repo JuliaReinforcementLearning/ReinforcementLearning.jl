@@ -2,7 +2,6 @@ import OrdinaryDiffEq
 
 export AcrobotEnv
 
-
 struct AcrobotEnvParams{T}
     link_length_a::T # [m]
     link_length_b::T # [m]
@@ -29,8 +28,6 @@ end
 
 mutable struct AcrobotEnv{T,R<:AbstractRNG} <: AbstractEnv
     params::AcrobotEnvParams{T}
-    action_space::DiscreteSpace{UnitRange{Int}}
-    observation_space::MultiContinuousSpace{Vector{T}}
     state::Vector{T}
     action::Int
     done::Bool
@@ -99,11 +96,8 @@ function AcrobotEnv(;
         max_steps,
     )
 
-    high = ([T(1.0), T(1.0), T(1.0), T(1.0), max_vel_a, max_vel_b])
     env = AcrobotEnv(
         params,
-        DiscreteSpace(3),
-        MultiContinuousSpace(-high, high),
         zeros(T, 4),
         0,
         false,
@@ -119,10 +113,16 @@ end
 
 acrobot_observation(s) = [cos(s[1]), sin(s[1]), cos(s[2]), sin(s[2]), s[3], s[4]]
 
-RLBase.get_actions(env::AcrobotEnv) = env.action_space
-RLBase.get_terminal(env::AcrobotEnv) = env.done
-RLBase.get_state(env::AcrobotEnv) = acrobot_observation(env.state)
-RLBase.get_reward(env::AcrobotEnv) = env.reward
+RLBase.action_space(env::AcrobotEnv) = Base.OneTo(3)
+
+function RLBase.state_space(env::AcrobotEnv{T}) where T
+    high = [1.0, 1.0, 1.0, 1.0, env.params.max_vel_a, env.params.max_vel_b]
+    Space(ClosedInterval{T}.(-high, high))
+end
+
+RLBase.is_terminated(env::AcrobotEnv) = env.done
+RLBase.state(env::AcrobotEnv) = acrobot_observation(env.state)
+RLBase.reward(env::AcrobotEnv) = env.reward
 
 function RLBase.reset!(env::AcrobotEnv{T}) where {T<:Number}
     env.state[:] = T(0.1) * rand(env.rng, T, 4) .- T(0.05)
