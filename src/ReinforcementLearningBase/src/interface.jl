@@ -377,17 +377,17 @@ DefaultStateStyle(ss::Tuple{Vararg{<:AbstractStateStyle}}) = first(ss)
 # General
 #####
 
-struct DefaultPlayer end
-const DEFAULT_PLAYER = DefaultPlayer()
+@api struct DefaultPlayer end
+@api const DEFAULT_PLAYER = DefaultPlayer()
 
-struct ChancePlayer end
-const CHANCE_PLAYER = ChancePlayer()
+@api struct ChancePlayer end
+@api const CHANCE_PLAYER = ChancePlayer()
 
-struct SimultaneousPlayer end
-const SIMULTANEOUS_PLAYER = SimultaneousPlayer()
+@api struct SimultaneousPlayer end
+@api const SIMULTANEOUS_PLAYER = SimultaneousPlayer()
 
-struct Spector end
-const SPECTOR = Spector()
+@api struct Spector end
+@api const SPECTOR = Spector()
 
 @api (env::AbstractEnv)(action, player = current_player(env))
 
@@ -400,7 +400,7 @@ Make an independent copy of `env`,
 @api copy(env::AbstractEnv) = deepcopy(env)
 @api copyto!(dest::AbstractEnv, src::AbstractEnv)
 
-@env_api nameof(env::AbstractEnv) = nameof(typeof(env))
+@api nameof(env::AbstractEnv) = nameof(typeof(env))
 
 """
 Get the action distribution of chance player.
