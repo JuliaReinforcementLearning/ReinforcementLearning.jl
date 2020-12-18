@@ -21,12 +21,15 @@ end
 
 for f in vcat(RLBase.ENV_API, RLBase.MULTI_AGENT_ENV_API)
     if f != :terminal
-        @eval RLBase.$f(x::MaxTimeoutEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
+        @eval RLBase.$f(x::MaxTimeoutEnv, args...; kwargs...) =
+            $f(x.env, args...; kwargs...)
     end
 end
 
-RLBase.is_terminated(env::MaxTimeoutEnv) = (env.current_t > env.max_t) || is_terminated(env.env)
+RLBase.is_terminated(env::MaxTimeoutEnv) =
+    (env.current_t > env.max_t) || is_terminated(env.env)
 
 
 RLBase.state(env::MaxTimeoutEnv, ss::RLBase.AbstractStateStyle) = state(env.env, ss)
-RLBase.state_space(env::MaxTimeoutEnv, ss::RLBase.AbstractStateStyle) = state_space(env.env, ss)
+RLBase.state_space(env::MaxTimeoutEnv, ss::RLBase.AbstractStateStyle) =
+    state_space(env.env, ss)

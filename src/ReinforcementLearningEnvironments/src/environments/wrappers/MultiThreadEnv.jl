@@ -122,7 +122,8 @@ end
 
 function RLBase.legal_action_space_mask(env::MultiThreadEnv)
     @sync for i in 1:length(env)
-        @spawn selectdim(env.legal_action_space_mask, N, i) .= legal_action_space_mask(env[i])
+        @spawn selectdim(env.legal_action_space_mask, N, i) .=
+            legal_action_space_mask(env[i])
     end
     env.legal_action_space_mask
 end

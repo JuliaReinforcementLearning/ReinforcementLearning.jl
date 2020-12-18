@@ -96,7 +96,7 @@ Random.seed!(env::GymEnv, s) = env.pyenv.seed(s)
 function space_transform(s::PyObject)
     spacetype = s.__class__.__name__
     if spacetype == "Box"
-        Space(ClosedInterval.(s.low,s.high))
+        Space(ClosedInterval.(s.low, s.high))
     elseif spacetype == "Discrete"  # for GymEnv("CliffWalking-v0"), `s.n` is of type PyObject (numpy.int64)
         ZeroTo(py"int($s.n)" - 1)
     elseif spacetype == "MultiBinary"

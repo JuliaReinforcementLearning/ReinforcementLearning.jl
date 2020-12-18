@@ -69,7 +69,8 @@ Random.seed!(env::PendulumNonInteractiveEnv, seed) = Random.seed!(env.rng, seed)
 RLBase.reward(env::PendulumNonInteractiveEnv) = 0
 RLBase.is_terminated(env::PendulumNonInteractiveEnv) = env.done
 RLBase.state(env::PendulumNonInteractiveEnv) = env.state
-RLBase.state_space(env::PendulumNonInteractiveEnv{T}) where T = Space([typemin(T)..typemax(T), typemin(T)..typemax(T)])
+RLBase.state_space(env::PendulumNonInteractiveEnv{T}) where {T} =
+    Space([typemin(T)..typemax(T), typemin(T)..typemax(T)])
 
 function RLBase.reset!(env::PendulumNonInteractiveEnv{Fl}) where {Fl}
     env.state .= (Fl(2 * pi) * rand(env.rng, Fl), randn(env.rng, Fl))

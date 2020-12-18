@@ -31,9 +31,11 @@ end
 
 for f in vcat(RLBase.ENV_API, RLBase.MULTI_AGENT_ENV_API)
     if f != :state
-        @eval RLBase.$f(x::StateCachedEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
+        @eval RLBase.$f(x::StateCachedEnv, args...; kwargs...) =
+            $f(x.env, args...; kwargs...)
     end
 end
 
 RLBase.state(env::StateCachedEnv, ss::RLBase.AbstractStateStyle) = state(env.env, ss)
-RLBase.state_space(env::StateCachedEnv, ss::RLBase.AbstractStateStyle) = state_space(env.env, ss)
+RLBase.state_space(env::StateCachedEnv, ss::RLBase.AbstractStateStyle) =
+    state_space(env.env, ss)

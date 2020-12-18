@@ -103,7 +103,8 @@ RLBase.state_space(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, p
     KUHN_POKER_STATES
 
 RLBase.action_space(env::KuhnPokerEnv, ::Int) = Base.OneTo(length(KUHN_POKER_ACTIONS))
-RLBase.action_space(env::KuhnPokerEnv, ::ChancePlayer) = Base.OneTo(length(KUHN_POKER_CARDS))
+RLBase.action_space(env::KuhnPokerEnv, ::ChancePlayer) =
+    Base.OneTo(length(KUHN_POKER_CARDS))
 
 RLBase.legal_action_space(env::KuhnPokerEnv, p::ChancePlayer) =
     [x for x in action_space(env, p) if KUHN_POKER_CARDS[x] ∉ env.cards]

@@ -4,7 +4,7 @@
     obs_prob = 0.85
     env = TigerProblemEnv(; rng = rng, obs_prob = obs_prob)
 
-RLBase.test_interfaces!(env)
+    RLBase.test_interfaces!(env)
 
     rewards = []
     for _ in 1:50_000

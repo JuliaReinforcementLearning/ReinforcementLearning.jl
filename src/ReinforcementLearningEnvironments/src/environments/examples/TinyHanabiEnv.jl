@@ -56,7 +56,8 @@ RLBase.action_space(env::TinyHanabiEnv, ::Int) = Base.OneTo(3)
 RLBase.action_space(env::TinyHanabiEnv, ::ChancePlayer) = Base.OneTo(2)
 
 RLBase.legal_action_space(env::TinyHanabiEnv, ::ChancePlayer) = findall(!in(env.cards), 1:2)
-RLBase.legal_action_space_mask(env::TinyHanabiEnv, ::ChancePlayer) = [x ∉ env.cards for x in 1:2]
+RLBase.legal_action_space_mask(env::TinyHanabiEnv, ::ChancePlayer) =
+    [x ∉ env.cards for x in 1:2]
 
 function RLBase.prob(env::TinyHanabiEnv, ::ChancePlayer)
     if isempty(env.cards)

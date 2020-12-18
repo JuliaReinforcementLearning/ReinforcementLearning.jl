@@ -66,15 +66,7 @@ function CartPoleEnv(;
         2.4,
         max_steps,
     )
-    high = 
-    cp = CartPoleEnv(
-        params,
-        zeros(T, 4),
-        2,
-        false,
-        0,
-        rng,
-    )
+    high = cp = CartPoleEnv(params, zeros(T, 4), 2, false, 0, rng)
     reset!(cp)
     cp
 end
@@ -91,14 +83,12 @@ end
 
 RLBase.action_space(env::CartPoleEnv) = Base.OneTo(2)
 
-RLBase.state_space(env::CartPoleEnv{T}) where T = Space(
-    ClosedInterval{T}[
-        (-2 * env.params.xthreshold)..(2 * env.params.xthreshold),
-        -1e38..1e38,
-        (-2 * env.params.thetathreshold)..(2 * env.params.thetathreshold),
-        -1e38..1e38
-    ]
-)
+RLBase.state_space(env::CartPoleEnv{T}) where {T} = Space(ClosedInterval{T}[
+    (-2*env.params.xthreshold)..(2*env.params.xthreshold),
+    -1e38..1e38,
+    (-2*env.params.thetathreshold)..(2*env.params.thetathreshold),
+    -1e38..1e38,
+])
 
 RLBase.reward(env::CartPoleEnv{T}) where {T} = env.done ? zero(T) : one(T)
 RLBase.is_terminated(env::CartPoleEnv) = env.done

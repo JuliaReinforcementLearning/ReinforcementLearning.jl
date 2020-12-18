@@ -75,8 +75,10 @@ RLBase.current_player(env::TicTacToeEnv) = env.player
 RLBase.players(env::TicTacToeEnv) = (CROSS, NOUGHT)
 
 RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = env.board
-RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = Space(fill(false..true, 3, 3, 3))
-RLBase.state(env::TicTacToeEnv, ::Observation{Int}, p) = get_tic_tac_toe_state_info()[env].index
+RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) =
+    Space(fill(false..true, 3, 3, 3))
+RLBase.state(env::TicTacToeEnv, ::Observation{Int}, p) =
+    get_tic_tac_toe_state_info()[env].index
 RLBase.state_space(env::TicTacToeEnv, ::Observation{Int}, p) =
     Base.OneTo(length(get_tic_tac_toe_state_info()))
 

@@ -115,7 +115,7 @@ acrobot_observation(s) = [cos(s[1]), sin(s[1]), cos(s[2]), sin(s[2]), s[3], s[4]
 
 RLBase.action_space(env::AcrobotEnv) = Base.OneTo(3)
 
-function RLBase.state_space(env::AcrobotEnv{T}) where T
+function RLBase.state_space(env::AcrobotEnv{T}) where {T}
     high = [1.0, 1.0, 1.0, 1.0, env.params.max_vel_a, env.params.max_vel_b]
     Space(ClosedInterval{T}.(-high, high))
 end

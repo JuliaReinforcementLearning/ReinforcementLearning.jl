@@ -44,10 +44,7 @@ using StatsBase: sample, weights
   `True` or `False` (instead of `true` or `false`). Another approach is to just
   specify parameters in `kwargs` in the Julia style.
 """
-function OpenSpielEnv(
-    name="kuhn_poker";
-    kwargs...,
-)
+function OpenSpielEnv(name = "kuhn_poker"; kwargs...)
     game = load_game(String(name); kwargs...)
     state = new_initial_state(game)
     OpenSpielEnv(state, game)
@@ -65,21 +62,21 @@ RLBase.players(env::OpenSpielEnv) = 0:(num_players(env.game)-1)
 
 function RLBase.action_space(env::OpenSpielEnv, player)
     if player == chance_player(env)
-        [k for (k,v) in chance_outcomes(env.state)]
+        [k for (k, v) in chance_outcomes(env.state)]
     else
-        ZeroTo(num_distinct_actions(env.game)-1)
+        ZeroTo(num_distinct_actions(env.game) - 1)
     end
 end
 
 function RLBase.legal_action_space(env::OpenSpielEnv, player)
     if player == chance_player(env)
-        [k for (k,v) in chance_outcomes(env.state)]
+        [k for (k, v) in chance_outcomes(env.state)]
     else
         legal_actions(env.state, player)
     end
 end
 
-RLBase.prob(env::OpenSpielEnv, player) = [v for (k,v) in chance_outcomes(env.state)]
+RLBase.prob(env::OpenSpielEnv, player) = [v for (k, v) in chance_outcomes(env.state)]
 
 function RLBase.legal_action_space_mask(env::OpenSpielEnv, player)
     n =
@@ -107,7 +104,7 @@ end
 
 function RLBase.state(env::OpenSpielEnv, ss::RLBase.AbstractStateStyle, player)
     if player < 0  # TODO: revisit this in OpenSpiel@v0.2
-        @warn "unexpected player $player, falling back to default state value." maxlog=1
+        @warn "unexpected player $player, falling back to default state value." maxlog = 1
         s = state_space(env)
         if s isa WorldSpace
             ""
@@ -119,13 +116,28 @@ function RLBase.state(env::OpenSpielEnv, ss::RLBase.AbstractStateStyle, player)
     end
 end
 
-_state(env::OpenSpielEnv, ::RLBase.InformationSet{String}, player) = information_state_string(env.state, player)
-_state(env::OpenSpielEnv, ::RLBase.InformationSet{Array}, player) = information_state_tensor(env.state, player)
-_state(env::OpenSpielEnv, ::Observation{String}, player) = observation_string(env.state, player)
-_state(env::OpenSpielEnv, ::Observation{Array}, player) = observation_tensor(env.state, player)
+_state(env::OpenSpielEnv, ::RLBase.InformationSet{String}, player) =
+    information_state_string(env.state, player)
+_state(env::OpenSpielEnv, ::RLBase.InformationSet{Array}, player) =
+    information_state_tensor(env.state, player)
+_state(env::OpenSpielEnv, ::Observation{String}, player) =
+    observation_string(env.state, player)
+_state(env::OpenSpielEnv, ::Observation{Array}, player) =
+    observation_tensor(env.state, player)
 
-RLBase.state_space(env::OpenSpielEnv, ::Union{InformationSet{String},Observation{String}}, p) = WorldSpace{AbstractString}()
-RLBase.state_space(env::OpenSpielEnv, ::Union{InformationSet{Array},Observation{Array}}, p) = Space(fill(typemin(Float64)..typemax(Float64), information_state_tensor_size(env.state)))
+RLBase.state_space(
+    env::OpenSpielEnv,
+    ::Union{InformationSet{String},Observation{String}},
+    p,
+) = WorldSpace{AbstractString}()
+RLBase.state_space(
+    env::OpenSpielEnv,
+    ::Union{InformationSet{Array},Observation{Array}},
+    p,
+) = Space(fill(
+    typemin(Float64)..typemax(Float64),
+    information_state_tensor_size(env.state),
+))
 
 Random.seed!(env::OpenSpielEnv, s) = @warn "seed!(OpenSpielEnv) is not supported currently."
 
@@ -154,10 +166,16 @@ function RLBase.UtilityStyle(env::OpenSpielEnv)
 end
 
 RLBase.ActionStyle(env::OpenSpielEnv) = FULL_ACTION_SET
-RLBase.DynamicStyle(env::OpenSpielEnv) = dynamics(get_type(env.game))== OpenSpiel.SEQUENTIAL ? RLBase.SEQUENTIAL : RLBase.SIMULTANEOUS
-RLBase.InformationStyle(env::OpenSpielEnv) = information(get_type(env.game)) ==OpenSpiel.PERFECT_INFORMATION ? RLBase.PERFECT_INFORMATION : RLBase.IMPERFECT_INFORMATION
+RLBase.DynamicStyle(env::OpenSpielEnv) =
+    dynamics(get_type(env.game)) == OpenSpiel.SEQUENTIAL ? RLBase.SEQUENTIAL :
+    RLBase.SIMULTANEOUS
+RLBase.InformationStyle(env::OpenSpielEnv) =
+    information(get_type(env.game)) == OpenSpiel.PERFECT_INFORMATION ?
+    RLBase.PERFECT_INFORMATION : RLBase.IMPERFECT_INFORMATION
 RLBase.NumAgentStyle(env::OpenSpielEnv) = MultiAgent(num_players(env.game))
-RLBase.RewardStyle(env::OpenSpielEnv) = reward_model(get_type(env.game)) == OpenSpiel.REWARDS ? RLBase.STEP_REWARD : RLBase.TERMINAL_REWARD
+RLBase.RewardStyle(env::OpenSpielEnv) =
+    reward_model(get_type(env.game)) == OpenSpiel.REWARDS ? RLBase.STEP_REWARD :
+    RLBase.TERMINAL_REWARD
 
 RLBase.StateStyle(env::OpenSpielEnv) = (
     RLBase.InformationSet{String}(),

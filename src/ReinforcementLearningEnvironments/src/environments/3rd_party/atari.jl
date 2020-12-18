@@ -57,12 +57,12 @@ function AtariEnv(;
     observation_size =
         grayscale_obs ? (getScreenWidth(ale), getScreenHeight(ale)) :
         (3, getScreenWidth(ale), getScreenHeight(ale))  # !!! note the order
-    observation_space = Space(
-        ClosedInterval{Cuchar}.(
-            fill(typemin(Cuchar), observation_size),
-            fill(typemax(Cuchar), observation_size),
-        )
-    )
+    observation_space = Space(ClosedInterval{
+        Cuchar,
+    }.(
+        fill(typemin(Cuchar), observation_size),
+        fill(typemax(Cuchar), observation_size),
+    ))
 
     actions = full_action_space ? getLegalActionSet(ale) : getMinimalActionSet(ale)
     action_space = Base.OneTo(length(actions))
@@ -165,16 +165,14 @@ end
 
 function Base.show(io::IO, m::MIME"image/png", env::AtariEnv)
     x = getScreenRGB(env.ale)
-    p=imshowcolor(x, (Int(getScreenWidth(env.ale)), Int(getScreenHeight(env.ale))))
+    p = imshowcolor(x, (Int(getScreenWidth(env.ale)), Int(getScreenHeight(env.ale))))
     show(io, m, p)
 end
 
 Base.show(io::IO, t::MIME"text/plain", env::AbstractEnv) = show(
-    IOContext(
-        io,
-        :is_show_state => false,
-        :is_show_state_space => false),
+    IOContext(io, :is_show_state => false, :is_show_state_space => false),
     MIME"text/markdown"(),
-    env)
+    env,
+)
 
 list_atari_rom_names() = getROMList()

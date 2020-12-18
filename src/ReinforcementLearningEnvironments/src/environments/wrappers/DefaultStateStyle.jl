@@ -20,7 +20,8 @@ for f in vcat(RLBase.ENV_API, RLBase.MULTI_AGENT_ENV_API)
     end
 end
 
-(env::DefaultStateStyleEnv)(args...;kwargs...) = env.env(args...;kwargs...)
+(env::DefaultStateStyleEnv)(args...; kwargs...) = env.env(args...; kwargs...)
 
 RLBase.state(env::DefaultStateStyleEnv, ss::RLBase.AbstractStateStyle) = state(env.env, ss)
-RLBase.state_space(env::DefaultStateStyleEnv, ss::RLBase.AbstractStateStyle) = state_space(env.env, ss)
+RLBase.state_space(env::DefaultStateStyleEnv, ss::RLBase.AbstractStateStyle) =
+    state_space(env.env, ss)
