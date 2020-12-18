@@ -16,6 +16,8 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
 GR = "0.46, 0.47, 0.48, 0.49, 0.50, 0.51, 0.52, 0.53"
+IntervalSets = "0.5"
+MacroTools = "0.5"
 OrdinaryDiffEq = "5"
 ReinforcementLearningBase = "0.9"
 Requires = "1.0"
