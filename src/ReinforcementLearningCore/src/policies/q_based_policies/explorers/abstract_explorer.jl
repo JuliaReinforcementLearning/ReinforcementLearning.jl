@@ -14,15 +14,15 @@ function (p::AbstractExplorer)(x) end
 function (p::AbstractExplorer)(x, mask) end
 
 """
-    get_prob(p::AbstractExplorer, x) -> AbstractDistribution
+    prob(p::AbstractExplorer, x) -> AbstractDistribution
 
 Get the action distribution given action values.
 """
-function RLBase.get_prob(p::AbstractExplorer, x) end
+function RLBase.prob(p::AbstractExplorer, x) end
 
 """
-    get_prob(p::AbstractExplorer, x, mask)
+    prob(p::AbstractExplorer, x, mask)
 
-Similart to `get_prob(p::AbstractExplorer, x)`, but here only the `mask`ed elements are considered.
+Similart to `prob(p::AbstractExplorer, x)`, but here only the `mask`ed elements are considered.
 """
-function RLBase.get_prob(p::AbstractExplorer, x, mask) end
+function RLBase.prob(p::AbstractExplorer, x, mask) end

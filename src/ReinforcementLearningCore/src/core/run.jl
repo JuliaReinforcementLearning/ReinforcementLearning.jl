@@ -33,7 +33,7 @@ function _run(
         policy(PRE_EPISODE_STAGE, env)
         hook(PRE_EPISODE_STAGE, policy, env)
 
-        while !get_terminal(env) # one episode
+        while !is_terminated(env) # one episode
             action = policy(PRE_ACT_STAGE, env)
             hook(PRE_ACT_STAGE, policy, env, action)
 
@@ -50,32 +50,6 @@ function _run(
 
         policy(POST_EPISODE_STAGE, env)  # let the policy see the last observation
         hook(POST_EPISODE_STAGE, policy, env)
-    end
-    hook
-end
-
-function _run(
-    ::Sequential,
-    ::SingleAgent,
-    policy::AbstractPolicy,
-    env::MultiThreadEnv,
-    stop_condition,
-    hook::AbstractHook = EmptyHook(),
-)
-
-    while true
-        reset!(env)
-        action = policy(PRE_ACT_STAGE, env)
-        hook(PRE_ACT_STAGE, policy, env, action)
-
-        env(action)
-        policy(POST_ACT_STAGE, env)
-        hook(POST_ACT_STAGE, policy, env)
-
-        if stop_condition(policy, env)
-            policy(PRE_ACT_STAGE, env)  # let the policy see the last observation
-            break
-        end
     end
     hook
 end

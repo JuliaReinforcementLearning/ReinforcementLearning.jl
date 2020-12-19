@@ -6,18 +6,18 @@
             Random.seed!(explorer, 123)
 
             values = [0, 1, 2, -1]
-            target_prob = [0.025, 0.025, 0.925, 0.025]
+            tarprob = [0.025, 0.025, 0.925, 0.025]
 
             # https://github.com/JuliaLang/julia/issues/10391#issuecomment-488642687
-            # @test isapprox(get_prob(explorer, values), target_prob)
-            @test isapprox(probs(get_prob(explorer, values)), target_prob)
+            # @test isapprox(prob(explorer, values), tarprob)
+            @test isapprox(probs(prob(explorer, values)), tarprob)
 
             actions = [explorer(values) for _ in 1:10000]
             action_counts = countmap(actions)
 
             @test all(isapprox.(
                 [action_counts[i] for i in 1:length(values)] ./ 10000,
-                target_prob;
+                tarprob;
                 atol = 0.005,
             ))
         end
@@ -38,7 +38,7 @@
             for ϵ in E
                 @test RLCore.get_ϵ(explorer) ≈ ϵ
                 @test isapprox(
-                    probs(get_prob(explorer, xs)),
+                    probs(prob(explorer, xs)),
                     [ϵ / 5, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2],
                 )
                 explorer(xs)
@@ -55,7 +55,7 @@
             for ϵ in E
                 @test RLCore.get_ϵ(explorer) ≈ ϵ
                 @test isapprox(
-                    probs(get_prob(explorer, xs, mask)),
+                    probs(prob(explorer, xs, mask)),
                     [ϵ / 3, (1 - ϵ) + ϵ / 3, 0.0, ϵ / 3, 0.0],
                 )
                 explorer(xs)
@@ -90,7 +90,7 @@
             end
             ϵ = 0.1 + (0.9 - 0.1) * exp(-1)
             @test isapprox(
-                probs(get_prob(explorer, xs)),
+                probs(prob(explorer, xs)),
                 [ϵ / 5, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2],
             )
 
@@ -99,7 +99,7 @@
             end
             ϵ = 0.1
             @test isapprox(
-                probs(get_prob(explorer, xs)),
+                probs(prob(explorer, xs)),
                 [ϵ / 5, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2, ϵ / 5, ϵ / 5 + (1 - ϵ) / 2];
                 atol = 1e-5,
             )

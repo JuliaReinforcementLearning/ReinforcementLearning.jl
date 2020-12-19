@@ -95,7 +95,7 @@ function StopAfterEpisode(episode; cur = 0, is_show_progress = true)
 end
 
 function (s::StopAfterEpisode)(agent, env)
-    if get_terminal(env)
+    if is_terminated(env)
         s.cur += 1
         if !isnothing(s.progress)
             next!(s.progress;)
@@ -104,10 +104,6 @@ function (s::StopAfterEpisode)(agent, env)
 
     s.cur >= s.episode
 end
-
-(s::StopAfterEpisode)(agent, env::MultiThreadEnv) =
-    @error "MultiThreadEnv is not supported!"
-
 
 #####
 # StopAfterNoImprovement
@@ -128,7 +124,7 @@ Parameters:
 
 fn: a closure, return a scalar value, which indicates the performance of the policy (the higher the better)
 e.g. 
-1. () -> get_reward(env)
+1. () -> reward(env)
 1. () -> total_reward_per_episode.reward
 
 patience: Number of epochs with no improvement after which training will be stopped.
@@ -142,7 +138,7 @@ function StopAfterNoImprovement(fn, patience::Int, δ::T = 0.0f0) where {T<:Numb
 end
 
 function (s::StopAfterNoImprovement)(agent, env)::Bool
-    get_terminal(env) || return false # post episode stage
+    is_terminated(env) || return false # post episode stage
     val = s.fn()
     improved = isfull(s.buffer) ? all(s.buffer .< (val - s.δ)) : true
     push!(s.buffer, val)
@@ -160,7 +156,7 @@ Return `true` if the environment is terminated.
 """
 struct StopWhenDone end
 
-(s::StopWhenDone)(agent, env) = get_terminal(env)
+(s::StopWhenDone)(agent, env) = is_terminated(env)
 
 #####
 # StopSignal

@@ -85,7 +85,7 @@ function RLBase.update!(
     ::Union{PreActStage,PostEpisodeStage},
 )
     action = policy(env)
-    push!(trajectory[:state], get_state(env))
+    push!(trajectory[:state], state(env))
     push!(trajectory[:action], action)
     action
 end
@@ -100,9 +100,9 @@ function RLBase.update!(
     ::Union{PreActStage,PostEpisodeStage},
 )
     action = policy(env)
-    push!(trajectory[:state], get_state(env))
+    push!(trajectory[:state], state(env))
     push!(trajectory[:action], action)
-    push!(trajectory[:legal_actions_mask], get_legal_actions_mask(env))
+    push!(trajectory[:legal_actions_mask], legal_action_space_mask(env))
     action
 end
 
@@ -112,6 +112,6 @@ function RLBase.update!(
     env::AbstractEnv,
     ::PostActStage,
 )
-    push!(trajectory[:reward], get_reward(env))
-    push!(trajectory[:terminal], get_terminal(env))
+    push!(trajectory[:reward], reward(env))
+    push!(trajectory[:terminal], is_terminated(env))
 end

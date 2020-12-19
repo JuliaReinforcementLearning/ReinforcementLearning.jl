@@ -33,13 +33,13 @@ function (s::WeightedExplorer)(values, mask)
     s(values)
 end
 
-RLBase.get_prob(s::WeightedExplorer{true}, values) = values
-RLBase.get_prob(s::WeightedExplorer{false}, values) = values ./ sum(values)
+RLBase.prob(s::WeightedExplorer{true}, values) = values
+RLBase.prob(s::WeightedExplorer{false}, values) = values ./ sum(values)
 
 # assume `values` and `mask` matches and `sum(values) == 1`
-RLBase.get_prob(s::WeightedExplorer{true}, values, mask) = values
+RLBase.prob(s::WeightedExplorer{true}, values, mask) = values
 
-function RLBase.get_prob(s::WeightedExplorer{false}, values, mask)
+function RLBase.prob(s::WeightedExplorer{false}, values, mask)
     s = sum(@view(values[mask]))
     map((v, m) -> m ? v / s : zero(v), values, mask)
 end

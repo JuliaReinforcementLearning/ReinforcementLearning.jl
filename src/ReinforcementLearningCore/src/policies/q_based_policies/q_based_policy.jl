@@ -19,17 +19,17 @@ end
 Flux.functor(x::QBasedPolicy) = (learner = x.learner,), y -> @set x.learner = y.learner
 
 (π::QBasedPolicy)(env) = π(env, ActionStyle(env))
-(π::QBasedPolicy)(env, ::MinimalActionSet) = get_actions(env)[π.explorer(π.learner(env))]
+(π::QBasedPolicy)(env, ::MinimalActionSet) = action_space(env)[π.explorer(π.learner(env))]
 (π::QBasedPolicy)(env, ::FullActionSet) =
-    get_actions(env)[π.explorer(π.learner(env), get_legal_actions_mask(env))]
+    action_space(env)[π.explorer(π.learner(env), legal_action_space_mask(env))]
 
-RLBase.get_prob(p::QBasedPolicy, env) = get_prob(p, env, ActionStyle(env))
-RLBase.get_prob(p::QBasedPolicy, env, ::MinimalActionSet) =
-    get_prob(p.explorer, p.learner(env))
-RLBase.get_prob(p::QBasedPolicy, env, ::FullActionSet) =
-    get_prob(p.explorer, p.learner(env), get_legal_actions_mask(env))
+RLBase.prob(p::QBasedPolicy, env) = prob(p, env, ActionStyle(env))
+RLBase.prob(p::QBasedPolicy, env, ::MinimalActionSet) =
+    prob(p.explorer, p.learner(env))
+RLBase.prob(p::QBasedPolicy, env, ::FullActionSet) =
+    prob(p.explorer, p.learner(env), legal_action_space_mask(env))
 
-@forward QBasedPolicy.learner RLBase.get_priority
+@forward QBasedPolicy.learner RLBase.priority
 
 RLBase.update!(p::QBasedPolicy, trajectory::AbstractTrajectory) =
     update!(p.learner, trajectory)
@@ -53,16 +53,16 @@ end
 
 function (p::TabularRandomPolicy)(env::AbstractEnv)
     if ChanceStyle(env) === EXPLICIT_STOCHASTIC
-        if get_current_player(env) == get_chance_player(env)
+        if current_player(env) == chance_player(env)
             # this should be faster. we don't need to allocate memory to store the probability of chance node
-            return rand(p.explorer.rng, get_actions(env))
+            return rand(p.explorer.rng, action_space(env))
         end
     end
     p(env, ActionStyle(env))  # fall back to general implementation above
 end
 
-function RLBase.get_prob(p::TabularRandomPolicy, env, ::FullActionSet)
-    m = get_legal_actions_mask(env)
+function RLBase.prob(p::TabularRandomPolicy, env, ::FullActionSet)
+    m = legal_action_space_mask(env)
     prob = zeros(length(m))
     prob[m] .= p.learner(env)
     prob

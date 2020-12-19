@@ -110,11 +110,7 @@ function (hook::RewardsPerEpisode)(::PreEpisodeStage, agent, env)
 end
 
 function (hook::RewardsPerEpisode)(::PostActStage, agent, env)
-    push!(hook.rewards[end], get_reward(env))
-end
-
-function (hook::RewardsPerEpisode)(::PostActStage, agent, env::RewardOverriddenEnv)
-    push!(hook.rewards[end], get_reward(env.env))
+    push!(hook.rewards[end], reward(env))
 end
 
 #####
@@ -125,9 +121,6 @@ end
     TotalRewardPerEpisode(; rewards = Float64[], reward = 0.0)
 
 Store the total rewards of each episode in the field of `rewards`.
-
-!!! note
-    If the environment is a [`RewardOverriddenenv`](@ref), then the original reward is recorded.
 """
 Base.@kwdef mutable struct TotalRewardPerEpisode <: AbstractHook
     rewards::Vector{Float64} = Float64[]
@@ -136,58 +129,11 @@ end
 
 Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
-(hook::TotalRewardPerEpisode)(s::AbstractStage, agent, env) =
-    hook(s, agent, env, RewardStyle(env), NumAgentStyle(env))
-(hook::TotalRewardPerEpisode)(::AbstractStage, agent, env, ::Any, ::Any) = nothing
+function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env)
+    hook.reward += reward(env)
+end
 
-(hook::TotalRewardPerEpisode)(
-    ::PostEpisodeStage,
-    agent,
-    env,
-    ::TerminalReward,
-    ::SingleAgent,
-) = push!(hook.rewards, get_reward(env))
-(hook::TotalRewardPerEpisode)(
-    ::PostEpisodeStage,
-    agent,
-    env,
-    ::TerminalReward,
-    ::MultiAgent,
-) = push!(hook.rewards, get_reward(env, get_role(agent)))
-(hook::TotalRewardPerEpisode)(::PostActStage, agent, env, ::StepReward, ::SingleAgent) =
-    hook.reward += get_reward(env)
-(hook::TotalRewardPerEpisode)(::PostActStage, agent, env, ::StepReward, ::MultiAgent) =
-    hook.reward += get_reward(env, get_role(agent))
-(hook::TotalRewardPerEpisode)(
-    ::PostEpisodeStage,
-    agent,
-    env::RewardOverriddenEnv,
-    ::TerminalReward,
-    ::SingleAgent,
-) = push!(hook.rewards, get_reward(env.env))
-(hook::TotalRewardPerEpisode)(
-    ::PostEpisodeStage,
-    agent,
-    env::RewardOverriddenEnv,
-    ::TerminalReward,
-    ::MultiAgent,
-) = push!(hook.rewards, get_reward(env.env, get_role(agent)))
-(hook::TotalRewardPerEpisode)(
-    ::PostActStage,
-    agent,
-    env::RewardOverriddenEnv,
-    ::StepReward,
-    ::SingleAgent,
-) = hook.reward += get_reward(env.env)
-(hook::TotalRewardPerEpisode)(
-    ::PostActStage,
-    agent,
-    env::RewardOverriddenEnv,
-    ::StepReward,
-    ::MultiAgent,
-) = hook.reward += get_reward(env.env, get_role(agent))
-
-function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env, ::StepReward, ::Any)
+function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env)
     push!(hook.rewards, hook.reward)
     hook.reward = 0
 end
@@ -205,32 +151,26 @@ Base.getindex(h::TotalBatchRewardPerEpisode) = h.rewards
 """
     TotalBatchRewardPerEpisode(batch_size::Int)
 
-Similar to [`TotalRewardPerEpisode`](@ref), but will record total rewards per episode in [`MultiThreadEnv`](@ref).
-
-!!! note
-    If the environment is a [`RewardOverriddenEnv`](@ref), then the original reward is recorded.
+Similar to [`TotalRewardPerEpisode`](@ref), but is specific to environments
+which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 """
 function TotalBatchRewardPerEpisode(batch_size::Int)
     TotalBatchRewardPerEpisode([Float64[] for _ in 1:batch_size], zeros(batch_size))
 end
 
-function (hook::TotalBatchRewardPerEpisode)(
-    ::PostActStage,
-    agent,
-    env::MultiThreadEnv{T},
-) where {T}
-    for i in 1:length(env)
-        if T <: RewardOverriddenEnv
-            hook.reward[i] += get_reward(env[i].env)
-        else
-            hook.reward[i] += get_reward(env[i])
-        end
-        if get_terminal(env[i])
+function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env)
+    for (i, (t, r)) in enumerate(zip(is_terminated(env), reward(env)))
+        hook.reward[i] += r
+        if t
             push!(hook.rewards[i], hook.reward[i])
             hook.reward[i] = 0.0
         end
     end
 end
+
+#####
+# BatchStepsPerEpisode
+#####
 
 struct BatchStepsPerEpisode <: AbstractHook
     steps::Vector{Vector{Int}}
@@ -242,16 +182,17 @@ Base.getindex(h::BatchStepsPerEpisode) = h.steps
 """
     BatchStepsPerEpisode(batch_size::Int; tag = "TRAINING")
 
-Similar to [`StepsPerEpisode`](@ref), but only work for [`MultiThreadEnv`](@ref)
+Similar to [`StepsPerEpisode`](@ref), but is specific to environments
+which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 """
 function BatchStepsPerEpisode(batch_size::Int)
     BatchStepsPerEpisode([Int[] for _ in 1:batch_size], zeros(Int, batch_size))
 end
 
-function (hook::BatchStepsPerEpisode)(::PostActStage, agent, env::MultiThreadEnv)
-    for i in 1:length(env)
+function (hook::BatchStepsPerEpisode)(::PostActStage, agent, env)
+    for (i, t) in enumerate(is_terminated(env))
         hook.step[i] += 1
-        if get_terminal(env[i])
+        if t
             push!(hook.steps[i], hook.step[i])
             hook.step[i] = 0
         end
@@ -266,24 +207,20 @@ end
     CumulativeReward(rewards::Vector{Float64} = [0.0])
 
 Store cumulative rewards since the beginning to the field of `rewards`.
-
-!!! note
-    If the environment is a [`RewardOverriddenEnv`](@ref), then the original reward is recorded instead.
 """
 Base.@kwdef struct CumulativeReward <: AbstractHook
-    rewards::Vector{Float64} = [0.0]
+    rewards::Vector{Vector{Float64}} = [[0.0]]
 end
 
 Base.getindex(h::CumulativeReward) = h.rewards
 
-function (hook::CumulativeReward)(::PostActStage, agent, env::T) where {T}
-    if T <: RewardOverriddenEnv
-        r = get_reward(env.env)
-    else
-        r = get_reward(env)
-    end
-    push!(hook.rewards, r + hook.rewards[end])
-    @debug hook.tag CUMULATIVE_REWARD = hook.rewards[end]
+function (hook::CumulativeReward)(::PostEpisodeStage, agent, env)
+    push!(hook.rewards, [0.0])
+end
+
+function (hook::CumulativeReward)(::PostActStage, agent, env)
+    r = reward(env)
+    push!(hook.rewards[end], r + hook.rewards[end][end])
 end
 
 #####
@@ -363,7 +300,7 @@ Base.@kwdef mutable struct UploadTrajectoryEveryNStep{M,S} <: AbstractHook
     sealer::S = deepcopy
 end
 
-function (hook::UploadTrajectoryEveryNStep)(::PostActStage, agent, env)
+function (hook::UploadTrajectoryEveryNStep)(::PostActStage, agent::Agent, env)
     hook.t += 1
     if hook.t > 0 && hook.t % hook.n == 0
         put!(hook.mailbox, hook.sealer(agent.trajectory))
