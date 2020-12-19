@@ -1,3 +1,5 @@
+using .SnakeGames
+
 function SnakeGameEnv(; action_style = MINIMAL_ACTION_SET, kw...)
     game = SnakeGame(; kw...)
     n_snakes = length(game.snakes)
@@ -41,19 +43,20 @@ end
 
 RLBase.action_space(env::SnakeGameEnv) = 1:4
 RLBase.state(env::SnakeGameEnv) = env.game.board
+RLBase.state_space(env::SnakeGameEnv) = Space(fill(false..true, size(env.game.board)))
 RLBase.reward(env::SnakeGameEnv{<:Any,SINGLE_AGENT}) =
     length(env.game.snakes[]) - env.latest_snakes_length[]
 RLBase.reward(env::SnakeGameEnv) = length.(env.game.snakes) .- env.latest_snakes_length
 RLBase.is_terminated(env::SnakeGameEnv) = env.is_terminated
 
-RLBase.get_legal_actions(env::SnakeGameEnv{FULL_ACTION_SET,SINGLE_AGENT}) =
+RLBase.legal_action_space(env::SnakeGameEnv{FULL_ACTION_SET,SINGLE_AGENT}) =
     findall(!=(-env.latest_actions[]), SNAKE_GAME_ACTIONS)
-RLBase.get_legal_actions(env::SnakeGameEnv{FULL_ACTION_SET}) =
+RLBase.legal_action_space(env::SnakeGameEnv{FULL_ACTION_SET}) =
     [findall(!=(-a), SNAKE_GAME_ACTIONS) for a in env.latest_actions]
 
-RLBase.get_legal_actions_mask(env::SnakeGameEnv{FULL_ACTION_SET,SINGLE_AGENT}) =
+RLBase.legal_action_space_mask(env::SnakeGameEnv{FULL_ACTION_SET,SINGLE_AGENT}) =
     [a != -env.latest_actions[] for a in SNAKE_GAME_ACTIONS]
-RLBase.get_legal_actions_mask(env::SnakeGameEnv{FULL_ACTION_SET}) =
+RLBase.legal_action_space_mask(env::SnakeGameEnv{FULL_ACTION_SET}) =
     [[x != -a for x in SNAKE_GAME_ACTIONS] for a in env.latest_actions]
 
 function RLBase.reset!(env::SnakeGameEnv)
