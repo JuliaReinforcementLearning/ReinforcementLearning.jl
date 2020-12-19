@@ -24,9 +24,15 @@ function Base.show(io::IO, t::MIME"text/markdown", env::MultiThreadEnv)
     show(io, t, Markdown.parse(s))
 end
 
-function MultiThreadEnv(f, n)
-    envs = [f() for _ in 1:n]
+"""
+    MultiThreadEnv(f, n::Int)
 
+`f` is a lambda function which creates an `AbstractEnv` by calling `f()`.
+"""
+MultiThreadEnv(f, n::Int) = MultiThreadEnv([f() for _ in 1:n])
+
+function MultiThreadEnv(envs::Vector{<:AbstractEnv})
+    n = length(envs)
     S = state_space(envs[1])
     s = state(envs[1])
     if S isa Space
