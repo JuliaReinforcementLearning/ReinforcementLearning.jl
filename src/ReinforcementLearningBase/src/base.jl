@@ -191,7 +191,7 @@ function test_interfaces!(env)
     reset!(env)
 end
 
-function test_runnable!(env, n = 1000;rng=Random.GLOBAL_RNG)
+function test_runnable!(env, n = 1000; rng = Random.GLOBAL_RNG)
     @testset "random policy with $(nameof(env))" begin
         reset!(env)
         for _ in 1:n
@@ -199,7 +199,8 @@ function test_runnable!(env, n = 1000;rng=Random.GLOBAL_RNG)
             a = rand(rng, A)
             @test a in A
 
-            if ActionStyle(env) === EXPLICIT_STOCHASTIC && current_player(env) == chance_player(env)
+            if ActionStyle(env) === EXPLICIT_STOCHASTIC &&
+               current_player(env) == chance_player(env)
                 @test isapprox(sum(prob(env)), 1)
             end
 
