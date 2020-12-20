@@ -29,10 +29,10 @@
         # note that for "2", the values are the same, but the lower action will be chosen since we're using `>` instead of `>=` for selecting action with a larger value
 
         walk(env) do x
-            if get_current_player(x) == 0
-                @test bp0(x) == expected_response_0[get_state(x)]
-            elseif get_current_player(x) == 1
-                @test bp1(x) == expected_response_1[get_state(x)]
+            if current_player(x) == 0
+                @test bp0(x) == expected_response_0[state(x)]
+            elseif current_player(x) == 1
+                @test bp1(x) == expected_response_1[state(x)]
             end
         end
     end
@@ -61,8 +61,8 @@
             Dict("0b" => 0, "0p" => 0, "1b" => 1, "1p" => 1, "2b" => 1, "2p" => 1)
 
         walk(env) do x
-            if get_current_player(x) == 1
-                @test bp1(x) == expected_response_1[get_state(x)]
+            if current_player(x) == 1
+                @test bp1(x) == expected_response_1[state(x)]
             end
         end
     end
@@ -77,10 +77,10 @@
             Dict("0b" => 0, "0p" => 0, "1p" => 0, "1b" => 0, "2p" => 1, "2b" => 1)
 
         walk(env) do x
-            if get_current_player(x) == 0
-                @test bp0(x) == expected_response_0[get_state(x)]
-            elseif get_current_player(x) == 1
-                @test bp1(x) == expected_response_1[get_state(x)]
+            if current_player(x) == 0
+                @test bp0(x) == expected_response_0[state(x)]
+            elseif current_player(x) == 1
+                @test bp1(x) == expected_response_1[state(x)]
             end
         end
     end

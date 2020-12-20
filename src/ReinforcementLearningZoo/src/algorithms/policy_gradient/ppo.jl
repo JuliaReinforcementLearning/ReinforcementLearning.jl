@@ -127,7 +127,7 @@ function PPOPolicy(;
     )
 end
 
-function RLBase.get_prob(
+function RLBase.prob(
     p::PPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal},
     state::AbstractArray,
 )
@@ -136,7 +136,7 @@ function RLBase.get_prob(
     StructArray{Normal}
 end
 
-function RLBase.get_prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArray)
+function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArray)
     logits =
         p.approximator.actor(send_to_device(device(p.approximator), state)) |>
         softmax |>
@@ -144,16 +144,16 @@ function RLBase.get_prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::Abstrac
     [Categorical(x; check_args = false) for x in eachcol(logits)]
 end
 
-RLBase.get_prob(p::PPOPolicy, env::MultiThreadEnv) = get_prob(p, get_state(env))
+RLBase.prob(p::PPOPolicy, env::MultiThreadEnv) = prob(p, state(env))
 
-function RLBase.get_prob(p::PPOPolicy, env::AbstractEnv)
-    s = get_state(env)
+function RLBase.prob(p::PPOPolicy, env::AbstractEnv)
+    s = state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
-    get_prob(p, s)[1]
+    prob(p, s)[1]
 end
 
-(p::PPOPolicy)(env::MultiThreadEnv) = rand.(p.rng, get_prob(p, env))
-(p::PPOPolicy)(env::AbstractEnv) = rand(p.rng, get_prob(p, env))
+(p::PPOPolicy)(env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
+(p::PPOPolicy)(env::AbstractEnv) = rand(p.rng, prob(p, env))
 
 function RLBase.update!(p::PPOPolicy, t::Union{PPOTrajectory, MaskedPPOTrajectory})
     length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
@@ -255,8 +255,8 @@ function RLBase.update!(
     env::MultiThreadEnv,
     ::Union{PreActStage, PostEpisodeStage},
 )
-    state = get_state(env)
-    dist = get_prob(policy, env)
+    s = state(env)
+    dist = prob(policy, env)
 
     # currently RandomPolicy returns a Matrix instead of a (vector of) distribution.
     if dist isa Matrix{<:Number}
@@ -276,13 +276,13 @@ function RLBase.update!(
     action_log_prob = [logpdf(d, a) for (d, a) in zip(dist, action)]
     push!(
         trajectory;
-        state = state,
+        state = s,
         action = action,
         action_log_prob = action_log_prob,
     )
 
     if trajectory isa MaskedPPOTrajectory
-        push!(trajectory; legal_actions_mask=get_legal_actions_mask(env))
+        push!(trajectory; legal_actions_mask=legal_action_space_mask(env))
     end
 
     action

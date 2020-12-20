@@ -43,7 +43,7 @@ in order to make sure low ≤ value ≤ high
 Base.@kwdef mutable struct VPGPolicy{
     A<:NeuralNetworkApproximator,
     B<:Union{NeuralNetworkApproximator,Nothing},
-    S<:AbstractSpace,
+    S,
     R<:AbstractRNG,
 } <: AbstractPolicy
     approximator::A
@@ -68,12 +68,12 @@ About continuous action space, see
 function (π::VPGPolicy)(env::AbstractEnv)
     to_dev(x) = send_to_device(device(π.approximator), x)
 
-    logits = env |> get_state |> to_dev |> π.approximator
+    logits = env |> state |> to_dev |> π.approximator
 
-    if π.action_space isa DiscreteSpace
+    if π.action_space isa AbstractVector
         dist = logits |> softmax |> π.dist
         action = π.action_space[rand(π.rng, dist)]
-    elseif π.action_space isa ContinuousSpace
+    elseif π.action_space isa Interval
         dist = π.dist.(logits...)
         action = rand.(π.rng, dist)[1]
     else
@@ -89,7 +89,7 @@ end
 
 function RLBase.update!(trajectory::ElasticSARTTrajectory, policy::VPGPolicy, env::AbstractEnv, ::PreActStage)
     action = policy(env)
-    push!(trajectory[:state], get_state(env))
+    push!(trajectory[:state], state(env))
     push!(trajectory[:action], action)
     action
 end
@@ -133,10 +133,10 @@ function RLBase.update!(π::VPGPolicy, traj::ElasticSARTTrajectory, ::AbstractEn
         end
 
         gs = gradient(Flux.params(model)) do
-            if π.action_space isa DiscreteSpace
+            if π.action_space isa AbstractVector
                 log_prob = S |> model |> logsoftmax
                 log_probₐ = log_prob[CartesianIndex.(A, 1:length(A))]
-            elseif π.action_space isa ContinuousSpace
+            elseif π.action_space isa Interval
                 dist = π.dist.(model(S)...) # TODO: this part does not work on GPU. See: https://github.com/JuliaStats/Distributions.jl/issues/1183 .
                 log_probₐ = logpdf.(dist, A)
             end

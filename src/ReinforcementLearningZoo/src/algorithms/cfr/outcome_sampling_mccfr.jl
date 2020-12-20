@@ -19,8 +19,8 @@ end
 
 (p::OutcomeSamplingMCCFRPolicy)(env::AbstractEnv) = p.behavior_policy(env)
 
-RLBase.get_prob(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv) =
-    get_prob(p.behavior_policy, env)
+RLBase.prob(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv) =
+    prob(p.behavior_policy, env)
 
 function OutcomeSamplingMCCFRPolicy(; state_type = String, rng = Random.GLOBAL_RNG, ϵ = 0.6)
     OutcomeSamplingMCCFRPolicy(
@@ -38,7 +38,7 @@ end
 "Run one interation"
 function RLBase.update!(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv)
     for x in get_players(env)
-        if x != get_chance_player(env)
+        if x != chance_player(env)
             outcome_sampling(copy(env), x, p.nodes, p.ϵ, 1.0, 1.0, 1.0, p.rng)
         end
     end
@@ -57,16 +57,16 @@ function RLBase.update!(p::OutcomeSamplingMCCFRPolicy)
 end
 
 function outcome_sampling(env, i, nodes, ϵ, πᵢ, π₋ᵢ, s, rng)
-    current_player = get_current_player(env)
+    current_player = current_player(env)
 
-    if get_terminal(env)
-        get_reward(env, i) / s, 1.0
-    elseif current_player == get_chance_player(env)
-        env(rand(rng, get_actions(env)))
+    if is_terminated(env)
+        reward(env, i) / s, 1.0
+    elseif current_player == chance_player(env)
+        env(rand(rng, action_space(env)))
         outcome_sampling(env, i, nodes, ϵ, πᵢ, π₋ᵢ, s, rng)
     else
-        I = get_state(env)
-        legal_actions = get_legal_actions(env)
+        I = state(env)
+        legal_actions = legal_action_space(env)
         n = length(legal_actions)
         node = get!(nodes, I, InfoStateNode(n))
         regret_matching!(node; is_reset_neg_regrets = false)
@@ -82,7 +82,7 @@ function outcome_sampling(env, i, nodes, ϵ, πᵢ, π₋ᵢ, s, rng)
             πᵢ′, π₋ᵢ′, s′ = πᵢ, π₋ᵢ * pᵢ, s * pᵢ
         end
 
-        env(get_legal_actions(env)[aᵢ])
+        env(legal_action_space(env)[aᵢ])
         u, πₜₐᵢₗ = outcome_sampling(env, i, nodes, ϵ, πᵢ′, π₋ᵢ′, s′, rng)
 
         if i == current_player

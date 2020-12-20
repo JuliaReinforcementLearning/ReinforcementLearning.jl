@@ -15,7 +15,7 @@ function RLCore.Experiment(
     rng = StableRNG(seed)
 
     env = MountainCarEnv(; T = Float32, max_steps = 5000, rng = rng)
-    ns, na = length(get_state(env)), length(get_actions(env))
+    ns, na = length(state(env)), length(action_space(env))
 
     agent = Agent(
         policy = QBasedPolicy(

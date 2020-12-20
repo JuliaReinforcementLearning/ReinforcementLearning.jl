@@ -16,8 +16,8 @@ end
 (p::MinimaxPolicy)(env::AbstractEnv) = p(env, DynamicStyle(env), NumAgentStyle(env))
 
 function (p::MinimaxPolicy)(env::AbstractEnv, ::Sequential, ::MultiAgent{2})
-    if get_terminal(env)
-        rand(get_actions(env))  # just a dummy action
+    if is_terminated(env)
+        rand(action_space(env))  # just a dummy action
     else
         a, v = α_β_search(
             env,
@@ -25,7 +25,7 @@ function (p::MinimaxPolicy)(env::AbstractEnv, ::Sequential, ::MultiAgent{2})
             p.maximum_depth,
             -Inf,
             Inf,
-            get_current_player(env),
+            current_player(env),
         )
         p.v = v  # for debug only
         a
@@ -33,12 +33,12 @@ function (p::MinimaxPolicy)(env::AbstractEnv, ::Sequential, ::MultiAgent{2})
 end
 
 function α_β_search(env::AbstractEnv, value_function, depth, α, β, maximizing_role)
-    if get_terminal(env)
-        nothing, get_reward(env, maximizing_role)
+    if is_terminated(env)
+        nothing, reward(env, maximizing_role)
     elseif depth == 0
         nothing, value_function(env)
-    elseif get_current_player(env) == maximizing_role
-        legal_actions = get_legal_actions(env)
+    elseif current_player(env) == maximizing_role
+        legal_actions = legal_action_space(env)
         best_action = legal_actions[1]
         v = -Inf
         for a in legal_actions
@@ -53,7 +53,7 @@ function α_β_search(env::AbstractEnv, value_function, depth, α, β, maximizin
         end
         best_action, v
     else
-        legal_actions = get_legal_actions(env)
+        legal_actions = legal_action_space(env)
         best_action = legal_actions[1]
         v = Inf
         for a in legal_actions

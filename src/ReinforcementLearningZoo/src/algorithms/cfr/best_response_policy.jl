@@ -22,8 +22,8 @@ function BestResponsePolicy(
     state_type = String,
     action_type = Int,
 )
-    # S = typeof(get_state(env))  # TODO: currently it will break the OpenSpielEnv. Can not get information set for chance player
-    # A = eltype(get_actions(env))  # TODO: for chance players it will return ActionProbPair
+    # S = typeof(state(env))  # TODO: currently it will break the OpenSpielEnv. Can not get information set for chance player
+    # A = eltype(action_space(env))  # TODO: for chance players it will return ActionProbPair
     S = state_type
     A = action_type
     E = typeof(env)
@@ -45,7 +45,7 @@ function BestResponsePolicy(
 end
 
 function (p::BestResponsePolicy)(env::AbstractEnv)
-    if get_current_player(env) == p.best_responder
+    if current_player(env) == p.best_responder
         best_response_action(p, env)
     else
         p.policy(env)
@@ -53,23 +53,23 @@ function (p::BestResponsePolicy)(env::AbstractEnv)
 end
 
 function init_cfr_reach_prob!(p, env, reach_prob = 1.0)
-    if !get_terminal(env)
-        if get_current_player(env) == p.best_responder
-            push!(get!(p.cfr_reach_prob, get_state(env), []), env => reach_prob)
+    if !is_terminated(env)
+        if current_player(env) == p.best_responder
+            push!(get!(p.cfr_reach_prob, state(env), []), env => reach_prob)
 
-            for a in get_legal_actions(env)
+            for a in legal_action_space(env)
                 init_cfr_reach_prob!(p, child(env, a), reach_prob)
             end
-        elseif get_current_player(env) == get_chance_player(env)
-            for a::ActionProbPair in get_actions(env)
+        elseif current_player(env) == chance_player(env)
+            for a::ActionProbPair in action_space(env)
                 init_cfr_reach_prob!(p, child(env, a), reach_prob * a.prob)
             end
         else  # opponents
-            for a in get_legal_actions(env)
+            for a in legal_action_space(env)
                 init_cfr_reach_prob!(
                     p,
                     child(env, a),
-                    reach_prob * get_prob(p.policy, env, a),
+                    reach_prob * prob(p.policy, env, a),
                 )
             end
         end
@@ -78,21 +78,21 @@ end
 
 function best_response_value(p, env)
     get!(p.best_response_value_cache, env) do
-        if get_terminal(env)
-            get_reward(env, p.best_responder)
-        elseif get_current_player(env) == p.best_responder
+        if is_terminated(env)
+            reward(env, p.best_responder)
+        elseif current_player(env) == p.best_responder
             a = best_response_action(p, env)
             best_response_value(p, child(env, a))
-        elseif get_current_player(env) == get_chance_player(env)
+        elseif current_player(env) == chance_player(env)
             v = 0.0
-            for a::ActionProbPair in get_actions(env)
+            for a::ActionProbPair in action_space(env)
                 v += a.prob * best_response_value(p, child(env, a))
             end
             v
         else
             v = 0.0
-            for a in get_legal_actions(env)
-                v += get_prob(p.policy, env, a) * best_response_value(p, child(env, a))
+            for a in legal_action_space(env)
+                v += prob(p.policy, env, a) * best_response_value(p, child(env, a))
             end
             v
         end
@@ -100,12 +100,12 @@ function best_response_value(p, env)
 end
 
 function best_response_action(p, env)
-    get!(p.best_response_action_cache, get_state(env)) do
+    get!(p.best_response_action_cache, state(env)) do
         best_action, best_action_value = nothing, typemin(Float64)
-        for a in get_legal_actions(env)
-            # for each information set (`get_state(env)` here), we may have several paths to reach it
+        for a in legal_action_space(env)
+            # for each information set (`state(env)` here), we may have several paths to reach it
             # here we sum the cfr reach prob weighted value to find out the best action
-            v = sum(p.cfr_reach_prob[get_state(env)]) do (e, reach_prob)
+            v = sum(p.cfr_reach_prob[state(env)]) do (e, reach_prob)
                 reach_prob * best_response_value(p, child(e, a))
             end
             if v > best_action_value
@@ -118,10 +118,10 @@ end
 
 RLBase.update!(p::BestResponsePolicy, args...) = nothing
 
-function RLBase.get_prob(p::BestResponsePolicy, env::AbstractEnv)
-    if get_current_player(env) == p.best_responder
-        onehot(p(env), get_actions(env))
+function RLBase.prob(p::BestResponsePolicy, env::AbstractEnv)
+    if current_player(env) == p.best_responder
+        onehot(p(env), action_space(env))
     else
-        get_prob(p.policy, env)
+        prob(p.policy, env)
     end
 end

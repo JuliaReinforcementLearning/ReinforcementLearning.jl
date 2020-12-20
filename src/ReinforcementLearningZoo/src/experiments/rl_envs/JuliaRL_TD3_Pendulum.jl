@@ -14,12 +14,12 @@ function RLCore.Experiment(
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = StableRNG(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
-    action_space = get_actions(inner_env)
-    low = action_space.low
-    high = action_space.high
-    ns = length(get_state(inner_env))
+    A = action_space(inner_env)
+    low = A.left
+    high = A.right
+    ns = length(state(inner_env))
 
-    env = inner_env |> ActionTransformedEnv(x -> low + (x + 1) * 0.5 * (high - low))
+    env = ActionTransformedEnv(inner_env; action_mapping=x -> low + (x + 1) * 0.5 * (high - low))
     init = glorot_uniform(rng)
 
     create_actor() = Chain(
@@ -58,7 +58,7 @@ function RLCore.Experiment(
             ρ = 0.99f0,
             batch_size = 64,
             start_steps = 1000,
-            start_policy = RandomPolicy(ContinuousSpace(-1.0, 1.0); rng = rng),
+            start_policy = RandomPolicy(-1.0..1.0; rng = rng),
             update_after = 1000,
             update_every = 1,
             policy_freq = 2,

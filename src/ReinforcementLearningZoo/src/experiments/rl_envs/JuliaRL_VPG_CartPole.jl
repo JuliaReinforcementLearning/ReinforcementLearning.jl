@@ -14,7 +14,7 @@ function RLCore.Experiment(
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = StableRNG(seed)
     env = CartPoleEnv(; T = Float32, rng = rng)
-    ns, na = length(get_state(env)), length(get_actions(env))
+    ns, na = length(state(env)), length(action_space(env))
 
     agent = Agent(
         policy = VPGPolicy(
@@ -34,7 +34,7 @@ function RLCore.Experiment(
                 ),
                 optimizer = ADAM(),
             ) |> cpu,
-            action_space = get_actions(env),
+            action_space = action_space(env),
             dist = Categorical,
             γ = 0.99f0,
             rng = rng,

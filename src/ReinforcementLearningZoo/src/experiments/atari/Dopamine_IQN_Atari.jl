@@ -22,7 +22,7 @@ function RLCore.Experiment(
     MAX_STEPS_PER_EPISODE = 27_000
 
     env = atari_env_factory(name, STATE_SIZE, N_FRAMES; seed = hash(seed + 2))
-    N_ACTIONS = length(get_actions(env))
+    N_ACTIONS = length(action_space(env))
     Nₑₘ = 64
 
     init = glorot_uniform(rng)

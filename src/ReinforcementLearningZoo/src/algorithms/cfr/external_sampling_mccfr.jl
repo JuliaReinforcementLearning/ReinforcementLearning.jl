@@ -18,8 +18,8 @@ end
 
 (p::ExternalSamplingMCCFRPolicy)(env::AbstractEnv) = p.behavior_policy(env)
 
-RLBase.get_prob(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv) =
-    get_prob(p.behavior_policy, env)
+RLBase.prob(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv) =
+    prob(p.behavior_policy, env)
 
 function ExternalSamplingMCCFRPolicy(; state_type = String, rng = Random.GLOBAL_RNG)
     ExternalSamplingMCCFRPolicy(
@@ -48,23 +48,23 @@ end
 "Run one interation"
 function RLBase.update!(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv)
     for x in get_players(env)
-        if x != get_chance_player(env)
+        if x != chance_player(env)
             external_sampling(copy(env), x, p.nodes, p.rng)
         end
     end
 end
 
 function external_sampling(env, i, nodes, rng)
-    current_player = get_current_player(env)
+    current_player = current_player(env)
 
-    if get_terminal(env)
-        get_reward(env, i)
-    elseif current_player == get_chance_player(env)
-        env(rand(rng, get_actions(env)))
+    if is_terminated(env)
+        reward(env, i)
+    elseif current_player == chance_player(env)
+        env(rand(rng, action_space(env)))
         external_sampling(env, i, nodes, rng)
     else
-        I = get_state(env)
-        legal_actions = get_legal_actions(env)
+        I = state(env)
+        legal_actions = legal_action_space(env)
         n = length(legal_actions)
         node = get!(nodes, I, InfoStateNode(n))
         regret_matching!(node; is_reset_neg_regrets = false)

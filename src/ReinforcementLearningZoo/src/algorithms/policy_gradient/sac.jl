@@ -101,7 +101,7 @@ function (p::SACPolicy)(env)
         p.start_policy(env)
     else
         D = device(p.policy)
-        s = get_state(env)
+        s = state(env)
         s = Flux.unsqueeze(s, ndims(s) + 1)
         # trainmode:
         action = evaluate(p, s)[1][] # returns action as scalar

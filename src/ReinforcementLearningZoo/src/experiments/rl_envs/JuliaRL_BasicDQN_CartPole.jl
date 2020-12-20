@@ -15,7 +15,7 @@ function RLCore.Experiment(
     rng = StableRNG(seed)
 
     env = CartPoleEnv(; T = Float32, rng = rng)
-    ns, na = length(get_state(env)), length(get_actions(env))
+    ns, na = length(state(env)), length(action_space(env))
     agent = Agent(
         policy = QBasedPolicy(
             learner = BasicDQNLearner(

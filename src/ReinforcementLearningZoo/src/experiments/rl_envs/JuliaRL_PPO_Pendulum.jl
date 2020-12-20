@@ -14,10 +14,10 @@ function RLCore.Experiment(
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = StableRNG(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
-    action_space = get_actions(inner_env)
+    action_space = action_space(inner_env)
     low = action_space.low
     high = action_space.high
-    ns = length(get_state(inner_env))
+    ns = length(state(inner_env))
 
     N_ENV = 8
     UPDATE_FREQ = 2048
@@ -82,7 +82,7 @@ function RLCore.Experiment(
                     loss = agent.policy.loss[end, end],
                 )
                 for i in 1:length(env)
-                    if get_terminal(env[i])
+                    if is_terminated(env[i])
                         @info "training" reward = total_reward_per_episode.rewards[i][end] log_step_increment =
                             0
                         break

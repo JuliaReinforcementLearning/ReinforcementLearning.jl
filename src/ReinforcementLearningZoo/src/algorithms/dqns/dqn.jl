@@ -80,7 +80,7 @@ end
 
 function (learner::DQNLearner)(env)
     env |>
-    get_state |>
+    state |>
     x -> Flux.unsqueeze(x, ndims(x) + 1) |>
     x -> send_to_device(device(learner), x) |>
     learner.approximator |>

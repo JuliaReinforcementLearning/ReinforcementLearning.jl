@@ -111,9 +111,9 @@ function RainbowLearner(;
 end
 
 function (learner::RainbowLearner)(env)
-    state = send_to_device(device(learner.approximator), get_state(env))
-    state = Flux.unsqueeze(state, ndims(state) + 1)
-    logits = learner.approximator(state)
+    s = send_to_device(device(learner.approximator), state(env))
+    s = Flux.unsqueeze(s, ndims(s) + 1)
+    logits = learner.approximator(s)
     q = learner.support .* softmax(reshape(logits, :, learner.n_actions))
     vec(sum(q, dims = 1)) |> send_to_host
 end

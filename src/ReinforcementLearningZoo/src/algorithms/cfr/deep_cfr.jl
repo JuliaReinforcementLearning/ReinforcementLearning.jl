@@ -40,21 +40,21 @@ Base.@kwdef mutable struct DeepCFR{TP,TV,TMP,TMV,I,R,P} <: AbstractCFRPolicy
         Dict(k => zeros(Float32, n_training_steps_V) for (k, _) in MV)
 end
 
-function RLBase.get_prob(π::DeepCFR, env::AbstractEnv)
-    I = send_to_device(device(π.Π), get_state(env))
-    m = send_to_device(device(π.Π), ifelse.(get_legal_actions_mask(env), 0.0f0, -Inf32))
+function RLBase.prob(π::DeepCFR, env::AbstractEnv)
+    I = send_to_device(device(π.Π), state(env))
+    m = send_to_device(device(π.Π), ifelse.(legal_action_space_mask(env), 0.0f0, -Inf32))
     logits = π.Π(Flux.unsqueeze(I, ndims(I) + 1)) |> vec
     σ = softmax(logits .+ m)
     send_to_host(σ)
 end
 
 (π::DeepCFR)(env::AbstractEnv) =
-    sample(π.rng, get_actions(env), Weights(get_prob(π, env), 1.0))
+    sample(π.rng, action_space(env), Weights(prob(π, env), 1.0))
 
 "Run one interation"
 function RLBase.update!(π::DeepCFR, env::AbstractEnv)
     for p in get_players(env)
-        if p != get_chance_player(env)
+        if p != chance_player(env)
             for k in 1:π.K
                 external_sampling!(π, copy(env), p)
             end
@@ -135,17 +135,17 @@ end
 
 "CFR Traversal with External Sampling"
 function external_sampling!(π::DeepCFR, env::AbstractEnv, p)
-    if get_terminal(env)
-        get_reward(env, p)
-    elseif get_current_player(env) == get_chance_player(env)
-        env(rand(π.rng, get_actions(env)))
+    if is_terminated(env)
+        reward(env, p)
+    elseif current_player(env) == chance_player(env)
+        env(rand(π.rng, action_space(env)))
         external_sampling!(π, env, p)
-    elseif get_current_player(env) == p
+    elseif current_player(env) == p
         V = π.V[p]
-        s = get_state(env)
+        s = state(env)
         I = send_to_device(device(V), Flux.unsqueeze(s, ndims(s) + 1))
-        A = get_actions(env)
-        m = get_legal_actions_mask(env)
+        A = action_space(env)
+        m = legal_action_space_mask(env)
         σ = masked_regret_matching(V(I) |> send_to_host |> vec, m)
         v = zeros(length(σ))
         v̄ = 0.0
@@ -158,11 +158,11 @@ function external_sampling!(π::DeepCFR, env::AbstractEnv, p)
         push!(π.MV[p], I = s, t = π.t, r̃ = (v .- v̄) .* m, m = m)
         v̄
     else
-        V = π.V[get_current_player(env)]
-        s = get_state(env)
+        V = π.V[current_player(env)]
+        s = state(env)
         I = send_to_device(device(V), Flux.unsqueeze(s, ndims(s) + 1))
-        A = get_actions(env)
-        m = get_legal_actions_mask(env)
+        A = action_space(env)
+        m = legal_action_space_mask(env)
         σ = masked_regret_matching(V(I) |> send_to_host |> vec, m)
         push!(π.MΠ, I = s, t = π.t, σ = σ, m = m)
         a = sample(π.rng, A, Weights(σ, 1.0))

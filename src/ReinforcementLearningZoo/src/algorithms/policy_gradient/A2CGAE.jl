@@ -33,7 +33,7 @@ Flux.functor(x::A2CGAELearner) = (app = x.approximator, ), y -> @set x.approxima
 (learner::A2CGAELearner)(env::MultiThreadEnv) =
     learner.approximator.actor(send_to_device(
         device(learner),
-        get_state(env),
+        state(env),
     )) |> send_to_host
 
 function RLBase.update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)

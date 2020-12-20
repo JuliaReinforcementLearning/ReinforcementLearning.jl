@@ -68,7 +68,7 @@ function RLCore.Experiment(
             p => NeuralNetworkApproximator(
                 model = Chain(Dense(30, 64, relu), Dense(64, 64, relu), Dense(64, 3)) |> gpu,
                 optimizer = ADAM(0.001),
-            ) for p in get_players(env) if p != get_chance_player(env)
+            ) for p in get_players(env) if p != chance_player(env)
         ),
         MV = Dict(
             p => ReservoirTrajectory(
@@ -77,7 +77,7 @@ function RLCore.Experiment(
                 :t => Int,
                 :r̃ => Vector{Float32},
                 :m => Vector{Bool},
-            ) for p in get_players(env) if p != get_chance_player(env)
+            ) for p in get_players(env) if p != chance_player(env)
         ),
         K = 1500,
         n_training_steps_V = 750,

@@ -30,12 +30,12 @@ Flux.functor(x::MACLearner) = (app = x.approximator, ), y -> @set x.approximator
 function (learner::MACLearner)(env::MultiThreadEnv)
     learner.approximator.actor(send_to_device(
         device(learner.approximator),
-        get_state(env),
+        state(env),
     )) |> send_to_host
 end
 
 function (learner::MACLearner)(env)
-    s = get_state(env)
+    s = state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
     s = send_to_device(device(learner.approximator), s)
     learner.approximator.actor(s) |> vec |> send_to_host

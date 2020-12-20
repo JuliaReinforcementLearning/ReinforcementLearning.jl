@@ -137,11 +137,11 @@ function IQNLearner(;
 end
 
 function (learner::IQNLearner)(env)
-    state = send_to_device(device(learner), get_state(env))
-    state = Flux.unsqueeze(state, ndims(state) + 1)
+    s = send_to_device(device(learner), state(env))
+    s = Flux.unsqueeze(s, ndims(s) + 1)
     τ = rand(learner.device_rng, Float32, learner.K, 1)
     τₑₘ = embed(τ, learner.Nₑₘ)
-    quantiles = learner.approximator(state, τₑₘ)
+    quantiles = learner.approximator(s, τₑₘ)
     vec(mean(quantiles; dims = 2)) |> send_to_host
 end
 

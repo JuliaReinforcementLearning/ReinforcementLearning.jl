@@ -20,7 +20,7 @@ function RLCore.Experiment(
     N_FRAMES = 4
     STATE_SIZE = (84, 84)
     env = atari_env_factory(name, STATE_SIZE, N_FRAMES; seed = hash(seed + 1))
-    N_ACTIONS = length(get_actions(env))
+    N_ACTIONS = length(action_space(env))
     init = glorot_uniform(rng)
 
     create_model() =

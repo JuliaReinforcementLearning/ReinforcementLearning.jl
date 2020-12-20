@@ -25,7 +25,7 @@ end
 
 (p::TabularCFRPolicy)(env::AbstractEnv) = p.behavior_policy(env)
 
-RLBase.get_prob(p::TabularCFRPolicy, env::AbstractEnv) = get_prob(p.behavior_policy, env)
+RLBase.prob(p::TabularCFRPolicy, env::AbstractEnv) = prob(p.behavior_policy, env)
 
 """
     TabularCFRPolicy(;kwargs...)
@@ -90,7 +90,7 @@ function RLBase.update!(p::TabularCFRPolicy, env::AbstractEnv)
     w = p.is_linear_averaging ? max(p.n_iteration - p.weighted_averaging_delay, 0) : 1
     if p.is_alternating_update
         for x in get_players(env)
-            if x != get_chance_player(env)
+            if x != chance_player(env)
                 cfr!(p.nodes, env, x, w)
                 regret_matching!(p)
             end
@@ -114,29 +114,29 @@ v: counterfactual value **before weighted by opponent's reaching probability**
 V: a vector containing the `v` after taking each action with current information set. Used to calculate the **regret value**
 """
 function cfr!(nodes, env, p, w, π = Dict(x => 1.0 for x in get_players(env)))
-    if get_terminal(env)
-        get_reward(env, p)
+    if is_terminated(env)
+        reward(env, p)
     else
-        if get_current_player(env) == get_chance_player(env)
+        if current_player(env) == chance_player(env)
             v = 0.0
-            for a::ActionProbPair in get_legal_actions(env)
+            for a::ActionProbPair in legal_action_space(env)
                 π′ = copy(π)
-                π′[get_current_player(env)] *= a.prob
+                π′[current_player(env)] *= a.prob
                 v += a.prob * cfr!(nodes, child(env, a), p, w, π′)
             end
             v
         else
             v = 0.0
-            legal_actions = get_legal_actions(env)
-            node = get!(nodes, get_state(env), InfoStateNode(length(legal_actions)))
+            legal_actions = legal_action_space(env)
+            node = get!(nodes, state(env), InfoStateNode(length(legal_actions)))
 
-            is_update = isnothing(p) || p == get_current_player(env)
+            is_update = isnothing(p) || p == current_player(env)
             V = is_update ? Vector{Float64}(undef, length(legal_actions)) : nothing
 
             for (i, a) in enumerate(legal_actions)
                 σᵢ = node.strategy[i]
                 π′ = copy(π)
-                π′[get_current_player(env)] *= σᵢ
+                π′[current_player(env)] *= σᵢ
 
                 vₐ = cfr!(nodes, child(env, a), p, w, π′)
                 is_update && (V[i] = vₐ)
@@ -144,8 +144,8 @@ function cfr!(nodes, env, p, w, π = Dict(x => 1.0 for x in get_players(env)))
             end
 
             if is_update
-                πᵢ = π[get_current_player(env)]
-                π₋ᵢ = reduce(*, (prob for (p, prob) in π if p != get_current_player(env)))
+                πᵢ = π[current_player(env)]
+                π₋ᵢ = reduce(*, (prob for (p, prob) in π if p != current_player(env)))
                 node.cumulative_regret .+= π₋ᵢ .* (V .- v)
                 node.cumulative_strategy .+= w .* πᵢ .* node.strategy
             end

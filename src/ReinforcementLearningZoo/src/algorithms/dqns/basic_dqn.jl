@@ -37,7 +37,7 @@ end
 
 (learner::BasicDQNLearner)(env) =
     env |>
-    get_state |>
+    state |>
     x -> send_to_device(device(learner), x) |>
     learner.approximator |>
     send_to_host

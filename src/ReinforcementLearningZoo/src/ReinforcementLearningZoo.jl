@@ -6,11 +6,13 @@ export RLZoo
 using CircularArrayBuffers
 using ReinforcementLearningBase
 using ReinforcementLearningCore
+using ReinforcementLearningEnvironments
 using Setfield: @set
 using StableRNGs
 using Logging
 using Flux.Losses
 using Dates
+using IntervalSets
 using Random
 using Random: shuffle
 using CUDA

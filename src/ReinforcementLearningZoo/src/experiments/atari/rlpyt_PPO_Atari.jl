@@ -28,7 +28,7 @@ function RLCore.Experiment(
             seed = seed + i,
         ) for i in 1:N_ENV
     ])
-    N_ACTIONS = length(get_actions(env[1]))
+    N_ACTIONS = length(action_space(env[1]))
     INIT_CLIP_RANGE = 0.1f0
     INIT_LEARNING_RATE = 1e-3
 
@@ -46,7 +46,7 @@ function RLCore.Experiment(
     agent = Agent(
         policy = RandomStartPolicy(
             num_rand_start = 1000,
-            random_policy = RandomPolicy(get_actions(env); rng = rng),
+            random_policy = RandomPolicy(action_space(env); rng = rng),
             policy = PPOPolicy(
                 approximator = ActorCritic(
                     actor = Chain(model, Dense(512, N_ACTIONS; initW = init)),
@@ -106,14 +106,14 @@ function RLCore.Experiment(
             with_logger(lg) do
                 rewards = [
                     total_batch_reward_per_episode.rewards[i][end]
-                    for i in 1:length(env) if get_terminal(env[i])
+                    for i in 1:length(env) if is_terminated(env[i])
                 ]
                 if length(rewards) > 0
                     @info "training" rewards = mean(rewards) log_step_increment = 0
                 end
                 steps = [
                     batch_steps_per_episode.steps[i][end]
-                    for i in 1:length(env) if get_terminal(env[i])
+                    for i in 1:length(env) if is_terminated(env[i])
                 ]
                 if length(steps) > 0
                     @info "training" steps = mean(steps) log_step_increment = 0
