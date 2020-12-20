@@ -33,6 +33,19 @@ RLBase.prob(p::QBasedPolicy, env, ::FullActionSet) =
 RLBase.update!(p::QBasedPolicy, trajectory::AbstractTrajectory) =
     update!(p.learner, trajectory)
 
+function check(p::QBasedPolicy, env::AbstractEnv)
+    A = action_space(env)
+    if (A isa AbstractVector && A == 1:length(A)) ||
+        (A isa Tuple && A == Tuple(1:length(A)))
+        # this is expected
+    else
+        @warn "Applying a QBasedPolicy to an environment with a unknown action space. Maybe convert the environment with `discrete2standard_discrete` in ReinforcementLearningEnvironments.jl first or redesign the environment."
+    end
+
+    check(p.learner, env)
+    check(p.explorer, env)
+end
+
 #####
 # TabularRandomPolicy
 #####
