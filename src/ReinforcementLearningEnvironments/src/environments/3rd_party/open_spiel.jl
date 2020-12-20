@@ -16,7 +16,6 @@ import .OpenSpiel:
     num_distinct_actions,
     num_players,
     apply_action,
-    current_player,
     player_reward,
     legal_actions,
     legal_actions_mask,
@@ -29,7 +28,6 @@ import .OpenSpiel:
     chance_outcomes,
     max_chance_outcomes,
     utility
-using StatsBase: sample, weights
 
 
 """
@@ -56,9 +54,17 @@ RLBase.reset!(env::OpenSpielEnv) = env.state = new_initial_state(env.game)
 
 (env::OpenSpielEnv)(action::Int) = apply_action(env.state, action)
 
-RLBase.current_player(env::OpenSpielEnv) = current_player(env.state)
+RLBase.current_player(env::OpenSpielEnv) = OpenSpiel.current_player(env.state)
 RLBase.chance_player(env::OpenSpielEnv) = convert(Int, OpenSpiel.CHANCE_PLAYER)
-RLBase.players(env::OpenSpielEnv) = 0:(num_players(env.game)-1)
+
+function RLBase.players(env::OpenSpielEnv)
+    p = 0:(num_players(env.game)-1)
+    if ChanceStyle(env) === EXPLICIT_STOCHASTIC
+        (p..., RLBase.chance_player(env))
+    else
+        p
+    end
+end
 
 function RLBase.action_space(env::OpenSpielEnv, player)
     if player == chance_player(env)

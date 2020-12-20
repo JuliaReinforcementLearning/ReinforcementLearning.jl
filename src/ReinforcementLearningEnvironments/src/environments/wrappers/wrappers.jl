@@ -5,7 +5,7 @@ Base.nameof(env::AbstractEnvWrapper) = "$(nameof(env.env)) |> $(nameof(typeof(en
 include("ActionTransformedEnv.jl")
 include("DefaultStateStyle.jl")
 include("MaxTimeoutEnv.jl")
-include("MultiThreadEnv.jl")
 include("RewardOverriddenEnv.jl")
 include("StateCachedEnv.jl")
 include("StateOverriddenEnv.jl")
+include("StochasticEnv.jl")

@@ -87,7 +87,7 @@ end
 RLBase.is_terminated(env::KuhnPokerEnv) =
     length(env.actions) == 2 && (env.actions[1] == :bet || env.actions[2] == :pass) ||
     length(env.actions) == 3
-RLBase.players(env::KuhnPokerEnv) = 1:2
+RLBase.players(env::KuhnPokerEnv) = (1, 2, CHANCE_PLAYER)
 
 function RLBase.state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, p::Int)
     if length(env.cards) >= p
@@ -120,7 +120,9 @@ function RLBase.prob(env::KuhnPokerEnv, ::ChancePlayer)
         fill(1 / 3, 3)
     elseif length(env.cards) == 1
         p = fill(1 / 2, 3)
-        p[env.cards[1]] = 0
+        i = findfirst(==(env.cards[1]), KUHN_POKER_CARDS)
+        p[i] = 0
+        p
     else
         @error "it's not chance player's turn!"
     end
@@ -130,6 +132,8 @@ end
 (env::KuhnPokerEnv)(action::Int, p::ChancePlayer) = env(KUHN_POKER_CARDS[action], p)
 (env::KuhnPokerEnv)(action::Symbol, ::ChancePlayer) = push!(env.cards, action)
 (env::KuhnPokerEnv)(action::Symbol, ::Int) = push!(env.actions, action)
+
+RLBase.reward(::KuhnPokerEnv, ::ChancePlayer) = 0
 
 function RLBase.reward(env::KuhnPokerEnv, p)
     if is_terminated(env)

@@ -39,27 +39,6 @@
         end
     end
 
-    @testset "MultiThreadEnv" begin
-        rng = StableRNG(123)
-        env = MultiThreadEnv(4) do
-            AtariEnv("pong")
-        end
-
-        reset!(env)
-        n = 1_000
-        for _ in 1:n
-            A = legal_action_space(env)
-            a = rand(rng, A)
-            @test a in A
-
-            S = state_space(env)
-            s = state(env)
-            @test s in S
-            env(a)
-            reset!(env)
-        end
-    end
-
     @testset "RewardOverriddenEnv" begin
         rng = StableRNG(123)
         env = TigerProblemEnv(; rng = rng)
@@ -99,6 +78,15 @@
 
         # RLBase.test_interfaces!(env′)
         # RLBase.test_runnable!(env′)
+    end
+
+    @testset "StochasticEnv" begin
+        env = KuhnPokerEnv()
+        rng = StableRNG(123)
+        env′ = StochasticEnv(env;rng=rng)
+
+        RLBase.test_interfaces!(env′)
+        RLBase.test_runnable!(env′)
     end
 
 end
