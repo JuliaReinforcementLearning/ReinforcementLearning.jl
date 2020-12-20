@@ -199,6 +199,10 @@ function test_runnable!(env, n = 1000;rng=Random.GLOBAL_RNG)
             a = rand(rng, A)
             @test a in A
 
+            if ActionStyle(env) === EXPLICIT_STOCHASTIC && current_player(env) == chance_player(env)
+                @test isapprox(sum(prob(env)), 1)
+            end
+
             S = state_space(env)
             s = state(env)
             @test s in S
