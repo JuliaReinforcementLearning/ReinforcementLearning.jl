@@ -1,3 +1,5 @@
+include("multi_thread_env.jl")
+
 """
 Many policy gradient based algorithms require that the `env` is a
 `MultiThreadEnv` to increase the diversity during training. So the training

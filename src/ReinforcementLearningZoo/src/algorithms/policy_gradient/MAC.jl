@@ -133,3 +133,5 @@ function _update!(learner::MACLearner, t::CircularArraySARTTrajectory)
     end
     update!(AC.critic, gs2)
 end
+
+RLCore.check(::QBasedPolicy{<:MACLearner}, ::MultiThreadEnv) = nothing

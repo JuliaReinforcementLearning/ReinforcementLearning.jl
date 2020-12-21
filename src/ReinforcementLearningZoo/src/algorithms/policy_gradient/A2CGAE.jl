@@ -113,3 +113,5 @@ function _update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
 
     update!(AC, gs)
 end
+
+RLCore.check(::QBasedPolicy{<:A2CGAELearner}, ::MultiThreadEnv) = nothing

@@ -6,7 +6,6 @@ export RLZoo
 using CircularArrayBuffers
 using ReinforcementLearningBase
 using ReinforcementLearningCore
-using ReinforcementLearningEnvironments
 using Setfield: @set
 using StableRNGs
 using Logging
