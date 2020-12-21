@@ -20,11 +20,11 @@ Flux.functor(x::QBasedPolicy) = (learner = x.learner,), y -> @set x.learner = y.
 
 (π::QBasedPolicy)(env) = π(env, ActionStyle(env))
 (π::QBasedPolicy)(env, ::MinimalActionSet) = π.explorer(π.learner(env))
-(π::QBasedPolicy)(env, ::FullActionSet) = π.explorer(π.learner(env), legal_action_space_mask(env))
+(π::QBasedPolicy)(env, ::FullActionSet) =
+    π.explorer(π.learner(env), legal_action_space_mask(env))
 
 RLBase.prob(p::QBasedPolicy, env) = prob(p, env, ActionStyle(env))
-RLBase.prob(p::QBasedPolicy, env, ::MinimalActionSet) =
-    prob(p.explorer, p.learner(env))
+RLBase.prob(p::QBasedPolicy, env, ::MinimalActionSet) = prob(p.explorer, p.learner(env))
 RLBase.prob(p::QBasedPolicy, env, ::FullActionSet) =
     prob(p.explorer, p.learner(env), legal_action_space_mask(env))
 
@@ -36,7 +36,7 @@ RLBase.update!(p::QBasedPolicy, trajectory::AbstractTrajectory) =
 function check(p::QBasedPolicy, env::AbstractEnv)
     A = action_space(env)
     if (A isa AbstractVector && A == 1:length(A)) ||
-        (A isa Tuple && A == Tuple(1:length(A)))
+       (A isa Tuple && A == Tuple(1:length(A)))
         # this is expected
     else
         @warn "Applying a QBasedPolicy to an environment with a unknown action space. Maybe convert the environment with `discrete2standard_discrete` in ReinforcementLearningEnvironments.jl first or redesign the environment."

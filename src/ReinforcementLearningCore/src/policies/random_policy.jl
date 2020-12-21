@@ -20,19 +20,23 @@ end
 
 Random.seed!(p::RandomPolicy, seed) = Random.seed!(p.rng, seed)
 
-RandomPolicy(s=nothing; rng = Random.GLOBAL_RNG) = RandomPolicy(s, rng)
+RandomPolicy(s = nothing; rng = Random.GLOBAL_RNG) = RandomPolicy(s, rng)
 
 (p::RandomPolicy{Nothing})(env) = rand(p.rng, legal_action_space(env))
 (p::RandomPolicy)(env) = rand(p.rng, p.action_space)
 
 function RLBase.prob(p::RandomPolicy{<:Union{AbstractVector,Tuple}}, env::AbstractEnv)
     n = length(p.action_space)
-    Categorical(fill(1/n, n); check_args=false)
+    Categorical(fill(1 / n, n); check_args = false)
 end
 
 RLBase.prob(p::RandomPolicy{Nothing}, env::AbstractEnv) = prob(p, env, ChanceStyle(env))
 
-function RLBase.prob(p::RandomPolicy{Nothing}, env::AbstractEnv, ::RLBase.AbstractChanceStyle)
+function RLBase.prob(
+    p::RandomPolicy{Nothing},
+    env::AbstractEnv,
+    ::RLBase.AbstractChanceStyle,
+)
     mask = legal_action_space_mask(env)
     n = sum(mask)
     prob = zeros(length(mask))
@@ -40,7 +44,11 @@ function RLBase.prob(p::RandomPolicy{Nothing}, env::AbstractEnv, ::RLBase.Abstra
     prob
 end
 
-function RLBase.prob(p::RandomPolicy{Nothing}, env::AbstractEnv, ::RLBase.ExplicitStochastic)
+function RLBase.prob(
+    p::RandomPolicy{Nothing},
+    env::AbstractEnv,
+    ::RLBase.ExplicitStochastic,
+)
     if current_player(env) == chance_player(env)
         prob(env, chance_player(env))
     else
