@@ -24,7 +24,8 @@ functor(x::Agent) = (policy = x.policy,), y -> @set x.policy = y.policy
 (agent::Agent)(env) = agent.policy(env)
 
 function check(agent::Agent, env::AbstractEnv)
-    if ActionStyle(env) === FULL_ACTION_SET && !haskey(agent.trajectory, :legal_actions_mask)
+    if ActionStyle(env) === FULL_ACTION_SET &&
+       !haskey(agent.trajectory, :legal_actions_mask)
         @warn "The env[$(nameof(env))] is of FULL_ACTION_SET, but I can not find a trace named :legal_actions_mask in the trajectory"
     end
     check(agent.policy, env)
