@@ -57,7 +57,7 @@ function RLCore.Experiment(
             entropy_loss_weight = 0.00f0,
             dist = Normal,
             rng = rng,
-            update_freq = UPDATE_FREQ
+            update_freq = UPDATE_FREQ,
         ),
         trajectory = PPOTrajectory(;
             capacity = UPDATE_FREQ,
@@ -92,11 +92,5 @@ function RLCore.Experiment(
         end,
     )
 
-    Experiment(
-        agent,
-        env,
-        stop_condition,
-        hook,
-        "# Play Pendulum with PPO",
-    )
+    Experiment(agent, env, stop_condition, hook, "# Play Pendulum with PPO")
 end

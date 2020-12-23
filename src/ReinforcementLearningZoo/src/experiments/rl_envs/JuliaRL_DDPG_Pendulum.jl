@@ -19,7 +19,10 @@ function RLCore.Experiment(
     high = A.right
     ns = length(state(inner_env))
 
-    env = ActionTransformedEnv(inner_env; action_mapping=x -> low + (x + 1) * 0.5 * (high - low))
+    env = ActionTransformedEnv(
+        inner_env;
+        action_mapping = x -> low + (x + 1) * 0.5 * (high - low),
+    )
     init = glorot_uniform(rng)
 
     create_actor() = Chain(
@@ -93,12 +96,5 @@ function RLCore.Experiment(
         end,
     )
 
-    Experiment(
-        agent,
-        env,
-        stop_condition,
-        hook,
-        "# Play Pendulum with DDPG",
-    )
+    Experiment(agent, env, stop_condition, hook, "# Play Pendulum with DDPG")
 end
-

@@ -36,7 +36,7 @@ function RLCore.Experiment(
                     ) |> cpu,
                     optimizer = ADAM(),
                 ),
-                loss_func = (ŷ, y) -> huber_loss(ŷ, y; agg=identity),
+                loss_func = (ŷ, y) -> huber_loss(ŷ, y; agg = identity),
                 stack_size = nothing,
                 batch_size = 32,
                 update_horizon = 1,

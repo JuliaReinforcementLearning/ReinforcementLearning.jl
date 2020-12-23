@@ -51,7 +51,7 @@ function RLCore.Experiment(
                 batch_size = 32,
                 stack_size = N_FRAMES,
                 min_replay_history = 20_000,
-                loss_func = (ŷ, y) -> logitcrossentropy(ŷ, y;agg=identity),
+                loss_func = (ŷ, y) -> logitcrossentropy(ŷ, y; agg = identity),
                 target_update_freq = 8_000,
                 rng = rng,
             ),
@@ -157,4 +157,3 @@ function RLCore.Experiment(
 
     Experiment(agent, env, stop_condition, hook, description)
 end
-

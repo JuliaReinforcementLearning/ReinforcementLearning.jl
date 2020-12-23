@@ -63,12 +63,12 @@ function RLCore.Experiment(
                 critic_loss_weight = 0.5f0,
                 entropy_loss_weight = 0.01f0,
                 rng = rng,
-                update_freq = UPDATE_FREQ
+                update_freq = UPDATE_FREQ,
             ),
         ),
         trajectory = PPOTrajectory(;
             capacity = UPDATE_FREQ,
-            state = Array{Float32, 4} => (STATE_SIZE..., N_FRAMES, N_ENV),
+            state = Array{Float32,4} => (STATE_SIZE..., N_FRAMES, N_ENV),
             action = Vector{Int} => (N_ENV,),
             reward = Vector{Float32} => (N_ENV,),
             terminal = Vector{Bool} => (N_ENV,),

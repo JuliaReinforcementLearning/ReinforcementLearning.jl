@@ -13,10 +13,13 @@ const PPOTrajectory = Trajectory{
     },
 }
 
-function PPOTrajectory(;capacity, action_log_prob,kwargs...)
+function PPOTrajectory(; capacity, action_log_prob, kwargs...)
     merge(
-        CircularArrayTrajectory(;capacity=capacity+1, action_log_prob=action_log_prob),
-        CircularArraySARTTrajectory(;capacity=capacity, kwargs...)
+        CircularArrayTrajectory(;
+            capacity = capacity + 1,
+            action_log_prob = action_log_prob,
+        ),
+        CircularArraySARTTrajectory(; capacity = capacity, kwargs...),
     )
 end
 
@@ -34,10 +37,13 @@ const MaskedPPOTrajectory = Trajectory{
     },
 }
 
-function MaskedPPOTrajectory(;capacity, action_log_prob,kwargs...)
+function MaskedPPOTrajectory(; capacity, action_log_prob, kwargs...)
     merge(
-        CircularArrayTrajectory(;capacity=capacity+1, action_log_prob=action_log_prob),
-        CircularArraySLARTTrajectory(;capacity=capacity, kwargs...)
+        CircularArrayTrajectory(;
+            capacity = capacity + 1,
+            action_log_prob = action_log_prob,
+        ),
+        CircularArraySLARTTrajectory(; capacity = capacity, kwargs...),
     )
 end
 
@@ -92,7 +98,7 @@ end
 function PPOPolicy(;
     approximator,
     update_freq,
-    update_step=0,
+    update_step = 0,
     γ = 0.99f0,
     λ = 0.95f0,
     clip_range = 0.2f0,
@@ -155,7 +161,7 @@ end
 (p::PPOPolicy)(env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
 (p::PPOPolicy)(env::AbstractEnv) = rand(p.rng, prob(p, env))
 
-function RLBase.update!(p::PPOPolicy, t::Union{PPOTrajectory, MaskedPPOTrajectory})
+function RLBase.update!(p::PPOPolicy, t::Union{PPOTrajectory,MaskedPPOTrajectory})
     length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
     p.update_step += 1
     if p.update_step % p.update_freq == 0
@@ -184,8 +190,16 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
     states_plus = send_to_device(D, t[:state])
 
     states_flatten = flatten_batch(select_last_dim(states_plus, 1:n))
-    states_plus_values = reshape(send_to_host(AC.critic(flatten_batch(states_plus))), n_envs, :)
-    advantages = generalized_advantage_estimation(t[:reward], states_plus_values, γ, λ; dims = 2, terminal=t[:terminal])
+    states_plus_values =
+        reshape(send_to_host(AC.critic(flatten_batch(states_plus))), n_envs, :)
+    advantages = generalized_advantage_estimation(
+        t[:reward],
+        states_plus_values,
+        γ,
+        λ;
+        dims = 2,
+        terminal = t[:terminal],
+    )
     returns = advantages .+ select_last_dim(states_plus_values, 1:n_rollout)
 
     actions = select_last_dim(t[:action], 1:n)
@@ -199,7 +213,10 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
             if t isa MaskedPPOTrajectory
                 lam = send_to_device(
                     D,
-                    select_last_dim(flatten_batch(select_last_dim(t[:legal_actions_mask], 1:n)), inds),
+                    select_last_dim(
+                        flatten_batch(select_last_dim(t[:legal_actions_mask], 1:n)),
+                        inds,
+                    ),
                 )
                 @error "TODO:"
             end
@@ -251,9 +268,9 @@ end
 
 function RLBase.update!(
     trajectory::Union{PPOTrajectory,MaskedPPOTrajectory},
-    policy::Union{PPOPolicy, RandomStartPolicy{<:PPOPolicy}},
+    policy::Union{PPOPolicy,RandomStartPolicy{<:PPOPolicy}},
     env::MultiThreadEnv,
-    ::Union{PreActStage, PostEpisodeStage},
+    ::Union{PreActStage,PostEpisodeStage},
 )
     s = state(env)
     dist = prob(policy, env)
@@ -274,15 +291,10 @@ function RLBase.update!(
 
     action = [rand(rng, d) for d in dist]
     action_log_prob = [logpdf(d, a) for (d, a) in zip(dist, action)]
-    push!(
-        trajectory;
-        state = s,
-        action = action,
-        action_log_prob = action_log_prob,
-    )
+    push!(trajectory; state = s, action = action, action_log_prob = action_log_prob)
 
     if trajectory isa MaskedPPOTrajectory
-        push!(trajectory; legal_actions_mask=legal_action_space_mask(env))
+        push!(trajectory; legal_actions_mask = legal_action_space_mask(env))
     end
 
     action
