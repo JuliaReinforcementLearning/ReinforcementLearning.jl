@@ -37,4 +37,4 @@ struct PostActStage <: AbstractStage end
 const POST_ACT_STAGE = PostActStage()
 
 (p::AbstractPolicy)(::AbstractStage, ::AbstractEnv) = nothing
-(p::AbstractPolicy)(::PreActStage, env::AbstractEnv) = p(env)
+(p::AbstractPolicy)(::AbstractStage, ::AbstractEnv, action) = nothing
