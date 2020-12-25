@@ -52,7 +52,7 @@ Base.copy(env::OpenSpielEnv) = OpenSpielEnv(copy(env.state), env.game)
 
 RLBase.reset!(env::OpenSpielEnv) = env.state = new_initial_state(env.game)
 
-(env::OpenSpielEnv)(action::Int) = apply_action(env.state, action)
+(env::OpenSpielEnv)(action::Integer) = apply_action(env.state, action)
 
 RLBase.current_player(env::OpenSpielEnv) = OpenSpiel.current_player(env.state)
 RLBase.chance_player(env::OpenSpielEnv) = convert(Int, OpenSpiel.CHANCE_PLAYER)
@@ -68,7 +68,10 @@ end
 
 function RLBase.action_space(env::OpenSpielEnv, player)
     if player == chance_player(env)
-        [k for (k, v) in chance_outcomes(env.state)]
+        # !!! this bug is already fixed in OpenSpiel
+        # replace it with the following one later
+        # ZeroTo(max_chance_outcomes(env.game)-1)
+        ZeroTo(max_chance_outcomes(env.game))
     else
         ZeroTo(num_distinct_actions(env.game) - 1)
     end
@@ -82,7 +85,14 @@ function RLBase.legal_action_space(env::OpenSpielEnv, player)
     end
 end
 
-RLBase.prob(env::OpenSpielEnv, player) = [v for (k, v) in chance_outcomes(env.state)]
+function RLBase.prob(env::OpenSpielEnv, player)
+    # @assert player == chance_player(env)
+    p = zeros(length(action_space(env)))
+    for (k, v) in chance_outcomes(env.state)
+        p[k+1] = v
+    end
+    p
+end
 
 function RLBase.legal_action_space_mask(env::OpenSpielEnv, player)
     n =
@@ -101,8 +111,8 @@ function RLBase.reward(env::OpenSpielEnv, player)
     if DynamicStyle(env) === SIMULTANEOUS &&
        player == convert(Int, OpenSpiel.SIMULTANEOUS_PLAYER)
         rewards(env.state)
-    elseif RLBase.current_player(env) < 0  # TODO: revisit this in OpenSpiel@v0.2
-        0  # ??? type stable
+    elseif player < 0
+        0
     else
         player_reward(env.state, player)
     end
