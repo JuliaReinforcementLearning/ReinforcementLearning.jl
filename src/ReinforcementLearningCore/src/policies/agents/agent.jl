@@ -72,18 +72,36 @@ function (agent::Agent)(stage::PreActStage, env::AbstractEnv, action)
     update!(agent.policy, agent.trajectory, env, stage)
 end
 
-function RLBase.update!(::AbstractPolicy, ::AbstractTrajectory, ::AbstractEnv, ::AbstractStage)
-end
+function RLBase.update!(
+    ::AbstractPolicy,
+    ::AbstractTrajectory,
+    ::AbstractEnv,
+    ::AbstractStage,
+) end
 
-function RLBase.update!(p::AbstractPolicy, t::AbstractTrajectory, ::AbstractEnv, ::PreActStage)
+function RLBase.update!(
+    p::AbstractPolicy,
+    t::AbstractTrajectory,
+    ::AbstractEnv,
+    ::PreActStage,
+)
     update!(p, t)
 end
 
-function RLBase.update!(::AbstractTrajectory, ::AbstractPolicy, ::AbstractEnv, ::AbstractStage)
-end
+function RLBase.update!(
+    ::AbstractTrajectory,
+    ::AbstractPolicy,
+    ::AbstractEnv,
+    ::AbstractStage,
+) end
 
-function RLBase.update!(::AbstractTrajectory, ::AbstractPolicy, ::AbstractEnv, ::PreActStage, action)
-end
+function RLBase.update!(
+    ::AbstractTrajectory,
+    ::AbstractPolicy,
+    ::AbstractEnv,
+    ::PreActStage,
+    action,
+) end
 
 #####
 # Default behaviors for known trajectories
@@ -119,7 +137,7 @@ function RLBase.update!(
     policy::AbstractPolicy,
     env::AbstractEnv,
     ::PreActStage,
-    action
+    action,
 )
     push!(trajectory[:state], state(env))
     push!(trajectory[:action], action)
