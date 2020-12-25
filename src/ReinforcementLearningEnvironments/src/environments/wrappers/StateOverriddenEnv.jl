@@ -19,7 +19,7 @@ StateOverriddenEnv(f) = env -> StateOverriddenEnv(f, env)
 (env::StateOverriddenEnv)(args...; kwargs...) = env.env(args...; kwargs...)
 
 for f in vcat(RLBase.ENV_API, RLBase.MULTI_AGENT_ENV_API)
-    if f ∉ (:state, )
+    if f ∉ (:state,)
         @eval RLBase.$f(x::StateOverriddenEnv, args...; kwargs...) =
             $f(x.env, args...; kwargs...)
     end

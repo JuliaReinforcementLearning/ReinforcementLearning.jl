@@ -24,17 +24,17 @@ function discrete2standard_discrete(env::AbstractEnv)
     if is_discrete_space(A)
         AS = ActionStyle(env)
         if AS === FULL_ACTION_SET
-            mapping = Dict(x => i for (i,x) in enumerate(A))
+            mapping = Dict(x => i for (i, x) in enumerate(A))
             ActionTransformedEnv(
                 env;
                 action_space_mapping = a -> map(x -> mapping[x], a),
-                action_mapping = i -> A[i]
+                action_mapping = i -> A[i],
             )
         elseif AS === MINIMAL_ACTION_SET
             ActionTransformedEnv(
                 env;
                 action_space_mapping = x -> Base.OneTo(length(A)),
-                action_mapping = i -> A[i]
+                action_mapping = i -> A[i],
             )
         else
             @error "unknown ActionStyle $AS"

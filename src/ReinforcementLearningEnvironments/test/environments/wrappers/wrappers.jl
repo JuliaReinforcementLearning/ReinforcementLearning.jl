@@ -83,7 +83,7 @@
     @testset "StochasticEnv" begin
         env = KuhnPokerEnv()
         rng = StableRNG(123)
-        env′ = StochasticEnv(env;rng=rng)
+        env′ = StochasticEnv(env; rng = rng)
 
         RLBase.test_interfaces!(env′)
         RLBase.test_runnable!(env′)
