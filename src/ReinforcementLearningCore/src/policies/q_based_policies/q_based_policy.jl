@@ -19,18 +19,36 @@ end
 Flux.functor(x::QBasedPolicy) = (learner = x.learner,), y -> @set x.learner = y.learner
 
 (π::QBasedPolicy)(env) = π(env, ActionStyle(env))
-(π::QBasedPolicy)(env, ::MinimalActionSet) = π.explorer(π.learner(env))
+(π::QBasedPolicy)(env, ::MinimalActionSet) = action_space(env)[π.explorer(π.learner(env))]
 (π::QBasedPolicy)(env, ::FullActionSet) =
-    π.explorer(π.learner(env), legal_action_space_mask(env))
+    action_space(env)[π.explorer(π.learner(env), legal_action_space_mask(env))]
 
-RLBase.prob(p::QBasedPolicy, env) = prob(p, env, ActionStyle(env))
-RLBase.prob(p::QBasedPolicy, env, ::MinimalActionSet) = prob(p.explorer, p.learner(env))
-RLBase.prob(p::QBasedPolicy, env, ::FullActionSet) =
+RLBase.prob(p::QBasedPolicy, env::AbstractEnv) = prob(p, env, ActionStyle(env))
+RLBase.prob(p::QBasedPolicy, env::AbstractEnv, ::MinimalActionSet) = prob(p.explorer, p.learner(env))
+RLBase.prob(p::QBasedPolicy, env::AbstractEnv, ::FullActionSet) =
     prob(p.explorer, p.learner(env), legal_action_space_mask(env))
+
+function RLBase.prob(p::QBasedPolicy, env::AbstractEnv, action)
+    A = action_space(env)
+    P = prob(p, env)
+    @assert length(A) == length(P)
+    if A isa Base.OneTo
+        P[action]
+    # elseif A isa ZeroTo
+    #     P[action+1]
+    else
+        for (a, p) in zip(A, P)
+            if a == action
+                return p
+            end
+        end
+        @error "action[$action] is not found in action space[$(action_space(env))]"
+    end
+end
 
 @forward QBasedPolicy.learner RLBase.priority
 
-RLBase.update!(p::QBasedPolicy, trajectory::AbstractTrajectory) =
+RLBase.update!(p::QBasedPolicy, trajectory) =
     update!(p.learner, trajectory)
 
 function check(p::QBasedPolicy, env::AbstractEnv)
@@ -63,19 +81,4 @@ function TabularRandomPolicy(;
     )
 end
 
-function (p::TabularRandomPolicy)(env::AbstractEnv)
-    if ChanceStyle(env) === EXPLICIT_STOCHASTIC
-        if current_player(env) == chance_player(env)
-            # this should be faster. we don't need to allocate memory to store the probability of chance node
-            return rand(p.explorer.rng, action_space(env))
-        end
-    end
-    p(env, ActionStyle(env))  # fall back to general implementation above
-end
-
-function RLBase.prob(p::TabularRandomPolicy, env, ::FullActionSet)
-    m = legal_action_space_mask(env)
-    prob = zeros(length(m))
-    prob[m] .= p.learner(env)
-    prob
-end
+RLBase.prob(p::TabularRandomPolicy, env::AbstractEnv) = p.learner(env)

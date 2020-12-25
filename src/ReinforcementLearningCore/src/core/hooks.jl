@@ -10,7 +10,8 @@ export AbstractHook,
     TimePerStep,
     DoEveryNEpisode,
     DoEveryNStep,
-    UploadTrajectoryEveryNStep
+    UploadTrajectoryEveryNStep,
+    MultiAgentHook
 
 """
 A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
@@ -113,6 +114,10 @@ function (hook::RewardsPerEpisode)(::PostActStage, agent, env)
     push!(hook.rewards[end], reward(env))
 end
 
+function (hook::RewardsPerEpisode)(::PostActStage, agent::NamedPolicy, env)
+    push!(hook.rewards[end], reward(env, nameof(agent)))
+end
+
 #####
 # TotalRewardPerEpisode
 #####
@@ -131,6 +136,10 @@ Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
 function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env)
     hook.reward += reward(env)
+end
+
+function (hook::TotalRewardPerEpisode)(::PostActStage, agent::NamedTuple, env)
+    hook.reward += reward(env, nameof(agent))
 end
 
 function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env)
@@ -159,7 +168,8 @@ function TotalBatchRewardPerEpisode(batch_size::Int)
 end
 
 function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env)
-    for (i, (t, r)) in enumerate(zip(is_terminated(env), reward(env)))
+    R = agent isa NamedPolicy ? reward(env, nameof(agent)) : reward(env)
+    for (i, (t, r)) in enumerate(zip(is_terminated(env), R))
         hook.reward[i] += r
         if t
             push!(hook.rewards[i], hook.reward[i])
@@ -219,7 +229,7 @@ function (hook::CumulativeReward)(::PostEpisodeStage, agent, env)
 end
 
 function (hook::CumulativeReward)(::PostActStage, agent, env)
-    r = reward(env)
+    r = agent isa NamedPolicy ? reward(env, nameof(agent)) : reward(env)
     push!(hook.rewards[end], r + hook.rewards[end][end])
 end
 
@@ -304,5 +314,22 @@ function (hook::UploadTrajectoryEveryNStep)(::PostActStage, agent::Agent, env)
     hook.t += 1
     if hook.t > 0 && hook.t % hook.n == 0
         put!(hook.mailbox, hook.sealer(agent.trajectory))
+    end
+end
+
+"""
+    MultiAgentHook(player=>hook...)
+"""
+struct MultiAgentHook <: AbstractHook
+    hooks::Dict{Any, Any}
+end
+
+MultiAgentHook(player_hook_pair::Pair...) = MultiAgentHook(Dict(player_hook_pair...))
+
+Base.getindex(h::MultiAgentHook, p) = getindex(h.hooks, p)
+
+function (hook::MultiAgentHook)(s::AbstractStage, p::AbstractPolicy, env::AbstractEnv, args...)
+    for (p, h) in hook.hooks
+        h(s, p, env, args...)
     end
 end

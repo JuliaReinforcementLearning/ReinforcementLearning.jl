@@ -1,5 +1,3 @@
-export expected_policy_values
-
 import Base: run
 
 function run(
@@ -15,12 +13,7 @@ end
 "Inject some customized checkings here by overwriting this function"
 function check(policy, env) end
 
-_run(policy, env, stop_condition, hook) =
-    _run(DynamicStyle(env), NumAgentStyle(env), policy, env, stop_condition, hook)
-
 function _run(
-    ::Sequential,
-    ::SingleAgent,
     policy::AbstractPolicy,
     env::AbstractEnv,
     stop_condition,
