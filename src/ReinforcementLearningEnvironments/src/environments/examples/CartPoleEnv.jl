@@ -131,7 +131,8 @@ function plotendofepisode(x, y, d)
     end
     return nothing
 end
-function Base.show(io::IO, m::MIME"image/png", env::CartPoleEnv)
+
+function GR.plot(env::CartPoleEnv)
     s, a, d = env.state, env.action, env.done
     x, xdot, theta, thetadot = s
     l = 2 * env.params.halflength
@@ -146,6 +147,6 @@ function Base.show(io::IO, m::MIME"image/png", env::CartPoleEnv)
     setlinecolorind(2)
     drawarrow(x + (a == 1) - 0.5, -.025, x + 1.4 * (a == 1) - 0.7, -.025)
     plotendofepisode(xthreshold - 0.2, l, d)
-    p = updatews()
-    show(io, m, p)
+    updatews()
+    plot()
 end

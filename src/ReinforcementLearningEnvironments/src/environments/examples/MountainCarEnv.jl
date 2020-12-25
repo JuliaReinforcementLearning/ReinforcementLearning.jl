@@ -141,7 +141,7 @@ height(xs) = sin(3 * xs) * 0.45 + 0.55
 rotate(xs, ys, θ) = xs * cos(θ) - ys * sin(θ), ys * cos(θ) + xs * sin(θ)
 translate(xs, ys, t) = xs .+ t[1], ys .+ t[2]
 
-function Base.display(io::IO, m::MIME"image/png", env::MountainCarEnv)
+function GR.plot(env::MountainCarEnv)
     s = env.state
     d = env.done
     clearws()
@@ -167,6 +167,6 @@ function Base.display(io::IO, m::MIME"image/png", env::MountainCarEnv)
     xs, ys = translate(xs, ys, [x, height(x)])
     fillarea(xs, ys)
     plotendofepisode(env.params.max_pos + 0.1, 0, d)
-    p = updatews()
-    show(io, m, p)
+    updatews()
+    plot()
 end
