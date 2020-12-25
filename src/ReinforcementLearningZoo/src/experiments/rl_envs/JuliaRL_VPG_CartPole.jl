@@ -39,9 +39,7 @@ function RLCore.Experiment(
             γ = 0.99f0,
             rng = rng,
         ),
-        trajectory = ElasticSARTTrajectory(
-            state = Vector{Float32} => (ns,),
-        ),
+        trajectory = ElasticSARTTrajectory(state = Vector{Float32} => (ns,)),
     )
     # VPG is updated after each episode
     stop_condition = StopAfterEpisode(500)

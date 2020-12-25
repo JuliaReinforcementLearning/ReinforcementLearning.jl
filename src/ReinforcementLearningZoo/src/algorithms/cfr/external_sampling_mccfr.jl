@@ -18,8 +18,7 @@ end
 
 (p::ExternalSamplingMCCFRPolicy)(env::AbstractEnv) = p.behavior_policy(env)
 
-RLBase.prob(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv) =
-    prob(p.behavior_policy, env)
+RLBase.prob(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv) = prob(p.behavior_policy, env)
 
 function ExternalSamplingMCCFRPolicy(; state_type = String, rng = Random.GLOBAL_RNG)
     ExternalSamplingMCCFRPolicy(

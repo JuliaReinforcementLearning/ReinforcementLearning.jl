@@ -57,14 +57,14 @@ function RLCore.Experiment(
                     actor_loss_weight = 1.0f0,
                     critic_loss_weight = 0.25f0,
                     entropy_loss_weight = 0.01f0,
-                    update_freq = UPDATE_FREQ
+                    update_freq = UPDATE_FREQ,
                 ),
                 explorer = BatchExplorer(GumbelSoftmaxExplorer(; rng = rng)),
             ),
         ),
         trajectory = CircularArraySARTTrajectory(;
             capacity = UPDATE_FREQ,
-            state = Array{Float32, 4} => (STATE_SIZE..., N_FRAMES, N_ENV),
+            state = Array{Float32,4} => (STATE_SIZE..., N_FRAMES, N_ENV),
             action = Vector{Int} => (N_ENV,),
             reward = Vector{Float32} => (N_ENV,),
             terminal = Vector{Bool} => (N_ENV,),

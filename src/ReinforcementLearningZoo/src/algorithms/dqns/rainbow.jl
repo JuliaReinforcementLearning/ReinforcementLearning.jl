@@ -87,7 +87,12 @@ function RainbowLearner(;
     default_priority >= 1.0f0 || error("default value must be >= 1.0f0")
     copyto!(approximator, target_approximator)  # force sync
     support = send_to_device(device(approximator), support)
-    sampler = NStepBatchSampler{traces}(;γ=γ, n=update_horizon,stack_size=stack_size,batch_size=batch_size)
+    sampler = NStepBatchSampler{traces}(;
+        γ = γ,
+        n = update_horizon,
+        stack_size = stack_size,
+        batch_size = batch_size,
+    )
     RainbowLearner(
         approximator,
         target_approximator,
@@ -147,7 +152,7 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
     next_q = reshape(sum(support .* next_probs, dims = 1), n_actions, :)
     if haskey(batch, :next_legal_actions_mask)
         l′ = send_to_device(D, batch[:next_legal_actions_mask])
-        next_q .+= ifelse.(l′, 0.f0, typemin(Float32))
+        next_q .+= ifelse.(l′, 0.0f0, typemin(Float32))
     end
     next_prob_select = select_best_probs(next_probs, next_q)
 

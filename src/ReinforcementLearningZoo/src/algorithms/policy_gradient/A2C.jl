@@ -29,13 +29,10 @@ Base.@kwdef mutable struct A2CLearner{A<:ActorCritic} <: AbstractLearner
     norm::Float32 = 0.0f0
 end
 
-Flux.functor(x::A2CLearner) = (app = x.approximator, ), y -> @set x.approximator = y.app
+Flux.functor(x::A2CLearner) = (app = x.approximator,), y -> @set x.approximator = y.app
 
 function (learner::A2CLearner)(env::MultiThreadEnv)
-    learner.approximator.actor(send_to_device(
-        device(learner),
-        state(env),
-    )) |> send_to_host
+    learner.approximator.actor(send_to_device(device(learner), state(env))) |> send_to_host
 end
 
 function (learner::A2CLearner)(env)
@@ -70,20 +67,17 @@ function _update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
     actions = flatten_batch(actions)
     actions = CartesianIndex.(actions, 1:length(actions))
 
-    next_state_values = t[:state] |>
-        select_last_frame |>
-        Array |>
-        to_device |>
-        AC.critic |>
-        send_to_host
+    next_state_values =
+        t[:state] |> select_last_frame |> Array |> to_device |> AC.critic |> send_to_host
 
-    gains = discount_rewards(
-        t[:reward],
-        γ;
-        dims = 2,
-        init = send_to_host(next_state_values),
-        terminal = t[:terminal],
-    ) |> to_device
+    gains =
+        discount_rewards(
+            t[:reward],
+            γ;
+            dims = 2,
+            init = send_to_host(next_state_values),
+            terminal = t[:terminal],
+        ) |> to_device
 
     ps = Flux.params(AC)
     gs = gradient(ps) do

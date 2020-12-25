@@ -4,7 +4,7 @@
 
 const PERLearners = Union{PrioritizedDQNLearner,RainbowLearner,IQNLearner}
 
-function RLBase.update!(learner::Union{DQNLearner, PERLearners}, t::AbstractTrajectory)
+function RLBase.update!(learner::Union{DQNLearner,PERLearners}, t::AbstractTrajectory)
     length(t[:terminal]) < learner.min_replay_history && return
 
     learner.update_step += 1
@@ -21,11 +21,16 @@ function RLBase.update!(learner::Union{DQNLearner, PERLearners}, t::AbstractTraj
         priorities = update!(learner, batch)
         t[:priority][inds] .= priorities
     else
-        update!(learner,batch)
+        update!(learner, batch)
     end
 end
 
-function RLBase.update!(trajectory::PrioritizedTrajectory, p::QBasedPolicy{<:PERLearners}, env::AbstractEnv, ::PostActStage)
+function RLBase.update!(
+    trajectory::PrioritizedTrajectory,
+    p::QBasedPolicy{<:PERLearners},
+    env::AbstractEnv,
+    ::PostActStage,
+)
     push!(trajectory[:reward], reward(env))
     push!(trajectory[:terminal], is_terminated(env))
     push!(trajectory[:priority], p.learner.default_priority)

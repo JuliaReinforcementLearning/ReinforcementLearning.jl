@@ -42,7 +42,7 @@ function RLCore.Experiment(
             actor_loss_weight = 1.0f0,
             critic_loss_weight = 0.5f0,
             entropy_loss_weight = 0.001f0,
-            update_freq = UPDATE_FREQ
+            update_freq = UPDATE_FREQ,
         ),
         trajectory = PPOTrajectory(;
             capacity = UPDATE_FREQ,
@@ -79,11 +79,5 @@ function RLCore.Experiment(
         end,
     )
 
-    Experiment(
-        agent,
-        env,
-        stop_condition,
-        hook,
-        "# PPO with CartPole",
-    )
+    Experiment(agent, env, stop_condition, hook, "# PPO with CartPole")
 end

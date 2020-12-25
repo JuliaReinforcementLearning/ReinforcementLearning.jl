@@ -55,7 +55,12 @@ function DQNLearner(;
     rng = Random.GLOBAL_RNG,
 ) where {Tq,Tt,Tf}
     copyto!(approximator, target_approximator)
-    sampler = NStepBatchSampler{traces}(;γ=γ, n=update_horizon,stack_size=stack_size,batch_size=batch_size)
+    sampler = NStepBatchSampler{traces}(;
+        γ = γ,
+        n = update_horizon,
+        stack_size = stack_size,
+        batch_size = batch_size,
+    )
     DQNLearner(
         approximator,
         target_approximator,
@@ -81,11 +86,13 @@ end
 function (learner::DQNLearner)(env)
     env |>
     state |>
-    x -> Flux.unsqueeze(x, ndims(x) + 1) |>
-    x -> send_to_device(device(learner), x) |>
-    learner.approximator |>
-    vec |>
-    send_to_host
+    x ->
+        Flux.unsqueeze(x, ndims(x) + 1) |>
+        x ->
+            send_to_device(device(learner), x) |>
+            learner.approximator |>
+            vec |>
+            send_to_host
 end
 
 function RLBase.update!(learner::DQNLearner, batch::NamedTuple)
@@ -103,7 +110,7 @@ function RLBase.update!(learner::DQNLearner, batch::NamedTuple)
     target_q = Qₜ(s′)
     if haskey(batch, :next_legal_actions_mask)
         l′ = send_to_device(D, batch[:next_legal_actions_mask])
-        target_q .+= ifelse.(l′, 0.f0, typemin(Float32))
+        target_q .+= ifelse.(l′, 0.0f0, typemin(Float32))
     end
 
     q′ = dropdims(maximum(target_q; dims = 1), dims = 1)

@@ -157,4 +157,3 @@ function RLCore.Experiment(
 
     Experiment(agent, env, stop_condition, hook, description)
 end
-

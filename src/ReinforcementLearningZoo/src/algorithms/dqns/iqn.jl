@@ -114,7 +114,12 @@ function IQNLearner(;
     if device(approximator) !== device(device_rng)
         throw(ArgumentError("device of `approximator` doesn't match the device of `device_rng`: $(device(approximator)) !== $(device_rng)"))
     end
-    sampler = NStepBatchSampler{traces}(;γ=γ, n=update_horizon,stack_size=stack_size,batch_size=batch_size)
+    sampler = NStepBatchSampler{traces}(;
+        γ = γ,
+        n = update_horizon,
+        stack_size = stack_size,
+        batch_size = batch_size,
+    )
     IQNLearner(
         approximator,
         target_approximator,
@@ -158,7 +163,8 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
     batch_size = learner.sampler.batch_size
 
     D = device(Z)
-    s, r, t, s′ = (send_to_device(D, batch[x]) for x in (:state, :reward, :terminal, :next_state))
+    s, r, t, s′ =
+        (send_to_device(D, batch[x]) for x in (:state, :reward, :terminal, :next_state))
 
     τ′ = rand(learner.device_rng, Float32, N′, batch_size)  # TODO: support β distribution
     τₑₘ′ = embed(τ′, Nₑₘ)
@@ -174,7 +180,9 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
     aₜ = argmax(avg_zₜ, dims = 1)
     aₜ = aₜ .+ typeof(aₜ)(CartesianIndices((0, 0:N′-1, 0)))
     qₜ = reshape(zₜ[aₜ], :, batch_size)
-    target = reshape(r, 1, batch_size) .+ learner.sampler.γ * reshape(1 .- t, 1, batch_size) .* qₜ  # reshape to allow broadcast
+    target =
+        reshape(r, 1, batch_size) .+
+        learner.sampler.γ * reshape(1 .- t, 1, batch_size) .* qₜ  # reshape to allow broadcast
 
     τ = rand(learner.device_rng, Float32, N, batch_size)
     τₑₘ = embed(τ, Nₑₘ)

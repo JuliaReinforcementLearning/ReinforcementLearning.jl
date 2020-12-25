@@ -44,7 +44,7 @@ function RLCore.Experiment(
                 ) |> cpu,
                 γ = 0.99f0,
                 bootstrap = true,
-                update_freq = UPDATE_FREQ
+                update_freq = UPDATE_FREQ,
             ),
             explorer = BatchExplorer(GumbelSoftmaxExplorer()),#= seed = nothing =#
         ),
@@ -80,11 +80,5 @@ function RLCore.Experiment(
             end
         end,
     )
-    Experiment(
-        agent,
-        env,
-        stop_condition,
-        hook,
-        "# MAC with CartPole",
-    )
+    Experiment(agent, env, stop_condition, hook, "# MAC with CartPole")
 end

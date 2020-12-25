@@ -66,11 +66,7 @@ function init_cfr_reach_prob!(p, env, reach_prob = 1.0)
             end
         else  # opponents
             for a in legal_action_space(env)
-                init_cfr_reach_prob!(
-                    p,
-                    child(env, a),
-                    reach_prob * prob(p.policy, env, a),
-                )
+                init_cfr_reach_prob!(p, child(env, a), reach_prob * prob(p.policy, env, a))
             end
         end
     end
