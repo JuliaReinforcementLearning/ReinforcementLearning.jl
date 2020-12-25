@@ -4,7 +4,7 @@ using ReinforcementLearningEnvironments
 using ArcadeLearningEnvironment
 using PyCall
 using OpenSpiel
-using SnakeGames
+# using SnakeGames
 using Random
 using StableRNGs
 using Statistics
