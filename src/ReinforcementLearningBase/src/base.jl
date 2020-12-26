@@ -1,4 +1,74 @@
 #####
+# Spaces
+#####
+
+export WorldSpace
+
+"""
+In some cases, we may not be interested in the action/state space.
+One can return `WorldSpace()` to keep the interface consistent.
+"""
+struct WorldSpace{T} end
+
+WorldSpace() = WorldSpace{Any}()
+
+Base.in(x, ::WorldSpace{T}) where {T} = x isa T
+
+export Space
+
+"""
+A wrapper to treat each element as a sub-space which supports:
+
+- `Base.in`
+- `Random.rand`
+"""
+struct Space{T}
+    s::T
+end
+
+Base.similar(s::Space, args...) = Space(similar(s.s, args...))
+Base.getindex(s::Space, args...) = getindex(s.s, args...)
+Base.setindex!(s::Space, args...) = setindex!(s.s, args...)
+Base.size(s::Space) = size(s.s)
+Base.length(s::Space) = length(s.s)
+Base.iterate(s::Space, args...) = iterate(s.s, args...)
+
+Random.rand(s::Space) = rand(Random.GLOBAL_RNG, s)
+
+Random.rand(rng::AbstractRNG, s::Space) =
+    map(s.s) do x
+        rand(rng, x)
+    end
+
+Random.rand(rng::AbstractRNG, s::Space{<:Dict}) = Dict(k => rand(rng, v) for (k, v) in s.s)
+
+function Base.in(X, S::Space)
+    if length(X) == length(S.s)
+        for (x, s) in zip(X, S.s)
+            if x ∉ s
+                return false
+            end
+        end
+        return true
+    else
+        return false
+    end
+end
+
+function Base.in(X::Dict, S::Space{<:Dict})
+    if keys(X) == keys(S.s)
+        for k in keys(X)
+            if X[k] ∉ S.s[k]
+                return false
+            end
+        end
+        return true
+    else
+        return false
+    end
+end
+
+#####
 # printing
 #####
 
