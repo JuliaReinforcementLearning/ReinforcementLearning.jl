@@ -29,7 +29,7 @@ end
 RLBase.is_terminated(env::MaxTimeoutEnv) =
     (env.current_t > env.max_t) || is_terminated(env.env)
 
-function RLBase.reset!(env::MyMaxTimeoutEnv)
+function RLBase.reset!(env::MaxTimeoutEnv)
     env.current_t = 1
     RLBase.reset!(env.env)
 end
