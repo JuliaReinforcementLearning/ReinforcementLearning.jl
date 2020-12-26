@@ -16,18 +16,6 @@ end
 # WorldSpace
 #####
 
-export WorldSpace
-
-"""
-In some cases, we may not be interested in the action/state space.
-One can return `WorldSpace()` to keep the interface consistent.
-"""
-struct WorldSpace{T} end
-
-WorldSpace() = WorldSpace{Any}()
-
-Base.in(x, ::WorldSpace{T}) where {T} = x isa T
-
 #####
 # ZeroTo
 #####
@@ -57,57 +45,6 @@ end
 #####
 # Space
 #####
-
-export Space
-
-"""
-A wrapper to treat each element as a sub-space which supports:
-
-- `Base.in`
-- `Random.rand`
-"""
-struct Space{T}
-    s::T
-end
-
-@forward Space.s Base.getindex, Base.setindex!, Base.size, Base.length
-
-Base.similar(s::Space, args...) = Space(similar(s.s, args...))
-
-Random.rand(s::Space) = rand(Random.GLOBAL_RNG, s)
-
-Random.rand(rng::AbstractRNG, s::Space) =
-    map(s.s) do x
-        rand(rng, x)
-    end
-
-Random.rand(rng::AbstractRNG, s::Space{<:Dict}) = Dict(k => rand(rng, v) for (k, v) in s.s)
-
-function Base.in(X, S::Space)
-    if length(X) == length(S.s)
-        for (x, s) in zip(X, S.s)
-            if x ∉ s
-                return false
-            end
-        end
-        return true
-    else
-        return false
-    end
-end
-
-function Base.in(X::Dict, S::Space{<:Dict})
-    if keys(X) == keys(S.s)
-        for k in keys(X)
-            if X[k] ∉ S.s[k]
-                return false
-            end
-        end
-        return true
-    else
-        return false
-    end
-end
 
 #####
 # Generate README

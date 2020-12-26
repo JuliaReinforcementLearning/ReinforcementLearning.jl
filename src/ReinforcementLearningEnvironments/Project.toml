@@ -1,7 +1,7 @@
 name = "ReinforcementLearningEnvironments"
 uuid = "25e41dd2-4622-11e9-1641-f1adca772921"
 authors = ["Jun Tian <juti@microsoft.com>"]
-version = "0.4.2"
+version = "0.4.3"
 
 [deps]
 GR = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
@@ -19,7 +19,7 @@ GR = "0.46, 0.47, 0.48, 0.49, 0.50, 0.51, 0.52, 0.53"
 IntervalSets = "0.5"
 MacroTools = "0.5"
 OrdinaryDiffEq = "5"
-ReinforcementLearningBase = "0.9"
+ReinforcementLearningBase = "0.9.1"
 Requires = "1.0"
 StatsBase = "0.32, 0.33"
 julia = "1.3"
