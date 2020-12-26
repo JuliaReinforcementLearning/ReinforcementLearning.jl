@@ -19,13 +19,9 @@ function BestResponsePolicy(
     policy,
     env,
     best_responder;
-    state_type = String,
-    action_type = Int,
 )
-    # S = typeof(state(env))  # TODO: currently it will break the OpenSpielEnv. Can not get information set for chance player
-    # A = eltype(action_space(env))  # TODO: for chance players it will return ActionProbPair
-    S = state_type
-    A = action_type
+    S = eltype(state_space(env))
+    A = eltype(action_space(env))
     E = typeof(env)
 
     p = BestResponsePolicy(
@@ -61,8 +57,10 @@ function init_cfr_reach_prob!(p, env, reach_prob = 1.0)
                 init_cfr_reach_prob!(p, child(env, a), reach_prob)
             end
         elseif current_player(env) == chance_player(env)
-            for a::ActionProbPair in action_space(env)
-                init_cfr_reach_prob!(p, child(env, a), reach_prob * a.prob)
+            for (a, pₐ) in zip(action_space(env), prob(env))
+                if pₐ > 0
+                    init_cfr_reach_prob!(p, child(env, a), reach_prob * pₐ)
+                end
             end
         else  # opponents
             for a in legal_action_space(env)
@@ -81,8 +79,12 @@ function best_response_value(p, env)
             best_response_value(p, child(env, a))
         elseif current_player(env) == chance_player(env)
             v = 0.0
-            for a::ActionProbPair in action_space(env)
-                v += a.prob * best_response_value(p, child(env, a))
+            A, P = action_space(env), prob(env)
+            @assert length(A) == length(P)
+            for (a, pₐ) in zip(A, P)
+                if pₐ > 0
+                    v += pₐ * best_response_value(p, child(env, a))
+                end
             end
             v
         else

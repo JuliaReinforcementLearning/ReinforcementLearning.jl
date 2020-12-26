@@ -53,7 +53,7 @@ end
 
 "Run one interation"
 function RLBase.update!(π::DeepCFR, env::AbstractEnv)
-    for p in get_players(env)
+    for p in players(env)
         if p != chance_player(env)
             for k in 1:π.K
                 external_sampling!(π, copy(env), p)

@@ -161,7 +161,28 @@ end
 (p::PPOPolicy)(env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
 (p::PPOPolicy)(env::AbstractEnv) = rand(p.rng, prob(p, env))
 
-function RLBase.update!(p::PPOPolicy, t::Union{PPOTrajectory,MaskedPPOTrajectory})
+function (agent::Agent{<:PPOPolicy})(env::AbstractEnv)
+    dist = prob(agent.policy, env)
+    a = rand(agent.policy.rng, dist)
+    EnrichedAction(a; action_log_prob=logpdf(dist, a))
+end
+
+function (agent::Agent{<:PPOPolicy})(env::MultiThreadEnv)
+    dist = prob(agent.policy, env)
+    action = rand.(agent.policy.rng, dist)
+    EnrichedAction(action; action_log_prob=logpdf.(dist, action))
+end
+
+function (agent::Agent{<:RandomStartPolicy{<:PPOPolicy}})(env::AbstractEnv)
+    a = agent.policy(env)
+    if a isa EnrichedAction
+        a
+    else
+        EnrichedAction(a; action_log_prob=logpdf(prob(agent.policy, a)))
+    end
+end
+
+function RLBase.update!(p::PPOPolicy, t::Union{PPOTrajectory, MaskedPPOTrajectory})
     length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
     p.update_step += 1
     if p.update_step % p.update_freq == 0
@@ -270,32 +291,17 @@ function RLBase.update!(
     trajectory::Union{PPOTrajectory,MaskedPPOTrajectory},
     policy::Union{PPOPolicy,RandomStartPolicy{<:PPOPolicy}},
     env::MultiThreadEnv,
-    ::Union{PreActStage,PostEpisodeStage},
+    ::PreActStage,
+    action::EnrichedAction
 )
-    s = state(env)
-    dist = prob(policy, env)
-
-    # currently RandomPolicy returns a Matrix instead of a (vector of) distribution.
-    if dist isa Matrix{<:Number}
-        dist = [Categorical(x; check_args = false) for x in eachcol(dist)]
-    elseif dist isa Vector{<:Vector{<:Number}}
-        dist = [Categorical(x; check_args = false) for x in dist]
-    end
-
-    # !!! a little ugly
-    rng = if policy isa PPOPolicy
-        policy.rng
-    elseif policy isa RandomStartPolicy
-        policy.policy.rng
-    end
-
-    action = [rand(rng, d) for d in dist]
-    action_log_prob = [logpdf(d, a) for (d, a) in zip(dist, action)]
-    push!(trajectory; state = s, action = action, action_log_prob = action_log_prob)
+    push!(
+        trajectory;
+        state = state(env),
+        action = action.action,
+        action_log_prob = action.meta.action_log_prob,
+    )
 
     if trajectory isa MaskedPPOTrajectory
         push!(trajectory; legal_actions_mask = legal_action_space_mask(env))
     end
-
-    action
 end

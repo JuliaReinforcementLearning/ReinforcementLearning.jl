@@ -87,16 +87,9 @@ function (π::VPGPolicy)(env::MultiThreadEnv)
     # TODO: can PG support multi env? PG only get updated at the end of an episode.
 end
 
-function RLBase.update!(
-    trajectory::ElasticSARTTrajectory,
-    policy::VPGPolicy,
-    env::AbstractEnv,
-    ::PreActStage,
-)
-    action = policy(env)
+function RLBase.update!(trajectory::ElasticSARTTrajectory, policy::VPGPolicy, env::AbstractEnv, ::PreActStage, action)
     push!(trajectory[:state], state(env))
     push!(trajectory[:action], action)
-    action
 end
 
 function RLBase.update!(

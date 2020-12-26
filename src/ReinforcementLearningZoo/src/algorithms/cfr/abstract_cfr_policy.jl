@@ -10,7 +10,7 @@ function Base.run(
     @assert DynamicStyle(env) === SEQUENTIAL
     @assert RewardStyle(env) === TERMINAL_REWARD
     @assert ChanceStyle(env) === EXPLICIT_STOCHASTIC
-    @assert DefaultStateStyle(env) isa Information
+    @assert DefaultStateStyle(env) isa InformationSet
 
     RLBase.reset!(env)
 

@@ -1,12 +1,21 @@
 export TabularCFRPolicy
 
-struct InfoStateNode
+struct InfoStateNode{M<:AbstractVector{Bool}}
     strategy::Vector{Float64}
     cumulative_regret::Vector{Float64}
     cumulative_strategy::Vector{Float64}
+    mask::M
 end
 
-InfoStateNode(n) = InfoStateNode(fill(1 / n, n), zeros(n), zeros(n))
+function InfoStateNode(mask)
+    n = sum(mask)
+    InfoStateNode(
+        fill(1 / n, n),
+        zeros(n),
+        zeros(n),
+        mask
+    )
+end
 
 #####
 # TabularCFRPolicy
@@ -77,7 +86,10 @@ function RLBase.update!(p::TabularCFRPolicy)
     for (k, v) in p.nodes
         s = sum(v.cumulative_strategy)
         if s != 0
-            update!(p.behavior_policy, k => v.cumulative_strategy ./ s)
+            m = v.mask
+            strategy = zeros(length(m))
+            strategy[m] .= v.cumulative_strategy ./ s
+            update!(p.behavior_policy, k => strategy)
         else
             # The TabularLearner will return uniform distribution by default. 
             # So we do nothing here.
@@ -89,7 +101,7 @@ end
 function RLBase.update!(p::TabularCFRPolicy, env::AbstractEnv)
     w = p.is_linear_averaging ? max(p.n_iteration - p.weighted_averaging_delay, 0) : 1
     if p.is_alternating_update
-        for x in get_players(env)
+        for x in players(env)
             if x != chance_player(env)
                 cfr!(p.nodes, env, x, w)
                 regret_matching!(p)
@@ -113,22 +125,25 @@ w: weight
 v: counterfactual value **before weighted by opponent's reaching probability**
 V: a vector containing the `v` after taking each action with current information set. Used to calculate the **regret value**
 """
-function cfr!(nodes, env, p, w, π = Dict(x => 1.0 for x in get_players(env)))
+function cfr!(nodes, env, p, w, π = Dict(x => 1.0 for x in players(env)))
     if is_terminated(env)
         reward(env, p)
     else
         if current_player(env) == chance_player(env)
             v = 0.0
-            for a::ActionProbPair in legal_action_space(env)
-                π′ = copy(π)
-                π′[current_player(env)] *= a.prob
-                v += a.prob * cfr!(nodes, child(env, a), p, w, π′)
+            for (a, pₐ) in zip(action_space(env), prob(env))
+                if pₐ > 0
+                    π′ = copy(π)
+                    π′[current_player(env)] *= pₐ
+                    v += pₐ * cfr!(nodes, child(env, a), p, w, π′)
+                end
             end
             v
         else
             v = 0.0
             legal_actions = legal_action_space(env)
-            node = get!(nodes, state(env), InfoStateNode(length(legal_actions)))
+            M = legal_action_space_mask(env)
+            node = get!(nodes, state(env), InfoStateNode(M))
 
             is_update = isnothing(p) || p == current_player(env)
             V = is_update ? Vector{Float64}(undef, length(legal_actions)) : nothing

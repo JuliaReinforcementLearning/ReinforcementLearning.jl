@@ -6,8 +6,6 @@ Many policy gradient based algorithms require that the `env` is a
 pipeline is different from the default one in `RLCore`.
 """
 function RLCore._run(
-    ::Sequential,
-    ::SingleAgent,
     policy::AbstractPolicy,
     env::MultiThreadEnv,
     stop_condition,
@@ -16,7 +14,8 @@ function RLCore._run(
 
     while true
         reset!(env)  # this is a soft reset!, only environments reached the end will get reset.
-        action = policy(PRE_ACT_STAGE, env)
+        action = policy(env)
+        policy(PRE_ACT_STAGE, env, action)
         hook(PRE_ACT_STAGE, policy, env, action)
 
         env(action)

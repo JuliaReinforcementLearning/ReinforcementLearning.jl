@@ -20,6 +20,9 @@ end
 
 RLBase.prob(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv) = prob(p.behavior_policy, env)
 
+RLBase.prob(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv, action) =
+    prob(p.behavior_policy, env, action)
+
 function ExternalSamplingMCCFRPolicy(; state_type = String, rng = Random.GLOBAL_RNG)
     ExternalSamplingMCCFRPolicy(
         Dict{state_type,InfoStateNode}(),
@@ -36,7 +39,10 @@ function RLBase.update!(p::ExternalSamplingMCCFRPolicy)
     for (k, v) in p.nodes
         s = sum(v.cumulative_strategy)
         if s != 0
-            update!(p.behavior_policy, k => v.cumulative_strategy ./ s)
+            m = v.mask
+            strategy = zeros(length(m))
+            strategy[m] .= v.cumulative_strategy ./ s
+            update!(p.behavior_policy, k => strategy)
         else
             # The TabularLearner will return uniform distribution by default. 
             # So we do nothing here.
@@ -46,7 +52,7 @@ end
 
 "Run one interation"
 function RLBase.update!(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv)
-    for x in get_players(env)
+    for x in players(env)
         if x != chance_player(env)
             external_sampling(copy(env), x, p.nodes, p.rng)
         end
@@ -54,22 +60,23 @@ function RLBase.update!(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv)
 end
 
 function external_sampling(env, i, nodes, rng)
-    current_player = current_player(env)
+    player = current_player(env)
 
     if is_terminated(env)
         reward(env, i)
-    elseif current_player == chance_player(env)
-        env(rand(rng, action_space(env)))
+    elseif player == chance_player(env)
+        env(sample(rng, action_space(env), Weights(prob(env), 1.0)))
         external_sampling(env, i, nodes, rng)
     else
         I = state(env)
         legal_actions = legal_action_space(env)
+        M = legal_action_space_mask(env)
         n = length(legal_actions)
-        node = get!(nodes, I, InfoStateNode(n))
+        node = get!(nodes, I, InfoStateNode(M))
         regret_matching!(node; is_reset_neg_regrets = false)
         σ, rI, sI = node.strategy, node.cumulative_regret, node.cumulative_strategy
 
-        if i == current_player
+        if i == player
             u = zeros(n)
             uσ = 0
             for (aᵢ, a) in enumerate(legal_actions)

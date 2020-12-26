@@ -20,10 +20,7 @@ struct MultiThreadEnv{E,S,R,AS,SS,L} <: AbstractEnv
 end
 
 function Base.show(io::IO, t::MIME"text/markdown", env::MultiThreadEnv)
-    s = """
-    # MultiThreadEnv($(length(env)) x $(nameof(env[1])))
-    """
-    show(io, t, Markdown.parse(s))
+    print(io, "MultiThreadEnv($(length(env)) x $(nameof(env[1])))")
 end
 
 """
@@ -145,4 +142,26 @@ for f in RLBase.ENV_API
     if endswith(String(f), "Style")
         @eval RLBase.$f(x::MultiThreadEnv) = $f(x[1])
     end
+end
+
+#####
+# Patches
+#####
+
+(env::MultiThreadEnv)(action::EnrichedAction) = env(action.action)
+
+function (π::QBasedPolicy)(env::MultiThreadEnv, ::MinimalActionSet, A)
+    [A[i][a] for (i, a) in enumerate(π.explorer(π.learner(env)))]
+end
+
+function (π::QBasedPolicy)(env::MultiThreadEnv, ::FullActionSet, A)
+    [A[i][a] for (i,a) in enumerate(π.explorer(π.learner(env), legal_action_space_mask(env)))]
+end
+
+function (π::QBasedPolicy)(env::MultiThreadEnv, ::MinimalActionSet, ::Space{<:Vector{<:Base.OneTo{<:Integer}}})
+    π.explorer(π.learner(env))
+end
+
+function (π::QBasedPolicy)(env::MultiThreadEnv, ::FullActionSet, ::Space{<:Vector{<:Base.OneTo{<:Integer}}})
+    π.explorer(π.learner(env), legal_action_space_mask(env))
 end

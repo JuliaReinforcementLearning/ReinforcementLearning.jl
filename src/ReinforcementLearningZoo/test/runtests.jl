@@ -82,21 +82,21 @@ end
         end
     end
 
-    # @testset "minimax" begin
-    #     e = E`JuliaRL_Minimax_OpenSpiel(tic_tac_toe)`
-    #     run(e)
-    #     @test e.hook[1].rewards[end] == e.hook[2].rewards[end] == 0.0
-    # end
+    @testset "minimax" begin
+        e = E`JuliaRL_Minimax_OpenSpiel(tic_tac_toe)`
+        run(e)
+        @test e.hook[1][] == e.hook[0][] == [0.0]
+    end
 
-    # @testset "TabularCFR" begin
-    #     e = E`JuliaRL_TabularCFR_OpenSpiel(kuhn_poker)`
-    #     run(e)
+    @testset "TabularCFR" begin
+        e = E`JuliaRL_TabularCFR_OpenSpiel(kuhn_poker)`
+        run(e)
 
-    #     reset!(e.env)
-    #     expected_values = expected_policy_values(e.agent, e.env)
-    #     @test isapprox(expected_values[1], -1 / 18; atol = 0.001)
-    #     @test isapprox(expected_values[2], 1 / 18; atol = 0.001)
-    # end
+        reset!(e.env)
+        expected_values = expected_policy_values(e.policy, e.env)
+        @test isapprox(expected_values[1], -1 / 18; atol = 0.001)
+        @test isapprox(expected_values[2], 1 / 18; atol = 0.001)
+    end
 
-    # include("cfr/cfr.jl")
+    include("cfr/cfr.jl")
 end
