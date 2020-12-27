@@ -21,13 +21,16 @@ Flux.functor(x::QBasedPolicy) = (learner = x.learner,), y -> @set x.learner = y.
 (π::QBasedPolicy)(env) = π(env, ActionStyle(env), action_space(env))
 
 (π::QBasedPolicy)(env, ::MinimalActionSet, ::Base.OneTo) = π.explorer(π.learner(env))
-(π::QBasedPolicy)(env, ::FullActionSet, ::Base.OneTo) = π.explorer(π.learner(env), legal_action_space_mask(env))
+(π::QBasedPolicy)(env, ::FullActionSet, ::Base.OneTo) =
+    π.explorer(π.learner(env), legal_action_space_mask(env))
 
 (π::QBasedPolicy)(env, ::MinimalActionSet, A) = A[π.explorer(π.learner(env))]
-(π::QBasedPolicy)(env, ::FullActionSet, A) = A[π.explorer(π.learner(env), legal_action_space_mask(env))]
+(π::QBasedPolicy)(env, ::FullActionSet, A) =
+    A[π.explorer(π.learner(env), legal_action_space_mask(env))]
 
 RLBase.prob(p::QBasedPolicy, env::AbstractEnv) = prob(p, env, ActionStyle(env))
-RLBase.prob(p::QBasedPolicy, env::AbstractEnv, ::MinimalActionSet) = prob(p.explorer, p.learner(env))
+RLBase.prob(p::QBasedPolicy, env::AbstractEnv, ::MinimalActionSet) =
+    prob(p.explorer, p.learner(env))
 RLBase.prob(p::QBasedPolicy, env::AbstractEnv, ::FullActionSet) =
     prob(p.explorer, p.learner(env), legal_action_space_mask(env))
 
@@ -37,8 +40,8 @@ function RLBase.prob(p::QBasedPolicy, env::AbstractEnv, action)
     @assert length(A) == length(P)
     if A isa Base.OneTo
         P[action]
-    # elseif A isa ZeroTo
-    #     P[action+1]
+        # elseif A isa ZeroTo
+        #     P[action+1]
     else
         for (a, p) in zip(A, P)
             if a == action
@@ -51,8 +54,7 @@ end
 
 @forward QBasedPolicy.learner RLBase.priority
 
-RLBase.update!(p::QBasedPolicy, trajectory) =
-    update!(p.learner, trajectory)
+RLBase.update!(p::QBasedPolicy, trajectory) = update!(p.learner, trajectory)
 
 function check(p::QBasedPolicy, env::AbstractEnv)
     A = action_space(env)

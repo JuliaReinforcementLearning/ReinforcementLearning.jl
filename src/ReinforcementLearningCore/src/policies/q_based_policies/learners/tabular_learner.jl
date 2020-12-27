@@ -38,7 +38,7 @@ end
 function (t::TabularLearner)(::MinimalActionSet, env::AbstractEnv)
     get!(t.table, state(env)) do
         n = length(action_space(env))
-        fill(1/n, n)
+        fill(1 / n, n)
     end
 end
 

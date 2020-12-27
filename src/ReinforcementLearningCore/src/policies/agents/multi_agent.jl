@@ -23,7 +23,8 @@ MultiAgentManager(policies...) = MultiAgentManager(Dict(nameof(p) => p for p in 
 
 (A::MultiAgentManager)(env::AbstractEnv) = A(env, DynamicStyle(env))
 (A::MultiAgentManager)(env::AbstractEnv, ::Sequential) = A[current_player(env)](env)
-(A::MultiAgentManager)(env::AbstractEnv, ::Simultaneous) = [agent(env) for agent in values(A.agents)]
+(A::MultiAgentManager)(env::AbstractEnv, ::Simultaneous) =
+    [agent(env) for agent in values(A.agents)]
 
 function (A::MultiAgentManager)(stage::AbstractStage, env::AbstractEnv)
     for agent in values(A.agents)
@@ -46,7 +47,12 @@ function (A::MultiAgentManager)(stage::PreActStage, env::AbstractEnv, ::Sequenti
     end
 end
 
-function (A::MultiAgentManager)(stage::PreActStage, env::AbstractEnv, ::Simultaneous, actions)
+function (A::MultiAgentManager)(
+    stage::PreActStage,
+    env::AbstractEnv,
+    ::Simultaneous,
+    actions,
+)
     for (agent, action) in zip(values(A.agents), actions)
         agent(stage, env, action)
     end

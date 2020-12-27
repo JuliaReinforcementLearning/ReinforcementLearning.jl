@@ -13,12 +13,7 @@ end
 "Inject some customized checkings here by overwriting this function"
 function check(policy, env) end
 
-function _run(
-    policy::AbstractPolicy,
-    env::AbstractEnv,
-    stop_condition,
-    hook::AbstractHook,
-)
+function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook::AbstractHook)
 
     is_stop = false
     while !is_stop

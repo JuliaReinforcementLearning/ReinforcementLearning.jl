@@ -321,14 +321,19 @@ end
     MultiAgentHook(player=>hook...)
 """
 struct MultiAgentHook <: AbstractHook
-    hooks::Dict{Any, Any}
+    hooks::Dict{Any,Any}
 end
 
 MultiAgentHook(player_hook_pair::Pair...) = MultiAgentHook(Dict(player_hook_pair...))
 
 Base.getindex(h::MultiAgentHook, p) = getindex(h.hooks, p)
 
-function (hook::MultiAgentHook)(s::AbstractStage, p::AbstractPolicy, env::AbstractEnv, args...)
+function (hook::MultiAgentHook)(
+    s::AbstractStage,
+    p::AbstractPolicy,
+    env::AbstractEnv,
+    args...,
+)
     for (p, h) in hook.hooks
         h(s, p, env, args...)
     end

@@ -158,7 +158,7 @@ function RLBase.update!(
     policy::NamedPolicy,
     env::AbstractEnv,
     ::PreActStage,
-    action
+    action,
 )
     push!(trajectory[:state], state(env, nameof(policy)))
     push!(trajectory[:action], action)
