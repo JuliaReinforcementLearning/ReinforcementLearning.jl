@@ -38,8 +38,9 @@
             @test n >= 0
         end
 
-        RLBase.reset!(env′)
+        reset!(env′)
         @test env′.current_t == 1
+        @test is_terminated(env′) == false
     end
 
     @testset "RewardOverriddenEnv" begin
