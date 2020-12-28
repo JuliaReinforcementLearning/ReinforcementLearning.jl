@@ -37,6 +37,10 @@
             n -= 1
             @test n >= 0
         end
+
+        reset!(env′)
+        @test env′.current_t == 1
+        @test is_terminated(env′) == false
     end
 
     @testset "RewardOverriddenEnv" begin
