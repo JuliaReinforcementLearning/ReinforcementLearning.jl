@@ -139,7 +139,6 @@ manipulation.
 - `ActionTransformedEnv`
 - `DefaultStateStyleEnv`
 - `MaxTimeoutEnv`
-- `MultiThreadEnv`
 - `RewardOverriddenEnv`
 - `StateCachedEnv`
 - `StateOverriddenEnv`
