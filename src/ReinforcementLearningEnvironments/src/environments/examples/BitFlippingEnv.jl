@@ -18,15 +18,15 @@ end
 
 function BitFlippingEnv(; N = 8)
     rng = Random.GLOBAL_RNG
-    state = bitrand(rng,N)
-    goal_state  = bitrand(rng,N)
-    BitFlippingEnv(N,rng,state,goal_state)
+    state = bitrand(rng, N)
+    goal_state = bitrand(rng, N)
+    BitFlippingEnv(N, rng, state, goal_state)
 end
 
 function BitFlippingEnv(; N = 8, rng = Random.GLOBAL_RNG)
-    state = bitrand(rng,N)
-    goal_state  = bitrand(rng,N)
-    BitFlippingEnv(N,rng,state,goal_state)
+    state = bitrand(rng, N)
+    goal_state = bitrand(rng, N)
+    BitFlippingEnv(N, rng, state, goal_state)
 end
 
 Random.seed!(env::BitFlippingEnv, s) = Random.seed!(env.rng, s)
@@ -47,13 +47,13 @@ end
 RLBase.state(env::BitFlippingEnv) = state(env::BitFlippingEnv, Observation{BitArray{1}}())
 RLBase.state(env::BitFlippingEnv, ::Observation) = env.state
 RLBase.state(env::BitFlippingEnv, ::GoalState) = env.goal_state
-RLBase.state_space(env::BitFlippingEnv, ::Observation) = Space(fill(false..true,env.N))
-RLBase.state_space(env::BitFlippingEnv, ::GoalState) = Space(fill(false..true,env.N))
+RLBase.state_space(env::BitFlippingEnv, ::Observation) = Space(fill(false..true, env.N))
+RLBase.state_space(env::BitFlippingEnv, ::GoalState) = Space(fill(false..true, env.N))
 RLBase.is_terminated(env::BitFlippingEnv) = env.state == env.goal_state
 
 function RLBase.reset!(env::BitFlippingEnv)
-    env.state .= bitrand(env.rng,env.N)
-    env.goal_state .= bitrand(env.rng,env.N)
+    env.state .= bitrand(env.rng, env.N)
+    env.goal_state .= bitrand(env.rng, env.N)
 end
 
 function RLBase.reward(env::BitFlippingEnv)
