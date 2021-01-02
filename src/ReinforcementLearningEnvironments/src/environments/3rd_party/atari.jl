@@ -37,8 +37,11 @@ function AtariEnv(;
     log_level = :error,
 )
     frame_skip > 0 || throw(ArgumentError("frame_skip must be greater than 0!"))
-    name in getROMList() ||
-        throw(ArgumentError("unknown ROM name.\n\nRun `ReinforcementLearningEnvironments.list_atari_rom_names()` to see all the game names."))
+    name in getROMList() || throw(
+        ArgumentError(
+            "unknown ROM name.\n\nRun `ReinforcementLearningEnvironments.list_atari_rom_names()` to see all the game names.",
+        ),
+    )
 
     ale = ALE_new()
     if isnothing(seed)
@@ -57,12 +60,14 @@ function AtariEnv(;
     observation_size =
         grayscale_obs ? (getScreenWidth(ale), getScreenHeight(ale)) :
         (3, getScreenWidth(ale), getScreenHeight(ale))  # !!! note the order
-    observation_space = Space(ClosedInterval{
-        Cuchar,
-    }.(
-        fill(typemin(Cuchar), observation_size),
-        fill(typemax(Cuchar), observation_size),
-    ))
+    observation_space = Space(
+        ClosedInterval{
+            Cuchar,
+        }.(
+            fill(typemin(Cuchar), observation_size),
+            fill(typemax(Cuchar), observation_size),
+        ),
+    )
 
     actions = full_action_space ? getLegalActionSet(ale) : getMinimalActionSet(ale)
     action_space = Base.OneTo(length(actions))

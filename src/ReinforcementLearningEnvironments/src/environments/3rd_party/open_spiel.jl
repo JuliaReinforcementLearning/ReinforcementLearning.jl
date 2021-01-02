@@ -150,10 +150,9 @@ RLBase.state_space(
     env::OpenSpielEnv,
     ::Union{InformationSet{Array},Observation{Array}},
     p,
-) = Space(fill(
-    typemin(Float64)..typemax(Float64),
-    information_state_tensor_size(env.state),
-))
+) = Space(
+    fill(typemin(Float64)..typemax(Float64), information_state_tensor_size(env.state)),
+)
 
 Random.seed!(env::OpenSpielEnv, s) = @warn "seed!(OpenSpielEnv) is not supported currently."
 

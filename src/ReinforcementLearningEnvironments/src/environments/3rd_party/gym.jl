@@ -3,13 +3,17 @@ using .PyCall
 # TODO: support `seed`
 function GymEnv(name::String)
     if !PyCall.pyexists("gym")
-        error("Cannot import module 'gym'.\n\nIf you did not yet install it, try running\n`ReinforcementLearningEnvironments.install_gym()`\n")
+        error(
+            "Cannot import module 'gym'.\n\nIf you did not yet install it, try running\n`ReinforcementLearningEnvironments.install_gym()`\n",
+        )
     end
     gym = pyimport_conda("gym", "gym")
     pyenv = try
         gym.make(name)
     catch e
-        error("Gym environment $name not found.\n\nRun `ReinforcementLearningEnvironments.list_gym_env_names()` to find supported environments.\n")
+        error(
+            "Gym environment $name not found.\n\nRun `ReinforcementLearningEnvironments.list_gym_env_names()` to find supported environments.\n",
+        )
     end
     obs_space = space_transform(pyenv.observation_space)
     act_space = space_transform(pyenv.action_space)
