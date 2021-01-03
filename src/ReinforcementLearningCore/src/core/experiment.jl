@@ -27,8 +27,11 @@ end
 
 function Experiment(s::String)
     m = match(r"(?<source>\w+)_(?<method>\w+)_(?<env>\w+)(\((?<game>\w*)\))?", s)
-    isnothing(m) &&
-        throw(ArgumentError("invalid format, got $s, expected format is a local dir or a predefined experiment like dopamine_dqn_atari(pong)`"))
+    isnothing(m) && throw(
+        ArgumentError(
+            "invalid format, got $s, expected format is a local dir or a predefined experiment like dopamine_dqn_atari(pong)`",
+        ),
+    )
     Experiment(
         Val(Symbol(m[:source])),
         Val(Symbol(m[:method])),
