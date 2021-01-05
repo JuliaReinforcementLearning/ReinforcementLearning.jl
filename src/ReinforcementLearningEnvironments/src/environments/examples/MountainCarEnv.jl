@@ -168,5 +168,4 @@ function GR.plot(env::MountainCarEnv)
     fillarea(xs, ys)
     plotendofepisode(env.params.max_pos + 0.1, 0, d)
     updatews()
-    plot()
 end

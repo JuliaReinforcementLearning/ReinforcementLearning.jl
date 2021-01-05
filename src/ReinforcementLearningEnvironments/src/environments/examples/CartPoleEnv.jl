@@ -150,5 +150,4 @@ function GR.plot(env::CartPoleEnv)
     drawarrow(x + (a == 1) - 0.5, -.025, x + 1.4 * (a == 1) - 0.7, -.025)
     plotendofepisode(xthreshold - 0.2, l, d)
     updatews()
-    plot()
 end
