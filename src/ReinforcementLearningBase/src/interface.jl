@@ -336,6 +336,10 @@ InformationSet() = InformationSet{Any}()
 @api struct InternalState{T} <: AbstractStateStyle end
 InternalState() = InternalState{Any}()
 
+"Use it to represent the [goal state](http://proceedings.mlr.press/v37/schaul15.pdf)"
+@api struct GoalState{T} <: AbstractStateStyle end
+GoalState() = GoalState{Any}()
+
 """
 Sometimes people from different field talk about the same thing with a different
 name. Here we set the `Observation{Any}()` as the default state style in this
