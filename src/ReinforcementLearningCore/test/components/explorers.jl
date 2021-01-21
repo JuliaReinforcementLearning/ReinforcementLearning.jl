@@ -15,11 +15,13 @@
             actions = [explorer(values) for _ in 1:10000]
             action_counts = countmap(actions)
 
-            @test all(isapprox.(
-                [action_counts[i] for i in 1:length(values)] ./ 10000,
-                tarprob;
-                atol = 0.005,
-            ))
+            @test all(
+                isapprox.(
+                    [action_counts[i] for i in 1:length(values)] ./ 10000,
+                    tarprob;
+                    atol = 0.005,
+                ),
+            )
         end
 
         @testset "linear" begin

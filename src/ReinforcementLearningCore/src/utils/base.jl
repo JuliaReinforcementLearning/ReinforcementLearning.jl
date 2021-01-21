@@ -233,11 +233,13 @@ function _discount_rewards!(
     dims::Int,
 )
     dims = ndims(rewards) - dims + 1
-    for (i, (r′, r, t)) in enumerate(zip(
-        eachslice(new_rewards, dims = dims),
-        eachslice(rewards, dims = dims),
-        eachslice(terminal, dims = dims),
-    ))
+    for (i, (r′, r, t)) in enumerate(
+        zip(
+            eachslice(new_rewards, dims = dims),
+            eachslice(rewards, dims = dims),
+            eachslice(terminal, dims = dims),
+        ),
+    )
         _discount_rewards!(r′, r, γ, t, init[i])
     end
 end
