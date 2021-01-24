@@ -1,11 +1,11 @@
 export RandomWalk1D
 
 """
-    RandomWalk1D(;rewards=-1. => 1.0, N=7, start_pos=(N+1) ÷ 2)
+    RandomWalk1D(;rewards=-1. => 1.0, N=7, start_pos=(N+1) ÷ 2, actions=[-1,1])
 
-An agent is placed at the `start_pos` and can either move `:left` or `:right`.
-The game terminates when the agent reaches either end and receives a reward
-correspondingly.
+An agent is placed at the `start_pos` and can move left or right (stride is
+defined in actions). The game terminates when the agent reaches either end and
+receives a reward correspondingly.
 
 Compared to the [`MultiArmBanditsEnv`](@ref):
 
@@ -16,24 +16,15 @@ Compared to the [`MultiArmBanditsEnv`](@ref):
 Base.@kwdef mutable struct RandomWalk1D <: AbstractEnv
     rewards::Pair{Float64,Float64} = -1.0 => 1.0
     N::Int = 7
+    actions::Vector{Int} = [-1, 1]
     start_pos::Int = (N + 1) ÷ 2
     pos::Int = start_pos
 end
 
-const ACTIONS_OF_RANDOMWALK1D = (:left, :right)
+RLBase.action_space(env::RandomWalk1D) = Base.OneTo(length(env.actions))
 
-RLBase.action_space(::RandomWalk1D) = Base.OneTo(length(ACTIONS_OF_RANDOMWALK1D))
-
-(env::RandomWalk1D)(action::Int) = env(ACTIONS_OF_RANDOMWALK1D[action])
-
-function (env::RandomWalk1D)(action::Symbol)
-    if action == :left
-        env.pos = max(env.pos - 1, 1)
-    elseif action == :right
-        env.pos = min(env.pos + 1, env.N)
-    else
-        @error "invalid action: $action"
-    end
+function (env::RandomWalk1D)(action)
+    env.pos = max(min(env.pos + env.actions[action], env.N), 1)
 end
 
 RLBase.state(env::RandomWalk1D) = env.pos

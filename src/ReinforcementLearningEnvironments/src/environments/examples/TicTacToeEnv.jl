@@ -82,6 +82,26 @@ RLBase.state(env::TicTacToeEnv, ::Observation{Int}, p) =
 RLBase.state_space(env::TicTacToeEnv, ::Observation{Int}, p) =
     Base.OneTo(length(get_tic_tac_toe_state_info()))
 
+RLBase.state_space(env::TicTacToeEnv, ::Observation{String}, p) = WorldSpace{String}()
+
+function RLBase.state(env::TicTacToeEnv, ::Observation{String}, p)
+    buff = IOBuffer()
+    for i in 1:3
+        for j in 1:3
+            if env.board[i, j, 1]
+                x = '.'
+            elseif env.board[i, j, 2]
+                x = 'x'
+            else
+                x = 'o'
+            end
+            print(buff, x)
+        end
+        print(buff, '\n')
+    end
+    String(take!(buff))
+end
+
 RLBase.is_terminated(env::TicTacToeEnv) = get_tic_tac_toe_state_info()[env].is_terminated
 
 function RLBase.reward(env::TicTacToeEnv, player)
@@ -150,7 +170,7 @@ RLBase.NumAgentStyle(::TicTacToeEnv) = MultiAgent(2)
 RLBase.DynamicStyle(::TicTacToeEnv) = SEQUENTIAL
 RLBase.ActionStyle(::TicTacToeEnv) = FULL_ACTION_SET
 RLBase.InformationStyle(::TicTacToeEnv) = PERFECT_INFORMATION
-RLBase.StateStyle(::TicTacToeEnv) = (Observation{Int}(), Observation{BitArray{3}}())
+RLBase.StateStyle(::TicTacToeEnv) = (Observation{String}(), Observation{Int}(), Observation{BitArray{3}}())
 RLBase.RewardStyle(::TicTacToeEnv) = TERMINAL_REWARD
 RLBase.UtilityStyle(::TicTacToeEnv) = ZERO_SUM
 RLBase.ChanceStyle(::TicTacToeEnv) = DETERMINISTIC
