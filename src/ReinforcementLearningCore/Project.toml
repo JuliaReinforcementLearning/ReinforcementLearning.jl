@@ -28,7 +28,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 AbstractTrees = "0.3"
-Adapt = "2"
+Adapt = "2, 3"
 CUDA = "1, 2.1"
 CircularArrayBuffers = "0.1"
 Distributions = "0.24"
