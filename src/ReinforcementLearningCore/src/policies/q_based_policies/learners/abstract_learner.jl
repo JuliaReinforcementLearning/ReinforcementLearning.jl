@@ -18,3 +18,11 @@ function RLBase.priority(p::AbstractLearner, experience) end
 
 Base.show(io::IO, p::AbstractLearner) =
     AbstractTrees.print_tree(io, StructTree(p), get(io, :max_depth, 10))
+
+function RLBase.update!(
+    p::AbstractLearner,
+    t::AbstractTrajectory,
+    e::AbstractEnv,
+    s::AbstractStage
+)
+end

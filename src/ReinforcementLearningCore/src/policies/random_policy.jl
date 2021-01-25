@@ -26,11 +26,16 @@ RandomPolicy(s = nothing; rng = Random.GLOBAL_RNG) = RandomPolicy(s, rng)
 (p::RandomPolicy)(env) = rand(p.rng, p.action_space)
 
 function RLBase.prob(p::RandomPolicy{<:Union{AbstractVector,Tuple}}, env::AbstractEnv)
+    prob(p, state(env))
+end
+
+function RLBase.prob(p::RandomPolicy{<:Union{AbstractVector,Tuple}}, s)
     n = length(p.action_space)
     Categorical(fill(1 / n, n); check_args = false)
 end
 
 RLBase.prob(p::RandomPolicy{Nothing}, env::AbstractEnv) = prob(p, env, ChanceStyle(env))
+RLBase.prob(p::RandomPolicy{Nothing}, x) = @error "no I really don't know how to calculate the prob from nothing"
 
 function RLBase.prob(
     p::RandomPolicy{Nothing},
@@ -58,7 +63,7 @@ end
 
 RLBase.update!(p::RandomPolicy, x) = nothing
 
-RLBase.prob(p::RandomPolicy, env::AbstractEnv, a) = 1 / length(p.action_space)
+RLBase.prob(p::RandomPolicy, env_or_state, a) = 1 / length(p.action_space)
 
 function RLBase.prob(p::RandomPolicy{Nothing}, env::AbstractEnv, a)
     # we can safely assume s is discrete here.

@@ -1,13 +1,15 @@
 @testset "Approximators" begin
 
     @testset "TabularApproximator" begin
-        A = TabularApproximator(ones(3))
+        A = TabularVApproximator(;n_state=2,opt=InvDecay(1.0))
 
-        @test A(1) == 1.0
-        @test A(2) == 1.0
+        @test A(1) == 0.
+        @test A(2) == 0.
 
-        update!(A, 2 => 3.0)
-        @test A(2) == 4.0
+        update!(A, 2 => A(2)-3.0)
+        @test A(2) == 1.5
+        update!(A, 2 => A(2)-6.0)
+        @test A(2) == 3.
     end
 
     @testset "NeuralNetworkApproximator" begin

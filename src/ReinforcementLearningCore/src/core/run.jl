@@ -38,8 +38,10 @@ function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook::Ab
             end
         end # end of an episode
 
-        policy(POST_EPISODE_STAGE, env)  # let the policy see the last observation
-        hook(POST_EPISODE_STAGE, policy, env)
+        if is_terminated(env)
+            policy(POST_EPISODE_STAGE, env)  # let the policy see the last observation
+            hook(POST_EPISODE_STAGE, policy, env)
+        end
     end
     hook
 end

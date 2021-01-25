@@ -8,7 +8,7 @@ using Setfield: @set
 
 A policy wrapper to provide a name. Mostly used in multi-agent environments.
 """
-struct NamedPolicy{P,N} <: AbstractPolicy
+Base.@kwdef struct NamedPolicy{P,N} <: AbstractPolicy
     name::N
     policy::P
 end
@@ -23,6 +23,25 @@ function check(agent::NamedPolicy, env::AbstractEnv)
     check(agent.policy, env)
 end
 
-RLBase.update!(p::NamedPolicy, args...) = update!(p.policy, args...)
+function RLBase.update!(
+    p::NamedPolicy,
+    t::AbstractTrajectory,
+    e::AbstractEnv,
+    s::AbstractStage,
+)
+    update!(p.policy, t, e, s)
+end
+
+function RLBase.update!(
+    p::NamedPolicy,
+    t::AbstractTrajectory,
+    e::AbstractEnv,
+    s::PreActStage,
+)
+    update!(p.policy, t, e, s)
+end
+
 
 (p::NamedPolicy)(env::AbstractEnv) = p.policy(env)
+(p::NamedPolicy)(s::AbstractStage, env::AbstractEnv) = p.policy(s, env)
+(p::NamedPolicy)(s::PreActStage, env::AbstractEnv, action) = p.policy(s, env, action)

@@ -9,7 +9,8 @@ export Trajectory,
     CircularArrayPSARTTrajectory,
     ElasticArrayTrajectory,
     ElasticSARTTrajectory,
-    VectorTrajectory
+    VectorTrajectory,
+    VectorSARTTrajectory
 
 using MacroTools: @forward
 using ElasticArrays
@@ -201,6 +202,11 @@ function VectorTrajectory(; kwargs...)
     end)
 end
 
+const VectorSARTTrajectory = Trajectory{<:NamedTuple{SART}}
+
+function VectorSARTTrajectory(;state=Int, action=Int, reward=Float32, terminal=Bool)
+    VectorTrajectory(;state=state, action=action, reward=reward, terminal=terminal)
+end
 #####
 
 Base.@kwdef struct PrioritizedTrajectory{T,P} <: AbstractTrajectory

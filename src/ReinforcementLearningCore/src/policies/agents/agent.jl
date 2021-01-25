@@ -26,7 +26,7 @@ functor(x::Agent) = (policy = x.policy,), y -> @set x.policy = y.policy
 function check(agent::Agent, env::AbstractEnv)
     if ActionStyle(env) === FULL_ACTION_SET &&
        !haskey(agent.trajectory, :legal_actions_mask)
-        @warn "The env[$(nameof(env))] is of FULL_ACTION_SET, but I can not find a trace named :legal_actions_mask in the trajectory"
+    #     @warn "The env[$(nameof(env))] is of FULL_ACTION_SET, but I can not find a trace named :legal_actions_mask in the trajectory"
     end
     check(agent.policy, env)
 end
@@ -81,14 +81,9 @@ function RLBase.update!(
     ::AbstractStage,
 ) end
 
-function RLBase.update!(
-    p::AbstractPolicy,
-    t::AbstractTrajectory,
-    ::AbstractEnv,
-    ::PreActStage,
-)
-    update!(p, t)
-end
+#####
+# Default behaviors for known trajectories
+#####
 
 function RLBase.update!(
     ::AbstractTrajectory,
@@ -96,18 +91,6 @@ function RLBase.update!(
     ::AbstractEnv,
     ::AbstractStage,
 ) end
-
-function RLBase.update!(
-    ::AbstractTrajectory,
-    ::AbstractPolicy,
-    ::AbstractEnv,
-    ::PreActStage,
-    action,
-) end
-
-#####
-# Default behaviors for known trajectories
-#####
 
 function RLBase.update!(
     trajectory::Union{
@@ -131,6 +114,7 @@ end
 
 function RLBase.update!(
     trajectory::Union{
+        VectorSARTTrajectory,
         CircularArraySARTTrajectory,
         CircularArraySLARTTrajectory,
         PrioritizedTrajectory{<:CircularArraySARTTrajectory},
@@ -150,6 +134,7 @@ end
 
 function RLBase.update!(
     trajectory::Union{
+        VectorSARTTrajectory,
         CircularArraySARTTrajectory,
         CircularArraySLARTTrajectory,
         PrioritizedTrajectory{<:CircularArraySARTTrajectory},
@@ -169,6 +154,7 @@ end
 
 function RLBase.update!(
     trajectory::Union{
+        VectorSARTTrajectory,
         CircularArraySARTTrajectory,
         CircularArraySLARTTrajectory,
         PrioritizedTrajectory{<:CircularArraySARTTrajectory},
@@ -193,6 +179,7 @@ end
 
 function RLBase.update!(
     trajectory::Union{
+        VectorSARTTrajectory,
         CircularArraySARTTrajectory,
         CircularArraySLARTTrajectory,
         PrioritizedTrajectory{<:CircularArraySARTTrajectory},

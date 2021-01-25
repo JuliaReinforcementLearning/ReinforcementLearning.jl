@@ -6,7 +6,6 @@ export AbstractHook,
     TotalRewardPerEpisode,
     TotalBatchRewardPerEpisode,
     BatchStepsPerEpisode,
-    CumulativeReward,
     TimePerStep,
     DoEveryNEpisode,
     DoEveryNStep,
@@ -138,7 +137,7 @@ function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env)
     hook.reward += reward(env)
 end
 
-function (hook::TotalRewardPerEpisode)(::PostActStage, agent::NamedTuple, env)
+function (hook::TotalRewardPerEpisode)(::PostActStage, agent::NamedPolicy, env)
     hook.reward += reward(env, nameof(agent))
 end
 
@@ -207,30 +206,6 @@ function (hook::BatchStepsPerEpisode)(::PostActStage, agent, env)
             hook.step[i] = 0
         end
     end
-end
-
-#####
-# CumulativeReward
-#####
-
-"""
-    CumulativeReward(rewards::Vector{Float64} = [0.0])
-
-Store cumulative rewards since the beginning to the field of `rewards`.
-"""
-Base.@kwdef struct CumulativeReward <: AbstractHook
-    rewards::Vector{Vector{Float64}} = [[0.0]]
-end
-
-Base.getindex(h::CumulativeReward) = h.rewards
-
-function (hook::CumulativeReward)(::PostEpisodeStage, agent, env)
-    push!(hook.rewards, [0.0])
-end
-
-function (hook::CumulativeReward)(::PostActStage, agent, env)
-    r = agent isa NamedPolicy ? reward(env, nameof(agent)) : reward(env)
-    push!(hook.rewards[end], r + hook.rewards[end][end])
 end
 
 #####
@@ -328,13 +303,8 @@ MultiAgentHook(player_hook_pair::Pair...) = MultiAgentHook(Dict(player_hook_pair
 
 Base.getindex(h::MultiAgentHook, p) = getindex(h.hooks, p)
 
-function (hook::MultiAgentHook)(
-    s::AbstractStage,
-    p::AbstractPolicy,
-    env::AbstractEnv,
-    args...,
-)
-    for (p, h) in hook.hooks
+function (hook::MultiAgentHook)(s::AbstractStage, m::MultiAgentManager, env::AbstractEnv, args...)
+    for (p, h) in zip(values(m.agents), values(hook.hooks))
         h(s, p, env, args...)
     end
 end
