@@ -23,7 +23,7 @@ end
 
 mutable struct TabularCFRPolicy{S,T,R<:AbstractRNG} <: AbstractCFRPolicy
     nodes::Dict{S,InfoStateNode}
-    behavior_policy::QBasedPolicy{TabularLearner{S,T},WeightedExplorer{true,R}}
+    behavior_policy::TabularRandomPolicy{S,T,R}
     is_reset_neg_regrets::Bool
     is_linear_averaging::Bool
     weighted_averaging_delay::Int
@@ -70,7 +70,6 @@ function TabularCFRPolicy(;
         TabularRandomPolicy(;
             rng = rng,
             table = Dict{state_type,Vector{Float64}}(),
-            is_normalized = true,
         ),
         is_reset_neg_regrets,
         is_linear_averaging,
@@ -91,7 +90,7 @@ function RLBase.update!(p::TabularCFRPolicy)
             strategy[m] .= v.cumulative_strategy ./ s
             update!(p.behavior_policy, k => strategy)
         else
-            # The TabularLearner will return uniform distribution by default. 
+            # The TabularRandomPolicy will return uniform distribution by default. 
             # So we do nothing here.
         end
     end

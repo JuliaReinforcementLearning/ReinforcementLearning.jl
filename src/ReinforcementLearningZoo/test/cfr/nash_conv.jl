@@ -9,7 +9,7 @@
 
     env = OpenSpielEnv( "leduc_poker")
     p = TabularRandomPolicy()
-    @test RLZoo.nash_conv(p, env) ≈ 4.747222222222222
+    @test isapprox(RLZoo.nash_conv(p, env), 4.747222222222222; atol=0.0001)
 
     env = OpenSpielEnv("kuhn_poker(players=3)")
     p = TabularRandomPolicy()

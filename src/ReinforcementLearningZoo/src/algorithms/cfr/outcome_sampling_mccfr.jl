@@ -30,7 +30,6 @@ function OutcomeSamplingMCCFRPolicy(; state_type = String, rng = Random.GLOBAL_R
         TabularRandomPolicy(;
             rng = rng,
             table = Dict{state_type,Vector{Float64}}(),
-            is_normalized = true,
         ),
         ϵ,
         rng,
@@ -55,7 +54,7 @@ function RLBase.update!(p::OutcomeSamplingMCCFRPolicy)
             strategy[m] .= v.cumulative_strategy ./ s
             update!(p.behavior_policy, k => strategy)
         else
-            # The TabularLearner will return uniform distribution by default. 
+            # The TabularRandomPolicy will return uniform distribution by default. 
             # So we do nothing here.
         end
     end

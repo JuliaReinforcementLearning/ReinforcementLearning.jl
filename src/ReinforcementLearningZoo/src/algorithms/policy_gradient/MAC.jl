@@ -39,7 +39,7 @@ function (learner::MACLearner)(env)
     learner.approximator.actor(s) |> vec |> send_to_host
 end
 
-function RLBase.update!(learner::MACLearner, t::CircularArraySARTTrajectory)
+function RLBase.update!(learner::MACLearner, t::CircularArraySARTTrajectory, ::AbstractEnv, ::PreActStage)
     length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
     learner.update_step += 1
     if learner.update_step % learner.update_freq == 0

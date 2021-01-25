@@ -126,7 +126,7 @@ function (p::TD3Policy)(env)
     end
 end
 
-function RLBase.update!(p::TD3Policy, traj::CircularArraySARTTrajectory)
+function RLBase.update!(p::TD3Policy, traj::CircularArraySARTTrajectory, ::AbstractEnv, ::PreActStage)
     length(traj) > p.update_after || return
     p.step % p.update_every == 0 || return
     inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))

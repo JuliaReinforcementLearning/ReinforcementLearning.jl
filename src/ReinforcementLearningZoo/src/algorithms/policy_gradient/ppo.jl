@@ -182,7 +182,7 @@ function (agent::Agent{<:RandomStartPolicy{<:PPOPolicy}})(env::AbstractEnv)
     end
 end
 
-function RLBase.update!(p::PPOPolicy, t::Union{PPOTrajectory, MaskedPPOTrajectory})
+function RLBase.update!(p::PPOPolicy, t::Union{PPOTrajectory, MaskedPPOTrajectory}, ::AbstractEnv, ::PreActStage)
     length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
     p.update_step += 1
     if p.update_step % p.update_freq == 0
