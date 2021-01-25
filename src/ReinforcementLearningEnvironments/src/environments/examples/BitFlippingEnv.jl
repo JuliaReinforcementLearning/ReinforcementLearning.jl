@@ -13,13 +13,6 @@ struct BitFlippingEnv <: AbstractEnv
     goal_state::BitArray{1}
 end
 
-function BitFlippingEnv(; N = 8)
-    rng = Random.GLOBAL_RNG
-    state = bitrand(rng, N)
-    goal_state = bitrand(rng, N)
-    BitFlippingEnv(N, rng, state, goal_state)
-end
-
 function BitFlippingEnv(; N = 8, rng = Random.GLOBAL_RNG)
     state = bitrand(rng, N)
     goal_state = bitrand(rng, N)
