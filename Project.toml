@@ -1,7 +1,7 @@
 name = "ReinforcementLearning"
 uuid = "158674fc-8238-5cab-b5ba-03dfc80d1318"
 authors = ["Johanni Brea <jbrea@users.noreply.github.com>", "Jun Tian <tianjun.cpp@gmail.com>"]
-version = "0.7.0"
+version = "0.8.0"
 
 [deps]
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
@@ -13,7 +13,7 @@ ReinforcementLearningZoo = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 [compat]
 Reexport = "0.2"
 ReinforcementLearningBase = "0.9"
-ReinforcementLearningCore = "0.6"
+ReinforcementLearningCore = "0.7"
 ReinforcementLearningEnvironments = "0.4"
 ReinforcementLearningZoo = "0.3"
 julia = "1.4"
