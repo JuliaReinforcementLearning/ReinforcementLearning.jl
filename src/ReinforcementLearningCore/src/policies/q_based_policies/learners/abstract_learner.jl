@@ -20,9 +20,18 @@ Base.show(io::IO, p::AbstractLearner) =
     AbstractTrees.print_tree(io, StructTree(p), get(io, :max_depth, 10))
 
 function RLBase.update!(
-    p::AbstractLearner,
+    L::AbstractLearner,
     t::AbstractTrajectory,
     e::AbstractEnv,
     s::AbstractStage
 )
+end
+
+function RLBase.update!(
+    L::AbstractLearner,
+    t::AbstractTrajectory,
+    e::AbstractEnv,
+    s::PreActStage
+)
+    update!(L, t)
 end
