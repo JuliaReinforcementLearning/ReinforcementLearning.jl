@@ -64,7 +64,7 @@ end
 
 (p::TabularRandomPolicy)(env::AbstractEnv) = sample(p.rng, action_space(env), Weights(prob(p, env), 1.0))
 
-"!!! Assumeing table is already initialized"
+# !!! Assumeing table is already initialized
 (p::TabularRandomPolicy{S})(state::S) where S = sample(p.rng, Weights(p.table[state], 1.0))
 
 """
