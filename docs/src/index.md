@@ -5,8 +5,12 @@
   </p>
 
   <p>
-  <a href="https://JuliaReinforcementLearning.github.io/ReinforcementLearning.jl/latest"><img src="https://img.shields.io/badge/docs-latest-blue.svg"></a>
-  <a href="https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearning.jl"><img src="https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearning.jl.svg?branch=master"></a>
+  <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/actions?query=workflow%3ACI"><img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/workflows/CI/badge.svg"></a>
+  <a href="https://juliahub.com/ui/Packages/ReinforcementLearning/6l2TO"><img src="https://juliahub.com/docs/ReinforcementLearning/pkgeval.svg"></a>
+  <a href="https://juliahub.com/ui/Packages/ReinforcementLearning/6l2TO"><img src="https://juliahub.com/docs/ReinforcementLearning/version.svg"></a>
+  <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/LICENSE.md"><img src="http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat"></a>
+  <a href="https://julialang.org/slack/"><img src=https://img.shields.io/badge/Chat%20on%20Slack-%23reinforcement--learnin-ff69b4"></a>
+  <a href="https://github.com/SciML/ColPrac"><img src="https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet"></a>
   </p>
 </div>
 ```
@@ -39,33 +43,32 @@ Check out the [Get Started](https://juliareinforcementlearning.org/get_started/)
 
 `ReinforcementLearning.jl` itself is just a wrapper around several other packages inside the [JuliaReinforcementLearning](https://github.com/JuliaReinforcementLearning) org. The relationship between different packages is described below:
 
-```@raw html
-<pre>+-----------------------------------------------------------------------------------+
+```
++-----------------------------------------------------------------------------------+
 |                                                                                   |
-|  <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl">ReinforcementLearning.jl</a>                                                         |
+|  ReinforcementLearning.jl                                                         |
 |                                                                                   |
 |      +------------------------------+                                             |
-|      | <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl">ReinforcementLearningBase.jl</a> |                                             |
+|      | ReinforcementLearningBase.jl |                                             |
 |      +----|-------------------------+                                             |
 |           |                                                                       |
 |           |     +--------------------------------------+                          |
-|           +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl">ReinforcementLearningEnvironments.jl</a> |                          |
+|           +---->+ ReinforcementLearningEnvironments.jl |                          |
 |           |     +--------------------------------------+                          |
 |           |                                                                       |
 |           |     +------------------------------+                                  |
-|           +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl">ReinforcementLearningCore.jl</a> |                                  |
+|           +---->+ ReinforcementLearningCore.jl |                                  |
 |                 +----|-------------------------+                                  |
 |                      |                                                            |
 |                      |     +-----------------------------+                        |
-|                      +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl">ReinforcementLearningZoo.jl</a> |                        |
+|                      +---->+ ReinforcementLearningZoo.jl |                        |
 |                            +----|------------------------+                        |
 |                                 |                                                 |
 |                                 |     +-------------------------------------+     |
-|                                 +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/DistributedReinforcementLearning.jl">DistributedReinforcementLearning.jl</a> |     |
+|                                 +---->+ DistributedReinforcementLearning.jl |     |
 |                                       +-------------------------------------+     |
 |                                                                                   |
 +-----------------------------------------------------------------------------------+
-</pre>
 ```
 
 ### Scope of Each Package
@@ -86,3 +89,26 @@ Check out the [Get Started](https://juliareinforcementlearning.org/get_started/)
   This package is still experimental and is not included in
   `ReinforcementLearning.jl` yet. Its goal is to extend some algorithms in
   `ReinforcementLearningZoo.jl` to apply them in distributed computing systems.
+
+## Supporting 🖖
+
+`ReinforcementLearning.jl` is a MIT licensed open source project with its
+ongoing development made possible by many contributors in their spare time.
+However, modern reinforcement learning research requires huge computing
+resource, which is unaffordable for individual contributors. So if you or your
+organization could provide the computing resource in some degree and would like
+to cooperate in some way, please contact us!
+
+## Citing
+
+If you use `ReinforcementLearning.jl` in a scientific publication, we would
+appreciate references to the following BibTex entry:
+
+```
+@misc{Tian2020Reinforcement,
+  author       = {Jun Tian and other contributors},
+  title        = {ReinforcementLearning.jl: A Reinforcement Learning Package for the Julia Language},
+  year         = 2020,
+  url          = {https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl}
+}
+```
