@@ -1,6 +1,6 @@
 <div align="center">
   <p>
-  <img src="./docs/src/assets/logo.svg">
+  <img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/logo.svg?sanitize=true" width="320px">
   </p>
 
   <p>
@@ -80,5 +80,5 @@ Check out the [Get Started](https://juliareinforcementlearning.org/get_started/)
   `Experiment`s) are collected in this package.
 - [DistributedReinforcementLearning.jl](https://github.com/JuliaReinforcementLearning/DistributedReinforcementLearning.jl)
   This package is still experimental and is not included in
-  `ReinforcementLearning.jl` yet. It's goal is to extend some algorithms in
+  `ReinforcementLearning.jl` yet. Its goal is to extend some algorithms in
   `ReinforcementLearningZoo.jl` to apply them in distributed computing systems.
