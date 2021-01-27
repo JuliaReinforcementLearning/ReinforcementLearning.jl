@@ -29,7 +29,8 @@
       "contributions": [
         "code",
         "doc",
-        "maintenance"
+        "maintenance",
+        "ideas"
       ]
     },
     {
@@ -153,5 +154,6 @@
       ]
     }
   ],
-  "contributorsPerLine": 7
+  "contributorsPerLine": 7,
+  "skipCi": true
 }
