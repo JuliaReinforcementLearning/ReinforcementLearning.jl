@@ -62,18 +62,20 @@ function HTMLWriter.render_html(
     scripts::Vector{DOM.Node} = DOM.Node[],
 )
     @tags html body div script
-    DOM.HTMLDocument(html[:lang=>"en"](
-        head,
-        body(
-            Tag(Symbol("#RAW#"))(top_nav),
-            div[".documenter-wrapper#documenter"](
-                sidebar,
-                div[".docs-main"](navbar, article, footer),
-                HTMLWriter.render_settings(ctx),
+    DOM.HTMLDocument(
+        html[:lang=>"en"](
+            head,
+            body(
+                Tag(Symbol("#RAW#"))(top_nav),
+                div[".documenter-wrapper#documenter"](
+                    sidebar,
+                    div[".docs-main"](navbar, article, footer),
+                    HTMLWriter.render_settings(ctx),
+                ),
             ),
+            scripts...,
         ),
-        scripts...,
-    ))
+    )
 end
 
 makedocs(
@@ -91,7 +93,9 @@ makedocs(
         assets = [
             "assets/favicon.ico",
             "assets/custom.css",
-            asset("https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"),
+            asset(
+                "https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css",
+            ),
         ],
     ),
     sitename = "ReinforcementLearning.jl",
