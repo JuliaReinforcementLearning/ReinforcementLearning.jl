@@ -1,6 +1,6 @@
 # ReinforcementLearningBase.jl
 
-[![Build Status](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl.svg?branch=master)](https://travis-ci.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl)
+![CI](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl/workflows/CI/badge.svg)
 
 This package defines two core concepts in reinforcement learning:
 
