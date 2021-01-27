@@ -89,7 +89,7 @@ Check out the [Get Started](https://juliareinforcementlearning.org/get_started/)
   `ReinforcementLearning.jl` yet. Its goal is to extend some algorithms in
   `ReinforcementLearningZoo.jl` to apply them in distributed computing systems.
 
-## 🖖 Supporting
+## Supporting 🖖
 
 `ReinforcementLearning.jl` is a MIT licensed open source project with its
 ongoing development made possible by many contributors in their spare time.
@@ -111,3 +111,41 @@ appreciate references to the following BibTex entry:
   url          = {https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl}
 }
 ```
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="http://lcn.epfl.ch/~brea/"><img src="https://avatars.githubusercontent.com/u/12857162?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jbrea</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=jbrea" title="Code">💻</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=jbrea" title="Documentation">📖</a> <a href="#maintenance-jbrea" title="Maintenance">🚧</a></td>
+    <td align="center"><a href="https://tianjun.me/"><img src="https://avatars.githubusercontent.com/u/5612003?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jun Tian</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=findmyway" title="Code">💻</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=findmyway" title="Documentation">📖</a> <a href="#maintenance-findmyway" title="Maintenance">🚧</a></td>
+    <td align="center"><a href="https://github.com/amanbh"><img src="https://avatars.githubusercontent.com/u/911313?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aman Bhatia</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=amanbh" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://avt.im/"><img src="https://avatars.githubusercontent.com/u/4722472?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alexander Terenin</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=aterenin" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/Sid-Bhatia-0"><img src="https://avatars.githubusercontent.com/u/32610387?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sid-Bhatia-0</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=Sid-Bhatia-0" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/norci"><img src="https://avatars.githubusercontent.com/u/2986988?v=4?s=100" width="100px;" alt=""/><br /><sub><b>norci</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=norci" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/sriram13m"><img src="https://avatars.githubusercontent.com/u/28051516?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sriram</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=sriram13m" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/gpavanb1"><img src="https://avatars.githubusercontent.com/u/50511632?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Pavan B Govindaraju</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=gpavanb1" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/AlexLewandowski"><img src="https://avatars.githubusercontent.com/u/15149466?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alex Lewandowski</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=AlexLewandowski" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/RajGhugare19"><img src="https://avatars.githubusercontent.com/u/62653460?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Raj Ghugare</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=RajGhugare19" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/rbange"><img src="https://avatars.githubusercontent.com/u/13252574?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Roman Bange</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=rbange" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/felixchalumeau"><img src="https://avatars.githubusercontent.com/u/49362657?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Felix Chalumeau</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=felixchalumeau" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/rishabhvarshney14"><img src="https://avatars.githubusercontent.com/u/53183977?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rishabh Varshney</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=rishabhvarshney14" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/zsunberg"><img src="https://avatars.githubusercontent.com/u/4240491?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Zachary Sunberg</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=zsunberg" title="Code">💻</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=zsunberg" title="Documentation">📖</a> <a href="#maintenance-zsunberg" title="Maintenance">🚧</a> <a href="#ideas-zsunberg" title="Ideas, Planning, & Feedback">🤔</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://www.cs.cmu.edu/~jlaurent/"><img src="https://avatars.githubusercontent.com/u/6361331?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jonathan Laurent</b></sub></a><br /><a href="#ideas-jonathan-laurent" title="Ideas, Planning, & Feedback">🤔</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!

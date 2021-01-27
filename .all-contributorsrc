@@ -1,0 +1,157 @@
+{
+  "projectName": "ReinforcementLearning.jl",
+  "projectOwner": "JuliaReinforcementLearning",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "none",
+  "contributors": [
+    {
+      "login": "jbrea",
+      "name": "jbrea",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12857162?v=4",
+      "profile": "http://lcn.epfl.ch/~brea/",
+      "contributions": [
+        "code",
+        "doc",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "findmyway",
+      "name": "Jun Tian",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5612003?v=4",
+      "profile": "https://tianjun.me/",
+      "contributions": [
+        "code",
+        "doc",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "amanbh",
+      "name": "Aman Bhatia",
+      "avatar_url": "https://avatars.githubusercontent.com/u/911313?v=4",
+      "profile": "https://github.com/amanbh",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "aterenin",
+      "name": "Alexander Terenin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4722472?v=4",
+      "profile": "https://avt.im/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Sid-Bhatia-0",
+      "name": "Sid-Bhatia-0",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32610387?v=4",
+      "profile": "https://github.com/Sid-Bhatia-0",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "norci",
+      "name": "norci",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2986988?v=4",
+      "profile": "https://github.com/norci",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "sriram13m",
+      "name": "Sriram",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28051516?v=4",
+      "profile": "https://github.com/sriram13m",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "gpavanb1",
+      "name": "Pavan B Govindaraju",
+      "avatar_url": "https://avatars.githubusercontent.com/u/50511632?v=4",
+      "profile": "https://github.com/gpavanb1",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "AlexLewandowski",
+      "name": "Alex Lewandowski",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15149466?v=4",
+      "profile": "https://github.com/AlexLewandowski",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "RajGhugare19",
+      "name": "Raj Ghugare",
+      "avatar_url": "https://avatars.githubusercontent.com/u/62653460?v=4",
+      "profile": "https://github.com/RajGhugare19",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "rbange",
+      "name": "Roman Bange",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13252574?v=4",
+      "profile": "https://github.com/rbange",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "felixchalumeau",
+      "name": "Felix Chalumeau",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49362657?v=4",
+      "profile": "https://github.com/felixchalumeau",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "rishabhvarshney14",
+      "name": "Rishabh Varshney",
+      "avatar_url": "https://avatars.githubusercontent.com/u/53183977?v=4",
+      "profile": "https://github.com/rishabhvarshney14",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "zsunberg",
+      "name": "Zachary Sunberg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4240491?v=4",
+      "profile": "https://github.com/zsunberg",
+      "contributions": [
+        "code",
+        "doc",
+        "maintenance",
+        "ideas"
+      ]
+    },
+    {
+      "login": "jonathan-laurent",
+      "name": "Jonathan Laurent",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6361331?v=4",
+      "profile": "https://www.cs.cmu.edu/~jlaurent/",
+      "contributions": [
+        "ideas"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
