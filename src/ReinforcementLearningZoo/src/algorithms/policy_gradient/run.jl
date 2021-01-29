@@ -13,7 +13,7 @@ function RLCore._run(
 )
 
     while true
-        reset!(env)  # this is a soft reset!, only environments reached the end will get reset.
+        reset!(env)  # this is a soft reset!, only environments reached the end will be reset.
         action = policy(env)
         policy(PRE_ACT_STAGE, env, action)
         hook(PRE_ACT_STAGE, policy, env, action)
@@ -23,9 +23,11 @@ function RLCore._run(
         hook(POST_ACT_STAGE, policy, env)
 
         if stop_condition(policy, env)
-            policy(PRE_ACT_STAGE, env)  # let the policy see the last observation
             break
         end
     end
-    hook
+    action = policy(env)
+    policy(PRE_ACT_STAGE, env, action)  # let the policy see the last observation
+    hook(PRE_ACT_STAGE, policy, env, action)
+    nothing
 end

@@ -19,15 +19,14 @@ function RLCore.Experiment(
     UPDATE_FREQ = 64
     N_FRAMES = 4
     STATE_SIZE = (80, 104)
-    env = MultiThreadEnv([
-        atari_env_factory(
-            name,
-            STATE_SIZE,
-            N_FRAMES;
-            repeat_action_probability = 0,
-            seed = seed + i,
-        ) for i in 1:N_ENV
-    ])
+    env = atari_env_factory(
+        name,
+        STATE_SIZE,
+        N_FRAMES;
+        repeat_action_probability = 0,
+        seed = seed,
+        n_replica = N_ENV
+    )
     N_ACTIONS = length(action_space(env[1]))
     INIT_CLIP_RANGE = 0.1f0
     INIT_LEARNING_RATE = 1e-3
@@ -44,27 +43,24 @@ function RLCore.Experiment(
     )
 
     agent = Agent(
-        policy = RandomStartPolicy(
-            num_rand_start = 1000,
-            random_policy = RandomPolicy(action_space(env); rng = rng),
-            policy = PPOPolicy(
-                approximator = ActorCritic(
-                    actor = Chain(model, Dense(512, N_ACTIONS; initW = init)),
-                    critic = Chain(model, Dense(512, 1; initW = init)),
-                    optimizer = ADAM(INIT_LEARNING_RATE),  # decrease learning rate with a hook
-                ) |> gpu,
-                γ = 0.99f0,
-                λ = 0.98f0,
-                clip_range = INIT_CLIP_RANGE,  # decrease with a hook
-                max_grad_norm = 1.0f0,
-                n_microbatches = 4,
-                n_epochs = 4,
-                actor_loss_weight = 1.0f0,
-                critic_loss_weight = 0.5f0,
-                entropy_loss_weight = 0.01f0,
-                rng = rng,
-                update_freq = UPDATE_FREQ,
-            ),
+        policy = PPOPolicy(
+            approximator = ActorCritic(
+                actor = Chain(model, Dense(512, N_ACTIONS; initW = init)),
+                critic = Chain(model, Dense(512, 1; initW = init)),
+                optimizer = ADAM(INIT_LEARNING_RATE),  # decrease learning rate with a hook
+            ) |> gpu,
+            γ = 0.99f0,
+            λ = 0.98f0,
+            clip_range = INIT_CLIP_RANGE,  # decrease with a hook
+            max_grad_norm = 1.0f0,
+            n_microbatches = 4,
+            n_epochs = 4,
+            actor_loss_weight = 1.0f0,
+            critic_loss_weight = 0.5f0,
+            entropy_loss_weight = 0.01f0,
+            rng = rng,
+            update_freq = UPDATE_FREQ,
+            n_random_start = 1000,
         ),
         trajectory = PPOTrajectory(;
             capacity = UPDATE_FREQ,
@@ -90,7 +86,7 @@ function RLCore.Experiment(
         total_batch_reward_per_episode,
         batch_steps_per_episode,
         DoEveryNStep(UPDATE_FREQ) do t, agent, env
-            p = agent.policy.policy
+            p = agent.policy
             with_logger(lg) do
                 @info "training" loss = mean(p.loss) actor_loss = mean(p.actor_loss) critic_loss =
                     mean(p.critic_loss) entropy_loss = mean(p.entropy_loss) norm =
@@ -99,8 +95,8 @@ function RLCore.Experiment(
         end,
         DoEveryNStep(UPDATE_FREQ) do t, agent, env
             decay = (N_TRAINING_STEPS - t) / N_TRAINING_STEPS
-            agent.policy.policy.approximator.optimizer.eta = INIT_LEARNING_RATE * decay
-            agent.policy.policy.clip_range = INIT_CLIP_RANGE * Float32(decay)
+            agent.policy.approximator.optimizer.eta = INIT_LEARNING_RATE * decay
+            agent.policy.clip_range = INIT_CLIP_RANGE * Float32(decay)
         end,
         DoEveryNStep() do t, agent, env
             with_logger(lg) do
@@ -126,16 +122,15 @@ function RLCore.Experiment(
             h = TotalBatchRewardPerEpisode(N_ENV)
             s = @elapsed run(
                 agent.policy,
-                MultiThreadEnv([
-                    atari_env_factory(
-                        name,
-                        STATE_SIZE,
-                        N_FRAMES,
-                        MAX_EPISODE_STEPS_EVAL;
-                        repeat_action_probability = 0,
-                        seed = seed + t + i,
-                    ) for i in 1:4
-                ]),
+                atari_env_factory(
+                    name,
+                    STATE_SIZE,
+                    N_FRAMES,
+                    MAX_EPISODE_STEPS_EVAL;
+                    repeat_action_probability = 0,
+                    seed = seed,
+                    n_replica = 4
+                ),
                 StopAfterStep(27_000; is_show_progress = false),
                 h,
             )

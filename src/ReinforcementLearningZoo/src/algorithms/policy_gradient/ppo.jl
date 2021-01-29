@@ -85,6 +85,7 @@ mutable struct PPOPolicy{A<:ActorCritic,D,R} <: AbstractPolicy
     critic_loss_weight::Float32
     entropy_loss_weight::Float32
     rng::R
+    n_random_start::Int
     update_freq::Int
     update_step::Int
     # for logging
@@ -98,6 +99,7 @@ end
 function PPOPolicy(;
     approximator,
     update_freq,
+    n_random_start = 0,
     update_step = 0,
     γ = 0.99f0,
     λ = 0.95f0,
@@ -123,6 +125,7 @@ function PPOPolicy(;
         critic_loss_weight,
         entropy_loss_weight,
         rng,
+        n_random_start,
         update_freq,
         update_step,
         zeros(Float32, n_microbatches, n_epochs),
@@ -137,9 +140,13 @@ function RLBase.prob(
     p::PPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal},
     state::AbstractArray,
 )
-    p.approximator.actor(send_to_device(device(p.approximator), state)) |>
-    send_to_host |>
-    StructArray{Normal}
+    if p.update_step < p.n_random_start
+        @error "todo"
+    else
+        p.approximator.actor(send_to_device(device(p.approximator), state)) |>
+        send_to_host |>
+        StructArray{Normal}
+    end
 end
 
 function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArray)
@@ -147,7 +154,11 @@ function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArr
         p.approximator.actor(send_to_device(device(p.approximator), state)) |>
         softmax |>
         send_to_host
-    [Categorical(x; check_args = false) for x in eachcol(logits)]
+    if p.update_step < p.n_random_start
+        [Categorical(fill(1/length(x), length(x)); check_args = false) for x in eachcol(logits)]
+    else
+        [Categorical(x; check_args = false) for x in eachcol(logits)]
+    end
 end
 
 RLBase.prob(p::PPOPolicy, env::MultiThreadEnv) = prob(p, state(env))
@@ -161,29 +172,14 @@ end
 (p::PPOPolicy)(env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
 (p::PPOPolicy)(env::AbstractEnv) = rand(p.rng, prob(p, env))
 
-function (agent::Agent{<:PPOPolicy})(env::AbstractEnv)
-    dist = prob(agent.policy, env)
-    a = rand(agent.policy.rng, dist)
-    EnrichedAction(a; action_log_prob=logpdf(dist, a))
-end
-
 function (agent::Agent{<:PPOPolicy})(env::MultiThreadEnv)
     dist = prob(agent.policy, env)
     action = rand.(agent.policy.rng, dist)
     EnrichedAction(action; action_log_prob=logpdf.(dist, action))
 end
 
-function (agent::Agent{<:RandomStartPolicy{<:PPOPolicy}})(env::AbstractEnv)
-    a = agent.policy(env)
-    if a isa EnrichedAction
-        a
-    else
-        EnrichedAction(a; action_log_prob=logpdf(prob(agent.policy, a)))
-    end
-end
-
 function RLBase.update!(p::PPOPolicy, t::Union{PPOTrajectory, MaskedPPOTrajectory}, ::AbstractEnv, ::PreActStage)
-    length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
+    length(t) == 0 && return  # in the first update, only state & action are inserted into trajectory
     p.update_step += 1
     if p.update_step % p.update_freq == 0
         _update!(p, t)
@@ -289,7 +285,7 @@ end
 
 function RLBase.update!(
     trajectory::Union{PPOTrajectory,MaskedPPOTrajectory},
-    policy::Union{PPOPolicy,RandomStartPolicy{<:PPOPolicy}},
+    ::PPOPolicy,
     env::MultiThreadEnv,
     ::PreActStage,
     action::EnrichedAction

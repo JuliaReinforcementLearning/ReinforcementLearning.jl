@@ -19,15 +19,14 @@ function RLCore.Experiment(
     UPDATE_FREQ = 5
     N_FRAMES = 4
     STATE_SIZE = (80, 104)
-    env = MultiThreadEnv([
-        atari_env_factory(
-            name,
-            STATE_SIZE,
-            N_FRAMES;
-            repeat_action_probability = 0,
-            seed = hash(seed + i),
-        ) for i in 1:N_ENV
-    ])
+    env = atari_env_factory(
+        name,
+        STATE_SIZE,
+        N_FRAMES;
+        repeat_action_probability = 0,
+        seed = seed,
+        n_replica = N_ENV
+    ) 
     N_ACTIONS = length(action_space(env[1]))
 
     init = orthogonal(rng)
@@ -77,7 +76,7 @@ function RLCore.Experiment(
     N_CHECKPOINTS = 3
     stop_condition = StopAfterStep(N_TRAINING_STEPS)
 
-    total_batch_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
+    total_batch_reward_per_episode = TotalBatchOriginalRewardPerEpisode(N_ENV)
     batch_steps_per_episode = BatchStepsPerEpisode(N_ENV)
     evaluation_result = []
 
@@ -112,19 +111,18 @@ function RLCore.Experiment(
         end,
         DoEveryNStep(EVALUATION_FREQ) do t, agent, env
             @info "evaluating agent at $t step..."
-            h = TotalBatchRewardPerEpisode(N_ENV)
+            h = TotalBatchOriginalRewardPerEpisode(N_ENV)
             s = @elapsed run(
                 agent.policy,
-                MultiThreadEnv([
-                    atari_env_factory(
-                        name,
-                        STATE_SIZE,
-                        N_FRAMES,
-                        MAX_EPISODE_STEPS_EVAL;
-                        repeat_action_probability = 0,
-                        seed = hash(seed + t + i),
-                    ) for i in 1:N_ENV
-                ]),
+                atari_env_factory(
+                    name,
+                    STATE_SIZE,
+                    N_FRAMES,
+                    MAX_EPISODE_STEPS_EVAL;
+                    repeat_action_probability = 0,
+                    seed = seed + t,
+                    n_replica = 4
+                ),
                 StopAfterStep(27_000; is_show_progress = false),
                 h,
             )

@@ -86,7 +86,7 @@ function RLCore.Experiment(
     MAX_EPISODE_STEPS_EVAL = 27_000
     N_CHECKPOINTS = 3
 
-    total_reward_per_episode = TotalRewardPerEpisode()
+    total_reward_per_episode = TotalOriginalRewardPerEpisode()
     time_per_step = TimePerStep()
     steps_per_episode = StepsPerEpisode()
     hook = ComposedHook(
@@ -108,7 +108,7 @@ function RLCore.Experiment(
             @info "evaluating agent at $t step..."
             p = agent.policy
             p = @set p.explorer = EpsilonGreedyExplorer(0.001; rng = rng)  # set evaluation epsilon
-            h = ComposedHook(TotalRewardPerEpisode(), StepsPerEpisode())
+            h = ComposedHook(TotalOriginalRewardPerEpisode(), StepsPerEpisode())
             s = @elapsed run(
                 p,
                 atari_env_factory(
