@@ -167,7 +167,9 @@ function RLBase.update!(
     # Note that for trajectories like `CircularArraySARTTrajectory`, data are
     # stored in a SARSA format, which means we still need to generate a dummy
     # action at the end of an episode. Here we simply select a random one using
-    # the global rng. In theory it shouldn't affect the performance of specific algorithm.
+    # the global rng. In theory it shouldn't affect the performance of specific
+    # algorithm.
+    # TODO: how to inject a local rng here to avoid polluting the global rng
     action = rand(action_space(env))
 
     push!(trajectory[:state], state(env))

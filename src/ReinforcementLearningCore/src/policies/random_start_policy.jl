@@ -15,7 +15,9 @@ function (p::RandomStartPolicy)(env)
     end
 end
 
-RLBase.update!(p::RandomStartPolicy, experience) = update!(p.policy, experience)
+function RLBase.update!(p::RandomStartPolicy, t::AbstractTrajectory, e::AbstractEnv, s::AbstractStage)
+    update!(p.policy, t, e, s)
+end
 
 for f in (:prob, :priority)
     @eval function RLBase.$f(p::RandomStartPolicy, args...)
