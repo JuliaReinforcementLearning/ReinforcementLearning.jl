@@ -28,8 +28,8 @@ function (env::SnakeGameEnv{A})(actions::Vector{CartesianIndex{2}}) where {A}
     if A === MINIMAL_ACTION_SET
         # avoid turn back
         actions = [
-            a_new == -a_old ? a_old : a_new
-            for (a_new, a_old) in zip(actions, env.latest_actions)
+            a_new == -a_old ? a_old : a_new for
+            (a_new, a_old) in zip(actions, env.latest_actions)
         ]
     end
 

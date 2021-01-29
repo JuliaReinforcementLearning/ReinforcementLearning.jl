@@ -23,7 +23,8 @@ end
 (env::DefaultStateStyleEnv)(args...; kwargs...) = env.env(args...; kwargs...)
 
 RLBase.state(env::DefaultStateStyleEnv, ss::RLBase.AbstractStateStyle) = state(env.env, ss)
-RLBase.state(env::DefaultStateStyleEnv, ss::RLBase.AbstractStateStyle, p) = state(env.env, ss, p)
+RLBase.state(env::DefaultStateStyleEnv, ss::RLBase.AbstractStateStyle, p) =
+    state(env.env, ss, p)
 
 RLBase.state_space(env::DefaultStateStyleEnv, ss::RLBase.AbstractStateStyle) =
     state_space(env.env, ss)

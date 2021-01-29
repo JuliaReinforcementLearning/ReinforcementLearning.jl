@@ -170,7 +170,8 @@ RLBase.NumAgentStyle(::TicTacToeEnv) = MultiAgent(2)
 RLBase.DynamicStyle(::TicTacToeEnv) = SEQUENTIAL
 RLBase.ActionStyle(::TicTacToeEnv) = FULL_ACTION_SET
 RLBase.InformationStyle(::TicTacToeEnv) = PERFECT_INFORMATION
-RLBase.StateStyle(::TicTacToeEnv) = (Observation{String}(), Observation{Int}(), Observation{BitArray{3}}())
+RLBase.StateStyle(::TicTacToeEnv) =
+    (Observation{String}(), Observation{Int}(), Observation{BitArray{3}}())
 RLBase.RewardStyle(::TicTacToeEnv) = TERMINAL_REWARD
 RLBase.UtilityStyle(::TicTacToeEnv) = ZERO_SUM
 RLBase.ChanceStyle(::TicTacToeEnv) = DETERMINISTIC

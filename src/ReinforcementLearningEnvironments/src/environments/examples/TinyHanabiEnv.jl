@@ -77,8 +77,8 @@ RLBase.state(env::TinyHanabiEnv, ::InformationSet, ::ChancePlayer) = (0, env.car
 
 function RLBase.state_space(env::TinyHanabiEnv, ::InformationSet, p::Int)
     Tuple(
-        (p, c..., a...) for p in 1:2 for c in ((), 1, 2)
-        for a in ((), 1:3..., ((i, j) for i in 1:3 for j in 1:3)...)
+        (p, c..., a...) for p in 1:2 for c in ((), 1, 2) for
+        a in ((), 1:3..., ((i, j) for i in 1:3 for j in 1:3)...)
     )
 end
 
