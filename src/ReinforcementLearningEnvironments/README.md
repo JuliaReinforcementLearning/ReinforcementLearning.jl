@@ -149,4 +149,4 @@ Checkout
 [experiments](https://github.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl/tree/master/src/experiments)
 in
 [ReinforcementLearningZoo.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl)
-for how to apply modern reinforcement learning algorithms to these environments.
+for how to apply modern reinforcement learning algorithms to these environments. You may also want to read this [pluto notebook](https://juliareinforcementlearning.org/blog/how_to_write_a_customized_environment/) for how to write a customized environment.
