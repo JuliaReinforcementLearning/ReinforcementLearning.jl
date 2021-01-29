@@ -152,6 +152,15 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "drozzy",
+      "name": "Andriy Drozdyuk",
+      "avatar_url": "https://avatars.githubusercontent.com/u/140710?v=4",
+      "profile": "https://github.com/drozzy",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
