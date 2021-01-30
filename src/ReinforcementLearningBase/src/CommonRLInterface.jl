@@ -69,6 +69,7 @@ Base.convert(::Type{AbstractEnv}, env::CRL.AbstractEnv) = convert(RLBaseEnv, env
 Base.convert(::Type{RLBaseEnv}, env::CRL.AbstractEnv) = RLBaseEnv(env, 0.0f0)  # can not determine reward ahead. Assume `Float32`.
 
 state(env::RLBaseEnv) = CRL.observe(env.env)
+state_space(env::RLBaseEnv) = CRL.observations(env.env)
 action_space(env::RLBaseEnv) = CRL.actions(env.env)
 reward(env::RLBaseEnv) = env.r
 is_terminated(env::RLBaseEnv) = CRL.terminated(env.env)
