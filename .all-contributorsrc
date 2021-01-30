@@ -161,6 +161,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "rcnlee",
+      "name": "Ritchie Lee",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7119868?v=4",
+      "profile": "http://ritchielee.net",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
