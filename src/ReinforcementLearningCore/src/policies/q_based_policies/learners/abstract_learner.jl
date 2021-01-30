@@ -23,15 +23,14 @@ function RLBase.update!(
     L::AbstractLearner,
     t::AbstractTrajectory,
     e::AbstractEnv,
-    s::AbstractStage
-)
-end
+    s::AbstractStage,
+) end
 
 function RLBase.update!(
     L::AbstractLearner,
     t::AbstractTrajectory,
     e::AbstractEnv,
-    s::PreActStage
+    s::PreActStage,
 )
     update!(L, t)
 end

@@ -35,7 +35,8 @@ function RLBase.prob(p::RandomPolicy{<:Union{AbstractVector,Tuple}}, s)
 end
 
 RLBase.prob(p::RandomPolicy{Nothing}, env::AbstractEnv) = prob(p, env, ChanceStyle(env))
-RLBase.prob(p::RandomPolicy{Nothing}, x) = @error "no I really don't know how to calculate the prob from nothing"
+RLBase.prob(p::RandomPolicy{Nothing}, x) =
+    @error "no I really don't know how to calculate the prob from nothing"
 
 function RLBase.prob(
     p::RandomPolicy{Nothing},

@@ -58,7 +58,7 @@ function RLBase.update!(
     p::QBasedPolicy,
     t::AbstractTrajectory,
     e::AbstractEnv,
-    s::AbstractStage
+    s::AbstractStage,
 )
     update!(p.learner, t, e, s)
 end
