@@ -204,8 +204,13 @@ end
 
 const VectorSARTTrajectory = Trajectory{<:NamedTuple{SART}}
 
-function VectorSARTTrajectory(;state=Int, action=Int, reward=Float32, terminal=Bool)
-    VectorTrajectory(;state=state, action=action, reward=reward, terminal=terminal)
+function VectorSARTTrajectory(;
+    state = Int,
+    action = Int,
+    reward = Float32,
+    terminal = Bool,
+)
+    VectorTrajectory(; state = state, action = action, reward = reward, terminal = terminal)
 end
 #####
 

@@ -15,7 +15,12 @@ function (p::RandomStartPolicy)(env)
     end
 end
 
-function RLBase.update!(p::RandomStartPolicy, t::AbstractTrajectory, e::AbstractEnv, s::AbstractStage)
+function RLBase.update!(
+    p::RandomStartPolicy,
+    t::AbstractTrajectory,
+    e::AbstractEnv,
+    s::AbstractStage,
+)
     update!(p.policy, t, e, s)
 end
 

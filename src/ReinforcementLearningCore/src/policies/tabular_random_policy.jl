@@ -5,13 +5,15 @@ export TabularRandomPolicy
 
 Use a `Dict` to store action distribution.
 """
-Base.@kwdef struct TabularRandomPolicy{S,T, R} <: AbstractPolicy
-    table::Dict{S,T} = Dict{Any, Vector{Float32}}()
+Base.@kwdef struct TabularRandomPolicy{S,T,R} <: AbstractPolicy
+    table::Dict{S,T} = Dict{Any,Vector{Float32}}()
     rng::R = Random.GLOBAL_RNG
 end
 
-TabularRandomPolicy{S}(;rng=Random.GLOBAL_RNG) where {S} = TabularRandomPolicy{S,Vector{Float32}}(;rng=rng)
-TabularRandomPolicy{S,T}(;rng=Random.GLOBAL_RNG) where {S,T} = TabularRandomPolicy(Dict{S,T}(),rng)
+TabularRandomPolicy{S}(; rng = Random.GLOBAL_RNG) where {S} =
+    TabularRandomPolicy{S,Vector{Float32}}(; rng = rng)
+TabularRandomPolicy{S,T}(; rng = Random.GLOBAL_RNG) where {S,T} =
+    TabularRandomPolicy(Dict{S,T}(), rng)
 
 RLBase.prob(p::TabularRandomPolicy, env::AbstractEnv) = prob(p, ChanceStyle(env), env)
 
@@ -37,7 +39,7 @@ end
 function RLBase.prob(t::TabularRandomPolicy, ::MinimalActionSet, env::AbstractEnv)
     get!(t.table, state(env)) do
         n = length(action_space(env))
-        fill(1/n, n)
+        fill(1 / n, n)
     end
 end
 
@@ -49,7 +51,12 @@ function RLBase.prob(t::TabularRandomPolicy, env::AbstractEnv, action_space, act
     prob(t, env)[findfirst(==(action), action_space)]
 end
 
-function RLBase.prob(t::TabularRandomPolicy, env::AbstractEnv, action_space::Base.OneTo, action)
+function RLBase.prob(
+    t::TabularRandomPolicy,
+    env::AbstractEnv,
+    action_space::Base.OneTo,
+    action,
+)
     prob(t, env)[action]
 end
 
@@ -62,10 +69,12 @@ function RLBase.prob(t::TabularRandomPolicy, state, action)
     t.table[state][action]
 end
 
-(p::TabularRandomPolicy)(env::AbstractEnv) = sample(p.rng, action_space(env), Weights(prob(p, env), 1.0))
+(p::TabularRandomPolicy)(env::AbstractEnv) =
+    sample(p.rng, action_space(env), Weights(prob(p, env), 1.0))
 
 # !!! Assumeing table is already initialized
-(p::TabularRandomPolicy{S})(state::S) where S = sample(p.rng, Weights(p.table[state], 1.0))
+(p::TabularRandomPolicy{S})(state::S) where {S} =
+    sample(p.rng, Weights(p.table[state], 1.0))
 
 """
     update!(p::TabularRandomPolicy, state => value)
