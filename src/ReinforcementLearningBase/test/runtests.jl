@@ -1,4 +1,12 @@
 using ReinforcementLearningBase
 using Test
 
-@testset "ReinforcementLearningBase" begin end
+using CommonRLInterface
+const CRL = CommonRLInterface
+
+using POMDPs
+using POMDPModelTools: Deterministic
+
+@testset "ReinforcementLearningBase" begin
+include("CommonRLInterface.jl")
+end
