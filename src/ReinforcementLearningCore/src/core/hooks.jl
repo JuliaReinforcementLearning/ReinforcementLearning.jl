@@ -147,7 +147,7 @@ function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env)
 end
 
 #####
-# TotalBatchRewardPerEpisode 
+# TotalBatchRewardPerEpisode
 #####
 struct TotalBatchRewardPerEpisode <: AbstractHook
     rewards::Vector{Vector{Float64}}
@@ -260,15 +260,17 @@ end
 Execute `f(agent, env)` every `n` episode.
 `t` is a counter of steps.
 """
-Base.@kwdef mutable struct DoEveryNEpisode{F} <: AbstractHook
+Base.@kwdef mutable struct DoEveryNEpisode{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <:
+                           AbstractHook
     f::F
     n::Int = 1
     t::Int = 0
 end
 
-DoEveryNEpisode(f, n = 1, t = 0) = DoEveryNEpisode(f, n, t)
+DoEveryNEpisode(f::F, n = 1, t = 0; stage::S = POST_EPISODE_STAGE) where {S,F} =
+    DoEveryNEpisode{S,F}(f, n, t)
 
-function (hook::DoEveryNEpisode)(::PostEpisodeStage, agent, env)
+function (hook::DoEveryNEpisode{S})(::S, agent, env) where {S}
     hook.t += 1
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
