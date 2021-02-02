@@ -22,3 +22,10 @@ end
 
 orthogonal(dims...) = orthogonal(Random.GLOBAL_RNG, dims...)
 orthogonal(rng::AbstractRNG) = (dims...) -> orthogonal(rng, dims...)
+
+function batch!(data, xs)
+    for (i, x) in enumerate(xs)
+        data[Flux.batchindex(data, i)...] = x
+    end
+    data
+end
