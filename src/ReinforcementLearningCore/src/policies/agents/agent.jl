@@ -54,11 +54,11 @@ The default behaviors for `Agent` are:
      the `trajectory`.
   3. In `PostActStage`, we query the `reward` and `is_terminated` info from
      `env` and push them into `trajectory`.
-  4. For `CircularSARTTrajectory`:
-     1. In the `PosEpisodeStage`, we push the `state` at the end of an episode
-        and a dummy action into the `trajectory`.
-     1. In the `PreEpisodeStage`, we pop out the lastest `state` and `action`
-        pair (which are dummy ones) from `trajectory`.
+  4. In the `PosEpisodeStage`, we push the `state` at the end of an episode and
+     a dummy action into the `trajectory`.
+  5. In the `PreEpisodeStage`, we pop out the lastest `state` and `action` pair
+     (which are dummy ones) from `trajectory`.
+
 2. Update the inner `policy` given the context of `trajectory`, `env`, and
    `stage`.
   1. By default, we only `update!` the `policy` in the `PreActStage`. And it's
@@ -93,12 +93,7 @@ function RLBase.update!(
 ) end
 
 function RLBase.update!(
-    trajectory::Union{
-        CircularArraySARTTrajectory,
-        CircularArraySLARTTrajectory,
-        PrioritizedTrajectory{<:CircularArraySARTTrajectory},
-        PrioritizedTrajectory{<:CircularArraySLARTTrajectory},
-    },
+    trajectory::AbstractTrajectory,
     ::AbstractPolicy,
     ::AbstractEnv,
     ::PreEpisodeStage,
@@ -113,53 +108,23 @@ function RLBase.update!(
 end
 
 function RLBase.update!(
-    trajectory::Union{
-        VectorSARTTrajectory,
-        CircularArraySARTTrajectory,
-        CircularArraySLARTTrajectory,
-        PrioritizedTrajectory{<:CircularArraySARTTrajectory},
-        PrioritizedTrajectory{<:CircularArraySLARTTrajectory},
-    },
+    trajectory::AbstractTrajectory,
     policy::AbstractPolicy,
     env::AbstractEnv,
     ::PreActStage,
     action,
 )
-    push!(trajectory[:state], state(env))
+    s = policy isa NamedPolicy ? state(env, nameof(policy)) : state(env)
+    push!(trajectory[:state], s)
     push!(trajectory[:action], action)
     if haskey(trajectory, :legal_actions_mask)
-        push!(trajectory[:legal_actions_mask], legal_action_space_mask(env))
+        lasm = policy isa NamedPolicy ? legal_action_space_mask(env, nameof(policy)) : legal_action_space_mask(env)
+        push!(trajectory[:legal_actions_mask], lasm)
     end
 end
 
 function RLBase.update!(
-    trajectory::Union{
-        VectorSARTTrajectory,
-        CircularArraySARTTrajectory,
-        CircularArraySLARTTrajectory,
-        PrioritizedTrajectory{<:CircularArraySARTTrajectory},
-        PrioritizedTrajectory{<:CircularArraySLARTTrajectory},
-    },
-    policy::NamedPolicy,
-    env::AbstractEnv,
-    ::PreActStage,
-    action,
-)
-    push!(trajectory[:state], state(env, nameof(policy)))
-    push!(trajectory[:action], action)
-    if haskey(trajectory, :legal_actions_mask)
-        push!(trajectory[:legal_actions_mask], legal_action_space_mask(env, nameof(policy)))
-    end
-end
-
-function RLBase.update!(
-    trajectory::Union{
-        VectorSARTTrajectory,
-        CircularArraySARTTrajectory,
-        CircularArraySLARTTrajectory,
-        PrioritizedTrajectory{<:CircularArraySARTTrajectory},
-        PrioritizedTrajectory{<:CircularArraySLARTTrajectory},
-    },
+    trajectory::AbstractTrajectory,
     policy::AbstractPolicy,
     env::AbstractEnv,
     ::PostEpisodeStage,
@@ -172,50 +137,22 @@ function RLBase.update!(
     # TODO: how to inject a local rng here to avoid polluting the global rng
     action = rand(action_space(env))
 
-    push!(trajectory[:state], state(env))
+    s = policy isa NamedPolicy ? state(env, nameof(policy)) : state(env)
+    push!(trajectory[:state], s)
     push!(trajectory[:action], action)
     if haskey(trajectory, :legal_actions_mask)
-        push!(trajectory[:legal_actions_mask], legal_action_space_mask(env))
+        lasm = policy isa NamedPolicy ? legal_action_space_mask(env, nameof(policy)) : legal_action_space_mask(env)
+        push!(trajectory[:legal_actions_mask], lasm)
     end
 end
 
 function RLBase.update!(
-    trajectory::Union{
-        VectorSARTTrajectory,
-        CircularArraySARTTrajectory,
-        CircularArraySLARTTrajectory,
-        PrioritizedTrajectory{<:CircularArraySARTTrajectory},
-        PrioritizedTrajectory{<:CircularArraySLARTTrajectory},
-    },
-    policy::NamedPolicy,
-    env::AbstractEnv,
-    ::PostEpisodeStage,
-)
-    action = rand(action_space(env))
-    push!(trajectory[:state], state(env, nameof(policy)))
-    push!(trajectory[:action], action)
-    if haskey(trajectory, :legal_actions_mask)
-        push!(trajectory[:legal_actions_mask], legal_action_space_mask(env, nameof(policy)))
-    end
-end
-
-
-function RLBase.update!(
     trajectory::AbstractTrajectory,
-    ::AbstractPolicy,
+    policy::AbstractPolicy,
     env::AbstractEnv,
     ::PostActStage,
 )
-    push!(trajectory[:reward], reward(env))
-    push!(trajectory[:terminal], is_terminated(env))
-end
-
-function RLBase.update!(
-    trajectory::AbstractTrajectory,
-    policy::NamedPolicy,
-    env::AbstractEnv,
-    ::PostActStage,
-)
-    push!(trajectory[:reward], reward(env, nameof(policy)))
+    r = policy isa NamedPolicy ? reward(env, nameof(policy)) : reward(env)
+    push!(trajectory[:reward], r)
     push!(trajectory[:terminal], is_terminated(env))
 end

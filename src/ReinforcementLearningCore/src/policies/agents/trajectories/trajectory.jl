@@ -10,6 +10,7 @@ export Trajectory,
     ElasticArrayTrajectory,
     ElasticSARTTrajectory,
     VectorTrajectory,
+    VectorSATrajectory,
     VectorSARTTrajectory
 
 using MacroTools: @forward
@@ -202,7 +203,17 @@ function VectorTrajectory(; kwargs...)
     end)
 end
 
-const VectorSARTTrajectory = Trajectory{<:NamedTuple{SART}}
+const VectorSARTTrajectory = Trajectory{
+    <:NamedTuple{
+        SART,
+        <:Tuple{
+            <:Vector,
+            <:Vector,
+            <:Vector,
+            <:Vector,
+        },
+    }
+}
 
 function VectorSARTTrajectory(;
     state = Int,
@@ -211,6 +222,23 @@ function VectorSARTTrajectory(;
     terminal = Bool,
 )
     VectorTrajectory(; state = state, action = action, reward = reward, terminal = terminal)
+end
+
+const VectorSATrajectory = Trajectory{
+    <:NamedTuple{
+        (:state, :action),
+        <:Tuple{
+            <:Vector,
+            <:Vector,
+        },
+    }
+}
+
+function VectorSATrajectory(;
+    state = Int,
+    action = Int,
+)
+    VectorTrajectory(; state = state, action = action)
 end
 #####
 
@@ -252,3 +280,6 @@ function Base.length(
     x = t[:terminal]
     size(x, ndims(x))
 end
+
+Base.length(t::VectorSARTTrajectory) = length(t[:terminal])
+Base.length(t::VectorSATrajectory) = length(t[:action])
