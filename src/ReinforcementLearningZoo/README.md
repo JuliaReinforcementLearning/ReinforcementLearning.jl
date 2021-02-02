@@ -27,6 +27,7 @@ This project aims to provide some implementations of the most typical reinforcem
 - SAC
 - CFR/OS-MCCFR/ES-MCCFR/DeepCFR
 - Minimax
+- Behavior Cloning
 
 If you are looking for tabular reinforcement learning algorithms, you may refer [ReinforcementLearningAnIntroduction.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl).
 
@@ -58,6 +59,7 @@ Some built-in experiments are exported to help new users to easily run benchmark
 - ``E`JuliaRL_TabularCFR_OpenSpiel(kuhn_poker)` ``
 - ``E`JuliaRL_DeepCFR_OpenSpiel(leduc_poker)` ``
 - ``E`JuliaRL_DQN_SnakeGame` ``
+- ``E`JuliaRL_BC_CartPole` ``
 - ``E`Dopamine_DQN_Atari(pong)` ``
 - ``E`Dopamine_Rainbow_Atari(pong)` ``
 - ``E`Dopamine_IQN_Atari(pong)` ``
