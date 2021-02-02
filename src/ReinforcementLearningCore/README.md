@@ -11,7 +11,7 @@ This package is the core component of [ReinforcementLearning.jl](https://github.
 ```
 ./src
 ├── core (define how policies interact with environments)
-├── extensions (patch code fore upstream packages are stored here)
+├── extensions (patch code for upstream packages are stored here)
 ├── policies (all policies are put here)
 │   ├── agents (= policy + trajectory)
 │   ├── q_based_policies
