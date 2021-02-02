@@ -73,11 +73,11 @@ function StatsBase.sample(rng::AbstractRNG, t::AbstractTrajectory, s::BatchSampl
 end
 
 function fetch!(
-    s::BatchSampler{traces},
-    t::CircularVectorSARTSATrajectory,
+    s::BatchSampler,
+    t::AbstractTrajectory,
     inds::Vector{Int},
-) where {traces}
-    batch = NamedTuple{traces}(view(t[x], inds) for x in traces)
+)
+    batch = NamedTuple{keys(t)}(view(t[x], inds) for x in keys(t))
     if isnothing(s.cache)
         s.cache = map(Flux.batch, batch)
     else
