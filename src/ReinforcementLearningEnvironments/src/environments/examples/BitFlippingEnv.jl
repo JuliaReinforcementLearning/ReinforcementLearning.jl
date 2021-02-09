@@ -6,17 +6,20 @@ In Bit Flipping Environment we have n bits. The actions are 1 to n where executi
 Refer [Hindsight Experience Replay paper](https://arxiv.org/pdf/1707.01495.pdf) for the motivation behind the environment.
 """
 
-struct BitFlippingEnv <: AbstractEnv
+mutable struct BitFlippingEnv <: AbstractEnv
     N::Int
     rng::AbstractRNG
     state::BitArray{1}
     goal_state::BitArray{1}
+    max_steps::Int
+    t::Int
 end
 
-function BitFlippingEnv(; N = 8, rng = Random.GLOBAL_RNG)
+function BitFlippingEnv(; N = 8, T = N,rng = Random.GLOBAL_RNG)
     state = bitrand(rng, N)
     goal_state = bitrand(rng, N)
-    BitFlippingEnv(N, rng, state, goal_state)
+    max_steps = T
+    BitFlippingEnv(N, rng, state, goal_state, max_steps, 0)
 end
 
 Random.seed!(env::BitFlippingEnv, s) = Random.seed!(env.rng, s)
@@ -26,6 +29,7 @@ RLBase.action_space(env::BitFlippingEnv) = Base.OneTo(env.N)
 RLBase.legal_action_space(env::BitFlippingEnv) = Base.OneTo(env.N)
 
 function (env::BitFlippingEnv)(action::Int)
+    env.t += 1
     if 1 <= action <= env.N
         env.state[action] = !env.state[action]
         nothing
@@ -39,9 +43,10 @@ RLBase.state(env::BitFlippingEnv, ::Observation) = env.state
 RLBase.state(env::BitFlippingEnv, ::GoalState) = env.goal_state
 RLBase.state_space(env::BitFlippingEnv, ::Observation) = Space(fill(false..true, env.N))
 RLBase.state_space(env::BitFlippingEnv, ::GoalState) = Space(fill(false..true, env.N))
-RLBase.is_terminated(env::BitFlippingEnv) = env.state == env.goal_state
+RLBase.is_terminated(env::BitFlippingEnv) = (env.state == env.goal_state) || (env.t >= env.max_steps)
 
 function RLBase.reset!(env::BitFlippingEnv)
+    env.t = 0
     env.state .= bitrand(env.rng, env.N)
     env.goal_state .= bitrand(env.rng, env.N)
 end
