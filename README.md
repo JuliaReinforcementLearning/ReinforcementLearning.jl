@@ -142,6 +142,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://www.cs.cmu.edu/~jlaurent/"><img src="https://avatars.githubusercontent.com/u/6361331?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jonathan Laurent</b></sub></a><br /><a href="#ideas-jonathan-laurent" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://github.com/drozzy"><img src="https://avatars.githubusercontent.com/u/140710?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Andriy Drozdyuk</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=drozzy" title="Documentation">📖</a></td>
     <td align="center"><a href="http://ritchielee.net"><img src="https://avatars.githubusercontent.com/u/7119868?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ritchie Lee</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Arcnlee" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/xiruizhao"><img src="https://avatars.githubusercontent.com/u/35286069?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Xirui Zhao</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=xiruizhao" title="Code">💻</a></td>
   </tr>
 </table>
 
