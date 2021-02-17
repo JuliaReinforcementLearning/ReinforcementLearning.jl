@@ -171,6 +171,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "xiruizhao",
+      "name": "Xirui Zhao",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35286069?v=4",
+      "profile": "https://github.com/xiruizhao",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
