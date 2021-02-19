@@ -4,14 +4,11 @@ const KUHN_POKER_CARDS = (:J, :Q, :K)
 const KUHN_POKER_CARD_COMBINATIONS =
     ((:J, :Q), (:J, :K), (:Q, :J), (:Q, :K), (:K, :J), (:K, :Q))
 const KUHN_POKER_ACTIONS = (:pass, :bet)
-const KUHN_POKER_STATES = (
-    (),
+const KUHN_POKER_STATES = ((),
     map(tuple, KUHN_POKER_CARDS)...,
     KUHN_POKER_CARD_COMBINATIONS...,
     (
-        (cards..., actions...) for cards in ((), map(tuple, KUHN_POKER_CARDS)...) for
-        actions in (
-            (),
+        (cards..., actions...) for cards in ((), map(tuple, KUHN_POKER_CARDS)...) for actions in ((),
             (:bet,),
             (:bet, :bet),
             (:bet, :pass),
@@ -19,10 +16,8 @@ const KUHN_POKER_STATES = (
             (:pass, :pass),
             (:pass, :bet),
             (:pass, :bet, :pass),
-            (:pass, :bet, :bet),
-        )
-    )...,
-)
+            (:pass, :bet, :bet),)
+    )...,)
 
 """
 ![](https://upload.wikimedia.org/wikipedia/commons/a/a9/Kuhn_poker_tree.svg)
@@ -146,15 +141,16 @@ end
 
 RLBase.current_player(env::KuhnPokerEnv) =
     if length(env.cards) < 2
-        CHANCE_PLAYER
-    elseif length(env.actions) == 0
-        1
-    elseif length(env.actions) == 1
-        2
-    elseif length(env.actions) == 2
-        1
-    else
-    end
+    CHANCE_PLAYER
+elseif length(env.actions) == 0
+    1
+elseif length(env.actions) == 1
+    2
+elseif length(env.actions) == 2
+    1
+else
+    2  # actually the game is over now
+end
 
 RLBase.NumAgentStyle(::KuhnPokerEnv) = MultiAgent(2)
 RLBase.DynamicStyle(::KuhnPokerEnv) = SEQUENTIAL

@@ -6,7 +6,7 @@ the next interaction with `env`. This function is useful because some
 environments are stateful during each `state(env)`. For example:
 `StateOverriddenEnv(StackFrames(...))`.
 """
-mutable struct StateCachedEnv{S,E<:AbstractEnv} <: AbstractEnvWrapper
+mutable struct StateCachedEnv{S,E <: AbstractEnv} <: AbstractEnvWrapper
     s::S
     env::E
     is_state_cached::Bool
@@ -28,14 +28,3 @@ function RLBase.state(env::StateCachedEnv, args...; kwargs...)
         env.s
     end
 end
-
-for f in vcat(RLBase.ENV_API, RLBase.MULTI_AGENT_ENV_API)
-    if f != :state
-        @eval RLBase.$f(x::StateCachedEnv, args...; kwargs...) =
-            $f(x.env, args...; kwargs...)
-    end
-end
-
-RLBase.state(env::StateCachedEnv, ss::RLBase.AbstractStateStyle) = state(env.env, ss)
-RLBase.state_space(env::StateCachedEnv, ss::RLBase.AbstractStateStyle) =
-    state_space(env.env, ss)
