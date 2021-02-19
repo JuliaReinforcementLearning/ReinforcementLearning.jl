@@ -9,7 +9,7 @@ Apply `f` to override `state(env)`.
     If the meaning of state space is changed after apply `f`, one should
     manually redefine the `RLBase.state_space(env::YourSpecificEnv)`.
 """
-struct StateOverriddenEnv{F,E <: AbstractEnv} <: AbstractEnvWrapper
+struct StateOverriddenEnv{F,E<:AbstractEnv} <: AbstractEnvWrapper
     env::E
     f::F
 end

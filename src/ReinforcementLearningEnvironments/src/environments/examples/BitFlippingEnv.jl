@@ -15,7 +15,7 @@ mutable struct BitFlippingEnv <: AbstractEnv
     t::Int
 end
 
-function BitFlippingEnv(; N = 8, T = N,rng = Random.GLOBAL_RNG)
+function BitFlippingEnv(; N = 8, T = N, rng = Random.GLOBAL_RNG)
     state = bitrand(rng, N)
     goal_state = bitrand(rng, N)
     max_steps = T
@@ -43,7 +43,8 @@ RLBase.state(env::BitFlippingEnv, ::Observation) = env.state
 RLBase.state(env::BitFlippingEnv, ::GoalState) = env.goal_state
 RLBase.state_space(env::BitFlippingEnv, ::Observation) = Space(fill(false..true, env.N))
 RLBase.state_space(env::BitFlippingEnv, ::GoalState) = Space(fill(false..true, env.N))
-RLBase.is_terminated(env::BitFlippingEnv) = (env.state == env.goal_state) || (env.t >= env.max_steps)
+RLBase.is_terminated(env::BitFlippingEnv) =
+    (env.state == env.goal_state) || (env.t >= env.max_steps)
 
 function RLBase.reset!(env::BitFlippingEnv)
     env.t = 0

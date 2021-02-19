@@ -1,6 +1,6 @@
 export ActionTransformedEnv
 
-struct ActionTransformedEnv{P,M,E <: AbstractEnv} <: AbstractEnvWrapper
+struct ActionTransformedEnv{P,M,E<:AbstractEnv} <: AbstractEnvWrapper
     action_space_mapping::P
     action_mapping::M
     env::E
@@ -15,8 +15,8 @@ feeding it into `env`.
 """
 function ActionTransformedEnv(
     env;
-    action_space_mapping=identity,
-    action_mapping=identity,
+    action_space_mapping = identity,
+    action_mapping = identity,
 )
     ActionTransformedEnv(action_space_mapping, action_mapping, env)
 end

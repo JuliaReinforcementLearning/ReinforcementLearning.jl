@@ -2,12 +2,12 @@ export StochasticEnv
 
 using StatsBase: sample, Weights
 
-struct StochasticEnv{E <: AbstractEnv,R} <: AbstractEnvWrapper
+struct StochasticEnv{E<:AbstractEnv,R} <: AbstractEnvWrapper
     env::E
     rng::R
 end
 
-function StochasticEnv(env; rng=Random.GLOBAL_RNG)
+function StochasticEnv(env; rng = Random.GLOBAL_RNG)
     ChanceStyle(env) === EXPLICIT_STOCHASTIC ||
         throw(ArgumentError("only environments of EXPLICIT_STOCHASTIC style is supported"))
     env = StochasticEnv(env, rng)

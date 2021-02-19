@@ -1,6 +1,6 @@
 export RewardOverriddenEnv
 
-struct RewardOverriddenEnv{F,E <: AbstractEnv} <: AbstractEnvWrapper
+struct RewardOverriddenEnv{F,E<:AbstractEnv} <: AbstractEnvWrapper
     env::E
     f::F
 end

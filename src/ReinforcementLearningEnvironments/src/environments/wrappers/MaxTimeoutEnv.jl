@@ -1,6 +1,6 @@
 export MaxTimeoutEnv
 
-mutable struct MaxTimeoutEnv{E <: AbstractEnv} <: AbstractEnvWrapper
+mutable struct MaxTimeoutEnv{E<:AbstractEnv} <: AbstractEnvWrapper
     env::E
     max_t::Int
     current_t::Int
@@ -11,7 +11,7 @@ end
 
 Force `is_terminated(env)` return `true` after `max_t` interactions.
 """
-MaxTimeoutEnv(env::E, max_t::Int; current_t::Int=1) where {E <: AbstractEnv} =
+MaxTimeoutEnv(env::E, max_t::Int; current_t::Int = 1) where {E<:AbstractEnv} =
     MaxTimeoutEnv(env, max_t, current_t)
 
 function (env::MaxTimeoutEnv)(args...; kwargs...)
