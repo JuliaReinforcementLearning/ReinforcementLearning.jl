@@ -3,7 +3,8 @@ export StopAfterStep,
     StopWhenDone,
     ComposedStopCondition,
     StopSignal,
-    StopAfterNoImprovement
+    StopAfterNoImprovement,
+    StopAfterNSeconds
 
 using ProgressMeter
 using CircularArrayBuffers: CircularArrayBuffer, isfull
@@ -185,3 +186,26 @@ Base.getindex(s::StopSignal) = s.is_stop[]
 Base.setindex!(s::StopSignal, v::Bool) = s.is_stop[] = v
 
 (s::StopSignal)(agent, env) = s[]
+
+"""
+StopAfterNSeconds
+
+parameter:
+1. time badget
+
+stop training after N seconds
+
+"""
+Base.@kwdef mutable struct StopAfterNSeconds
+    budget::Float64
+    deadline::Float64 = 0.0
+end
+function RLBase.reset!(s::StopAfterNSeconds)
+    s.deadline = time() + s.budget
+    s
+end
+function StopAfterNSeconds(budget::Float64)
+    s = StopAfterNSeconds(; budget)
+    RLBase.reset!(s)
+end
+(s::StopAfterNSeconds)(_...) = time() > s.deadline

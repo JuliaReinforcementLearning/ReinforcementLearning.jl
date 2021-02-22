@@ -16,3 +16,10 @@
 
     @test argmax(total_reward_per_episode.rewards) != patience
 end
+
+@testset "StopAfterNSeconds" begin
+    s = StopAfterNSeconds(0.01)
+    @test !s()
+    sleep(0.02)
+    @test s()
+end
