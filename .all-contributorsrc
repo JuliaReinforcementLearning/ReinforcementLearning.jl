@@ -180,6 +180,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "metab0t",
+      "name": "Nerd",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10501166?v=4",
+      "profile": "https://github.com/metab0t",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
