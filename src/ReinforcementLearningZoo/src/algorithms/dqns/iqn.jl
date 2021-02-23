@@ -112,7 +112,11 @@ function IQNLearner(;
 )
     copyto!(approximator, target_approximator)  # force sync
     if device(approximator) !== device(device_rng)
-        throw(ArgumentError("device of `approximator` doesn't match the device of `device_rng`: $(device(approximator)) !== $(device_rng)"))
+        throw(
+            ArgumentError(
+                "device of `approximator` doesn't match the device of `device_rng`: $(device(approximator)) !== $(device_rng)",
+            ),
+        )
     end
     sampler = NStepBatchSampler{traces}(;
         γ = γ,

@@ -1,6 +1,6 @@
 export policy_evaluation!, policy_improvement!, policy_iteration!
 
-using Distributions:probs
+using Distributions: probs
 
 """
     policy_evaluation!(;V, π, model, γ, θ)
@@ -15,8 +15,7 @@ using Distributions:probs
 - `γ::Float64`, discount rate.
 - `θ::Float64`, threshold to stop evaluation.
 """
-function policy_evaluation!(
-    ;
+function policy_evaluation!(;
     V::AbstractApproximator,
     π::AbstractPolicy,
     model::AbstractEnvironmentModel,
@@ -28,10 +27,8 @@ function policy_evaluation!(
         Δ = 0.0
         for s in states
             v = sum(
-                prob(π, s, a) * sum(
-                    p * (r + (1-t) * γ * V(s′))
-                    for ((r, t, s′), p) in model(s, a)
-                )
+                prob(π, s, a) *
+                sum(p * (r + (1 - t) * γ * V(s′)) for ((r, t, s′), p) in model(s, a))
                 for a in actions
             )
             δ = V(s) - v
@@ -43,8 +40,7 @@ function policy_evaluation!(
     V
 end
 
-function policy_improvement!(
-    ;
+function policy_improvement!(;
     V::AbstractApproximator,
     π::AbstractPolicy,
     model::AbstractEnvironmentModel,
@@ -54,14 +50,10 @@ function policy_improvement!(
     is_policy_stable = true
     for s in states
         old_a = π(s)
-        best_action_inds = find_all_max(
-            [
-                sum(
-                    p * (r + (1-t)* γ * V(s′))
-                    for ((r, t, s′), p) in model(s, a,)
-                ) for a in actions
-            ]
-        )[2]
+        best_action_inds = find_all_max([
+            sum(p * (r + (1 - t) * γ * V(s′)) for ((r, t, s′), p) in model(s, a)) for
+            a in actions
+        ])[2]
         new_a = rand(best_action_inds)  # break tie
         if new_a != old_a
             update!(π, s => new_a)
@@ -71,8 +63,7 @@ function policy_improvement!(
     is_policy_stable
 end
 
-function policy_iteration!(
-    ;
+function policy_iteration!(;
     V::AbstractApproximator,
     π::AbstractPolicy,
     model::AbstractEnvironmentModel,
@@ -80,15 +71,14 @@ function policy_iteration!(
     θ::Float64 = 1e-4,
     max_iter = typemax(Int),
 )
-    for i = 1:max_iter
+    for i in 1:max_iter
         policy_evaluation!(; V = V, π = π, model = model, γ = γ, θ = θ)
         policy_improvement!(; V = V, π = π, model = model, γ = γ) && return i
     end
     return max_iter
 end
 
-function value_iteration!(
-    ;
+function value_iteration!(;
     V::AbstractApproximator,
     model::AbstractEnvironmentModel,
     γ::Float64 = 0.9,
@@ -96,10 +86,13 @@ function value_iteration!(
     max_iter = typemax(Int),
 )
     states, actions = state_space(model), action_space(model)
-    for i = 1:max_iter
+    for i in 1:max_iter
         Δ = 0.0
         for s in states
-            v = maximum(sum(p * (r + (1-t) * γ * V(s′)) for ((r, t, s′), p) in model(s, a)) for a in actions)
+            v = maximum(
+                sum(p * (r + (1 - t) * γ * V(s′)) for ((r, t, s′), p) in model(s, a))
+                for a in actions
+            )
             δ = V(s) - v
             update!(V, s => δ)
             Δ = max(Δ, abs(δ))

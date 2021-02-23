@@ -1,9 +1,9 @@
 export MonteCarloLearner,
-       FIRST_VISIT,
-       EVERY_VISIT,
-       NO_SAMPLING,
-       ORDINARY_IMPORTANCE_SAMPLING,
-       WEIGHTED_IMPORTANCE_SAMPLING
+    FIRST_VISIT,
+    EVERY_VISIT,
+    NO_SAMPLING,
+    ORDINARY_IMPORTANCE_SAMPLING,
+    WEIGHTED_IMPORTANCE_SAMPLING
 
 using StatsBase: countmap
 
@@ -45,11 +45,15 @@ end
 (learner::MonteCarloLearner)(s) = learner.approximator(s)
 (learner::MonteCarloLearner)(s, a) = learner.approximator(s, a)
 
-function RLBase.update!(::VBasedPolicy{<:MonteCarloLearner}, ::AbstractTrajectory)
-end
+function RLBase.update!(::VBasedPolicy{<:MonteCarloLearner}, ::AbstractTrajectory) end
 
 "Only update at the end of an episode"
-function RLBase.update!(p::VBasedPolicy{<:MonteCarloLearner}, t::AbstractTrajectory, ::AbstractEnv, ::PostEpisodeStage)
+function RLBase.update!(
+    p::VBasedPolicy{<:MonteCarloLearner},
+    t::AbstractTrajectory,
+    ::AbstractEnv,
+    ::PostEpisodeStage,
+)
     update!(p.learner, t)
 end
 
@@ -57,15 +61,14 @@ function RLBase.update!(
     L::MonteCarloLearner,
     t::AbstractTrajectory,
     e::AbstractEnv,
-    s::PreActStage
-)
-end
+    s::PreActStage,
+) end
 
 function RLBase.update!(
     L::MonteCarloLearner,
     t::AbstractTrajectory,
     e::AbstractEnv,
-    s::PostEpisodeStage
+    s::PostEpisodeStage,
 )
     update!(L, t)
 end
@@ -76,9 +79,10 @@ function RLBase.update!(
     ::Union{
         VBasedPolicy{<:MonteCarloLearner},
         QBasedPolicy{<:MonteCarloLearner},
-        NamedPolicy{<:VBasedPolicy{<:MonteCarloLearner}}},
+        NamedPolicy{<:VBasedPolicy{<:MonteCarloLearner}},
+    },
     ::AbstractEnv,
-    ::PreEpisodeStage
+    ::PreEpisodeStage,
 )
     empty!(t)
 end
@@ -92,7 +96,7 @@ function _update!(
     ::Union{TabularVApproximator,LinearVApproximator},
     ::NoSampling,
     L::MonteCarloLearner,
-    t::AbstractTrajectory
+    t::AbstractTrajectory,
 )
     S, R = t[:state], t[:reward]
     V, G, γ = L.approximator, 0.0, L.γ
@@ -132,7 +136,7 @@ function _update!(
     t::AbstractTrajectory,
 )
     S, A, R = t[:state], t[:action], t[:reward]
-    γ, Q, G = L.γ, L.approximator, 0.
+    γ, Q, G = L.γ, L.approximator, 0.0
     for i in length(R):-1:1
         s, a, r = S[i], A[i], R[i]
         G = γ * G + R[i]
@@ -148,10 +152,10 @@ function _update!(
     t::AbstractTrajectory,
 )
     S, A, R = t[:state], t[:action], t[:reward]
-    γ, Q, G = L.γ, L.approximator, 0.
+    γ, Q, G = L.γ, L.approximator, 0.0
     seen_pairs = countmap(zip(@view(S[1:end-1]), @view(A[1:end-1])))
 
-    for i = length(R):-1:1
+    for i in length(R):-1:1
         s, a, r = S[i], A[i], R[i]
         pair = (s, a)
         G = γ * G + r
@@ -165,7 +169,10 @@ end
 
 function _update!(
     ::FirstVisit,
-    ::Tuple{<:Union{TabularVApproximator,LinearVApproximator}, <:Union{TabularVApproximator,LinearVApproximator}},
+    ::Tuple{
+        <:Union{TabularVApproximator,LinearVApproximator},
+        <:Union{TabularVApproximator,LinearVApproximator},
+    },
     ::OrdinaryImportanceSampling,
     L::MonteCarloLearner,
     t::AbstractTrajectory,
@@ -175,7 +182,7 @@ function _update!(
     seen_states = countmap(@view(S[1:end-1]))
 
     # @info "debug" S R W seen_states G V t[:action]
-    for i = length(R):-1:1
+    for i in length(R):-1:1
         s, r = S[i], R[i]
         g = γ * g + r
         ρ *= W[i]
@@ -193,13 +200,13 @@ function _update!(
     ::Tuple,
     ::WeightedImportanceSampling,
     L::MonteCarloLearner,
-    t::AbstractTrajectory
+    t::AbstractTrajectory,
 )
-    S, R, W = t[:state],  t[:reward], t[:weight]
-    (V, G, Ρ), g, γ,ρ = L.approximator, 0.0, L.γ, 1.0
+    S, R, W = t[:state], t[:reward], t[:weight]
+    (V, G, Ρ), g, γ, ρ = L.approximator, 0.0, L.γ, 1.0
     seen_states = countmap(@view(S[1:end-1]))
 
-    for i = length(R):-1:1
+    for i in length(R):-1:1
         s, r = S[i], R[i]
         g = γ * g + r
         ρ *= W[i]

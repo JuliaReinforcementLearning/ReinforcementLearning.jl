@@ -1,7 +1,7 @@
 using .ArcadeLearningEnvironment
 using .ReinforcementLearningEnvironments
 using BSON
-using Flux:Chain
+using Flux: Chain
 
 function atari_env_factory(
     name,
@@ -10,31 +10,33 @@ function atari_env_factory(
     max_episode_steps = 100_000;
     seed = nothing,
     repeat_action_probability = 0.25,
-    n_replica = 1
+    n_replica = 1,
 )
-    init(seed) = AtariEnv(;
-        name = string(name),
-        grayscale_obs = true,
-        noop_max = 30,
-        frame_skip = 4,
-        terminal_on_life_loss = false,
-        repeat_action_probability = repeat_action_probability,
-        max_num_frames_per_episode = n_frames * max_episode_steps,
-        color_averaging = false,
-        full_action_space = false,
-        seed = seed,
-    ) |>
-    env -> StateOverriddenEnv(
-        env,
-        Chain(ResizeImage(state_size...), StackFrames(state_size..., n_frames))
-    ) |>
-    StateCachedEnv |>
-    env -> RewardOverriddenEnv(env, r -> clamp(r, -1, 1))
+    init(seed) =
+        AtariEnv(;
+            name = string(name),
+            grayscale_obs = true,
+            noop_max = 30,
+            frame_skip = 4,
+            terminal_on_life_loss = false,
+            repeat_action_probability = repeat_action_probability,
+            max_num_frames_per_episode = n_frames * max_episode_steps,
+            color_averaging = false,
+            full_action_space = false,
+            seed = seed,
+        ) |>
+        env ->
+            StateOverriddenEnv(
+                env,
+                Chain(ResizeImage(state_size...), StackFrames(state_size..., n_frames)),
+            ) |>
+            StateCachedEnv |>
+            env -> RewardOverriddenEnv(env, r -> clamp(r, -1, 1))
 
     if n_replica == 1
         init(seed)
     else
-        envs = [init(hash(seed+i)) for i in 1:n_replica]
+        envs = [init(hash(seed + i)) for i in 1:n_replica]
         states = Flux.batch(state.(envs))
         rewards = reward.(envs)
         terminals = is_terminated.(envs)
@@ -50,7 +52,11 @@ Base.@kwdef mutable struct TotalOriginalRewardPerEpisode <: AbstractHook
     reward::Float64 = 0.0
 end
 
-function (hook::TotalOriginalRewardPerEpisode)(::PostActStage, agent, env::RewardOverriddenEnv)
+function (hook::TotalOriginalRewardPerEpisode)(
+    ::PostActStage,
+    agent,
+    env::RewardOverriddenEnv,
+)
     hook.reward += reward(env.env)
 end
 
@@ -69,7 +75,11 @@ function TotalBatchOriginalRewardPerEpisode(batch_size::Int)
     TotalBatchOriginalRewardPerEpisode([Float64[] for _ in 1:batch_size], zeros(batch_size))
 end
 
-function (hook::TotalBatchOriginalRewardPerEpisode)(::PostActStage, agent, env::MultiThreadEnv{<:RewardOverriddenEnv})
+function (hook::TotalBatchOriginalRewardPerEpisode)(
+    ::PostActStage,
+    agent,
+    env::MultiThreadEnv{<:RewardOverriddenEnv},
+)
     for (i, e) in enumerate(env.envs)
         hook.reward[i] += reward(e.env)
         if is_terminated(e)

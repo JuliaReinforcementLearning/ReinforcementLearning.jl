@@ -15,11 +15,7 @@ end
 - `env`, the environment to handle.
 - `best_responder`, the player to choose best response action.
 """
-function BestResponsePolicy(
-    policy,
-    env,
-    best_responder;
-)
+function BestResponsePolicy(policy, env, best_responder;)
     S = eltype(state_space(env))
     A = eltype(action_space(env))
     E = typeof(env)

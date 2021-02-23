@@ -15,6 +15,6 @@ struct EnrichedAction{A,M}
     meta::M
 end
 
-EnrichedAction(action;kwargs...) = EnrichedAction(action, kwargs.data)
+EnrichedAction(action; kwargs...) = EnrichedAction(action, kwargs.data)
 
 (env::AbstractEnv)(action::EnrichedAction) = env(action.action)

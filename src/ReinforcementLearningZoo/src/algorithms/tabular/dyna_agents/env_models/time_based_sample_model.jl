@@ -7,7 +7,7 @@ import StatsBase: sample
     TimeBasedSamplingModel(n_actions::Int, κ::Float64 = 1e-4)
 """
 Base.@kwdef mutable struct TimeBasedSamplingModel{R} <: AbstractEnvironmentModel
-    experiences::Dict{ Any, Dict{Any,Any}} = Dict{Any, Dict{Any, Any}}()
+    experiences::Dict{Any,Dict{Any,Any}} = Dict{Any,Dict{Any,Any}}()
     n_actions::Int
     κ::Float64 = 1e-4
     t::Int = 0
@@ -20,7 +20,7 @@ function RLBase.update!(
     t::AbstractTrajectory,
     ::AbstractPolicy,
     ::AbstractEnv,
-    ::Union{PreActStage, PostEpisodeStage}
+    ::Union{PreActStage,PostEpisodeStage},
 )
     if length(t[:terminal]) > 0
         transition = (
@@ -28,7 +28,7 @@ function RLBase.update!(
             t[:action][end-1],
             t[:reward][end],
             t[:terminal][end],
-            t[:state][end]
+            t[:state][end],
         )
         update!(m, transition)
     end

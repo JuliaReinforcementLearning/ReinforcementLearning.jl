@@ -39,7 +39,12 @@ function (learner::MACLearner)(env)
     learner.approximator.actor(s) |> vec |> send_to_host
 end
 
-function RLBase.update!(learner::MACLearner, t::CircularArraySARTTrajectory, ::AbstractEnv, ::PreActStage)
+function RLBase.update!(
+    learner::MACLearner,
+    t::CircularArraySARTTrajectory,
+    ::AbstractEnv,
+    ::PreActStage,
+)
     length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
     learner.update_step += 1
     if learner.update_step % learner.update_freq == 0
@@ -112,10 +117,14 @@ function _update!(learner::MACLearner, t::CircularArraySARTTrajectory)
             next_state_values = AC.critic(next_state_flattened)
             target_action_values =
                 vec(rewards_flattened) .+
-                γ * vec(Zygote.dropgrad(sum(
-                    next_state_values .* softmax(AC.actor(next_state_flattened)),
-                    dims = 1,
-                )))
+                γ * vec(
+                    Zygote.dropgrad(
+                        sum(
+                            next_state_values .* softmax(AC.actor(next_state_flattened)),
+                            dims = 1,
+                        ),
+                    ),
+                )
             critic_loss =
                 mean((vec(target_action_values) .- vec(action_values[actions])) .^ 2)
         end

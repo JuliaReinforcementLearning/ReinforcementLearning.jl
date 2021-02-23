@@ -9,15 +9,27 @@ end
 
 const VectorWSARTTrajectory = Trajectory{<:NamedTuple{(:weight, SART...)}}
 
-function VectorWSARTTrajectory(;weight=Float64, state=Int, action=Int, reward=Float32, terminal=Bool)
-    VectorTrajectory(;weight=Float64, state=state, action=action, reward=reward, terminal=terminal)
+function VectorWSARTTrajectory(;
+    weight = Float64,
+    state = Int,
+    action = Int,
+    reward = Float32,
+    terminal = Bool,
+)
+    VectorTrajectory(;
+        weight = Float64,
+        state = state,
+        action = action,
+        reward = reward,
+        terminal = terminal,
+    )
 end
 
 function RLBase.update!(
     p::OffPolicy,
     t::VectorWSARTTrajectory,
     e::AbstractEnv,
-    s::AbstractStage
+    s::AbstractStage,
 )
     update!(p.π_target, t, e, s)
 end
@@ -27,7 +39,7 @@ function RLBase.update!(
     p::OffPolicy,
     env::AbstractEnv,
     ::PreActStage,
-    a
+    a,
 )
     s = state(env)
     push!(t[:state], s)
@@ -39,7 +51,10 @@ end
 
 function RLBase.update!(
     t::VectorWSARTTrajectory,
-    p::Union{OffPolicy{<:QBasedPolicy{<:TDLearner}}, OffPolicy{<:VBasedPolicy{<:MonteCarloLearner}}},
+    p::Union{
+        OffPolicy{<:QBasedPolicy{<:TDLearner}},
+        OffPolicy{<:VBasedPolicy{<:MonteCarloLearner}},
+    },
     env::AbstractEnv,
     s::PreEpisodeStage,
 )
@@ -48,7 +63,10 @@ end
 
 function RLBase.update!(
     t::VectorWSARTTrajectory,
-    p::Union{OffPolicy{<:QBasedPolicy{<:TDLearner}}, OffPolicy{<:VBasedPolicy{<:MonteCarloLearner}}},
+    p::Union{
+        OffPolicy{<:QBasedPolicy{<:TDLearner}},
+        OffPolicy{<:VBasedPolicy{<:MonteCarloLearner}},
+    },
     env::AbstractEnv,
     s::PostEpisodeStage,
 )

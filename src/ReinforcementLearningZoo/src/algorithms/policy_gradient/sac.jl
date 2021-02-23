@@ -125,7 +125,12 @@ function evaluate(p::SACPolicy, state)
     return tanh.(z), logp_π
 end
 
-function RLBase.update!(p::SACPolicy, traj::CircularArraySARTTrajectory, ::AbstractEnv, ::PreActStage)
+function RLBase.update!(
+    p::SACPolicy,
+    traj::CircularArraySARTTrajectory,
+    ::AbstractEnv,
+    ::PreActStage,
+)
     length(traj) > p.update_after || return
     p.step % p.update_every == 0 || return
     inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))

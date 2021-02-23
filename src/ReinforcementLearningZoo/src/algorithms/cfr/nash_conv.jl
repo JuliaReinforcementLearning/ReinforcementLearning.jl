@@ -31,8 +31,8 @@ function nash_conv(π, env; is_reduce = true, kw...)
     RLBase.reset!(e)
 
     σ′ = [
-        best_response_value(BestResponsePolicy(π, e, i; kw...), e)
-        for i in players(e) if i != chance_player(e)
+        best_response_value(BestResponsePolicy(π, e, i; kw...), e) for
+        i in players(e) if i != chance_player(e)
     ]
 
     σ = expected_policy_values(π, e)

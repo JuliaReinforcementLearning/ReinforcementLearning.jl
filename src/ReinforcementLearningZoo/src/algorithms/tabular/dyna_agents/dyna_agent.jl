@@ -1,6 +1,6 @@
 export DynaAgent
 
-Base.@kwdef struct DynaAgent{P, M,T} <: AbstractPolicy
+Base.@kwdef struct DynaAgent{P,M,T} <: AbstractPolicy
     policy::P
     model::M
     trajectory::T
@@ -37,9 +37,8 @@ function RLBase.update!(
     ::AbstractTrajectory,
     ::AbstractPolicy,
     ::AbstractEnv,
-    ::AbstractStage
-)
-end
+    ::AbstractStage,
+) end
 
 # 3. policy learning
 # By default we do nothing
@@ -48,6 +47,5 @@ function RLBase.update!(
     ::AbstractEnvironmentModel,
     ::AbstractTrajectory,
     ::AbstractEnv,
-    ::AbstractStage
-)
-end
+    ::AbstractStage,
+) end

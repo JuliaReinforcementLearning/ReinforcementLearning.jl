@@ -10,7 +10,7 @@ Randomly generate a transition of (s, a, r, t, s′) based on previous experienc
 in each sampling.
 """
 Base.@kwdef mutable struct ExperienceBasedSamplingModel{R} <: AbstractEnvironmentModel
-    experiences::Dict{Any, Dict{Any,Any}} = Dict{Any, Dict{Any, Any}}()
+    experiences::Dict{Any,Dict{Any,Any}} = Dict{Any,Dict{Any,Any}}()
     sample_count::Int = 0
     rng::R = Random.GLOBAL_RNG
 end
@@ -20,7 +20,7 @@ function RLBase.update!(
     t::AbstractTrajectory,
     ::AbstractPolicy,
     ::AbstractEnv,
-    ::Union{PreActStage, PostEpisodeStage}
+    ::Union{PreActStage,PostEpisodeStage},
 )
     if length(t[:terminal]) > 0
         transition = (
@@ -28,7 +28,7 @@ function RLBase.update!(
             t[:action][end-1],
             t[:reward][end],
             t[:terminal][end],
-            t[:state][end]
+            t[:state][end],
         )
         update!(m, transition)
     end

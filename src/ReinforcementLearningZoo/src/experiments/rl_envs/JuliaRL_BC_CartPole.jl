@@ -1,9 +1,9 @@
 Base.@kwdef struct RecordStateAction <: AbstractHook
-    records::Any = VectorSATrajectory(;state=Vector{Float32})
+    records::Any = VectorSATrajectory(; state = Vector{Float32})
 end
 
 function (h::RecordStateAction)(::PreActStage, policy, env, action)
-    push!(h.records;state=copy(state(env)), action=action)
+    push!(h.records; state = copy(state(env)), action = action)
 end
 
 function RLCore.Experiment(
@@ -52,14 +52,14 @@ function RLCore.Experiment(
     run(agent, env, stop_condition, hook)
 
     bc = BehaviorCloningPolicy(
-        approximator =  NeuralNetworkApproximator(
+        approximator = NeuralNetworkApproximator(
             model = Chain(
                 Dense(ns, 128, relu; initW = glorot_uniform(rng)),
                 Dense(128, 128, relu; initW = glorot_uniform(rng)),
                 Dense(128, na; initW = glorot_uniform(rng)),
             ) |> cpu,
             optimizer = ADAM(),
-        )
+        ),
     )
 
     s = BatchSampler{(:state, :action)}(32;)
@@ -76,10 +76,7 @@ function RLCore.Experiment(
     `JuliaRL_BasicDQN_CartPole` to train a behavior policy.
     """
 
-    hook = ComposedHook(
-        TotalRewardPerEpisode(),
-        TimePerStep(),
-    )
+    hook = ComposedHook(TotalRewardPerEpisode(), TimePerStep())
 
     Experiment(bc, env, StopAfterEpisode(100), hook, description)
 end

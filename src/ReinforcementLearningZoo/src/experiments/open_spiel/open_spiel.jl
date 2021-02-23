@@ -6,10 +6,7 @@ function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:Minimax}, ::Val{:OpenSpiel}, 
         NamedPolicy(0 => MinimaxPolicy()),
         NamedPolicy(1 => MinimaxPolicy()),
     )
-    hooks = MultiAgentHook(
-        0 => TotalRewardPerEpisode(),
-        1 => TotalRewardPerEpisode()
-    )
+    hooks = MultiAgentHook(0 => TotalRewardPerEpisode(), 1 => TotalRewardPerEpisode())
     description = """
       # Play `$game` in OpenSpiel with Minimax
       """
@@ -26,7 +23,7 @@ function RLCore.Experiment(
 )
     env = OpenSpielEnv(game)
     rng = StableRNG(seed)
-    π = TabularCFRPolicy(;rng=rng)
+    π = TabularCFRPolicy(; rng = rng)
 
     description = """
         # Play `$game` in OpenSpiel with TabularCFRPolicy

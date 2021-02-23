@@ -13,7 +13,8 @@ end
 
 const LinearVApproximator = LinearApproximator{1}
 
-LinearVApproximator(;n, init=0., opt=Descent(1.0)) = LinearApproximator(fill(init, n), opt)
+LinearVApproximator(; n, init = 0.0, opt = Descent(1.0)) =
+    LinearApproximator(fill(init, n), opt)
 
 (V::LinearVApproximator)(s) = dot(s, V.weights)
 
@@ -30,7 +31,8 @@ end
 
 const LinearQApproximator = LinearApproximator{2}
 
-LinearQApproximator(;n_state, n_action, init=0., opt=Descent(1.0)) = LinearApproximator(fill(init, n_state, n_action), opt)
+LinearQApproximator(; n_state, n_action, init = 0.0, opt = Descent(1.0)) =
+    LinearApproximator(fill(init, n_state, n_action), opt)
 
 (Q::LinearQApproximator)(s) = [dot(s, c) for c in eachcol(Q.weights)]
 (Q::LinearQApproximator)(s, a) = dot(s, @view(Q.weights[:, a]))

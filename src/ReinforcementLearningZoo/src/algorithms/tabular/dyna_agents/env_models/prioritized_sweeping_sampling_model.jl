@@ -14,14 +14,13 @@ mutable struct PrioritizedSweepingSamplingModel <: AbstractEnvironmentModel
     predecessors::Dict{Any,Set{Tuple{Any,Any,Float64,Bool}}}
     θ::Float64
     sample_count::Int
-    PrioritizedSweepingSamplingModel(θ::Float64 = 1e-4) =
-        new(
-            Dict{Tuple{Any,Any},Tuple{Float64,Bool,Any}}(),
-            PriorityQueue{Tuple{Any,Any},Float64}(Base.Order.Reverse),
-            Dict{Any,Set{Tuple{Any,Any,Float64,Bool}}}(),
-            θ,
-            0,
-        )
+    PrioritizedSweepingSamplingModel(θ::Float64 = 1e-4) = new(
+        Dict{Tuple{Any,Any},Tuple{Float64,Bool,Any}}(),
+        PriorityQueue{Tuple{Any,Any},Float64}(Base.Order.Reverse),
+        Dict{Any,Set{Tuple{Any,Any,Float64,Bool}}}(),
+        θ,
+        0,
+    )
 end
 
 function RLBase.update!(
@@ -29,7 +28,7 @@ function RLBase.update!(
     t::AbstractTrajectory,
     p::AbstractPolicy,
     ::AbstractEnv,
-    ::Union{PreActStage, PostEpisodeStage}
+    ::Union{PreActStage,PostEpisodeStage},
 )
     if length(t[:terminal]) > 0
         transition = (
@@ -37,7 +36,7 @@ function RLBase.update!(
             t[:action][end-1],
             t[:reward][end],
             t[:terminal][end],
-            t[:state][end]
+            t[:state][end],
         )
         pri = RLBase.priority(p, transition)
         update!(m, (transition..., pri))

@@ -25,7 +25,7 @@ function RLCore.Experiment(
         N_FRAMES;
         repeat_action_probability = 0,
         seed = seed,
-        n_replica = N_ENV
+        n_replica = N_ENV,
     )
     N_ACTIONS = length(action_space(env[1]))
     INIT_CLIP_RANGE = 0.1f0
@@ -101,15 +101,15 @@ function RLCore.Experiment(
         DoEveryNStep() do t, agent, env
             with_logger(lg) do
                 rewards = [
-                    total_batch_reward_per_episode.rewards[i][end]
-                    for i in 1:length(env) if is_terminated(env[i])
+                    total_batch_reward_per_episode.rewards[i][end] for
+                    i in 1:length(env) if is_terminated(env[i])
                 ]
                 if length(rewards) > 0
                     @info "training" rewards = mean(rewards) log_step_increment = 0
                 end
                 steps = [
-                    batch_steps_per_episode.steps[i][end]
-                    for i in 1:length(env) if is_terminated(env[i])
+                    batch_steps_per_episode.steps[i][end] for
+                    i in 1:length(env) if is_terminated(env[i])
                 ]
                 if length(steps) > 0
                     @info "training" steps = mean(steps) log_step_increment = 0
@@ -129,7 +129,7 @@ function RLCore.Experiment(
                     MAX_EPISODE_STEPS_EVAL;
                     repeat_action_probability = 0,
                     seed = seed,
-                    n_replica = 4
+                    n_replica = 4,
                 ),
                 StopAfterStep(27_000; is_show_progress = false),
                 h,

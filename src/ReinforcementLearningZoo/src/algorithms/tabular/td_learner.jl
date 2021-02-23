@@ -1,7 +1,7 @@
 export TDLearner
 
-using LinearAlgebra:dot
-using Distributions:pdf
+using LinearAlgebra: dot
+using Distributions: pdf
 
 Base.@kwdef struct TDLearner{A} <: AbstractLearner
     approximator::A
@@ -20,7 +20,7 @@ function RLBase.update!(
     p::QBasedPolicy{<:TDLearner},
     t::AbstractTrajectory,
     e::AbstractEnv,
-    s::AbstractStage
+    s::AbstractStage,
 )
     if p.learner.method === :ExpectedSARSA && s === PRE_ACT_STAGE
         # A special case
@@ -35,12 +35,22 @@ function RLBase.update!(L::TDLearner, t::AbstractTrajectory, ::AbstractEnv, s::P
     _update!(L, L.approximator, Val(L.method), t, s)
 end
 
-function RLBase.update!(L::TDLearner, t::AbstractTrajectory, ::AbstractEnv, s::PostEpisodeStage)
+function RLBase.update!(
+    L::TDLearner,
+    t::AbstractTrajectory,
+    ::AbstractEnv,
+    s::PostEpisodeStage,
+)
     _update!(L, L.approximator, Val(L.method), t, s)
 end
 
 # for ExpectedSARSA
-function RLBase.update!(L::TDLearner, t::Tuple, ::AbstractEnv, s::Union{PreActStage, PostEpisodeStage})
+function RLBase.update!(
+    L::TDLearner,
+    t::Tuple,
+    ::AbstractEnv,
+    s::Union{PreActStage,PostEpisodeStage},
+)
     _update!(L, L.approximator, Val(L.method), t, s)
 end
 
@@ -48,9 +58,13 @@ end
 
 function RLBase.update!(
     t::AbstractTrajectory,
-    ::Union{QBasedPolicy{<:TDLearner}, NamedPolicy{<:QBasedPolicy{<:TDLearner}}, VBasedPolicy{<:TDLearner}},
+    ::Union{
+        QBasedPolicy{<:TDLearner},
+        NamedPolicy{<:QBasedPolicy{<:TDLearner}},
+        VBasedPolicy{<:TDLearner},
+    },
     ::AbstractEnv,
-    ::PreEpisodeStage
+    ::PreEpisodeStage,
 )
     empty!(t)
 end
@@ -59,18 +73,18 @@ end
 
 function _update!(
     L::TDLearner,
-    ::Union{TabularQApproximator, LinearQApproximator},
-    ::Union{Val{:SARSA}, Val{:ExpectedSARSA}, Val{:SARS}},
+    ::Union{TabularQApproximator,LinearQApproximator},
+    ::Union{Val{:SARSA},Val{:ExpectedSARSA},Val{:SARS}},
     t::Trajectory,
-    ::PostEpisodeStage
+    ::PostEpisodeStage,
 )
     S, A, R, T = [t[x] for x in SART]
     n, γ, Q = L.n, L.γ, L.approximator
-    G = 0.
-    for i in 1:min(n+1, length(R))
+    G = 0.0
+    for i in 1:min(n + 1, length(R))
         G = R[end-i+1] + γ * G
         s, a = S[end-i], A[end-i]
-        update!(Q, (s,a) => Q(s, a) - G)
+        update!(Q, (s, a) => Q(s, a) - G)
     end
 end
 
@@ -79,15 +93,15 @@ function _update!(
     ::Union{TabularQApproximator,LinearQApproximator},
     ::Val{:SARSA},
     t::Trajectory,
-    ::PreActStage
+    ::PreActStage,
 )
     S, A, R, T = [t[x] for x in SART]
     n, γ, Q = L.n, L.γ, L.approximator
 
-    if length(R) >= n+1
+    if length(R) >= n + 1
         s, a, s′, a′ = S[end-n-1], A[end-n-1], S[end], A[end]
-        G = discount_rewards_reduced(@view(R[end-n:end]), γ) + γ^(n+1) * Q(s′, a′)
-        update!(Q, (s,a) => Q(s ,a) - G)
+        G = discount_rewards_reduced(@view(R[end-n:end]), γ) + γ^(n + 1) * Q(s′, a′)
+        update!(Q, (s, a) => Q(s, a) - G)
     end
 end
 
@@ -96,7 +110,7 @@ function _update!(
     ::TabularQApproximator,
     ::Val{:ExpectedSARSA},
     experience,
-    ::PreActStage
+    ::PreActStage,
 )
     t, p = experience
 
@@ -106,19 +120,19 @@ function _update!(
 
     n, γ, Q = L.n, L.γ, L.approximator
 
-    if length(R) >= n+1
+    if length(R) >= n + 1
         s, a, s′ = S[end-n-1], A[end-n-1], S[end]
-        G = discount_rewards_reduced(@view(R[end-n:end]), γ) + γ^(n+1) * dot(Q(s′), p)
-        update!(Q, (s,a) => Q(s ,a) - G)
+        G = discount_rewards_reduced(@view(R[end-n:end]), γ) + γ^(n + 1) * dot(Q(s′), p)
+        update!(Q, (s, a) => Q(s, a) - G)
     end
 end
 
 function _update!(
     L::TDLearner,
-    ::Union{TabularQApproximator, LinearQApproximator},
+    ::Union{TabularQApproximator,LinearQApproximator},
     ::Val{:SARS},
     t::AbstractTrajectory,
-    ::PreActStage
+    ::PreActStage,
 )
     S = t[:state]
     A = t[:action]
@@ -126,25 +140,25 @@ function _update!(
 
     n, γ, Q = L.n, L.γ, L.approximator
 
-    if length(R) >= n+1
+    if length(R) >= n + 1
         s, a, s′ = S[end-n-1], A[end-n-1], S[end]
-        G = discount_rewards_reduced(@view(R[end-n:end]), γ) + γ^(n+1) * maximum(Q(s′))
-        update!(Q, (s,a) => Q(s ,a) - G)
+        G = discount_rewards_reduced(@view(R[end-n:end]), γ) + γ^(n + 1) * maximum(Q(s′))
+        update!(Q, (s, a) => Q(s, a) - G)
     end
 end
 
 function _update!(
     L::TDLearner,
-    ::Union{TabularVApproximator, LinearVApproximator},
+    ::Union{TabularVApproximator,LinearVApproximator},
     ::Val{:SRS},
     t::Trajectory,
-    ::PostEpisodeStage
+    ::PostEpisodeStage,
 )
     S, R = t[:state], t[:reward]
     n, γ, V = L.n, L.γ, L.approximator
-    G = 0.
+    G = 0.0
     w = 1.0
-    for i in 1:min(n+1, length(R))
+    for i in 1:min(n + 1, length(R))
         G = R[end-i+1] + γ * G
         s = S[end-i]
         if haskey(t, :weight)
@@ -156,18 +170,18 @@ end
 
 function _update!(
     L::TDLearner,
-    ::Union{TabularVApproximator, LinearVApproximator},
+    ::Union{TabularVApproximator,LinearVApproximator},
     ::Val{:SRS},
     t::AbstractTrajectory,
-    ::PreActStage
+    ::PreActStage,
 )
     S = t[:state]
     R = t[:reward]
 
     n, γ, V = L.n, L.γ, L.approximator
-    if length(R) >= n+1
+    if length(R) >= n + 1
         s, s′ = S[end-n-1], S[end]
-        G = discount_rewards_reduced(@view(R[end-n:end]), γ) + γ^(n+1) * V(s′)
+        G = discount_rewards_reduced(@view(R[end-n:end]), γ) + γ^(n + 1) * V(s′)
         if haskey(t, :weight)
             W = t[:weight]
             @views w = reduce(*, W[end-n-1:end-1])
@@ -184,18 +198,18 @@ end
 
 function RLBase.update!(
     p::QBasedPolicy{<:TDLearner},
-    m::Union{ExperienceBasedSamplingModel, TimeBasedSamplingModel},
+    m::Union{ExperienceBasedSamplingModel,TimeBasedSamplingModel},
     ::AbstractTrajectory,
     env::AbstractEnv,
-    ::Union{PreActStage, PostEpisodeStage}
+    ::Union{PreActStage,PostEpisodeStage},
 )
     if p.learner.method == :SARS
         transition = sample(m)
         if !isnothing(transition)
             s, a, r, t, s′ = transition
             traj = VectorSARTTrajectory()
-            push!(traj; state=s, action=a, reward=r, terminal=t)
-            push!(traj; state=s′, action=a)  # here a is a dummy one
+            push!(traj; state = s, action = a, reward = r, terminal = t)
+            push!(traj; state = s′, action = a)  # here a is a dummy one
             update!(p.learner, traj, env, t ? POST_EPISODE_STAGE : PRE_ACT_STAGE)
         end
     else
@@ -208,17 +222,17 @@ function RLBase.update!(
     m::PrioritizedSweepingSamplingModel,
     ::AbstractTrajectory,
     env::AbstractEnv,
-    ::Union{PreActStage, PostEpisodeStage}
+    ::Union{PreActStage,PostEpisodeStage},
 )
     if p.learner.method == :SARS
         transition = sample(m)
         if !isnothing(transition)
             s, a, r, t, s′ = transition
             traj = VectorSARTTrajectory()
-            push!(traj; state=s, action=a, reward=r, terminal=t)
-            push!(traj; state=s′, action=a)  # here a is a dummy one
+            push!(traj; state = s, action = a, reward = r, terminal = t)
+            push!(traj; state = s′, action = a)  # here a is a dummy one
             update!(p.learner, traj, env, t ? POST_EPISODE_STAGE : PRE_ACT_STAGE)
-            
+
             # update priority
             for (s̄, ā, r̄, d̄) in m.predecessors[s]
                 P = RLBase.priority(p.learner, (s̄, ā, r̄, d̄, s))
@@ -265,32 +279,31 @@ function RLBase.update!(
     L::TDλReturnLearner,
     t::AbstractTrajectory,
     ::AbstractEnv,
-    ::PreActStage
-)
-end
+    ::PreActStage,
+) end
 
 function RLBase.update!(
     L::TDλReturnLearner,
     t::AbstractTrajectory,
     ::AbstractEnv,
-    ::PostEpisodeStage
+    ::PostEpisodeStage,
 )
     λ, γ, V = L.λ, L.γ, L.approximator
     R = t[:reward]
     S = @view t[:state][1:end-1]
     S′ = @view t[:state][2:end]
     T = length(R)
-    for t = 1:T
+    for t in 1:T
         G = 0.0
-        for n = 1:(T-t)
-            G += λ^(n - 1) *
-                (discount_rewards_reduced(@view(R[t:t+n-1]), γ) +
-                γ^n * V(S′[t+n-1]))
+        for n in 1:(T-t)
+            G +=
+                λ^(n - 1) *
+                (discount_rewards_reduced(@view(R[t:t+n-1]), γ) + γ^n * V(S′[t+n-1]))
         end
         G *= 1 - λ
-        G += λ^(T - t) *
-            (discount_rewards_reduced(@view(R[t:T]), γ) +
-            γ^(T - t + 1) * V(S′[T]))
+        G +=
+            λ^(T - t) *
+            (discount_rewards_reduced(@view(R[t:T]), γ) + γ^(T - t + 1) * V(S′[T]))
         sₜ = S[t]
         update!(V, sₜ => V(sₜ) - G)
     end
@@ -300,7 +313,7 @@ function RLBase.update!(
     t::AbstractTrajectory,
     ::VBasedPolicy{<:TDλReturnLearner},
     ::AbstractEnv,
-    ::PreEpisodeStage
+    ::PreEpisodeStage,
 )
     empty!(t)
 end

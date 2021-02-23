@@ -9,12 +9,7 @@ end
 
 function InfoStateNode(mask)
     n = sum(mask)
-    InfoStateNode(
-        fill(1 / n, n),
-        zeros(n),
-        zeros(n),
-        mask
-    )
+    InfoStateNode(fill(1 / n, n), zeros(n), zeros(n), mask)
 end
 
 #####
@@ -67,10 +62,7 @@ function TabularCFRPolicy(;
 )
     TabularCFRPolicy(
         Dict{state_type,InfoStateNode}(),
-        TabularRandomPolicy(;
-            rng = rng,
-            table = Dict{state_type,Vector{Float64}}(),
-        ),
+        TabularRandomPolicy(; rng = rng, table = Dict{state_type,Vector{Float64}}()),
         is_reset_neg_regrets,
         is_linear_averaging,
         weighted_averaging_delay,

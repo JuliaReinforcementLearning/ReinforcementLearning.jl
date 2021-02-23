@@ -155,7 +155,10 @@ function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArr
         softmax |>
         send_to_host
     if p.update_step < p.n_random_start
-        [Categorical(fill(1/length(x), length(x)); check_args = false) for x in eachcol(logits)]
+        [
+            Categorical(fill(1 / length(x), length(x)); check_args = false) for
+            x in eachcol(logits)
+        ]
     else
         [Categorical(x; check_args = false) for x in eachcol(logits)]
     end
@@ -175,10 +178,15 @@ end
 function (agent::Agent{<:PPOPolicy})(env::MultiThreadEnv)
     dist = prob(agent.policy, env)
     action = rand.(agent.policy.rng, dist)
-    EnrichedAction(action; action_log_prob=logpdf.(dist, action))
+    EnrichedAction(action; action_log_prob = logpdf.(dist, action))
 end
 
-function RLBase.update!(p::PPOPolicy, t::Union{PPOTrajectory, MaskedPPOTrajectory}, ::AbstractEnv, ::PreActStage)
+function RLBase.update!(
+    p::PPOPolicy,
+    t::Union{PPOTrajectory,MaskedPPOTrajectory},
+    ::AbstractEnv,
+    ::PreActStage,
+)
     length(t) == 0 && return  # in the first update, only state & action are inserted into trajectory
     p.update_step += 1
     if p.update_step % p.update_freq == 0
@@ -288,7 +296,7 @@ function RLBase.update!(
     ::PPOPolicy,
     env::MultiThreadEnv,
     ::PreActStage,
-    action::EnrichedAction
+    action::EnrichedAction,
 )
     push!(
         trajectory;

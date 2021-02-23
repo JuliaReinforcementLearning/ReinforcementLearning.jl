@@ -119,7 +119,12 @@ function (p::DDPGPolicy)(env)
     end
 end
 
-function RLBase.update!(p::DDPGPolicy, traj::CircularArraySARTTrajectory, ::AbstractEnv, ::PreActStage)
+function RLBase.update!(
+    p::DDPGPolicy,
+    traj::CircularArraySARTTrajectory,
+    ::AbstractEnv,
+    ::PreActStage,
+)
     length(traj) > p.update_after || return
     p.step % p.update_every == 0 || return
     inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
