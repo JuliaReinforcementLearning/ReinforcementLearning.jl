@@ -31,7 +31,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 AbstractTrees = "0.3"
-BSON = "0.2"
+BSON = "0.2, 0.3"
 CUDA = "1, 2.1"
 CircularArrayBuffers = "0.1"
 DataStructures = "0.18"
