@@ -144,6 +144,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://ritchielee.net"><img src="https://avatars.githubusercontent.com/u/7119868?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ritchie Lee</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Arcnlee" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/xiruizhao"><img src="https://avatars.githubusercontent.com/u/35286069?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Xirui Zhao</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=xiruizhao" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/metab0t"><img src="https://avatars.githubusercontent.com/u/10501166?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nerd</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=metab0t" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/albheim"><img src="https://avatars.githubusercontent.com/u/3112674?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Albin Heimerson</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=albheim" title="Code">💻</a></td>
   </tr>
 </table>
 

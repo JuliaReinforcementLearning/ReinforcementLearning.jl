@@ -189,6 +189,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "albheim",
+      "name": "Albin Heimerson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3112674?v=4",
+      "profile": "https://github.com/albheim",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
