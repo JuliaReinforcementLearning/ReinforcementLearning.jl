@@ -60,6 +60,7 @@ Some built-in experiments are exported to help new users to easily run benchmark
 - ``E`JuliaRL_DeepCFR_OpenSpiel(leduc_poker)` ``
 - ``E`JuliaRL_DQN_SnakeGame` ``
 - ``E`JuliaRL_BC_CartPole` ``
+- ``E`JuliaRL_BasicDQN_EmptyRoom` ``
 - ``E`Dopamine_DQN_Atari(pong)` ``
 - ``E`Dopamine_Rainbow_Atari(pong)` ``
 - ``E`Dopamine_IQN_Atari(pong)` ``
@@ -87,7 +88,7 @@ julia> run(E`rlpyt_PPO_Atari(pong)`)  # the Atari environment is provided in Arc
 - Experiments on `CartPole` usually run faster with CPU only due to the overhead of sending data between CPU and GPU.
 - It shouldn't surprise you that our experiments on `CartPole` are much faster than those written in Python. The secret is that our environment is written in Julia!
 - Remember to set `JULIA_NUM_THREADS` to enable multi-threading when using algorithms like `A2C` and `PPO`.
-- Experiments on `Atari` (`OpenSpiel`, `SnakeGame`) are only available after you have `ArcadeLearningEnvironment.jl` (`OpenSpiel.jl`, `SnakeGame.jl`) installed and `using ArcadeLearningEnvironment` (`using OpenSpiel`, `using SnakeGame`).
+- Experiments on `Atari` (`OpenSpiel`, `SnakeGame`, `GridWorlds`) are only available after you have `ArcadeLearningEnvironment.jl` (`OpenSpiel.jl`, `SnakeGame.jl`, `GridWorlds.jl`) installed and `using ArcadeLearningEnvironment` (`using OpenSpiel`, `using SnakeGame`, `import GridWorlds`).
 
 ### Speed
 

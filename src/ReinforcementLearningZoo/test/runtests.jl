@@ -8,6 +8,7 @@ using Statistics
 using Random
 using OpenSpiel
 using StableRNGs
+import GridWorlds
 
 function get_optimal_kuhn_policy(α = 0.2)
     TabularRandomPolicy(
@@ -94,6 +95,24 @@ end
         e = E`JuliaRL_Minimax_OpenSpiel(tic_tac_toe)`
         run(e)
         @test e.hook[1][] == e.hook[0][] == [0.0]
+    end
+
+    @testset "GridWorlds" begin
+        mktempdir() do dir
+            for method in (:BasicDQN,)
+                res = run(
+                    Experiment(
+                        Val(:JuliaRL),
+                        Val(method),
+                        Val(:EmptyRoom),
+                        nothing;
+                        save_dir = joinpath(dir, "EmptyRoom", string(method)),
+                    ),
+                )
+                @info "stats for $method" avg_reward = mean(res.hook[1].rewards) avg_fps =
+                    1 / mean(res.hook[2].times)
+            end
+        end
     end
 
     @testset "TabularCFR" begin

@@ -42,6 +42,9 @@ function __init__()
         @require OpenSpiel = "ceb70bd2-fe3f-44f0-b81f-41608acaf2f2" include(
             "experiments/open_spiel/open_spiel.jl",
         )
+        @require GridWorlds = "e15a9946-cd7f-4d03-83e2-6c30bacb0043" include(
+            "experiments/gridworlds/gridworlds.jl",
+        )
     end
 end
 

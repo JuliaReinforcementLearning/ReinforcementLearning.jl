@@ -51,9 +51,10 @@ Zygote = "0.5, 0.6"
 julia = "1.4"
 
 [extras]
+GridWorlds = "e15a9946-cd7f-4d03-83e2-6c30bacb0043"
 OpenSpiel = "ceb70bd2-fe3f-44f0-b81f-41608acaf2f2"
 ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "ReinforcementLearningEnvironments", "OpenSpiel"]
+test = ["Test", "ReinforcementLearningEnvironments", "OpenSpiel", "GridWorlds"]
