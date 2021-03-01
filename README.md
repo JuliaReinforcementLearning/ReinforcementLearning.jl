@@ -25,6 +25,7 @@ Our design principles are:
   experiments, compare different algorithms, evaluate and diagnose agents.
 - **Reproducibility**: Facilitate reproducibility from traditional tabular
   methods to modern deep reinforcement learning algorithms.
+  
 
 ## Get Started
 
@@ -36,7 +37,7 @@ julia> using ReinforcementLearning
 julia> run(E`JuliaRL_BasicDQN_CartPole`)
 ```
 
-Check out the [Get Started](https://juliareinforcementlearning.org/get_started/) page for more detailed explanation!
+Check out the [Get Started](https://juliareinforcementlearning.org/get_started/) page for a detailed explanation. The underlying design decisions and implementation details are documented in this [blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/).
 
 ## Project Structure
 
