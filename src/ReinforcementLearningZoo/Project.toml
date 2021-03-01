@@ -1,7 +1,7 @@
 name = "ReinforcementLearningZoo"
 uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
-version = "0.3.3"
+version = "0.3.4"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
