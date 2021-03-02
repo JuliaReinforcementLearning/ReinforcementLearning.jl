@@ -184,11 +184,11 @@ function (agent::Agent{<:PPOPolicy})(env::MultiThreadEnv)
     dist = prob(agent.policy, env)
     action = rand.(agent.policy.rng, dist)
     if ndims(action) == 2
-        action_log_prob = sum(logpdf.(dist, action), dims=1)
+        action_log_prob = sum(logpdf.(dist, action), dims = 1)
     else
         action_log_prob = logpdf.(dist, action)
     end
-    EnrichedAction(action; action_log_prob=vec(action_log_prob))
+    EnrichedAction(action; action_log_prob = vec(action_log_prob))
 end
 
 function RLBase.update!(
@@ -267,11 +267,11 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
                 if AC.actor isa GaussianNetwork
                     μ, σ = AC.actor(s)
                     if ndims(a) == 2
-                        log_p′ₐ = sum(normlogpdf(μ, σ, a), dims=1)
+                        log_p′ₐ = sum(normlogpdf(μ, σ, a), dims = 1)
                     else
                         log_p′ₐ = normlogpdf(μ, σ, a)
                     end
-                    entropy_loss = mean((log(2.0f0π) + 1) / 2 .+ sum(log.(σ), dims=1))
+                    entropy_loss = mean((log(2.0f0π) + 1) / 2 .+ sum(log.(σ), dims = 1))
                 else
                     # actor is assumed to return discrete logits
                     logit′ = AC.actor(s)

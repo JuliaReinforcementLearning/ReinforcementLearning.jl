@@ -85,7 +85,7 @@ function (env::MultiThreadEnv)(actions)
     N = ndims(actions)
     @sync for i in 1:length(env)
         @spawn begin
-            if N == 1 
+            if N == 1
                 env[i](actions[i])
             else
                 env[i](selectdim(actions, N, i))

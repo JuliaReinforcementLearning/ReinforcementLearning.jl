@@ -17,7 +17,11 @@ function RLCore.Experiment(
     inner_env = GridWorlds.EmptyRoom(rng = rng)
     action_space_mapping = x -> Base.OneTo(length(RLBase.action_space(inner_env)))
     action_mapping = i -> RLBase.action_space(inner_env)[i]
-    env = RLEnvs.ActionTransformedEnv(inner_env, action_space_mapping = action_space_mapping, action_mapping = action_mapping)
+    env = RLEnvs.ActionTransformedEnv(
+        inner_env,
+        action_space_mapping = action_space_mapping,
+        action_mapping = action_mapping,
+    )
     env = RLEnvs.StateOverriddenEnv(env, x -> vec(Float32.(x)))
     env = RewardOverriddenEnv(env, x -> x - convert(typeof(x), 0.01))
     env = MaxTimeoutEnv(env, 240)
