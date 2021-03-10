@@ -60,8 +60,10 @@ mutable struct BatchSampler{traces} <: AbstractSampler{traces}
     rng::Any
 end
 
-BatchSampler(batch_size::Int; cache=nothing, rng=Random.GLOBAL_RNG) = BatchSampler{SARTSA}(batch_size, cache, rng)
-BatchSampler{T}(batch_size::Int; cache=nothing, rng=Random.GLOBAL_RNG) where T = BatchSampler{T}(batch_size, cache, rng)
+BatchSampler(batch_size::Int; cache = nothing, rng = Random.GLOBAL_RNG) =
+    BatchSampler{SARTSA}(batch_size, cache, rng)
+BatchSampler{T}(batch_size::Int; cache = nothing, rng = Random.GLOBAL_RNG) where {T} =
+    BatchSampler{T}(batch_size, cache, rng)
 
 (s::BatchSampler)(t::AbstractTrajectory) = sample(s.rng, t, s)
 
@@ -72,11 +74,7 @@ function StatsBase.sample(rng::AbstractRNG, t::AbstractTrajectory, s::BatchSampl
     inds, s.cache
 end
 
-function fetch!(
-    s::BatchSampler,
-    t::AbstractTrajectory,
-    inds::Vector{Int},
-)
+function fetch!(s::BatchSampler, t::AbstractTrajectory, inds::Vector{Int})
     batch = NamedTuple{keys(t)}(view(t[x], inds) for x in keys(t))
     if isnothing(s.cache)
         s.cache = map(Flux.batch, batch)
@@ -87,17 +85,11 @@ function fetch!(
     end
 end
 
-function fetch!(
-    s::BatchSampler{SARTS},
-    t::CircularArraySARTTrajectory,
-    inds::Vector{Int}
-)
-    batch = NamedTuple{SARTS}(
-        (
-            (consecutive_view(t[x], inds) for x in SART)...,
-            consecutive_view(t[:state], inds .+ 1),
-        )
-    )
+function fetch!(s::BatchSampler{SARTS}, t::CircularArraySARTTrajectory, inds::Vector{Int})
+    batch = NamedTuple{SARTS}((
+        (consecutive_view(t[x], inds) for x in SART)...,
+        consecutive_view(t[:state], inds .+ 1),
+    ))
     if isnothing(s.cache)
         s.cache = map(batch) do x
             convert(Array, x)

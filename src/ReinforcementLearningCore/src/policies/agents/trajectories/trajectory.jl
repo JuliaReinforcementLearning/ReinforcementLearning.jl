@@ -203,17 +203,8 @@ function VectorTrajectory(; kwargs...)
     end)
 end
 
-const VectorSARTTrajectory = Trajectory{
-    <:NamedTuple{
-        SART,
-        <:Tuple{
-            <:Vector,
-            <:Vector,
-            <:Vector,
-            <:Vector,
-        },
-    }
-}
+const VectorSARTTrajectory =
+    Trajectory{<:NamedTuple{SART,<:Tuple{<:Vector,<:Vector,<:Vector,<:Vector}}}
 
 function VectorSARTTrajectory(;
     state = Int,
@@ -224,20 +215,10 @@ function VectorSARTTrajectory(;
     VectorTrajectory(; state = state, action = action, reward = reward, terminal = terminal)
 end
 
-const VectorSATrajectory = Trajectory{
-    <:NamedTuple{
-        (:state, :action),
-        <:Tuple{
-            <:Vector,
-            <:Vector,
-        },
-    }
-}
+const VectorSATrajectory =
+    Trajectory{<:NamedTuple{(:state, :action),<:Tuple{<:Vector,<:Vector}}}
 
-function VectorSATrajectory(;
-    state = Int,
-    action = Int,
-)
+function VectorSATrajectory(; state = Int, action = Int)
     VectorTrajectory(; state = state, action = action)
 end
 #####

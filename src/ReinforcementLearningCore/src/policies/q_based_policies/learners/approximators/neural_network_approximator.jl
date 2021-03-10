@@ -22,7 +22,10 @@ end
 # some model may accept multiple inputs
 (app::NeuralNetworkApproximator)(args...; kwargs...) = app.model(args...; kwargs...)
 
-@forward NeuralNetworkApproximator.model Flux.testmode!, Flux.trainmode!, Flux.params, device
+@forward NeuralNetworkApproximator.model Flux.testmode!,
+Flux.trainmode!,
+Flux.params,
+device
 
 functor(x::NeuralNetworkApproximator) =
     (model = x.model,), y -> NeuralNetworkApproximator(y.model, x.optimizer)

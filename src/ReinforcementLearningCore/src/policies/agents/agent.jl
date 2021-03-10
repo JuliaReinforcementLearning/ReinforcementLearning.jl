@@ -118,7 +118,9 @@ function RLBase.update!(
     push!(trajectory[:state], s)
     push!(trajectory[:action], action)
     if haskey(trajectory, :legal_actions_mask)
-        lasm = policy isa NamedPolicy ? legal_action_space_mask(env, nameof(policy)) : legal_action_space_mask(env)
+        lasm =
+            policy isa NamedPolicy ? legal_action_space_mask(env, nameof(policy)) :
+            legal_action_space_mask(env)
         push!(trajectory[:legal_actions_mask], lasm)
     end
 end
@@ -141,7 +143,9 @@ function RLBase.update!(
     push!(trajectory[:state], s)
     push!(trajectory[:action], action)
     if haskey(trajectory, :legal_actions_mask)
-        lasm = policy isa NamedPolicy ? legal_action_space_mask(env, nameof(policy)) : legal_action_space_mask(env)
+        lasm =
+            policy isa NamedPolicy ? legal_action_space_mask(env, nameof(policy)) :
+            legal_action_space_mask(env)
         push!(trajectory[:legal_actions_mask], lasm)
     end
 end

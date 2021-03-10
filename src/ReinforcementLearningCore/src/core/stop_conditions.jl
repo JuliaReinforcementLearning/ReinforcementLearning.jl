@@ -132,11 +132,7 @@ mutable struct StopAfterNoImprovement{T<:Number,F}
     counter::Int
 end
 
-function StopAfterNoImprovement(
-    fn,
-    patience::Int,
-    δ::T = 0.0f0,
-) where {T<:Number}
+function StopAfterNoImprovement(fn, patience::Int, δ::T = 0.0f0) where {T<:Number}
     StopAfterNoImprovement(fn, patience, δ, typemin(T), 1)
 end
 
