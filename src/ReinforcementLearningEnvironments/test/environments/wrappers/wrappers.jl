@@ -21,6 +21,16 @@
 
         RLBase.test_interfaces!(env′)
         RLBase.test_runnable!(env′)
+
+        # fix #129
+        env = TicTacToeEnv()
+        s_env = state(env)
+        @test s_env ∈ state_space(env)
+
+        E = DefaultStateStyleEnv{Observation{Int}()}(env)  # error probably somewhere here
+        s = state(E)
+        @test s isa Int
+        @test s ∈ state_space(E)
     end
 
     @testset "MaxTimeoutEnv" begin
