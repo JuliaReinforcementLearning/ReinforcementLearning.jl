@@ -198,6 +198,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "michelangelo21",
+      "name": "michelangelo21",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49211663?v=4",
+      "profile": "https://github.com/michelangelo21",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
