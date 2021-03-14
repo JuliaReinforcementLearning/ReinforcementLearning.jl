@@ -12,6 +12,7 @@ import .OpenSpiel:
     information,
     information_state_tensor,
     information_state_tensor_size,
+    information_state_tensor_shape,
     information_state_string,
     num_distinct_actions,
     num_players,
@@ -22,6 +23,7 @@ import .OpenSpiel:
     rewards,
     reward_model,
     observation_tensor_size,
+    observation_tensor_shape,
     observation_tensor,
     observation_string,
     chance_mode,
@@ -42,7 +44,7 @@ import .OpenSpiel:
   `True` or `False` (instead of `true` or `false`). Another approach is to just
   specify parameters in `kwargs` in the Julia style.
 """
-function OpenSpielEnv(name = "kuhn_poker"; kwargs...)
+function OpenSpielEnv(name="kuhn_poker"; kwargs...)
     game = load_game(String(name); kwargs...)
     state = new_initial_state(game)
     OpenSpielEnv(state, game)
@@ -58,7 +60,7 @@ RLBase.current_player(env::OpenSpielEnv) = OpenSpiel.current_player(env.state)
 RLBase.chance_player(env::OpenSpielEnv) = convert(Int, OpenSpiel.CHANCE_PLAYER)
 
 function RLBase.players(env::OpenSpielEnv)
-    p = 0:(num_players(env.game)-1)
+    p = 0:(num_players(env.game) - 1)
     if ChanceStyle(env) === EXPLICIT_STOCHASTIC
         (p..., RLBase.chance_player(env))
     else
@@ -89,7 +91,7 @@ function RLBase.prob(env::OpenSpielEnv, player)
     # @assert player == chance_player(env)
     p = zeros(length(action_space(env)))
     for (k, v) in chance_outcomes(env.state)
-        p[k+1] = v
+        p[k + 1] = v
     end
     p
 end
@@ -100,7 +102,7 @@ function RLBase.legal_action_space_mask(env::OpenSpielEnv, player)
         num_distinct_actions(env.game)
     mask = BitArray(undef, n)
     for a in legal_actions(env.state, player)
-        mask[a+1] = true
+        mask[a + 1] = true
     end
     mask
 end
@@ -135,23 +137,28 @@ end
 _state(env::OpenSpielEnv, ::RLBase.InformationSet{String}, player) =
     information_state_string(env.state, player)
 _state(env::OpenSpielEnv, ::RLBase.InformationSet{Array}, player) =
-    information_state_tensor(env.state, player)
+    reshape(information_state_tensor(env.state, player), reverse(information_state_tensor_shape(env.game))...)
 _state(env::OpenSpielEnv, ::Observation{String}, player) =
     observation_string(env.state, player)
 _state(env::OpenSpielEnv, ::Observation{Array}, player) =
-    observation_tensor(env.state, player)
+    reshape(observation_tensor(env.state, player), reverse(observation_tensor_shape(env.game))...)
 
 RLBase.state_space(
     env::OpenSpielEnv,
     ::Union{InformationSet{String},Observation{String}},
     p,
 ) = WorldSpace{AbstractString}()
-RLBase.state_space(
-    env::OpenSpielEnv,
-    ::Union{InformationSet{Array},Observation{Array}},
+
+RLBase.state_space(env::OpenSpielEnv, ::InformationSet{Array},
     p,
 ) = Space(
-    fill(typemin(Float64)..typemax(Float64), information_state_tensor_size(env.state)),
+    fill(typemin(Float64)..typemax(Float64), reverse(information_state_tensor_shape(env.game))...),
+)
+
+RLBase.state_space(env::OpenSpielEnv, ::Observation{Array},
+    p,
+) = Space(
+    fill(typemin(Float64)..typemax(Float64), reverse(observation_tensor_shape(env.game))...),
 )
 
 Random.seed!(env::OpenSpielEnv, s) = @warn "seed!(OpenSpielEnv) is not supported currently."
@@ -192,9 +199,7 @@ RLBase.RewardStyle(env::OpenSpielEnv) =
     reward_model(get_type(env.game)) == OpenSpiel.REWARDS ? RLBase.STEP_REWARD :
     RLBase.TERMINAL_REWARD
 
-RLBase.StateStyle(env::OpenSpielEnv) = (
-    RLBase.InformationSet{String}(),
+RLBase.StateStyle(env::OpenSpielEnv) = (RLBase.InformationSet{String}(),
     RLBase.InformationSet{Array}(),
     RLBase.Observation{String}(),
-    RLBase.Observation{Array}(),
-)
+    RLBase.Observation{Array}(),)
