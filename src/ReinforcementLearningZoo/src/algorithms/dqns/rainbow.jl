@@ -9,7 +9,7 @@ See paper: [Rainbow: Combining Improvements in Deep Reinforcement Learning](http
 
 - `approximator`::[`AbstractApproximator`](@ref): used to get Q-values of a state.
 - `target_approximator`::[`AbstractApproximator`](@ref): similar to `approximator`, but used to estimate the target (the next state).
-- `loss_func`: the loss function.
+- `loss_func`: the loss function. It is recommended to use Flux.Losses.logitcrossentropy. Flux.Losses.crossentropy will encounter the problem of negative numbers.
 - `Vₘₐₓ::Float32`: the maximum value of distribution.
 - `Vₘᵢₙ::Float32`: the minimum value of distribution.
 - `n_actions::Int`: number of possible actions.
@@ -176,6 +176,7 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
     gs = gradient(Flux.params(Q)) do
         logits = reshape(Q(states), n_atoms, n_actions, :)
         select_logits = logits[:, actions]
+        # The original paper normalized logits, but using normalization and Flux.Losses.crossentropy is not as stable as using Flux.Losses.logitcrossentropy.
         batch_losses = loss_func(select_logits, target_distribution)
         loss =
             is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1 // batch_size :
