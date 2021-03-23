@@ -17,6 +17,7 @@ mutable struct DQNLearner{
     rng::R
     # for logging
     loss::Float32
+    is_enable_double_DQN::Bool
 end
 
 """
@@ -36,8 +37,9 @@ See paper: [Human-level control through deep reinforcement learning](https://www
 - `update_freq::Int=4`: the frequency of updating the `approximator`.
 - `target_update_freq::Int=100`: the frequency of syncing `target_approximator`.
 - `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
-- `traces = SARTS`, set to `SLARTSL` if you are to apply to an environment of `FULL_ACTION_SET`.
+- `traces = SARTS`: set to `SLARTSL` if you are to apply to an environment of `FULL_ACTION_SET`.
 - `rng = Random.GLOBAL_RNG`
+- `double = Bool`: Enable double dqn, enabled by default.
 """
 function DQNLearner(;
     approximator::Tq,
@@ -53,6 +55,7 @@ function DQNLearner(;
     traces = SARTS,
     update_step = 0,
     rng = Random.GLOBAL_RNG,
+    is_enable_double_DQN::Bool = true
 ) where {Tq,Tt,Tf}
     copyto!(approximator, target_approximator)
     sampler = NStepBatchSampler{traces}(;
@@ -72,6 +75,7 @@ function DQNLearner(;
         sampler,
         rng,
         0.0f0,
+        is_enable_double_DQN
     )
 end
 
@@ -102,18 +106,30 @@ function RLBase.update!(learner::DQNLearner, batch::NamedTuple)
     loss_func = learner.loss_func
     n = learner.sampler.n
     batch_size = learner.sampler.batch_size
+    is_enable_double_DQN = learner.is_enable_double_DQN
     D = device(Q)
 
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     a = CartesianIndex.(a, 1:batch_size)
 
-    target_q = Qₜ(s′)
+    if is_enable_double_DQN
+        q_values = Q(s′)
+    else
+        q_values = Qₜ(s′)
+    end
+    
     if haskey(batch, :next_legal_actions_mask)
         l′ = send_to_device(D, batch[:next_legal_actions_mask])
-        target_q .+= ifelse.(l′, 0.0f0, typemin(Float32))
+        q_values .+= ifelse.(l′, 0.0f0, typemin(Float32))
     end
 
-    q′ = dropdims(maximum(target_q; dims = 1), dims = 1)
+    if is_enable_double_DQN
+        selected_actions = dropdims(argmax(q_values, dims=1), dims=1)
+        q′ = Qₜ(s′)[selected_actions]
+    else
+        q′ = dropdims(maximum(q_values; dims = 1), dims = 1)
+    end
+
     G = r .+ γ^n .* (1 .- t) .* q′
 
     gs = gradient(params(Q)) do
