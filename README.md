@@ -150,6 +150,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/pilgrimygy"><img src="https://avatars.githubusercontent.com/u/49673553?v=4?s=100" width="100px;" alt=""/><br /><sub><b>GuoYu Yang</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=pilgrimygy" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/Mobius1D"><img src="https://avatars.githubusercontent.com/u/49596933?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Prasidh Srikumar</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=Mobius1D" title="Code">💻</a></td>
   </tr>
 </table>
 
