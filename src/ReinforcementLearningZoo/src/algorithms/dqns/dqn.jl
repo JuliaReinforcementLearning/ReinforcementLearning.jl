@@ -39,7 +39,7 @@ See paper: [Human-level control through deep reinforcement learning](https://www
 - `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
 - `traces = SARTS`: set to `SLARTSL` if you are to apply to an environment of `FULL_ACTION_SET`.
 - `rng = Random.GLOBAL_RNG`
-- `double = Bool`: Enable double dqn, enabled by default.
+- `is_enable_double_DQN = Bool`: enable double dqn, enabled by default.
 """
 function DQNLearner(;
     approximator::Tq,
