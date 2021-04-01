@@ -94,16 +94,16 @@ const CircularArraySLARTTrajectory = Trajectory{
 CircularArraySLARTTrajectory(;
     capacity::Int,
     state = Int => (),
-    action = Int => (),
     legal_actions_mask,
+    action = Int => (),
     reward = Float32 => (),
     terminal = Bool => (),
 ) = merge(
     CircularArrayTrajectory(;
         capacity = capacity + 1,
         state = state,
-        action = action,
         legal_actions_mask = legal_actions_mask,
+        action = action,
     ),
     CircularArrayTrajectory(; capacity = capacity, reward = reward, terminal = terminal),
 )
