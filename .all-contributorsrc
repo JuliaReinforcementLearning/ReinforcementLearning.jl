@@ -225,6 +225,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "ilancoulon",
+      "name": "Ilan Coulon",
+      "avatar_url": "https://avatars.githubusercontent.com/u/764934?v=4",
+      "profile": "https://github.com/ilancoulon",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
