@@ -5,7 +5,7 @@
 const PERLearners = Union{PrioritizedDQNLearner,RainbowLearner,IQNLearner}
 
 function RLBase.update!(learner::Union{DQNLearner,PERLearners}, t::AbstractTrajectory)
-    length(t[:terminal]) < learner.min_replay_history && return
+    length(t[:terminal]) - learner.sampler.n <= learner.min_replay_history && return
 
     learner.update_step += 1
 
