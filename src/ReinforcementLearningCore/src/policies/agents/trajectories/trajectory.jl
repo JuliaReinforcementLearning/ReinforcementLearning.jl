@@ -254,6 +254,7 @@ CircularArrayPSARTTrajectory(; capacity, kwargs...) = PrioritizedTrajectory(
 function Base.length(
     t::Union{
         CircularArraySARTTrajectory,
+        CircularArraySLARTTrajectory,
         CircularVectorSARTSATrajectory,
         ElasticSARTTrajectory,
     },
