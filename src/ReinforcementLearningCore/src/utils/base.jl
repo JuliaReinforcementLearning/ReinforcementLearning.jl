@@ -11,6 +11,7 @@ export nframes,
     flatten_batch
 
 using StatsBase
+using Compat
 
 nframes(a::AbstractArray{T,N}) where {T,N} = size(a, N)
 
@@ -144,8 +145,8 @@ function find_all_max(x, mask::AbstractVector{Bool})
 end
 
 # !!! watch https://github.com/JuliaLang/julia/pull/35316#issuecomment-622629895
-Base.findmax(f, domain) = mapfoldl(x -> (f(x), x), _rf_findmax, domain)
-_rf_findmax((fm, m), (fx, x)) = isless(fm, fx) ? (fx, x) : (fm, m)
+# Base.findmax(f, domain) = mapfoldl(x -> (f(x), x), _rf_findmax, domain)
+# _rf_findmax((fm, m), (fx, x)) = isless(fm, fx) ? (fx, x) : (fm, m)
 
 # !!! type piracy
 Base.findmax(A::AbstractVector, mask::AbstractVector{Bool}) =
