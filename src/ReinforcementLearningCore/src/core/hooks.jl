@@ -236,16 +236,16 @@ end
 """
     DoEveryNStep(f; n=1, t=0)
 
-Execute `f(agent, env)` every `n` step.
+Execute `f(t, agent, env)` every `n` step.
 `t` is a counter of steps.
 """
-Base.@kwdef mutable struct DoEveryNStep{F} <: AbstractHook
+mutable struct DoEveryNStep{F} <: AbstractHook
     f::F
-    n::Int = 1
-    t::Int = 0
+    n::Int
+    t::Int
 end
 
-DoEveryNStep(f, n = 1, t = 0) = DoEveryNStep(f, n, t)
+DoEveryNStep(f; n = 1, t = 0) = DoEveryNStep(f, n, t)
 
 function (hook::DoEveryNStep)(::PostActStage, agent, env)
     hook.t += 1
