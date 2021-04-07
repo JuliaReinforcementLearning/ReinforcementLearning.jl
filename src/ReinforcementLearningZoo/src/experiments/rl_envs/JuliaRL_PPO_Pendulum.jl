@@ -14,16 +14,16 @@ function RLCore.Experiment(
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = StableRNG(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
-    action_space = action_space(inner_env)
-    low = action_space.low
-    high = action_space.high
+    A = action_space(inner_env)
+    low = A.left
+    high = A.right
     ns = length(state(inner_env))
 
     N_ENV = 8
     UPDATE_FREQ = 2048
     env = MultiThreadEnv([
         PendulumEnv(T = Float32, rng = StableRNG(hash(seed + i))) |>
-        ActionTransformedEnv(x -> clamp(x * 2, low, high)) for i in 1:N_ENV
+        env -> ActionTransformedEnv(env, action_mapping = x -> clamp(x * 2, low, high)) for i in 1:N_ENV
     ])
 
     init = glorot_uniform(rng)
