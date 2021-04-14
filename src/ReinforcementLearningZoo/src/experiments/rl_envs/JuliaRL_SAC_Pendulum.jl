@@ -30,7 +30,7 @@ function RLCore.Experiment(
             Chain(Dense(ns, 30, relu), Dense(30, 30, relu)),
             Chain(Dense(30, 1, initW = init)),
             Chain(
-                Dense(30, 1, x -> min(max(x, typeof(x)(-20)), typeof(x)(2)), initW = init),
+                Dense(30, 1, x -> clamp(x, typeof(x)(-2), typeof(x)(2)), initW = init),
             ),
         ),
         optimizer = ADAM(0.003),
