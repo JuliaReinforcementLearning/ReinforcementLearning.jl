@@ -14,7 +14,7 @@ function RLCore.Experiment(
     lg = TBLogger(log_dir, min_level = Logging.Info)
     rng = StableRNG(seed)
 
-    inner_env = GridWorlds.EmptyRoom(rng = rng)
+    inner_env = GridWorlds.EmptyRoomDirected(rng = rng)
     action_space_mapping = x -> Base.OneTo(length(RLBase.action_space(inner_env)))
     action_mapping = i -> RLBase.action_space(inner_env)[i]
     env = RLEnvs.ActionTransformedEnv(
