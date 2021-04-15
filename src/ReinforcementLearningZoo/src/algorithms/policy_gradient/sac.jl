@@ -1,13 +1,4 @@
-export SACPolicy, SACPolicyNetwork
-
-# Define SAC Actor
-struct SACPolicyNetwork
-    pre::Chain
-    mean::Chain
-    log_std::Chain
-end
-Flux.@functor SACPolicyNetwork
-(m::SACPolicyNetwork)(state) = (x = m.pre(state); (m.mean(x), m.log_std(x)))
+export SACPolicy
 
 mutable struct SACPolicy{
     BA<:NeuralNetworkApproximator,
@@ -54,6 +45,10 @@ end
 - `update_every = 50`,
 - `step = 0`,
 - `rng = Random.GLOBAL_RNG`,
+
+`policy` is expected to output a tuple `(μ, logσ)` of mean and
+log standard deviations for the desired action distributions, this
+can be implemented using a `GaussianNetwork` in a `NeuralNetworkApproximator`.
 """
 function SACPolicy(;
     policy,
@@ -117,8 +112,8 @@ end
 This function is compatible with a multidimensional action space.
 """
 function evaluate(p::SACPolicy, state)
-    μ, log_σ = p.policy(state)
-    π_dist = Normal.(μ, exp.(log_σ))
+    μ, logσ = p.policy(state)
+    π_dist = Normal.(μ, exp.(logσ))
     z = rand.(p.rng, π_dist)
     logp_π = sum(logpdf.(π_dist, z), dims = 1)
     logp_π -= sum((2.0f0 .* (log(2.0f0) .- z - softplus.(-2.0f0 * z))), dims = 1)

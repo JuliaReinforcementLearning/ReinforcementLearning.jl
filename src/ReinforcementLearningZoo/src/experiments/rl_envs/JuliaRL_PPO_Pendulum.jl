@@ -37,7 +37,7 @@ function RLCore.Experiment(
                         Dense(64, 64, relu; initW = glorot_uniform(rng)),
                     ),
                     μ = Chain(Dense(64, 1, tanh; initW = glorot_uniform(rng)), vec),
-                    σ = Chain(Dense(64, 1; initW = glorot_uniform(rng)), vec),
+                    logσ = Chain(Dense(64, 1; initW = glorot_uniform(rng)), vec),
                 ),
                 critic = Chain(
                     Dense(ns, 64, relu; initW = glorot_uniform(rng)),
