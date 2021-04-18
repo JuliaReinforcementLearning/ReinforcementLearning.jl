@@ -16,7 +16,7 @@ function RLCore.Experiment(
 
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(state(env)), length(action_space(env))
-    ensemble_num = 6
+    ensemble_num = 16
 
     agent = Agent(
         policy = QBasedPolicy(

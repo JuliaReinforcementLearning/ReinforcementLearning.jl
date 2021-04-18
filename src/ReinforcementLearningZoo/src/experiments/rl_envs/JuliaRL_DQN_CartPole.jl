@@ -16,24 +16,21 @@ function RLCore.Experiment(
 
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(state(env)), length(action_space(env))
+    base_model = Chain(
+        Dense(ns, 128, relu; initW = glorot_uniform(rng)),
+        Dense(128, 128, relu; initW = glorot_uniform(rng)),
+        Dense(128, na; initW = glorot_uniform(rng))
+        )
 
     agent = Agent(
         policy = QBasedPolicy(
             learner = DQNLearner(
                 approximator = NeuralNetworkApproximator(
-                    model = Chain(
-                        Dense(ns, 128, relu; initW = glorot_uniform(rng)),
-                        Dense(128, 128, relu; initW = glorot_uniform(rng)),
-                        Dense(128, na; initW = glorot_uniform(rng)),
-                    ) |> cpu,
+                    model = build_dueling_network(base_model) |> cpu,
                     optimizer = ADAM(),
                 ),
                 target_approximator = NeuralNetworkApproximator(
-                    model = Chain(
-                        Dense(ns, 128, relu; initW = glorot_uniform(rng)),
-                        Dense(128, 128, relu; initW = glorot_uniform(rng)),
-                        Dense(128, na; initW = glorot_uniform(rng)),
-                    ) |> cpu,
+                    model = build_dueling_network(base_model) |> cpu,
                 ),
                 loss_func = huber_loss,
                 stack_size = nothing,
