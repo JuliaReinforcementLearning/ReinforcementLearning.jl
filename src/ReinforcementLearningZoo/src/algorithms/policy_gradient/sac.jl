@@ -23,6 +23,9 @@ mutable struct SACPolicy{
     update_every::Int
     step::Int
     rng::R
+    # Logging
+    reward_term::Float32
+    entropy_term::Float32
 end
 
 """
@@ -49,6 +52,8 @@ end
 `policy` is expected to output a tuple `(μ, logσ)` of mean and
 log standard deviations for the desired action distributions, this
 can be implemented using a `GaussianNetwork` in a `NeuralNetworkApproximator`.
+
+Implemented based on http://arxiv.org/abs/1812.05905
 """
 function SACPolicy(;
     policy,
@@ -85,6 +90,8 @@ function SACPolicy(;
         update_every,
         step,
         rng,
+        0f0,
+        0f0,
     )
 end
 
@@ -99,12 +106,12 @@ function (p::SACPolicy)(env)
         s = state(env)
         s = Flux.unsqueeze(s, ndims(s) + 1)
         # trainmode:
-        action = evaluate(p, s)[1][] # returns action as scalar
+        action = dropdims(evaluate(p, s)[1], dims=2) # Single action vec, drop second dim
 
         # testmode:
         # if testing dont sample an action, but act deterministically by
         # taking the "mean" action
-        # action = p.policy(s)[1][] # returns action as scalar
+        # action = dropdims(p.policy(s)[1], dims=2) 
     end
 end
 
@@ -137,17 +144,13 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
 
     γ, ρ, α = p.γ, p.ρ, p.α
 
-    # !!! we have several assumptions here, need revisit when we have more complex environments
-    # state is vector
-    # action is scalar
     a′, log_π = evaluate(p, s′)
     q′_input = vcat(s′, a′)
     q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
-    y = r .+ γ .* (1 .- t) .* vec((q′ .- α .* log_π))
+    y = r .+ γ .* (1 .- t) .* vec(q′ .- α .* log_π)
 
     # Train Q Networks
-    a = Flux.unsqueeze(a, 1)
     q_input = vcat(s, a)
 
     q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
@@ -166,7 +169,13 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
         a, log_π = evaluate(p, s)
         q_input = vcat(s, a)
         q = min.(p.qnetwork1(q_input), p.qnetwork2(q_input))
-        mean(α .* log_π .- q)
+        reward = mean(q)
+        entropy = mean(log_π)
+        ignore() do 
+            p.reward_term = reward
+            p.entropy_term = entropy
+        end
+        α * entropy - reward
     end
     update!(p.policy, p_grad)
 
