@@ -56,13 +56,13 @@ The default behaviors for `Agent` are:
      `env` and push them into `trajectory`.
   4. In the `PosEpisodeStage`, we push the `state` at the end of an episode and
      a dummy action into the `trajectory`.
-  5. In the `PreEpisodeStage`, we pop out the lastest `state` and `action` pair
+  5. In the `PreEpisodeStage`, we pop out the latest `state` and `action` pair
      (which are dummy ones) from `trajectory`.
 
 2. Update the inner `policy` given the context of `trajectory`, `env`, and
    `stage`.
   1. By default, we only `update!` the `policy` in the `PreActStage`. And it's
-     despatched to `update!(policy, trajectory)`.
+     dispatched to `update!(policy, trajectory)`.
 """
 function (agent::Agent)(stage::AbstractStage, env::AbstractEnv)
     update!(agent.trajectory, agent.policy, env, stage)
