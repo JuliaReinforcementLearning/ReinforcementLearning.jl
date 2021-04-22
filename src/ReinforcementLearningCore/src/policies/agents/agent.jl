@@ -62,7 +62,7 @@ The default behaviors for `Agent` are:
 2. Update the inner `policy` given the context of `trajectory`, `env`, and
    `stage`.
   1. By default, we only `update!` the `policy` in the `PreActStage`. And it's
-     dispatched to `update!(policy, trajectory)`.
+     dispatched to `update!(policy, trajectory, env, stage)`.
 """
 function (agent::Agent)(stage::AbstractStage, env::AbstractEnv)
     update!(agent.trajectory, agent.policy, env, stage)
