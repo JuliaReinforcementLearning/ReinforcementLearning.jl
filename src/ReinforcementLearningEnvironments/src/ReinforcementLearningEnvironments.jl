@@ -5,7 +5,7 @@ using Random
 using GR
 using Requires
 using IntervalSets
-using Base.Threads: @spawn
+using Base.Threads:@spawn
 using Markdown
 
 const RLEnvs = ReinforcementLearningEnvironments
@@ -29,6 +29,11 @@ function __init__()
     @require SnakeGames = "34dccd9f-48d6-4445-aa0f-8c2e373b5429" include(
         "environments/3rd_party/snake.jl",
     )
+    @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" include(
+        "environments/3rd_party/AcrobotEnv.jl",
+    )
+
+
 end
 
 end # module
