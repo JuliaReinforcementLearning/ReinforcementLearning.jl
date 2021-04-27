@@ -1,0 +1,5 @@
+[deps]
+CommonRLInterface = "d842c3ba-07a1-494f-bbec-f5741b0a3e98"
+POMDPModelTools = "08074719-1b2a-587c-a292-00f91cc44415"
+POMDPs = "a93abf59-7444-517b-a68a-c42f96afdd7d"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
