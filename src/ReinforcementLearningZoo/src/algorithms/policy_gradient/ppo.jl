@@ -173,11 +173,11 @@ RLBase.prob(p::PPOPolicy, env::MultiThreadEnv) = prob(p, state(env))
 function RLBase.prob(p::PPOPolicy, env::AbstractEnv)
     s = state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
-    prob(p, s)[1]
+    prob(p, s)
 end
 
 (p::PPOPolicy)(env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
-(p::PPOPolicy)(env::AbstractEnv) = rand(p.rng, prob(p, env))
+(p::PPOPolicy)(env::AbstractEnv) = rand.(p.rng, prob(p, env))
 
 function (agent::Agent{<:PPOPolicy})(env::MultiThreadEnv)
     dist = prob(agent.policy, env)
