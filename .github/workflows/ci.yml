@@ -36,7 +36,7 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
-      - run: julia --color=yes --project -e 'using Pkg; Pkg.build(verbose=true);'
+      - run: julia --color=yes --project -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate();'
   docs:
     name: Documentation
     runs-on: ubuntu-latest
