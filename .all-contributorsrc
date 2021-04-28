@@ -244,6 +244,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "luigiannelli",
+      "name": "luigiannelli",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24853508?v=4",
+      "profile": "https://github.com/luigiannelli",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
