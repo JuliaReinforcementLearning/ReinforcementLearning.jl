@@ -253,6 +253,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "JBoerma",
+      "name": "Jacob Boerma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7275916?v=4",
+      "profile": "https://github.com/JBoerma",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
