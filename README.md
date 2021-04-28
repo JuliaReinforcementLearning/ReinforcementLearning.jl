@@ -153,6 +153,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/Mobius1D"><img src="https://avatars.githubusercontent.com/u/49596933?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Prasidh Srikumar</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=Mobius1D" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/ilancoulon"><img src="https://avatars.githubusercontent.com/u/764934?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ilan Coulon</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=ilancoulon" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/JinraeKim"><img src="https://avatars.githubusercontent.com/u/43136096?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jinrae Kim</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=JinraeKim" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/luigiannelli"><img src="https://avatars.githubusercontent.com/u/24853508?v=4?s=100" width="100px;" alt=""/><br /><sub><b>luigiannelli</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Aluigiannelli" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
