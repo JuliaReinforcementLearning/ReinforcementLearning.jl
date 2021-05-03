@@ -1,0 +1,5 @@
+.DS_Store
+Manifest.toml
+/dev/
+/checkpoints/
+/logs/
