@@ -86,6 +86,7 @@ function RLBase.reset!(env::AcrobotEnv{T}) where {T <: Number}
     env.t = 0
     env.action = 2
     env.done = false
+    env.reward = -1
     nothing
 end
 
@@ -117,8 +118,9 @@ function (env::AcrobotEnv{T})(a) where {T <: Number}
     ns[4] = bound(ns[4], -env.params.max_vel_b, env.params.max_vel_b)
     env.state = ns
     # termination criterion
-    env.done = (-cos(ns[1]) - cos(ns[2] + ns[1]) > 1.0) || env.t > env.params.max_steps
-    env.reward = env.done ? -1.0 : 0.0
+    succeeded = -cos(ns[1]) - cos(ns[2] + ns[1]) > 1.0
+    env.done = succeeded || env.t > env.params.max_steps
+    env.reward = succeeded ? 0.0 : -1.0
     nothing
 end
 
