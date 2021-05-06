@@ -142,7 +142,7 @@ manipulation.
 - `MaxTimeoutEnv`
 - `RewardOverriddenEnv`
 - `StateCachedEnv`
-- `StateOverriddenEnv`
+- `StateTransformedEnv`
 
 ## Application
 

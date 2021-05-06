@@ -4,9 +4,9 @@ export StateCachedEnv
 Cache the state so that `state(env)` will always return the same result before
 the next interaction with `env`. This function is useful because some
 environments are stateful during each `state(env)`. For example:
-`StateOverriddenEnv(StackFrames(...))`.
+`StateTransformedEnv(StackFrames(...))`.
 """
-mutable struct StateCachedEnv{S,E<:AbstractEnv} <: AbstractEnvWrapper
+mutable struct StateCachedEnv{S,E <: AbstractEnv} <: AbstractEnvWrapper
     s::S
     env::E
     is_state_cached::Bool

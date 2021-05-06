@@ -1,9 +1,9 @@
 export ActionTransformedEnv
 
 struct ActionTransformedEnv{P,M,E<:AbstractEnv} <: AbstractEnvWrapper
-    action_space_mapping::P
-    action_mapping::M
     env::E
+    action_mapping::M
+    action_space_mapping::P
 end
 
 """
@@ -13,13 +13,8 @@ end
 `legal_action_space(env)`. `action_mapping` will be applied to `action` before
 feeding it into `env`.
 """
-function ActionTransformedEnv(
-    env;
-    action_space_mapping = identity,
-    action_mapping = identity,
-)
-    ActionTransformedEnv(action_space_mapping, action_mapping, env)
-end
+ActionTransformedEnv(env; action_mapping = identity, action_space_mapping = identity) = 
+    ActionTransformedEnv(env, action_mapping, action_space_mapping)
 
 RLBase.action_space(env::ActionTransformedEnv, args...) =
     env.action_space_mapping(action_space(env.env), args...)
