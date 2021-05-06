@@ -85,7 +85,7 @@ function RLCore.Experiment(
     hook = ComposedHook(
         total_batch_reward_per_episode,
         batch_steps_per_episode,
-        DoEveryNStep(UPDATE_FREQ) do t, agent, env
+        DoEveryNStep(;n=UPDATE_FREQ) do t, agent, env
             p = agent.policy
             with_logger(lg) do
                 @info "training" loss = mean(p.loss) actor_loss = mean(p.actor_loss) critic_loss =
@@ -93,7 +93,7 @@ function RLCore.Experiment(
                     mean(p.norm) log_step_increment = UPDATE_FREQ
             end
         end,
-        DoEveryNStep(UPDATE_FREQ) do t, agent, env
+        DoEveryNStep(;n=UPDATE_FREQ) do t, agent, env
             decay = (N_TRAINING_STEPS - t) / N_TRAINING_STEPS
             agent.policy.approximator.optimizer.eta = INIT_LEARNING_RATE * decay
             agent.policy.clip_range = INIT_CLIP_RANGE * Float32(decay)
@@ -116,7 +116,7 @@ function RLCore.Experiment(
                 end
             end
         end,
-        DoEveryNStep(EVALUATION_FREQ) do t, agent, env
+        DoEveryNStep(;n=EVALUATION_FREQ) do t, agent, env
             @info "evaluating agent at $t step..."
             # switch to GreedyExplorer?
             h = TotalBatchRewardPerEpisode(N_ENV)

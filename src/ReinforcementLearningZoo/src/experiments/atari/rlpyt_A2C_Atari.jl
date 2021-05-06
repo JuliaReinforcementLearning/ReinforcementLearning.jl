@@ -83,7 +83,7 @@ function RLCore.Experiment(
     hook = ComposedHook(
         total_batch_reward_per_episode,
         batch_steps_per_episode,
-        DoEveryNStep(UPDATE_FREQ) do t, agent, env
+        DoEveryNStep(;n=UPDATE_FREQ) do t, agent, env
             learner = agent.policy.policy.learner
             with_logger(lg) do
                 @info "training" loss = learner.loss actor_loss = learner.actor_loss critic_loss =
@@ -109,7 +109,7 @@ function RLCore.Experiment(
                 end
             end
         end,
-        DoEveryNStep(EVALUATION_FREQ) do t, agent, env
+        DoEveryNStep(;n=EVALUATION_FREQ) do t, agent, env
             @info "evaluating agent at $t step..."
             h = TotalBatchOriginalRewardPerEpisode(N_ENV)
             s = @elapsed run(
