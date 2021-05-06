@@ -64,16 +64,16 @@ function RLCore.Experiment(
         total_reward_per_episode,
         time_per_step,
         DoEveryNStep() do t, agent, env
-        with_logger(lg) do
-            @info "training" loss = agent.policy.learner.loss
-        end
-    end,
+            with_logger(lg) do
+                @info "training" loss = agent.policy.learner.loss
+            end
+        end,
         DoEveryNEpisode() do t, agent, env
         with_logger(lg) do
             @info "training" reward = total_reward_per_episode.rewards[end] log_step_increment =
                     0
-        end
-    end,
+            end
+        end,
     )
 
     description = """

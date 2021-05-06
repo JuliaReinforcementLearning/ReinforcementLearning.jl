@@ -87,7 +87,7 @@
         rng = StableRNG(123)
         env = TigerProblemEnv(; rng=rng)
         # S = (:door1, :door2, :door3, :none)
-        # env′ = StateTransformedEnv(env, s -> s+1)
+        # env′ = StateTransformedEnv(env, state_mapping=s -> s+1)
         # RLBase.state_space(env::typeof(env′), ::RLBase.AbstractStateStyle, ::Any) = S
 
         # RLBase.test_interfaces!(env′)
