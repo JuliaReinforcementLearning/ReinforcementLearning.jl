@@ -13,7 +13,7 @@ end
 and similarly `state_space_mapping` will be applied when calling `state_space(env)`.
 """
 StateTransformedEnv(env; state_mapping=identity, state_space_mapping=identity) = 
-    StateTransformedEnv(state_mapping, state_space_mapping, env)
+    StateTransformedEnv(env, state_mapping, state_space_mapping)
 
 RLBase.state(env::StateTransformedEnv, args...; kwargs...) =
     env.state_mapping(state(env.env, args...; kwargs...))
