@@ -1,20 +1,22 @@
-export StateOverriddenEnv
+export StateTransformedEnv
 
-"""
-    StateOverriddenEnv(f, env)
-
-Apply `f` to override `state(env)`.
-
-!!! note
-    If the meaning of state space is changed after apply `f`, one should
-    manually redefine the `RLBase.state_space(env::YourSpecificEnv)`.
-"""
-struct StateOverriddenEnv{F,E<:AbstractEnv} <: AbstractEnvWrapper
+struct StateTransformedEnv{P,M,E<:AbstractEnv} <: AbstractEnvWrapper
     env::E
-    f::F
+    state_mapping::P
+    state_space_mapping::M
 end
 
-StateOverriddenEnv(f) = env -> StateOverriddenEnv(f, env)
+"""
+    StateTransformedEnv(env; state_mapping=identity, state_space_mapping=identity)
 
-RLBase.state(env::StateOverriddenEnv, args...; kwargs...) =
-    env.f(state(env.env, args...; kwargs...))
+`state_mapping` will be applied on the original state when calling `state(env)`,
+and similarly `state_space_mapping` will be applied when calling `state_space(env)`.
+"""
+StateTransformedEnv(env; state_mapping=identity, state_space_mapping=identity) = 
+    StateTransformedEnv(state_mapping, state_space_mapping, env)
+
+RLBase.state(env::StateTransformedEnv, args...; kwargs...) =
+    env.state_mapping(state(env.env, args...; kwargs...))
+
+RLBase.state_space(env::StateTransformedEnv, args...; kwargs...) = 
+    env.state_space_mapping(state_space(env.env, args...; kwargs...))
