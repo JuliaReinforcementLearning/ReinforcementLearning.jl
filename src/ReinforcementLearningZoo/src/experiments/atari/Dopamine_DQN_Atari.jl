@@ -89,7 +89,7 @@ function RLCore.Experiment(
                     total_reward_per_episode.rewards[end] log_step_increment = 0
             end
         end,
-        DoEveryNStep(EVALUATION_FREQ) do t, agent, env
+        DoEveryNStep(;n=EVALUATION_FREQ) do t, agent, env
             @info "evaluating agent at $t step..."
             p = agent.policy
             p = @set p.explorer = EpsilonGreedyExplorer(0.001; rng = rng)  # set evaluation epsilon
