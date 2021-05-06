@@ -43,10 +43,10 @@
         RLBase.test_runnable!(env′)
 
         while !is_terminated(env′)
-    env′(:listen)
-    n -= 1
-    @test n >= 0
-end
+            env′(:listen)
+            n -= 1
+            @test n >= 0
+        end
 
         reset!(env′)
         @test env′.current_t == 1
@@ -62,9 +62,9 @@ end
         RLBase.test_runnable!(env′)
 
         while !is_terminated(env′)
-    env′(rand(rng, legal_action_space(env′)))
-    @test reward(env′) ∈ (-1, 0, 1)
-end
+            env′(rand(rng, legal_action_space(env′)))
+            @test reward(env′) ∈ (-1, 0, 1)
+        end
     end
 
     @testset "StateCachedEnv" begin
@@ -76,11 +76,11 @@ end
         RLBase.test_runnable!(env′)
 
         while !is_terminated(env′)
-    env′(rand(rng, legal_action_space(env′)))
-    s1 = state(env)
-    s2 = state(env)
-    @test s1 === s2
-end
+            env′(rand(rng, legal_action_space(env′)))
+            s1 = state(env)
+            s2 = state(env)
+            @test s1 === s2
+        end
     end
 
     @testset "StateTransformedEnv" begin
