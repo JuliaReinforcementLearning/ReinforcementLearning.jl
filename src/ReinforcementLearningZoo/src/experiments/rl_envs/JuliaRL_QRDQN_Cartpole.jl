@@ -54,7 +54,10 @@ function RLCore.Experiment(
 
     stop_condition = StopAfterStep(10_000)
 
-    hook = ComposedHook(TotalRewardPerEpisode())
+    hook = ComposedHook(
+        TotalRewardPerEpisode(),
+        TimePerStep(),
+    )
 
     description = """
     This experiment uses the `QRDQNLearner` method with three dense layers to approximate the quantile values.
