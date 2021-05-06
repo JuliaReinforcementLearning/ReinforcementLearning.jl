@@ -26,9 +26,9 @@ function atari_env_factory(
             seed = seed,
         ) |>
         env ->
-            StateOverriddenEnv(
-                env,
-                Chain(ResizeImage(state_size...), StackFrames(state_size..., n_frames)),
+            StateTransformedEnv(
+                env;
+                state_mapping = Chain(ResizeImage(state_size...), StackFrames(state_size..., n_frames)),
             ) |>
             StateCachedEnv |>
             env -> RewardOverriddenEnv(env, r -> clamp(r, -1, 1))
