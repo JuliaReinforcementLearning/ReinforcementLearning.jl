@@ -26,15 +26,15 @@ function RLCore.Experiment(
     init = glorot_uniform(rng)
 
     create_actor() = Chain(
-        Dense(ns, 30, relu; initW = init),
-        Dense(30, 30, relu; initW = init),
-        Dense(30, 1, tanh; initW = init),
+        Dense(ns, 30, relu; init = init),
+        Dense(30, 30, relu; init = init),
+        Dense(30, 1, tanh; init = init),
     )
 
     create_critic() = Chain(
-        Dense(ns + 1, 30, relu; initW = init),
-        Dense(30, 30, relu; initW = init),
-        Dense(30, 1; initW = init),
+        Dense(ns + 1, 30, relu; init = init),
+        Dense(30, 30, relu; init = init),
+        Dense(30, 1; init = init),
     )
 
     agent = Agent(

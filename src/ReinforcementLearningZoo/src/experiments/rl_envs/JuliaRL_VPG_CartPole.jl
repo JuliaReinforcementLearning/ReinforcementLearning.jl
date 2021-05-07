@@ -20,17 +20,17 @@ function RLCore.Experiment(
         policy = VPGPolicy(
             approximator = NeuralNetworkApproximator(
                 model = Chain(
-                    Dense(ns, 128, relu; initW = glorot_uniform(rng)),
-                    Dense(128, 128, relu; initW = glorot_uniform(rng)),
-                    Dense(128, na; initW = glorot_uniform(rng)),
+                    Dense(ns, 128, relu; init = glorot_uniform(rng)),
+                    Dense(128, 128, relu; init = glorot_uniform(rng)),
+                    Dense(128, na; init = glorot_uniform(rng)),
                 ),
                 optimizer = ADAM(),
             ) |> cpu,
             baseline = NeuralNetworkApproximator(
                 model = Chain(
-                    Dense(ns, 128, relu; initW = glorot_uniform(rng)),
-                    Dense(128, 128, relu; initW = glorot_uniform(rng)),
-                    Dense(128, 1; initW = glorot_uniform(rng)),
+                    Dense(ns, 128, relu; init = glorot_uniform(rng)),
+                    Dense(128, 128, relu; init = glorot_uniform(rng)),
+                    Dense(128, 1; init = glorot_uniform(rng)),
                 ),
                 optimizer = ADAM(),
             ) |> cpu,

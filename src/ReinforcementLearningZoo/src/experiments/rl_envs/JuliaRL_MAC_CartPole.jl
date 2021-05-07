@@ -27,17 +27,17 @@ function RLCore.Experiment(
                 approximator = ActorCritic(
                     actor = NeuralNetworkApproximator(
                         model = Chain(
-                            Dense(ns, 30, relu; initW = glorot_uniform(rng)),
-                            Dense(30, 30, relu; initW = glorot_uniform(rng)),
-                            Dense(30, na; initW = glorot_uniform(rng)),
+                            Dense(ns, 30, relu; init = glorot_uniform(rng)),
+                            Dense(30, 30, relu; init = glorot_uniform(rng)),
+                            Dense(30, na; init = glorot_uniform(rng)),
                         ),
                         optimizer = ADAM(1e-2),
                     ),
                     critic = NeuralNetworkApproximator(
                         model = Chain(
-                            Dense(ns, 30, relu; initW = glorot_uniform(rng)),
-                            Dense(30, 30, relu; initW = glorot_uniform(rng)),
-                            Dense(30, na; initW = glorot_uniform(rng)),
+                            Dense(ns, 30, relu; init = glorot_uniform(rng)),
+                            Dense(30, 30, relu; init = glorot_uniform(rng)),
+                            Dense(30, na; init = glorot_uniform(rng)),
                         ),
                         optimizer = ADAM(3e-3),
                     ),

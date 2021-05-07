@@ -24,9 +24,9 @@ function RLCore.Experiment(
 
     nn_creator() =
         ImplicitQuantileNet(
-            ψ = Dense(ns, n_hidden, relu; initW = init),
-            ϕ = Dense(Nₑₘ, n_hidden, relu; initW = init),
-            header = Dense(n_hidden, na; initW = init),
+            ψ = Dense(ns, n_hidden, relu; init = init),
+            ϕ = Dense(Nₑₘ, n_hidden, relu; init = init),
+            header = Dense(n_hidden, na; init = init),
         ) |> cpu
 
     agent = Agent(

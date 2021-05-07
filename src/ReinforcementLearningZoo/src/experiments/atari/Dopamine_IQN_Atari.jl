@@ -36,10 +36,10 @@ function RLCore.Experiment(
                 CrossCor((3, 3), 64 => 64, relu; stride = 1, pad = 1, init = init),
                 x -> reshape(x, :, size(x)[end]),
             ),
-            ϕ = Dense(Nₑₘ, 11 * 11 * 64, relu; initW = init),
+            ϕ = Dense(Nₑₘ, 11 * 11 * 64, relu; init = init),
             header = Chain(
-                Dense(11 * 11 * 64, 512, relu; initW = init),
-                Dense(512, N_ACTIONS; initW = init),
+                Dense(11 * 11 * 64, 512, relu; init = init),
+                Dense(512, N_ACTIONS; init = init),
             ),
         ) |> gpu
 

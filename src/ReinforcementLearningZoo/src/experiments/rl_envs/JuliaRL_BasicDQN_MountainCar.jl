@@ -21,9 +21,9 @@ function RLCore.Experiment(
             learner = BasicDQNLearner(
                 approximator = NeuralNetworkApproximator(
                     model = Chain(
-                        Dense(ns, 64, relu; initW = glorot_uniform(rng)),
-                        Dense(64, 64, relu; initW = glorot_uniform(rng)),
-                        Dense(64, na; initW = glorot_uniform(rng)),
+                        Dense(ns, 64, relu; init = glorot_uniform(rng)),
+                        Dense(64, 64, relu; init = glorot_uniform(rng)),
+                        Dense(64, na; init = glorot_uniform(rng)),
                     ) |> cpu,
                     optimizer = ADAM(),
                 ),

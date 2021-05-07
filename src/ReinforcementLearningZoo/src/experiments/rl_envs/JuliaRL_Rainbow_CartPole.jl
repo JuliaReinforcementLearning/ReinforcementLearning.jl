@@ -23,17 +23,17 @@ function RLCore.Experiment(
             learner = RainbowLearner(
                 approximator = NeuralNetworkApproximator(
                     model = Chain(
-                        Dense(ns, 128, relu; initW = glorot_uniform(rng)),
-                        Dense(128, 128, relu; initW = glorot_uniform(rng)),
-                        Dense(128, na * n_atoms; initW = glorot_uniform(rng)),
+                        Dense(ns, 128, relu; init = glorot_uniform(rng)),
+                        Dense(128, 128, relu; init = glorot_uniform(rng)),
+                        Dense(128, na * n_atoms; init = glorot_uniform(rng)),
                     ) |> cpu,
                     optimizer = ADAM(0.0005),
                 ),
                 target_approximator = NeuralNetworkApproximator(
                     model = Chain(
-                        Dense(ns, 128, relu; initW = glorot_uniform(rng)),
-                        Dense(128, 128, relu; initW = glorot_uniform(rng)),
-                        Dense(128, na * n_atoms; initW = glorot_uniform(rng)),
+                        Dense(ns, 128, relu; init = glorot_uniform(rng)),
+                        Dense(128, 128, relu; init = glorot_uniform(rng)),
+                        Dense(128, na * n_atoms; init = glorot_uniform(rng)),
                     ) |> cpu,
                     optimizer = ADAM(0.0005),
                 ),
