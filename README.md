@@ -41,9 +41,8 @@ julia> using ReinforcementLearning
 julia> run(E`JuliaRL_BasicDQN_CartPole`)
 ```
 
-![JuliaRL_BasicDQN_CartPole.gif](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/manual/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true)
-
 <!-- ```@raw html -->
+<img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/manual/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true" width="600px">
 <details>
   <summary>Full list of available experiments</summary>
   <ur>
