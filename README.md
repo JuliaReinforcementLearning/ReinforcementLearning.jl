@@ -41,7 +41,48 @@ julia> using ReinforcementLearning
 julia> run(E`JuliaRL_BasicDQN_CartPole`)
 ```
 
-Check out the [Get Started](https://juliareinforcementlearning.org/get_started/) page for a detailed explanation. The underlying design decisions and implementation details are documented in this [blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/).
+![JuliaRL_BasicDQN_CartPole.gif](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/manual/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true)
+
+<!-- ```@raw html -->
+<details>
+  <summary>Full list of available experiments</summary>
+  <ur>
+    <li><code>E`JuliaRL_BasicDQN_CartPole`</code></li>
+    <li><code>E`JuliaRL_DQN_CartPole`</code></li>
+    <li><code>E`JuliaRL_PrioritizedDQN_CartPole`</code></li>
+    <li><code>E`JuliaRL_Rainbow_CartPole`</code></li>
+    <li><code>E`JuliaRL_IQN_CartPole`</code></li>
+    <li><code>E`JuliaRL_A2C_CartPole`</code></li>
+    <li><code>E`JuliaRL_A2CGAE_CartPole`</code> (Thanks to <a href="https://github.com/sriram13m">@sriram13m</a></li>
+    <li><code>E`JuliaRL_MAC_CartPole`</code> (Thanks to <a href="https://github.com/RajGhugare19">@RajGhugare19</a>)</li>
+    <li><code>E`JuliaRL_PPO_CartPole`</code></li>
+    <li><code>E`JuliaRL_VPG_CartPole`</code> (Thanks to <a href="https://github.com/norci">@norci</a>)</li>
+    <li><code>E`JuliaRL_DDPG_Pendulum`</code></li>
+    <li><code>E`JuliaRL_TD3_Pendulum`</code> (Thanks to <a href="https://github.com/rbange">@rbange</a>)</li>
+    <li><code>E`JuliaRL_SAC_Pendulum`</code> (Thanks to <a href="https://github.com/rbange">@rbange</a>)</li>
+    <li><code>E`JuliaRL_PPO_Pendulum`</code></li>
+    <li><code>E`JuliaRL_BasicDQN_MountainCar`</code> (Thanks to <a href="https://github.com/felixchalumeau">@felixchalumeau</a>)</li>
+    <li><code>E`JuliaRL_DQN_MountainCar`</code> (Thanks to <a href="https://github.com/felixchalumeau">@felixchalumeau</a>)</li>
+    <li><code>E`JuliaRL_Minimax_OpenSpiel(tic_tac_toe)`</code></li>
+    <li><code>E`JuliaRL_TabularCFR_OpenSpiel(kuhn_poker)`</code></li>
+    <li><code>E`JuliaRL_DeepCFR_OpenSpiel(leduc_poker)`</code></li>
+    <li><code>E`JuliaRL_DQN_SnakeGame`</code></li>
+    <li><code>E`JuliaRL_BC_CartPole`</code></li>
+    <li><code>E`JuliaRL_BasicDQN_EmptyRoom`</code></li>
+    <li><code>E`Dopamine_DQN_Atari(pong)`</code></li>
+    <li><code>E`Dopamine_Rainbow_Atari(pong)`</code></li>
+    <li><code>E`Dopamine_IQN_Atari(pong)`</code></li>
+    <li><code>E`rlpyt_A2C_Atari(pong)`</code></li>
+    <li><code>E`rlpyt_PPO_Atari(pong)`</code></li>
+  </ul>
+</details>
+<!-- ``` -->
+
+Check out the [Get Started](https://juliareinforcementlearning.org/get_started/)
+page for a detailed explanation on what an `Experiment` is. The underlying design decisions and
+implementation details are documented in this
+[blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/).
+
 
 ## Project Structure
 

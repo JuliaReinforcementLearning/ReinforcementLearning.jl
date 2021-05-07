@@ -4,19 +4,12 @@ function RLCore.Experiment(
     ::Val{:CartPole},
     ::Nothing;
     seed = 123,
-    save_dir = nothing,
 )
-    if isnothing(save_dir)
-        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
-        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_BasicDQN_CartPole_$(t)")
-    end
-    log_dir = joinpath(save_dir, "tb_log")
-    lg = TBLogger(log_dir, min_level = Logging.Info)
     rng = StableRNG(seed)
-
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(state(env)), length(action_space(env))
-    agent = Agent(
+
+    policy = Agent(
         policy = QBasedPolicy(
             learner = BasicDQNLearner(
                 approximator = NeuralNetworkApproximator(
@@ -46,32 +39,11 @@ function RLCore.Experiment(
     )
 
     stop_condition = StopAfterStep(10_000)
-
-    total_reward_per_episode = TotalRewardPerEpisode()
-    time_per_step = TimePerStep()
-    hook = ComposedHook(
-        total_reward_per_episode,
-        time_per_step,
-        DoEveryNStep() do t, agent, env
-            with_logger(lg) do
-                @info "training" loss = agent.policy.learner.loss
-            end
-        end,
-        DoEveryNEpisode() do t, agent, env
-            with_logger(lg) do
-                @info "training" reward = total_reward_per_episode.rewards[end] log_step_increment =
-                    0
-            end
-        end,
-    )
+    hook = ComposedHook(TotalRewardPerEpisode(), TimePerStep())
 
     description = """
-    This experiment uses three dense layers to approximate the Q value.
-    The testing environment is CartPoleEnv.
-
-    You can view the runtime logs with `tensorboard --logdir $log_dir`.
-    Some useful statistics are stored in the `hook` field of this experiment.
+    # BasicDQN <=> CartPoleEnv
     """
 
-    Experiment(agent, env, stop_condition, hook, description)
+    Experiment(policy, env, stop_condition, hook, description)
 end
