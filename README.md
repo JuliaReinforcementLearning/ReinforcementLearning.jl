@@ -1,7 +1,7 @@
 <!-- ```@raw html -->
 <div align="center">
   <p>
-  <img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/logo.svg?sanitize=true" width="320px">
+  <img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/manual/src/assets/logo.svg?sanitize=true" width="320px">
   </p>
 
   <p>
