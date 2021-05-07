@@ -83,7 +83,6 @@ page for a detailed explanation on what an `Experiment` is. The underlying desig
 implementation details are documented in this
 [blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/).
 
-
 ## Project Structure 🌲
 
 `ReinforcementLearning.jl` itself is just a wrapper around several other
@@ -117,21 +116,6 @@ subpackages. The relationship between them is depicted below:
 +-----------------------------------------------------------------------------------+
 </pre>
 <!-- ``` -->
-
-### Scope of Each Package
-
-- [ReinforcementLearningBase.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningBase)
-  Two main concepts in reinforcement learning are precisely defined here: **Policy**
-  and **Environment**.
-- [ReinforcementLearningEnvironments.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningEnvironments)
-  Typical environment examples in pure Julia and wrappers for 3-rd party
-  environments are provided in this package.
-- [ReinforcementLearningCore.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningCore)
-  Common utility functions and different layers of abstractions are contained in
-  this package.
-- [ReinforcementLearningZoo.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningZoo)
-  Common reinforcement learning algorithms and their typical applications (aka
-  `Experiment`s) are collected in this package.
 
 ## Supporting 🖖
 
