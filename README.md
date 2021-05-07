@@ -129,7 +129,7 @@ to cooperate in some way, please contact us!
 ## Citing ✍️
 
 If you use `ReinforcementLearning.jl` in a scientific publication, we would
-appreciate references to the [CITATION.bib]https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/CITATION.bib):
+appreciate references to the [CITATION.bib](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/CITATION.bib):
 
 ## Contributors ✨
 
