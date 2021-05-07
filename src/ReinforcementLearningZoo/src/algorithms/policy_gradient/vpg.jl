@@ -17,7 +17,7 @@ Flux.@functor GaussianNetwork
 
 function (m::GaussianNetwork)(S)
     x = m.pre(S)
-    m.μ(x), m.logσ(x) 
+    m.μ(x), m.logσ(x)
 end
 
 """

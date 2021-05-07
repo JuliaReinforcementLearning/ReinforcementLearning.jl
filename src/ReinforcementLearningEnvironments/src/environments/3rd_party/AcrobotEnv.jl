@@ -18,23 +18,23 @@ AcrobotEnv(;kwargs...)
 - `avail_torque = [T(-1.), T(0.), T(1.)]`
 """
 function AcrobotEnv(;
-    T=Float64,
-    link_length_a=T(1.0),
-    link_length_b=T(1.0),
-    link_mass_a=T(1.0),
-    link_mass_b=T(1.0),
-    link_com_pos_a=T(0.5),
-    link_com_pos_b=T(0.5),
-    link_moi=T(1.0),
-    max_torque_noise=T(0.0),
-    max_vel_a=T(4 * π),
-    max_vel_b=T(9 * π),
-    g=T(9.8),
-    dt=T(0.2),
-    max_steps=200,
-    rng=Random.GLOBAL_RNG,
-    book_or_nips="book",
-    avail_torque=[T(-1.0), T(0.0), T(1.0)],
+    T = Float64,
+    link_length_a = T(1.0),
+    link_length_b = T(1.0),
+    link_mass_a = T(1.0),
+    link_mass_b = T(1.0),
+    link_com_pos_a = T(0.5),
+    link_com_pos_b = T(0.5),
+    link_moi = T(1.0),
+    max_torque_noise = T(0.0),
+    max_vel_a = T(4 * π),
+    max_vel_b = T(9 * π),
+    g = T(9.8),
+    dt = T(0.2),
+    max_steps = 200,
+    rng = Random.GLOBAL_RNG,
+    book_or_nips = "book",
+    avail_torque = [T(-1.0), T(0.0), T(1.0)],
 )
 
     params = AcrobotEnvParams{T}(
@@ -81,7 +81,7 @@ RLBase.is_terminated(env::AcrobotEnv) = env.done
 RLBase.state(env::AcrobotEnv) = acrobot_observation(env.state)
 RLBase.reward(env::AcrobotEnv) = env.reward
 
-function RLBase.reset!(env::AcrobotEnv{T}) where {T <: Number}
+function RLBase.reset!(env::AcrobotEnv{T}) where {T<:Number}
     env.state[:] = T(0.1) * rand(env.rng, T, 4) .- T(0.05)
     env.t = 0
     env.action = 2
@@ -91,7 +91,7 @@ function RLBase.reset!(env::AcrobotEnv{T}) where {T <: Number}
 end
 
 # governing equations as per python gym
-function (env::AcrobotEnv{T})(a) where {T <: Number}
+function (env::AcrobotEnv{T})(a) where {T<:Number}
     env.action = a
     env.t += 1
     torque = env.avail_torque[a]
@@ -137,7 +137,7 @@ function dsdt(du, s_augmented, env::AcrobotEnv, t)
 
     # extract action and state
     a = s_augmented[end]
-    s = s_augmented[1:end - 1]
+    s = s_augmented[1:end-1]
 
     # writing in standard form
     theta1 = s[1]
@@ -201,7 +201,7 @@ function wrap(x, m, M)
     while x < m
         x = x + diff
     end
-return x
+    return x
 end
 
 function bound(x, m, M)

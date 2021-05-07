@@ -23,7 +23,8 @@ function RLCore.Experiment(
     UPDATE_FREQ = 2048
     env = MultiThreadEnv([
         PendulumEnv(T = Float32, rng = StableRNG(hash(seed + i))) |>
-        env -> ActionTransformedEnv(env, action_mapping = x -> clamp(x * 2, low, high)) for i in 1:N_ENV
+        env -> ActionTransformedEnv(env, action_mapping = x -> clamp(x * 2, low, high))
+        for i in 1:N_ENV
     ])
 
     init = glorot_uniform(rng)

@@ -41,7 +41,8 @@ end
 # !!! may need to be extended by user
 CRL.@provide CRL.observe(env::CommonRLEnv) = state(env.env)
 
-CRL.provided(::typeof(CRL.state), env::CommonRLEnv) = !isnothing(find_state_style(env.env, InternalState))
+CRL.provided(::typeof(CRL.state), env::CommonRLEnv) =
+    !isnothing(find_state_style(env.env, InternalState))
 CRL.state(env::CommonRLEnv) = state(env.env, find_state_style(env.env, InternalState))
 
 CRL.@provide CRL.clone(env::CommonRLEnv) = CommonRLEnv(copy(env.env))

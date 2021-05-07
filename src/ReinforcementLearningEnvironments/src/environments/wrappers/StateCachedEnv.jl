@@ -6,7 +6,7 @@ the next interaction with `env`. This function is useful because some
 environments are stateful during each `state(env)`. For example:
 `StateTransformedEnv(StackFrames(...))`.
 """
-mutable struct StateCachedEnv{S,E <: AbstractEnv} <: AbstractEnvWrapper
+mutable struct StateCachedEnv{S,E<:AbstractEnv} <: AbstractEnvWrapper
     s::S
     env::E
     is_state_cached::Bool

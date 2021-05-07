@@ -90,8 +90,8 @@ function SACPolicy(;
         update_every,
         step,
         rng,
-        0f0,
-        0f0,
+        0.0f0,
+        0.0f0,
     )
 end
 
@@ -106,7 +106,7 @@ function (p::SACPolicy)(env)
         s = state(env)
         s = Flux.unsqueeze(s, ndims(s) + 1)
         # trainmode:
-        action = dropdims(evaluate(p, s)[1], dims=2) # Single action vec, drop second dim
+        action = dropdims(evaluate(p, s)[1], dims = 2) # Single action vec, drop second dim
 
         # testmode:
         # if testing dont sample an action, but act deterministically by
@@ -171,7 +171,7 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
         q = min.(p.qnetwork1(q_input), p.qnetwork2(q_input))
         reward = mean(q)
         entropy = mean(log_π)
-        ignore() do 
+        ignore() do
             p.reward_term = reward
             p.entropy_term = entropy
         end

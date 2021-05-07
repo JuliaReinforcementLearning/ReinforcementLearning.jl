@@ -1,5 +1,5 @@
 @testset "test StopAfterNoImprovement" begin
-    env = StateTransformedEnv(CartPoleEnv{Float32}();state_mapping=deepcopy)
+    env = StateTransformedEnv(CartPoleEnv{Float32}(); state_mapping = deepcopy)
     policy = RandomPolicy(action_space(env))
 
     total_reward_per_episode = TotalRewardPerEpisode()

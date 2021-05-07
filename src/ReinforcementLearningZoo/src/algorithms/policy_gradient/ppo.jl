@@ -148,7 +148,9 @@ function RLBase.prob(
     if p.update_step < p.n_random_start
         @error "todo"
     else
-        μ, logσ = p.approximator.actor(send_to_device(device(p.approximator), state)) |> send_to_host 
+        μ, logσ =
+            p.approximator.actor(send_to_device(device(p.approximator), state)) |>
+            send_to_host
         StructArray{Normal}((μ, exp.(logσ)))
     end
 end
@@ -270,7 +272,8 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
                     else
                         log_p′ₐ = normlogpdf(μ, exp.(logσ), a)
                     end
-                    entropy_loss = mean(size(logσ, 1) * (log(2.0f0π) + 1) .+ sum(logσ; dims = 1)) / 2
+                    entropy_loss =
+                        mean(size(logσ, 1) * (log(2.0f0π) + 1) .+ sum(logσ; dims = 1)) / 2
                 else
                     # actor is assumed to return discrete logits
                     logit′ = AC.actor(s)

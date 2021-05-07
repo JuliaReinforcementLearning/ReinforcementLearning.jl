@@ -5,7 +5,7 @@ using Random
 using GR
 using Requires
 using IntervalSets
-using Base.Threads:@spawn
+using Base.Threads: @spawn
 using Markdown
 
 const RLEnvs = ReinforcementLearningEnvironments

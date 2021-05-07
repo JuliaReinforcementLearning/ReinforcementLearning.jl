@@ -45,7 +45,7 @@ function RLCore.Experiment(
                 update_freq = 1,
                 target_update_freq = 100,
                 ensemble_num = ensemble_num,
-                ensemble_method = :rand, 
+                ensemble_method = :rand,
                 rng = rng,
             ),
             explorer = EpsilonGreedyExplorer(

@@ -140,7 +140,7 @@ end
 
 function fetch!(
     sampler::NStepBatchSampler{traces},
-    traj::Union{CircularArraySARTTrajectory, CircularArraySLARTTrajectory},
+    traj::Union{CircularArraySARTTrajectory,CircularArraySLARTTrajectory},
     inds::Vector{Int},
 ) where {traces}
     γ, n, bz, sz = sampler.γ, sampler.n, sampler.batch_size, sampler.stack_size
