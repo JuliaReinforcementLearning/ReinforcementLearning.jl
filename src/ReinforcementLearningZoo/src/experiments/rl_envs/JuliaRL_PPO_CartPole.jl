@@ -24,12 +24,12 @@ function RLCore.Experiment(
         policy = PPOPolicy(
             approximator = ActorCritic(
                 actor = Chain(
-                    Dense(ns, 256, relu; initW = glorot_uniform(rng)),
-                    Dense(256, na; initW = glorot_uniform(rng)),
+                    Dense(ns, 256, relu; init = glorot_uniform(rng)),
+                    Dense(256, na; init = glorot_uniform(rng)),
                 ),
                 critic = Chain(
-                    Dense(ns, 256, relu; initW = glorot_uniform(rng)),
-                    Dense(256, 1; initW = glorot_uniform(rng)),
+                    Dense(ns, 256, relu; init = glorot_uniform(rng)),
+                    Dense(256, 1; init = glorot_uniform(rng)),
                 ),
                 optimizer = ADAM(1e-3),
             ) |> cpu,

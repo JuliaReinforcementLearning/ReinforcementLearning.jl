@@ -24,17 +24,17 @@ function RLCore.Experiment(
                 approximator = NeuralNetworkApproximator(
                     model = Chain(
                         # Multi-head method, please refer to "https://github.com/google-research/batch_rl/tree/b55ba35ebd2381199125dd77bfac9e9c59a64d74/batch_rl/multi_head".
-                        Dense(ns, 128, relu; initW = glorot_uniform(rng)),
-                        Dense(128, 128, relu; initW = glorot_uniform(rng)),
-                        Dense(128, na * ensemble_num; initW = glorot_uniform(rng)),
+                        Dense(ns, 128, relu; init = glorot_uniform(rng)),
+                        Dense(128, 128, relu; init = glorot_uniform(rng)),
+                        Dense(128, na * ensemble_num; init = glorot_uniform(rng)),
                     ) |> cpu,
                     optimizer = ADAM(),
                 ),
                 target_approximator = NeuralNetworkApproximator(
                     model = Chain(
-                        Dense(ns, 128, relu; initW = glorot_uniform(rng)),
-                        Dense(128, 128, relu; initW = glorot_uniform(rng)),
-                        Dense(128, na * ensemble_num; initW = glorot_uniform(rng)),
+                        Dense(ns, 128, relu; init = glorot_uniform(rng)),
+                        Dense(128, 128, relu; init = glorot_uniform(rng)),
+                        Dense(128, na * ensemble_num; init = glorot_uniform(rng)),
                     ) |> cpu,
                 ),
                 loss_func = huber_loss,

@@ -39,14 +39,14 @@ function RLCore.Experiment(
         CrossCor((8, 8), N_FRAMES => 32, relu; stride = 4, pad = 0, init = init),
         CrossCor((4, 4), 32 => 64, relu; stride = 2, pad = 1, init = init),
         x -> reshape(x, :, size(x)[end]),
-        Dense(6912, 512, relu; initW = init),
+        Dense(6912, 512, relu; init = init),
     )
 
     agent = Agent(
         policy = PPOPolicy(
             approximator = ActorCritic(
-                actor = Chain(model, Dense(512, N_ACTIONS; initW = init)),
-                critic = Chain(model, Dense(512, 1; initW = init)),
+                actor = Chain(model, Dense(512, N_ACTIONS; init = init)),
+                critic = Chain(model, Dense(512, 1; init = init)),
                 optimizer = ADAM(INIT_LEARNING_RATE),  # decrease learning rate with a hook
             ) |> gpu,
             γ = 0.99f0,
@@ -101,15 +101,13 @@ function RLCore.Experiment(
         DoEveryNStep() do t, agent, env
             with_logger(lg) do
                 rewards = [
-                    total_batch_reward_per_episode.rewards[i][end] for
-                    i in 1:length(env) if is_terminated(env[i])
+                    total_batch_reward_per_episode.rewards[i][end] for i in 1:length(env) if is_terminated(env[i])
                 ]
                 if length(rewards) > 0
                     @info "training" rewards = mean(rewards) log_step_increment = 0
                 end
                 steps = [
-                    batch_steps_per_episode.steps[i][end] for
-                    i in 1:length(env) if is_terminated(env[i])
+                    batch_steps_per_episode.steps[i][end] for i in 1:length(env) if is_terminated(env[i])
                 ]
                 if length(steps) > 0
                     @info "training" steps = mean(steps) log_step_increment = 0

@@ -18,17 +18,17 @@ function RLCore.Experiment(
             learner=QRDQNLearner(
                 approximator=NeuralNetworkApproximator(
                     model=Chain(
-                        Dense(ns, 128, relu; initW=glorot_uniform(rng)),
-                        Dense(128, 128, relu; initW=glorot_uniform(rng)),
-                        Dense(128, N * na; initW=glorot_uniform(rng)),
+                        Dense(ns, 128, relu; init=glorot_uniform(rng)),
+                        Dense(128, 128, relu; init=glorot_uniform(rng)),
+                        Dense(128, N * na; init=glorot_uniform(rng)),
                     ) |> cpu,
                     optimizer=ADAM(),
                 ),
                 target_approximator=NeuralNetworkApproximator(
                     model=Chain(
-                        Dense(ns, 128, relu; initW=glorot_uniform(rng)),
-                        Dense(128, 128, relu; initW=glorot_uniform(rng)),
-                        Dense(128, N * na; initW=glorot_uniform(rng)),
+                        Dense(ns, 128, relu; init=glorot_uniform(rng)),
+                        Dense(128, 128, relu; init=glorot_uniform(rng)),
+                        Dense(128, N * na; init=glorot_uniform(rng)),
                     ) |> cpu,
                 ),
                 stack_size=nothing,

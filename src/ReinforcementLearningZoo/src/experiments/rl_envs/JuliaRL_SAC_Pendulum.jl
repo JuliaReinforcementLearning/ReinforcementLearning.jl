@@ -32,17 +32,17 @@ function RLCore.Experiment(
                 Dense(ns, 30, relu), 
                 Dense(30, 30, relu),
             ),
-            μ = Chain(Dense(30, na, initW = init)),
-            logσ = Chain(Dense(30, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), initW = init)),
+            μ = Chain(Dense(30, na, init = init)),
+            logσ = Chain(Dense(30, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),
         ),
         optimizer = ADAM(0.003),
     )
 
     create_q_net() = NeuralNetworkApproximator(
         model = Chain(
-            Dense(ns + na, 30, relu; initW = init),
-            Dense(30, 30, relu; initW = init),
-            Dense(30, 1; initW = init),
+            Dense(ns + na, 30, relu; init = init),
+            Dense(30, 30, relu; init = init),
+            Dense(30, 1; init = init),
         ),
         optimizer = ADAM(0.003),
     )
