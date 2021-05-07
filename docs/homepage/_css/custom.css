@@ -1,0 +1,334 @@
+/* HomePage */
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255,255,255,.8) !important;
+}
+
+.navbar-dark .navbar-nav .nav-link:focus, .navbar-dark .navbar-nav .nav-link:hover {
+    color: rgba(255,255,255,1.0) !important;
+}
+
+.jumbotron {
+  background-color: transparent !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.key-feature h3 {
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.feature-section {
+  margin-top: 5rem;
+  margin-bottom: 5rem;
+}
+
+.feature-section img {
+  max-height: 250px;
+}
+
+/* CODE */
+
+a code {
+    background-color: #f8f8f8;
+    font-size: 90%;
+}
+
+code {
+    padding: 2px 4px;
+    font-size: 90%;
+    color: inherit;
+    background-color: #f8f8f8;
+    border-radius: 4px;
+}
+
+blockquote {
+    padding: 0px 10px;
+    border-left: 5px solid #eee;
+}
+
+.hljs {
+    font-size: 90%;
+    line-height: 1.35em;
+    border-radius: 10px; }
+
+.hljs-meta, .hljs-metas, .hljs-metap { font-weight: bold; }
+
+.hljs-meta { color: rgb(25, 179, 51); }
+
+.hljs-metas { color: red; }
+
+.hljs-metap { color: rgb(51, 131, 231); }
+
+
+/* DISTILL */
+
+html {
+  font-size: 14px;
+	line-height: 1.6em;
+  /* font-family: "Libre Franklin", "Helvetica Neue", sans-serif; */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  /*, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";*/
+  text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media(min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+d-article h4 {
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+figure figcaption {
+  margin: 15px;
+}
+
+d-title a{
+  color: inherit;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.8);
+}
+
+d-title a:hover {
+  color: inherit;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.8);
+}
+
+d-appendix a {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.8);
+}
+
+d-appendix a:hover{
+  color: inherit;
+  text-decoration: none;
+}
+
+d-article a:hover{
+  color: inherit;
+  text-decoration: none;
+}
+
+a.footnote-backlink{
+  border-bottom: 0px solid rgba(0, 0, 0, 0.8);
+}
+
+d-article h1 a,
+d-article h2 a,
+d-article h3 a,
+d-article h4 a{
+  color: inherit;
+  text-decoration: none;
+  border-bottom: none !important;
+}
+
+d-article li{
+  margin-bottom: 0.3em !important;
+}
+
+/* ADJUSTMENTS */
+
+.franklin-content ul li p { margin: 0; }
+
+body {
+  padding-top: 5rem;
+}
+
+/* footer */
+.distill-site-footer {
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    z-index: 3;
+    margin-top: 30px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    text-align: center;
+    background-color: #f4f4f4;
+  }
+  
+.distill-site-footer a,
+.package-list a {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* CSS for table of contents */
+
+.franklin-toc {
+  color: rgba(0,0,0,0.8);
+  font-size: 0.8em;
+  line-height: 1em;
+}
+
+.franklin-toc-header {
+  font-size: 0.6rem;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  margin-top: 0;
+  margin-bottom: 1.3em;
+}
+
+.franklin-toc a {
+  border-bottom: none;
+}
+
+.franklin-toc ol {
+  padding-left: 0;
+}
+
+.franklin-toc li>ol {
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 16px;
+  margin-bottom: 0.6em;
+}
+
+.franklin-toc ol,
+.franklin-toc li {
+  list-style-type: none;
+}
+
+.franklin-toc li {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em !important;
+}
+
+.franklin-toc-separator {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.franklin-toc-header {
+    font-size: 0.6rem;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.5);
+    text-transform: uppercase;
+    margin-top: 0;
+    margin-bottom: 1.3em;
+}
+
+
+/* ****************************************
+ * TOC
+ ******************************************/
+    @media(max-width: 1199px){
+      d-contents {
+        display: none;
+        justify-self: start;
+        align-self: start;
+        padding-bottom: 0.5em;
+        margin-bottom: 1em;
+        padding-left: 0.25em;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        border-bottom-width: 1px;
+        border-bottom-style: solid;
+        border-bottom-color: rgba(0, 0, 0, 0.1);
+      }
+    }
+    d-contents a:hover {
+      border-bottom: none;
+    }
+
+    @media (min-width: 1200px){
+      d-contents {
+        align-self: start;
+        grid-column-start: 1 !important;
+        grid-column-end: 4 !important;
+        justify-self: end;
+        margin-top:  0em;
+        padding-right: 3em;
+        padding-left: 2em;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        border-right-width: 1px;
+        border-right-style: solid;
+        border-right-color: rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    d-contents nav h3 {
+      margin-top: 0;
+      margin-bottom: 1em;
+    }
+
+    d-contents nav div {
+      color: rgba(0, 0, 0, 0.8);
+      font-weight: bold;
+    }
+
+    d-contents nav a {
+      color: rgba(0, 0, 0, 0.8);
+      border-bottom: none;
+      text-decoration: none;
+    }
+
+    d-contents li {
+      list-style-type: none;
+    }
+
+    d-contents ul {
+      padding-left: 1em;
+    }
+
+    d-contents nav ul li {
+      margin-bottom: .25em;
+    }
+
+    d-contents nav a:hover {
+      text-decoration: underline solid rgba(0, 0, 0, 0.6);
+    }
+
+    d-contents nav ul {
+      margin-top: 0;
+      margin-bottom: 6px;
+    }
+
+
+    d-contents nav>div {
+      display: block;
+      outline: none;
+      margin-bottom: 0.5em;
+    }
+
+    d-contents nav>div>a {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    d-contents nav>div>a:hover,
+    d-contents nav>ul>li>a:hover {
+        text-decoration: none;
+    }
+
+
+/* note */
+
+.note {
+  margin-top: 1.5em;
+  width: 95%;
+  margin-left: 5px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  margin-bottom: 1em;
+}
+.note .content {
+  color: white;
+  margin-left: 5px;
+  padding: 10px;
+  padding-left: 12px;
+}
+.note .title{
+  font-size: 105%;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  padding-left: 7px;
+  padding-top: 2px;
+  color: white;
+  background: cornflowerblue;
+}

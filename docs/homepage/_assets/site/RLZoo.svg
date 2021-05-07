@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.0"
+   width="400"
+   height="600"
+   id="svg2515">
+  <defs
+     id="defs2517">
+    <radialGradient
+       id="radialGradient705"
+       xlink:href="#linearGradient638" />
+    <radialGradient
+       id="radialGradient700"
+       xlink:href="#linearGradient638" />
+    <radialGradient
+       id="radialGradient695"
+       xlink:href="#linearGradient638" />
+    <radialGradient
+       id="radialGradient690"
+       xlink:href="#linearGradient638" />
+    <radialGradient
+       id="radialGradient685"
+       xlink:href="#linearGradient638" />
+    <radialGradient
+       id="radialGradient680"
+       xlink:href="#linearGradient638" />
+    <radialGradient
+       id="radialGradient675"
+       xlink:href="#linearGradient638" />
+    <radialGradient
+       id="radialGradient670"
+       xlink:href="#linearGradient638" />
+    <radialGradient
+       id="radialGradient644"
+       xlink:href="#linearGradient638" />
+    <radialGradient
+       id="radialGradient643"
+       xlink:href="#linearGradient638" />
+    <linearGradient
+       id="linearGradient642"
+       xlink:href="#linearGradient638" />
+    <linearGradient
+       x1="1.427495e-09"
+       y1="3.9742119e-08"
+       x2="1"
+       y2="3.9742119e-08"
+       id="linearGradient641"
+       xlink:href="#linearGradient638" />
+    <linearGradient
+       id="linearGradient638">
+      <stop
+         style="stop-color:#000000;stop-opacity:1"
+         offset="0"
+         id="stop639" />
+      <stop
+         style="stop-color:#ffffff;stop-opacity:0"
+         offset="1"
+         id="stop640" />
+    </linearGradient>
+  </defs>
+  <g
+     id="layer1">
+    <g
+       id="g4652">
+      <path
+         d="M 240.73222,231.5351 L 240.73222,139.2321 L 333.03522,231.5351 L 333.03522,323.8381 L 333.57372,323.75927 L 240.73222,231.5351 z "
+         style="font-size:12px;fill:#ef3d61;fill-opacity:0.99610003;fill-rule:evenodd;stroke:#000000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="path734" />
+      <path
+         d="M 376.2715,462.85554 L 283.96851,370.55258 L 376.2715,370.55255 L 376.2715,462.85554 z "
+         style="font-size:12px;fill:#f195c8;fill-opacity:0.99610003;fill-rule:evenodd;stroke:#000000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="path731" />
+      <path
+         d="M 116.03151,515.04844 L 116.03151,330.44244 L 23.7285,422.74544 L 116.03151,515.04844 z "
+         style="font-size:12px;fill:#f8cb2c;fill-opacity:0.99610003;fill-rule:evenodd;stroke:#000000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="path730" />
+      <path
+         d="M 70.522056,56.397108 L 150.4588,10.245608 L 196.6103,90.18236 L 116.67356,136.33385 L 117.79322,136.12405 C 117.79322,136.12405 114.66596,134.03922 70.522056,56.397108 z "
+         style="font-size:12px;fill:#a796c2;fill-rule:evenodd;stroke:#000000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="path729" />
+      <path
+         d="M 306.74567,399.38996 L 122.13963,214.78394 L 122.13963,399.38996 L 306.74567,399.38996 z "
+         style="font-size:12px;fill:#c9e891;fill-opacity:0.99620002;fill-rule:evenodd;stroke:#000000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="path727" />
+      <path
+         d="M 119.53182,459.21823 L 119.53182,589.7544 L 184.79992,524.48632 L 119.53182,459.21823 z "
+         style="font-size:12px;fill:#f9f223;fill-opacity:0.99610003;fill-rule:evenodd;stroke:#000000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="path726" />
+      <path
+         d="M 51.942595,140.10658 L 236.54862,324.71258 L 236.54857,140.1066 L 51.942595,140.10658 z "
+         style="font-size:12px;fill:#68c0d2;fill-opacity:0.99610003;fill-rule:evenodd;stroke:#000000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="path724" />
+    </g>
+  </g>
+</svg>
