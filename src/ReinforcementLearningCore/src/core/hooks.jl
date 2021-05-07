@@ -12,6 +12,8 @@ export AbstractHook,
     UploadTrajectoryEveryNStep,
     MultiAgentHook
 
+using UnicodePlots:lineplot
+
 """
 A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
 By default, a `AbstractHook` will do nothing. One can override the behavior by implementing the following methods:
@@ -122,13 +124,16 @@ end
 #####
 
 """
-    TotalRewardPerEpisode(; rewards = Float64[], reward = 0.0)
+    TotalRewardPerEpisode(; rewards = Float64[], reward = 0.0, is_display_on_exit = true)
 
-Store the total rewards of each episode in the field of `rewards`.
+Store the total reward of each episode in the field of `rewards`. If
+`is_display_on_exit` is set to `true`, a unicode plot will be shown at the end of
+an [`Experiment`](@ref).
 """
 Base.@kwdef mutable struct TotalRewardPerEpisode <: AbstractHook
     rewards::Vector{Float64} = Float64[]
     reward::Float64 = 0.0
+    is_display_on_exit::Bool = true
 end
 
 Base.getindex(h::TotalRewardPerEpisode) = h.rewards
@@ -144,6 +149,10 @@ end
 function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env)
     push!(hook.rewards, hook.reward)
     hook.reward = 0
+end
+
+function (hook::TotalRewardPerEpisode)(::PostExperimentStage, agent, env)
+    println(lineplot(hook.rewards, title="Total reward per episode", xlabel="Episode", ylabel="Score"))
 end
 
 #####
