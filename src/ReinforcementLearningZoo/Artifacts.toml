@@ -1,0 +1,7 @@
+[JuliaRL_BasicDQN_CartPole]
+git-tree-sha1 = "d55d71211dcd0f5b56c55640f4873b1344e67a2a"
+lazy = true
+
+    [[JuliaRL_BasicDQN_CartPole.download]]
+    url = "http://data.juliareinforcementlearning.org/artifacts/JuliaRL_BasicDQN_CartPole.tar.gz"
+    sha256 = "d4087daec14d08306d9288b0cb71aa43df198159f43932bc38f0ae535b7a63b5"
