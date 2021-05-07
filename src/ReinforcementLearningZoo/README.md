@@ -47,8 +47,6 @@ Some built-in experiments are exported to help new users to easily run benchmark
 - ``E`JuliaRL_MAC_CartPole` `` (Thanks to [@RajGhugare19](https://github.com/RajGhugare19))
 - ``E`JuliaRL_PPO_CartPole` ``
 - ``E`JuliaRL_VPG_CartPole` `` (Thanks to [@norci](https://github.com/norci))
-- ``E`JuliaRL_VPG_Pendulum` `` (continuous action space)
-- ``E`JuliaRL_VPG_PendulumD` `` (discrete action space)
 - ``E`JuliaRL_DDPG_Pendulum` ``
 - ``E`JuliaRL_TD3_Pendulum` `` (Thanks to [@rbange](https://github.com/rbange))
 - ``E`JuliaRL_SAC_Pendulum` `` (Thanks to [@rbange](https://github.com/rbange))
