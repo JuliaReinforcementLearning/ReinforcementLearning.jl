@@ -19,13 +19,25 @@ jobs:
             using Pkg; Pkg.add(["NodeJS", "Franklin"]);
             using NodeJS; run(`$(npm_cmd()) install highlight.js`);
             using Franklin;
-            Pkg.activate("."); Pkg.instantiate();
+            Pkg.activate(".");
+            Pkg.develop(path="../../src/ReinforcementLearningBase")
+            Pkg.develop(path="../../src/ReinforcementLearningCore")
+            Pkg.develop(path="../../src/ReinforcementLearningEnvironments")
+            Pkg.develop(path="../../src/ReinforcementLearningZoo")
+            Pkg.develop(path="../../")
+            Pkg.instantiate()
             optimize()'
 
       - run: |
           cd docs/manual
           julia --color=yes -e '
-            using Pkg; Pkg.activate("."); Pkg.instantiate();
+            using Pkg; Pkg.activate(".");
+            Pkg.develop(path="../../src/ReinforcementLearningBase")
+            Pkg.develop(path="../../src/ReinforcementLearningCore")
+            Pkg.develop(path="../../src/ReinforcementLearningEnvironments")
+            Pkg.develop(path="../../src/ReinforcementLearningZoo")
+            Pkg.develop(path="../../")
+            Pkg.instantiate()
             include("make.jl")'
           mv build ../homepage/__site/docs
 
