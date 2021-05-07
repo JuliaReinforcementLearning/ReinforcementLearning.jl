@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta name="viewport" content="width=device-width" />
+                <title>⚡ Pluto.jl ⚡</title>
+                <meta charset="utf-8" />
+
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.12.18/frontend/editor.css" type="text/css" />
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.12.18/frontend/treeview.css" type="text/css" />
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.12.18/frontend/hide-ui.css" type="text/css" />
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.58.1/lib/codemirror.min.css" type="text/css" />
+
+                <style id="MJX-SVG-styles">
+mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"] > svg a {
+  fill: blue;
+  stroke: blue;
+}
+
+mjx-assistive-mml {
+  position: absolute !important;
+  top: 0px;
+  left: 0px;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 1px 0px 0px 0px !important;
+  border: 0px !important;
+  display: block !important;
+  width: auto !important;
+  overflow: hidden !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+mjx-assistive-mml[display="block"] {
+  width: 100% !important;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][display="true"][width="full"] {
+  display: flex;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > g > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+</style>
+            </head>
+            <body>
+                <main><preamble><button class="runallchanged" title="Save and run all changed cells"><span></span></button></preamble><pluto-notebook id="ce797966-5f07-11eb-3585-7b713034f24e"><pluto-cell class="" id="bd94028c-5d8e-11eb-22b6-5fa384999fdb"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="scroll_y rich_output " mime="text/plain"><assignee></assignee><div></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 5px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;" tabindex="0"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -17px; border-right-width: 33px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>6</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 15px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">begin</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">using</span> <span class="cm-variable">ReinforcementLearning</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">using</span> <span class="cm-variable">Flux</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">using</span> <span class="cm-variable">Statistics</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">using</span> <span class="cm-variable">Plots</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">end</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 33px; width: 1px; border-bottom: 0px solid transparent; top: 98px;"></div><div class="CodeMirror-gutters" style="height: 131px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">45.1&nbsp;s</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="code_folded " id="fbf4f518-5d8e-11eb-1611-2b658a468f57"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="rich_output " mime="text/html"><assignee></assignee><div><div class="markdown"><p>To describe the <strong>Grid World</strong> in <strong>Example 3.5</strong>, we'll create a distributional environment model. Here the <em>distributional</em> means, given a state-action paire, we can predict the possible next state, reward, termination info and the corresponding probability.</p>
+</div></div></pluto-output><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">12.5&nbsp;μs</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="5ff21d54-5d8f-11eb-0e8f-95ca0eabc01f"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="scroll_y rich_output " mime="text/plain"><assignee></assignee><div></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 5px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;" tabindex="0"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -17px; border-right-width: 33px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>35</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 15px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">begin</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">function</span> <span class="cm-def">nextstep</span>(<span class="cm-variable">s</span><span class="cm-builtin">::CartesianIndex{2}</span>, <span class="cm-variable">a</span><span class="cm-builtin">::CartesianIndex{2}</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">if</span> <span class="cm-variable">s</span> <span class="cm-operator">==</span> <span class="cm-builtin">CartesianIndex</span>(<span class="cm-number">1</span>, <span class="cm-number">2</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">r</span>, <span class="cm-variable">s′</span> <span class="cm-operator">=</span> &nbsp;<span class="cm-number">10.</span>, <span class="cm-builtin">CartesianIndex</span>(<span class="cm-number">5</span>, <span class="cm-number">2</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">elseif</span> <span class="cm-variable">s</span> <span class="cm-operator">==</span> <span class="cm-builtin">CartesianIndex</span>(<span class="cm-number">1</span>, <span class="cm-number">4</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">r</span>, <span class="cm-variable">s′</span> <span class="cm-operator">=</span> <span class="cm-number">5.</span>, <span class="cm-builtin">CartesianIndex</span>(<span class="cm-number">3</span>, <span class="cm-number">4</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">else</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">s′</span> <span class="cm-operator">=</span> <span class="cm-variable">s</span> <span class="cm-operator">+</span> <span class="cm-variable">a</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">if</span> <span class="cm-number">1</span> <span class="cm-operator">≤</span> <span class="cm-variable">s′</span>[<span class="cm-number">1</span>] <span class="cm-operator">≤</span> <span class="cm-number">5</span> <span class="cm-operator">&amp;&amp;</span> <span class="cm-number">1</span> <span class="cm-operator">≤</span> <span class="cm-variable">s′</span>[<span class="cm-number">2</span>] <span class="cm-operator">≤</span> <span class="cm-number">5</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">r</span> <span class="cm-operator">=</span> <span class="cm-number">0.</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">else</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">r</span> <span class="cm-operator">=</span> <span class="cm-operator">-</span><span class="cm-number">1.</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">s′</span> <span class="cm-operator">=</span> <span class="cm-variable">s</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">end</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">15</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">end</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">16</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>[(<span class="cm-variable">r</span>, <span class="cm-builtin">false</span>, <span class="cm-builtin">LinearIndices</span>((<span class="cm-number">5</span>,<span class="cm-number">5</span>))[<span class="cm-variable">s′</span>]) <span class="cm-operator">=&gt;</span> <span class="cm-number">1.0</span>]</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">17</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">end</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">18</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">19</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">ACTIONS</span> <span class="cm-operator">=</span> (</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">20</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-builtin">CartesianIndex</span>(<span class="cm-operator">-</span><span class="cm-number">1</span>, <span class="cm-number">0</span>),</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">21</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-builtin">CartesianIndex</span>(<span class="cm-number">1</span>,<span class="cm-number">0</span>),</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">22</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-builtin">CartesianIndex</span>(<span class="cm-number">0</span>, <span class="cm-number">1</span>),</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">23</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-builtin">CartesianIndex</span>(<span class="cm-number">0</span>, <span class="cm-operator">-</span><span class="cm-number">1</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">24</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">25</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">26</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">struct</span> <span class="cm-def">GridWorldModel</span> <span class="cm-operator">&lt;:</span> <span class="cm-variable">AbstractEnvironmentModel</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">27</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">end</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">28</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">29</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">function</span> (<span class="cm-def">m</span><span class="cm-builtin">::GridWorldModel</span>)(<span class="cm-variable">s</span>, <span class="cm-variable">a</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">30</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-builtin">nextstep</span>(<span class="cm-builtin">CartesianIndices</span>((<span class="cm-number">5</span>,<span class="cm-number">5</span>))[<span class="cm-variable">s</span>], <span class="cm-variable">ACTIONS</span>[<span class="cm-variable">a</span>])</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">31</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">end</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">32</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">33</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">RLBase</span><span class="cm-operator">.</span><span class="cm-def">state_space</span>(<span class="cm-variable">m</span><span class="cm-builtin">::GridWorldModel</span>) <span class="cm-operator">=</span> <span class="cm-variable">Base</span><span class="cm-operator">.</span><span class="cm-builtin">OneTo</span>(<span class="cm-number">5</span><span class="cm-operator">*</span><span class="cm-number">5</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">34</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">RLBase</span><span class="cm-operator">.</span><span class="cm-def">action_space</span>(<span class="cm-variable">m</span><span class="cm-builtin">::GridWorldModel</span>) <span class="cm-operator">=</span> <span class="cm-variable">Base</span><span class="cm-operator">.</span><span class="cm-builtin">OneTo</span>(<span class="cm-builtin">length</span>(<span class="cm-variable">ACTIONS</span>))</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">35</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">end</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 33px; width: 1px; border-bottom: 0px solid transparent; top: 533px;"></div><div class="CodeMirror-gutters" style="height: 566px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">24.4&nbsp;ms</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="81bcb7a8-5d8f-11eb-070b-97e0199e6c4e"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="" mime="application/vnd.pluto.tree+object"><assignee>V</assignee><div><jltree class="collapsed">TabularApproximator{1,Array{Float64,1},Descent}<jlstruct><r><k>table</k><v><jltree class="collapsed">Float64<jlarray class="Array"><r><k>1</k><v><pre>0.0</pre></v></r><r><k>2</k><v><pre>0.0</pre></v></r><r><k>3</k><v><pre>0.0</pre></v></r><r><k>4</k><v><pre>0.0</pre></v></r><r><k>5</k><v><pre>0.0</pre></v></r><r><k>6</k><v><pre>0.0</pre></v></r><r><k>7</k><v><pre>0.0</pre></v></r><r><k>8</k><v><pre>0.0</pre></v></r><r><k>9</k><v><pre>0.0</pre></v></r><r><k>10</k><v><pre>0.0</pre></v></r><r><k>11</k><v><pre>0.0</pre></v></r><r><k>12</k><v><pre>0.0</pre></v></r><r><k>13</k><v><pre>0.0</pre></v></r><r><k>14</k><v><pre>0.0</pre></v></r><r><k>15</k><v><pre>0.0</pre></v></r><r><k>16</k><v><pre>0.0</pre></v></r><r><k>17</k><v><pre>0.0</pre></v></r><r><k>18</k><v><pre>0.0</pre></v></r><r><k>19</k><v><pre>0.0</pre></v></r><r><k>20</k><v><pre>0.0</pre></v></r><r><k>21</k><v><pre>0.0</pre></v></r><r><k>22</k><v><pre>0.0</pre></v></r><r><k>23</k><v><pre>0.0</pre></v></r><r><k>24</k><v><pre>0.0</pre></v></r><r><k>25</k><v><pre>0.0</pre></v></r></jlarray></jltree></v></r><r><k>optimizer</k><v><jltree class="collapsed">Descent<jlstruct><r><k>eta</k><v><pre>1.0</pre></v></r></jlstruct></jltree></v></r></jlstruct></jltree></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 5px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;" tabindex="0"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -17px; border-right-width: 33px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>1</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 15px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation"><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-variable">V</span> <span class="cm-operator">=</span> <span class="cm-builtin">TabularVApproximator</span>(;<span class="cm-variable">n_state</span><span class="cm-operator">=</span><span class="cm-number">25</span>, <span class="cm-variable">opt</span><span class="cm-operator">=</span><span class="cm-builtin">Descent</span>(<span class="cm-number">1.0</span>))</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 33px; width: 1px; border-bottom: 0px solid transparent; top: 23px;"></div><div class="CodeMirror-gutters" style="height: 56px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">21.9&nbsp;ms</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="86d47256-5d8f-11eb-27ae-ffa516974fe2"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="" mime="application/vnd.pluto.tree+object"><assignee></assignee><div><jltree class="collapsed">TabularApproximator{1,Array{Float64,1},Descent}<jlstruct><r><k>table</k><v><jltree class="collapsed">Float64<jlarray class="Array"><r><k>1</k><v><pre>3.30943</pre></v></r><r><k>2</k><v><pre>1.52199</pre></v></r><r><k>3</k><v><pre>0.0512075</pre></v></r><r><k>4</k><v><pre>-0.973217</pre></v></r><r><k>5</k><v><pre>-1.85733</pre></v></r><r><k>6</k><v><pre>8.78964</pre></v></r><r><k>7</k><v><pre>2.99266</pre></v></r><r><k>8</k><v><pre>0.738502</pre></v></r><r><k>9</k><v><pre>-0.435172</pre></v></r><r><k>10</k><v><pre>-1.34491</pre></v></r><r><k>11</k><v><pre>4.42795</pre></v></r><r><k>12</k><v><pre>2.25045</pre></v></r><r><k>13</k><v><pre>0.673411</pre></v></r><r><k>14</k><v><pre>-0.354592</pre></v></r><r><k>15</k><v><pre>-1.22898</pre></v></r><r><k>16</k><v><pre>5.32267</pre></v></r><r><k>17</k><v><pre>1.90786</pre></v></r><r><k>18</k><v><pre>0.358465</pre></v></r><r><k>19</k><v><pre>-0.585334</pre></v></r><r><k>20</k><v><pre>-1.42265</pre></v></r><r><k>21</k><v><pre>1.49249</pre></v></r><r><k>22</k><v><pre>0.54769</pre></v></r><r><k>23</k><v><pre>-0.40287</pre></v></r><r><k>24</k><v><pre>-1.18281</pre></v></r><r><k>25</k><v><pre>-1.97492</pre></v></r></jlarray></jltree></v></r><r><k>optimizer</k><v><jltree class="collapsed">Descent<jlstruct><r><k>eta</k><v><pre>1.0</pre></v></r></jlstruct></jltree></v></r></jlstruct></jltree></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 5px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;" tabindex="0"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -17px; border-right-width: 33px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>6</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 15px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-builtin">policy_evaluation!</span>(</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp;<span class="cm-variable">V</span> <span class="cm-operator">=</span> <span class="cm-variable">V</span>,</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp;<span class="cm-variable">π</span><span class="cm-operator">=</span><span class="cm-builtin">RandomPolicy</span>(<span class="cm-variable">Base</span><span class="cm-operator">.</span><span class="cm-builtin">OneTo</span>(<span class="cm-number">4</span>)),</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp;<span class="cm-variable">model</span><span class="cm-operator">=</span><span class="cm-builtin">GridWorldModel</span>(),</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"> &nbsp; &nbsp;<span class="cm-variable">γ</span><span class="cm-operator">=</span><span class="cm-number">0.9</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">)</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 33px; width: 1px; border-bottom: 0px solid transparent; top: 98px;"></div><div class="CodeMirror-gutters" style="height: 131px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">456&nbsp;ms</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="8b4d1bc8-5d8f-11eb-1e5b-ddbaa49c216b"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="scroll_y " mime="text/plain"><assignee>table</assignee><div><pre><code>5×5 Array{Float64,2}:
+  3.30943     8.78964    4.42795    5.32267    1.49249
+  1.52199     2.99266    2.25045    1.90786    0.54769
+  0.0512075   0.738502   0.673411   0.358465  -0.40287
+ -0.973217   -0.435172  -0.354592  -0.585334  -1.18281
+ -1.85733    -1.34491   -1.22898   -1.42265   -1.97492</code></pre></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 5px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;" tabindex="0"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -17px; border-right-width: 33px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>1</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 15px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation"><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-variable">table</span> <span class="cm-operator">=</span> <span class="cm-builtin">reshape</span>(<span class="cm-variable">V</span><span class="cm-operator">.</span><span class="cm-variable">table</span>, <span class="cm-number">5</span>, <span class="cm-number">5</span>)</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 33px; width: 1px; border-bottom: 0px solid transparent; top: 23px;"></div><div class="CodeMirror-gutters" style="height: 56px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">1.8&nbsp;μs</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="90c88768-5d8f-11eb-2a17-0dcdf7e0772a"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="rich_output " mime="text/html"><assignee></assignee><div><!--?xml version="1.0" encoding="utf-8"?-->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="400" viewBox="0 0 2400 1600">
+<defs>
+  <clipPath id="clip620">
+    <rect x="0" y="0" width="2400" height="1600"></rect>
+  </clipPath>
+</defs>
+<path clip-path="url(#clip620)" d="
+M0 1600 L2400 1600 L2400 0 L0 0  Z
+  " fill="#ffffff" fill-rule="evenodd" fill-opacity="1"></path>
+<defs>
+  <clipPath id="clip621">
+    <rect x="480" y="0" width="1681" height="1600"></rect>
+  </clipPath>
+</defs>
+<path clip-path="url(#clip620)" d="
+M112.177 1486.45 L2112.76 1486.45 L2112.76 47.2441 L112.177 47.2441  Z
+  " fill="#ffffff" fill-rule="evenodd" fill-opacity="1"></path>
+<defs>
+  <clipPath id="clip622">
+    <rect x="112" y="47" width="2002" height="1440"></rect>
+  </clipPath>
+</defs>
+<polyline clip-path="url(#clip622)" style="stroke:#000000; stroke-width:2; stroke-opacity:0.1; fill:none" points="
+  312.235,47.2441 312.235,1486.45 
+  "></polyline>
+<polyline clip-path="url(#clip622)" style="stroke:#000000; stroke-width:2; stroke-opacity:0.1; fill:none" points="
+  712.351,47.2441 712.351,1486.45 
+  "></polyline>
+<polyline clip-path="url(#clip622)" style="stroke:#000000; stroke-width:2; stroke-opacity:0.1; fill:none" points="
+  1112.47,47.2441 1112.47,1486.45 
+  "></polyline>
+<polyline clip-path="url(#clip622)" style="stroke:#000000; stroke-width:2; stroke-opacity:0.1; fill:none" points="
+  1512.58,47.2441 1512.58,1486.45 
+  "></polyline>
+<polyline clip-path="url(#clip622)" style="stroke:#000000; stroke-width:2; stroke-opacity:0.1; fill:none" points="
+  1912.7,47.2441 1912.7,1486.45 
+  "></polyline>
+<polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  112.177,1486.45 2112.76,1486.45 
+  "></polyline>
+<polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  312.235,1486.45 312.235,1469.18 
+  "></polyline>
+<polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  712.351,1486.45 712.351,1469.18 
+  "></polyline>
+<polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  1112.47,1486.45 1112.47,1469.18 
+  "></polyline>
+<polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  1512.58,1486.45 1512.58,1469.18 
+  "></polyline>
+<polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  1912.7,1486.45 1912.7,1469.18 
+  "></polyline>
+<path clip-path="url(#clip620)" d="M 0 0 M302.617 1543.18 L310.256 1543.18 L310.256 1516.82 L301.946 1518.49 L301.946 1514.23 L310.21 1512.56 L314.885 1512.56 L314.885 1543.18 L322.524 1543.18 L322.524 1547.12 L302.617 1547.12 L302.617 1543.18 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M707.004 1543.18 L723.323 1543.18 L723.323 1547.12 L701.379 1547.12 L701.379 1543.18 Q704.041 1540.43 708.624 1535.8 Q713.23 1531.15 714.411 1529.81 Q716.656 1527.28 717.536 1525.55 Q718.439 1523.79 718.439 1522.1 Q718.439 1519.34 716.494 1517.61 Q714.573 1515.87 711.471 1515.87 Q709.272 1515.87 706.818 1516.63 Q704.388 1517.4 701.61 1518.95 L701.61 1514.23 Q704.434 1513.09 706.888 1512.51 Q709.342 1511.93 711.379 1511.93 Q716.749 1511.93 719.943 1514.62 Q723.138 1517.31 723.138 1521.8 Q723.138 1523.93 722.328 1525.85 Q721.541 1527.74 719.434 1530.34 Q718.855 1531.01 715.754 1534.23 Q712.652 1537.42 707.004 1543.18 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M1116.71 1528.49 Q1120.07 1529.2 1121.95 1531.47 Q1123.84 1533.74 1123.84 1537.07 Q1123.84 1542.19 1120.33 1544.99 Q1116.81 1547.79 1110.33 1547.79 Q1108.15 1547.79 1105.83 1547.35 Q1103.54 1546.93 1101.09 1546.08 L1101.09 1541.56 Q1103.03 1542.7 1105.35 1543.28 Q1107.66 1543.86 1110.19 1543.86 Q1114.58 1543.86 1116.88 1542.12 Q1119.19 1540.38 1119.19 1537.07 Q1119.19 1534.02 1117.04 1532.31 Q1114.91 1530.57 1111.09 1530.57 L1107.06 1530.57 L1107.06 1526.73 L1111.27 1526.73 Q1114.72 1526.73 1116.55 1525.36 Q1118.38 1523.97 1118.38 1521.38 Q1118.38 1518.72 1116.48 1517.31 Q1114.61 1515.87 1111.09 1515.87 Q1109.17 1515.87 1106.97 1516.29 Q1104.77 1516.7 1102.13 1517.58 L1102.13 1513.42 Q1104.79 1512.68 1107.11 1512.31 Q1109.45 1511.93 1111.51 1511.93 Q1116.83 1511.93 1119.93 1514.37 Q1123.03 1516.77 1123.03 1520.89 Q1123.03 1523.76 1121.39 1525.75 Q1119.75 1527.72 1116.71 1528.49 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M1515.59 1516.63 L1503.79 1535.08 L1515.59 1535.08 L1515.59 1516.63 M1514.36 1512.56 L1520.24 1512.56 L1520.24 1535.08 L1525.17 1535.08 L1525.17 1538.97 L1520.24 1538.97 L1520.24 1547.12 L1515.59 1547.12 L1515.59 1538.97 L1499.99 1538.97 L1499.99 1534.46 L1514.36 1512.56 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M1902.98 1512.56 L1921.33 1512.56 L1921.33 1516.5 L1907.26 1516.5 L1907.26 1524.97 Q1908.28 1524.62 1909.3 1524.46 Q1910.31 1524.27 1911.33 1524.27 Q1917.12 1524.27 1920.5 1527.44 Q1923.88 1530.62 1923.88 1536.03 Q1923.88 1541.61 1920.41 1544.71 Q1916.93 1547.79 1910.61 1547.79 Q1908.44 1547.79 1906.17 1547.42 Q1903.92 1547.05 1901.52 1546.31 L1901.52 1541.61 Q1903.6 1542.74 1905.82 1543.3 Q1908.05 1543.86 1910.52 1543.86 Q1914.53 1543.86 1916.86 1541.75 Q1919.2 1539.64 1919.2 1536.03 Q1919.2 1532.42 1916.86 1530.31 Q1914.53 1528.21 1910.52 1528.21 Q1908.65 1528.21 1906.77 1528.62 Q1904.92 1529.04 1902.98 1529.92 L1902.98 1512.56 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><polyline clip-path="url(#clip622)" style="stroke:#000000; stroke-width:2; stroke-opacity:0.1; fill:none" points="
+  112.177,191.164 2112.76,191.164 
+  "></polyline>
+<polyline clip-path="url(#clip622)" style="stroke:#000000; stroke-width:2; stroke-opacity:0.1; fill:none" points="
+  112.177,479.005 2112.76,479.005 
+  "></polyline>
+<polyline clip-path="url(#clip622)" style="stroke:#000000; stroke-width:2; stroke-opacity:0.1; fill:none" points="
+  112.177,766.846 2112.76,766.846 
+  "></polyline>
+<polyline clip-path="url(#clip622)" style="stroke:#000000; stroke-width:2; stroke-opacity:0.1; fill:none" points="
+  112.177,1054.69 2112.76,1054.69 
+  "></polyline>
+<polyline clip-path="url(#clip622)" style="stroke:#000000; stroke-width:2; stroke-opacity:0.1; fill:none" points="
+  112.177,1342.53 2112.76,1342.53 
+  "></polyline>
+<polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  112.177,47.2441 112.177,1486.45 
+  "></polyline>
+<polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  112.177,191.164 136.184,191.164 
+  "></polyline>
+<polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  112.177,479.005 136.184,479.005 
+  "></polyline>
+<polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  112.177,766.846 136.184,766.846 
+  "></polyline>
+<polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  112.177,1054.69 136.184,1054.69 
+  "></polyline>
+<polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  112.177,1342.53 136.184,1342.53 
+  "></polyline>
+<path clip-path="url(#clip620)" d="M 0 0 M56.2699 204.509 L63.9087 204.509 L63.9087 178.144 L55.5986 179.81 L55.5986 175.551 L63.8624 173.884 L68.5383 173.884 L68.5383 204.509 L76.1772 204.509 L76.1772 208.444 L56.2699 208.444 L56.2699 204.509 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M59.8578 492.35 L76.1772 492.35 L76.1772 496.285 L54.2328 496.285 L54.2328 492.35 Q56.8949 489.595 61.4782 484.966 Q66.0846 480.313 67.2652 478.971 Q69.5105 476.447 70.3902 474.711 Q71.2929 472.952 71.2929 471.262 Q71.2929 468.508 69.3485 466.771 Q67.4272 465.035 64.3254 465.035 Q62.1263 465.035 59.6726 465.799 Q57.2421 466.563 54.4643 468.114 L54.4643 463.392 Q57.2884 462.258 59.7421 461.679 Q62.1958 461.1 64.2328 461.1 Q69.6031 461.1 72.7976 463.785 Q75.992 466.471 75.992 470.961 Q75.992 473.091 75.1818 475.012 Q74.3948 476.91 72.2883 479.503 Q71.7096 480.174 68.6078 483.392 Q65.5059 486.586 59.8578 492.35 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M69.0476 765.492 Q72.404 766.209 74.279 768.478 Q76.1772 770.746 76.1772 774.08 Q76.1772 779.195 72.6587 781.996 Q69.1402 784.797 62.6587 784.797 Q60.4828 784.797 58.168 784.357 Q55.8764 783.941 53.4227 783.084 L53.4227 778.57 Q55.3671 779.705 57.6819 780.283 Q59.9967 780.862 62.5198 780.862 Q66.918 780.862 69.2096 779.126 Q71.5244 777.39 71.5244 774.08 Q71.5244 771.024 69.3717 769.311 Q67.242 767.575 63.4226 767.575 L59.3949 767.575 L59.3949 763.733 L63.6078 763.733 Q67.0569 763.733 68.8855 762.367 Q70.7142 760.978 70.7142 758.385 Q70.7142 755.723 68.8161 754.311 Q66.9411 752.876 63.4226 752.876 Q61.5013 752.876 59.3023 753.293 Q57.1032 753.709 54.4643 754.589 L54.4643 750.422 Q57.1264 749.682 59.4412 749.311 Q61.7791 748.941 63.8393 748.941 Q69.1633 748.941 72.2652 751.372 Q75.367 753.779 75.367 757.899 Q75.367 760.77 73.7235 762.76 Q72.08 764.728 69.0476 765.492 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M66.5939 1041.48 L54.7884 1059.93 L66.5939 1059.93 L66.5939 1041.48 M65.367 1037.41 L71.2466 1037.41 L71.2466 1059.93 L76.1772 1059.93 L76.1772 1063.82 L71.2466 1063.82 L71.2466 1071.97 L66.5939 1071.97 L66.5939 1063.82 L50.9921 1063.82 L50.9921 1059.3 L65.367 1037.41 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M55.2745 1325.25 L73.6309 1325.25 L73.6309 1329.18 L59.5569 1329.18 L59.5569 1337.65 Q60.5754 1337.31 61.5939 1337.15 Q62.6124 1336.96 63.6309 1336.96 Q69.418 1336.96 72.7976 1340.13 Q76.1772 1343.3 76.1772 1348.72 Q76.1772 1354.3 72.705 1357.4 Q69.2328 1360.48 62.9134 1360.48 Q60.7374 1360.48 58.4689 1360.11 Q56.2236 1359.74 53.8162 1359 L53.8162 1354.3 Q55.8995 1355.43 58.1217 1355.99 Q60.3439 1356.54 62.8208 1356.54 Q66.8254 1356.54 69.1633 1354.44 Q71.5013 1352.33 71.5013 1348.72 Q71.5013 1345.11 69.1633 1343 Q66.8254 1340.9 62.8208 1340.9 Q60.9458 1340.9 59.0708 1341.31 Q57.2189 1341.73 55.2745 1342.61 L55.2745 1325.25 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><g clip-path="url(#clip622)">
+<image width="2001" height="1439" xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAB9EAAAWfCAYAAAAcawbXAAAgAElEQVR4nOzbvS0FcBSHYcQIktvZ
+QHIbIyglOhOZwRZa0RhAp5do5C7go0TzLnA1xz95ngl+9XlzDu/Pr38OAOAPLp4upycAsKDXq9vp
+CQAs6OR0Nz0BgAXd3LlfAbC/o+kBAAAAAAAAAPBfiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAA
+AEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAA
+AAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAA
+AAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAA
+AAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAA
+AAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAA
+AAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoA
+AAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgO
+AAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKi
+AwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI
+6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAg
+IjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAA
+iIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAA
+ACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAA
+AICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAA
+AAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAA
+AAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAA
+AAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAA
+AAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEA
+AAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQA
+AAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEd
+AAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAERE
+BwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR
+0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABA
+RHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAA
+EBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAA
+AEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAA
+AAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAA
+AABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAA
+AAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAA
+AAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAA
+AAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMA
+AAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgA
+AAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6
+AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiI
+DgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAi
+ogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACA
+iOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAA
+ICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAA
+AIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAA
+AAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAA
+AACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAA
+AAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAA
+AAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAA
+AAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcA
+AAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEB
+AAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0
+AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABAR
+HQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACDHj7vN9AYAFvW5
+fZieAMCC3r7OpicAsKCP5+30BAAW9PL+PT0BgAX5RAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAA
+ACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAA
+AICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAA
+AAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAA
+AAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAA
+AAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAA
+AAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEA
+AAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQA
+AAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEd
+AAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAERE
+BwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR
+0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABA
+RHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAA
+EBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAA
+AEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAA
+AAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAA
+AABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAA
+AAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAA
+AAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAA
+AAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMA
+AAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgA
+AAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6
+AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiI
+DgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAi
+ogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACA
+iOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAA
+ICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAA
+AIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAA
+AAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAA
+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
+ogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACA
+iOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAA
+ICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAA
+AIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAA
+AAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAA
+AACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAA
+AAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAA
+AAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAA
+AAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcA
+AAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEB
+AAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0
+AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABAR
+HQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABE
+RAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAA
+EdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAA
+QER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAA
+ABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAA
+AABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAA
+AAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAA
+AAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAA
+AAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAA
+AAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4A
+AAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqID
+AAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjo
+AAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAi
+OgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACI
+iA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAA
+IqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAA
+gIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAA
+ACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAA
+AACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAA
+AAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAA
+AAAAgIjoAAAAAAAAABARHQAAAAAAAAAiokD6MjUAABcvSURBVAMAAAAAAABARHQAAAAAAAAAiIgO
+AAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKi
+AwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI
+6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAg
+IjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAA
+iIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAA
+AHJ6eXw7pkcAsKbn7XV6AgALetjO0xMAWNDtdJ2eAMCCLvvH9AQAFuSJDgAAAAAAAAAR0QEAAAAA
+AAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAA
+AAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAA
+AAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAA
+AAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEA
+AAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQA
+AAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEd
+AAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAERE
+BwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR
+0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABA
+RHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAA
+EBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAA
+AEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAA
+AAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAA
+AABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAA
+AAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAA
+AAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAA
+AAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMA
+AAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgA
+AAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6
+AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiI
+DgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAi
+ogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACA
+iOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAA
+ICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAA
+AIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAA
+AAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAA
+AACAiOgAAADw374dnCAQREEUZBAWNwXzz80IBHFBvbwcPgNVEfT90QAAAAAR0QEAAAAAAAAgIjoA
+AAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgO
+AAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKi
+AwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI
+6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAg
+IjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAA
+iIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAA
+ACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAA
+AICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAA
+AAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAA
+AAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAA
+AAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAA
+AAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEA
+AAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQA
+AAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEd
+AAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAERE
+BwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR
+0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABA
+RHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAA
+EBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAA
+AEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAA
+AAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAA
+AABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABkrXX/TY8AYE/n8ZieAMCG
+buuYngDAhq7va3oCABt6f57TEwDYkCc6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAA
+AAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAA
+AAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAA
+AAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAA
+AAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0A
+AAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQH
+AAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHR
+AQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBE
+dAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQ
+ER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAA
+REQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAA
+ABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAA
+AEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAAAAAA
+AAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAA
+AAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgOAAAA
+AAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKiAwAA
+AAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI6AAA
+AAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAgIjoA
+AAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAAiIgO
+AAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAAACKi
+AwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAAAICI
+6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAAAAAg
+IjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAAAAAA
+iIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAAAAAA
+ACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAAAAAA
+AICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEAAAAA
+AAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQAAAAA
+AAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEdAAAA
+AAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAEREBwAA
+AAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR0QEA
+AAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABARHQA
+AAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAAEBEd
+AAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAAAERE
+BwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAAAAAR
+0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAAAABA
+RHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAAAAAA
+EBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAAAAAA
+AEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAAAAAA
+AAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMAAAAA
+AABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgAAAAA
+AAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6AAAA
+AAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiIDgAA
+AAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAiogMA
+AAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACAiOgA
+AAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAACIiA4AAAAAAAAAEdEBAAAAAAAAICI6
+AAAAAAAAAEREBwAAAAAAAICI6AAAAAAAAAAQER0AAAAAAAAAIqIDAAAAAAAAQER0AAAAAAAAAIiI
+DgAAAAAAAAAR0QEAAAAAAAAgIjoAAAAAAAAAREQHAAAAAAAAgIjoAAAAAAAAABARHQAAAAAAAAAi
+ogMAAAAAAABARHQAAAAAAAAAiIgOAAAAAAAAABHRAQAAAAAAACAiOgAAAAAAAABERAcAAAAAAACA
+iOgAAAAAAAAAEBEdAAAAAAAAACKiAwAAAAAAAEBEdAAAAAAAAADIH+IkNyq0n6bwAAAAAElFTkSu
+QmCC
+" transform="translate(112, 47)"></image>
+</g>
+<defs>
+  <clipPath id="clip623">
+    <rect x="2160" y="47" width="73" height="1440"></rect>
+  </clipPath>
+</defs>
+<g clip-path="url(#clip623)">
+<image width="72" height="1439" xlink:href="data:image/png;base64,
+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
+BYGCQOE/LrLuTX/wFc8AAAAASUVORK5CYII=
+" transform="translate(2161, 47)"></image>
+</g>
+<path clip-path="url(#clip620)" d="M 0 0 M2280.7 1204.57 Q2277.09 1204.57 2275.26 1208.14 Q2273.45 1211.68 2273.45 1218.81 Q2273.45 1225.92 2275.26 1229.48 Q2277.09 1233.02 2280.7 1233.02 Q2284.33 1233.02 2286.14 1229.48 Q2287.97 1225.92 2287.97 1218.81 Q2287.97 1211.68 2286.14 1208.14 Q2284.33 1204.57 2280.7 1204.57 M2280.7 1200.87 Q2286.51 1200.87 2289.57 1205.48 Q2292.64 1210.06 2292.64 1218.81 Q2292.64 1227.54 2289.57 1232.14 Q2286.51 1236.73 2280.7 1236.73 Q2274.89 1236.73 2271.81 1232.14 Q2268.76 1227.54 2268.76 1218.81 Q2268.76 1210.06 2271.81 1205.48 Q2274.89 1200.87 2280.7 1200.87 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M2274.38 897.874 L2290.7 897.874 L2290.7 901.81 L2268.76 901.81 L2268.76 897.874 Q2271.42 895.12 2276 890.49 Q2280.61 885.837 2281.79 884.495 Q2284.03 881.972 2284.91 880.236 Q2285.82 878.476 2285.82 876.787 Q2285.82 874.032 2283.87 872.296 Q2281.95 870.56 2278.85 870.56 Q2276.65 870.56 2274.2 871.324 Q2271.77 872.088 2268.99 873.638 L2268.99 868.916 Q2271.81 867.782 2274.27 867.203 Q2276.72 866.625 2278.76 866.625 Q2284.13 866.625 2287.32 869.31 Q2290.52 871.995 2290.52 876.486 Q2290.52 878.615 2289.7 880.537 Q2288.92 882.435 2286.81 885.027 Q2286.23 885.699 2283.13 888.916 Q2280.03 892.111 2274.38 897.874 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M2295.77 895.93 L2300.65 895.93 L2300.65 901.81 L2295.77 901.81 L2295.77 895.93 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M2305.77 867.25 L2324.13 867.25 L2324.13 871.185 L2310.05 871.185 L2310.05 879.657 Q2311.07 879.31 2312.09 879.148 Q2313.11 878.962 2314.13 878.962 Q2319.91 878.962 2323.29 882.134 Q2326.67 885.305 2326.67 890.722 Q2326.67 896.3 2323.2 899.402 Q2319.73 902.481 2313.41 902.481 Q2311.23 902.481 2308.96 902.111 Q2306.72 901.74 2304.31 900.999 L2304.31 896.3 Q2306.39 897.435 2308.62 897.99 Q2310.84 898.546 2313.32 898.546 Q2317.32 898.546 2319.66 896.439 Q2322 894.333 2322 890.722 Q2322 887.111 2319.66 885.004 Q2317.32 882.898 2313.32 882.898 Q2311.44 882.898 2309.57 883.314 Q2307.71 883.731 2305.77 884.611 L2305.77 867.25 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M2270.21 533.004 L2288.57 533.004 L2288.57 536.939 L2274.5 536.939 L2274.5 545.411 Q2275.52 545.064 2276.53 544.902 Q2277.55 544.717 2278.57 544.717 Q2284.36 544.717 2287.74 547.888 Q2291.12 551.059 2291.12 556.476 Q2291.12 562.054 2287.64 565.156 Q2284.17 568.235 2277.85 568.235 Q2275.68 568.235 2273.41 567.865 Q2271.16 567.494 2268.76 566.753 L2268.76 562.054 Q2270.84 563.189 2273.06 563.744 Q2275.28 564.3 2277.76 564.3 Q2281.77 564.3 2284.1 562.193 Q2286.44 560.087 2286.44 556.476 Q2286.44 552.865 2284.1 550.758 Q2281.77 548.652 2277.76 548.652 Q2275.89 548.652 2274.01 549.068 Q2272.16 549.485 2270.21 550.365 L2270.21 533.004 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M2296.19 561.684 L2301.07 561.684 L2301.07 567.564 L2296.19 567.564 L2296.19 561.684 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M2316.14 536.082 Q2312.53 536.082 2310.7 539.647 Q2308.89 543.189 2308.89 550.318 Q2308.89 557.425 2310.7 560.99 Q2312.53 564.531 2316.14 564.531 Q2319.77 564.531 2321.58 560.99 Q2323.41 557.425 2323.41 550.318 Q2323.41 543.189 2321.58 539.647 Q2319.77 536.082 2316.14 536.082 M2316.14 532.379 Q2321.95 532.379 2325.01 536.985 Q2328.08 541.568 2328.08 550.318 Q2328.08 559.045 2325.01 563.652 Q2321.95 568.235 2316.14 568.235 Q2310.33 568.235 2307.25 563.652 Q2304.2 559.045 2304.2 550.318 Q2304.2 541.568 2307.25 536.985 Q2310.33 532.379 2316.14 532.379 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M2268.76 198.758 L2290.98 198.758 L2290.98 200.748 L2278.43 233.318 L2273.55 233.318 L2285.35 202.693 L2268.76 202.693 L2268.76 198.758 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M2296.05 227.438 L2300.93 227.438 L2300.93 233.318 L2296.05 233.318 L2296.05 227.438 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><path clip-path="url(#clip620)" d="M 0 0 M2306.05 198.758 L2324.4 198.758 L2324.4 202.693 L2310.33 202.693 L2310.33 211.165 Q2311.35 210.818 2312.37 210.656 Q2313.39 210.471 2314.4 210.471 Q2320.19 210.471 2323.57 213.642 Q2326.95 216.813 2326.95 222.23 Q2326.95 227.808 2323.48 230.91 Q2320.01 233.989 2313.69 233.989 Q2311.51 233.989 2309.24 233.619 Q2307 233.248 2304.59 232.507 L2304.59 227.808 Q2306.67 228.943 2308.89 229.498 Q2311.12 230.054 2313.59 230.054 Q2317.6 230.054 2319.94 227.947 Q2322.27 225.841 2322.27 222.23 Q2322.27 218.619 2319.94 216.512 Q2317.6 214.406 2313.59 214.406 Q2311.72 214.406 2309.84 214.822 Q2307.99 215.239 2306.05 216.119 L2306.05 198.758 Z" fill="#000000" fill-rule="evenodd" fill-opacity="1"></path><polyline clip-path="url(#clip620)" style="stroke:#000000; stroke-width:4; stroke-opacity:1; fill:none" points="
+  2232.76,1486.45 2232.76,1222.4 2256.76,1222.4 2232.76,1222.4 2232.76,888.158 2256.76,888.158 2232.76,888.158 2232.76,553.912 2256.76,553.912 2232.76,553.912 
+  2232.76,219.666 2256.76,219.666 2232.76,219.666 2232.76,47.2441 
+  "></polyline>
+</svg>
+</div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 5px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;" tabindex="0"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -17px; border-right-width: 33px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>1</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 4px; top: 0px; height: 15px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation"><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-builtin">heatmap</span>(<span class="cm-variable">table</span>,<span class="cm-variable">yflip</span><span class="cm-operator">=</span><span class="cm-builtin">true</span>)</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 33px; width: 1px; border-bottom: 0px solid transparent; top: 23px;"></div><div class="CodeMirror-gutters" style="height: 56px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">16.7&nbsp;s</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell></pluto-notebook><dropruler></dropruler></main>
+                <svg id="MJX-SVG-global-cache" style="display: none;"><defs></defs></svg>
+            </body>
+            </html>
+        
