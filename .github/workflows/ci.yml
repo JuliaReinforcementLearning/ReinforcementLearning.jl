@@ -76,7 +76,9 @@ jobs:
 
       - run: |
           cd docs/manual
-          julia --color=yes --project make.jl
+          julia --color=yes -e '
+            using Pkg; Pkg.activate("."); Pkg.instantiate();
+            include("make.jl")'
           mv build ../homepage/__site/docs
 
       - name: Deploy to the main repo
