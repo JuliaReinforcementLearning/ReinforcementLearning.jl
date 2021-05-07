@@ -84,56 +84,54 @@ implementation details are documented in this
 [blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/).
 
 
-## Project Structure
+## Project Structure 🌲
 
-`ReinforcementLearning.jl` itself is just a wrapper around several other packages inside the [JuliaReinforcementLearning](https://github.com/JuliaReinforcementLearning) org. The relationship between different packages is described below:
+`ReinforcementLearning.jl` itself is just a wrapper around several other
+subpackages. The relationship between them is depicted below:
 
-```
-+-----------------------------------------------------------------------------------+
+<!-- ```@raw html -->
+<pre>+-----------------------------------------------------------------------------------+
 |                                                                                   |
-|  ReinforcementLearning.jl                                                         |
+|  <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl">ReinforcementLearning.jl</a>                                                         |
 |                                                                                   |
 |      +------------------------------+                                             |
-|      | ReinforcementLearningBase.jl |                                             |
+|      | <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningBase">ReinforcementLearningBase.jl</a> |                                             |
 |      +----|-------------------------+                                             |
 |           |                                                                       |
 |           |     +--------------------------------------+                          |
-|           +---->+ ReinforcementLearningEnvironments.jl |                          |
+|           +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningEnvironments">ReinforcementLearningEnvironments.jl</a> |                          |
 |           |     +--------------------------------------+                          |
 |           |                                                                       |
 |           |     +------------------------------+                                  |
-|           +---->+ ReinforcementLearningCore.jl |                                  |
+|           +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningCore">ReinforcementLearningCore.jl</a> |                                  |
 |                 +----|-------------------------+                                  |
 |                      |                                                            |
 |                      |     +-----------------------------+                        |
-|                      +---->+ ReinforcementLearningZoo.jl |                        |
+|                      +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningZoo">ReinforcementLearningZoo.jl</a> |                        |
 |                            +----|------------------------+                        |
 |                                 |                                                 |
 |                                 |     +-------------------------------------+     |
-|                                 +---->+ DistributedReinforcementLearning.jl |     |
+|                                 +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/DistributedReinforcementLearning.jl">DistributedReinforcementLearning.jl</a> |     |
 |                                       +-------------------------------------+     |
 |                                                                                   |
 +-----------------------------------------------------------------------------------+
-```
+</pre>
+<!-- ``` -->
 
 ### Scope of Each Package
 
-- [ReinforcementLearningBase.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl)
+- [ReinforcementLearningBase.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningBase)
   Two main concepts in reinforcement learning are precisely defined here: **Policy**
   and **Environment**.
-- [ReinforcementLearningEnvironments.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl)
+- [ReinforcementLearningEnvironments.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningEnvironments)
   Typical environment examples in pure Julia and wrappers for 3-rd party
   environments are provided in this package.
-- [ReinforcementLearningCore.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl)
+- [ReinforcementLearningCore.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningCore)
   Common utility functions and different layers of abstractions are contained in
   this package.
-- [ReinforcementLearningZoo.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl)
+- [ReinforcementLearningZoo.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningZoo)
   Common reinforcement learning algorithms and their typical applications (aka
   `Experiment`s) are collected in this package.
-- [DistributedReinforcementLearning.jl](https://github.com/JuliaReinforcementLearning/DistributedReinforcementLearning.jl)
-  This package is still experimental and is not included in
-  `ReinforcementLearning.jl` yet. Its goal is to extend some algorithms in
-  `ReinforcementLearningZoo.jl` to apply them in distributed computing systems.
 
 ## Supporting 🖖
 
@@ -144,19 +142,10 @@ resource, which is unaffordable for individual contributors. So if you or your
 organization could provide the computing resource in some degree and would like
 to cooperate in some way, please contact us!
 
-## Citing
+## Citing ✍️
 
 If you use `ReinforcementLearning.jl` in a scientific publication, we would
-appreciate references to the following BibTex entry:
-
-```
-@misc{Tian2020Reinforcement,
-  author       = {Jun Tian and other contributors},
-  title        = {ReinforcementLearning.jl: A Reinforcement Learning Package for the Julia Language},
-  year         = 2020,
-  url          = {https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl}
-}
-```
+appreciate references to the [CITATION.bib]https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/CITATION.bib):
 
 ## Contributors ✨
 

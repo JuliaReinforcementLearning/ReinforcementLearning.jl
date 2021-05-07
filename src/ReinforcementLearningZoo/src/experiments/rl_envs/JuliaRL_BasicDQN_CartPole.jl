@@ -4,6 +4,7 @@ function RLCore.Experiment(
     ::Val{:CartPole},
     ::Nothing;
     seed = 123,
+    save_dir = nothing,
 )
     rng = StableRNG(seed)
     env = CartPoleEnv(; T = Float32, rng = rng)
