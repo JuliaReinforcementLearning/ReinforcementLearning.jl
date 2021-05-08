@@ -4,7 +4,7 @@ using Markdown
 using Dates
 
 """
-    Experiment(policy, env, stop_condition, hook, description)
+    Experiment(policy, env, stop_condition, hook, description="Experiment created at...")
 
 These are the four essential components in a typical reinforcement learning experiment:
 

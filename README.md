@@ -31,58 +31,59 @@ Our design principles are:
   methods to modern deep reinforcement learning algorithms.
   
 
-## Get Started
+## 🏹 Get Started
 
 ```julia
 julia> ] add ReinforcementLearning
 
 julia> using ReinforcementLearning
 
-julia> run(E`JuliaRL_BasicDQN_CartPole`)
+julia> run(
+           RandomPolicy(),
+           CartPoleEnv(),
+           StopAfterStep(1_000),
+           TotalRewardPerEpisode()
+       )
 ```
 
-<!-- ```@raw html -->
-<img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/manual/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true" width="600px">
-<details>
-  <summary>Full list of available experiments</summary>
-  <ur>
-    <li><code>E`JuliaRL_BasicDQN_CartPole`</code></li>
-    <li><code>E`JuliaRL_DQN_CartPole`</code></li>
-    <li><code>E`JuliaRL_PrioritizedDQN_CartPole`</code></li>
-    <li><code>E`JuliaRL_Rainbow_CartPole`</code></li>
-    <li><code>E`JuliaRL_IQN_CartPole`</code></li>
-    <li><code>E`JuliaRL_A2C_CartPole`</code></li>
-    <li><code>E`JuliaRL_A2CGAE_CartPole`</code> (Thanks to <a href="https://github.com/sriram13m">@sriram13m</a></li>
-    <li><code>E`JuliaRL_MAC_CartPole`</code> (Thanks to <a href="https://github.com/RajGhugare19">@RajGhugare19</a>)</li>
-    <li><code>E`JuliaRL_PPO_CartPole`</code></li>
-    <li><code>E`JuliaRL_VPG_CartPole`</code> (Thanks to <a href="https://github.com/norci">@norci</a>)</li>
-    <li><code>E`JuliaRL_DDPG_Pendulum`</code></li>
-    <li><code>E`JuliaRL_TD3_Pendulum`</code> (Thanks to <a href="https://github.com/rbange">@rbange</a>)</li>
-    <li><code>E`JuliaRL_SAC_Pendulum`</code> (Thanks to <a href="https://github.com/rbange">@rbange</a>)</li>
-    <li><code>E`JuliaRL_PPO_Pendulum`</code></li>
-    <li><code>E`JuliaRL_BasicDQN_MountainCar`</code> (Thanks to <a href="https://github.com/felixchalumeau">@felixchalumeau</a>)</li>
-    <li><code>E`JuliaRL_DQN_MountainCar`</code> (Thanks to <a href="https://github.com/felixchalumeau">@felixchalumeau</a>)</li>
-    <li><code>E`JuliaRL_Minimax_OpenSpiel(tic_tac_toe)`</code></li>
-    <li><code>E`JuliaRL_TabularCFR_OpenSpiel(kuhn_poker)`</code></li>
-    <li><code>E`JuliaRL_DeepCFR_OpenSpiel(leduc_poker)`</code></li>
-    <li><code>E`JuliaRL_DQN_SnakeGame`</code></li>
-    <li><code>E`JuliaRL_BC_CartPole`</code></li>
-    <li><code>E`JuliaRL_BasicDQN_EmptyRoom`</code></li>
-    <li><code>E`Dopamine_DQN_Atari(pong)`</code></li>
-    <li><code>E`Dopamine_Rainbow_Atari(pong)`</code></li>
-    <li><code>E`Dopamine_IQN_Atari(pong)`</code></li>
-    <li><code>E`rlpyt_A2C_Atari(pong)`</code></li>
-    <li><code>E`rlpyt_PPO_Atari(pong)`</code></li>
-  </ul>
-</details>
-<!-- ``` -->
+The above simple example demonstrates four core components in a general
+reinforcement learning experiment:
 
-Check out the [Get Started](https://juliareinforcementlearning.org/get_started/)
-page for a detailed explanation on what an `Experiment` is. The underlying design decisions and
-implementation details are documented in this
-[blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/).
+- **Policy**. The
+  [`RandomPolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.RandomPolicy)
+  is the simplest instance of
+  [`AbstractPolicy`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.AbstractPolicy).
+  It generates a random action at each step.
 
-## Project Structure 🌲
+- **Environment**. The
+  [`CartPoleEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.CartPoleEnv-Tuple{})
+  is a typical
+  [`AbstractEnv`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.AbstractEnv)
+  to test reinforcement learning algorithms.
+
+- **Stop Condition**. The
+  [`StopAfterStep`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.StopAfterStep)
+  is a built-in structure to inform that our experiment should stop after
+  `1_000` steps.
+
+- **Hook**. The
+  [`TotalRewardPerEpisode`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.TotalRewardPerEpisode)
+  structure is one of the most common
+  [`AbstractHook`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.AbstractHook)s.
+  It is used to collect the total reward of each episode in an experiment.
+
+Check out the [tutorials][TODO, INSERT LINK] page to learn how these four
+components are assembled together to solve many interesting problems. A
+collection of [demos][TODO, INSERT LINK] are also provided to help you
+understand how to train or evaluate policies, tune parameters, log
+intermediate data, load or save parameters, plot results and record videos. We
+also write [blogs](https://juliareinforcementlearning.org/blog/)
+occasionally to explain the implementation details of some algorithms. Among
+them, the most recommended one is [*An Introduction to
+ReinforcementLearning.jl*](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/),
+which explains the design idea of this package.
+
+## 🌲 Project Structure
 
 `ReinforcementLearning.jl` itself is just a wrapper around several other
 subpackages. The relationship between them is depicted below:
@@ -116,7 +117,7 @@ subpackages. The relationship between them is depicted below:
 </pre>
 <!-- ``` -->
 
-## Supporting 🖖
+## 🖖 Supporting
 
 `ReinforcementLearning.jl` is a MIT licensed open source project with its
 ongoing development made possible by many contributors in their spare time.
@@ -125,12 +126,12 @@ resource, which is unaffordable for individual contributors. So if you or your
 organization could provide the computing resource in some degree and would like
 to cooperate in some way, please contact us!
 
-## Citing ✍️
+## ✍️ Citing
 
 If you use `ReinforcementLearning.jl` in a scientific publication, we would
 appreciate references to the [CITATION.bib](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/CITATION.bib).
 
-## Contributors ✨
+## ✨ Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 

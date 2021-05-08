@@ -57,3 +57,35 @@ jobs:
             Pkg.test("ReinforcementLearningEnvironments")
             Pkg.test("ReinforcementLearningZoo")
             Pkg.test("ReinforcementLearning")'
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: '1'
+      - run: |
+          cd docs/homepage
+          julia --project --color=yes -e '
+            using Pkg; Pkg.instantiate();
+            using NodeJS; run(`$(npm_cmd()) install highlight.js`);
+            using Franklin;
+            optimize()'
+
+      - run: |
+          cd docs/manual
+          julia --project --color=yes -e '
+            using Pkg; Pkg.instantiate();
+            include("make.jl")'
+          mv build ../homepage/__site/docs
+
+      - name: Deploy to the main repo
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name == 'push' }}
+        with:
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          external_repository: JuliaReinforcementLearning/JuliaReinforcementLearning.github.io
+          force_orphan: true
+          publish_branch: master
+          publish_dir: ./docs/homepage/__site
