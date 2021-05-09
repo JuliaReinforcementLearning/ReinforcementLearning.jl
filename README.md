@@ -72,16 +72,66 @@ reinforcement learning experiment:
   [`AbstractHook`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.AbstractHook)s.
   It is used to collect the total reward of each episode in an experiment.
 
-Check out the [tutorials][TODO, INSERT LINK] page to learn how these four
-components are assembled together to solve many interesting problems. A
-collection of [demos][TODO, INSERT LINK] are also provided to help you
-understand how to train or evaluate policies, tune parameters, log
-intermediate data, load or save parameters, plot results and record videos. We
-also write [blogs](https://juliareinforcementlearning.org/blog/)
-occasionally to explain the implementation details of some algorithms. Among
-them, the most recommended one is [*An Introduction to
+Check out the [tutorials][TODO:INSERT LINK] page to learn how these four
+components are assembled together to solve many interesting problems. We also
+write [blogs](https://juliareinforcementlearning.org/blog/) occasionally to
+explain the implementation details of some algorithms. Among them, the most
+recommended one is [*An Introduction to
 ReinforcementLearning.jl*](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/),
-which explains the design idea of this package.
+which explains the design idea of this package. Besides, a collection of
+[demos][TODO:INSERT LINK] are also provided to help you understand how to train
+or evaluate policies, tune parameters, log intermediate data, load or save
+parameters, plot results and record videos. For example:
+
+[TODO: CorrectVideo]
+
+<!-- ```@raw html -->
+<img
+src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/manual/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true"
+width="600px">
+<details>
+  <summary>Click to see the full list of available experiments! [TODO: Insert Demo Link]</summary>
+  <ur>
+    <li><code>E`JuliaRL_BasicDQN_CartPole`</code></li>
+    <li><code>E`JuliaRL_DQN_CartPole`</code></li>
+    <li><code>E`JuliaRL_PrioritizedDQN_CartPole`</code></li>
+    <li><code>E`JuliaRL_Rainbow_CartPole`</code></li>
+    <li><code>E`JuliaRL_IQN_CartPole`</code></li>
+    <li><code>E`JuliaRL_A2C_CartPole`</code></li>
+    <li><code>E`JuliaRL_A2CGAE_CartPole`</code> (Thanks to <a href="https://github.com/sriram13m">@sriram13m</a></li>
+    <li><code>E`JuliaRL_MAC_CartPole`</code> (Thanks to <a href="https://github.com/RajGhugare19">@RajGhugare19</a>)</li>
+    <li><code>E`JuliaRL_PPO_CartPole`</code></li>
+    <li><code>E`JuliaRL_VPG_CartPole`</code> (Thanks to <a href="https://github.com/norci">@norci</a>)</li>
+    <li><code>E`JuliaRL_DDPG_Pendulum`</code></li>
+    <li><code>E`JuliaRL_TD3_Pendulum`</code> (Thanks to <a href="https://github.com/rbange">@rbange</a>)</li>
+    <li><code>E`JuliaRL_SAC_Pendulum`</code> (Thanks to <a href="https://github.com/rbange">@rbange</a>)</li>
+    <li><code>E`JuliaRL_PPO_Pendulum`</code></li>
+    <li><code>E`JuliaRL_BasicDQN_MountainCar`</code> (Thanks to <a href="https://github.com/felixchalumeau">@felixchalumeau</a>)</li>
+    <li><code>E`JuliaRL_DQN_MountainCar`</code> (Thanks to <a href="https://github.com/felixchalumeau">@felixchalumeau</a>)</li>
+    <li><code>E`JuliaRL_Minimax_OpenSpiel(tic_tac_toe)`</code></li>
+    <li><code>E`JuliaRL_TabularCFR_OpenSpiel(kuhn_poker)`</code></li>
+    <li><code>E`JuliaRL_DeepCFR_OpenSpiel(leduc_poker)`</code></li>
+    <li><code>E`JuliaRL_DQN_SnakeGame`</code></li>
+    <li><code>E`JuliaRL_BC_CartPole`</code></li>
+    <li><code>E`JuliaRL_BasicDQN_EmptyRoom`</code></li>
+    <li><code>E`Dopamine_DQN_Atari(pong)`</code></li>
+    <li><code>E`Dopamine_Rainbow_Atari(pong)`</code></li>
+    <li><code>E`Dopamine_IQN_Atari(pong)`</code></li>
+    <li><code>E`rlpyt_A2C_Atari(pong)`</code></li>
+    <li><code>E`rlpyt_PPO_Atari(pong)`</code></li>
+  </ul>
+</details>
+<!-- ``` -->
+
+## 🙋 Why ReinforcementLearning.jl?
+
+### 🚀 Fast Speed
+
+[TODO:]
+
+### 🧰 Feature Rich
+
+[TODO:]
 
 ## 🌲 Project Structure
 
@@ -113,7 +163,16 @@ subpackages. The relationship between them is depicted below:
 |                                 +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/DistributedReinforcementLearning.jl">DistributedReinforcementLearning.jl</a> |     |
 |                                       +-------------------------------------+     |
 |                                                                                   |
-+-----------------------------------------------------------------------------------+
++------|----------------------------------------------------------------------------+
+       |
+       |     +-------------------------------------+
+       +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningExperiments">ReinforcementLearningExperiments.jl</a> |
+       |     +-------------------------------------+
+       |
+       |     +----------------------------------------+
+       +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl">ReinforcementLearningAnIntroduction.jl</a> |
+             +----------------------------------------+
+
 </pre>
 <!-- ``` -->
 
