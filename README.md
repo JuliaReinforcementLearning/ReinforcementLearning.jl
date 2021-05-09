@@ -89,8 +89,8 @@ parameters, plot results and record videos. For example:
 <img
 src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/manual/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true"
 width="600px">
-<details>
-  <summary>Click to see the full list of available experiments! [TODO: Insert Demo Link]</summary>
+<details open>
+  <summary>Here are the full list of available experiments! [TODO: Insert Demo Link]</summary>
   <ur>
     <li><code>E`JuliaRL_BasicDQN_CartPole`</code></li>
     <li><code>E`JuliaRL_DQN_CartPole`</code></li>
