@@ -3,6 +3,7 @@ using .ReinforcementLearningEnvironments
 using BSON
 using Flux: Chain
 
+# TODO: move this into RLEnvs
 function atari_env_factory(
     name,
     state_size,

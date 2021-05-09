@@ -72,18 +72,18 @@ reinforcement learning experiment:
   [`AbstractHook`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.AbstractHook)s.
   It is used to collect the total reward of each episode in an experiment.
 
-Check out the [tutorials][TODO:INSERT LINK] page to learn how these four
+Check out the [tutorial](https://juliareinforcementlearning.org/docs/tutorial/) page to learn how these four
 components are assembled together to solve many interesting problems. We also
-write [blogs](https://juliareinforcementlearning.org/blog/) occasionally to
+write [blog](https://juliareinforcementlearning.org/blog/) occasionally to
 explain the implementation details of some algorithms. Among them, the most
 recommended one is [*An Introduction to
 ReinforcementLearning.jl*](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/),
 which explains the design idea of this package. Besides, a collection of
-[demos][TODO:INSERT LINK] are also provided to help you understand how to train
+[experiments](https://juliareinforcementlearning.org/docs/experiments/) are also provided to help you understand how to train
 or evaluate policies, tune parameters, log intermediate data, load or save
 parameters, plot results and record videos. For example:
 
-[TODO: CorrectVideo]
+[TODO: Use `ReinforcementLearningExperiments.jl` instead]
 
 <!-- ```@raw html -->
 <img
