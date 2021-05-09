@@ -62,8 +62,8 @@ reinforcement learning experiment:
   to test reinforcement learning algorithms.
 
 - **Stop Condition**. The
-  [`StopAfterStep`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.StopAfterStep)
-  is a built-in structure to inform that our experiment should stop after
+  [`StopAfterStep(1_000)`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.StopAfterStep)
+  is to inform that our experiment should stop after
   `1_000` steps.
 
 - **Hook**. The
