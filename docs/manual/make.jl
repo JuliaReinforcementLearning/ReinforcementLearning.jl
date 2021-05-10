@@ -1,6 +1,7 @@
 using ReinforcementLearning
 using Documenter
 using Markdown
+using DemoCards
 
 open(joinpath(@__DIR__, "..", "..", "README.md"), "r") do f_src
     open(joinpath(@__DIR__, "src", "index.md"), "w") do f_dest
@@ -10,6 +11,14 @@ open(joinpath(@__DIR__, "..", "..", "README.md"), "r") do f_src
         write(f_dest, s_dest)
     end
 end
+
+assets = [
+    "assets/favicon.ico",
+    "assets/custom.css",
+]
+
+demopage, postprocess_cb, demo_assets = makedemos("experiments/")
+push!(assets, demo_assets)
 
 makedocs(
     modules = [
@@ -22,17 +31,14 @@ makedocs(
     format = Documenter.HTML(
         prettyurls = true,
         analytics = "UA-149861753-1",
-        assets = [
-            "assets/favicon.ico",
-            "assets/custom.css",
-        ],
+        assets = assets,
     ),
     sitename = "ReinforcementLearning.jl",
     linkcheck = !("skiplinks" in ARGS),
     pages = [
         "Home" => "index.md",
         "Tutorial" => "tutorial.md",
-        # "Experiments"
+        demopage,
         "Manual" => [
             "RLBase" => "rlbase.md",
             "RLCore" => "rlcore.md",
@@ -41,3 +47,5 @@ makedocs(
         ],
     ],
 )
+
+# postprocess_cb()

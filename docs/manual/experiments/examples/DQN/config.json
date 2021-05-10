@@ -1,0 +1,7 @@
+{
+  "description": "Demos can be written in typical markdown files with [Documenter syntax](https://juliadocs.github.io/Documenter.jl/stable/man/syntax/), the only thing DemoCards does is to analyse the folder structure of your markdown files.",
+  "order": [
+    "a.md",
+    "b.md"
+  ]
+}
