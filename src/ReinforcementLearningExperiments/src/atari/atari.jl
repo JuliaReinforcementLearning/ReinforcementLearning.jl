@@ -1,5 +1,3 @@
-using .ArcadeLearningEnvironment
-using .ReinforcementLearningEnvironments
 using BSON
 using Flux: Chain
 

@@ -31,7 +31,7 @@ docs/homepage/__site
 # environment.
 Manifest.toml
 !docs/homepage/Manifest.toml
-!docs/manual/Manifest.toml
+!docs/Manifest.toml
 
 .vscode/*
 
