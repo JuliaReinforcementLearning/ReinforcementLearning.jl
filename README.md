@@ -121,7 +121,8 @@ width="600px">
     <li><code>E`rlpyt_PPO_Atari(pong)`</code></li>
   </ul>
 </details>
-<!-- ``` -->
+
+<!--
 
 ## 🙋 Why ReinforcementLearning.jl?
 
@@ -132,6 +133,10 @@ width="600px">
 ### 🧰 Feature Rich
 
 [TODO:]
+
+-->
+
+<!-- ``` -->
 
 ## 🌲 Project Structure
 
