@@ -256,6 +256,11 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
             end
             s = send_to_device(D, select_last_dim(states_flatten, inds))  # !!! performance critical
             a = send_to_device(D, select_last_dim(actions_flatten, inds))
+            
+            if eltype(a) === Int
+                a = CartesianIndex.(a, 1:length(a))
+            end
+            
             r = send_to_device(D, vec(returns)[inds])
             log_p = send_to_device(D, vec(action_log_probs)[inds])
             adv = send_to_device(D, vec(advantages)[inds])
@@ -276,7 +281,7 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
                     logit′ = AC.actor(s)
                     p′ = softmax(logit′)
                     log_p′ = logsoftmax(logit′)
-                    log_p′ₐ = log_p′[CartesianIndex.(a, 1:length(a))]
+                    log_p′ₐ = log_p′[a]
                     entropy_loss = -sum(p′ .* log_p′) * 1 // size(p′, 2)
                 end
                 ratio = exp.(log_p′ₐ .- log_p)
