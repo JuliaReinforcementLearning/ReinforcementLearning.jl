@@ -4,9 +4,27 @@
 
 ### ReinforcementLearningBase.jl
 
+No change.
+
 ### ReinforcementLearningCore.jl
 
 #### v0.8.0
 
-- Removed `ResizeImage` preprocessor to reduce the dependencies.
+- Removed `ResizeImage` preprocessor to reduce the dependency of `ImageTransformations`. 
 - Show unicode plot at the end of an experiment in the `TotalRewardPerEpisode` hook.
+
+### ReinforcementLearningZoo.jl
+
+#### v0.4.0
+
+- Moved all the experiments into a new package `ReinforcementLearningExperiments.jl`. The related dependencies are also removed (`BSON.jl`, `StableRNGs.jl`, `TensorBoardLogger.jl`).
+
+### ReinforcementLearningEnvironments.jl
+
+#### v0.6.0
+
+- Set `AcrobotEnv` into lazy loading to reduce the dependency of `OrdinaryDiffEq`.
+
+### ReinforcementLearningExperiments.jl
+
+#### v0.1.0
