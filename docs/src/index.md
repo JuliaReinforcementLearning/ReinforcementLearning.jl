@@ -1,4 +1,4 @@
-<!-- ```@raw html -->
+```@raw html
 <div align="center">
   <p>
   <img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/manual/src/assets/logo.svg?sanitize=true" width="320px">
@@ -14,7 +14,7 @@
   </p>
 
 </div>
-<!-- ``` -->
+```
 
 ---
 
@@ -85,7 +85,7 @@ parameters, plot results and record videos. For example:
 
 [TODO: Use `ReinforcementLearningExperiments.jl` instead]
 
-<!-- ```@raw html -->
+```@raw html
 <img
 src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/manual/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true"
 width="600px">
@@ -136,14 +136,14 @@ width="600px">
 
 -->
 
-<!-- ``` -->
+```
 
 ## 🌲 Project Structure
 
 `ReinforcementLearning.jl` itself is just a wrapper around several other
 subpackages. The relationship between them is depicted below:
 
-<!-- ```@raw html -->
+```@raw html
 <pre>+-----------------------------------------------------------------------------------+
 |                                                                                   |
 |  <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl">ReinforcementLearning.jl</a>                                                         |
@@ -179,7 +179,7 @@ subpackages. The relationship between them is depicted below:
              +----------------------------------------+
 
 </pre>
-<!-- ``` -->
+```
 
 ## 🖖 Supporting
 
@@ -199,7 +199,7 @@ appreciate references to the [CITATION.bib](https://github.com/JuliaReinforcemen
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
-<!-- ```@raw html -->
+```@raw html
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
@@ -234,11 +234,10 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://github.com/pilgrimygy"><img src="https://avatars.githubusercontent.com/u/49673553?v=4?s=100" width="100px;" alt=""/><br /><sub><b>GuoYu Yang</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=pilgrimygy" title="Documentation">📖</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=pilgrimygy" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/Mobius1D"><img src="https://avatars.githubusercontent.com/u/49596933?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Prasidh Srikumar</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=Mobius1D" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/ilancoulon"><img src="https://avatars.githubusercontent.com/u/764934?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ilan Coulon</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=ilancoulon" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/JinraeKim"><img src="https://avatars.githubusercontent.com/u/43136096?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jinrae Kim</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=JinraeKim" title="Documentation">📖</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3AJinraeKim" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/JinraeKim"><img src="https://avatars.githubusercontent.com/u/43136096?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jinrae Kim</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=JinraeKim" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/luigiannelli"><img src="https://avatars.githubusercontent.com/u/24853508?v=4?s=100" width="100px;" alt=""/><br /><sub><b>luigiannelli</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Aluigiannelli" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/JBoerma"><img src="https://avatars.githubusercontent.com/u/7275916?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jacob Boerma</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=JBoerma" title="Code">💻</a></td>
-    <td align="center"><a href="http://gitlab.com/plut0n"><img src="https://avatars.githubusercontent.com/u/50026682?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Xavier Valcarce</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Aplu70n" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
@@ -246,6 +245,6 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
-<!-- ``` -->
+```
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!

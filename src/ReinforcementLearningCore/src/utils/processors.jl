@@ -1,28 +1,8 @@
-export StackFrames, ResizeImage
+export StackFrames
 
-using ImageTransformations: imresize!
 import CircularArrayBuffers
 using CircularArrayBuffers: CircularArrayBuffer
 using MacroTools: @forward
-
-"""
-    ResizeImage(img::Array{T, N})
-    ResizeImage(dims::Int...) -> ResizeImage(Float32, dims...)
-    ResizeImage(T::Type{<:Number}, dims::Int...)
-
-Using BSpline method to resize the `state` field of an observation to size of `img` (or `dims`).
-"""
-struct ResizeImage{T,N}
-    img::Array{T,N}
-end
-
-ResizeImage(dims::Int...) = ResizeImage(Float32, dims...)
-ResizeImage(T::Type{<:Number}, dims::Int...) = ResizeImage(Array{T}(undef, dims))
-
-function (p::ResizeImage)(state::AbstractArray)
-    imresize!(p.img, state)
-    p.img
-end
 
 """
     StackFrames(::Type{T}=Float32, d::Int...)

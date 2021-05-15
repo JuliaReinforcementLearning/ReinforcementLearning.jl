@@ -1,3 +1,5 @@
+export DuelingNetwork
+
 #####
 # some common components for Prioritized Experience Replay based methods
 #####
