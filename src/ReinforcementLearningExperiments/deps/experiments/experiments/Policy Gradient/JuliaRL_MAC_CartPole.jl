@@ -1,3 +1,5 @@
+using Random
+
 function Experiment(
     ::Val{:JuliaRL},
     ::Val{:MAC},
