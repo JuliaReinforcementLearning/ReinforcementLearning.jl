@@ -263,6 +263,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "plu70n",
+      "name": "Xavier Valcarce",
+      "avatar_url": "https://avatars.githubusercontent.com/u/50026682?v=4",
+      "profile": "http://gitlab.com/plut0n",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
