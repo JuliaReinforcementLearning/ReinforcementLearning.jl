@@ -87,7 +87,7 @@ parameters, plot results and record videos. For example:
 
 <!-- ```@raw html -->
 <img
-src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/manual/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true"
+src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true"
 width="600px">
 <details open>
   <summary>Here are the full list of available experiments! [TODO: Insert Demo Link]</summary>
