@@ -57,7 +57,7 @@ jobs:
             Pkg.test("ReinforcementLearningCore")
             Pkg.test("ReinforcementLearningEnvironments")
             Pkg.test("ReinforcementLearningZoo")
-            Pkg.test("ReinforcementLearning")'
+            Pkg.test("ReinforcementLearning")
             Pkg.test("ReinforcementLearningExperiments")'
   docs:
     name: Documentation
