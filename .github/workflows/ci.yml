@@ -86,7 +86,7 @@ jobs:
     #     fi
 
       - name: Build docs
-      - run: |
+        run: |
           cd docs
           julia --project --color=yes -e '
             using Pkg; Pkg.instantiate();
