@@ -1,4 +1,24 @@
-function Experiment(
+# ---
+# title: Generate your cover on the fly
+# cover: assets/logo.svg
+# description: this demo shows you how to generate cover on the fly
+# date: 2020-09-13
+# author: Jun Tian
+# ---
+
+# There're many reasons that you don't want to mannually manage the cover image.
+# DemoCards.jl allows you to generate the card cover on the fly for demos written
+# in julia.
+#
+# Let's do this with a simple example
+
+#+ tangle=true
+using ReinforcementLearning
+using StableRNGs
+using Flux
+using Flux.Losses
+
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BasicDQN},
     ::Val{:CartPole},
@@ -38,13 +58,14 @@ function Experiment(
             state = Vector{Float32} => (ns,),
         ),
     )
-
     stop_condition = StopAfterStep(10_000)
     hook = ComposedHook(TotalRewardPerEpisode(), TimePerStep())
-
-    description = """
-    # BasicDQN <=> CartPoleEnv
-    """
-
-    Experiment(policy, env, stop_condition, hook, description)
+    Experiment(policy, env, stop_condition, hook, "")
 end
+
+# Now let's get start!
+
+#+ tangle=false
+run(RL.Experiment(Val(:JuliaRL), Val(:BasicDQN), Val(:CartPole), nothing))
+
+1 + 2

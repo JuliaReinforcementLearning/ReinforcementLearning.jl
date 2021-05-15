@@ -1,0 +1,7 @@
+{
+  "description": "Counterfactual regret related experiments.",
+  "order": [
+    "JuliaRL_TabularCFR_OpenSpiel.jl",
+    "JuliaRL_DeepCFR_OpenSpiel.jl"
+  ]
+}

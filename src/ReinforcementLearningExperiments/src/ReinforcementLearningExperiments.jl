@@ -11,15 +11,16 @@ using TensorBoardLogger
 using Logging
 using Distributions
 using IntervalSets
+using BSON
 
 import ReinforcementLearning: Experiment
 
 export @experiment_cmd, @E_cmd, Experiment
 
-include("rl_envs/rl_envs.jl")
-include("atari/atari.jl")
-include("open_spiel/open_spiel.jl")
-include("gridworlds/gridworlds.jl")
+const EXPERIMENTS_DIR = joinpath(@__DIR__, "experiments")
+for f in readdir(EXPERIMENTS_DIR)
+    include(joinpath(EXPERIMENTS_DIR, f))
+end
 
 # dynamic loading environments
 function __init__()
