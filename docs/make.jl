@@ -1,6 +1,7 @@
 using ReinforcementLearning
 using Documenter
 using Markdown
+using DemoCards
 
 open(joinpath(@__DIR__, "..", "README.md"), "r") do f_src
     open(joinpath(@__DIR__, "src", "index.md"), "w") do f_dest
