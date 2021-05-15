@@ -68,7 +68,7 @@ jobs:
         with:
           version: '1'
       - name: Build homepage
-      - run: |
+        run: |
           cd docs/homepage
           julia --project --color=yes -e '
             using Pkg; Pkg.instantiate();
