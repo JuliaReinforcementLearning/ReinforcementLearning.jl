@@ -1,3 +1,5 @@
+using GridWorlds
+
 function Experiment(
     ::Val{:JuliaRL},
     ::Val{:BasicDQN},

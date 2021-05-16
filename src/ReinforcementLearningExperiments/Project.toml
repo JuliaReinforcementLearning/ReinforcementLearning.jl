@@ -23,6 +23,7 @@ Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
 StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
 TensorBoardLogger = "899adc3e-224a-11e9-021f-63837185c80f"
+Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 
 [compat]
 AbstractTrees = "0.3"

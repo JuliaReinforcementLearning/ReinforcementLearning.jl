@@ -53,6 +53,7 @@ jobs:
             Pkg.develop(path="src/ReinforcementLearningZoo")
             Pkg.develop(path=".")
             Pkg.develop(path="src/ReinforcementLearningExperiments")
+            Pkg.build("ReinforcementLearningExperiments")
             Pkg.test("ReinforcementLearningBase")
             Pkg.test("ReinforcementLearningCore")
             Pkg.test("ReinforcementLearningEnvironments")
