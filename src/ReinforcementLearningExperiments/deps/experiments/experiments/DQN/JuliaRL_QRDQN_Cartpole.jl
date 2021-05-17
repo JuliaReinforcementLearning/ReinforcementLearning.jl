@@ -13,22 +13,24 @@ function Experiment(
     env = CartPoleEnv(; T=Float32, rng=rng)
     ns, na = length(state(env)), length(action_space(env))
 
+    init = glorot_uniform(rng)
+
     agent = Agent(
         policy=QBasedPolicy(
             learner=QRDQNLearner(
                 approximator=NeuralNetworkApproximator(
                     model=Chain(
-                        Dense(ns, 128, relu; init=glorot_uniform(rng)),
-                        Dense(128, 128, relu; init=glorot_uniform(rng)),
-                        Dense(128, N * na; init=glorot_uniform(rng)),
+                        Dense(ns, 128, relu; init = init),
+                        Dense(128, 128, relu; init = init),
+                        Dense(128, N * na; init = init),
                     ) |> cpu,
                     optimizer=ADAM(),
                 ),
                 target_approximator=NeuralNetworkApproximator(
                     model=Chain(
-                        Dense(ns, 128, relu; init=glorot_uniform(rng)),
-                        Dense(128, 128, relu; init=glorot_uniform(rng)),
-                        Dense(128, N * na; init=glorot_uniform(rng)),
+                        Dense(ns, 128, relu; init = init),
+                        Dense(128, 128, relu; init = init),
+                        Dense(128, N * na; init = init),
                     ) |> cpu,
                 ),
                 stack_size=nothing,
@@ -38,6 +40,7 @@ function Experiment(
                 update_freq=1,
                 target_update_freq=100,
                 n_quantile=N,
+                rng=rng,
             ),
             explorer=EpsilonGreedyExplorer(
                 kind=:exp,

@@ -272,6 +272,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "ashwani-rathee",
+      "name": "Ashwani Rathee",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54855463?v=4",
+      "profile": "https://ashwani-rathee.github.io/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
