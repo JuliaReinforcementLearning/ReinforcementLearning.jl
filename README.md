@@ -240,6 +240,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/JBoerma"><img src="https://avatars.githubusercontent.com/u/7275916?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jacob Boerma</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=JBoerma" title="Code">💻</a></td>
     <td align="center"><a href="http://gitlab.com/plut0n"><img src="https://avatars.githubusercontent.com/u/50026682?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Xavier Valcarce</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Aplu70n" title="Bug reports">🐛</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://ashwani-rathee.github.io/"><img src="https://avatars.githubusercontent.com/u/54855463?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ashwani Rathee</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=ashwani-rathee" title="Code">💻</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-restore -->
