@@ -346,7 +346,7 @@ md"""
 
 The `DefaultStateStyle` trait returns the first element in the result of `StateStyle` by default.
 
-For algorithm developers, they usually don't care about the state style. They can assume that the default state style is always well defined and simply call `state(env)` to get the right representation. So for environments of many different representations, `state(env)` will be dispatched to `state(DefaultStateStyle(env), env)`. And we can use the [`DefaultStateStyleEnv`](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/rl_envs/#ReinforcementLearningEnvironments.DefaultStateStyleEnv-Union{Tuple{E},%20Tuple{S}}%20where%20E%20where%20S) wrapper to override the pre-defined `DefaultStateStyle(::YourEnv)`.
+For algorithm developers, they usually don't care about the state style. They can assume that the default state style is always well defined and simply call `state(env)` to get the right representation. So for environments of many different representations, `state(env)` will be dispatched to `state(DefaultStateStyle(env), env)`. And we can use the [`DefaultStateStyleEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.DefaultStateStyleEnv-Union{Tuple{E},%20Tuple{S}}%20where%20E%20where%20S) wrapper to override the pre-defined `DefaultStateStyle(::YourEnv)`.
 """
 
 # ╔═╡ 8ddb2a40-60b6-11eb-1396-d9880e304217
