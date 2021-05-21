@@ -16,7 +16,7 @@ using InteractiveUtils
 using Pkg, Dates
 today()
 versioninfo()
-Pkg.status()
+buff = IOBuffer();Pkg.status(io=buff);println(String(take!(buff)))
 ```
 
 ## Downgrade happends when using this package

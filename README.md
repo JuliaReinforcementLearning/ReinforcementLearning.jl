@@ -13,6 +13,10 @@
   <a href="https://github.com/SciML/ColPrac"><img src="https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet"></a>
   </p>
 
+  <p>
+  <a href="https://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast">"Make It Work Make It Right Make It Fast"</a>
+  </p>
+
 </div>
 <!-- ``` -->
 
