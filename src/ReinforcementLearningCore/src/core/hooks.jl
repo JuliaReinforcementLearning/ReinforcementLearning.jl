@@ -9,6 +9,7 @@ export AbstractHook,
     TimePerStep,
     DoEveryNEpisode,
     DoEveryNStep,
+    DoOnExit,
     UploadTrajectoryEveryNStep,
     MultiAgentHook
 
@@ -22,6 +23,7 @@ By default, a `AbstractHook` will do nothing. One can override the behavior by i
 - `(hook::YourHook)(::PostActStage, agent, env)`
 - `(hook::YourHook)(::PreEpisodeStage, agent, env)`
 - `(hook::YourHook)(::PostEpisodeStage, agent, env)`
+- `(hook::YourHook)(::PostExperimentStage, agent, env)`
 """
 abstract type AbstractHook end
 
@@ -283,6 +285,19 @@ function (hook::DoEveryNEpisode{S})(::S, agent, env) where {S}
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
     end
+end
+
+"""
+    DoOnExit(f)
+
+Call the lambda function `f` at the end of an [`Experiment`](@ref).
+"""
+struct DoOnExit{F} <: AbstractHook
+    f::F
+end
+
+function (h::DoOnExit)(::PostExperimentStage, agent, env)
+    h.f()
 end
 
 """

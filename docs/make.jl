@@ -12,12 +12,6 @@ open(joinpath(@__DIR__, "..", "README.md"), "r") do f_src
     end
 end
 
-cp(
-    joinpath(@__DIR__, "..", "src", "ReinforcementLearningExperiments", "deps", "experiments"),
-    joinpath(@__DIR__, "experiments")
-    ;force=true
-)
-
 experiments, postprocess_cb, experiments_assets = makedemos("experiments")
 
 assets = [

@@ -1,3 +1,12 @@
+# ---
+# title: Play EmptyRoom with BasicDQNLearner
+# cover: assets/JuliaRL_BasicDQN_CartPole.png
+# description: The simplest example to demonstrate how to use BasicDQN
+# date: 2021-05-22
+# author: Jun Tian
+# ---
+
+#+ tangle=true
 using GridWorlds
 
 function Experiment(
@@ -6,14 +15,7 @@ function Experiment(
     ::Val{:EmptyRoom},
     ::Nothing;
     seed=123,
-    save_dir=nothing,
 )
-    if isnothing(save_dir)
-        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
-        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_BasicDQN_EmptyRoom$(t)")
-    end
-    log_dir = joinpath(save_dir, "tb_log")
-    lg = TBLogger(log_dir, min_level=Logging.Info)
     rng = StableRNG(seed)
 
     inner_env = GridWorlds.EmptyRoomDirected(rng=rng)
