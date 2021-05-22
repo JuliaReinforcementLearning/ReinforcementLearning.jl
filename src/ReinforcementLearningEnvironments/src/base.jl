@@ -115,7 +115,7 @@ function gen_traits_table(io, envs)
     for env in envs
         println(
             io,
-            "<li> <a href=\"https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/rl_envs/#ReinforcementLearningEnvironments.$(nameof(env))-Tuple{}\"> $(nameof(env)) </a></li>",
+            "<li> <a href=\"https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.$(nameof(env))-Tuple{}\"> $(nameof(env)) </a></li>",
         )
     end
     print(io, "</ol>")

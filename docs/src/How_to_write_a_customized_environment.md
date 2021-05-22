@@ -44,7 +44,8 @@ This game is a one-shot game. It terminates immediately after taking an action
 and a reward is received. First we define a concrete subtype of `AbstractEnv`
 named `LotteryEnv`:
 
-```@example customized_env
+```@repl customized_env
+using ReinforcementLearning
 Base.@kwdef mutable struct LotteryEnv <: AbstractEnv
     reward::Union{Nothing, Int} = nothing
 end
@@ -53,14 +54,13 @@ end
 The `LotteryEnv` has only one field named `reward`, by default it is
 initialized with `nothing`. Now let's implement the necessary interfaces:
 
-```@example customized_env
-using ReinforcementLearning
+```@repl customized_env
 RLBase.action_space(env::LotteryEnv) = (:PowerRich, :MegaHaul, nothing)
 ```
 
 Here `RLBase` is just an alias for `ReinforcementLearningBase`.
 
-```@example customized_env
+```@repl customized_env
 RLBase.reward(env::LotteryEnv) = env.reward
 RLBase.state(env::LotteryEnv) = !isnothing(env.reward)
 RLBase.state_space(env::LotteryEnv) = [false, true]
@@ -77,7 +77,7 @@ in the initial state again.
 
 The only left one is to implement the game logic:
 
-```@example customized_env
+```@repl customized_env
 function (x::LotteryEnv)(action)
     if action == :PowerRich
         x.reward = rand() < 0.01 ? 100_000_000 : -10
@@ -95,7 +95,7 @@ end
 A method named `RLBase.test_runnable!` is provided to rollout several
 simulations and see whether the environment we defined is functional.
 
-```@example customized_env
+```@repl customized_env
 env = LotteryEnv()
 RLBase.test_runnable!(env)
 ```
@@ -115,7 +115,7 @@ One step further is to test that other components in
 ReinforcementLearning.jl also work. Similar to the test above, let's try the
 [`RandomPolicy`](@ref) first:
 
-```@example customized_env
+```@repl customized_env
 run(RandomPolicy(action_space(env)), env, StopAfterEpisode(1_000)) 
 ```
 
@@ -123,7 +123,7 @@ If no error shows up, then it means our environment at least works with
 the [`RandomPolicy`](@ref) 🎉🎉🎉. Next, we can add a hook to collect the reward in each
 episode to see the performance of the `RandomPolicy`.
 
-```@example customized_env
+```@repl customized_env
 hook = TotalRewardPerEpisode()
 run(RandomPolicy(action_space(env)), env, StopAfterEpisode(1_000), hook)
 using Plots
@@ -138,7 +138,7 @@ savefig("custom_env_random_policy_reward.svg"); nothing # hide
 Now suppose we'd like to use a tabular based monte carlo method to estimate the
 state-action value.
 
-```@example customized_env
+```@repl customized_env
 using Flux: InvDecay
 p = QBasedPolicy(
     learner = MonteCarloLearner(;
@@ -165,15 +165,9 @@ by the `learner`. Inside of the [`MonteCarloLearner`](@ref), a
 
 That's the problem! A [`TabularQApproximator`](@ref) only accepts states of type `Int`.
 
-```@example customized_env
+```@repl customized_env
 p.learner.approximator(1, 1)  # Q(s, a)
-```
-
-```@example customized_env
 p.learner.approximator(1)     # [Q(s, a) for a in action_space(env)]
-```
-
-```@example customized_env
 p.learner.approximator(false)
 ```
 
@@ -184,16 +178,15 @@ force it return an `Int`. That's workable. But in some cases, we may be using
 environments written by others and it's not very easy to modify the code
 directly. Fortunatelly, some environment wrappers are provided to help us
 transform the environment.
-"""
 
-```@example customized_env
+```@repl customized_env
 wrapped_env = ActionTransformedEnv(
     StateTransformedEnv(
         env;
         state_mapping=s -> s ? 1 : 2,
         state_space_mapping = _ -> Base.OneTo(2)
     );
-    action_mapping = i -> action_space(env)[i]
+    action_mapping = i -> action_space(env)[i],
     action_space_mapping = _ -> Base.OneTo(3),
 )
 p(wrapped_env)
@@ -201,7 +194,7 @@ p(wrapped_env)
 
 Nice job! Now we are ready to run the experiment:
 
-```@example customized_env
+```@repl customized_env
 h = TotalRewardPerEpisode()
 run(p, wrapped_env, StopAfterEpisode(1_000), h)
 plot(h.rewards)
@@ -237,9 +230,8 @@ learning?](https://ai.stackexchange.com/questions/5970/what-is-the-difference-be
 To avoid confusion when executing `state(env)`, the environment designer can
 explicitly define `state(::AbstractStateStyle, env::YourEnv)`. So that users can
 fetch necessary information on demand. Following are some built-in state styles:
-"""
 
-```@example customized_env
+```@repl customized_env
 subtypes(RLBase.AbstractStateStyle)
 ```
 
@@ -247,27 +239,18 @@ Note that every state style may have many different representations, `String`,
 `Array`, `Graph` and so on. All the above state styles can accept a data type as
 parameter. For example:
 
-```@example customized_env
+```@repl customized_env
 RLBase.state(::Observation{String}, env::LotteryEnv) = is_terminated(env) ? "Game Over" : "Game Start"
 ```
 
 For environments which support many different kinds of states, developers
 should specify all the supported state styles. For example:
 
-```@example customized_env
+```@repl customized_env
 tp = TigerProblemEnv();
 StateStyle(tp)
-```
-
-```@example customized_env
 state(tp, Observation{Int64}())
-```
-
-```@example customized_env
 state(tp, InternalState{Int64}())
-```
-
-```@example customized_env
 state(tp)
 ```
 
@@ -292,11 +275,8 @@ it as [`StepReward`](@ref). Actually the `TerminalReward` is a special case of
 want to distinguish these two cases is that, for some algorithms there may be a
 more efficient implementation for `TerminalReward` style games.
 
-```@example customized_env
+```@repl customized_env
 RewardStyle(tp)
-```
-
-```@example customized_env
 RewardStyle(MontyHallEnv())
 ```
 
@@ -307,16 +287,10 @@ this kind of environments are of [`FullActionSet`](@ref). Otherwise, we say the
 environment is of [`MinimalActionSet`](@ref). A typical built-in environment with
 [`FullActionSet`](@ref) is the [`TicTacToeEnv`](@ref). Two extra methods must be implemented:
 
-```@example customized_env
-ttt = TicTacToeEnv()
+```@repl customized_env
+ttt = TicTacToeEnv();
 ActionStyle(ttt)
-```
-
-```@example customized_env
 legal_action_space(ttt)
-```
-
-```@example customized_env
 legal_action_space_mask(ttt)
 ```
 
@@ -325,11 +299,8 @@ legal_action_space_mask(ttt)
 In the above `LotteryEnv`, only one player is involved in the environment. In
 many board games, usually multiple players are engaged.
 
-```@example customized_env
+```@repl customized_env
 NumAgentStyle(env)
-```
-
-```@example customized_env
 NumAgentStyle(ttt)
 ```
 
@@ -337,11 +308,8 @@ For multi-agent environments, some new APIs are introduced. The meaning of
 some APIs we've seen are also extended. First, multi-agent environment developers must implement `players` to
 distinguish different players.
 
-```@example customized_env
+```@repl customized_env
 players(ttt)
-```
-
-```@example customized_env
 current_player(ttt)
 ```
 
@@ -378,18 +346,14 @@ at each step, only **ONE** player was allowed to take an action. Alternatively
 there are [`Simultaneous`](@ref) environments, where all the players take actions
 simultaneously without seeing each other's action in advance. Simultaneous
 environments must take a collection of actions from different players as input.
-"""
 
-```@example customized_env
+```@repl customized_env
 rps = RockPaperScissorsEnv();
 action_space(rps)
-```
-
-```@example customized_env
 rps(rand(action_space(rps)))
 ```
 
-### `ChanceStyle`
+### [`ChanceStyle`](@ref)
 
 If there's no `rng` in the environment, everything is deterministic afer taking
 each action, then we call the [`ChanceStyle`](@ref) of these environments are of
@@ -398,16 +362,10 @@ in [Extensive Form Games](https://en.wikipedia.org/wiki/Extensive-form_game), a
 chance node is envolved. And the action probability of this special player is
 known. For these environments, we need to have the following methods defined:
 
-```@example customized_env
+```@repl customized_env
 kp = KuhnPokerEnv();
 chance_player(kp)
-```
-
-```@example customized_env
 prob(kp, chance_player(kp))
-```
-
-```@example customized_env
 chance_player(kp) in players(kp)
 ```
 

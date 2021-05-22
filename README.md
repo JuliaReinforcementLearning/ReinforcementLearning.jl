@@ -3,7 +3,11 @@
   <p>
   <img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/logo.svg?sanitize=true" width="320px">
   </p>
-
+  
+  <p>
+  <a href="https://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast">"Make It Work Make It Right Make It Fast"</a>
+  </p>
+  
   <p>
   <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/actions?query=workflow%3ACI"><img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/workflows/CI/badge.svg"></a>
   <a href="https://juliahub.com/ui/Packages/ReinforcementLearning/6l2TO"><img src="https://juliahub.com/docs/ReinforcementLearning/pkgeval.svg"></a>
@@ -83,44 +87,10 @@ which explains the design idea of this package. Besides, a collection of
 or evaluate policies, tune parameters, log intermediate data, load or save
 parameters, plot results and record videos. For example:
 
-[TODO: Use `ReinforcementLearningExperiments.jl` instead]
-
 <!-- ```@raw html -->
 <img
 src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true"
 width="600px">
-<details open>
-  <summary>Here are the full list of available experiments! [TODO: Insert Demo Link]</summary>
-  <ur>
-    <li><code>E`JuliaRL_BasicDQN_CartPole`</code></li>
-    <li><code>E`JuliaRL_DQN_CartPole`</code></li>
-    <li><code>E`JuliaRL_PrioritizedDQN_CartPole`</code></li>
-    <li><code>E`JuliaRL_Rainbow_CartPole`</code></li>
-    <li><code>E`JuliaRL_IQN_CartPole`</code></li>
-    <li><code>E`JuliaRL_A2C_CartPole`</code></li>
-    <li><code>E`JuliaRL_A2CGAE_CartPole`</code> (Thanks to <a href="https://github.com/sriram13m">@sriram13m</a></li>
-    <li><code>E`JuliaRL_MAC_CartPole`</code> (Thanks to <a href="https://github.com/RajGhugare19">@RajGhugare19</a>)</li>
-    <li><code>E`JuliaRL_PPO_CartPole`</code></li>
-    <li><code>E`JuliaRL_VPG_CartPole`</code> (Thanks to <a href="https://github.com/norci">@norci</a>)</li>
-    <li><code>E`JuliaRL_DDPG_Pendulum`</code></li>
-    <li><code>E`JuliaRL_TD3_Pendulum`</code> (Thanks to <a href="https://github.com/rbange">@rbange</a>)</li>
-    <li><code>E`JuliaRL_SAC_Pendulum`</code> (Thanks to <a href="https://github.com/rbange">@rbange</a>)</li>
-    <li><code>E`JuliaRL_PPO_Pendulum`</code></li>
-    <li><code>E`JuliaRL_BasicDQN_MountainCar`</code> (Thanks to <a href="https://github.com/felixchalumeau">@felixchalumeau</a>)</li>
-    <li><code>E`JuliaRL_DQN_MountainCar`</code> (Thanks to <a href="https://github.com/felixchalumeau">@felixchalumeau</a>)</li>
-    <li><code>E`JuliaRL_Minimax_OpenSpiel(tic_tac_toe)`</code></li>
-    <li><code>E`JuliaRL_TabularCFR_OpenSpiel(kuhn_poker)`</code></li>
-    <li><code>E`JuliaRL_DeepCFR_OpenSpiel(leduc_poker)`</code></li>
-    <li><code>E`JuliaRL_DQN_SnakeGame`</code></li>
-    <li><code>E`JuliaRL_BC_CartPole`</code></li>
-    <li><code>E`JuliaRL_BasicDQN_EmptyRoom`</code></li>
-    <li><code>E`Dopamine_DQN_Atari(pong)`</code></li>
-    <li><code>E`Dopamine_Rainbow_Atari(pong)`</code></li>
-    <li><code>E`Dopamine_IQN_Atari(pong)`</code></li>
-    <li><code>E`rlpyt_A2C_Atari(pong)`</code></li>
-    <li><code>E`rlpyt_PPO_Atari(pong)`</code></li>
-  </ul>
-</details>
 
 <!--
 
