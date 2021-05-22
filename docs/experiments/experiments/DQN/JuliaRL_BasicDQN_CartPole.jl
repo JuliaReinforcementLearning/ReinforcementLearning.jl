@@ -1,5 +1,5 @@
 # ---
-# title: Play CartPole with BasicDQN
+# title: JuliaRL\_BasicDQN\_CartPole
 # cover: assets/JuliaRL_BasicDQN_CartPole.png
 # description: The simplest example to demonstrate how to use BasicDQN
 # date: 2021-05-22
@@ -11,7 +11,6 @@ using ReinforcementLearning
 using StableRNGs
 using Flux
 using Flux.Losses
-using Plots
 
 function RL.Experiment(
     ::Val{:JuliaRL},
@@ -53,23 +52,24 @@ function RL.Experiment(
         ),
     )
     stop_condition = StopAfterStep(10_000)
-    reward_hook = TotalRewardPerEpisode()
-    save_fig_hook = DoOnExit() do
-        plot(reward_hook.rewards)
-        savefig("assets/JuliaRL_BasicDQN_CartPole.png")
-    end
-    hook = ComposedHook(reward_hook, save_fig_hook)
+    hook = TotalRewardPerEpisode()
     Experiment(policy, env, stop_condition, hook, "")
 end
 
 #+ tangle=false
-ex = E`JuliaRL_BasicDQN_CartPole`;
+ex = Experiment(Val(:JuliaRL), Val(:BasicDQN), Val(:CartPole), nothing)
 run(ex)
 
-# The total reward per episode is:
+# After the experiment finishes, we can draw the total reward per episode:
+
+using Plots
+plot(ex.hook.rewards)
+savefig("assets/JuliaRL_BasicDQN_CartPole.png")  #hide
+
 # ![](assets/JuliaRL_BasicDQN_CartPole.png)
 
 # ## References
 # ```@docs
 # BasicDQNLearner
+# EpsilonGreedyExplorer
 # ```

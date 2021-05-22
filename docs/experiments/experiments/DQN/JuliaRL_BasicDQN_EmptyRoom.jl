@@ -1,15 +1,19 @@
 # ---
-# title: Play EmptyRoom with BasicDQNLearner
-# cover: assets/JuliaRL_BasicDQN_CartPole.png
-# description: The simplest example to demonstrate how to use BasicDQN
+# title: JuliaRL\_BasicDQN\_EmptyRoom
+# cover: assets/JuliaRL_BasicDQN_EmptyRoom.png
+# description: A simple example to demonstrate how to use environments in GridWorlds.jl
 # date: 2021-05-22
-# author: Jun Tian
+# author: Siddharth Bhatia
 # ---
 
 #+ tangle=true
+using ReinforcementLearning
 using GridWorlds
+using StableRNGs
+using Flux
+using Flux.Losses
 
-function Experiment(
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BasicDQN},
     ::Val{:EmptyRoom},
@@ -61,32 +65,26 @@ function Experiment(
     )
 
     stop_condition = StopAfterStep(10_000)
-
-    total_reward_per_episode = TotalRewardPerEpisode()
-    time_per_step = TimePerStep()
-    hook = ComposedHook(
-        total_reward_per_episode,
-        time_per_step,
-        DoEveryNStep() do t, agent, env
-            with_logger(lg) do
-                @info "training" loss = agent.policy.learner.loss
-            end
-        end,
-        DoEveryNEpisode() do t, agent, env
-            with_logger(lg) do
-                @info "training" reward = total_reward_per_episode.rewards[end] log_step_increment =
-                    0
-            end
-        end,
-    )
-
-    description = """
-    This experiment uses three dense layers to approximate the Q value.
-    The testing environment is EmptyRoom.
-
-    You can view the runtime logs with `tensorboard --logdir $log_dir`.
-    Some useful statistics are stored in the `hook` field of this experiment.
-    """
-
-    Experiment(agent, env, stop_condition, hook, description)
+    hook = TotalRewardPerEpisode()
+    Experiment(agent, env, stop_condition, hook, "")
 end
+
+#+ tangle=false
+ex = Experiment(Val(:JuliaRL), Val(:BasicDQN), Val(:EmptyRoom), nothing)
+run(ex)
+
+# After the experiment finishes, we can draw the total reward per episode:
+
+using Plots
+p = plot(ex.hook.rewards)
+savefig(p, "assets/JuliaRL_BasicDQN_EmptyRoom.png")  #hide
+
+# ![](assets/JuliaRL_BasicDQN_EmptyRoom.png)
+
+# TODO: Generate a GIF and use it as the cover?
+
+# ## References
+# ```@docs
+# BasicDQNLearner
+# EpsilonGreedyExplorer
+# ```
