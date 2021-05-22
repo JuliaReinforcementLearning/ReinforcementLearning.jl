@@ -4,9 +4,6 @@
 
 - [An Introduction to ReinforcementLearning.jl: Design, Implementations and Thoughts](/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts)
 
-- [How to Write a Customized
-  Environment?](/blog/how_to_write_a_customized_environment/)
-
 - Notebooks for the book: [*Reinforcement Learning: an Introduction 2nd
   Edition*](https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl)
 
