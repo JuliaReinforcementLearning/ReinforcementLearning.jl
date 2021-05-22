@@ -54,7 +54,7 @@ of time by using a [`TabularPolicy`](@ref).
 
 ```@repl randomwalk1d
 NS, NA = length(S), length(A)
-policy = TabularPolicy(;table=Dict(zip(1:NS, rand(A, NS))))
+policy = TabularPolicy(;table=Dict(zip(1:NS, fill(2, NS))))
 run(
     policy,
     RandomWalk1D(),
