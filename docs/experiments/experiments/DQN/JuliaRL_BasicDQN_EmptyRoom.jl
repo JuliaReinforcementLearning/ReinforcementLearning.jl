@@ -70,10 +70,23 @@ function RL.Experiment(
 end
 
 #+ tangle=false
-using Plots
-abc = E`JuliaRL_BasicDQN_EmptyRoom`
-run(abc)
-plot(abc.hook.rewards)
-savefig("assets/JuliaRL_BasicDQN_EmptyRoom.png") #hide
+
+# Now let's run this experiment and see the rewards:
+
+# ```julia
+# using Plots
+# ex = E`JuliaRL_BasicDQN_EmptyRoom`
+# run(ex)
+# plot(ex.hook.rewards)
+# ```
+
+#src FIXME: run(ex) errors if passed to Documenter, so wrap with julia annoation, and
+#src        only run it with DemoCards
+using Plots #src
+ex = E`JuliaRL_BasicDQN_EmptyRoom` #src
+run(ex) #src
+plot(ex.hook.rewards) #src
+isdir("assets") || mkdir("assets") #src
+savefig("assets/JuliaRL_BasicDQN_EmptyRoom.png") #src
 
 # ![](assets/JuliaRL_BasicDQN_EmptyRoom.png)
