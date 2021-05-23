@@ -57,19 +57,10 @@ function RL.Experiment(
 end
 
 #+ tangle=false
-ex = Experiment(Val(:JuliaRL), Val(:BasicDQN), Val(:CartPole), nothing)
-run(ex)
-
-# After the experiment finishes, we can draw the total reward per episode:
-
 using Plots
+ex = E`JuliaRL_BasicDQN_CartPole`
+run(ex)
 plot(ex.hook.rewards)
-savefig("assets/JuliaRL_BasicDQN_CartPole.png")  #hide
+savefig("assets/JuliaRL_BasicDQN_CartPole.png") #hide
 
 # ![](assets/JuliaRL_BasicDQN_CartPole.png)
-
-# ## References
-# ```@docs
-# BasicDQNLearner
-# EpsilonGreedyExplorer
-# ```
