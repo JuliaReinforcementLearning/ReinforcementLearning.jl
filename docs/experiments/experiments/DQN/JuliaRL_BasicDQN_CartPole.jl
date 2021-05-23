@@ -1,16 +1,10 @@
 # ---
-# title: Generate your cover on the fly
-# cover: assets/logo.svg
-# description: this demo shows you how to generate cover on the fly
-# date: 2020-09-13
+# title: JuliaRL\_BasicDQN\_CartPole
+# cover: assets/JuliaRL_BasicDQN_CartPole.png
+# description: The simplest example to demonstrate how to use BasicDQN
+# date: 2021-05-22
 # author: Jun Tian
 # ---
-
-# There're many reasons that you don't want to mannually manage the cover image.
-# DemoCards.jl allows you to generate the card cover on the fly for demos written
-# in julia.
-#
-# Let's do this with a simple example
 
 #+ tangle=true
 using ReinforcementLearning
@@ -24,7 +18,6 @@ function RL.Experiment(
     ::Val{:CartPole},
     ::Nothing;
     seed = 123,
-    save_dir = nothing,
 )
     rng = StableRNG(seed)
     env = CartPoleEnv(; T = Float32, rng = rng)
@@ -59,13 +52,24 @@ function RL.Experiment(
         ),
     )
     stop_condition = StopAfterStep(10_000)
-    hook = ComposedHook(TotalRewardPerEpisode(), TimePerStep())
+    hook = TotalRewardPerEpisode()
     Experiment(policy, env, stop_condition, hook, "")
 end
 
-# Now let's get start!
-
 #+ tangle=false
-run(RL.Experiment(Val(:JuliaRL), Val(:BasicDQN), Val(:CartPole), nothing))
+ex = Experiment(Val(:JuliaRL), Val(:BasicDQN), Val(:CartPole), nothing)
+run(ex)
 
-1 + 2
+# After the experiment finishes, we can draw the total reward per episode:
+
+using Plots
+plot(ex.hook.rewards)
+savefig("assets/JuliaRL_BasicDQN_CartPole.png")  #hide
+
+# ![](assets/JuliaRL_BasicDQN_CartPole.png)
+
+# ## References
+# ```@docs
+# BasicDQNLearner
+# EpsilonGreedyExplorer
+# ```

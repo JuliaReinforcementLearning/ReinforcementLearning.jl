@@ -23,37 +23,17 @@ src/ReinforcementLearningBase`, then `]add Statistics`.
 
 ## How to contribute a new experiment?
 
-Let's take a look at the folder structure of
-`ReinforcementLearningExperiments.jl` first:
-
-```
-tree -d ./src/ReinforcementLearningExperiments
-
-./src/ReinforcementLearningExperiments
-├── deps
-│   └── experiments
-│       ├── assets
-│       └── experiments
-│           ├── CFR
-│           ├── DQN
-│           │   └── assets
-│           ├── Offline
-│           ├── Policy Gradient
-│           │   └── assets
-│           └── Search
-├── src
-│   └── experiments
-└── test
-```
-
 We use the [DemoCards.jl](https://johnnychen94.github.io/DemoCards.jl/stable/)
 to generate the documentation of all the experiments. If you want to contribute
 a new experiment, simply create a `Your_Experiment.jl` file in a specific
-algorithm category under the
-`src/ReinforcementLearningExperiments/deps/experiments` folder.
-Node that the this file should follow the format defined in
-[Literate.jl](https://github.com/fredrikekre/Literate.jl).
+algorithm category under the `docs/experiments` folder.
+Node that this file should follow the format defined in
+[Literate.jl](https://github.com/fredrikekre/Literate.jl). And then update the
+`config.json` file correspondingly. If your experiment needs an extra
+dependency, remember to update both `docs/Project.toml` and
+`src/ReinforcementLearningExperiments/Project.toml`.
 
 !!! note
-    And all the cells after the `#+ tangle=true` line will be extracted into the
-    `ReinforcementLearningExperiments` package automatically.
+    All the cells after the `#+ tangle=true` line in `Your_Experment.jl` will be extracted into the
+`ReinforcementLearningExperiments` package automatically. This feature is
+supported by [Weave.jl](https://weavejl.mpastell.com/stable/usage/#tangle).
