@@ -70,21 +70,10 @@ function RL.Experiment(
 end
 
 #+ tangle=false
-ex = Experiment(Val(:JuliaRL), Val(:BasicDQN), Val(:EmptyRoom), nothing)
-run(ex)
-
-# After the experiment finishes, we can draw the total reward per episode:
-
 using Plots
-p = plot(ex.hook.rewards)
-savefig(p, "assets/JuliaRL_BasicDQN_EmptyRoom.png")  #hide
+abc = E`JuliaRL_BasicDQN_EmptyRoom`
+run(abc)
+plot(abc.hook.rewards)
+savefig("assets/JuliaRL_BasicDQN_EmptyRoom.png") #hide
 
 # ![](assets/JuliaRL_BasicDQN_EmptyRoom.png)
-
-# TODO: Generate a GIF and use it as the cover?
-
-# ## References
-# ```@docs
-# BasicDQNLearner
-# EpsilonGreedyExplorer
-# ```
