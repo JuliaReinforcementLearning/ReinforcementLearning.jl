@@ -1,4 +1,18 @@
-function Experiment(
+# ---
+# title: JuliaRL\_A2C\_CartPole
+# cover: assets/JuliaRL_A2C_CartPole.png
+# description: A2C applied to CartPole
+# date: 2021-05-22
+# author: "[Jun Tian](https://github.com/findmyway)"
+# ---
+
+#+ tangle=true
+using ReinforcementLearning
+using StableRNGs
+using Flux
+using Flux.Losses
+
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:A2C},
     ::Val{:CartPole},
@@ -6,12 +20,6 @@ function Experiment(
     save_dir = nothing,
     seed = 123,
 )
-    if isnothing(save_dir)
-        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
-        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_A2C_CartPole_$(t)")
-    end
-
-    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = StableRNG(seed)
     N_ENV = 16
     UPDATE_FREQ = 10
@@ -51,30 +59,21 @@ function Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(50_000)
-    total_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
-    time_per_step = TimePerStep()
-    hook = ComposedHook(
-        total_reward_per_episode,
-        time_per_step,
-        DoEveryNStep() do t, agent, env
-            with_logger(lg) do
-                @info(
-                    "training",
-                    actor_loss = agent.policy.learner.actor_loss,
-                    critic_loss = agent.policy.learner.critic_loss,
-                    entropy_loss = agent.policy.learner.entropy_loss,
-                    loss = agent.policy.learner.loss,
-                )
-                for i in 1:length(env)
-                    if is_terminated(env[i])
-                        @info "training" reward = total_reward_per_episode.rewards[i][end] log_step_increment =
-                            0
-                        break
-                    end
-                end
-            end
-        end,
-    )
+    stop_condition = StopAfterStep(50_000, is_show_progress=true)
+    hook = TotalBatchRewardPerEpisode(N_ENV)
     Experiment(agent, env, stop_condition, hook, "# A2C with CartPole")
 end
+
+#+ tangle=false
+using Plots
+using Statistics
+pyplot() #hide
+ex = E`JuliaRL_A2C_CartPole`
+run(ex)
+n = minimum(map(length, ex.hook.rewards))
+m = mean([@view(x[1:n]) for x in ex.hook.rewards])
+s = std([@view(x[1:n]) for x in ex.hook.rewards])
+plot(m,ribbon=s)
+savefig("assets/JuliaRL_A2C_CartPole.png") #hide
+
+# ![](assets/JuliaRL_A2C_CartPole.png)

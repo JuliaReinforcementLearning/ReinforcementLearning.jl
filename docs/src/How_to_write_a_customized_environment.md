@@ -127,6 +127,7 @@ episode to see the performance of the `RandomPolicy`.
 hook = TotalRewardPerEpisode()
 run(RandomPolicy(action_space(env)), env, StopAfterEpisode(1_000), hook)
 using Plots
+pyplot() #hide
 plot(hook.rewards)
 savefig("custom_env_random_policy_reward.svg"); nothing # hide
 ```

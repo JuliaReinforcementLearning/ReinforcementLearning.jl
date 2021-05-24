@@ -1,17 +1,25 @@
-function Experiment(
+# ---
+# title: JuliaRL\_VPG\_CartPole
+# cover: assets/JuliaRL_VPG_CartPole.png
+# description: VPG applied to CartPole
+# date: 2021-05-22
+# author: "[norci](https://github.com/norci)"
+# ---
+
+#+ tangle=true
+using ReinforcementLearning
+using StableRNGs
+using Flux
+using Flux.Losses
+using Distributions
+
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:VPG},
     ::Val{:CartPole},
     ::Nothing;
-    save_dir = nothing,
     seed = 123,
 )
-    if isnothing(save_dir)
-        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
-        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_VPG_CartPole_$(t)")
-    end
-
-    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = StableRNG(seed)
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(state(env)), length(action_space(env))
@@ -41,27 +49,19 @@ function Experiment(
         ),
         trajectory = ElasticSARTTrajectory(state = Vector{Float32} => (ns,)),
     )
-    # VPG is updated after each episode
-    stop_condition = StopAfterEpisode(500)
+    stop_condition = StopAfterEpisode(500, is_show_progress=false)
 
-    total_reward_per_episode = TotalRewardPerEpisode()
-    time_per_step = TimePerStep()
-    hook = ComposedHook(
-        total_reward_per_episode,
-        time_per_step,
-        DoEveryNEpisode() do t, agent, env
-            with_logger(lg) do
-                @info(
-                    "training",
-                    loss = agent.policy.loss,
-                    baseline_loss = agent.policy.baseline_loss,
-                    reward = total_reward_per_episode.rewards[end],
-                )
-            end
-        end,
-    )
-
+    hook = TotalRewardPerEpisode()
     description = "# Play CartPole with VPG"
-
     Experiment(agent, env, stop_condition, hook, description)
 end
+
+#+ tangle=false
+using Plots
+pyplot() #hide
+ex = E`JuliaRL_VPG_CartPole`
+run(ex)
+plot(ex.hook.rewards)
+savefig("assets/JuliaRL_VPG_CartPole.png") #hide
+
+# ![](assets/JuliaRL_VPG_CartPole.png)

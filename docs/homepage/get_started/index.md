@@ -202,7 +202,8 @@ and
 
 ```julia:./ex1
 using ReinforcementLearning # hide
-using Plots # hide
+using Plots
+pyplot() #hide # hide
 
 experiment = E`JuliaRL_BasicDQN_CartPole`
 hook = TotalRewardPerEpisode()

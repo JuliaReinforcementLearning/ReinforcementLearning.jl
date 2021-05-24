@@ -1,4 +1,18 @@
-function Experiment(
+# ---
+# title: JuliaRL\_PrioritizedDQN\_CartPole
+# cover: assets/JuliaRL_PrioritizedDQN_CartPole.png
+# description: PrioritizedDQN applied to CartPole
+# date: 2021-05-22
+# author: "[Jun Tian](https://github.com/findmyway)"
+# ---
+
+#+ tangle=true
+using ReinforcementLearning
+using StableRNGs
+using Flux
+using Flux.Losses
+
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:PrioritizedDQN},
     ::Val{:CartPole},
@@ -6,12 +20,6 @@ function Experiment(
     save_dir = nothing,
     seed = 123,
 )
-    if isnothing(save_dir)
-        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
-        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_PrioritizedDQN_CartPole_$(t)")
-    end
-
-    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = StableRNG(seed)
 
     env = CartPoleEnv(; T = Float32, rng = rng)
@@ -59,31 +67,17 @@ function Experiment(
     )
 
     stop_condition = StopAfterStep(10_000)
-
-    total_reward_per_episode = TotalRewardPerEpisode()
-    time_per_step = TimePerStep()
-    hook = ComposedHook(
-        total_reward_per_episode,
-        time_per_step,
-        DoEveryNStep() do t, agent, env
-            if agent.policy.learner.update_step % agent.policy.learner.update_freq == 0
-                with_logger(lg) do
-                    @info "training" loss = agent.policy.learner.loss
-                end
-            end
-        end,
-        DoEveryNEpisode() do t, agent, env
-            with_logger(lg) do
-                @info "training" reward = total_reward_per_episode.rewards[end] log_step_increment =
-                    0
-            end
-        end,
-    )
-
-    description = """
-    This experiment uses the `PrioritizedDQNLearner` method with three dense layers to approximate the Q value.
-    The testing environment is CartPoleEnv.
-    """
-
-    Experiment(agent, env, stop_condition, hook, description)
+    hook = TotalRewardPerEpisode()
+    Experiment(agent, env, stop_condition, hook, "# Play CartPole with PrioritizedDQN")
 end
+
+
+#+ tangle=false
+using Plots
+pyplot() #hide
+ex = E`JuliaRL_PrioritizedDQN_CartPole`
+run(ex)
+plot(ex.hook.rewards)
+savefig("assets/JuliaRL_PrioritizedDQN_CartPole.png") #hide
+
+# ![](assets/JuliaRL_PrioritizedDQN_CartPole.png)

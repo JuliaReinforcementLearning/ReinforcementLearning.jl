@@ -1,17 +1,25 @@
-function Experiment(
+# ---
+# title: JuliaRL\_TD3\_Pendulum
+# cover: assets/JuliaRL_TD3_Pendulum.png
+# description: TD3 applied to Pendulum
+# date: 2021-05-22
+# author: "[Roman Bange](https://github.com/rbange)"
+# ---
+
+#+ tangle=true
+using ReinforcementLearning
+using StableRNGs
+using Flux
+using Flux.Losses
+using IntervalSets
+
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:TD3},
     ::Val{:Pendulum},
     ::Nothing;
-    save_dir = nothing,
     seed = 123,
 )
-    if isnothing(save_dir)
-        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
-        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_TD3_Pendulum_$(t)")
-    end
-
-    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = StableRNG(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
     A = action_space(inner_env)
@@ -78,28 +86,17 @@ function Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000)
-    total_reward_per_episode = TotalRewardPerEpisode()
-    time_per_step = TimePerStep()
-    hook = ComposedHook(
-        total_reward_per_episode,
-        time_per_step,
-        DoEveryNStep() do t, agent, env
-            with_logger(lg) do
-                @info(
-                    "training",
-                    actor_loss = agent.policy.actor_loss,
-                    critic_loss = agent.policy.critic_loss
-                )
-            end
-        end,
-        DoEveryNEpisode() do t, agent, env
-            with_logger(lg) do
-                @info "training" reward = total_reward_per_episode.rewards[end] log_step_increment =
-                    0
-            end
-        end,
-    )
-
+    stop_condition = StopAfterStep(10_000, is_show_progress=false)
+    hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "# Play Pendulum with TD3")
 end
+
+#+ tangle=false
+using Plots
+pyplot() #hide
+ex = E`JuliaRL_TD3_Pendulum`
+run(ex)
+plot(ex.hook.rewards)
+savefig("assets/JuliaRL_TD3_Pendulum.png") #hide
+
+# ![](assets/JuliaRL_TD3_Pendulum.png)

@@ -1,19 +1,26 @@
-function Experiment(
+# ---
+# title: JuliaRL\_BasicDQN\_MountainCar
+# cover: assets/JuliaRL_BasicDQN_MountainCar.png
+# description: BasicDQN can also be applied to MountainCar
+# date: 2021-05-22
+# author: "[Felix Chalumeau](https://github.com/felixchalumeau)"
+# ---
+
+#+ tangle=true
+using ReinforcementLearning
+using GridWorlds
+using StableRNGs
+using Flux
+using Flux.Losses
+
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BasicDQN},
     ::Val{:MountainCar},
     ::Nothing;
-    save_dir = nothing,
     seed = 123,
 )
     rng = StableRNG(seed)
-    if isnothing(save_dir)
-        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
-        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_BasicDQN_MountainCar_$(t)")
-    end
-
-    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
-
     env = MountainCarEnv(; T = Float32, max_steps = 5000, rng = rng)
     ns, na = length(state(env)), length(action_space(env))
     agent = Agent(
@@ -45,30 +52,18 @@ function Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(70_000)
+    stop_condition = StopAfterStep(70_000, is_show_progress=false)
+    hook = TotalRewardPerEpisode()
 
-    total_reward_per_episode = TotalRewardPerEpisode()
-    time_per_step = TimePerStep()
-    hook = ComposedHook(
-        total_reward_per_episode,
-        time_per_step,
-        DoEveryNStep() do t, agent, env
-            with_logger(lg) do
-                @info "training" loss = agent.policy.learner.loss
-            end
-        end,
-        DoEveryNEpisode() do t, agent, env
-            with_logger(lg) do
-                @info "training" reward = total_reward_per_episode.rewards[end] log_step_increment =
-                    0
-            end
-        end,
-    )
-
-    description = """
-    This experiment uses three dense layers to approximate the Q value.
-    The testing environment is MountainCarEnv.
-    """
-
-    Experiment(agent, env, stop_condition, hook, description)
+    Experiment(agent, env, stop_condition, hook, "")
 end
+
+#+ tangle=false
+using Plots
+pyplot() #hide
+ex = E`JuliaRL_BasicDQN_MountainCar`
+run(ex)
+plot(ex.hook.rewards)
+savefig("assets/JuliaRL_BasicDQN_MountainCar.png") #hide
+
+# ![](assets/JuliaRL_BasicDQN_MountainCar.png)
