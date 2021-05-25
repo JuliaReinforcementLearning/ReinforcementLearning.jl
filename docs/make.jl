@@ -53,7 +53,7 @@ makedocs(
             "RLEnvs" => "rlenvs.md",
             "RLZoo" => "rlzoo.md",
         ],
-    ],
+    ]
 )
 
 postprocess_cb()

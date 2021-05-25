@@ -1,19 +1,26 @@
-function Experiment(
+# ---
+# title: JuliaRL\_DQN\_MountainCar
+# cover: assets/JuliaRL_DQN_MountainCar.png
+# description: DQN can also be applied to MountainCar
+# date: 2021-05-22
+# author: "[Felix Chalumeau](https://github.com/felixchalumeau)"
+# ---
+
+#+ tangle=true
+using ReinforcementLearning
+using GridWorlds
+using StableRNGs
+using Flux
+using Flux.Losses
+
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:DQN},
     ::Val{:MountainCar},
     ::Nothing;
-    save_dir = nothing,
     seed = 123,
 )
-    if isnothing(save_dir)
-        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
-        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_DQN_MountainCar_$(t)")
-    end
-
-    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = StableRNG(seed)
-
     env = MountainCarEnv(; T = Float32, max_steps = 5000, rng = rng)
     ns, na = length(state(env)), length(action_space(env))
 
@@ -58,32 +65,17 @@ function Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(40_000)
-
-    total_reward_per_episode = TotalRewardPerEpisode()
-    time_per_step = TimePerStep()
-    hook = ComposedHook(
-        total_reward_per_episode,
-        time_per_step,
-        DoEveryNStep() do t, agent, env
-            if agent.policy.learner.update_step % agent.policy.learner.update_freq == 0
-                with_logger(lg) do
-                    @info "training" loss = agent.policy.learner.loss
-                end
-            end
-        end,
-        DoEveryNEpisode() do t, agent, env
-            with_logger(lg) do
-                @info "training" reward = total_reward_per_episode.rewards[end] log_step_increment =
-                    0
-            end
-        end,
-    )
-
-    description = """
-    This experiment uses the `DQNLearner` method with three dense layers to approximate the Q value.
-    The testing environment is MountainCarEnv.
-    """
-
-    Experiment(agent, env, stop_condition, hook, description)
+    stop_condition = StopAfterStep(40_000, is_show_progress=false)
+    hook = TotalRewardPerEpisode()
+    Experiment(agent, env, stop_condition, hook, "")
 end
+
+#+ tangle=false
+using Plots
+pyplot() #hide
+ex = E`JuliaRL_DQN_MountainCar`
+run(ex)
+plot(ex.hook.rewards)
+savefig("assets/JuliaRL_DQN_MountainCar.png") #hide
+
+# ![](assets/JuliaRL_DQN_MountainCar.png)

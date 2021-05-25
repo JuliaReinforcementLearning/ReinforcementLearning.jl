@@ -1,4 +1,19 @@
-function Experiment(
+# ---
+# title: JuliaRL\_SAC\_Pendulum
+# cover: assets/JuliaRL_SAC_Pendulum.png
+# description: SAC applied to Pendulum
+# date: 2021-05-22
+# author: "[Roman Bange](https://github.com/rbange)"
+# ---
+
+#+ tangle=true
+using ReinforcementLearning
+using StableRNGs
+using Flux
+using Flux.Losses
+using IntervalSets
+
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:SAC},
     ::Val{:Pendulum},
@@ -6,12 +21,6 @@ function Experiment(
     save_dir = nothing,
     seed = 123,
 )
-    if isnothing(save_dir)
-        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
-        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_SAC_Pendulum_$(t)")
-    end
-
-    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = StableRNG(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
     A = action_space(inner_env)
@@ -71,25 +80,17 @@ function Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000)
-    total_reward_per_episode = TotalRewardPerEpisode()
-    time_per_step = TimePerStep()
-    hook = ComposedHook(
-        total_reward_per_episode,
-        time_per_step,
-        DoEveryNStep() do t, agent, env
-            with_logger(lg) do
-                @info(
-                    "training",
-                    reward_term = agent.policy.reward_term,
-                    entropy_term = agent.policy.entropy_term,
-                )
-                if is_terminated(env)
-                    @info "training" reward = total_reward_per_episode.reward log_step_increment = 0
-                end
-            end
-        end,
-    )
-
+    stop_condition = StopAfterStep(10_000, is_show_progress=false)
+    hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "# Play Pendulum with SAC")
 end
+
+#+ tangle=false
+using Plots
+pyplot() #hide
+ex = E`JuliaRL_SAC_Pendulum`
+run(ex)
+plot(ex.hook.rewards)
+savefig("assets/JuliaRL_SAC_Pendulum.png") #hide
+
+# ![](assets/JuliaRL_SAC_Pendulum.png)

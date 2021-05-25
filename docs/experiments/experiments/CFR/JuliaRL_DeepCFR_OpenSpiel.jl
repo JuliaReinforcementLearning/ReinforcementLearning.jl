@@ -1,4 +1,16 @@
-function Experiment(
+# ---
+# title: JuliaRL\_DeepCFR\_OpenSpiel(leduc_poker)
+# cover: assets/logo.svg
+# description: DeepCFR applied to OpenSpiel(leduc_poker)
+# date: 2021-05-22
+# author: "[Jun Tian](https://github.com/findmyway)"
+# ---
+
+#+ tangle=true
+using ReinforcementLearning
+using OpenSpiel
+
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:DeepCFR},
     ::Val{:OpenSpiel},
@@ -50,5 +62,5 @@ function Experiment(
         initializer = glorot_normal(CUDA.CURAND.default_rng()),
     )
     # nash_conv ≈ 0.23
-    Experiment(p, env, StopAfterStep(500), EmptyHook(), "# run DeepcCFR on leduc_poker")
+    Experiment(p, env, StopAfterStep(500, is_show_progress=false), EmptyHook(), "# run DeepcCFR on leduc_poker")
 end

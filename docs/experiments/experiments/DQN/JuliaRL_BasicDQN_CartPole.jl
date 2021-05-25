@@ -3,7 +3,7 @@
 # cover: assets/JuliaRL_BasicDQN_CartPole.png
 # description: The simplest example to demonstrate how to use BasicDQN
 # date: 2021-05-22
-# author: Jun Tian
+# author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
 #+ tangle=true
@@ -51,13 +51,14 @@ function RL.Experiment(
             state = Vector{Float32} => (ns,),
         ),
     )
-    stop_condition = StopAfterStep(10_000)
+    stop_condition = StopAfterStep(10_000, is_show_progress=false)
     hook = TotalRewardPerEpisode()
-    Experiment(policy, env, stop_condition, hook, "")
+    Experiment(policy, env, stop_condition, hook, "# BasicDQN <-> CartPole")
 end
 
 #+ tangle=false
 using Plots
+pyplot() #hide
 ex = E`JuliaRL_BasicDQN_CartPole`
 run(ex)
 plot(ex.hook.rewards)

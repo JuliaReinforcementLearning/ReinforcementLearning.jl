@@ -5,6 +5,7 @@
     "JuliaRL_BasicDQN_MountainCar.jl",
     "JuliaRL_BasicDQN_EmptyRoom.jl",
     "JuliaRL_DQN_CartPole.jl",
+    "JuliaRL_PrioritizedDQN_CartPole.jl",
     "JuliaRL_DQN_MountainCar.jl",
     "JuliaRL_IQN_CartPole.jl",
     "JuliaRL_QRDQN_Cartpole.jl",

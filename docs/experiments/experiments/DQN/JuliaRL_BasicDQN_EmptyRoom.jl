@@ -3,7 +3,7 @@
 # cover: assets/JuliaRL_BasicDQN_EmptyRoom.png
 # description: A simple example to demonstrate how to use environments in GridWorlds.jl
 # date: 2021-05-22
-# author: Siddharth Bhatia
+# author: "[Siddharth Bhatia](https://github.com/Sid-Bhatia-0)"
 # ---
 
 #+ tangle=true
@@ -64,16 +64,17 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000)
+    stop_condition = StopAfterStep(10_000, is_show_progress=false)
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "")
 end
 
 #+ tangle=false
 using Plots
-abc = E`JuliaRL_BasicDQN_EmptyRoom`
-run(abc)
-plot(abc.hook.rewards)
+pyplot() #hide
+ex = E`JuliaRL_BasicDQN_EmptyRoom`
+run(ex)
+plot(ex.hook.rewards)
 savefig("assets/JuliaRL_BasicDQN_EmptyRoom.png") #hide
 
 # ![](assets/JuliaRL_BasicDQN_EmptyRoom.png)

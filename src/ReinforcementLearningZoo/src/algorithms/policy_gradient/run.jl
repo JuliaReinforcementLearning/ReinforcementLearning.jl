@@ -29,5 +29,6 @@ function RLCore._run(
     action = policy(env)
     policy(PRE_ACT_STAGE, env, action)  # let the policy see the last observation
     hook(PRE_ACT_STAGE, policy, env, action)
+    hook(POST_EXPERIMENT_STAGE, policy, env)
     nothing
 end

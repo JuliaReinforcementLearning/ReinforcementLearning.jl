@@ -35,5 +35,5 @@ dependency, remember to update both `docs/Project.toml` and
 
 !!! note
     All the cells after the `#+ tangle=true` line in `Your_Experment.jl` will be extracted into the
-`ReinforcementLearningExperiments` package automatically. This feature is
-supported by [Weave.jl](https://weavejl.mpastell.com/stable/usage/#tangle).
+    `ReinforcementLearningExperiments` package automatically. This feature is
+    supported by [Weave.jl](https://weavejl.mpastell.com/stable/usage/#tangle).

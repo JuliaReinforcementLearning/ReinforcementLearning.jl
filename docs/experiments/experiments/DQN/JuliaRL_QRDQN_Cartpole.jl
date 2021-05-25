@@ -1,9 +1,22 @@
-function Experiment(
+# ---
+# title: JuliaRL\_QRDQN\_CartPole
+# cover: assets/JuliaRL_QRDQN_CartPole.png
+# description: QRDQN applied to CartPole
+# date: 2021-05-22
+# author: "[Jun Tian](https://github.com/findmyway)"
+# ---
+
+#+ tangle=true
+using ReinforcementLearning
+using StableRNGs
+using Flux
+using Flux.Losses
+
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:QRDQN},
     ::Val{:CartPole},
     ::Nothing;
-    save_dir=nothing,
     seed=123,
 )
 
@@ -55,17 +68,17 @@ function Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000)
-
-    hook = ComposedHook(
-        TotalRewardPerEpisode(),
-        TimePerStep(),
-    )
-
-    description = """
-    This experiment uses the `QRDQNLearner` method with three dense layers to approximate the quantile values.
-    The testing environment is CartPoleEnv.
-    """
-
-    Experiment(agent, env, stop_condition, hook, description)
+    stop_condition = StopAfterStep(10_000, is_show_progress=false)
+    hook = TotalRewardPerEpisode()
+    Experiment(agent, env, stop_condition, hook, "")
 end
+
+#+ tangle=false
+using Plots
+pyplot() #hide
+ex = E`JuliaRL_QRDQN_CartPole`
+run(ex)
+plot(ex.hook.rewards)
+savefig("assets/JuliaRL_QRDQN_CartPole.png") #hide
+
+# ![](assets/JuliaRL_QRDQN_CartPole.png)

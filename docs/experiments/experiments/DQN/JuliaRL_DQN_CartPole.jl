@@ -1,4 +1,17 @@
-# Build Dueling Network
+# ---
+# title: JuliaRL\_DQN\_CartPole
+# cover: assets/JuliaRL_DQN_CartPole.png
+# description: DQN applied to CartPole
+# date: 2021-05-22
+# author: "[Jun Tian](https://github.com/findmyway)"
+# ---
+
+#+ tangle=true
+using ReinforcementLearning
+using StableRNGs
+using Flux
+using Flux.Losses
+
 function build_dueling_network(network::Chain)
     lm = length(network)
     if !(network[lm] isa Dense) || !(network[lm-1] isa Dense) 
@@ -11,22 +24,14 @@ function build_dueling_network(network::Chain)
     return DuelingNetwork(base, val, adv)
 end
 
-function Experiment(
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:DQN},
     ::Val{:CartPole},
     ::Nothing;
-    save_dir = nothing,
     seed = 123,
 )
-    if isnothing(save_dir)
-        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
-        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_DQN_CartPole_$(t)")
-    end
-
-    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = StableRNG(seed)
-
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(state(env)), length(action_space(env))
     base_model = Chain(
@@ -67,32 +72,17 @@ function Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000)
-
-    total_reward_per_episode = TotalRewardPerEpisode()
-    time_per_step = TimePerStep()
-    hook = ComposedHook(
-        total_reward_per_episode,
-        time_per_step,
-        DoEveryNStep() do t, agent, env
-            if agent.policy.learner.update_step % agent.policy.learner.update_freq == 0
-                with_logger(lg) do
-                    @info "training" loss = agent.policy.learner.loss
-                end
-            end
-        end,
-        DoEveryNEpisode() do t, agent, env
-            with_logger(lg) do
-                @info "training" reward = total_reward_per_episode.rewards[end] log_step_increment =
-                    0
-            end
-        end,
-    )
-
-    description = """
-    This experiment uses the `DQNLearner` method with three dense layers to approximate the Q value.
-    The testing environment is CartPoleEnv.
-    """
-
-    Experiment(agent, env, stop_condition, hook, description)
+    stop_condition = StopAfterStep(10_000, is_show_progress=false)
+    hook = TotalRewardPerEpisode()
+    Experiment(agent, env, stop_condition, hook, "")
 end
+
+#+ tangle=false
+using Plots
+pyplot() #hide
+ex = E`JuliaRL_DQN_CartPole`
+run(ex)
+plot(ex.hook.rewards)
+savefig("assets/JuliaRL_DQN_CartPole.png") #hide
+
+# ![](assets/JuliaRL_DQN_CartPole.png)

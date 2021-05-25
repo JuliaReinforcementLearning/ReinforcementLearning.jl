@@ -1,4 +1,4 @@
-function Experiment(
+function RL.Experiment(
     ::Val{:Dopamine},
     ::Val{:IQN},
     ::Val{:Atari},

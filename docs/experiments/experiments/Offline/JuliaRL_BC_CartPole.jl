@@ -1,3 +1,17 @@
+# ---
+# title: JuliaRL\_BC\_CartPole
+# cover: assets/JuliaRL_BC_CartPole.png
+# description: BC applied to CartPole
+# date: 2021-05-22
+# author: "[Jun Tian](https://github.com/findmyway)"
+# ---
+
+#+ tangle=true
+using ReinforcementLearning
+using StableRNGs
+using Flux
+using Flux.Losses
+
 Base.@kwdef struct RecordStateAction <: AbstractHook
     records::Any = VectorSATrajectory(; state = Vector{Float32})
 end
@@ -6,7 +20,7 @@ function (h::RecordStateAction)(::PreActStage, policy, env, action)
     push!(h.records; state = copy(state(env)), action = action)
 end
 
-function Experiment(
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BC},
     ::Val{:CartPole},
@@ -47,7 +61,7 @@ function Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000)
+    stop_condition = StopAfterStep(10_000, is_show_progress=false)
     hook = RecordStateAction()
     run(agent, env, stop_condition, hook)
 
@@ -69,14 +83,16 @@ function Experiment(
         RLBase.update!(bc, batch)
     end
 
-    description = """
-    # Behavior Cloning with CartPole
-
-    This experiment uses transitions during the experiment
-    `JuliaRL_BasicDQN_CartPole` to train a behavior policy.
-    """
-
-    hook = ComposedHook(TotalRewardPerEpisode(), TimePerStep())
-
-    Experiment(bc, env, StopAfterEpisode(100), hook, description)
+    hook = TotalRewardPerEpisode()
+    Experiment(bc, env, StopAfterEpisode(100, is_show_progress=false), hook, "BehaviorCloning <-> CartPole")
 end
+
+#+ tangle=false
+using Plots
+pyplot() #hide
+ex = E`JuliaRL_BC_CartPole`
+run(ex)
+plot(ex.hook.rewards)
+savefig("assets/JuliaRL_BC_CartPole.png") #hide
+
+# ![](assets/JuliaRL_BC_CartPole.png)

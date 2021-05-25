@@ -1,4 +1,19 @@
-function Experiment(
+# ---
+# title: JuliaRL\_PPO\_Pendulum
+# cover: assets/JuliaRL_PPO_Pendulum.png
+# description: PPO applied to Pendulum
+# date: 2021-05-22
+# author: "[Jun Tian](https://github.com/findmyway)"
+# ---
+
+#+ tangle=true
+using ReinforcementLearning
+using StableRNGs
+using Flux
+using Flux.Losses
+using Distributions
+
+function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:PPO},
     ::Val{:Pendulum},
@@ -6,12 +21,6 @@ function Experiment(
     save_dir = nothing,
     seed = 123,
 )
-    if isnothing(save_dir)
-        t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
-        save_dir = joinpath(pwd(), "checkpoints", "JuliaRL_PPO_Pendulum_$(t)")
-    end
-
-    lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
     rng = StableRNG(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
     A = action_space(inner_env)
@@ -69,28 +78,21 @@ function Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(50_000)
-    total_reward_per_episode = TotalBatchRewardPerEpisode(N_ENV)
-    hook = ComposedHook(
-        total_reward_per_episode,
-        DoEveryNStep() do t, agent, env
-            with_logger(lg) do
-                @info(
-                    "training",
-                    actor_loss = agent.policy.actor_loss[end, end],
-                    critic_loss = agent.policy.critic_loss[end, end],
-                    loss = agent.policy.loss[end, end],
-                )
-                for i in 1:length(env)
-                    if is_terminated(env[i])
-                        @info "training" reward = total_reward_per_episode.rewards[i][end] log_step_increment =
-                            0
-                        break
-                    end
-                end
-            end
-        end,
-    )
-
+    stop_condition = StopAfterStep(50_000, is_show_progress=false)
+    hook = TotalBatchRewardPerEpisode(N_ENV)
     Experiment(agent, env, stop_condition, hook, "# Play Pendulum with PPO")
 end
+
+#+ tangle=false
+using Plots
+using Statistics
+pyplot() #hide
+ex = E`JuliaRL_PPO_Pendulum`
+run(ex)
+n = minimum(map(length, ex.hook.rewards))
+m = mean([@view(x[1:n]) for x in ex.hook.rewards])
+s = std([@view(x[1:n]) for x in ex.hook.rewards])
+plot(m,ribbon=s)
+savefig("assets/JuliaRL_PPO_Pendulum.png") #hide
+
+# ![](assets/JuliaRL_PPO_Pendulum.png)

@@ -13,7 +13,8 @@ export AbstractHook,
     UploadTrajectoryEveryNStep,
     MultiAgentHook
 
-using UnicodePlots:lineplot
+using UnicodePlots:lineplot, lineplot!
+using Statistics
 
 """
 A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
@@ -153,7 +154,9 @@ function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env)
 end
 
 function (hook::TotalRewardPerEpisode)(::PostExperimentStage, agent, env)
-    println(lineplot(hook.rewards, title="Total reward per episode", xlabel="Episode", ylabel="Score"))
+    if hook.is_display_on_exit
+        println(lineplot(hook.rewards, title="Total reward per episode", xlabel="Episode", ylabel="Score"))
+    end
 end
 
 #####
@@ -162,18 +165,21 @@ end
 struct TotalBatchRewardPerEpisode <: AbstractHook
     rewards::Vector{Vector{Float64}}
     reward::Vector{Float64}
+    is_display_on_exit::Bool
 end
 
 Base.getindex(h::TotalBatchRewardPerEpisode) = h.rewards
 
 """
-    TotalBatchRewardPerEpisode(batch_size::Int)
+    TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit=true)
 
 Similar to [`TotalRewardPerEpisode`](@ref), but is specific to environments
 which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
+If `is_display_on_exit` is set to `true`, a ribbon plot will be shown to reflect
+the mean and std of rewards.
 """
-function TotalBatchRewardPerEpisode(batch_size::Int)
-    TotalBatchRewardPerEpisode([Float64[] for _ in 1:batch_size], zeros(batch_size))
+function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit=true)
+    TotalBatchRewardPerEpisode([Float64[] for _ in 1:batch_size], zeros(batch_size), is_display_on_exit)
 end
 
 function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env)
@@ -184,6 +190,18 @@ function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env)
             push!(hook.rewards[i], hook.reward[i])
             hook.reward[i] = 0.0
         end
+    end
+end
+
+function (hook::TotalBatchRewardPerEpisode)(::PostExperimentStage, agent, env)
+    if hook.is_display_on_exit
+        n = minimum(map(length, hook.rewards))
+        m = mean([@view(x[1:n]) for x in hook.rewards])
+        s = std([@view(x[1:n]) for x in hook.rewards])
+        p = lineplot(m, title="Avg total reward per episode", xlabel="Episode", ylabel="Score")
+        lineplot!(p, m .- s)
+        lineplot!(p, m .+ s)
+        println(p)
     end
 end
 
