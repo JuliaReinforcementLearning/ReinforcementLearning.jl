@@ -29,7 +29,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.arch }}
-      - run: python -m pip install --user gym
+      - run: python -m pip install --user gym matplotlib 
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
