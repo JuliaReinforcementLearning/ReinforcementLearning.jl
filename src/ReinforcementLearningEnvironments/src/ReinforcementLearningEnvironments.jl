@@ -2,7 +2,6 @@ module ReinforcementLearningEnvironments
 
 using ReinforcementLearningBase
 using Random
-using GR
 using Requires
 using IntervalSets
 using Base.Threads:@spawn

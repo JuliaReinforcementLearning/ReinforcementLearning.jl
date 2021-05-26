@@ -21,6 +21,10 @@ No change.
 
 ### ReinforcementLearningEnvironments.jl
 
+#### v0.6.1
+
+- Drop GR in RLEnvs and lazily load ploting functions.[#309](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/309), [#310](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/310)
+
 #### v0.6.0
 
 - Set `AcrobotEnv` into lazy loading to reduce the dependency of `OrdinaryDiffEq`.
