@@ -212,6 +212,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://ashwani-rathee.github.io/"><img src="https://avatars.githubusercontent.com/u/54855463?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ashwani Rathee</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=ashwani-rathee" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/jamblejoe"><img src="https://avatars.githubusercontent.com/u/12518354?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Goran Nakerst</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=jamblejoe" title="Code">💻</a></td>
   </tr>
 </table>
 
