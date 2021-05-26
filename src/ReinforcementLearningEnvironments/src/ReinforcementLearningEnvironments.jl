@@ -32,6 +32,9 @@ function __init__()
     @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" include(
         "environments/3rd_party/AcrobotEnv.jl",
     )
+    @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" include(
+         "plots.jl",
+    )
 
 
 end
