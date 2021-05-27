@@ -902,7 +902,7 @@ version = "0.6.1"
 deps = ["AbstractTrees", "CUDA", "CircularArrayBuffers", "DataStructures", "Dates", "Distributions", "Flux", "IntervalSets", "LinearAlgebra", "Logging", "MacroTools", "Random", "ReinforcementLearningBase", "ReinforcementLearningCore", "Setfield", "Statistics", "StatsBase", "StructArrays", "Zygote"]
 path = "../src/ReinforcementLearningZoo"
 uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
-version = "0.4.1"
+version = "0.4.0"
 
 [[Requires]]
 deps = ["UUIDs"]
