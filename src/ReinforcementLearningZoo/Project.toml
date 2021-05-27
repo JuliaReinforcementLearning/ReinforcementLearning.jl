@@ -1,7 +1,7 @@
 name = "ReinforcementLearningZoo"
 uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
-version = "0.4.0"
+version = "0.4.1"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -29,7 +29,7 @@ AbstractTrees = "0.3"
 CUDA = "3"
 CircularArrayBuffers = "0.1"
 DataStructures = "0.18"
-Distributions = "0.24, 0.25"
+Distributions = "0.23, 0.24, 0.25"
 Flux = "0.12"
 IntervalSets = "0.5"
 MacroTools = "0.5"
