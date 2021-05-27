@@ -62,7 +62,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000, is_show_progress=false)
+    stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalBatchRewardPerEpisode(N_ENV)
     Experiment(agent, env, stop_condition, hook, "# PPO with CartPole")
 end

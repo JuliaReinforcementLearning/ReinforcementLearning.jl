@@ -62,5 +62,5 @@ function RL.Experiment(
         initializer = glorot_normal(CUDA.CURAND.default_rng()),
     )
     # nash_conv ≈ 0.23
-    Experiment(p, env, StopAfterStep(500, is_show_progress=false), EmptyHook(), "# run DeepcCFR on leduc_poker")
+    Experiment(p, env, StopAfterStep(500, is_show_progress=!haskey(ENV, "CI")), EmptyHook(), "# run DeepcCFR on leduc_poker")
 end
