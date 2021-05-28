@@ -80,7 +80,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000, is_show_progress=false)
+    stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "# Play Pendulum with SAC")
 end
