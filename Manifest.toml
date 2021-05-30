@@ -51,15 +51,15 @@ version = "3.2.1"
 
 [[ChainRules]]
 deps = ["ChainRulesCore", "Compat", "LinearAlgebra", "Random", "Reexport", "Requires", "Statistics"]
-git-tree-sha1 = "3f1d9907dc8559cc7d568c5dd6eb1b583ac00aec"
+git-tree-sha1 = "422db294d817de46668a3bf119175080ab093b23"
 uuid = "082447d4-558c-5d27-93f4-14fc19e9eca2"
-version = "0.7.65"
+version = "0.7.70"
 
 [[ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "b391f22252b8754f4440de1f37ece49d8a7314bb"
+git-tree-sha1 = "4b28f88cecf5d9a07c85b9ce5209a361ecaff34a"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "0.9.44"
+version = "0.9.45"
 
 [[CircularArrayBuffers]]
 git-tree-sha1 = "a5f5b84ecff2f9822e0eda78418d1b15f13a10a0"
@@ -74,9 +74,9 @@ version = "0.7.0"
 
 [[ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "024fe24d83e4a5bf5fc80501a314ce0d1aa35597"
+git-tree-sha1 = "32a2b8af383f11cbb65803883837a149d10dfe8a"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.11.0"
+version = "0.10.12"
 
 [[Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
@@ -159,9 +159,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[Distributions]]
 deps = ["FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "3f61d283e34acbebba27c459cf7ea28ec6cc56fb"
+git-tree-sha1 = "64a3e756c44dcf33bd33e7f500113d9992a02e92"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.1"
+version = "0.25.2"
 
 [[DocStringExtensions]]
 deps = ["LibGit2", "Markdown", "Pkg", "Test"]
