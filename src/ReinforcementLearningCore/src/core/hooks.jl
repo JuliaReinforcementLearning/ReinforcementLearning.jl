@@ -285,17 +285,17 @@ end
 """
     DoEveryNEpisode(f; n=1, t=0)
 
-Execute `f(agent, env)` every `n` episode.
-`t` is a counter of steps.
+Execute `f(t, agent, env)` every `n` episode.
+`t` is a counter of episodes.
 """
-Base.@kwdef mutable struct DoEveryNEpisode{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <:
+mutable struct DoEveryNEpisode{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <:
                            AbstractHook
     f::F
-    n::Int = 1
-    t::Int = 0
+    n::Int
+    t::Int
 end
 
-DoEveryNEpisode(f::F, n = 1, t = 0; stage::S = POST_EPISODE_STAGE) where {S,F} =
+DoEveryNEpisode(f::F; n = 1, t = 0, stage::S = POST_EPISODE_STAGE) where {S,F} =
     DoEveryNEpisode{S,F}(f, n, t)
 
 function (hook::DoEveryNEpisode{S})(::S, agent, env) where {S}
