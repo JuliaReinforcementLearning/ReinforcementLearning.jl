@@ -14,7 +14,7 @@
 
 # Following are some basic stats. The evaluation result seems to be aligned with the result reported in [dopamine](https://github.com/google/dopamine/blob/master/baselines/data/pong.json).
 
-# + tangle=true
+#+ tangle=true
 using ReinforcementLearning
 using ArcadeLearningEnvironment
 using Flux
@@ -222,7 +222,6 @@ function RL.Experiment(
 
     EVALUATION_FREQ = 250_000
     MAX_EPISODE_STEPS_EVAL = 27_000
-    N_CHECKPOINTS = 3
 
     step_per_episode = StepsPerEpisode()
     reward_per_episode = TotalOriginalRewardPerEpisode()
