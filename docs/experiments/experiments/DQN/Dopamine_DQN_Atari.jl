@@ -1,5 +1,6 @@
 # ---
 # title: Dopamine\_DQN\_Atari(pong)
+# cover: assets/Dopamine_DQN_Atari_pong_evaluating_avg_score.svg
 # description: The simplest example to demonstrate how to use DQN to solve atari games.
 # date: 2021-05-22
 # author: "[Jun Tian](https://github.com/findmyway)"
@@ -12,7 +13,24 @@
 
 # On a machine with a Nvidia 2080Ti GPU card, the training speed of this experiment is about **208 steps/sec**. The testing speed about **1096 steps/sec**. For comparison, the training speed of dopamine is about **118 steps/sec**. the testing speed is about ** 260 steps/sec**.
 
-# Following are some basic stats. The evaluation result seems to be aligned with the result reported in [dopamine](https://github.com/google/dopamine/blob/master/baselines/data/pong.json).
+# Following are some basic stats. The evaluation result seems to be aligned with
+# the result reported in
+# [dopamine](https://github.com/google/dopamine/blob/master/baselines/data/pong.json).
+
+# Average reward per episode in evaluation mode:
+# ![](assets/Dopamine_DQN_Atari_pong_evaluating_avg_score.svg)
+
+# Average episode length in evaluation mode:
+# ![](assets/Dopamine_DQN_Atari_pong_evaluating_avg_length.svg)
+
+# Average episode length in training mode:
+# ![](assets/Dopamine_DQN_Atari_pong_training_episode_length.svg)
+
+# Training loss per updated:
+# ![](assets/Dopamine_DQN_Atari_pong_training_loss.svg)
+
+# Reward per episode in training mode:
+# ![](assets/Dopamine_DQN_Atari_pong_training_reward.svg)
 
 #+ tangle=true
 using ReinforcementLearning
@@ -201,7 +219,7 @@ function RL.Experiment(
                 update_horizon = 1,
                 batch_size = 32,
                 stack_size = N_FRAMES,
-                min_replay_history = 20_000,
+                min_replay_history = haskey(ENV, "CI") ? 900 : 20_000,
                 loss_func = huber_loss,
                 target_update_freq = 8_000,
                 rng = rng,
@@ -271,7 +289,7 @@ function RL.Experiment(
     )
 
     stop_condition = StopAfterStep(
-        haskey(ENV, "CI") ? 10_000 : 50_000_000,
+        haskey(ENV, "CI") ? 1_000 : 50_000_000,
         is_show_progress=!haskey(ENV, "CI")
     )
     Experiment(agent, env, stop_condition, hook, "# DQN <-> Atari($name)")

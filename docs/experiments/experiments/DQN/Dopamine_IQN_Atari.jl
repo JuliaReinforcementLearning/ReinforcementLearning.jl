@@ -8,6 +8,7 @@
 #+ tangle=true
 using ReinforcementLearning
 using ArcadeLearningEnvironment
+using CUDA
 using Flux
 using Flux.Losses: huber_loss
 using Dates
@@ -151,6 +152,8 @@ function RL.Experiment(
 )
     rng = Random.GLOBAL_RNG
     Random.seed!(rng, seed)
+    device_rng = CUDA.functional() ? CUDA.CURAND.RNG() : device_rng
+    Random.seed!(device_rng, isnothing(seed) ? nothing : hash(seed + 1))
 
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
@@ -162,7 +165,7 @@ function RL.Experiment(
     N_FRAMES = 4
     STATE_SIZE = (84, 84)
 
-    env = atari_env_factory(name, STATE_SIZE, N_FRAMES; seed = hash(seed + 2))
+    env = atari_env_factory(name, STATE_SIZE, N_FRAMES; seed = isnothing(seed) ? nothing : hash(seed + 2))
     N_ACTIONS = length(action_space(env))
     Nₑₘ = 64
 
