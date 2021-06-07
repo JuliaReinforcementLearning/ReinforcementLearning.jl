@@ -11,7 +11,7 @@
 # - We use the `BSpline(Linear())` instead of `cv2.INTER_AREA` method to resize the image.
 # - `RMSProp` in Flux.jl do not support centering. So we used `ADAM` instead here. (The result with `RMSProp` is poor.)
 
-# On a machine with a Nvidia 2080Ti GPU card, the training speed of this experiment is about **208 steps/sec**. The testing speed about **1096 steps/sec**. For comparison, the training speed of dopamine is about **118 steps/sec**. the testing speed is about ** 260 steps/sec**.
+# On a machine with a Nvidia 2080Ti GPU card, the training speed of this experiment is about **208 steps/sec**. The testing speed about **1096 steps/sec**. For comparison, the training speed of dopamine is about **96 steps/sec**.
 
 # Following are some basic stats. The evaluation result seems to be aligned with
 # the result reported in

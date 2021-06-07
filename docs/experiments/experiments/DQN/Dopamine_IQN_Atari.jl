@@ -5,6 +5,35 @@
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
+# This experiment tries to use the same config in [google/dopamine](https://github.com/google/dopamine/blob/master/dopamine/agents/implicit_quantile/configs/implicit_quantile.gin) to run the atari games with IQN, except the following two major differences:
+
+# - We use the `BSpline(Linear())` instead of `cv2.INTER_AREA` method to resize the image.
+# - `ADAM` in Flux.jl do not support setting `epsilon`. (This should be a minor issue.)
+
+# On a machine with a Nvidia 2080Ti GPU card, the training speed of this
+# experiment is about **138 steps/sec**. The testing speed about **695
+# steps/sec**. For comparison, the training speed of dopamine is about **79
+# steps/sec**.
+
+# Following are some basic stats. The evaluation result seems to be aligned with
+# the result reported in
+# [dopamine](https://github.com/google/dopamine/blob/2a7d91d283/baselines/data/breakout.json).
+
+# Average reward per episode in evaluation mode:
+# ![](assets/Dopamine_IQN_Atari_breakout_evaluating_avg_score.svg)
+
+# Average episode length in evaluation mode:
+# ![](assets/Dopamine_IQN_Atari_breakout_evaluating_avg_length.svg)
+
+# Average episode length in training mode:
+# ![](assets/Dopamine_IQN_Atari_breakout_training_episode_length.svg)
+
+# Training loss per updated:
+# ![](assets/Dopamine_IQN_Atari_breakout_training_loss.svg)
+
+# Reward per episode in training mode:
+# ![](assets/Dopamine_IQN_Atari_breakout_training_reward.svg)
+
 #+ tangle=true
 using ReinforcementLearning
 using ArcadeLearningEnvironment
