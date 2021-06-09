@@ -1,5 +1,6 @@
 # ---
 # title: Dopamine\_IQN\_Atari(breakout)
+# cover: assets/Dopamine_IQN_Atari_breakout_evaluating_avg_score.svg
 # description: Use the IQN to play the atari game breakout.
 # date: 2021-05-22
 # author: "[Jun Tian](https://github.com/findmyway)"

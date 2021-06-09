@@ -1,9 +1,39 @@
 # ---
 # title: Dopamine\_IQN\_Atari(ms_pacman)
+# cover: assets/Dopamine_Rainbow_Atari_mspacman_evaluating_avg_score.svg
 # description: Use the Rainbow to play the atari game ms_pacman.
 # date: 2021-05-22
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
+
+# This experiment tries to use the same config in [google/dopamine](https://github.com/google/dopamine/blob/master/dopamine/agents/rainbow/configs/rainbow.gin) to run the atari games with rainbow, except the following two major differences:
+
+# - We use the `BSpline(Linear())` instead of `cv2.INTER_AREA` method to resize the image.
+# - `ADAM` in Flux.jl do not support setting `epsilon`. (This should be a minor issue.)
+
+# On a machine with a Nvidia 2080Ti GPU card, the training speed of this
+# experiment is about **198 steps/sec**. The testing speed about **932
+# steps/sec**. For comparison, the training speed of dopamine is about **89
+# steps/sec**.
+
+# Following are some basic stats. The evaluation result seems to be aligned with
+# the result reported in
+# [dopamine](https://github.com/google/dopamine/blob/2a7d91d283/baselines/data/mspacman.json).
+
+# Average reward per episode in evaluation mode:
+# ![](assets/Dopamine_Rainbow_Atari_mspacman_evaluating_avg_score.svg)
+
+# Average episode length in evaluation mode:
+# ![](assets/Dopamine_Rainbow_Atari_mspacman_evaluating_avg_length.svg)
+
+# Average episode length in training mode:
+# ![](assets/Dopamine_Rainbow_Atari_mspacman_training_episode_length.svg)
+
+# Training loss per updated:
+# ![](assets/Dopamine_Rainbow_Atari_mspacman_training_loss.svg)
+
+# Reward per episode in training mode:
+# ![](assets/Dopamine_Rainbow_Atari_mspacman_training_reward.svg)
 
 #+ tangle=true
 using ReinforcementLearning
