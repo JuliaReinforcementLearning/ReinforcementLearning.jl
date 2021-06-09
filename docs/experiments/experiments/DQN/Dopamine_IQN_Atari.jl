@@ -1,27 +1,201 @@
+# ---
+# title: Dopamine\_IQN\_Atari(breakout)
+# cover: assets/Dopamine_IQN_Atari_breakout_evaluating_avg_score.svg
+# description: Use the IQN to play the atari game breakout.
+# date: 2021-05-22
+# author: "[Jun Tian](https://github.com/findmyway)"
+# ---
+
+# This experiment tries to use the same config in [google/dopamine](https://github.com/google/dopamine/blob/master/dopamine/agents/implicit_quantile/configs/implicit_quantile.gin) to run the atari games with IQN, except the following two major differences:
+
+# - We use the `BSpline(Linear())` instead of `cv2.INTER_AREA` method to resize the image.
+# - `ADAM` in Flux.jl do not support setting `epsilon`. (This should be a minor issue.)
+
+# On a machine with a Nvidia 2080Ti GPU card, the training speed of this
+# experiment is about **138 steps/sec**. The testing speed about **695
+# steps/sec**. For comparison, the training speed of dopamine is about **79
+# steps/sec**.
+
+# Following are some basic stats. The evaluation result seems to be aligned with
+# the result reported in
+# [dopamine](https://github.com/google/dopamine/blob/2a7d91d283/baselines/data/breakout.json).
+
+# Average reward per episode in evaluation mode:
+# ![](assets/Dopamine_IQN_Atari_breakout_evaluating_avg_score.svg)
+
+# Average episode length in evaluation mode:
+# ![](assets/Dopamine_IQN_Atari_breakout_evaluating_avg_length.svg)
+
+# Average episode length in training mode:
+# ![](assets/Dopamine_IQN_Atari_breakout_training_episode_length.svg)
+
+# Training loss per updated:
+# ![](assets/Dopamine_IQN_Atari_breakout_training_loss.svg)
+
+# Reward per episode in training mode:
+# ![](assets/Dopamine_IQN_Atari_breakout_training_reward.svg)
+
+#+ tangle=true
+using ReinforcementLearning
+using ArcadeLearningEnvironment
+using CUDA
+using Flux
+using Flux.Losses: huber_loss
+using Dates
+using Random
+using Setfield
+using Statistics
+using Logging
+using TensorBoardLogger
+
+#+ tangle=false
+## START TODO: move into a common file
+using ImageTransformations: imresize!
+
+"""
+    ResizeImage(img::Array{T, N})
+    ResizeImage(dims::Int...) -> ResizeImage(Float32, dims...)
+    ResizeImage(T::Type{<:Number}, dims::Int...)
+
+By default the `BSpline(Linear())`` method is used to resize the `state` field
+of an observation to size of `img` (or `dims`). In some other packages, people
+use the
+[`cv2.INTER_AREA`](https://github.com/google/dopamine/blob/2a7d91d2831ca28cea0d3b0f4d5c7a7107e846ab/dopamine/discrete_domains/atari_lib.py#L511-L513),
+which is not supported in `ImageTransformations.jl` yet.
+"""
+struct ResizeImage{T,N}
+    img::Array{T,N}
+end
+
+ResizeImage(dims::Int...) = ResizeImage(Float32, dims...)
+ResizeImage(T::Type{<:Number}, dims::Int...) = ResizeImage(Array{T}(undef, dims))
+
+function (p::ResizeImage)(state::AbstractArray)
+    imresize!(p.img, state)
+    p.img
+end
+
+function atari_env_factory(
+    name,
+    state_size,
+    n_frames,
+    max_episode_steps = 100_000;
+    seed = nothing,
+    repeat_action_probability = 0.25,
+    n_replica = nothing,
+)
+    init(seed) =
+        RewardOverriddenEnv(
+            StateCachedEnv(
+                StateTransformedEnv(
+                    AtariEnv(;
+                        name = string(name),
+                        grayscale_obs = true,
+                        noop_max = 30,
+                        frame_skip = 4,
+                        terminal_on_life_loss = false,
+                        repeat_action_probability = repeat_action_probability,
+                        max_num_frames_per_episode = n_frames * max_episode_steps,
+                        color_averaging = false,
+                        full_action_space = false,
+                        seed = seed,
+                    );
+                    state_mapping=Chain(
+                        ResizeImage(state_size...),
+                        StackFrames(state_size..., n_frames)
+                    ),
+                    state_space_mapping= _ -> Space(fill(0..256, state_size..., n_frames))
+                )
+            ),
+            r -> clamp(r, -1, 1)
+        )
+
+    if isnothing(n_replica)
+        init(seed)
+    else
+        envs = [
+            init(isnothing(seed) ? nothing : hash(seed + i))
+            for i in 1:n_replica
+        ]
+        states = Flux.batch(state.(envs))
+        rewards = reward.(envs)
+        terminals = is_terminated.(envs)
+        A = Space([action_space(x) for x in envs])
+        S = Space(fill(0..255, size(states)))
+        MultiThreadEnv(envs, states, rewards, terminals, A, S, nothing)
+    end
+end
+
+"Total reward per episode before reward reshaping"
+Base.@kwdef mutable struct TotalOriginalRewardPerEpisode <: AbstractHook
+    rewards::Vector{Float64} = Float64[]
+    reward::Float64 = 0.0
+end
+
+function (hook::TotalOriginalRewardPerEpisode)(
+    ::PostActStage,
+    agent,
+    env::RewardOverriddenEnv,
+)
+    hook.reward += reward(env.env)
+end
+
+function (hook::TotalOriginalRewardPerEpisode)(::PostEpisodeStage, agent, env)
+    push!(hook.rewards, hook.reward)
+    hook.reward = 0
+end
+
+"Total reward of each inner env per episode before reward reshaping"
+struct TotalBatchOriginalRewardPerEpisode <: AbstractHook
+    rewards::Vector{Vector{Float64}}
+    reward::Vector{Float64}
+end
+
+function TotalBatchOriginalRewardPerEpisode(batch_size::Int)
+    TotalBatchOriginalRewardPerEpisode([Float64[] for _ in 1:batch_size], zeros(batch_size))
+end
+
+function (hook::TotalBatchOriginalRewardPerEpisode)(
+    ::PostActStage,
+    agent,
+    env::MultiThreadEnv{<:RewardOverriddenEnv},
+)
+    for (i, e) in enumerate(env.envs)
+        hook.reward[i] += reward(e.env)
+        if is_terminated(e)
+            push!(hook.rewards[i], hook.reward[i])
+            hook.reward[i] = 0.0
+        end
+    end
+end
+
+## END TODO: move into a common file
+
+#+ tangle=true
 function RL.Experiment(
     ::Val{:Dopamine},
     ::Val{:IQN},
     ::Val{:Atari},
     name::AbstractString;
     save_dir = nothing,
-    seed = 123,
+    seed = nothing,
 )
-    @warn "Currently setting the `seed` will not guarantee the reproducibility. The instability seems to be caused by the `CrossCor` layer when calculating gradient."
-    rng = StableRNG(seed)
-    device_rng = CUDA.CURAND.RNG()
-    Random.seed!(device_rng, hash(seed + 1))
+    rng = Random.GLOBAL_RNG
+    Random.seed!(rng, seed)
+    device_rng = CUDA.functional() ? CUDA.CURAND.RNG() : device_rng
+    Random.seed!(device_rng, isnothing(seed) ? nothing : hash(seed + 1))
+
     if isnothing(save_dir)
         t = Dates.format(now(), "yyyy_mm_dd_HH_MM_SS")
-        save_dir = joinpath(pwd(), "checkpoints", "Dopamine_IQN_Atari_$(name)_$(t)")
+        save_dir = joinpath(pwd(), "checkpoints", "dopamine_IQN_atari_$(name)_$(t)")
     end
 
     lg = TBLogger(joinpath(save_dir, "tb_log"), min_level = Logging.Info)
 
     N_FRAMES = 4
     STATE_SIZE = (84, 84)
-    MAX_STEPS_PER_EPISODE = 27_000
 
-    env = atari_env_factory(name, STATE_SIZE, N_FRAMES; seed = hash(seed + 2))
+    env = atari_env_factory(name, STATE_SIZE, N_FRAMES; seed = isnothing(seed) ? nothing : hash(seed + 2))
     N_ACTIONS = length(action_space(env))
     Nₑₘ = 64
 
@@ -81,17 +255,13 @@ function RL.Experiment(
         ),
     )
 
-    evaluation_result = []
     EVALUATION_FREQ = 250_000
     MAX_EPISODE_STEPS_EVAL = 27_000
-    N_CHECKPOINTS = 3
 
     total_reward_per_episode = TotalOriginalRewardPerEpisode()
-    time_per_step = TimePerStep()
     steps_per_episode = StepsPerEpisode()
     hook = ComposedHook(
         total_reward_per_episode,
-        time_per_step,
         steps_per_episode,
         DoEveryNStep() do t, agent, env
             with_logger(lg) do
@@ -116,56 +286,30 @@ function RL.Experiment(
                     STATE_SIZE,
                     N_FRAMES,
                     MAX_EPISODE_STEPS_EVAL;
-                    seed = hash(seed + t),
+                    seed = isnothing(seed) ? nothing : hash(seed + t)
                 ),
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
             )
-            res = (
-                avg_length = mean(h[2].steps[1:end-1]),
-                avg_score = mean(h[1].rewards[1:end-1]),
-            )
-            push!(evaluation_result, res)
 
-            @info "finished evaluating agent in $s seconds" avg_length = res.avg_length avg_score =
-                res.avg_score
+            avg_score = mean(h[1].rewards[1:end-1])
+            avg_length = mean(h[2].steps[1:end-1])
+
+            @info "finished evaluating agent in $s seconds" avg_length = avg_length avg_score = avg_score
             with_logger(lg) do
-                @info "evaluating" avg_length = res.avg_length avg_score = res.avg_score log_step_increment = 0
-            end
-
-            policy = cpu(p)
-            mkdir(joinpath(save_dir, string(t)))
-            BSON.@save joinpath(save_dir, string(t), "policy.bson") policy
-            BSON.@save joinpath(save_dir, string(t), "stats.bson") total_reward_per_episode time_per_step evaluation_result
-
-            # only keep recent 3 checkpoints
-            old_checkpoint_folder =
-                joinpath(save_dir, string(t - EVALUATION_FREQ * N_CHECKPOINTS))
-            if isdir(old_checkpoint_folder)
-                rm(old_checkpoint_folder; force = true, recursive = true)
+                @info "evaluating" avg_length = avg_length avg_score = avg_score log_step_increment = 0
             end
         end,
     )
 
-    N_TRAINING_STEPS = 50_000_000
-    stop_condition = StopAfterStep(N_TRAINING_STEPS)
-
-    description = """
-    This experiment uses alomost the same config in [dopamine](https://github.com/google/dopamine/blob/master/dopamine/agents/implicit_quantile/configs/implicit_quantile.gin). But do notice that there are some minor differences:
-
-    - The epsilon in ADAM optimizer is not changed
-    - The image resize method used here is provided by ImageTransformers, which is not the same with the one in cv2.
-
-    The testing environment is $name.
-    Agent and statistic info will be saved to: `$(joinpath(save_dir, string(N_TRAINING_STEPS)))`
-    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
-
-    To load the agent and statistic info:
-    ```
-    BSON.@load joinpath("$(joinpath(save_dir, string(N_TRAINING_STEPS)))", "policy.bson") policy
-    BSON.@load joinpath("$(joinpath(save_dir, string(N_TRAINING_STEPS)))", "stats.bson") total_reward_per_episode time_per_step evaluation_result
-    ```
-    """
-
-    Experiment(agent, env, stop_condition, hook, description)
+    stop_condition = StopAfterStep(
+        haskey(ENV, "CI") ? 10_000 : 50_000_000,
+        is_show_progress=!haskey(ENV, "CI")
+    )
+    Experiment(agent, env, stop_condition, hook, "# IQN <-> Atari($name)")
 end
+
+
+#+ tangle=false
+ex = E`Dopamine_IQN_Atari(breakout)`
+run(ex)

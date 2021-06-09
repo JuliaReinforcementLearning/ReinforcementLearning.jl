@@ -1,6 +1,3 @@
-# Experiments
-
-
 ---
 
 {{{democards}}}
