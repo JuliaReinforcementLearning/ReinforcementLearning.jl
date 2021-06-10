@@ -32,6 +32,7 @@ Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 [compat]
 AbstractTrees = "0.3"
 BSON = "0.3"
+CUDA = "3"
 Distributions = "0.24, 0.25"
 Flux = "0.12"
 GridWorlds = "0.4"
