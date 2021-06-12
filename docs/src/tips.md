@@ -3,25 +3,15 @@
 ## How to setup local development environment?
 
 `ReinforcementLearning.jl` is kind of different from most packages you've seen.
-It simply re-export all the names in its dependent packages. So when you execute
-`]dev ReinforcementLearning` in the Julia REPL, all the dependents are not
-turned into the development mode automatically. The recommended process is:
-
-1. `git clone git@github.com:JuliaReinforcementLearning/ReinforcementLearning.jl.git`
-1. `cd ReinforcementLearning.jl`
-1. `julia --project`
-1. Press `]` to enter package mode in the Julia REPL.
-1. `pkg> instantiate`
-1. `pkg> up` (optional)
-
-Then you can modify the code in your favorite editor and test it as usual.
-Sometimes, you may need to add some extra dependencies. Remember to switch the
-environment before adding new packages. For example, if you want to add
+It simply re-export all the names in its dependent packages. The `Manifest.toml`
+files are committed in the source code. So when you execute
+`]dev ReinforcementLearning` in the Julia REPL, all the dependents are also
+turned into the development mode automatically. Then you can modify the code in
+your favorite editor and test it as usual. Sometimes, you may need to add some
+extra dependencies. Remember to switch the environment before adding new
+packages. For example, if you want to add
 `Statistics` in `ReinforcementLearningBase`, first run `]activate
 src/ReinforcementLearningBase`, then `]add Statistics`.
-
-If you'd like to test your modifications in some other environments, remember to
-run `dev /path/to/ReinforcementLearningBase` (or any other subpackages you've modified).
 
 ## How to contribute a new experiment?
 
