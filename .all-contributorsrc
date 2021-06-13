@@ -199,6 +199,98 @@
         "code",
         "doc"
       ]
+    },
+    {
+      "login": "michelangelo21",
+      "name": "michelangelo21",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49211663?v=4",
+      "profile": "https://github.com/michelangelo21",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "pilgrimygy",
+      "name": "GuoYu Yang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49673553?v=4",
+      "profile": "https://github.com/pilgrimygy",
+      "contributions": [
+        "doc",
+        "code"
+      ]
+    },
+    {
+      "login": "Mobius1D",
+      "name": "Prasidh Srikumar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49596933?v=4",
+      "profile": "https://github.com/Mobius1D",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "ilancoulon",
+      "name": "Ilan Coulon",
+      "avatar_url": "https://avatars.githubusercontent.com/u/764934?v=4",
+      "profile": "https://github.com/ilancoulon",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "JinraeKim",
+      "name": "Jinrae Kim",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43136096?v=4",
+      "profile": "https://github.com/JinraeKim",
+      "contributions": [
+        "doc",
+        "bug"
+      ]
+    },
+    {
+      "login": "luigiannelli",
+      "name": "luigiannelli",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24853508?v=4",
+      "profile": "https://github.com/luigiannelli",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "JBoerma",
+      "name": "Jacob Boerma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7275916?v=4",
+      "profile": "https://github.com/JBoerma",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "plu70n",
+      "name": "Xavier Valcarce",
+      "avatar_url": "https://avatars.githubusercontent.com/u/50026682?v=4",
+      "profile": "http://gitlab.com/plut0n",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "ashwani-rathee",
+      "name": "Ashwani Rathee",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54855463?v=4",
+      "profile": "https://ashwani-rathee.github.io/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "jamblejoe",
+      "name": "Goran Nakerst",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12518354?v=4",
+      "profile": "https://github.com/jamblejoe",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

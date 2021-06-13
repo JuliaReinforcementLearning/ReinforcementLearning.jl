@@ -1,0 +1,11 @@
+[deps]
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+Franklin = "713c75ef-9fc9-4b05-94a9-213340da978e"
+NodeJS = "2bd173c7-0d6d-553b-b6af-13a54713934c"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+ReinforcementLearning = "158674fc-8238-5cab-b5ba-03dfc80d1318"
+ReinforcementLearningBase = "e575027e-6cd6-5018-9292-cdc6200d2b44"
+ReinforcementLearningCore = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
+ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
+ReinforcementLearningZoo = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"

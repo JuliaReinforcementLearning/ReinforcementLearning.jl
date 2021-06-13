@@ -1,0 +1,16 @@
+name = "ReinforcementLearningBase"
+uuid = "e575027e-6cd6-5018-9292-cdc6200d2b44"
+authors = ["Johanni Brea <jbrea@users.noreply.github.com>", "Jun Tian <tianjun.cpp@gmail.com>"]
+version = "0.9.5"
+
+[deps]
+AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
+CommonRLInterface = "d842c3ba-07a1-494f-bbec-f5741b0a3e98"
+Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+AbstractTrees = "0.3"
+CommonRLInterface = "0.3"
+julia = "1.3"
