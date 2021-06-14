@@ -139,7 +139,7 @@ end
 function (s::StopAfterNoImprovement)(agent, env)::Bool
     is_terminated(env) || return false # post episode stage
     val = s.fn()
-    if val > s.peak - s.δ
+    if s.δ < val - s.peak
         s.counter = 1
         s.peak = max(val, s.peak)
         return false

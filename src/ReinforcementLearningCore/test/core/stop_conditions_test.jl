@@ -14,7 +14,7 @@
     hook = ComposedHook(total_reward_per_episode)
     run(policy, env, stop_condition, hook)
 
-    @test argmax(total_reward_per_episode.rewards) != patience
+    @test argmax(total_reward_per_episode.rewards) + patience == length(total_reward_per_episode.rewards
 end
 
 @testset "StopAfterNSeconds" begin
