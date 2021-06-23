@@ -20,6 +20,9 @@ And also https://danieltakeshi.github.io/2019/07/14/per/
 - `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
 - `default_priority::Float64=100.`: the default priority for newly added transitions.
 - `rng = Random.GLOBAL_RNG`
+
+!!! note
+    Our implementation is slightly different from the original paper. But it should be aligned with the version in [dopamine](https://github.com/google/dopamine/blob/90527f4eaad4c574b92df556c02dea45853ffd2e/dopamine/jax/agents/rainbow/rainbow_agent.py#L26-L30).
 """
 mutable struct PrioritizedDQNLearner{
     Tq<:AbstractApproximator,
