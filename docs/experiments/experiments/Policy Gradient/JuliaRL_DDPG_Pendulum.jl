@@ -26,6 +26,7 @@ function RL.Experiment(
     low = A.left
     high = A.right
     ns = length(state(inner_env))
+    na = 1
 
     env = ActionTransformedEnv(
         inner_env;
@@ -40,7 +41,7 @@ function RL.Experiment(
     )
 
     create_critic() = Chain(
-        Dense(ns + 1, 30, relu; init = init),
+        Dense(ns + na, 30, relu; init = init),
         Dense(30, 30, relu; init = init),
         Dense(30, 1; init = init),
     )
@@ -65,6 +66,7 @@ function RL.Experiment(
             ),
             γ = 0.99f0,
             ρ = 0.995f0,
+            na = 1,
             batch_size = 64,
             start_steps = 1000,
             start_policy = RandomPolicy(-1.0..1.0; rng = rng),
