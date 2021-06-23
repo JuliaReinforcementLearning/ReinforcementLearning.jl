@@ -79,7 +79,7 @@ function RL.Experiment(
         trajectory = CircularArraySARTTrajectory(
             capacity = 10000,
             state = Vector{Float32} => (ns,),
-            action = Float32 => (),
+            action = Float32 => (na, ),
         ),
     )
 
