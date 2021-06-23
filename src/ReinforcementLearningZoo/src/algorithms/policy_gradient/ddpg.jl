@@ -15,6 +15,7 @@ mutable struct DDPGPolicy{
     target_critic::TC
     γ::Float32
     ρ::Float32
+    na::Int
     batch_size::Int
     start_steps::Int
     start_policy::P
@@ -72,6 +73,7 @@ function DDPGPolicy(;
     start_policy,
     γ = 0.99f0,
     ρ = 0.995f0,
+    na = 1,
     batch_size = 32,
     start_steps = 10000,
     update_after = 1000,
@@ -90,6 +92,7 @@ function DDPGPolicy(;
         target_critic,
         γ,
         ρ,
+        na,
         batch_size,
         start_steps,
         start_policy,
@@ -114,8 +117,10 @@ function (p::DDPGPolicy)(env)
         D = device(p.behavior_actor)
         s = state(env)
         s = Flux.unsqueeze(s, ndims(s) + 1)
-        action = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
-        clamp(action[] + randn(p.rng) * p.act_noise, -p.act_limit, p.act_limit)
+        actions = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
+        c = clamp.(actions .+ randn(p.rng, p.na) .* repeat([p.act_noise], p.na), -p.act_limit, p.act_limit)
+        p.na == 1 && return c[1]
+        c
     end
 end
 
@@ -149,7 +154,7 @@ function RLBase.update!(p::DDPGPolicy, batch::NamedTuple{SARTS})
     a′ = Aₜ(s′)
     qₜ = Cₜ(vcat(s′, a′)) |> vec
     y = r .+ γ .* (1 .- t) .* qₜ
-    a = Flux.unsqueeze(a, 1)
+    a = Flux.unsqueeze(a, ndims(a)+1)
 
     gs1 = gradient(Flux.params(C)) do
         q = C(vcat(s, a)) |> vec
