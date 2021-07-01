@@ -233,6 +233,7 @@ explicitly define `state(::AbstractStateStyle, env::YourEnv)`. So that users can
 fetch necessary information on demand. Following are some built-in state styles:
 
 ```@repl customized_env
+using InteractiveUtils
 subtypes(RLBase.AbstractStateStyle)
 ```
 
