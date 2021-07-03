@@ -19,11 +19,11 @@ versioninfo()
 buff = IOBuffer();Pkg.status(io=buff);println(String(take!(buff)))
 ```
 
-## Downgrade happends when using this package
+## Downgrade happens when using this package
 
 This may happen occasionally. The reason is complex, either because we haven't
 updated the compat section yet, or some other packages you are using relies on
 an old dependency. Pleas [create an
 issue](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues)
-to describe how it happends and we can work on it together to resolve it.
+to describe how it happens and we can work on it together to resolve it.
 
