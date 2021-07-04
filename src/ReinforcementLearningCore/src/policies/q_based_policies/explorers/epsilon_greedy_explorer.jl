@@ -10,7 +10,7 @@ using Flux
 
 > Epsilon-greedy strategy: The best lever is selected for a proportion `1 - epsilon` of the trials, and a lever is selected at random (with uniform probability) for a proportion epsilon . [Multi-armed_bandit](https://en.wikipedia.org/wiki/Multi-armed_bandit)
 
-Two kinds of epsilon-decreasing strategy are implmented here (`linear` and `exp`).
+Two kinds of epsilon-decreasing strategy are implemented here (`linear` and `exp`).
 
 > Epsilon-decreasing strategy: Similar to the epsilon-greedy strategy, except that the value of epsilon decreases as the experiment progresses, resulting in highly explorative behaviour at the start and highly exploitative behaviour at the finish.  - [Multi-armed_bandit](https://en.wikipedia.org/wiki/Multi-armed_bandit)
 

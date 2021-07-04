@@ -37,7 +37,7 @@ end
 
 See [paper](https://arxiv.org/abs/1806.06923)
 
-# Keyworkd arugments
+# Keyword arguments
 - `approximator`, a [`ImplicitQuantileNet`](@ref)
 - `target_approximator`, a [`ImplicitQuantileNet`](@ref), must have the same structure as `approximator`
 - `κ = 1.0f0`,

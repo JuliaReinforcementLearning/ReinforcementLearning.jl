@@ -128,7 +128,7 @@ function RLBase.update!(
         S = select_last_dim(states, idx) |> to_dev
         A = actions[idx]
         G = gains[idx] |> x -> Flux.unsqueeze(x, 1) |> to_dev
-        # gains is a 1 colomn array, but the ouput of flux model is 1 row, n_batch columns array. so unsqueeze it.
+        # gains is a 1 column array, but the output of flux model is 1 row, n_batch columns array. so unsqueeze it.
 
         if π.baseline isa NeuralNetworkApproximator
             gs = gradient(Flux.params(π.baseline)) do

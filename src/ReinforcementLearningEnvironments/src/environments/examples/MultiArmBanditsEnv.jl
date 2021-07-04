@@ -87,7 +87,7 @@ increase reproducibility without creating a new instance of the same `rng`.
 Random.seed!(env::MultiArmBanditsEnv, x) = seed!(env.rng, x)
 
 # For this simple one-shot environment, the default definitions are enough.
-# Here we redefined them to help you compare the traits accross different
+# Here we redefined them to help you compare the traits across different
 # environments to gain a better understanding.
 
 RLBase.NumAgentStyle(::MultiArmBanditsEnv) = SINGLE_AGENT
