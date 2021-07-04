@@ -8,13 +8,13 @@ Symbols used here follow the paper: [Deep Counterfactual Regret Minimization](ht
 
 # Keyword arguments
 
-- `K`, number of traverrsal.
+- `K`, number of traversal.
 - `t`, number of iteration.
 - `Π`, the policy network.
 - `V`, a dictionary of each player's advantage network.
 - `MΠ`, a strategy memory.
 - `MV`, a dictionary of each player's advantage memory.
-- `reinitialize_freq=1`, the frequency of reinitializing the value networks.
+- `reinitialize_freq=1`, the frequency of re-initializing the value networks.
 """
 Base.@kwdef mutable struct DeepCFR{TP,TV,TMP,TMV,I,R,P} <: AbstractCFRPolicy
     Π::TP

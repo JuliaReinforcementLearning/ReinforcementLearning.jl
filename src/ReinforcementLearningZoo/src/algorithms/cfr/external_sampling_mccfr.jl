@@ -3,7 +3,7 @@ export ExternalSamplingMCCFRPolicy
 """
     ExternalSamplingMCCFRPolicy
 
-This implementation uses stochasticaly-weighted averaging.
+This implementation uses stochastically-weighted averaging.
 
 Ref:
 

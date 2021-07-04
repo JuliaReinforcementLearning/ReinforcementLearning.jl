@@ -23,6 +23,6 @@ function RLBase.prob(p::AbstractExplorer, x) end
 """
     prob(p::AbstractExplorer, x, mask)
 
-Similart to `prob(p::AbstractExplorer, x)`, but here only the `mask`ed elements are considered.
+Similar to `prob(p::AbstractExplorer, x)`, but here only the `mask`ed elements are considered.
 """
 function RLBase.prob(p::AbstractExplorer, x, mask) end
