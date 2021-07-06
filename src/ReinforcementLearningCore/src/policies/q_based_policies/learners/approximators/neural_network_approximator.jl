@@ -55,3 +55,8 @@ functor(x::ActorCritic) =
     (actor = x.actor, critic = x.critic), y -> ActorCritic(y.actor, y.critic, x.optimizer)
 
 RLBase.update!(app::ActorCritic, gs) = Flux.Optimise.update!(app.optimizer, params(app), gs)
+
+function Base.copyto!(dest::ActorCritic, src::ActorCritic)
+    Flux.loadparams!(dest.actor, params(src.actor))
+    Flux.loadparams!(dest.critic, params(src.critic))
+end
