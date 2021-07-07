@@ -172,7 +172,7 @@ function fetch!(
         batch = NamedTuple{SARTS}((s, a, r, t, s′))
     elseif traces == SLARTSL
         l = consecutive_view(traj[:legal_actions_mask], inds)
-        l′ = consecutive_view(traj[:next_legal_actions_mask], next_inds)
+        l′ = consecutive_view(traj[:legal_actions_mask], next_inds)
         batch = NamedTuple{SLARTSL}((s, l, a, r, t, s′, l′))
     else
         @error "unsupported traces $traces"
