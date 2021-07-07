@@ -9,7 +9,8 @@ using Random
 using StableRNGs
 using OpenSpiel
 
-function get_optimal_kuhn_policy(env, α = 0.2)
+function get_optimal_kuhn_policy(env; α = 0.2)
+
     if typeof(env) == KuhnPokerEnv
         TabularRandomPolicy(
             table = Dict(

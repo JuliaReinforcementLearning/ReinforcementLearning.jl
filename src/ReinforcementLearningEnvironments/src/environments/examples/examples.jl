@@ -11,7 +11,3 @@ include("CartPoleEnv.jl")
 include("MountainCarEnv.jl")
 include("PendulumEnv.jl")
 include("BitFlippingEnv.jl")
-
-# checking the state of env is enough?
-Base.:(==)(env1::AbstractEnv, env2::AbstractEnv) = state(env1) == state(env2)
-Base.hash(env::AbstractEnv, h::UInt) = hash(state(env), h)
