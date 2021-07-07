@@ -8,6 +8,10 @@ No change.
 
 ### ReinforcementLearningCore.jl
 
+#### v0.8.1
+
+- Minor bug & typo fixes
+
 #### v0.8.0
 
 - Removed `ResizeImage` preprocessor to reduce the dependency of `ImageTransformations`. 
