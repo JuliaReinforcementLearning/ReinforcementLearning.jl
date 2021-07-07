@@ -4,7 +4,7 @@
 
     @test RLZoo.nash_conv(p, env) == 11 / 12
 
-    p = get_optimal_kuhn_policy(env)
+    p = get_optimal_kuhn_policy()
     @test RLZoo.nash_conv(p, env) == 0.0
 
     env = OpenSpielEnv("leduc_poker")
