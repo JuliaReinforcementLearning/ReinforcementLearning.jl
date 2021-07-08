@@ -404,6 +404,19 @@ Make an independent copy of `env`,
 @api copy(env::AbstractEnv) = deepcopy(env)
 @api copyto!(dest::AbstractEnv, src::AbstractEnv)
 
+# checking the state of all players in env is enough?
+"""
+    Base.:(==)(env1::T, env2::T) where T<:AbstractEnv
+!!! warning
+    Only check the state of all players in the env.
+"""
+function Base.:(==)(env1::T, env2::T) where T<:AbstractEnv
+    len = length(players(env1))
+    len == length(players(env2)) && 
+    all(state(env1, player) == state(env2, player) for player in players(env1))
+end
+Base.hash(env::AbstractEnv, h::UInt) = hash([state(env, player) for player in players(env)], h)
+
 @api nameof(env::AbstractEnv) = nameof(typeof(env))
 
 """

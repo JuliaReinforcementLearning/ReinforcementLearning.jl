@@ -18,4 +18,11 @@
     env = OpenSpielEnv("kuhn_poker(players=4)")
     p = TabularRandomPolicy()
     @test RLZoo.nash_conv(p, env) ≈ 3.4760416666666663
+
+    env = KuhnPokerEnv()
+    p = TabularRandomPolicy()
+    @test RLZoo.nash_conv(p, env) == 11 / 12
+
+    p = get_optimal_kuhn_policy(env)
+    @test RLZoo.nash_conv(p, env) == 0.0
 end
