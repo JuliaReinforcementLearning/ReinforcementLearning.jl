@@ -4,7 +4,9 @@
 
 ### ReinforcementLearningBase.jl
 
-No change.
+#### v0.9.5
+
+- Add default `Base.:(==)` and `Base.hash` method for `AbstractEnv`. [#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 
 ### ReinforcementLearningCore.jl
 
