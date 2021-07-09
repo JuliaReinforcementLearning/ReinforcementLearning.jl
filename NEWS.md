@@ -21,6 +21,10 @@
 
 ### ReinforcementLearningZoo.jl
 
+#### v0.4.1
+
+- Make keyword argument `n_actions` in `TabularPolicy` optional. [#300](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/300)
+
 #### v0.4.0
 
 - Moved all the experiments into a new package `ReinforcementLearningExperiments.jl`. The related dependencies are also removed (`BSON.jl`, `StableRNGs.jl`, `TensorBoardLogger.jl`).
