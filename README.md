@@ -170,10 +170,10 @@ appreciate references to the [CITATION.bib](https://github.com/JuliaReinforcemen
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ```@raw html -->
+<!-- cSpell:disable -->
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
-<!-- cSpell:disable -->
 <table>
   <tr>
     <td align="center"><a href="http://lcn.epfl.ch/~brea/"><img src="https://avatars.githubusercontent.com/u/12857162?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jbrea</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=jbrea" title="Code">💻</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=jbrea" title="Documentation">📖</a> <a href="#maintenance-jbrea" title="Maintenance">🚧</a></td>
@@ -216,14 +216,15 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/jamblejoe"><img src="https://avatars.githubusercontent.com/u/12518354?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Goran Nakerst</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=jamblejoe" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/ultradian"><img src="https://avatars.githubusercontent.com/u/14141325?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ultradian</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=ultradian" title="Documentation">📖</a></td>
     <td align="center"><a href="https://bandism.net/"><img src="https://avatars.githubusercontent.com/u/22633385?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ikko Ashimine</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=eltociear" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/00krishna"><img src="https://avatars.githubusercontent.com/u/2063593?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Krishna Bhogaonker</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3A00krishna" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
-<!-- cSpell:enable -->
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+<!-- cSpell:enable -->
 <!-- ``` -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
