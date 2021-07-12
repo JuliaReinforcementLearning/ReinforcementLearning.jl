@@ -22,29 +22,27 @@ See paper: [Deep Reinforcement Learning from Self-Play in Imperfect-Information 
 # Keywords
 
 - `approximator`::[`AbstractApproximator`](@ref).
-- `loss_func`: the loss function.
 - `batch_size::Int=32`
 - `update_horizon::Int=1`: length of update ('n' in n-step update).
 - `min_replay_history::Int=32`: number of transitions that should be experienced before updating the `approximator`.
-- `update_freq::Int=4`: the frequency of updating the `approximator`.
-- `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
+- `update_freq::Int=1`: the frequency of updating the `approximator`.
+- `stack_size::Union{Int, Nothing}=nothing`: use the recent `stack_size` frames to form a stacked state.
 - `traces = SARTS`.
 - `rng = Random.GLOBAL_RNG`
 """
 
 function AverageLearner(;
     approximator::Tq,
-    stack_size::Union{Int,Nothing} = nothing,
     batch_size::Int = 32,
     update_horizon::Int = 1,
     min_replay_history::Int = 32,
     update_freq::Int = 1,
+    stack_size::Union{Int,Nothing} = nothing,
     traces = SARTS,
-    update_step = 0,
     rng = Random.GLOBAL_RNG,
 ) where {Tq}
     sampler = NStepBatchSampler{traces}(;
-        γ = 0f0,
+        γ = 0f0, # no need to set discount factor
         n = update_horizon,
         stack_size = stack_size,
         batch_size = batch_size,
