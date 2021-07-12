@@ -23,6 +23,7 @@ function RL.Experiment(
 )
     rng = StableRNG(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
+    action_dims = inner_env.n_actions
     A = action_space(inner_env)
     low = A.left
     high = A.right
@@ -64,13 +65,16 @@ function RL.Experiment(
             target_qnetwork1 = create_q_net(),
             target_qnetwork2 = create_q_net(),
             γ = 0.99f0,
-            ρ = 0.995f0,
+            τ = 0.005f0,
             α = 0.2f0,
             batch_size = 64,
             start_steps = 1000,
             start_policy = RandomPolicy(Space([-1.0..1.0 for _ in 1:na]); rng = rng),
             update_after = 1000,
             update_every = 1,
+            automatic_entropy_tuning = true,
+            lr_alpha = 0.003f0,
+            action_dims = action_dims,
             rng = rng,
         ),
         trajectory = CircularArraySARTTrajectory(
