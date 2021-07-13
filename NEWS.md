@@ -1,11 +1,4 @@
 # ReinforcementLearning.jl Release Notes
-## ReinforcementLearning.jl@v0.10.0
-
-### ReinforcementLearningZoo.jl
-
-#### v0.4.2
-
-- Update the complete SAC implementation and modify some details based on the original paper.
 
 ## ReinforcementLearning.jl@v0.9.0
 
