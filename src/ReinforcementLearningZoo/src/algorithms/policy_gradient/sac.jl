@@ -7,20 +7,22 @@ mutable struct SACPolicy{
     P,
     R<:AbstractRNG,
 } <: AbstractPolicy
-
     policy::BA
     qnetwork1::BC1
     qnetwork2::BC2
     target_qnetwork1::BC1
     target_qnetwork2::BC2
     γ::Float32
-    ρ::Float32
+    τ::Float32
     α::Float32
     batch_size::Int
     start_steps::Int
     start_policy::P
     update_after::Int
     update_every::Int
+    automatic_entropy_tuning::Bool
+    lr_alpha::Float32
+    target_entropy::Float32
     step::Int
     rng::R
     # Logging
@@ -40,12 +42,15 @@ end
 - `target_qnetwork2`,
 - `start_policy`,
 - `γ = 0.99f0`,
-- `ρ = 0.995f0`,
+- `τ = 0.005f0`,
 - `α = 0.2f0`,
 - `batch_size = 32`,
 - `start_steps = 10000`,
 - `update_after = 1000`,
 - `update_every = 50`,
+- `automatic_entropy_tuning::Bool = false`, whether to automatically tune the entropy.
+- `lr_alpha::Float32 = 0.003f0`, learning rate of tuning entropy.
+- `action_dims = 0`, the dimension of the action. if `automatic_entropy_tuning = true`, must enter this parameter.
 - `step = 0`,
 - `rng = Random.GLOBAL_RNG`,
 
@@ -63,17 +68,23 @@ function SACPolicy(;
     target_qnetwork2,
     start_policy,
     γ = 0.99f0,
-    ρ = 0.995f0,
+    τ = 0.005f0,
     α = 0.2f0,
     batch_size = 32,
     start_steps = 10000,
     update_after = 1000,
     update_every = 50,
+    automatic_entropy_tuning = true,
+    lr_alpha = 0.003f0,
+    action_dims = 0,
     step = 0,
     rng = Random.GLOBAL_RNG,
 )
     copyto!(qnetwork1, target_qnetwork1)  # force sync
     copyto!(qnetwork2, target_qnetwork2)  # force sync
+    if automatic_entropy_tuning
+        @assert action_dims != 0
+    end
     SACPolicy(
         policy,
         qnetwork1,
@@ -81,13 +92,16 @@ function SACPolicy(;
         target_qnetwork1,
         target_qnetwork2,
         γ,
-        ρ,
+        τ,
         α,
         batch_size,
         start_steps,
         start_policy,
         update_after,
         update_every,
+        automatic_entropy_tuning,
+        lr_alpha,
+        Float32(-action_dims),
         step,
         rng,
         0f0,
@@ -142,7 +156,7 @@ end
 function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
     s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
 
-    γ, ρ, α = p.γ, p.ρ, p.α
+    γ, τ, α = p.γ, p.τ, p.α
 
     a′, log_π = evaluate(p, s′)
     q′_input = vcat(s′, a′)
@@ -179,11 +193,16 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
     end
     update!(p.policy, p_grad)
 
+    # Tune entropy automatically
+    if p.automatic_entropy_tuning
+        p.α -= p.lr_alpha * mean(-log_π .- p.target_entropy)
+    end
+
     # polyak averaging
     for (dest, src) in zip(
         Flux.params([p.target_qnetwork1, p.target_qnetwork2]),
         Flux.params([p.qnetwork1, p.qnetwork2]),
     )
-        dest .= ρ .* dest .+ (1 - ρ) .* src
+        dest .= (1 - τ) .* dest .+ τ .* src
     end
 end

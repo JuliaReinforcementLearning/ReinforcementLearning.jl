@@ -1,7 +1,7 @@
 name = "ReinforcementLearningExperiments"
 uuid = "6bd458e5-1694-412f-b601-3a888375c491"
 authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -39,11 +39,11 @@ Flux = "0.12"
 GridWorlds = "0.4"
 ImageTransformations = "0.8"
 IntervalSets = "0.5"
-ReinforcementLearning = "0.9"
+ReinforcementLearning = "0.10"
 ReinforcementLearningBase = "0.9"
 ReinforcementLearningCore = "0.8"
 ReinforcementLearningEnvironments = "0.6"
-ReinforcementLearningZoo = "0.4"
+ReinforcementLearningZoo = "0.5"
 Requires = "1"
 Setfield = "0.7"
 StableRNGs = "1"
