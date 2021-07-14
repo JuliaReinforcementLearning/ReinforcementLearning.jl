@@ -1,6 +1,7 @@
-export NeuralNetworkApproximator, ActorCritic
+export NeuralNetworkApproximator, ActorCritic, GaussianNetwork, evaluate, DuelingNetwork
 
 using Flux
+using Distributions: Normal
 import Functors: functor
 using MacroTools: @forward
 
@@ -59,4 +60,63 @@ RLBase.update!(app::ActorCritic, gs) = Flux.Optimise.update!(app.optimizer, para
 function Base.copyto!(dest::ActorCritic, src::ActorCritic)
     Flux.loadparams!(dest.actor, params(src.actor))
     Flux.loadparams!(dest.critic, params(src.critic))
+end
+
+#####
+# GaussianNetwork
+#####
+
+"""
+    GaussianNetwork(;pre=identity, μ, logσ)
+
+Returns `μ` and `logσ` when called. 
+Create a distribution to sample from 
+using `Normal.(μ, exp.(logσ))`.
+"""
+Base.@kwdef struct GaussianNetwork{P,U,S}
+    pre::P = identity
+    μ::U
+    logσ::S
+end
+
+Flux.@functor GaussianNetwork
+
+function (m::GaussianNetwork)(S)
+    x = m.pre(S)
+    m.μ(x), m.logσ(x) 
+end
+
+"""
+This function is compatible with a multidimensional action space.
+"""
+function evaluate(model::GaussianNetwork, state)
+    μ, logσ = model(state)
+    π_dist = Normal.(μ, exp.(logσ))
+    z = rand.(π_dist)
+    logp_π = sum(logpdf.(π_dist, z), dims = 1)
+    logp_π -= sum((2.0f0 .* (log(2.0f0) .- z - softplus.(-2.0f0 * z))), dims = 1)
+    return tanh.(z), logp_π
+end
+
+#####
+# DuelingNetwork
+#####
+
+"""
+    DuelingNetwork(;base, val, adv)
+    
+Dueling network automatically produces separate estimates of the state value function network and advantage function network. The expected output size of val is 1, and adv is the size of the action space.
+"""
+struct DuelingNetwork{B,V,A}
+    base::B
+    val::V
+    adv::A
+end
+
+Flux.@functor DuelingNetwork
+
+function (m::DuelingNetwork)(state)
+    x = m.base(state)
+    val = m.val(x)
+    return val .+ m.adv(x) .- mean(m.adv(x), dims=1)
 end

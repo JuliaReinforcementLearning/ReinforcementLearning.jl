@@ -120,25 +120,13 @@ function (p::SACPolicy)(env)
         s = state(env)
         s = Flux.unsqueeze(s, ndims(s) + 1)
         # trainmode:
-        action = dropdims(evaluate(p, s)[1], dims=2) # Single action vec, drop second dim
+        action = dropdims(evaluate(p.policy.model, s)[1], dims=2) # Single action vec, drop second dim
 
         # testmode:
         # if testing dont sample an action, but act deterministically by
         # taking the "mean" action
         # action = dropdims(p.policy(s)[1], dims=2) 
     end
-end
-
-"""
-This function is compatible with a multidimensional action space.
-"""
-function evaluate(p::SACPolicy, state)
-    μ, logσ = p.policy(state)
-    π_dist = Normal.(μ, exp.(logσ))
-    z = rand.(p.rng, π_dist)
-    logp_π = sum(logpdf.(π_dist, z), dims = 1)
-    logp_π -= sum((2.0f0 .* (log(2.0f0) .- z - softplus.(-2.0f0 * z))), dims = 1)
-    return tanh.(z), logp_π
 end
 
 function RLBase.update!(
@@ -158,7 +146,7 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
 
     γ, τ, α = p.γ, p.τ, p.α
 
-    a′, log_π = evaluate(p, s′)
+    a′, log_π = evaluate(p.policy.model, s′)
     q′_input = vcat(s′, a′)
     q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
@@ -180,7 +168,7 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
 
     # Train Policy
     p_grad = gradient(Flux.params(p.policy)) do
-        a, log_π = evaluate(p, s)
+        a, log_π = evaluate(p.policy.model, s)
         q_input = vcat(s, a)
         q = min.(p.qnetwork1(q_input), p.qnetwork2(q_input))
         reward = mean(q)
