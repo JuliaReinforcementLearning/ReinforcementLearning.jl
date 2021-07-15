@@ -1,7 +1,8 @@
-export NeuralNetworkApproximator, ActorCritic, GaussianNetwork, evaluate, DuelingNetwork
+export NeuralNetworkApproximator, ActorCritic, GaussianNetwork, DuelingNetwork
 
 using Flux
-using Distributions: Normal
+using Random
+using Distributions: Normal, logpdf
 import Functors: functor
 using MacroTools: @forward
 
@@ -81,21 +82,33 @@ end
 
 Flux.@functor GaussianNetwork
 
-function (m::GaussianNetwork)(S)
-    x = m.pre(S)
-    m.μ(x), m.logσ(x) 
+"""
+This function is compatible with a multidimensional action space. When outputting an action, it uses `tanh` to normalize it.
+
+- `rng::AbstractRNG=Random.GLOBAL_RNG`
+- `is_sampling::Bool=false`, whether to sample from the obtained normal distribution. 
+- `is_return_log_prob`, whether to calculate the conditional probability of getting actions in the given state.
+"""
+function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    x = model.pre(state)
+    μ, logσ = model.μ(x), model.logσ(x) 
+    if is_sampling
+        π_dist = Normal.(μ, exp.(logσ))
+        z = rand.(rng, π_dist)
+        if is_return_log_prob
+            logp_π = sum(logpdf.(π_dist, z), dims = 1)
+            logp_π -= sum((2.0f0 .* (log(2.0f0) .- z - softplus.(-2.0f0 * z))), dims = 1)
+            return tanh.(z), logp_π
+        else
+            return tanh.(z)
+        end
+    else
+        return μ, logσ
+    end
 end
 
-"""
-This function is compatible with a multidimensional action space.
-"""
-function evaluate(model::GaussianNetwork, state)
-    μ, logσ = model(state)
-    π_dist = Normal.(μ, exp.(logσ))
-    z = rand.(π_dist)
-    logp_π = sum(logpdf.(π_dist, z), dims = 1)
-    logp_π -= sum((2.0f0 .* (log(2.0f0) .- z - softplus.(-2.0f0 * z))), dims = 1)
-    return tanh.(z), logp_π
+function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    model(Random.GLOBAL_RNG, state; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
 end
 
 #####
