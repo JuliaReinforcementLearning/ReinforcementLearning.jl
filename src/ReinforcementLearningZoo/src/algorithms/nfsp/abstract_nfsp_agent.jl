@@ -1,10 +1,8 @@
-abstract type NFSPAgents <: MultiAgentManager end
-
 include("average_learner.jl")
 include("nfsp.jl")
 
 function Base.run(
-    p::NFSPAgents,
+    nfsp::NFSPAgents,
     env::AbstractEnv,
     stop_condition = StopAfterEpisode(1),
     hook = EmptyHook(),
@@ -19,23 +17,22 @@ function Base.run(
 
     while !is_stop
         RLBase.reset!(env)
-        hook(PRE_EPISODE_STAGE, policy, env)
+        hook(PRE_EPISODE_STAGE, nfsp, env)
 
         while !is_terminated(env) # one episode
-            RLBase.update!(p, env)
-            hook(POST_ACT_STAGE, p, env)
+            RLBase.update!(nfsp, env)
+            hook(POST_ACT_STAGE, nfsp, env)
 
-            if stop_condition(p, env)
+            if stop_condition(nfsp, env)
                 is_stop = true
                 break
             end
         end # end of an episode
 
         if is_terminated(env)
-            policy(POST_EPISODE_STAGE, env)  # let the policy see the last observation
-            hook(POST_EPISODE_STAGE, policy, env)
+            hook(POST_EPISODE_STAGE, nfsp, env)
         end
     end
-    hook(POST_EXPERIMENT_STAGE, policy, env)
+    hook(POST_EXPERIMENT_STAGE, nfsp, env)
     hook
 end

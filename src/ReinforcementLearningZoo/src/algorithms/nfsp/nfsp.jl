@@ -3,12 +3,25 @@ Neural Fictitious Self-Play (NFSP) agent implemented in Julia.
 
 See the paper https://arxiv.org/abs/1603.01121 for more details.
 """
-export NFSPAgent
+export NFSPAgent, NFSPAgents
 
 using Distributions: TruncatedNormal
 
+mutable struct NFSPAgents <: AbstractPolicy
+    agents::Dict{Any, AbstractPolicy}
+end
+
+mutable struct NFSPAgent <: AbstractPolicy
+    η
+    rng
+    rl_agent::Agent
+    sl_agent::Agent
+end
+
 function initW(out_size, in_size)
-    d = TruncatedNormal(0, 1.0 / sqrt(in_size), -2, 2)
+    mean, stddev = 0.0, 1.0 / sqrt(in_size)
+    lower, upper = (-2 * stddev - mean) / stddev, (2 * stddev - mean) / stddev
+    d = TruncatedNormal(mean, stddev, lower, upper)
     rand(d, (out_size, in_size))
 end
 
@@ -23,13 +36,6 @@ function build_dueling_network(network::Chain)
     val = Chain(deepcopy(network[lm-1]), Dense(last_layer_dims, 1))
     adv = Chain([deepcopy(network[i]) for i=lm-1:lm]...)
     return DuelingNetwork(base, val, adv)
-end
-
-mutable struct NFSPAgent <: AbstractPolicy
-    η
-    rng::StableRNG
-    rl_agent::Agent
-    sl_agent::Agent
 end
 
 function NFSPAgents(env::AbstractEnv; kwargs...)
@@ -122,10 +128,10 @@ function NFSPAgent(
                 ),
                 batch_size = batch_size,
                 update_freq = learn_freq,
-                min_replay_history = min_buffer_size_to_learn,
+                min_reservoir_history = min_buffer_size_to_learn,
                 rng = rng,
             ),
-            explorer = WeightedExplorer(),
+            explorer = WeightedSoftmaxExplorer(),
         ),
         trajectory = CircularArraySARTTrajectory(
             capacity = reservoir_buffer_capacity,
@@ -161,12 +167,12 @@ function RLBase.update!(π::NFSPAgent, env::AbstractEnv)
     end
 end
 
-function RLBase.update!(agents::NFSPAgents, env::AbstractEnv)
+function RLBase.update!(π::NFSPAgents, env::AbstractEnv)
     player = current_player(env)
     if player == chance_player(env)
         env |> legal_action_space |> rand |> env
     else
-        RLBase.update!(agents.agents[player], env)
+        RLBase.update!(π.agents[player], env)
     end
 end
 
@@ -180,7 +186,6 @@ function (π::NFSPAgents)(env::AbstractEnv)
 end
 
 function RLBase.prob(π::NFSPAgents, env::AbstractEnv, args...)
-    player = current_player(env)
-    agent = π.agents[player].sl_agent
-    return prob(agent.policy, env, args...)
+    agent = π.agents[current_player(env)].sl_agent
+    prob(agent.policy, env, args...)
 end

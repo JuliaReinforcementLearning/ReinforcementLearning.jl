@@ -5,7 +5,7 @@ mutable struct AverageLearner{
     R<:AbstractRNG,
 } <: AbstractLearner
     approximator::Tq
-    min_replay_history::Int
+    min_reservoir_history::Int
     update_freq::Int
     update_step::Int
     sampler::NStepBatchSampler
@@ -24,7 +24,7 @@ See paper: [Deep Reinforcement Learning from Self-Play in Imperfect-Information 
 - `approximator`::[`AbstractApproximator`](@ref).
 - `batch_size::Int=32`
 - `update_horizon::Int=1`: length of update ('n' in n-step update).
-- `min_replay_history::Int=32`: number of transitions that should be experienced before updating the `approximator`.
+- `min_reservoir_history::Int=32`: number of transitions that should be experienced before updating the `approximator`.
 - `update_freq::Int=1`: the frequency of updating the `approximator`.
 - `stack_size::Union{Int, Nothing}=nothing`: use the recent `stack_size` frames to form a stacked state.
 - `traces = SARTS`.
@@ -35,7 +35,7 @@ function AverageLearner(;
     approximator::Tq,
     batch_size::Int = 32,
     update_horizon::Int = 1,
-    min_replay_history::Int = 32,
+    min_reservoir_history::Int = 32,
     update_freq::Int = 1,
     stack_size::Union{Int,Nothing} = nothing,
     traces = SARTS,
@@ -49,7 +49,7 @@ function AverageLearner(;
     )
     AverageLearner(
         approximator,
-        min_replay_history,
+        min_reservoir_history,
         update_freq,
         update_step,
         sampler,
@@ -73,7 +73,7 @@ function (learner::AverageLearner)(env)
 end
 
 function RLBase.update!(learner::AverageLearner, t::AbstractTrajectory)
-    length(t[:terminal]) - learner.sampler.n <= learner.min_replay_history && return
+    length(t[:terminal]) - learner.sampler.n <= learner.min_reservoir_history && return
 
     learner.update_step += 1
     learner.update_step % learner.update_freq == 0 || return
@@ -100,9 +100,8 @@ function RLBase.update!(learner::AverageLearner, batch::NamedTuple)
     gs = gradient(params(Q)) do
         ŷ = Q(s)
         y = Flux.onehotbatch(a, axes(ŷ, 1)) |> _device
-        logitcrossentropy(ŷ, y)
+        crossentropy(ŷ, y)
     end
 
-    update!(Q, gs)
-    
+    update!(Q, gs)  
 end
