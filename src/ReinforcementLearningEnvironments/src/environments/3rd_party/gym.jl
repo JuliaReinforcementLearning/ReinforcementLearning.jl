@@ -141,7 +141,7 @@ end
     install_gym(; packages = ["gym", "pybullet"])
 """
 function install_gym(; conda_forge_packages = ["gym", "pybullet"], default_packages=[])
-    # Use eventual proxy info
     println("Installing required python packages using conda")
     Conda.add.(conda_forge_packages;channel="conda-forge")
+    Conda.add(default_packages)
 end
