@@ -37,6 +37,7 @@ function AverageLearner(;
     update_horizon::Int = 1,
     min_reservoir_history::Int = 32,
     update_freq::Int = 1,
+    update_step::Int = 0,
     stack_size::Union{Int,Nothing} = nothing,
     traces = SARTS,
     rng = Random.GLOBAL_RNG,
@@ -56,7 +57,6 @@ function AverageLearner(;
         rng,
     )
 end
-
 
 Flux.functor(x::AverageLearner) = (Q = x.approximator, ), y -> begin
     x = @set x.approximator = y.Q

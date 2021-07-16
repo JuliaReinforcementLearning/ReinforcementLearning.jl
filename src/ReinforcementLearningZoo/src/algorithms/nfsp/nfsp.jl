@@ -82,7 +82,7 @@ function NFSPAgent(
         Dense(ns, hidden_layers[1], relu; init = initW),
         [Dense(hidden_layers[i], hidden_layers[i+1], relu; init = initW) 
             for i in 1:length(hidden_layers)-1]...,
-        Dense(hidden_layers[end], na; init = initW)
+        Dense(hidden_layers[end], na, relu; init = initW)
     )
 
     # RL agent
@@ -145,7 +145,6 @@ function NFSPAgent(
         rl_agent,
         sl_agent,
     )
-    
 end
 
 function RLBase.update!(π::NFSPAgent, env::AbstractEnv)

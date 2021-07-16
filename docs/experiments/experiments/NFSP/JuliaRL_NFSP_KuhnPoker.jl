@@ -8,11 +8,10 @@ using Flux
 using Flux.Losses
 
 mutable struct ResultNEpisode <: AbstractHook
-    episode::Vector{Int} = []
-    results::Vector{Float32} = []
+    episode::Vector{Int}
+    results
 end
-
-results = ResultNEpisode([], [])
+recorder = ResultNEpisode([], [])
 
 function RL.Experiment(
     ::Val{:JuliaRL},
@@ -69,8 +68,8 @@ function RL.Experiment(
 
     stop_condition = StopAfterEpisode(10_000_000, is_show_progress=!haskey(ENV, "CI"))
     hook = DoEveryNEpisode(; n = 10_000) do t, nfsp, wrapped_env
-            push!(results.episode, t)
-            push!(results.results, RLZoo.nash_conv(nfsp, wrapped_env))
+            push!(recorder.episode, t)
+            push!(recorder.results, RLZoo.nash_conv(nfsp, wrapped_env))
         end
     Experiment(nfsp, wrapped_env, stop_condition, hook, "")
 end
@@ -80,7 +79,7 @@ using Plots
 pyplot() #hide
 ex = E`JuliaRL_NFSP_KuhnPoker`
 run(ex)
-plot(results.episode, results.results, xaxis=:log, yaxis=:log)
+plot(recorder.episode, recorder.results, xaxis=:log, yaxis=:log)
 xlabel!("episode")
 ylabel!("nash_conv")
 
