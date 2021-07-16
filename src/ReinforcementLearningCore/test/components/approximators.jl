@@ -22,11 +22,13 @@
             sum(NN(rand(2, 5)))
         end
 
-        old_params = deepcopy(collect(params(NN).params))
-        update!(NN, gs)
-        new_params = collect(params(NN).params)
+        @test_throws ArgumentError begin
+            old_params = deepcopy(collect(params(NN).params))
+            update!(NN, gs)
+            new_params = collect(params(NN).params)
 
-        @assert old_params != new_params
+            @assert old_params != new_params
+        end
     end
 
     @testset "ActorCritic" begin
