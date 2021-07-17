@@ -6,7 +6,7 @@
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
-#+ tangle=true
+#+ tangle=false
 using ReinforcementLearning
 using OpenSpiel
 
@@ -21,7 +21,6 @@ function RL.Experiment(::Val{:JuliaRL}, ::Val{:Minimax}, ::Val{:OpenSpiel}, game
     Experiment(agents, env, StopAfterEpisode(1, is_show_progress=!haskey(ENV, "CI")), hooks, description)
 end
 
-#+ tangle=false
 using Plots
 ex = E`JuliaRL_Minimax_OpenSpiel(tic_tac_toe)`
 run(ex)

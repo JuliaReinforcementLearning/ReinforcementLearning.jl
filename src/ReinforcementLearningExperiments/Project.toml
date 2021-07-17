@@ -8,6 +8,7 @@ AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 ArcadeLearningEnvironment = "b7f77d8d-088d-5e02-8ac0-89aab2acc977"
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
@@ -34,6 +35,7 @@ AbstractTrees = "0.3"
 ArcadeLearningEnvironment = "0.2"
 BSON = "0.3"
 CUDA = "3"
+ChainRulesCore = "= 0.10.11"
 Distributions = "0.24, 0.25"
 Flux = "0.12"
 GridWorlds = "0.4"
@@ -52,8 +54,7 @@ Weave = "0.10"
 julia = "1.6"
 
 [extras]
-OpenSpiel = "ceb70bd2-fe3f-44f0-b81f-41608acaf2f2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "OpenSpiel"]
+test = ["Test"]

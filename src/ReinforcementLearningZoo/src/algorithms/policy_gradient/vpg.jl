@@ -1,24 +1,4 @@
-export VPGPolicy, GaussianNetwork
-
-"""
-    GaussianNetwork(;pre=identity, μ, logσ)
-
-Returns `μ` and `logσ` when called. 
-Create a distribution to sample from 
-using `Normal.(μ, exp.(logσ))`.
-"""
-Base.@kwdef struct GaussianNetwork{P,U,S}
-    pre::P = identity
-    μ::U
-    logσ::S
-end
-
-Flux.@functor GaussianNetwork
-
-function (m::GaussianNetwork)(S)
-    x = m.pre(S)
-    m.μ(x), m.logσ(x) 
-end
+export VPGPolicy
 
 """
 Vanilla Policy Gradient
