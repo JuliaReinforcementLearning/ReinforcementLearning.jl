@@ -52,8 +52,7 @@ Weave = "0.10"
 julia = "1.6"
 
 [extras]
-OpenSpiel = "ceb70bd2-fe3f-44f0-b81f-41608acaf2f2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "OpenSpiel"]
+test = ["Test"]
