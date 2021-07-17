@@ -101,7 +101,7 @@ function CQLPolicy(;
     )
 end
 
-# CQL(H) loss  until CQL loss is impleented in common.jl for offline algorithms
+# CQL(H) loss  until CQL loss is implemented in common.jl for offline algorithms
 
 function CQL_loss(q_value::Vector{T}, action_val::Vector{R}) where {T, R}
     mean(log.(sum(exp.(q_value), dims=1)) .- action_val)
@@ -122,19 +122,6 @@ function (p::CQLPolicy)(env)
     # taking the "mean" action
     # action = dropdims(p.policy(s)[1], dims=2) 
 end
-
-"""
-This function is compatible with a multidimensional action space.
-"""
-function evaluate(p::CQLPolicy, state)
-    μ, logσ = p.policy(state)
-    π_dist = Normal.(μ, exp.(logσ))
-    z = rand.(p.rng, π_dist)
-    logp_π = sum(logpdf.(π_dist, z), dims = 1)
-    logp_π -= sum((2.0f0 .* (log(2.0f0) .- z - softplus.(-2.0f0 * z))), dims = 1)
-    return tanh.(z), logp_π
-end
-
 
 function RLBase.update!(p::CQLPolicy, batch::NamedTuple{SARTS})
     s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
@@ -163,7 +150,7 @@ function RLBase.update!(p::CQLPolicy, batch::NamedTuple{SARTS})
 
     # Train Policy
     p_grad = gradient(Flux.params(p.policy)) do
-        a, log_π = evaluate(p, s)
+        a, log_π =  p.policy.model(s; is_sampling=true, is_return_log_prob=true)
         q_input = vcat(s, a)
         q = min.(p.qnetwork1(q_input), p.qnetwork2(q_input))
         reward = mean(q)
