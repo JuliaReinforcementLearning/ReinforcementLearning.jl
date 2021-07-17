@@ -115,7 +115,7 @@ function (p::CQLPolicy)(env)
     s = state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
     # trainmode:
-    action = dropdims(evaluate(p, s)[1], dims=2) # Single action vec, drop second dim
+    action = dropdims(p.policy.model(s; is_sampling=true, is_return_log_prob=false), dims=2) # Single action vec, drop second dim
 
     # testmode:
     # if testing dont sample an action, but act deterministically by
