@@ -41,7 +41,7 @@ end
 - `τ = 0.005f0`,
 - `α = 0.2f0`,
 - `η = 3f-4`, Hyperparameter for critics, based on the recommendations of the paper
-- `ηₐ = 3f-4`, Hyperparameter for the actor, based on the recommendations of the paper
+- `ηₐ = 3f-5`, Hyperparameter for the actor, based on the recommendations of the paper
 - `batch_size = 256`,
 - `automatic_entropy_tuning::Bool = false`, whether to automatically tune the entropy.
 - `lr_alpha::Float32 = 0.003f0`, learning rate of tuning entropy.
