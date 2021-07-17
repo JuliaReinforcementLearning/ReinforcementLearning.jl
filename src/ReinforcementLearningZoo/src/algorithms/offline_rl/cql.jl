@@ -128,7 +128,7 @@ function RLBase.update!(p::CQLPolicy, batch::NamedTuple{SARTS})
 
     γ, τ, α, η, ηₐ = p.γ, p.τ, p.α, p.η, p.ηₐ
 
-    a′, log_π = evaluate(p, s′)
+    a′, log_π = p.policy.model(s; is_sampling=true, is_return_log_prob=true)
     q′_input = vcat(s′, a′)
     q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
