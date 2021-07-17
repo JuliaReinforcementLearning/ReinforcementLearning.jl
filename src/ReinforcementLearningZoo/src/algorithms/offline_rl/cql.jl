@@ -15,7 +15,7 @@ mutable struct CQLPolicy{
     τ::Float32
     α::Float32
     η::Float32
-    ηₐ::float32
+    ηₐ::Float32
     batch_size::Int
     automatic_entropy_tuning::Bool
     lr_alpha::Float32
