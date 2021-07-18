@@ -1,11 +1,6 @@
 export NFSPAgentManager
 
 
-"""
-    Neural Fictitious Self-Play (NFSP) agent implemented in Julia.
-
-See the paper https://arxiv.org/abs/1603.01121 for more details.
-"""
 mutable struct NFSPAgentManager <: AbstractPolicy
     agents::Dict{Any, NFSPAgent}
 end
