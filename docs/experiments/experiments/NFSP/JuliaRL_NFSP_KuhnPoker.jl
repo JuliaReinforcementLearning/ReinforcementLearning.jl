@@ -1,7 +1,12 @@
-"""
-NFSP agents trained on Kuhn Poker game.
-"""
-#+ tangle=true
+# --- 
+# title: JuliaRL\_NFSP\_KuhnPoker 
+# cover: assets/logo.svg 
+# description: NFSP applied to KuhnPokerEnv 
+# date: 2021-07-18
+# author: "[Peter Chen](https://github.com/peterchen96)" 
+# --- 
+
+#+ tangle=false
 using ReinforcementLearning
 using StableRNGs
 using Flux
@@ -40,8 +45,8 @@ function RL.Experiment(
             state_space_mapping = ss -> [[i] for i in 1:length(states)]
         )
 
-    # set parameters and initial NFSPAgents
-    nfsp = NFSPAgents(wrapped_env;
+    # set parameters for NFSPAgentManager
+    nfsp = NFSPAgentManager(wrapped_env;
             η = 0.1,
             _device = Flux.cpu,
             Optimizer = Flux.Descent,
@@ -71,17 +76,14 @@ function RL.Experiment(
             push!(recorder.episode, t)
             push!(recorder.results, RLZoo.nash_conv(nfsp, wrapped_env))
         end
-    Experiment(nfsp, wrapped_env, stop_condition, hook, "")
+    Experiment(nfsp, wrapped_env, stop_condition, hook, "# run NFSP on KuhnPokerEnv")
 end
 
 #+ tangle=false
 using Plots
-pyplot() #hide
 ex = E`JuliaRL_NFSP_KuhnPoker`
 run(ex)
-plot(recorder.episode, recorder.results, xaxis=:log, yaxis=:log)
-xlabel!("episode")
-ylabel!("nash_conv")
+plot(recorder.episode, recorder.results, xaxis=:log, yaxis=:log, xlabel="episode", ylabel="nash_conv")
 
 savefig("assets/JuliaRL_NFSP_KuhnPoker.png")#hide
 
