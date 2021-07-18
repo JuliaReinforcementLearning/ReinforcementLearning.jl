@@ -100,7 +100,7 @@ function RLBase.update!(learner::AverageLearner, batch::NamedTuple)
     gs = gradient(params(Q)) do
         ŷ = Q(s)
         y = Flux.onehotbatch(a, axes(ŷ, 1)) |> _device
-        crossentropy(ŷ, y)
+        Flux.Losses.crossentropy(ŷ, y)
     end
 
     update!(Q, gs)  

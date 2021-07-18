@@ -3,6 +3,7 @@ Neural Fictitious Self-Play (NFSP) agent implemented in Julia.
 
 See the paper https://arxiv.org/abs/1603.01121 for more details.
 """
+
 export NFSPAgent, NFSPAgents
 
 using Distributions: TruncatedNormal
