@@ -24,3 +24,5 @@ function (s::WeightedSoftmaxExplorer)(values::AbstractVector{T}, mask) where {T}
     values[.!mask] .= typemin(T)
     s(values)
 end
+
+RLBase.prob(s::WeightedSoftmaxExplorer, values) = softmax(values)
