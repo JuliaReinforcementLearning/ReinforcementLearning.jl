@@ -1,6 +1,10 @@
 # ReinforcementLearning.jl Release Notes
 
 ## ReinforcementLearning.jl@v0.10.0
+### ReinforcementLearningCore.jl
+#### v0.8.2
+
+- Add GaussianNetwork and DuelingNetwork into ReinforcementLearningCore.jl as general components. [#370](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/370)
 
 ### ReinforcementLearningZoo.jl
 

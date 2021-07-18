@@ -21,9 +21,3 @@ run(E`JuliaRL_TD3_Pendulum`)
 run(E`JuliaRL_PPO_Pendulum`)
 
 run(E`JuliaRL_BasicDQN_EmptyRoom`)
-
-
-using OpenSpiel
-
-run(E`JuliaRL_Minimax_OpenSpiel(tic_tac_toe)`)
-run(E`JuliaRL_TabularCFR_OpenSpiel(kuhn_poker)`)

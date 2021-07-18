@@ -6,7 +6,7 @@
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
-#+ tangle=true
+#+ tangle=false
 using ReinforcementLearning
 using OpenSpiel
 
