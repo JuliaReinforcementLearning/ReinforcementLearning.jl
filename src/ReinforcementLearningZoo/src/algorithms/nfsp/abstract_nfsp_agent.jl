@@ -1,8 +1,10 @@
 include("average_learner.jl")
 include("nfsp.jl")
+include("nfsp_manager.jl")
+
 
 function Base.run(
-    nfsp::NFSPAgents,
+    nfsp::NFSPAgentManager,
     env::AbstractEnv,
     stop_condition = StopAfterEpisode(1),
     hook = EmptyHook(),
