@@ -11,14 +11,6 @@ export get_dataset, env_names, install_packages
 # TO-DO: give warning for getting atari datasets
 function get_dataset(env_name::String, package::String)
     
-    if !PyCall.pyexists("gym")
-        error(
-            "Cannot import module 'gym'.\n\nIf you did not yet install it, try running\n`ReinforcementLearningEnvironments.install_gym()`\n",
-        )
-    end
-    
-    gym =  pyimport("gym")
-    
     data = get_data(env_name, package)
         
     if package == "d4rl"
