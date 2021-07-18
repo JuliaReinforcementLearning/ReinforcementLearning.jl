@@ -1,17 +1,20 @@
-"""
-Neural Fictitious Self-Play (NFSP) agent implemented in Julia.
-
-See the paper https://arxiv.org/abs/1603.01121 for more details.
-"""
-
-export NFSPAgent, NFSPAgents
+export NFSPAgent
 
 using Distributions: TruncatedNormal
 
-mutable struct NFSPAgents <: AbstractPolicy
-    agents::Dict{Any, AbstractPolicy}
-end
+"""
+    NFSPAgent(; η, rng, rl_agent::Agent, sl_agent::Agent)
 
+Neural Fictitious Self-Play (NFSP) agent implemented in Julia. 
+See the paper https://arxiv.org/abs/1603.01121 for more details.
+
+# Keyword arguments
+
+- `η`, anticipatory parameter, the probability to use `ϵ-greedy(Q)` policy when training the agent.
+- `rng=StableRNG(seed)`.
+- `rl_agent::Agent`, Reinforcement Learning(RL) agent(use `DQN` as follows), which works to search the best response from the self-play process.
+- `sl_agent::Agent`, Supervisor Learning(SL) agent(use `AverageLearner` as follows), which works to learn the best response from the rl_agent's policy.
+"""
 mutable struct NFSPAgent <: AbstractPolicy
     η
     rng
@@ -19,14 +22,16 @@ mutable struct NFSPAgent <: AbstractPolicy
     sl_agent::Agent
 end
 
-function initW(out_size, in_size)
+# parameters initial method for network
+function _TruncatedNormal(out_size, in_size)
     mean, stddev = 0.0, 1.0 / sqrt(in_size)
     lower, upper = (-2 * stddev - mean) / stddev, (2 * stddev - mean) / stddev
     d = TruncatedNormal(mean, stddev, lower, upper)
     rand(d, (out_size, in_size))
 end
 
-# DQN network relative functions 
+
+# DQNLearner relative function
 function build_dueling_network(network::Chain)
     lm = length(network)
     if !(network[lm] isa Dense) || !(network[lm-1] isa Dense)
@@ -39,15 +44,7 @@ function build_dueling_network(network::Chain)
     return DuelingNetwork(base, val, adv)
 end
 
-function NFSPAgents(env::AbstractEnv; kwargs...)
-    NFSPAgents(
-        Dict((player, NFSPAgent(env, player; kwargs...)) 
-        for player in players(env) if player != chance_player(env)
-        )
-    )
-end
 
-# Neural Fictitious Self-play(NFSP) agent
 function NFSPAgent(
     env::AbstractEnv,
     player;
@@ -77,13 +74,13 @@ function NFSPAgent(
     reservoir_buffer_capacity::Int = 2_000_000
     )
 
-    # base Neural network for training DQNLearner
+    # base Neural network for training
     ns, na = length(state(env, player)), length(action_space(env, player))
     base_model = Chain(
-        Dense(ns, hidden_layers[1], relu; init = initW),
-        [Dense(hidden_layers[i], hidden_layers[i+1], relu; init = initW) 
+        Dense(ns, hidden_layers[1], relu; init = _TruncatedNormal),
+        [Dense(hidden_layers[i], hidden_layers[i+1], relu; init = _TruncatedNormal) 
             for i in 1:length(hidden_layers)-1]...,
-        Dense(hidden_layers[end], na, relu; init = initW)
+        Dense(hidden_layers[end], na, relu; init = _TruncatedNormal)
     )
 
     # RL agent
@@ -148,6 +145,13 @@ function NFSPAgent(
     )
 end
 
+
+(π::NFSPAgent)(env::AbstractEnv) = π.sl_agent(env)
+
+
+RLBase.prob(π::NFSPAgent, env::AbstractEnv, args...) = prob(π.sl_agent.policy, env, args...)
+
+
 function RLBase.update!(π::NFSPAgent, env::AbstractEnv)
     sl = π.sl_agent
     rl = π.rl_agent
@@ -165,27 +169,4 @@ function RLBase.update!(π::NFSPAgent, env::AbstractEnv)
         env(action)
         rl(POST_ACT_STAGE, env)
     end
-end
-
-function RLBase.update!(π::NFSPAgents, env::AbstractEnv)
-    player = current_player(env)
-    if player == chance_player(env)
-        env |> legal_action_space |> rand |> env
-    else
-        RLBase.update!(π.agents[player], env)
-    end
-end
-
-function (π::NFSPAgents)(env::AbstractEnv)
-    player = current_player(env)
-    if player == chance_player(env)
-        env |> legal_action_space |> rand |> env
-    else
-        π.agents[player].sl_agent(env) |> env
-    end
-end
-
-function RLBase.prob(π::NFSPAgents, env::AbstractEnv, args...)
-    agent = π.agents[current_player(env)].sl_agent
-    prob(agent.policy, env, args...)
 end
