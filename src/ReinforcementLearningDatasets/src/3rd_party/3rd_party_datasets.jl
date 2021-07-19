@@ -125,7 +125,7 @@ function env_names(package::String)
 end
 
 # Check if there are other dependencies on the package
-# Make sure that you install mujoco and mujocopy before installing the below packages
+# Make sure that you install mujoco and mujoco-py before installing the below packages
 """
     install_packages(packages)
 
