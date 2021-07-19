@@ -95,7 +95,10 @@
         "matryoshka",
         "rllib",
         "Thibaut",
-        "boxoban"
+        "boxoban",
+        "pybullet",
+        "qlearning",
+        "mujoco-py"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
