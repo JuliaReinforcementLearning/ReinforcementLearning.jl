@@ -5,8 +5,6 @@ mutable struct BehaviorCloningPolicy{A} <: AbstractPolicy
     explorer::Any
     sampler::BatchSampler{(:state, :action)}
     min_reservoir_history::Int
-    update_freq::Int
-    update_step::Int
 end
 
 """
@@ -18,7 +16,6 @@ end
 - `explorer=GreedyExplorer()` 
 - `batch_size::Int = 32`
 - `min_reservoir_history::Int = 100`, number of transitions that should be experienced before updating the `approximator`. 
-- `update_freq::Int = 1`: the frequency of updating the `approximator`.
 - `rng = Random.GLOBAL_RNG`
 """
 function BehaviorCloningPolicy(;
@@ -26,7 +23,6 @@ function BehaviorCloningPolicy(;
         explorer::Any = GreedyExplorer(),
         batch_size::Int = 32,
         min_reservoir_history::Int = 100,
-        update_freq::Int = 1,
         rng = Random.GLOBAL_RNG
 ) where {A}
     sampler = BatchSampler{(:state, :action)}(batch_size; rng = rng)
@@ -35,8 +31,6 @@ function BehaviorCloningPolicy(;
         explorer,
         sampler,
         min_reservoir_history,
-        update_freq,
-        0,
     )
 end
 
@@ -59,11 +53,8 @@ function RLBase.update!(p::BehaviorCloningPolicy, batch::NamedTuple{(:state, :ac
     update!(m, gs)
 end
 
-function RLBase.update!(p::BehaviorCloningPolicy, t::AbstractTrajectory, e::AbstractEnv, s::PreActStage)
+function RLBase.update!(p::BehaviorCloningPolicy, t::AbstractTrajectory)
     length(t) <= p.min_reservoir_history && length(t) <= p.sampler.batch_size && return
-
-    p.update_step += 1
-    p.update_step % p.update_freq == 0 || return
 
     _, batch = p.sampler(t)
     RLBase.update!(p, send_to_device(device(p.approximator), batch))
