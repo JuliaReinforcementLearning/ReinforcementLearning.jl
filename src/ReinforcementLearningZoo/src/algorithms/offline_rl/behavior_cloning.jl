@@ -45,7 +45,7 @@ function (p::BehaviorCloningPolicy)(env::AbstractEnv)
     s_batch = Flux.unsqueeze(s, ndims(s) + 1)
     s_batch = send_to_device(device(p.approximator), s_batch)
     logits = p.approximator(s_batch) |> vec |> send_to_host # drop dimension
-    p.explorer(logits)
+    typeof(ActionStyle(env)) == MinimalActionSet ? p.explorer(logits) : p.explorer(logits, legal_action_space_mask(env))
 end
 
 function RLBase.update!(p::BehaviorCloningPolicy, batch::NamedTuple{(:state, :action)})
