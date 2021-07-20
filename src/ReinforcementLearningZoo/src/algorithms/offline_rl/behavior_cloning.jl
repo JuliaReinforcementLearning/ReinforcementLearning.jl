@@ -68,3 +68,26 @@ function RLBase.update!(p::BehaviorCloningPolicy, t::AbstractTrajectory)
     _, batch = p.sampler(t)
     RLBase.update!(p, send_to_device(device(p.approximator), batch))
 end
+
+function RLBase.prob(p::BehaviorCloningPolicy, env::AbstractEnv)
+    s = state(env)
+    s_batch = Flux.unsqueeze(s, ndims(s) + 1)
+    values = p.approximator(s_batch) |> vec |> send_to_host
+    prob(p.explorer, values)
+end
+
+function RLBase.prob(p::BehaviorCloningPolicy, env::AbstractEnv, action)
+    A = action_space(env)
+    P = prob(p, env)
+    @assert length(A) == length(P)
+    if A isa Base.OneTo
+        P[action]
+    else
+        for (a, p) in zip(A, P)
+            if a == action
+                return p
+            end
+        end
+        @error "action[$action] is not found in action space[$(action_space(env))]"
+    end
+end
