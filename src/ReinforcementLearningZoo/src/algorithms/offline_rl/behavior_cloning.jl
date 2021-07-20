@@ -1,5 +1,14 @@
 export BehaviorCloningPolicy
 
+mutable struct BehaviorCloningPolicy{A} <: AbstractPolicy
+    approximator::A
+    explorer::Any
+    sampler::BatchSampler{(:state, :action)}
+    min_reservoir_history::Int
+    update_freq::Int
+    update_step::Int
+end
+
 """
     BehaviorCloningPolicy(;kw...)
 
@@ -7,17 +16,35 @@ export BehaviorCloningPolicy
 
 - `approximator`: calculate the logits of possible actions directly
 - `explorer=GreedyExplorer()` 
-
+- `batch_size::Int = 32`
+- `min_reservoir_history::Int = 100`, number of transitions that should be experienced before updating the `approximator`. 
+- `update_freq::Int = 1`: the frequency of updating the `approximator`.
+- `rng = Random.GLOBAL_RNG`
 """
-Base.@kwdef struct BehaviorCloningPolicy{A} <: AbstractPolicy
-    approximator::A
-    explorer::Any = GreedyExplorer()
+function BehaviorCloningPolicy(;
+        approximator::A,
+        explorer::Any = GreedyExplorer(),
+        batch_size::Int = 32,
+        min_reservoir_history::Int = 100,
+        update_freq::Int = 1,
+        rng = Random.GLOBAL_RNG
+) where {A}
+    sampler = BatchSampler{(:state, :action)}(batch_size; rng = rng)
+    BehaviorCloningPolicy(
+        approximator,
+        explorer,
+        sampler,
+        min_reservoir_history,
+        update_freq,
+        0,
+    )
 end
 
 function (p::BehaviorCloningPolicy)(env::AbstractEnv)
     s = state(env)
     s_batch = Flux.unsqueeze(s, ndims(s) + 1)
-    logits = p.approximator(s_batch) |> vec  # drop dimension
+    s_batch = send_to_device(device(p.approximator), s_batch)
+    logits = p.approximator(s_batch) |> vec |> send_to_host # drop dimension
     p.explorer(logits)
 end
 
