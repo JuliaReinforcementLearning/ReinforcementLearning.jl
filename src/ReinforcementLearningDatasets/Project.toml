@@ -1,16 +1,21 @@
 name = "ReinforcementLearningDatasets"
 uuid = "dd1544ca-2576-438c-a599-ae96278fd687"
-authors = ["Mobius1D"]
+authors = ["Mobius1D", "findmyway"]
 version = "0.1.0"
 
 [deps]
+ArcadeLearningEnvironment = "b7f77d8d-088d-5e02-8ac0-89aab2acc977"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+ReinforcementLearningCore = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
-julia = "1.6"
+ArcadeLearningEnvironment = "0.2.4"
 PyCall = "1.92"
 StatsBase = "0.33"
+ReinforcementLearningCore = "0.8"
+julia = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

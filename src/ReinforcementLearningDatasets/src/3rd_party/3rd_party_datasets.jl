@@ -2,7 +2,7 @@ using PyCall
 using StatsBase
 using ArcadeLearningEnvironment:ROM_PATH
 using Random:AbstractRNG
-using ReinforcementLearning: SART, SARTS, BatchSampler
+using ReinforcementLearningCore: SART, SARTS, BatchSampler
 
 export get_dataset, env_names, install_packages
 
@@ -28,7 +28,7 @@ function get_dataset(env_name::String, package::String = "d4rl")
     data = get_data(env_name, package)
         
     if package == "d4rl"
-        dataset = (state=(data["observations"]'),
+        return dataset = (state=(data["observations"]'),
                 action=copy(data["actions"]'),
                 reward=copy(data["rewards"]'),
                 terminal=copy(data["terminals"]'),
@@ -67,12 +67,7 @@ function get_data(env_name::String, package::String)
     if package == "d4rl"
         d4rl = pyimport(package)
         env = gym.make(env_name)
-        return data = d4rl.qlearning_dataset(env)
-    end
-    
-    # Needs to import ROM path
-    if package == "d4rl_atari"
-        run(`$(PyCall.python) -m atari_py.import_roms $(ROM_PATH)`);
+        return d4rl.qlearning_dataset(env)
     end
     
     pyimport(package)
@@ -112,16 +107,21 @@ function env_names(package::String)
     pyimport(package)
     
     modules = [
-        "d4rl_pybullet.envs"
-        "d4rl.gym_mujoco.gym_envs"
-        "d4rl_atari.envs"
-    ]
+            "d4rl.gym_mujoco.gym_envs"
+            "d4rl_pybullet.envs"
+            "d4rl_atari.envs"
+            ]
     
+    if package == "d4rl" mod = modules[1] end
+    if package == "d4rl_pybullet" mod = modules[2] end
+    if package == "d4rl_atari" mod = modules[3] end
+    
+    # maybe we can check once instead of calling it everytime when we use atari_dataset
     if package == "d4rl_atari"
         run(`$(PyCall.python) -m atari_py.import_roms $(ROM_PATH)`);
     end
     
-    [x.id for x in gym.envs.registry.all() if split(x.entry_point, ':')[1] in modules]
+    [x.id for x in gym.envs.registry.all() if split(x.entry_point, ':')[1] == mod]
 end
 
 # Check if there are other dependencies on the package
