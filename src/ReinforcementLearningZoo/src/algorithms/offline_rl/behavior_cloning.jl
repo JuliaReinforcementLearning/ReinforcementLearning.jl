@@ -59,8 +59,8 @@ function RLBase.update!(p::BehaviorCloningPolicy, batch::NamedTuple{(:state, :ac
     update!(m, gs)
 end
 
-function RLBase.update!(p::BehaviorCloningPolicy, t::AbstractTrajectory)
-    length(t) <= p.min_reservoir_history && return
+function RLBase.update!(p::BehaviorCloningPolicy, t::AbstractTrajectory, e::AbstractEnv, s::PreActStage)
+    length(t) <= p.min_reservoir_history && length(t) <= p.sampler.batch_size && return
 
     p.update_step += 1
     p.update_step % p.update_freq == 0 || return
