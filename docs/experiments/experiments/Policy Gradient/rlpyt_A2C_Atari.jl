@@ -137,7 +137,7 @@ function RL.Experiment(
             BSON.@save joinpath(save_dir, string(t), "policy.bson") policy
             BSON.@save joinpath(save_dir, string(t), "stats.bson") total_batch_reward_per_episode evaluation_result
 
-            # only keep recent 3 checkpoints
+            ## only keep recent 3 checkpoints
             old_checkpoint_folder =
                 joinpath(save_dir, string(t - EVALUATION_FREQ * N_CHECKPOINTS))
             if isdir(old_checkpoint_folder)
