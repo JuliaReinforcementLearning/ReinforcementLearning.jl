@@ -250,7 +250,7 @@ function RL.Experiment(
             ),
         ),
         trajectory = CircularArraySARTTrajectory(
-            capacity = 1_000_000,
+            capacity = haskey(ENV, "CI") : 1_000 : 1_000_000,
             state = Matrix{Float32} => STATE_SIZE,
         ),
     )
