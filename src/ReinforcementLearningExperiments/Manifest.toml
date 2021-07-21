@@ -34,9 +34,9 @@ uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 
 [[ArrayInterface]]
 deps = ["IfElse", "LinearAlgebra", "Requires", "SparseArrays", "Static"]
-git-tree-sha1 = "045ff5e1bc8c6fb1ecb28694abba0a0d55b5f4f5"
+git-tree-sha1 = "a71d224f61475b93c9e196e83c17c6ac4dedacfa"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "3.1.17"
+version = "3.1.18"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -265,10 +265,10 @@ uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 version = "0.8.4"
 
 [[Flux]]
-deps = ["AbstractTrees", "Adapt", "CUDA", "CodecZlib", "Colors", "DelimitedFiles", "Functors", "Juno", "LinearAlgebra", "MacroTools", "NNlib", "NNlibCUDA", "Pkg", "Printf", "Random", "Reexport", "SHA", "Statistics", "StatsBase", "Test", "ZipFile", "Zygote"]
-git-tree-sha1 = "0b3c6d0ce57d3b793eabd346ccc8f605035ef079"
+deps = ["AbstractTrees", "Adapt", "ArrayInterface", "CUDA", "CodecZlib", "Colors", "DelimitedFiles", "Functors", "Juno", "LinearAlgebra", "MacroTools", "NNlib", "NNlibCUDA", "Pkg", "Printf", "Random", "Reexport", "SHA", "Statistics", "StatsBase", "Test", "ZipFile", "Zygote"]
+git-tree-sha1 = "c58d1f9c9640f0bcb6869c6c9254d090b13c1908"
 uuid = "587475ba-b771-5e3f-ad9e-33799f191a9c"
-version = "0.12.4"
+version = "0.12.5"
 
 [[ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "LinearAlgebra", "NaNMath", "Printf", "Random", "SpecialFunctions", "StaticArrays"]
@@ -513,9 +513,9 @@ version = "0.7.25"
 
 [[NNlibCUDA]]
 deps = ["CUDA", "LinearAlgebra", "NNlib", "Random", "Statistics"]
-git-tree-sha1 = "5c970b9fd6098e5f04349b4d1a43fdd3e69c9e97"
+git-tree-sha1 = "a7de026dc0ff9f47551a16ad9a710da66881b953"
 uuid = "a00861dc-f156-4864-bf3c-e6376f28a68d"
-version = "0.1.6"
+version = "0.1.7"
 
 [[NaNMath]]
 git-tree-sha1 = "bfe47e760d60b82b66b61d2d44128b62e3a369fb"
@@ -645,7 +645,7 @@ uuid = "e575027e-6cd6-5018-9292-cdc6200d2b44"
 version = "0.9.6"
 
 [[ReinforcementLearningCore]]
-deps = ["AbstractTrees", "Adapt", "CUDA", "CircularArrayBuffers", "Compat", "Dates", "Distributions", "ElasticArrays", "FillArrays", "Flux", "Functors", "GPUArrays", "LinearAlgebra", "MacroTools", "Markdown", "ProgressMeter", "Random", "ReinforcementLearningBase", "Setfield", "Statistics", "StatsBase", "UnicodePlots", "Zygote"]
+deps = ["AbstractTrees", "Adapt", "ArrayInterface", "CUDA", "CircularArrayBuffers", "Compat", "Dates", "Distributions", "ElasticArrays", "FillArrays", "Flux", "Functors", "GPUArrays", "LinearAlgebra", "MacroTools", "Markdown", "ProgressMeter", "Random", "ReinforcementLearningBase", "Setfield", "Statistics", "StatsBase", "UnicodePlots", "Zygote"]
 path = "../ReinforcementLearningCore"
 uuid = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
 version = "0.8.2"
@@ -747,9 +747,9 @@ version = "0.1.1"
 
 [[Static]]
 deps = ["IfElse"]
-git-tree-sha1 = "2740ea27b66a41f9d213561a04573da5d3823d4b"
+git-tree-sha1 = "62701892d172a2fa41a1f829f66d2b0db94a9a63"
 uuid = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
-version = "0.2.5"
+version = "0.3.0"
 
 [[StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
@@ -816,9 +816,9 @@ uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 
 [[TensorBoardLogger]]
 deps = ["CRC32c", "FileIO", "ImageCore", "ProtoBuf", "Requires", "StatsBase"]
-git-tree-sha1 = "522390f787aee7474856d0d67124aa7250cc4bf7"
+git-tree-sha1 = "96d160e85038f6d89e6c9b91492466f9a7d454f2"
 uuid = "899adc3e-224a-11e9-021f-63837185c80f"
-version = "0.1.17"
+version = "0.1.18"
 
 [[TensorCore]]
 deps = ["LinearAlgebra"]
@@ -897,9 +897,9 @@ version = "1.5.0+0"
 
 [[Zygote]]
 deps = ["AbstractFFTs", "ChainRules", "ChainRulesCore", "DiffRules", "Distributed", "FillArrays", "ForwardDiff", "IRTools", "InteractiveUtils", "LinearAlgebra", "MacroTools", "NaNMath", "Random", "Requires", "SpecialFunctions", "Statistics", "ZygoteRules"]
-git-tree-sha1 = "4f9a5ba559da1fc7474f2ece6c6c1e21c4ab989c"
+git-tree-sha1 = "8b634fdb4c3c63f2ceaa2559a008da4f405af6b3"
 uuid = "e88e6eb3-aa80-5325-afca-941959d7151f"
-version = "0.6.16"
+version = "0.6.17"
 
 [[ZygoteRules]]
 deps = ["MacroTools"]
