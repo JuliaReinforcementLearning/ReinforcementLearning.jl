@@ -33,7 +33,7 @@ function RL.Experiment(
 
     init = orthogonal(rng)
 
-    # share model
+    ## share model
     model = Chain(
         x -> x ./ 255,
         CrossCor((8, 8), N_FRAMES => 32, relu; stride = 4, pad = 0, init = init),
@@ -116,7 +116,7 @@ function RL.Experiment(
         end,
         DoEveryNStep(;n=EVALUATION_FREQ) do t, agent, env
             @info "evaluating agent at $t step..."
-            # switch to GreedyExplorer?
+            ## switch to GreedyExplorer?
             h = TotalBatchRewardPerEpisode(N_ENV)
             s = @elapsed run(
                 agent.policy,
@@ -145,7 +145,7 @@ function RL.Experiment(
             BSON.@save joinpath(save_dir, string(t), "policy.bson") policy
             BSON.@save joinpath(save_dir, string(t), "stats.bson") total_batch_reward_per_episode evaluation_result
 
-            # only keep recent 3 checkpoints
+            ## only keep recent 3 checkpoints
             old_checkpoint_folder =
                 joinpath(save_dir, string(t - EVALUATION_FREQ * N_CHECKPOINTS))
             if isdir(old_checkpoint_folder)

@@ -31,7 +31,7 @@ function RL.Experiment(
 
     init = orthogonal(rng)
 
-    # share model
+    ## share model
     model = Chain(
         x -> x ./ 255,
         CrossCor((8, 8), N_FRAMES => 32, relu; stride = 4, pad = 0, init = init),
