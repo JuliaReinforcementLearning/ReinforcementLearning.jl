@@ -154,11 +154,5 @@ function RL.Experiment(
         end,
     )
 
-    description = """
-    # Play Atari($name) with PPO
-    The configurations use here should be aligned with [atari_ff_ppo.py](https://github.com/astooke/rlpyt/blob/master/rlpyt/experiments/configs/atari/pg/atari_ff_ppo.py) in rlpyt.
-    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
-    """
-
-    Experiment(agent, env, stop_condition, hook, description)
+    Experiment(agent, env, stop_condition, hook, "")
 end

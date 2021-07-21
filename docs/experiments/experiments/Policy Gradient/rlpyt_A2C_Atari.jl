@@ -146,13 +146,5 @@ function RL.Experiment(
         end,
     )
 
-    description = """
-    # Play Atari($name) with A2C
-
-    The configurations use here should be aligned with [atari_ff_a2c.py](https://github.com/astooke/rlpyt/blob/master/rlpyt/experiments/configs/atari/pg/atari_ff_a2c.py) in rlpyt.
-
-    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
-    """
-
-    Experiment(agent, env, stop_condition, hook, description)
+    Experiment(agent, env, stop_condition, hook, "")
 end
