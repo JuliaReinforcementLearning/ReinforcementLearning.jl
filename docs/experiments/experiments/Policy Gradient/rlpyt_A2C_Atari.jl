@@ -31,7 +31,7 @@ function RL.Experiment(
 
     init = orthogonal(rng)
 
-    # share model
+    ## share model
     model = Chain(
         x -> x ./ 255,
         CrossCor((8, 8), N_FRAMES => 32, relu; stride = 4, pad = 0, init = init),
@@ -137,7 +137,7 @@ function RL.Experiment(
             BSON.@save joinpath(save_dir, string(t), "policy.bson") policy
             BSON.@save joinpath(save_dir, string(t), "stats.bson") total_batch_reward_per_episode evaluation_result
 
-            # only keep recent 3 checkpoints
+            ## only keep recent 3 checkpoints
             old_checkpoint_folder =
                 joinpath(save_dir, string(t - EVALUATION_FREQ * N_CHECKPOINTS))
             if isdir(old_checkpoint_folder)
@@ -146,13 +146,5 @@ function RL.Experiment(
         end,
     )
 
-    description = """
-    # Play Atari($name) with A2C
-
-    The configurations use here should be aligned with [atari_ff_a2c.py](https://github.com/astooke/rlpyt/blob/master/rlpyt/experiments/configs/atari/pg/atari_ff_a2c.py) in rlpyt.
-
-    You can also view the tensorboard logs with `tensorboard --logdir $(joinpath(save_dir, "tb_log"))`
-    """
-
-    Experiment(agent, env, stop_condition, hook, description)
+    Experiment(agent, env, stop_condition, hook, "")
 end

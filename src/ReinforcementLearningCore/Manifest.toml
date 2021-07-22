@@ -20,6 +20,12 @@ version = "3.3.1"
 [[ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 
+[[ArrayInterface]]
+deps = ["IfElse", "LinearAlgebra", "Requires", "SparseArrays", "Static"]
+git-tree-sha1 = "a71d224f61475b93c9e196e83c17c6ac4dedacfa"
+uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
+version = "3.1.18"
+
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
@@ -45,15 +51,15 @@ version = "3.3.4"
 
 [[ChainRules]]
 deps = ["ChainRulesCore", "Compat", "LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "dabb81719f820cddd6df4916194d44f1fe282bd1"
+git-tree-sha1 = "0ff24ac6ea4f03d9ed5c90505c1e96273bf5f96d"
 uuid = "082447d4-558c-5d27-93f4-14fc19e9eca2"
-version = "0.8.22"
+version = "0.8.23"
 
 [[ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "0b0aa9d61456940511416b59a0e902c57b154956"
+git-tree-sha1 = "f53ca8d41e4753c41cdafa6ec5f7ce914b34be54"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "0.10.12"
+version = "0.10.13"
 
 [[CircularArrayBuffers]]
 git-tree-sha1 = "a5f5b84ecff2f9822e0eda78418d1b15f13a10a0"
@@ -186,10 +192,10 @@ uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 version = "0.8.4"
 
 [[Flux]]
-deps = ["AbstractTrees", "Adapt", "CUDA", "CodecZlib", "Colors", "DelimitedFiles", "Functors", "Juno", "LinearAlgebra", "MacroTools", "NNlib", "NNlibCUDA", "Pkg", "Printf", "Random", "Reexport", "SHA", "Statistics", "StatsBase", "Test", "ZipFile", "Zygote"]
-git-tree-sha1 = "0b3c6d0ce57d3b793eabd346ccc8f605035ef079"
+deps = ["AbstractTrees", "Adapt", "ArrayInterface", "CUDA", "CodecZlib", "Colors", "DelimitedFiles", "Functors", "Juno", "LinearAlgebra", "MacroTools", "NNlib", "NNlibCUDA", "Pkg", "Printf", "Random", "Reexport", "SHA", "Statistics", "StatsBase", "Test", "ZipFile", "Zygote"]
+git-tree-sha1 = "c58d1f9c9640f0bcb6869c6c9254d090b13c1908"
 uuid = "587475ba-b771-5e3f-ad9e-33799f191a9c"
-version = "0.12.4"
+version = "0.12.5"
 
 [[ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "LinearAlgebra", "NaNMath", "Printf", "Random", "SpecialFunctions", "StaticArrays"]
@@ -224,6 +230,11 @@ deps = ["InteractiveUtils", "MacroTools", "Test"]
 git-tree-sha1 = "95215cd0076a150ef46ff7928892bc341864c73c"
 uuid = "7869d1d1-7146-5819-86e3-90919afe41df"
 version = "0.4.3"
+
+[[IfElse]]
+git-tree-sha1 = "28e837ff3e7a6c3cdb252ce49fb412c8eb3caeef"
+uuid = "615f187c-cbe4-4ef1-ba3b-2fcf58d6d173"
+version = "0.1.0"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
@@ -329,9 +340,9 @@ version = "0.7.25"
 
 [[NNlibCUDA]]
 deps = ["CUDA", "LinearAlgebra", "NNlib", "Random", "Statistics"]
-git-tree-sha1 = "5c970b9fd6098e5f04349b4d1a43fdd3e69c9e97"
+git-tree-sha1 = "a7de026dc0ff9f47551a16ad9a710da66881b953"
 uuid = "a00861dc-f156-4864-bf3c-e6376f28a68d"
-version = "0.1.6"
+version = "0.1.7"
 
 [[NaNMath]]
 git-tree-sha1 = "bfe47e760d60b82b66b61d2d44128b62e3a369fb"
@@ -472,6 +483,12 @@ git-tree-sha1 = "a50550fa3164a8c46747e62063b4d774ac1bcf49"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
 version = "1.5.1"
 
+[[Static]]
+deps = ["IfElse"]
+git-tree-sha1 = "62701892d172a2fa41a1f829f66d2b0db94a9a63"
+uuid = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
+version = "0.3.0"
+
 [[StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
 git-tree-sha1 = "1b9a0f17ee0adde9e538227de093467348992397"
@@ -552,9 +569,9 @@ uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
 
 [[Zygote]]
 deps = ["AbstractFFTs", "ChainRules", "ChainRulesCore", "DiffRules", "Distributed", "FillArrays", "ForwardDiff", "IRTools", "InteractiveUtils", "LinearAlgebra", "MacroTools", "NaNMath", "Random", "Requires", "SpecialFunctions", "Statistics", "ZygoteRules"]
-git-tree-sha1 = "4f9a5ba559da1fc7474f2ece6c6c1e21c4ab989c"
+git-tree-sha1 = "8b634fdb4c3c63f2ceaa2559a008da4f405af6b3"
 uuid = "e88e6eb3-aa80-5325-afca-941959d7151f"
-version = "0.6.16"
+version = "0.6.17"
 
 [[ZygoteRules]]
 deps = ["MacroTools"]
