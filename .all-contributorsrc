@@ -318,6 +318,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "pkienscherf",
+      "name": "Philipp A. Kienscherf",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44019953?v=4",
+      "profile": "https://www.is3.uni-koeln.de/de/team/doctoral-researchers/philipp-artur-kienscherf/",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
