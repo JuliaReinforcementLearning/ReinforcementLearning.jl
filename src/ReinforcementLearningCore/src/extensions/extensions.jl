@@ -1,3 +1,4 @@
+include("ArrayInterface.jl")
 include("Flux.jl")
 include("CUDA.jl")
 include("Zygote.jl")
