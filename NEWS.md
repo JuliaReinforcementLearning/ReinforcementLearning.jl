@@ -1,10 +1,13 @@
 # ReinforcementLearning.jl Release Notes
 
 ## ReinforcementLearning.jl@v0.10.0
+
 ### ReinforcementLearningCore.jl
+
 #### v0.8.2
 
 - Add GaussianNetwork and DuelingNetwork into ReinforcementLearningCore.jl as general components. [#370](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/370)
+- Export `WeightedSoftmaxExplorer`.  [#382](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/382)
 
 ### ReinforcementLearningZoo.jl
 
@@ -12,6 +15,8 @@
 
 - Update the complete SAC implementation and modify some details based on the
   original paper. [#365](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/365)
+- Add some extra keyword parameters for `BehaviorCloningPolicy` to use it
+  online. [#390](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/390)
 
 ## ReinforcementLearning.jl@v0.9.0
 

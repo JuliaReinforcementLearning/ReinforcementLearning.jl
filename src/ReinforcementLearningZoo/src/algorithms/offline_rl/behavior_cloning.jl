@@ -1,5 +1,12 @@
 export BehaviorCloningPolicy
 
+mutable struct BehaviorCloningPolicy{A} <: AbstractPolicy
+    approximator::A
+    explorer::Any
+    sampler::BatchSampler{(:state, :action)}
+    min_reservoir_history::Int
+end
+
 """
     BehaviorCloningPolicy(;kw...)
 
@@ -7,18 +14,32 @@ export BehaviorCloningPolicy
 
 - `approximator`: calculate the logits of possible actions directly
 - `explorer=GreedyExplorer()` 
-
+- `batch_size::Int = 32`
+- `min_reservoir_history::Int = 100`, number of transitions that should be experienced before updating the `approximator`. 
+- `rng = Random.GLOBAL_RNG`
 """
-Base.@kwdef struct BehaviorCloningPolicy{A} <: AbstractPolicy
-    approximator::A
-    explorer::Any = GreedyExplorer()
+function BehaviorCloningPolicy(;
+        approximator::A,
+        explorer::Any = GreedyExplorer(),
+        batch_size::Int = 32,
+        min_reservoir_history::Int = 100,
+        rng = Random.GLOBAL_RNG
+) where {A}
+    sampler = BatchSampler{(:state, :action)}(batch_size; rng = rng)
+    BehaviorCloningPolicy(
+        approximator,
+        explorer,
+        sampler,
+        min_reservoir_history,
+    )
 end
 
 function (p::BehaviorCloningPolicy)(env::AbstractEnv)
     s = state(env)
     s_batch = Flux.unsqueeze(s, ndims(s) + 1)
-    logits = p.approximator(s_batch) |> vec  # drop dimension
-    p.explorer(logits)
+    s_batch = send_to_device(device(p.approximator), s_batch)
+    logits = p.approximator(s_batch) |> vec |> send_to_host # drop dimension
+    typeof(ActionStyle(env)) == MinimalActionSet ? p.explorer(logits) : p.explorer(logits, legal_action_space_mask(env))
 end
 
 function RLBase.update!(p::BehaviorCloningPolicy, batch::NamedTuple{(:state, :action)})
@@ -30,4 +51,34 @@ function RLBase.update!(p::BehaviorCloningPolicy, batch::NamedTuple{(:state, :ac
         logitcrossentropy(ŷ, y)
     end
     update!(m, gs)
+end
+
+function RLBase.update!(p::BehaviorCloningPolicy, t::AbstractTrajectory)
+    (length(t) <= p.min_reservoir_history || length(t) <= p.sampler.batch_size) && return
+
+    _, batch = p.sampler(t)
+    RLBase.update!(p, send_to_device(device(p.approximator), batch))
+end
+
+function RLBase.prob(p::BehaviorCloningPolicy, env::AbstractEnv)
+    s = state(env)
+    s_batch = Flux.unsqueeze(s, ndims(s) + 1)
+    values = p.approximator(s_batch) |> vec |> send_to_host
+    typeof(ActionStyle(env)) == MinimalActionSet ? prob(p.explorer, values) : prob(p.explorer, values, legal_action_space_mask(env))
+end
+
+function RLBase.prob(p::BehaviorCloningPolicy, env::AbstractEnv, action)
+    A = action_space(env)
+    P = prob(p, env)
+    @assert length(A) == length(P)
+    if A isa Base.OneTo
+        P[action]
+    else
+        for (a, p) in zip(A, P)
+            if a == action
+                return p
+            end
+        end
+        @error "action[$action] is not found in action space[$(action_space(env))]"
+    end
 end
