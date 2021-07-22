@@ -2,12 +2,20 @@
 
 ## ReinforcementLearning.jl@v0.10.0
 
+### ReinforcementLearningEnvironments.jl
+
+#### v0.6.2
+
+- Add `SequentialEnv` environment wrapper to turn a simultaneous environment
+  into a sequential one.
+
 ### ReinforcementLearningCore.jl
 
 #### v0.8.2
 
 - Add GaussianNetwork and DuelingNetwork into ReinforcementLearningCore.jl as general components. [#370](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/370)
-- Export `WeightedSoftmaxExplorer`.  [#382](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/382)
+- Export `WeightedSoftmaxExplorer`.
+  [#382](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/382)
 
 ### ReinforcementLearningZoo.jl
 

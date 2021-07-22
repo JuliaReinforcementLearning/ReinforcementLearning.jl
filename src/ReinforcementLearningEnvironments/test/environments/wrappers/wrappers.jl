@@ -103,4 +103,10 @@
         RLBase.test_runnable!(env′)
     end
 
+    @testset "SequentialEnv" begin
+        env =  RockPaperScissorsEnv()
+        env′ = SequentialEnv(env)
+        RLBase.test_interfaces!(env′)
+        RLBase.test_runnable!(env′)
+    end
 end
