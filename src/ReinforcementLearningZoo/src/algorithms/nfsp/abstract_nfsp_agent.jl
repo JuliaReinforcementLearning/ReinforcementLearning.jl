@@ -1,0 +1,41 @@
+function Base.run(
+    policy::NFSPAgentManager,
+    env::AbstractEnv,
+    stop_condition = StopAfterEpisode(1),
+    hook = EmptyHook(),
+)
+    @assert NumAgentStyle(env) isa MultiAgent
+    @assert DefaultStateStyle(env) isa InformationSet
+
+    is_stop = false
+
+    while !is_stop
+        RLBase.reset!(env)
+        hook(PRE_EPISODE_STAGE, policy, env)
+
+        # set train mode
+        for player in players(env)
+            if player != chance_player(env)
+                agent = policy.agents[player]
+                agent.mode = rand(agent.rng) < agent.η
+            end
+        end
+
+        while !is_terminated(env) # one episode
+            RLBase.update!(policy, env)
+            hook(POST_ACT_STAGE, policy, env)
+
+            if stop_condition(policy, env)
+                is_stop = true
+                break
+            end
+        end # end of an episode
+
+        if is_terminated(env)
+            policy(POST_EPISODE_STAGE, env)
+            hook(POST_EPISODE_STAGE, policy, env)
+        end
+    end
+    hook(POST_EXPERIMENT_STAGE, policy, env)
+    hook
+end
