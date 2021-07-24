@@ -5,6 +5,8 @@ function RLBase.update!(π::NFSPAgent, env::AbstractEnv)
     π(POST_ACT_STAGE, env)
 end
 
+RLBase.prob(π::NFSPAgent, env::AbstractEnv, args...) = prob(π.sl_agent.policy, env, args...)
+
 function (π::NFSPAgent)(stage::PreActStage, env::AbstractEnv, action)
     rl = π.rl_agent
     sl = π.sl_agent
