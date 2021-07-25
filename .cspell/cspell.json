@@ -96,7 +96,8 @@
         "rllib",
         "Thibaut",
         "boxoban",
-        "DATADEPS"
+        "DATADEPS",
+        "umaze"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
