@@ -58,12 +58,6 @@ function NFSPAgent(
 
     # base Neural network for training
     ns, na = length(state(env, player)), length(action_space(env, player))
-    base_model = Chain(
-        Dense(ns, hidden_layers[1], relu; init = glorot_normal(rng)),
-        [Dense(hidden_layers[i], hidden_layers[i+1], relu; init = glorot_normal(rng)) 
-            for i in 1:length(hidden_layers)-1]...,
-        Dense(hidden_layers[end], na; init = glorot_normal(rng))
-    )
 
     # RL agent
     rl_agent = Agent(
@@ -90,6 +84,7 @@ function NFSPAgent(
                 loss_func = rl_loss_func,
                 batch_size = batch_size,
                 update_freq = learn_freq,
+                update_horizon = 0,
                 min_replay_history = min_buffer_size_to_learn,
                 target_update_freq = update_target_network_freq,
                 rng = rng,

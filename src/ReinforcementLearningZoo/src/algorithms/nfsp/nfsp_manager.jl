@@ -27,6 +27,14 @@ function (π::NFSPAgentManager)(env::AbstractEnv)
     end
 end
 
+function (π::NFSPAgentManager)(stage::PostEpisodeStage, env::AbstractEnv)
+    for player in players(env)
+        if player != chance_player(env)
+            π.agents[player](stage, env)
+        end
+    end
+end
+
 function RLBase.prob(π::NFSPAgentManager, env::AbstractEnv, args...)
     agent = π.agents[current_player(env)].sl_agent
     prob(agent.policy, env, args...)
