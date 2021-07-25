@@ -10,14 +10,6 @@ mutable struct NFSPAgentManager <: AbstractPolicy
     agents::Dict{Any, NFSPAgent}
 end
 
-function NFSPAgentManager(env::AbstractEnv; kwargs...)
-    NFSPAgentManager(
-        Dict((player, NFSPAgent(env, player; kwargs...)) 
-        for player in players(env) if player != chance_player(env)
-        )
-    )
-end
-
 function (π::NFSPAgentManager)(env::AbstractEnv)
     player = current_player(env)
     if player == chance_player(env)
