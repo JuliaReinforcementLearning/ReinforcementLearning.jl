@@ -35,10 +35,7 @@ function (π::NFSPAgentManager)(stage::PostEpisodeStage, env::AbstractEnv)
     end
 end
 
-function RLBase.prob(π::NFSPAgentManager, env::AbstractEnv, args...)
-    agent = π.agents[current_player(env)].sl_agent
-    prob(agent.policy, env, args...)
-end
+RLBase.prob(π::NFSPAgentManager, env::AbstractEnv, args...) = prob(π.agents[current_player(env)], env, args...)
 
 function RLBase.update!(π::NFSPAgentManager, env::AbstractEnv)
     player = current_player(env)
