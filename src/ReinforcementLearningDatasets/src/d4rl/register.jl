@@ -4,7 +4,7 @@ export REF_MIN_SCORE
 
 """
 This file holds the registration information for d4rl datasets.
-It also registers the infsormation in DataDeps for further use in this package.
+It also registers the information in DataDeps for further use in this package.
 """
 
 const DATASET_URLS = Dict{String, String}(
@@ -279,7 +279,7 @@ function __init__()
                 """
                 Credits: https://arxiv.org/abs/2004.07219
                 The following dataset is fetched from the d4rl. 
-                The dataset is fetched and smodified in a form that is useful for RL.jl package.
+                The dataset is fetched and modified in a form that is useful for RL.jl package.
                 
                 Dataset information: 
                 Name: $(ds)

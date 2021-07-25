@@ -12,7 +12,7 @@ const SARTS = (:state, :action, :reward, :terminals, :next_state)
 const SART = (:state, :action, :reward, :terminals)
 
 #not exporting D4RL. (no need outside) -> Maybe make a constructor for D4RL that will return a D4RL dataset
-
+# write docstring for this.
 struct D4RL{T<:AbstractRNG}
     dataset::Dict{Symbol, Any}
     size::Int
@@ -22,7 +22,7 @@ struct D4RL{T<:AbstractRNG}
     style::Tuple
 end
 
-# havent included all the funtionality like is_sequential, will be implemented soon
+# haven't included all the functionalitylike is_sequential, will be implemented soon
 # Maybe enable the users providing their own paths to datasets if they already have it
 """
     dataset(dataset::String; style::Tuple, rng<:AbstractRNG, is_shuffle::Bool, max_iters::Int64, batch_size::Int64)
@@ -105,7 +105,7 @@ function dataset(dataset::String;
 end
 
 # making d4rl iterable
-# temporary workaround for maintaining reproducability (using seeds)
+# temporary workaround for maintaining reproducibility (using seeds)
 function iterate(ds::D4RL, state=1)
     if state == 1
         seeds = shuffle(ds.rng, 1:ds.size) #is shuffle needed here?
@@ -117,7 +117,7 @@ function iterate(ds::D4RL, state=1)
     seed = seeds[iter]
     rng = StableRNG(seed)
     
-    # check return for unshuffled dataset
+    # check return for dataset that is not shuffled dataset
     inds = rand(rng, 1:ds.size, ds.batch_size)
 
     batch = (state = copy(ds.dataset[:state][:, inds]),
