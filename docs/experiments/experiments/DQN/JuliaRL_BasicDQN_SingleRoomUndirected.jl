@@ -1,6 +1,6 @@
 # ---
-# title: JuliaRL\_BasicDQN\_EmptyRoom
-# cover: assets/JuliaRL_BasicDQN_EmptyRoom.png
+# title: JuliaRL\_BasicDQN\_SingleRoomUndirected
+# cover: assets/JuliaRL_BasicDQN_SingleRoomUndirected.png
 # description: A simple example to demonstrate how to use environments in GridWorlds.jl
 # date: 2021-05-22
 # author: "[Siddharth Bhatia](https://github.com/Sid-Bhatia-0)"
@@ -16,20 +16,14 @@ using Flux.Losses
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BasicDQN},
-    ::Val{:EmptyRoom},
+    ::Val{:SingleRoomUndirected},
     ::Nothing;
     seed=123,
 )
     rng = StableRNG(seed)
 
-    inner_env = GridWorlds.EmptyRoomDirected(rng=rng)
-    action_space_mapping = x -> Base.OneTo(length(RLBase.action_space(inner_env)))
-    action_mapping = i -> RLBase.action_space(inner_env)[i]
-    env = RLEnvs.ActionTransformedEnv(
-        inner_env,
-        action_space_mapping=action_space_mapping,
-        action_mapping=action_mapping,
-    )
+    env = GridWorlds.SingleRoomUndirectedModule.SingleRoomUndirected(rng=rng)
+    env = GridWorlds.RLBaseEnv(env)
     env = RLEnvs.StateTransformedEnv(env;state_mapping=x -> vec(Float32.(x)))
     env = RewardOverriddenEnv(env, x -> x - convert(typeof(x), 0.01))
     env = MaxTimeoutEnv(env, 240)
@@ -72,9 +66,9 @@ end
 #+ tangle=false
 using Plots
 pyplot() #hide
-ex = E`JuliaRL_BasicDQN_EmptyRoom`
+ex = E`JuliaRL_BasicDQN_SingleRoomUndirected`
 run(ex)
 plot(ex.hook.rewards)
-savefig("assets/JuliaRL_BasicDQN_EmptyRoom.png") #hide
+savefig("assets/JuliaRL_BasicDQN_SingleRoomUndirected.png") #hide
 
-# ![](assets/JuliaRL_BasicDQN_EmptyRoom.png)
+# ![](assets/JuliaRL_BasicDQN_SingleRoomUndirected.png)
