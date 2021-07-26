@@ -137,7 +137,7 @@ function list_gym_env_names(;
         "d4rl.gym_mujoco.gym_envs",
         "d4rl.locomotion.ant",
         "d4rl.gym_bullet.gym_envs",
-        "d4rl.pointmaze_bullet.bullet_maze", # yet to include flow and carls
+        "d4rl.pointmaze_bullet.bullet_maze", # yet to include flow and carla
     ],
 )   
     if PyCall.pyexists("d4rl") pyimport("d4rl") end
