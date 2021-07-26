@@ -13,16 +13,16 @@ using Flux
 using Flux.Losses
 
 mutable struct ResultNEpisode <: AbstractHook
-    step_counter::Int
+    episode_counter::Int
     eval_every::Int
     episode::Vector{Int}
     results::Vector{Float64}
 end
 
 function (hook::ResultNEpisode)(::PostEpisodeStage, policy, env)
-    hook.step_counter += 1
-    if hook.step_counter % hook.eval_every == 0
-        push!(hook.episode, hook.step_counter)
+    hook.episode_counter += 1
+    if hook.episode_counter % hook.eval_every == 0
+        push!(hook.episode, hook.episode_counter)
         push!(hook.results, RLZoo.nash_conv(policy, env))
     end
 end
@@ -34,9 +34,7 @@ function RL.Experiment(
     ::Nothing;
     seed = 123,
 )
-
     rng = StableRNG(seed)
-
     # Encode the KuhnPokerEnv's states for training.
     env = KuhnPokerEnv()
     wrapped_env = StateTransformedEnv(
@@ -44,7 +42,6 @@ function RL.Experiment(
         state_mapping = s -> [findfirst(==(s), state_space(env)) / length(state_space(env))], # for normalization
         state_space_mapping = ss -> [[findfirst(==(s), state_space(env)) / length(state_space(env))] for s in state_space(env)]
         )
-    
     player = 1 # or 2
     ns, na = length(state(wrapped_env, player)), length(action_space(wrapped_env, player))
 

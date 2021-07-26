@@ -15,6 +15,7 @@ See the paper https://arxiv.org/abs/1603.01121 for more details.
 - `rng=Random.GLOBAL_RNG`.
 - `update_freq::Int`: the frequency of updating the agents' `approximator`.
 - `step_counter::Int`, count the step.
+- `mode::Bool`, used when learning, true as BestResponse(rl_agent's output), false as AveragePolicy(sl_agent's output).
 """
 mutable struct NFSPAgent <: AbstractPolicy
     rl_agent::Agent
@@ -73,15 +74,16 @@ function (π::NFSPAgent)(stage::PostEpisodeStage, env::AbstractEnv)
     π.step_counter += 1
     if π.step_counter % π.update_freq == 0
         RLBase.update!(sl.policy, sl.trajectory)
-        if !π.mode 
-           rl_learn(π.rl_agent)
+        if !π.mode
+            rl_learn(π.rl_agent)
         end
     end
 end
 
 # Following is the supplement functions
 # if the implementation work well, following function maybe move to the correspond file.
-function rl_learn(rl_agent)
+function rl_learn(rl_agent::Agent{<:QBasedPolicy, <:AbstractTrajectory})
+    # just learn the approximator, not update target_approximator
     learner, t = rl_agent.policy.learner, rl_agent.trajectory
     length(t[:terminal]) - learner.sampler.n <= learner.min_replay_history && return
     
