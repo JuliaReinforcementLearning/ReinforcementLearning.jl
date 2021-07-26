@@ -35,7 +35,8 @@ function RL.Experiment(
     seed = 123,
 )
     rng = StableRNG(seed)
-    # Encode the KuhnPokerEnv's states for training.
+    
+    ## Encode the KuhnPokerEnv's states for training.
     env = KuhnPokerEnv()
     wrapped_env = StateTransformedEnv(
         env;
@@ -45,7 +46,7 @@ function RL.Experiment(
     player = 1 # or 2
     ns, na = length(state(wrapped_env, player)), length(action_space(wrapped_env, player))
 
-    # construct rl_agent(use `DQN`) and sl_agent(use `BehaviorCloningPolicy`)
+    ## construct rl_agent(use `DQN`) and sl_agent(use `BehaviorCloningPolicy`)
     rl_agent = Agent(
         policy = QBasedPolicy(
             learner = DQNLearner(
@@ -100,14 +101,14 @@ function RL.Experiment(
             rng = rng,
         ),
         trajectory = ReservoirTrajectory(
-            2_000_000;# capacity
+            2_000_000;# reservoir capacity
             rng = rng,
             :state => Vector{Float64},
             :action_probs => Vector{Float64},
         ),
     )
 
-    # set parameters
+    ## set parameters and initial NFSPAgentManager
     η = 0.1 # anticipatory parameter
     nfsp = NFSPAgentManager(
         Dict(
