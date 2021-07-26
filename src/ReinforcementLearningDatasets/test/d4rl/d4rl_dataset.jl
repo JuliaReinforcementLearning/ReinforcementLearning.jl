@@ -1,10 +1,9 @@
 @testset "dataset_d4rl" begin
-    ds, meta = dataset(
+    ds = dataset(
         "hopper-medium-replay-v0";
         style = SARTS,
         rng = StableRNG(123),
         is_shuffle = true,
-        max_iters = 4,
         batch_size = 256
     )
     n_s = 11
@@ -18,11 +17,16 @@
     @test size(data_dict[:reward]) == (N_samples,)
     @test size(data_dict[:terminal]) == (N_samples,)
 
-    for sample in ds
-         @test typeof(sample) <: NamedTuple #check for SARTS
+    i = 1
+
+    while i < 5
+        sample = iterate(ds)
+        @test typeof(sample) <: NamedTuple
+        i += 1
     end
-    sample1, state1 = iterate(ds)
-    sample2, state2 = iterate(ds, state1)
+
+    sample1 = iterate(ds)
+    sample2 = iterate(ds)
 
     @test sample1 != sample2
 end

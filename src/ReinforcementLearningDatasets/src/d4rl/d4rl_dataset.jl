@@ -11,37 +11,39 @@ export SART
 const SARTS = (:state, :action, :reward, :terminals, :next_state)
 const SART = (:state, :action, :reward, :terminals)
 
-#not exporting D4RL. (no need outside) -> Maybe make a constructor for D4RL that will return a D4RL dataset
+# not exporting D4RLDataSet. (no need outside) -> Maybe make a constructor for D4RLDataSet that will return a D4RLDataSet dataset
 # write docstring for this.
-struct D4RL{T<:AbstractRNG}
+struct D4RLDataSet{T<:AbstractRNG}
     dataset::Dict{Symbol, Any}
     size::Int
-    max_iters::Int64
     rng::T
     batch_size::Int64
     style::Tuple
+    meta::Dict
 end
 
-# haven't included all the functionalitylike is_sequential, will be implemented soon
+# haven't included all the functionality like is_sequential, will be implemented soon
 # Maybe enable the users providing their own paths to datasets if they already have it
+# add an optional env_arg for additional checking
 """
     dataset(dataset::String; style::Tuple, rng<:AbstractRNG, is_shuffle::Bool, max_iters::Int64, batch_size::Int64)
 
-    Creates a dataset of enclosed in a D4RL type and other related metadata for the `dataset` that is passed.
-    The dataset type is an iterable that fetches batches when used in a for loop for convenience during offline training.
-    
-    `dataset`: Name of the D4RL dataset.
-    `style`: the style of the iterator and the Dict inside D4RL that is returned.
-    `rng`: StableRNG
-    `max_iters`: maximum number of iterations for the iterator.
-    `is_shuffle`: whether the dataset is shuffled or not. `true` by default.
-    `batch_size`: batch_size that is yielded by the iterator. Defaults to 256.
+Creates a dataset of enclosed in a D4RLDataSet type and other related metadata for the `dataset` that is passed.
+The dataset type is an iterable that fetches batches when used in a for loop for convenience during offline training.
+
+`dataset`: Name of the D4RLDataSet dataset.
+`style`: the style of the iterator and the Dict inside D4RLDataSet that is returned.
+`rng`: StableRNG
+`max_iters`: maximum number of iterations for the iterator.
+`is_shuffle`: whether the dataset is shuffled or not. `true` by default.
+`batch_size`: batch_size that is yielded by the iterator. Defaults to 256.
+
+The returned type is an infinite iterator which can be called using `iterate` and will return batches as specified in the dataset.
 """
 function dataset(dataset::String;
     style=SARTS, 
     rng = StableRNG(123), 
     is_shuffle = true, 
-    max_iters = 1000, 
     batch_size=256
 )
     
@@ -91,8 +93,13 @@ function dataset(dataset::String;
         inds = shuffle(rng, 1:N_samples)
         
         for key in keys(dataset)
-            if length(size(dataset[key])) != 1
-                for i in inds if i > (size(dataset[key]))[2] print(true) end end 
+            dims = size(dataset[key])
+            if length(dims) != 1
+                for i in inds 
+                    if i > dims[2] 
+                        print(true) 
+                    end 
+                end 
                 dataset[key] = @view dataset[key][:, inds]
             else
                 dataset[key] = @view dataset[key][inds]
@@ -100,23 +107,14 @@ function dataset(dataset::String;
         end
     end
 
-    return D4RL(dataset, N_samples, max_iters, rng, batch_size, style), meta
+    return D4RLDataSet(dataset, N_samples, rng, batch_size, style, meta)
 
 end
 
-# making d4rl iterable
+# making D4RLDataSet iterable
 # temporary workaround for maintaining reproducibility (using seeds)
-function iterate(ds::D4RL, state=1)
-    if state == 1
-        seeds = shuffle(ds.rng, 1:ds.size) #is shuffle needed here?
-        iter = 1
-    else
-        seeds = state[1]
-        iter = state[2]
-    end
-    seed = seeds[iter]
-    rng = StableRNG(seed)
-    
+function iterate(ds::D4RLDataSet)
+    rng = ds.rng
     # check return for dataset that is not shuffled dataset
     inds = rand(rng, 1:ds.size, ds.batch_size)
 
@@ -128,11 +126,8 @@ function iterate(ds::D4RL, state=1)
     if ds.style == SARTS
         batch = merge(batch, (next_state = copy(ds.dataset[:next_state][:, inds]),))
     end
-    if iter < ds.max_iters
-        return batch, (seeds, iter+1)
-    else
-        return nothing
-    end
+    
+    return batch
 end
 
 function verify(data::Dict{String, Any})
