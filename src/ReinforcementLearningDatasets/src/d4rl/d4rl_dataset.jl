@@ -95,11 +95,6 @@ function dataset(dataset::String;
         for key in keys(dataset)
             dims = size(dataset[key])
             if length(dims) != 1
-                for i in inds 
-                    if i > dims[2] 
-                        print(true) 
-                    end 
-                end 
                 dataset[key] = @view dataset[key][:, inds]
             else
                 dataset[key] = @view dataset[key][inds]
