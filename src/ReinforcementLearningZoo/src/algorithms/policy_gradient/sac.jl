@@ -19,11 +19,11 @@ mutable struct SACPolicy{
     start_steps::Int
     start_policy::P
     update_after::Int
-    update_every::Int
+    update_freq::Int
     automatic_entropy_tuning::Bool
     lr_alpha::Float32
     target_entropy::Float32
-    step::Int
+    update_step::Int
     rng::R
     # Logging
     reward_term::Float32
@@ -47,11 +47,11 @@ end
 - `batch_size = 32`,
 - `start_steps = 10000`,
 - `update_after = 1000`,
-- `update_every = 50`,
+- `update_freq = 50`,
 - `automatic_entropy_tuning::Bool = false`, whether to automatically tune the entropy.
 - `lr_alpha::Float32 = 0.003f0`, learning rate of tuning entropy.
 - `action_dims = 0`, the dimension of the action. if `automatic_entropy_tuning = true`, must enter this parameter.
-- `step = 0`,
+- `update_step = 0`,
 - `rng = Random.GLOBAL_RNG`,
 
 `policy` is expected to output a tuple `(μ, logσ)` of mean and
@@ -73,11 +73,11 @@ function SACPolicy(;
     batch_size = 32,
     start_steps = 10000,
     update_after = 1000,
-    update_every = 50,
+    update_freq = 50,
     automatic_entropy_tuning = true,
     lr_alpha = 0.003f0,
     action_dims = 0,
-    step = 0,
+    update_step = 0,
     rng = Random.GLOBAL_RNG,
 )
     copyto!(qnetwork1, target_qnetwork1)  # force sync
@@ -98,11 +98,11 @@ function SACPolicy(;
         start_steps,
         start_policy,
         update_after,
-        update_every,
+        update_freq,
         automatic_entropy_tuning,
         lr_alpha,
         Float32(-action_dims),
-        step,
+        update_step,
         rng,
         0f0,
         0f0,
@@ -111,17 +111,17 @@ end
 
 # TODO: handle Training/Testing mode
 function (p::SACPolicy)(env)
-    p.step += 1
+    p.update_step += 1
 
-    if p.step <= p.start_steps
+    if p.update_step <= p.start_steps
         p.start_policy(env)
     else
         D = device(p.policy)
         s = state(env)
         s = Flux.unsqueeze(s, ndims(s) + 1)
         # trainmode:
-        action = dropdims(p.policy.model(s; is_sampling=true, is_return_log_prob=true)[1], dims=2) # Single action vec, drop second dim
-
+        action = dropdims(p.policy(s; is_sampling=true), dims=2) # Single action vec, drop second dim
+        
         # testmode:
         # if testing dont sample an action, but act deterministically by
         # taking the "mean" action
@@ -136,7 +136,7 @@ function RLBase.update!(
     ::PreActStage,
 )
     length(traj) > p.update_after || return
-    p.step % p.update_every == 0 || return
+    p.update_step % p.update_freq == 0 || return
     inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
     update!(p, batch)
 end
@@ -146,7 +146,7 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
 
     γ, τ, α = p.γ, p.τ, p.α
 
-    a′, log_π = p.policy.model(s′; is_sampling=true, is_return_log_prob=true)
+    a′, log_π = p.policy(s′; is_sampling=true, is_return_log_prob=true)
     q′_input = vcat(s′, a′)
     q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
@@ -168,7 +168,7 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
 
     # Train Policy
     p_grad = gradient(Flux.params(p.policy)) do
-        a, log_π = p.policy.model(s; is_sampling=true, is_return_log_prob=true)
+        a, log_π = p.policy(s; is_sampling=true, is_return_log_prob=true)
         q_input = vcat(s, a)
         q = min.(p.qnetwork1(q_input), p.qnetwork2(q_input))
         reward = mean(q)

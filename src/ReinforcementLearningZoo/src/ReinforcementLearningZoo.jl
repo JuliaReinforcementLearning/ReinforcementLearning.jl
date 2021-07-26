@@ -3,7 +3,7 @@ module ReinforcementLearningZoo
 const RLZoo = ReinforcementLearningZoo
 export RLZoo
 
-export GaussianNetwork
+export GaussianNetwork, DuelingNetwork
 
 using CircularArrayBuffers
 using ReinforcementLearningBase

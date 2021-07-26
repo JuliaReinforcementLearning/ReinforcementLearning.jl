@@ -111,6 +111,17 @@ function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_
     model(Random.GLOBAL_RNG, state; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
 end
 
+"""
+This function is used to infer the probability of getting action `a` given state `s`.
+"""
+function (model::GaussianNetwork)(state, action)
+    x = model.pre(state)
+    μ, logσ = model.μ(x), model.logσ(x) 
+    π_dist = Normal.(μ, exp.(logσ))
+    logp_π = sum(logpdf.(π_dist, action), dims = 1)
+    logp_π -= sum((2.0f0 .* (log(2.0f0) .- action - softplus.(-2.0f0 * action))), dims = 1)
+end
+
 #####
 # DuelingNetwork
 #####
