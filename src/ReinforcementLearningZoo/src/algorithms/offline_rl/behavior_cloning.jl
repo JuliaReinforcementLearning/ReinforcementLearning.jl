@@ -62,8 +62,9 @@ end
 
 function RLBase.prob(p::BehaviorCloningPolicy, env::AbstractEnv)
     s = state(env)
-    s_batch = Flux.unsqueeze(s, ndims(s) + 1)
-    values = p.approximator(s_batch) |> vec |> send_to_host
+    m = p.approximator
+    s_batch = send_to_device(device(m), Flux.unsqueeze(s, ndims(s) + 1))
+    values = m(s_batch) |> vec |> send_to_host
     typeof(ActionStyle(env)) == MinimalActionSet ? prob(p.explorer, values) : prob(p.explorer, values, legal_action_space_mask(env))
 end
 
