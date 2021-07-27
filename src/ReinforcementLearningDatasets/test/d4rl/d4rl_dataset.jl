@@ -1,16 +1,18 @@
-using Base: BitInteger32, cmd_interpolate1
+n_s = 11
+n_a = 3
+N_samples = 200919
+batch_size = 256
+style = SARTS
+rng = StableRNG(123)
+
 @testset "dataset_d4rl_shuffle" begin
     ds = dataset(
         "hopper-medium-replay-v0";
-        style = SARTS,
-        rng = StableRNG(123),
+        style = style,
+        rng = rng,
         is_shuffle = true,
-        batch_size = 256
+        batch_size = batch_size
     )
-    n_s = 11
-    n_a = 3
-    N_samples = 200919
-    batch_size = 256
 
     data_dict = ds.dataset
 
@@ -23,7 +25,7 @@ using Base: BitInteger32, cmd_interpolate1
 
     for sample in ds
         if i > 5 break end
-        @test typeof(sample) <: NamedTuple # clarify for checking SARTS
+        @test typeof(sample) <: NamedTuple
         i += 1
     end
 
@@ -55,15 +57,12 @@ end
 @testset "dataset_d4rl" begin
     ds = dataset(
         "hopper-medium-replay-v0";
-        style = SARTS,
-        rng = StableRNG(123),
+        style = style,
+        rng = rng,
         is_shuffle = false,
-        batch_size = 256
+        batch_size = batch_size
     )
-    n_s = 11
-    n_a = 3
-    N_samples = 200919
-    batch_size = 256
+
 
     data_dict = ds.dataset
 
@@ -76,7 +75,7 @@ end
 
     for sample in ds
         if i > 5 break end
-        @test typeof(sample) <: NamedTuple # clarify for checking SARTS
+        @test typeof(sample) <: NamedTuple
         i += 1
     end
 

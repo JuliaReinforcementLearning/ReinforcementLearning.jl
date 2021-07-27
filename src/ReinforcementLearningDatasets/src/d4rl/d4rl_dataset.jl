@@ -7,25 +7,35 @@ import Base: iterate, length, IteratorEltype
 export dataset
 export SARTS
 export SART
+export D4RLDataSet
 
 const SARTS = (:state, :action, :reward, :terminals, :next_state)
 const SART = (:state, :action, :reward, :terminals)
 
-# not exporting D4RLDataSet. (no need outside) -> Maybe make a constructor for D4RLDataSet that will return a D4RLDataSet dataset
-# write docstring for this.
+"""
+Represents a iterable dataset from d4rl with the following fields:
+
+`dataset`: Dict{Symbol, Any}, representation of the dataset as a Dictionary with style as `style`
+`size`: Integer, the size of the dataset
+`batch_size`: Integer, the size of the batches returned by `iterate`.
+`style`: Tuple, the type of the NamedTuple, for now SARTS and SART is supported.
+`rng`<: AbstractRNG.
+`meta`: Dict, the metadata provided along with the dataset
+`is_shuffle`: Bool, determines if the batches retuned by `iterate` are shuffled.
+"""
 struct D4RLDataSet{T<:AbstractRNG}
     dataset::Dict{Symbol, Any}
-    size::Int
-    batch_size::Int64
+    size::Integer
+    batch_size::Integer
     style::Tuple
     rng::T
     meta::Dict
     is_shuffle::Bool
 end
 
-# haven't included all the functionality like is_sequential, will be implemented soon
-# Maybe enable the users providing their own paths to datasets if they already have it
-# add an optional env_arg for additional checking
+# TO-DO: include other functionality like is_sequential, will be implemented soon
+# TO-DO: enable the users providing their own paths to datasets if they already have it
+# TO-DO: add additional env arg to do complete verify function
 """
     dataset(dataset::String; style::Tuple, rng<:AbstractRNG, is_shuffle::Bool, max_iters::Int64, batch_size::Int64)
 
@@ -59,13 +69,11 @@ function dataset(dataset::String;
     @assert length(readdir(path)) == 1
     file_name = readdir(path)[1]
     
-    # try to incorporate multi threading in loading stuff
     data = h5open(path*"/"*file_name, "r") do file
         read(file)
     end
 
-    #check if we could obtain more info so that we could verify if the dataset actually matches the requirement
-    #do some sanity checks on the data
+    # sanity checks on data
     verify(data)
 
     dataset = Dict{Symbol, Any}()
@@ -82,7 +90,6 @@ function dataset(dataset::String;
         dataset[:next_state] = cat(dataset[:next_state], data["observations"][:, 1]; dims = 2)
     end
     
-    # put the data in separate container based on requirements
     for key in keys(data)
         if !(key in ["observations", "actions", "rewards", "terminals"])
             meta[key] = data[key]
@@ -100,7 +107,6 @@ function iterate(ds::D4RLDataSet, state = 0)
     is_shuffle = ds.is_shuffle
     style = ds.style
 
-    # check return for dataset that is not shuffled dataset
     if is_shuffle
         inds = rand(rng, 1:size, batch_size)
     else
@@ -134,7 +140,6 @@ function verify(data::Dict{String, Any})
     for key in ["observations", "actions", "rewards", "terminals"]
         @assert (key in keys(data)) "Expected keys not present in data"
     end
-    #if possible perform some sanity check to check if the shape matches the requirements of the environment.
     N_samples = size(data["observations"])[2]
     @assert size(data["rewards"]) == (N_samples,)
     @assert size(data["terminals"]) == (N_samples,)
