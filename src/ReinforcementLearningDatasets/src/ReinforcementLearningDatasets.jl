@@ -1,6 +1,5 @@
 module ReinforcementLearningDatasets
 
-using Base: Symbol, NamedTuple
 const RLDatasets = ReinforcementLearningDatasets
 export RLDatasets
 
