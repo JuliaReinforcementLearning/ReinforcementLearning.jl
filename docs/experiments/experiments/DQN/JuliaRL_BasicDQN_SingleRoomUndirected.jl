@@ -2,7 +2,7 @@
 # title: JuliaRL\_BasicDQN\_SingleRoomUndirected
 # cover: assets/JuliaRL_BasicDQN_SingleRoomUndirected.png
 # description: A simple example to demonstrate how to use environments in GridWorlds.jl
-# date: 2021-05-22
+# date: 2021-07-27
 # author: "[Siddharth Bhatia](https://github.com/Sid-Bhatia-0)"
 # ---
 
