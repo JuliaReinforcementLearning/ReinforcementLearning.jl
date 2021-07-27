@@ -135,20 +135,16 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
         a_sample = AC.actor(learner.rng, s; is_sampling=true)
         q_t[i, :] = AC.critic(vcat(s, a_sample))
     end
-    println(size(maximum(q_t, dims=1)))
 
     ps = Flux.params(AC)
     gs = gradient(ps) do
         # Critic loss
         q_input = vcat(s, a)
         qa_t = AC.critic(q_input)
-        println(size(qa_t))
-        @assert 1 == 2
+
         critic_loss = Flux.Losses.logitcrossentropy(qa_t, target)
         
-        a = atanh.(a)
         log_π = AC.actor(s, a)
-        
         
         # Actor loss
         if advantage_estimator == :max
@@ -158,17 +154,16 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
         else
             error("Wrong parameter.")
         end
-        println(size(advantage))
 
         if policy_improvement_mode == :binary
             actor_loss_coef = Float32.(advantage .> 0.0f0)
         elseif policy_improvement_mode == :exp
-            actor_loss_coef = clamp.(exp.(advantage ./ beta), 0, ratio_upper_bound)
+            actor_loss_coef = clamp.(exp.(advantage ./ beta), 0.0f0, ratio_upper_bound)
         else
             error("Wrong parameter.")
         end
 
-        actor_loss = mean(-log_π)
+        actor_loss = mean(-log_π .* Zygote.dropgrad(actor_loss_coef))
 
         ignore() do
             learner.actor_loss = actor_loss
@@ -206,7 +201,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
         # Critic loss
         q_t = AC.critic(s)
         qa_t = q_t[a]
-        critic_loss = Flux.Losses.mse(qa_t, target)
+        critic_loss = Flux.Losses.logitcrossentropy(qa_t, target)
         
         # Actor loss
         a_t = softmax(AC.actor(s))
@@ -222,12 +217,12 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
         if policy_improvement_mode == :binary
             actor_loss_coef = Float32.(advantage .> 0.0f0)
         elseif policy_improvement_mode == :exp
-            actor_loss_coef = clamp.(exp.(advantage ./ beta), 0, ratio_upper_bound)
+            actor_loss_coef = clamp.(exp.(advantage ./ beta), 0.0f0, ratio_upper_bound)
         else
             error("Wrong parameter.")
         end
 
-        actor_loss = mean(-log.(a_t[a]) .* actor_loss_coef)
+        actor_loss = mean(-log.(a_t[a]) .* Zygote.dropgrad(actor_loss_coef))
 
         ignore() do
             learner.actor_loss = actor_loss

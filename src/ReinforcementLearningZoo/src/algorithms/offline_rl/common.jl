@@ -73,7 +73,6 @@ function StatsBase.sample(rng::AbstractRNG, dataset::Vector{T}, batch_size::Int)
         push!(r, data.reward)
         push!(t, data.terminal)
     end
-    #a = reshape(a, :, batch_size)
     batch = NamedTuple{SARTS}((s, a, r, t, s′))
     inds, batch
 end
