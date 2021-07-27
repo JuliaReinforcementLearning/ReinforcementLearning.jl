@@ -2,7 +2,7 @@ using Random
 using StableRNGs
 using HDF5
 
-import Base: iterate
+import Base: iterate, length, IteratorEltype
 
 export dataset
 export SARTS
@@ -16,10 +16,11 @@ const SART = (:state, :action, :reward, :terminals)
 struct D4RLDataSet{T<:AbstractRNG}
     dataset::Dict{Symbol, Any}
     size::Int
-    rng::T
     batch_size::Int64
     style::Tuple
+    rng::T
     meta::Dict
+    is_shuffle::Bool
 end
 
 # haven't included all the functionality like is_sequential, will be implemented soon
@@ -87,43 +88,47 @@ function dataset(dataset::String;
             meta[key] = data[key]
         end
     end
-    
-    if is_shuffle
-        # shuffle (try to incorporate multi threading in this)
-        inds = shuffle(rng, 1:N_samples)
-        
-        for key in keys(dataset)
-            dims = size(dataset[key])
-            if length(dims) != 1
-                dataset[key] = @view dataset[key][:, inds]
-            else
-                dataset[key] = @view dataset[key][inds]
-            end
-        end
-    end
 
-    return D4RLDataSet(dataset, N_samples, rng, batch_size, style, meta)
+    return D4RLDataSet(dataset, N_samples, batch_size, style, rng, meta, is_shuffle)
 
 end
 
-# making D4RLDataSet iterable
-# temporary workaround for maintaining reproducibility (using seeds)
-function iterate(ds::D4RLDataSet)
+function iterate(ds::D4RLDataSet, state = 0)
     rng = ds.rng
+    batch_size = ds.batch_size
+    size = ds.size
+    is_shuffle = ds.is_shuffle
+    style = ds.style
+
     # check return for dataset that is not shuffled dataset
-    inds = rand(rng, 1:ds.size, ds.batch_size)
+    if is_shuffle
+        inds = rand(rng, 1:size, batch_size)
+    else
+        if (state+1) * batch_size <= size
+            inds = state*batch_size+1:(state+1)*batch_size
+        else
+            return nothing
+        end
+        state += 1
+    end
 
     batch = (state = copy(ds.dataset[:state][:, inds]),
     action = copy(ds.dataset[:action][:, inds]),
     reward = copy(ds.dataset[:reward][inds]),
     terminal = copy(ds.dataset[:terminal][inds]))
 
-    if ds.style == SARTS
+    if style == SARTS
         batch = merge(batch, (next_state = copy(ds.dataset[:next_state][:, inds]),))
     end
     
-    return batch
+    return batch, state
 end
+
+
+take(ds::D4RLDataSet, n::Integer) = take(ds.dataset, n)
+length(ds::D4RLDataSet) = ds.size
+IteratorEltype(::Type{D4RLDataSet}) = EltypeUnknown() # see if eltype can be known (not sure about carla and adroit)
+
 
 function verify(data::Dict{String, Any})
     for key in ["observations", "actions", "rewards", "terminals"]
