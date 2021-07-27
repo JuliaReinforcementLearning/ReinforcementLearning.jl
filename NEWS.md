@@ -15,6 +15,8 @@
 - Add some extra keyword parameters for `BehaviorCloningPolicy` to use it
   online. [#390](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/390)
 
+### ReinforcementLearningDatasets.jl
+
 ## ReinforcementLearning.jl@v0.9.0
 
 ### ReinforcementLearningBase.jl

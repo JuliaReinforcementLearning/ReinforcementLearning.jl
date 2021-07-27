@@ -59,7 +59,8 @@ jobs:
             Pkg.test("ReinforcementLearningEnvironments")
             Pkg.test("ReinforcementLearningZoo")
             Pkg.test("ReinforcementLearning")
-            Pkg.test("ReinforcementLearningExperiments")'
+            Pkg.test("ReinforcementLearningExperiments")
+            Pkg.test("ReinforcementLearningDatasets")'
   docs:
     name: Documentation
     runs-on: ubuntu-latest
