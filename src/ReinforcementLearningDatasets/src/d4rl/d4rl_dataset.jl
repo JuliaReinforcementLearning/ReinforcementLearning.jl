@@ -85,11 +85,6 @@ function dataset(dataset::String;
             dataset[d_key] = data[key]
     end
     
-    if style == SARTS
-        dataset[:next_state] = @view data["observations"][:, 2:N_samples]
-        dataset[:next_state] = cat(dataset[:next_state], data["observations"][:, 1]; dims = 2)
-    end
-    
     for key in keys(data)
         if !(key in ["observations", "actions", "rewards", "terminals"])
             meta[key] = data[key]
@@ -109,6 +104,7 @@ function iterate(ds::D4RLDataSet, state = 0)
 
     if is_shuffle
         inds = rand(rng, 1:size, batch_size)
+        map((x)-> if x <= size x else 1 end, inds)
     else
         if (state+1) * batch_size <= size
             inds = state*batch_size+1:(state+1)*batch_size
@@ -124,7 +120,7 @@ function iterate(ds::D4RLDataSet, state = 0)
     terminal = copy(ds.dataset[:terminal][inds]))
 
     if style == SARTS
-        batch = merge(batch, (next_state = copy(ds.dataset[:next_state][:, inds]),))
+        batch = merge(batch, (next_state = copy(ds.dataset[:state][:, (1).+(inds)]),))
     end
     
     return batch, state

@@ -107,11 +107,11 @@ end
     @test data_dict[:action][:, 1:batch_size] == iter1[:action]
     @test data_dict[:reward][1:batch_size] == iter1[:reward]
     @test data_dict[:terminal][1:batch_size] == iter1[:terminal]
-    @test data_dict[:next_state][:, 1:batch_size] == iter1[:next_state]
+    @test data_dict[:state][:, 2:batch_size+1] == iter1[:next_state]
 
     @test data_dict[:state][:, batch_size+1:batch_size*2] == iter2[:state]
     @test data_dict[:action][:, batch_size+1:batch_size*2] == iter2[:action]
     @test data_dict[:reward][batch_size+1:batch_size*2] == iter2[:reward]
     @test data_dict[:terminal][batch_size+1:batch_size*2] == iter2[:terminal]
-    @test data_dict[:next_state][:, batch_size+1:batch_size*2] == iter2[:next_state]
+    @test data_dict[:state][:, batch_size+2:batch_size*2+1] == iter2[:next_state]
 end
