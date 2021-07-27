@@ -21,7 +21,7 @@ Represents a iterable dataset from d4rl with the following fields:
 `style`: Tuple, the type of the NamedTuple, for now SARTS and SART is supported.
 `rng`<: AbstractRNG.
 `meta`: Dict, the metadata provided along with the dataset
-`is_shuffle`: Bool, determines if the batches retuned by `iterate` are shuffled.
+`is_shuffle`: Bool, determines if the batches returned by `iterate` are shuffled.
 """
 struct D4RLDataSet{T<:AbstractRNG}
     dataset::Dict{Symbol, Any}
