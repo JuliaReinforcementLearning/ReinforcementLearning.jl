@@ -1,18 +1,26 @@
+<!-- ```@raw html -->
 <div align="center">
   <p>
   <img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/logo.svg?sanitize=true" width="320px">
   </p>
-
+  
+  <p>
+  <a href="https://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast">"Make It Work Make It Right Make It Fast"</a>
+  </p>
+  
   <p>
   <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/actions?query=workflow%3ACI"><img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/workflows/CI/badge.svg"></a>
   <a href="https://juliahub.com/ui/Packages/ReinforcementLearning/6l2TO"><img src="https://juliahub.com/docs/ReinforcementLearning/pkgeval.svg"></a>
   <a href="https://juliahub.com/ui/Packages/ReinforcementLearning/6l2TO"><img src="https://juliahub.com/docs/ReinforcementLearning/version.svg"></a>
   <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/LICENSE.md"><img src="http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat"></a>
-  <a href="https://julialang.org/slack/"><img src=https://img.shields.io/badge/Chat%20on%20Slack-%23reinforcement--learnin-ff69b4"></a>
+  <a href="https://julialang.org/slack/"><img src="https://img.shields.io/badge/Chat%20on%20Slack-%23reinforcement--learnin-ff69b4"></a>
   <a href="https://github.com/SciML/ColPrac"><img src="https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet"></a>
   </p>
 
 </div>
+<!-- ``` -->
+
+---
 
 [**ReinforcementLearning.jl**](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl),
 as the name says, is a package for reinforcement learning research in Julia.
@@ -27,70 +35,123 @@ Our design principles are:
   methods to modern deep reinforcement learning algorithms.
   
 
-## Get Started
+## 🏹 Get Started
 
 ```julia
 julia> ] add ReinforcementLearning
 
 julia> using ReinforcementLearning
 
-julia> run(E`JuliaRL_BasicDQN_CartPole`)
+julia> run(
+           RandomPolicy(),
+           CartPoleEnv(),
+           StopAfterStep(1_000),
+           TotalRewardPerEpisode()
+       )
 ```
 
-Check out the [Get Started](https://juliareinforcementlearning.org/get_started/) page for a detailed explanation. The underlying design decisions and implementation details are documented in this [blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/).
+The above simple example demonstrates four core components in a general
+reinforcement learning experiment:
 
-## Project Structure
+- **Policy**. The
+  [`RandomPolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.RandomPolicy)
+  is the simplest instance of
+  [`AbstractPolicy`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.AbstractPolicy).
+  It generates a random action at each step.
 
-`ReinforcementLearning.jl` itself is just a wrapper around several other packages inside the [JuliaReinforcementLearning](https://github.com/JuliaReinforcementLearning) org. The relationship between different packages is described below:
+- **Environment**. The
+  [`CartPoleEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.CartPoleEnv-Tuple{})
+  is a typical
+  [`AbstractEnv`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.AbstractEnv)
+  to test reinforcement learning algorithms.
 
-```
-+-----------------------------------------------------------------------------------+
+- **Stop Condition**. The
+  [`StopAfterStep(1_000)`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.StopAfterStep)
+  is to inform that our experiment should stop after
+  `1_000` steps.
+
+- **Hook**. The
+  [`TotalRewardPerEpisode`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.TotalRewardPerEpisode)
+  structure is one of the most common
+  [`AbstractHook`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.AbstractHook)s.
+  It is used to collect the total reward of each episode in an experiment.
+
+Check out the [tutorial](https://juliareinforcementlearning.org/docs/tutorial/) page to learn how these four
+components are assembled together to solve many interesting problems. We also
+write [blog](https://juliareinforcementlearning.org/blog/) occasionally to
+explain the implementation details of some algorithms. Among them, the most
+recommended one is [*An Introduction to
+ReinforcementLearning.jl*](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/),
+which explains the design idea of this package. Besides, a collection of
+[experiments](https://juliareinforcementlearning.org/docs/experiments/) are also provided to help you understand how to train
+or evaluate policies, tune parameters, log intermediate data, load or save
+parameters, plot results and record videos. For example:
+
+<!-- ```@raw html -->
+<img
+src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true"
+width="600px">
+
+<!--
+
+## 🙋 Why ReinforcementLearning.jl?
+
+### 🚀 Fast Speed
+
+[TODO:]
+
+### 🧰 Feature Rich
+
+[TODO:]
+
+-->
+
+<!-- ``` -->
+
+## 🌲 Project Structure
+
+`ReinforcementLearning.jl` itself is just a wrapper around several other
+subpackages. The relationship between them is depicted below:
+
+<!-- ```@raw html -->
+<pre>+-----------------------------------------------------------------------------------+
 |                                                                                   |
-|  ReinforcementLearning.jl                                                         |
+|  <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl">ReinforcementLearning.jl</a>                                                         |
 |                                                                                   |
 |      +------------------------------+                                             |
-|      | ReinforcementLearningBase.jl |                                             |
+|      | <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningBase">ReinforcementLearningBase.jl</a> |                                             |
 |      +----|-------------------------+                                             |
 |           |                                                                       |
 |           |     +--------------------------------------+                          |
-|           +---->+ ReinforcementLearningEnvironments.jl |                          |
+|           +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningEnvironments">ReinforcementLearningEnvironments.jl</a> |                          |
 |           |     +--------------------------------------+                          |
 |           |                                                                       |
 |           |     +------------------------------+                                  |
-|           +---->+ ReinforcementLearningCore.jl |                                  |
+|           +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningCore">ReinforcementLearningCore.jl</a> |                                  |
 |                 +----|-------------------------+                                  |
 |                      |                                                            |
 |                      |     +-----------------------------+                        |
-|                      +---->+ ReinforcementLearningZoo.jl |                        |
+|                      +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningZoo">ReinforcementLearningZoo.jl</a> |                        |
 |                            +----|------------------------+                        |
 |                                 |                                                 |
 |                                 |     +-------------------------------------+     |
-|                                 +---->+ DistributedReinforcementLearning.jl |     |
+|                                 +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/DistributedReinforcementLearning.jl">DistributedReinforcementLearning.jl</a> |     |
 |                                       +-------------------------------------+     |
 |                                                                                   |
-+-----------------------------------------------------------------------------------+
-```
++------|----------------------------------------------------------------------------+
+       |
+       |     +-------------------------------------+
+       +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningExperiments">ReinforcementLearningExperiments.jl</a> |
+       |     +-------------------------------------+
+       |
+       |     +----------------------------------------+
+       +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl">ReinforcementLearningAnIntroduction.jl</a> |
+             +----------------------------------------+
 
-### Scope of Each Package
+</pre>
+<!-- ``` -->
 
-- [ReinforcementLearningBase.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl)
-  Two main concepts in reinforcement learning are precisely defined here: **Policy**
-  and **Environment**.
-- [ReinforcementLearningEnvironments.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningEnvironments.jl)
-  Typical environment examples in pure Julia and wrappers for 3-rd party
-  environments are provided in this package.
-- [ReinforcementLearningCore.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl)
-  Common utility functions and different layers of abstractions are contained in
-  this package.
-- [ReinforcementLearningZoo.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl)
-  Common reinforcement learning algorithms and their typical applications (aka
-  `Experiment`s) are collected in this package.
-- [DistributedReinforcementLearning.jl](https://github.com/JuliaReinforcementLearning/DistributedReinforcementLearning.jl)
-  This package is still experimental and is not included in
-  `ReinforcementLearning.jl` yet. Its goal is to extend some algorithms in
-  `ReinforcementLearningZoo.jl` to apply them in distributed computing systems.
-
-## Supporting 🖖
+## 🖖 Supporting
 
 `ReinforcementLearning.jl` is a MIT licensed open source project with its
 ongoing development made possible by many contributors in their spare time.
@@ -99,24 +160,17 @@ resource, which is unaffordable for individual contributors. So if you or your
 organization could provide the computing resource in some degree and would like
 to cooperate in some way, please contact us!
 
-## Citing
+## ✍️ Citing
 
 If you use `ReinforcementLearning.jl` in a scientific publication, we would
-appreciate references to the following BibTex entry:
+appreciate references to the [CITATION.bib](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/CITATION.bib).
 
-```
-@misc{Tian2020Reinforcement,
-  author       = {Jun Tian and other contributors},
-  title        = {ReinforcementLearning.jl: A Reinforcement Learning Package for the Julia Language},
-  year         = 2020,
-  url          = {https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl}
-}
-```
-
-## Contributors ✨
+## ✨ Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
+<!-- ```@raw html -->
+<!-- cSpell:disable -->
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
@@ -145,13 +199,25 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://ritchielee.net"><img src="https://avatars.githubusercontent.com/u/7119868?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ritchie Lee</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Arcnlee" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/xiruizhao"><img src="https://avatars.githubusercontent.com/u/35286069?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Xirui Zhao</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=xiruizhao" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/metab0t"><img src="https://avatars.githubusercontent.com/u/10501166?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nerd</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=metab0t" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/albheim"><img src="https://avatars.githubusercontent.com/u/3112674?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Albin Heimerson</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=albheim" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/albheim"><img src="https://avatars.githubusercontent.com/u/3112674?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Albin Heimerson</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=albheim" title="Code">💻</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=albheim" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/michelangelo21"><img src="https://avatars.githubusercontent.com/u/49211663?v=4?s=100" width="100px;" alt=""/><br /><sub><b>michelangelo21</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Amichelangelo21" title="Bug reports">🐛</a></td>
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/pilgrimygy"><img src="https://avatars.githubusercontent.com/u/49673553?v=4?s=100" width="100px;" alt=""/><br /><sub><b>GuoYu Yang</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=pilgrimygy" title="Documentation">📖</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=pilgrimygy" title="Code">💻</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Apilgrimygy" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/Mobius1D"><img src="https://avatars.githubusercontent.com/u/49596933?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Prasidh Srikumar</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=Mobius1D" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/ilancoulon"><img src="https://avatars.githubusercontent.com/u/764934?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ilan Coulon</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=ilancoulon" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/JinraeKim"><img src="https://avatars.githubusercontent.com/u/43136096?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jinrae Kim</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=JinraeKim" title="Documentation">📖</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3AJinraeKim" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/luigiannelli"><img src="https://avatars.githubusercontent.com/u/24853508?v=4?s=100" width="100px;" alt=""/><br /><sub><b>luigiannelli</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Aluigiannelli" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/JBoerma"><img src="https://avatars.githubusercontent.com/u/7275916?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jacob Boerma</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=JBoerma" title="Code">💻</a></td>
+    <td align="center"><a href="http://gitlab.com/plut0n"><img src="https://avatars.githubusercontent.com/u/50026682?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Xavier Valcarce</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Aplu70n" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://ashwani-rathee.github.io/"><img src="https://avatars.githubusercontent.com/u/54855463?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ashwani Rathee</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=ashwani-rathee" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/jamblejoe"><img src="https://avatars.githubusercontent.com/u/12518354?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Goran Nakerst</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=jamblejoe" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/ultradian"><img src="https://avatars.githubusercontent.com/u/14141325?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ultradian</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=ultradian" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://bandism.net/"><img src="https://avatars.githubusercontent.com/u/22633385?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ikko Ashimine</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=eltociear" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/00krishna"><img src="https://avatars.githubusercontent.com/u/2063593?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Krishna Bhogaonker</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3A00krishna" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://www.is3.uni-koeln.de/de/team/doctoral-researchers/philipp-artur-kienscherf/"><img src="https://avatars.githubusercontent.com/u/44019953?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Philipp A. Kienscherf</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Apkienscherf" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
@@ -159,5 +225,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+<!-- cSpell:enable -->
+<!-- ``` -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!

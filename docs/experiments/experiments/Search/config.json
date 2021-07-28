@@ -1,0 +1,6 @@
+{
+  "description": "Searching related experiments.",
+  "order": [
+    "JuliaRL_Minimax_OpenSpiel.jl"
+  ]
+}

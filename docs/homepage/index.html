@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    {{ insert gtag.html }}
+
+    <title>JuliaReinforcementLearning</title>
+
+    <link rel="icon" href="/assets/site/logo.svg">
+    <link rel="stylesheet" href="/css/custom.css" />
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    {{insert nav.html}}
+    <div class="jumbotron jumbotron-fluid page-heading text-center">
+        <div class="container">
+            <img src="/assets/site/logo.svg" width="250px">
+            <h1> ReinforcementLearning.jl </h1>
+            <p class="text-muted"> A collection of tools for doing reinforcement learning research in Julia. </p>
+            <p>
+                <a class="github-button" href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl"
+                    data-icon="octicon-star" data-size="large" data-show-count="true"
+                    aria-label="Star JuliaLang/julia on GitHub">Star Us</a>
+            </p>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <div class="row key-feature">
+            <div class="col-md-12">
+                <h3 class="text-muted">Key Features &amp;<br>Capabilities</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3 col-md-6 col-sm-12 key-feature-box">
+                <h5>Easy experimentation</h5>
+                <p>Make it easy for new users to run benchmark experiments, compare different algorithms, evaluate and
+                    diagnose agents.</p>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-12 key-feature-box">
+                <h5>Reproducibility</h5>
+                <p>Facilitate reproducibility from traditional tabular methods to modern deep reinforcement learning
+                    algorithms.</p>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-12 key-feature-box">
+                <h5>Reusability and extensibility</h5>
+                <p>Provide elaborately designed components and interfaces to help users implement new algorithms.</p>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-12 key-feature-box">
+                <h5>Feature-rich Environments</h5>
+                <p>A number of built-in environments and third-party environment wrappers are provided to evaluate
+                    algorithms in various scenarios.</p>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <div class="row feature-section">
+            <div class="col-lg-7 col-md-6 ">
+                <div class="row">
+                    <div class="col-lg-1 col-md-0">
+                    </div>
+                    <div class="col-lg-10 col-md-12 text-center">
+                        <h3>Get Started in 3 lines!</h3>
+                        <p>ReinforcementLearning.jl is a wrapper package which contains a collection of different packages in
+                            the JuliaReinforcementLearning organization. You can simply run many built-in experiments in 3
+                            lines.</p>
+                        <a type="button" href="https://juliareinforcementlearning.org/docs/#Get-Started" class="btn btn-sm btn-outline-secondary">Get Started!</a>
+                    </div>
+                    <div class="col-lg-1 col-md-0">
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 col-md-6 mt-auto mb-auto">
+                <!-- HTML generated using hilite.me -->
+                <div style="background: #272822; overflow:auto;width:auto;padding:.8em .8em;border-radius:15px">
+                    <pre style="margin: 0; line-height: 125%"><span style="color: #06a313">julia&gt;</span> <span style="color: #f8f8f2">]</span> <span style="color: #f8f8f2">add</span> <span style="color: #f8f8f2">ReinforcementLearningExperiments</span>
+
+<span style="color: #06a313">julia&gt;</span> <span style="color: #66d9ef">using</span> <span style="color: #f8f8f2">ReinforcementLearningExperiments</span>
+
+<span style="color: #06a313">julia&gt;</span> <span style="color: #66d9ef">run</span><span style="color: #f8f8f2">(</span><span style="color: #ee18ee">E</span><span style="color: #e6db74">`JuliaRL_BasicDQN_CartPole`</span><span style="color: #f8f8f2">)</span>
+</pre>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <div class="row feature-section text-center">
+            <div class="col-lg-4 col-md-6">
+                <img src="/assets/site/RLIntro2Cover-min.jpg">
+            </div>
+            <div class="col-lg-8 col-md-6 mt-auto mb-auto">
+                <div class="row">
+                    <div class="col-lg-1 col-md-0"></div>
+                    <div class="col-lg-10 col-md-12">
+                        <h3>
+                            Tabular Reinforcement Learning
+                        </h3>
+                        <p>
+                            In ReinforcementLearningAnIntroduction.jl, we reproduced most figures in the famous book: <span
+                                style="font-style:italic">Reinforcement Learning: An Introduction (Second Edition)</span>.
+                            You can try those examples interactively online with the help of MyBinder and learn many tabular
+                            reinforcement learning algorithms.
+                        </p>
+                        <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl" type="button" class="btn btn-sm btn-outline-secondary">Learn Now!</a>
+                    </div>
+                    <div class="col-lg-1 col-md-0"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <div class="row feature-section text-center">
+            <div class="col-lg-8 col-md-6 mt-auto mb-auto">
+                <div class="row">
+                    <div class="col-lg-1 col-md-0"></div>
+                    <div class="col-lg-10 col-md-12">
+                        <h3>
+                            Deep Reinforcement Learning
+                        </h3>
+                        <p>
+                            In ReinforcementLearningZoo.jl, many deep reinforcement learning algorithms are implemented,
+                            including DQN, C51, Rainbow, IQN, A2C, PPO, DDPG, etc. All algorithms are written in a composable
+                            way, which make them easy to read, understand and extend.
+                        </p>
+                        <a href="https://juliareinforcementlearning.org/docs/experiments/" type="button" class="btn btn-sm btn-outline-secondary">Try Now!</a>
+                    </div>
+                    <div class="col-lg-1 col-md-0"></div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <img src="/assets/site/RLZoo.svg">
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Community</h2>
+            </div>
+            <div class="col-md-12">
+                <p class="h2-subheadline">Join the Julia Reinforcement Learning community to learn, contribute, and get
+                    your questions answered.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"> <svg class="octicon octicon-mark-github v-align-middle" height="32"
+                                viewBox="0 0 16 16" version="1.1" width="32" aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                    d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+                                </path>
+                            </svg> &nbsp; Github Issue/Pull Request</h5>
+                        <p class="card-text">Ask package usage questions, discuss designs and propose new features
+                            through github issues. Contributions through pull requests are warmly welcomed!</p>
+                        <a type="button" href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues" class="btn btn-sm btn-outline-secondary">Create an issue!</a>
+                        <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pulls" type="button" class="btn btn-sm btn-outline-secondary">Make a PR!</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><svg xmlns="http://www.w3.org/2000/svg" height="32"
+                                viewBox="0 -1 104 106">
+                                <defs>
+                                    <style>
+                                        .cls-1 {
+                                            fill: #231f20;
+                                        }
+
+                                        .cls-2 {
+                                            fill: #fff9ae;
+                                        }
+
+                                        .cls-3 {
+                                            fill: #00aeef;
+                                        }
+
+                                        .cls-4 {
+                                            fill: #00a94f;
+                                        }
+
+                                        .cls-5 {
+                                            fill: #f15d22;
+                                        }
+
+                                        .cls-6 {
+                                            fill: #e31b23;
+                                        }
+                                    </style>
+                                </defs>
+                                <title>Discourse_logo</title>
+                                <g id="Layer_2" data-name="Layer 2">
+                                    <g id="Layer_3" data-name="Layer 3">
+                                        <path class="cls-1"
+                                            d="M51.87,0C23.71,0,0,22.83,0,51c0,.91,0,52.81,0,52.81l51.86-.05c28.16,0,51-23.71,51-51.87S80,0,51.87,0Z" />
+                                        <path class="cls-2"
+                                            d="M52.37,19.74A31.62,31.62,0,0,0,24.58,66.41l-5.72,18.4L39.4,80.17a31.61,31.61,0,1,0,13-60.43Z" />
+                                        <path class="cls-3"
+                                            d="M77.45,32.12a31.6,31.6,0,0,1-38.05,48L18.86,84.82l20.91-2.47A31.6,31.6,0,0,0,77.45,32.12Z" />
+                                        <path class="cls-4"
+                                            d="M71.63,26.29A31.6,31.6,0,0,1,38.8,78L18.86,84.82,39.4,80.17A31.6,31.6,0,0,0,71.63,26.29Z" />
+                                        <path class="cls-5"
+                                            d="M26.47,67.11a31.61,31.61,0,0,1,51-35A31.61,31.61,0,0,0,24.58,66.41l-5.72,18.4Z" />
+                                        <path class="cls-6"
+                                            d="M24.58,66.41A31.61,31.61,0,0,1,71.63,26.29a31.61,31.61,0,0,0-49,39.63l-3.76,18.9Z" />
+                                    </g>
+                                </g>
+                            </svg> &nbsp;Julia Discourse/Slack &nbsp;<svg height="32"
+                                enable-background="new 0 0 2447.6 2452.5" viewBox="0 0 2447.6 2452.5"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <g clip-rule="evenodd" fill-rule="evenodd">
+                                    <path
+                                        d="m897.4 0c-135.3.1-244.8 109.9-244.7 245.2-.1 135.3 109.5 245.1 244.8 245.2h244.8v-245.1c.1-135.3-109.5-245.1-244.9-245.3.1 0 .1 0 0 0m0 654h-652.6c-135.3.1-244.9 109.9-244.8 245.2-.2 135.3 109.4 245.1 244.7 245.3h652.7c135.3-.1 244.9-109.9 244.8-245.2.1-135.4-109.5-245.2-244.8-245.3z"
+                                        fill="#36c5f0" />
+                                    <path
+                                        d="m2447.6 899.2c.1-135.3-109.5-245.1-244.8-245.2-135.3.1-244.9 109.9-244.8 245.2v245.3h244.8c135.3-.1 244.9-109.9 244.8-245.3zm-652.7 0v-654c.1-135.2-109.4-245-244.7-245.2-135.3.1-244.9 109.9-244.8 245.2v654c-.2 135.3 109.4 245.1 244.7 245.3 135.3-.1 244.9-109.9 244.8-245.3z"
+                                        fill="#2eb67d" />
+                                    <path
+                                        d="m1550.1 2452.5c135.3-.1 244.9-109.9 244.8-245.2.1-135.3-109.5-245.1-244.8-245.2h-244.8v245.2c-.1 135.2 109.5 245 244.8 245.2zm0-654.1h652.7c135.3-.1 244.9-109.9 244.8-245.2.2-135.3-109.4-245.1-244.7-245.3h-652.7c-135.3.1-244.9 109.9-244.8 245.2-.1 135.4 109.4 245.2 244.7 245.3z"
+                                        fill="#ecb22e" />
+                                    <path
+                                        d="m0 1553.2c-.1 135.3 109.5 245.1 244.8 245.2 135.3-.1 244.9-109.9 244.8-245.2v-245.2h-244.8c-135.3.1-244.9 109.9-244.8 245.2zm652.7 0v654c-.2 135.3 109.4 245.1 244.7 245.3 135.3-.1 244.9-109.9 244.8-245.2v-653.9c.2-135.3-109.4-245.1-244.7-245.3-135.4 0-244.9 109.8-244.8 245.1 0 0 0 .1 0 0"
+                                        fill="#e01e5a" />
+                                </g>
+                            </svg></h5>
+                        <p class="card-text">Ask general reinforcement learning related questions on Julia discourse in
+                            the #machinelearning domain, or on the Slack in #reinforcement-learnin channel.</p>
+                        <a href="https://discourse.julialang.org/c/domain/ML/24" type="button" class="btn btn-sm btn-outline-secondary">Ask on Discourse!</a>
+                        <a href="https://julialang.org/slack/" type="button" class="btn btn-sm btn-outline-secondary">Join Julia Slack!</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"> <svg xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" height="30" viewBox="0 0 325 300"
+                                version="1.1">
+                                <g id="surface91">
+                                    <path
+                                        style=" stroke:none;fill-rule:nonzero;fill:rgb(79.6%,23.5%,20%);fill-opacity:1;"
+                                        d="M 150.898438 225 C 150.898438 266.421875 117.320312 300 75.898438 300 C 34.476562 300 0.898438 266.421875 0.898438 225 C 0.898438 183.578125 34.476562 150 75.898438 150 C 117.320312 150 150.898438 183.578125 150.898438 225 " />
+                                    <path
+                                        style=" stroke:none;fill-rule:nonzero;fill:rgb(22%,59.6%,14.9%);fill-opacity:1;"
+                                        d="M 237.5 75 C 237.5 116.421875 203.921875 150 162.5 150 C 121.078125 150 87.5 116.421875 87.5 75 C 87.5 33.578125 121.078125 0 162.5 0 C 203.921875 0 237.5 33.578125 237.5 75 " />
+                                    <path
+                                        style=" stroke:none;fill-rule:nonzero;fill:rgb(58.4%,34.5%,69.8%);fill-opacity:1;"
+                                        d="M 324.101562 225 C 324.101562 266.421875 290.523438 300 249.101562 300 C 207.679688 300 174.101562 266.421875 174.101562 225 C 174.101562 183.578125 207.679688 150 249.101562 150 C 290.523438 150 324.101562 183.578125 324.101562 225 " />
+                                </g>
+                            </svg> &nbsp; Other Julia Packages</h5>
+                        <p class="card-text">
+                            <ul class="package-list">
+                                <li><a href="https://github.com/jonathan-laurent/AlphaZero.jl">AlphaZero.jl</a></li>
+                                <li><a href="https://github.com/JuliaPOMDP/DeepQLearning.jl">DeepQLearning.jl</a></li>
+                                <li><a href="https://github.com/mkschleg/DeepRL.jl">DeepRL.jl</a></li>
+                                <li><a href="https://github.com/JuliaML/Reinforce.jl">Reinforce.jl</a></li>
+                            </ul>
+                        </p>
+                        <a href="https://juliahub.com/ui/Packages?q=reinforce" type="button" class="btn btn-sm btn-outline-secondary">Find more packages on JuliaHub!</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{ insert foot.html }}
+</body>
+
+</html>
