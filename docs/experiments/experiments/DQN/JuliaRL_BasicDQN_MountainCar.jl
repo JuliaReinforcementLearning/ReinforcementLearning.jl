@@ -8,7 +8,6 @@
 
 #+ tangle=true
 using ReinforcementLearning
-using GridWorlds
 using StableRNGs
 using Flux
 using Flux.Losses

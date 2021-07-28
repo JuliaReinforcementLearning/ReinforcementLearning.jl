@@ -95,7 +95,9 @@
         "matryoshka",
         "rllib",
         "Thibaut",
-        "boxoban"
+        "boxoban",
+        "DATADEPS",
+        "umaze"
     ],
     "ignoreWords": [],
     "minWordLength": 5,

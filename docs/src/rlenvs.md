@@ -53,7 +53,7 @@
 | `GymEnv` | [PyCall.jl](https://github.com/JuliaPy/PyCall.jl) | |
 | `OpenSpielEnv` | [OpenSpiel.jl](https://github.com/JuliaReinforcementLearning/OpenSpiel.jl) | |
 | `SnakeGameEnv` | [SnakeGames.jl](https://github.com/JuliaReinforcementLearning/SnakeGames.jl) | `SingleAgent`/`Multi-Agent`, `FullActionSet`/`MinimalActionSet`|
-| [#list-of-environments](https://github.com/JuliaReinforcementLearning/GridWorlds.jl#list-of-environments) | [GridWorlds.jl](https://github.com/JuliaReinforcementLearning/GridWorlds.jl) | Environments in this package use the interfaces defined in `RLBae` directly |
+| [#list-of-environments](https://github.com/JuliaReinforcementLearning/GridWorlds.jl#list-of-environments) | [GridWorlds.jl](https://github.com/JuliaReinforcementLearning/GridWorlds.jl) | Environments in this package support the interfaces defined in `RLBase` |
 
 
 ```@autodocs
