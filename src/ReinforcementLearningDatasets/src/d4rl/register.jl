@@ -1,13 +1,13 @@
-export DATASET_URLS
-export REF_MAX_SCORE
-export REF_MIN_SCORE
+export D4RL_DATASET_URLS
+export D4RL_REF_MAX_SCORE
+export D4RL_REF_MIN_SCORE
 
 """
 This file holds the registration information for d4rl datasets.
 It also registers the information in DataDeps for further use in this package.
 """
 
-const DATASET_URLS = Dict{String, String}(
+const D4RL_DATASET_URLS = Dict{String, String}(
     "maze2d-open-v0" => "http://rail.eecs.berkeley.edu/datasets/offline_rl/maze2d/maze2d-open-sparse.hdf5",
     "maze2d-umaze-v1" => "http://rail.eecs.berkeley.edu/datasets/offline_rl/maze2d/maze2d-umaze-sparse-v1.hdf5",
     "maze2d-medium-v1" => "http://rail.eecs.berkeley.edu/datasets/offline_rl/maze2d/maze2d-medium-sparse-v1.hdf5",
@@ -100,7 +100,7 @@ const DATASET_URLS = Dict{String, String}(
 )
 
 
-const REF_MIN_SCORE = Dict{String, Float32}(
+const D4RL_REF_MIN_SCORE = Dict{String, Float32}(
     "maze2d-open-v0" => 0.01 ,
     "maze2d-umaze-v1" => 23.85 ,
     "maze2d-medium-v1" => 13.13 ,
@@ -184,7 +184,7 @@ const REF_MIN_SCORE = Dict{String, Float32}(
     "bullet-maze2d-large-v0"=> 1.820000,
 )
 
-const REF_MAX_SCORE = Dict{String, Float32}(
+const D4RL_REF_MAX_SCORE = Dict{String, Float32}(
     "maze2d-open-v0" => 20.66 ,
     "maze2d-umaze-v1" => 161.86 ,
     "maze2d-medium-v1" => 277.39 ,
@@ -269,13 +269,13 @@ const REF_MAX_SCORE = Dict{String, Float32}(
 )
 
 # give a prompt for flow and carla tasks
-# add checksums
 
-function __init__()
-    for ds in keys(DATASET_URLS)
+function d4rl_init()
+    repo = "d4rl"
+    for ds in keys(D4RL_DATASET_URLS)
         register(
             DataDep(
-                "d4rl-" * ds,
+                repo*"-"* ds,
                 """
                 Credits: https://arxiv.org/abs/2004.07219
                 The following dataset is fetched from the d4rl. 
@@ -283,10 +283,10 @@ function __init__()
                 
                 Dataset information: 
                 Name: $(ds)
-                $(if ds in keys(REF_MAX_SCORE) "MAXIMUM_SCORE: " * string(REF_MAX_SCORE[ds]) end)
-                $(if ds in keys(REF_MIN_SCORE) "MINIMUM_SCORE: " * string(REF_MIN_SCORE[ds]) end) 
+                $(if ds in keys(D4RL_REF_MAX_SCORE) "MAXIMUM_SCORE: " * string(D4RL_REF_MAX_SCORE[ds]) end)
+                $(if ds in keys(D4RL_REF_MIN_SCORE) "MINIMUM_SCORE: " * string(D4RL_REF_MIN_SCORE[ds]) end) 
                 """, #check if the MAX and MIN score part is even necessary and make the log file prettier
-                DATASET_URLS[ds],
+                D4RL_DATASET_URLS[ds],
             )
         )
     end
