@@ -15,6 +15,13 @@
 - Add some extra keyword parameters for `BehaviorCloningPolicy` to use it
   online. [#390](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/390)
 
+### ReinforcementLearningDatasets.jl
+
+#### v0.1.0
+
+- Add functionality for fetching d4rl datasets as an iterable D4RLDataSet. Credits: https://arxiv.org/abs/2004.07219
+- Uses DataDeps for data dependency management.
+
 ## ReinforcementLearning.jl@v0.9.0
 
 ### ReinforcementLearningBase.jl
