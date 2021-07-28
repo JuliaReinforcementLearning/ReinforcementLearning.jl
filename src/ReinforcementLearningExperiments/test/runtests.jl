@@ -20,4 +20,4 @@ run(E`JuliaRL_SAC_Pendulum`)
 run(E`JuliaRL_TD3_Pendulum`)
 run(E`JuliaRL_PPO_Pendulum`)
 
-run(E`JuliaRL_BasicDQN_EmptyRoom`)
+run(E`JuliaRL_BasicDQN_SingleRoomUndirected`)

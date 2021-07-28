@@ -462,7 +462,7 @@ version = "0.8.2"
 deps = ["IntervalSets", "MacroTools", "Markdown", "Random", "ReinforcementLearningBase", "Requires", "StatsBase"]
 path = "src/ReinforcementLearningEnvironments"
 uuid = "25e41dd2-4622-11e9-1641-f1adca772921"
-version = "0.6.1"
+version = "0.6.2"
 
 [[ReinforcementLearningZoo]]
 deps = ["AbstractTrees", "CUDA", "CircularArrayBuffers", "DataStructures", "Dates", "Distributions", "Flux", "IntervalSets", "LinearAlgebra", "Logging", "MacroTools", "Random", "ReinforcementLearningBase", "ReinforcementLearningCore", "Setfield", "Statistics", "StatsBase", "StructArrays", "Zygote"]

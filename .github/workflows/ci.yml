@@ -51,6 +51,7 @@ jobs:
             Pkg.develop(path="src/ReinforcementLearningCore")
             Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.develop(path="src/ReinforcementLearningZoo")
+            Pkg.develop(path="src/ReinforcementLearningDatasets")
             Pkg.develop(path=".")
             Pkg.develop(path="src/ReinforcementLearningExperiments")
             Pkg.build("ReinforcementLearningExperiments")
@@ -59,7 +60,8 @@ jobs:
             Pkg.test("ReinforcementLearningEnvironments")
             Pkg.test("ReinforcementLearningZoo")
             Pkg.test("ReinforcementLearning")
-            Pkg.test("ReinforcementLearningExperiments")'
+            Pkg.test("ReinforcementLearningExperiments")
+            Pkg.test("ReinforcementLearningDatasets")'
   docs:
     name: Documentation
     runs-on: ubuntu-latest
