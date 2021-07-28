@@ -19,7 +19,8 @@
 
 #### v0.1.0
 
-- Add functionality for fetching d4rl datasets as an iterable D4RLDataSet. Credits: https://arxiv.org/abs/2004.07219
+- Add functionality for fetching d4rl datasets as an iterable DataSet. Credits: https://arxiv.org/abs/2004.07219
+- This supports d4rl and d4rl-pybullet datasets.
 - Uses DataDeps for data dependency management.
 
 ## ReinforcementLearning.jl@v0.9.0
