@@ -96,8 +96,7 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=fal
         π_dist = Normal.(μ, exp.(logσ))
         z = rand.(rng, π_dist)
         if is_return_log_prob
-            logp_π = sum(logpdf.(π_dist, z), dims = 1)
-            logp_π .-= sum((2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
+            logp_π = sum(logpdf.(π_dist, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
             return tanh.(z), logp_π
         else
             return tanh.(z)
