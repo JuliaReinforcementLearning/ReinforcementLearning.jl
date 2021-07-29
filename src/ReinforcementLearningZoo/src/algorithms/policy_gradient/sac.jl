@@ -50,7 +50,7 @@ end
 - `update_every = 50`,
 - `automatic_entropy_tuning::Bool = false`, whether to automatically tune the entropy.
 - `lr_alpha::Float32 = 0.003f0`, learning rate of tuning entropy.
-- `action_dims = 0`, the dimension of the action. if `automatic_entropy_tuning = true`, must enter this parameter.
+- `action_dims = 0`, the dimensionality of the action. if `automatic_entropy_tuning = true`, must enter this parameter.
 - `step = 0`,
 - `rng = Random.GLOBAL_RNG`,
 
@@ -161,7 +161,7 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
     end
     update!(p.qnetwork1, q_grad_1)
     q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
-        q2 = p.qnetwork1(q_input) |> vec
+        q2 = p.qnetwork2(q_input) |> vec
         mse(q2, y)
     end
     update!(p.qnetwork2, q_grad_2)

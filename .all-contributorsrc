@@ -328,6 +328,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "Krastanov",
+      "name": "Stefan Krastanov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/705248?v=4",
+      "profile": "http://blog.krastanov.org/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

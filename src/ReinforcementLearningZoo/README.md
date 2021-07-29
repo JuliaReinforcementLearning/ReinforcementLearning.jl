@@ -4,14 +4,6 @@
 <p>― <a href="https://wiki.c2.com/?KentBeck">KentBeck</a></p>
 </div>
 
-<hr>
-<p align="center">
-  <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl/actions?query=workflow%3ACI">
-  <img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearningZoo.jl/workflows/CI/badge.svg">
-  </a>
-</p>
-
-
 This project aims to provide some implementations of the most typical reinforcement learning algorithms.
 
 # Algorithms Implemented
