@@ -181,7 +181,7 @@ function Base.run(policy, env, stop_condition, hook)
 end
 ```
 
-Except for some corner cases, the code above is very close to [our implementation](https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl/blob/master/src/core/run.jl).
+Except for some corner cases, the code above is very close to [our implementation](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/core/run.jl).
 
 ### 2.2 Trajectory
 
