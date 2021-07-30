@@ -50,7 +50,7 @@ end
 - `update_every = 50`,
 - `automatic_entropy_tuning::Bool = false`, whether to automatically tune the entropy.
 - `lr_alpha::Float32 = 0.003f0`, learning rate of tuning entropy.
-- `action_dims = 0`, the dimension of the action. if `automatic_entropy_tuning = true`, must enter this parameter.
+- `action_dims = 0`, the dimensionality of the action. if `automatic_entropy_tuning = true`, must enter this parameter.
 - `step = 0`,
 - `rng = Random.GLOBAL_RNG`,
 
@@ -120,7 +120,7 @@ function (p::SACPolicy)(env)
         s = state(env)
         s = Flux.unsqueeze(s, ndims(s) + 1)
         # trainmode:
-        action = dropdims(p.policy.model(s; is_sampling=true, is_return_log_prob=true)[1], dims=2) # Single action vec, drop second dim
+        action = dropdims(p.policy.model(p.rng, s; is_sampling=true, is_return_log_prob=true)[1], dims=2) # Single action vec, drop second dim
 
         # testmode:
         # if testing dont sample an action, but act deterministically by
@@ -146,7 +146,7 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
 
     γ, τ, α = p.γ, p.τ, p.α
 
-    a′, log_π = p.policy.model(s′; is_sampling=true, is_return_log_prob=true)
+    a′, log_π = p.policy.model(p.rng, s′; is_sampling=true, is_return_log_prob=true)
     q′_input = vcat(s′, a′)
     q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
@@ -161,14 +161,14 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
     end
     update!(p.qnetwork1, q_grad_1)
     q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
-        q2 = p.qnetwork1(q_input) |> vec
+        q2 = p.qnetwork2(q_input) |> vec
         mse(q2, y)
     end
     update!(p.qnetwork2, q_grad_2)
 
     # Train Policy
     p_grad = gradient(Flux.params(p.policy)) do
-        a, log_π = p.policy.model(s; is_sampling=true, is_return_log_prob=true)
+        a, log_π = p.policy.model(p.rng, s; is_sampling=true, is_return_log_prob=true)
         q_input = vcat(s, a)
         q = min.(p.qnetwork1(q_input), p.qnetwork2(q_input))
         reward = mean(q)

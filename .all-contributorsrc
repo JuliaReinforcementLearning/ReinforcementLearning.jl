@@ -216,7 +216,8 @@
       "profile": "https://github.com/pilgrimygy",
       "contributions": [
         "doc",
-        "code"
+        "code",
+        "bug"
       ]
     },
     {
@@ -326,6 +327,15 @@
       "profile": "https://www.is3.uni-koeln.de/de/team/doctoral-researchers/philipp-artur-kienscherf/",
       "contributions": [
         "bug"
+      ]
+    },
+    {
+      "login": "Krastanov",
+      "name": "Stefan Krastanov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/705248?v=4",
+      "profile": "http://blog.krastanov.org/",
+      "contributions": [
+        "doc"
       ]
     }
   ],

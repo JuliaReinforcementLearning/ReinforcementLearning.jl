@@ -7,15 +7,16 @@ import Base: iterate, length, IteratorEltype
 export dataset
 export SARTS
 export SART
-export D4RLDataSet
+export DataSet
 
-const SARTS = (:state, :action, :reward, :terminals, :next_state)
-const SART = (:state, :action, :reward, :terminals)
+const SARTS = (:state, :action, :reward, :terminal, :next_state)
+const SART = (:state, :action, :reward, :terminal)
 
 """
-Represents a iterable dataset from d4rl with the following fields:
+Represents a iterable dataset with the following fields:
 
 `dataset`: Dict{Symbol, Any}, representation of the dataset as a Dictionary with style as `style`
+`repo`: String, the repository from which the dataset is taken
 `size`: Integer, the size of the dataset
 `batch_size`: Integer, the size of the batches returned by `iterate`.
 `style`: Tuple, the type of the NamedTuple, for now SARTS and SART is supported.
@@ -23,8 +24,9 @@ Represents a iterable dataset from d4rl with the following fields:
 `meta`: Dict, the metadata provided along with the dataset
 `is_shuffle`: Bool, determines if the batches returned by `iterate` are shuffled.
 """
-struct D4RLDataSet{T<:AbstractRNG}
+struct DataSet{T<:AbstractRNG}
     dataset::Dict{Symbol, Any}
+    repo::String
     size::Integer
     batch_size::Integer
     style::Tuple
@@ -39,11 +41,12 @@ end
 """
     dataset(dataset::String; style::Tuple, rng<:AbstractRNG, is_shuffle::Bool, max_iters::Int64, batch_size::Int64)
 
-Creates a dataset of enclosed in a D4RLDataSet type and other related metadata for the `dataset` that is passed.
-The dataset type is an iterable that fetches batches when used in a for loop for convenience during offline training.
+Creates a dataset of enclosed in a DataSet type and other related metadata for the `dataset` that is passed.
+The `DataSet` type is an iterable that fetches batches when used in a for loop for convenience during offline training.
 
-`dataset`: Name of the D4RLDataSet dataset.
-`style`: the style of the iterator and the Dict inside D4RLDataSet that is returned.
+`dataset`: Dict{Symbol, Any}, Name of the datset.
+`repo`: Name of the repository of the dataset.
+`style`: the style of the iterator and the Dict inside DataSet that is returned.
 `rng`: StableRNG
 `max_iters`: maximum number of iterations for the iterator.
 `is_shuffle`: whether the dataset is shuffled or not. `true` by default.
@@ -52,19 +55,20 @@ The dataset type is an iterable that fetches batches when used in a for loop for
 The returned type is an infinite iterator which can be called using `iterate` and will return batches as specified in the dataset.
 """
 function dataset(dataset::String;
-    style=SARTS, 
+    style=SARTS,
+    repo = "d4rl",
     rng = StableRNG(123), 
     is_shuffle = true, 
     batch_size=256
 )
     
     try 
-        @datadep_str "d4rl-"*dataset 
+        @datadep_str repo*"-"*dataset 
     catch 
         throw("The provided dataset is not available") 
     end
         
-    path = @datadep_str "d4rl-"*dataset
+    path = @datadep_str repo*"-"*dataset 
 
     @assert length(readdir(path)) == 1
     file_name = readdir(path)[1]
@@ -79,7 +83,7 @@ function dataset(dataset::String;
     dataset = Dict{Symbol, Any}()
     meta = Dict{String, Any}()
 
-    N_samples = size(data["terminals"])[1]
+    N_samples = size(data["observations"])[2]
     
     for (key, d_key) in zip(["observations", "actions", "rewards", "terminals"], Symbol.(["state", "action", "reward", "terminal"]))
             dataset[d_key] = data[key]
@@ -91,11 +95,11 @@ function dataset(dataset::String;
         end
     end
 
-    return D4RLDataSet(dataset, N_samples, batch_size, style, rng, meta, is_shuffle)
+    return DataSet(dataset, repo, N_samples, batch_size, style, rng, meta, is_shuffle)
 
 end
 
-function iterate(ds::D4RLDataSet, state = 0)
+function iterate(ds::DataSet, state = 0)
     rng = ds.rng
     batch_size = ds.batch_size
     size = ds.size
@@ -127,9 +131,9 @@ function iterate(ds::D4RLDataSet, state = 0)
 end
 
 
-take(ds::D4RLDataSet, n::Integer) = take(ds.dataset, n)
-length(ds::D4RLDataSet) = ds.size
-IteratorEltype(::Type{D4RLDataSet}) = EltypeUnknown() # see if eltype can be known (not sure about carla and adroit)
+take(ds::DataSet, n::Integer) = take(ds.dataset, n)
+length(ds::DataSet) = ds.size
+IteratorEltype(::Type{DataSet}) = EltypeUnknown() # see if eltype can be known (not sure about carla and adroit)
 
 
 function verify(data::Dict{String, Any})
@@ -137,6 +141,6 @@ function verify(data::Dict{String, Any})
         @assert (key in keys(data)) "Expected keys not present in data"
     end
     N_samples = size(data["observations"])[2]
-    @assert size(data["rewards"]) == (N_samples,)
-    @assert size(data["terminals"]) == (N_samples,)
+    @assert size(data["rewards"]) == (N_samples,) || size(data["rewards"]) == (1, N_samples)
+    @assert size(data["terminals"]) == (N_samples,) || size(data["terminals"]) == (1, N_samples)
 end

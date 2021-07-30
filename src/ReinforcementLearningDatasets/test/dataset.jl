@@ -1,13 +1,14 @@
 n_s = 11
 n_a = 3
-N_samples = 200919
 batch_size = 256
 style = SARTS
 rng = StableRNG(123)
 
-@testset "dataset_d4rl_shuffle" begin
+# TO-DO make functions to make tests modular and more widely applicable
+@testset "dataset_shuffle" begin
     ds = dataset(
         "hopper-medium-replay-v0";
+        repo="d4rl",
         style = style,
         rng = rng,
         is_shuffle = true,
@@ -15,18 +16,15 @@ rng = StableRNG(123)
     )
 
     data_dict = ds.dataset
+    N_samples = size(data_dict[:state])[2]
 
     @test size(data_dict[:state]) == (n_s, N_samples)
     @test size(data_dict[:action]) == (n_a, N_samples)
     @test size(data_dict[:reward]) == (N_samples,)
     @test size(data_dict[:terminal]) == (N_samples,)
 
-    i = 1
-
-    for sample in ds
-        if i > 5 break end
+    for sample in Iterators.take(ds, 3)
         @test typeof(sample) <: NamedTuple
-        i += 1
     end
 
     sample1 = iterate(ds)
@@ -42,7 +40,7 @@ rng = StableRNG(123)
     @test length(iters) == 2
 
     for iter in iters
-        @test typeof(iter) <: NamedTuple
+        @test typeof(iter) <: NamedTuple{SARTS}
     end
 
     @test iter1 != iter2
@@ -54,7 +52,7 @@ rng = StableRNG(123)
 
 end
 
-@testset "dataset_d4rl" begin
+@testset "dataset" begin
     ds = dataset(
         "hopper-medium-replay-v0";
         style = style,
@@ -63,20 +61,16 @@ end
         batch_size = batch_size
     )
 
-
     data_dict = ds.dataset
+    N_samples = size(data_dict[:state])[2]
 
     @test size(data_dict[:state]) == (n_s, N_samples)
     @test size(data_dict[:action]) == (n_a, N_samples)
     @test size(data_dict[:reward]) == (N_samples,)
     @test size(data_dict[:terminal]) == (N_samples,)
 
-    i = 1
-
-    for sample in ds
-        if i > 5 break end
-        @test typeof(sample) <: NamedTuple
-        i += 1
+    for sample in Iterators.take(ds, 3)
+        @test typeof(sample) <: NamedTuple{SARTS}
     end
 
     sample1 = iterate(ds)

@@ -97,7 +97,8 @@
         "Thibaut",
         "boxoban",
         "DATADEPS",
-        "umaze"
+        "umaze",
+        "pybullet"
     ],
     "ignoreWords": [],
     "minWordLength": 5,

@@ -1,5 +1,5 @@
 @doc """
-[ReinforcementLearningBase.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl)
+[ReinforcementLearningBase.jl](https://juliareinforcementlearning.org/docs/rlbase/)
 (**RLBase**) provides some common constants, traits, abstractions and interfaces
 in developing reinforcement learning algorithms in Julia. 
 
