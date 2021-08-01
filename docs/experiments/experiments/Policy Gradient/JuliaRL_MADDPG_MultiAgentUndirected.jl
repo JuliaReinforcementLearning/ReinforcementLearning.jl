@@ -109,7 +109,6 @@ function RL.Experiment(
 end
 
 #+ tangle=false
-ENV["GKSwstype"]="nul"
 using Plots
 ex = E`JuliaRL_MADDPG_MultiAgentUndirected`
 run(ex)
