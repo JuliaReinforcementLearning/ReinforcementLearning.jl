@@ -1,34 +1,49 @@
 export MADDPGPolicy
 
+"""
+    MADDPGPolicy(; agents::Dict{<:Any, <:DDPGPolicy}, args...)
+
+Multi-agent Deep Deterministic Policy Gradient implemented in Julia. 
+See the paper https://arxiv.org/abs/1706.02275 for more details.
+
+# Keyword arguments
+
+- `agents::Dict{<:Any, <:DDPGPolicy}`
+- `batch_size::Int`
+- `update_after::Int`
+- `update_freq::Int`
+- `step_counter::Int`, count the step.
+- `rng::AbstractRNG`.
+"""
 mutable struct MADDPGPolicy <: AbstractPolicy
     agents::Dict{<:Any, <:DDPGPolicy}
     batch_size::Int
     update_after::Int
     update_freq::Int
-    step::Int
+    step_counter::Int
     rng::AbstractRNG
 end
 
 function (p::MADDPGPolicy)(env::AbstractEnv)
-    p.step += 1
+    p.step_counter += 1
     return [ceil(policy(env)) for policy in values(p.agents)]
 end
 
-function update!(
+function RLBase.update!(
     policy::MADDPGPolicy, 
     traj::AbstractTrajectory,
     ::AbstractEnv, 
     ::PreActStage,
     )
     length(traj) > policy.update_after || return
-    policy.step % policy.update_every == 0 || return
+    policy.step_counter % policy.update_freq == 0 || return
 
     _, batch = sample(policy.rng, traj, BatchSampler{SARTS}(policy.batch_size))
     _device = device(policy.agents[1])
     s, a, r, t, s′ = send_to_device(_device, batch)
 
-    mu_actions = vcat(p.behavior_actor(s) for p in values(policy.agents))
-    new_actions = vcat(p.target_actor(s′) for p in values(policy.agents))
+    mu_actions = vcat((p.behavior_actor(s) for p in values(policy.agents))...)
+    new_actions = vcat((p.target_actor(s′) for p in values(policy.agents))...)
 
     for p in values(policy.agents)
         A = p.behavior_actor
@@ -40,7 +55,7 @@ function update!(
         ρ = p.ρ
 
         qₜ = Cₜ(vcat(s′, new_actions)) |> vec
-        y = r .+ γ .* (1 .- t) .* qₜ # where r should be with respect ot specific agent
+        y = r .+ γ .* (1 .- t) .* qₜ # where r should be with respect to specific agent?
 
         gs1 = gradient(Flux.params(C)) do
             q = C(vcat(s, a)) |> vec

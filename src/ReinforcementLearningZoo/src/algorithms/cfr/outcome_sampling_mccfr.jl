@@ -49,7 +49,7 @@ function RLBase.update!(p::OutcomeSamplingMCCFRPolicy)
             m = v.mask
             strategy = zeros(length(m))
             strategy[m] .= v.cumulative_strategy ./ s
-            RLBase.update!(p.behavior_policy, k => strategy)
+            update!(p.behavior_policy, k => strategy)
         else
             # The TabularRandomPolicy will return uniform distribution by default. 
             # So we do nothing here.

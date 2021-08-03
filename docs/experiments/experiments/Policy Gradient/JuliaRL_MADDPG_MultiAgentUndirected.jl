@@ -94,7 +94,7 @@ function RL.Experiment(
         64, # batch_size
         1000, # update_after
         1, # update_freq
-        0, # step count
+        0, # step_counter
         rng),
         trajectory = CircularArraySARTTrajectory(
             capacity = 10000,
@@ -103,7 +103,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterEpisode(100_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterEpisode(10_000, is_show_progress=!haskey(ENV, "CI"))
     hook = StepRecorder(0, [])
     Experiment(agent, env, stop_condition, hook, "")
 end

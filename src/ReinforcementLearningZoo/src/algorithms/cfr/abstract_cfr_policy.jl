@@ -15,9 +15,9 @@ function Base.run(
     RLBase.reset!(env)
 
     while true
-        RLBase.update!(p, env)
+        update!(p, env)
         hook(POST_ACT_STAGE, p, env)
         stop_condition(p, env) && break
     end
-    RLBase.update!(p)
+    update!(p)
 end
