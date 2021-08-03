@@ -2,7 +2,6 @@
 Represents an iterable dataset of type AtariDataSet with the following fields:
 
 `dataset`: Dict{Symbol, Any}, representation of the dataset as a Dictionary with style as `style`
-`index`: Int, represents an init seed
 `epochs`: Vector{Int}, list of epochs to load
 `repo`: String, the repository from which the dataset is taken
 `size`: Integer, the size of the dataset
@@ -24,9 +23,8 @@ struct AtariDataSet{T<:AbstractRNG} <:RLDataSet
     is_shuffle::Bool
 end
 
-# TO-DO: include other functionality like is_sequential, will be implemented soon
-# TO-DO: enable the users providing their own paths to datasets if they already have it
-# TO-DO: add additional env arg to do complete verify function
+const samples_per_epoch = Int(1e6)
+
 """
     dataset(dataset::String, epochs::Vector{Int}; repo::String, style::Tuple, rng<:AbstractRNG, is_shuffle::Bool, max_iters::Int64, batch_size::Int64)
 
@@ -34,6 +32,7 @@ Creates a dataset of enclosed in a AtariDataSet type and other related metadata 
 The `AtariDataSet` type is an iterable that fetches batches when used in a for loop for convenience during offline training.
 
 `dataset`: String, name of the datset.
+`index`: Int, analogous to v
 `epochs`: Vector{Int}, list of epochs to load
 `repo`: Name of the repository of the dataset
 `style`: the style of the iterator and the Dict inside AtariDataSet that is returned.
@@ -66,7 +65,7 @@ function dataset(game::String,
     folder_name = readdir(path)[1]
     
     folder_path = "$path/$folder_name"
-    files = readdir(home_path)
+    files = readdir(folder_path)
     file_prefixes = map(x->join(split(x,"_")[1:2], "_"), files)
     set_file_prefixes = collect(Set(file_prefixes))
     fields = map(collect(set_file_prefixes)) do x
@@ -79,7 +78,7 @@ function dataset(game::String,
 
     s_epochs = Set(epochs)
     
-    dataset = Dict{Symbol, Any}()
+    dataset = Dict()
 
     for (prefix, field) in zip(set_file_prefixes, fields)
         for epoch in s_epochs
@@ -95,11 +94,11 @@ function dataset(game::String,
                 if field == "observation"
                     dataset[field] = cat(dataset[field], data, dims=3)
                 else
-                    dataset[field] = cat(dataset[field], data, dims=2)
+                    dataset[field] = cat(dataset[field], data, dims=1)
                 end
             else
                 dataset[field] = data
-            end    
+            end
         end
     end
 
@@ -107,16 +106,16 @@ function dataset(game::String,
 
     atari_verify(dataset, num_epochs) 
 
-    N_samples = size(data["observation"])[3]
+    N_samples = size(dataset["observation"])[3]
     
-    final_dataset = Dict{String, Any}()
+    final_dataset = Dict{Symbol, Any}()
     meta = Dict{String, Any}()
 
     for (key, d_key) in zip(["observation", "action", "reward", "terminal"], Symbol.(["state", "action", "reward", "terminal"]))
             final_dataset[d_key] = dataset[key]
     end
     
-    for key in keys(data)
+    for key in keys(dataset)
         if !(key in ["observation", "action", "reward", "terminal"])
             meta[key] = dataset[key]
         end
@@ -151,7 +150,7 @@ function iterate(ds::AtariDataSet, state = 0)
     terminal = copy(ds.dataset[:terminal][inds]))
 
     if style == SARTS
-        batch = merge(batch, (next_state = copy(ds.dataset[:state][:, (1).+(inds)]),))
+        batch = merge(batch, (next_state = copy(ds.dataset[:state][:, :, (1).+(inds)]),))
     end
     
     return batch, state
@@ -162,9 +161,9 @@ take(ds::AtariDataSet, n::Integer) = take(ds.dataset, n)
 length(ds::AtariDataSet) = ds.size
 IteratorEltype(::Type{AtariDataSet}) = EltypeUnknown() # see if eltype can be known (not sure about carla and adroit)
 
-function atari_verify(dataset::Dict{String, Any}, num_epochs::Int)
-    @assert size(dataset["observation"]) == (84, 84, num_epochs*Int(1e6))
-    @assert size(dataset["action"]) == (Int(1e6),)
-    @assert size(dataset["reward"]) == (Int(1e6),)
-    @assert size(dataset["terminal"]) == (Int(1e6),)
+function atari_verify(dataset::Dict, num_epochs::Int)
+    @assert size(dataset["observation"]) == (84, 84, num_epochs*samples_per_epoch)
+    @assert size(dataset["action"]) == (num_epochs * samples_per_epoch,)
+    @assert size(dataset["reward"]) == (num_epochs * samples_per_epoch,)
+    @assert size(dataset["terminal"]) == (num_epochs * samples_per_epoch,)
 end

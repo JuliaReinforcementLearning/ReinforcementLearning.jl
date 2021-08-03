@@ -12,6 +12,12 @@ Header{T}(descr::F, fortran_order, shape::NTuple{N,Int}) where {T,N,F} = Header{
 
 const Numpy2Julia = Dict{String, DataType}()
 
+const NPYMagic = UInt8[0x93, 'N', 'U', 'M', 'P', 'Y']
+const ZIPMagic = UInt8['P', 'K', 3, 4]
+const Version = UInt8[1, 0]
+
+const MaxMagicLen = maximum(length.([NPYMagic, ZIPMagic]))
+
 const TypeMaps = [
     ("b1", Bool),
     ("i1", Int8),
@@ -28,6 +34,8 @@ const TypeMaps = [
     ("c8", Complex{Float32}),
     ("c16", Complex{Float64}),
 ]
+
+readle(ios::IO, ::Type{T}) where T = ltoh(read(ios, T)) # ltoh is inverse of htol
 
 function parseheader(s::AbstractString)
     s = parsechar(s, '{')
