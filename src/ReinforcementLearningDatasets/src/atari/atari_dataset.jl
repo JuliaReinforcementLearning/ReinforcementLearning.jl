@@ -28,7 +28,7 @@ end
 # TO-DO: enable the users providing their own paths to datasets if they already have it
 # TO-DO: add additional env arg to do complete verify function
 """
-    atari_dataset(dataset::String, epochs::Vector{Int}; repo::String, style::Tuple, rng<:AbstractRNG, is_shuffle::Bool, max_iters::Int64, batch_size::Int64)
+    dataset(dataset::String, epochs::Vector{Int}; repo::String, style::Tuple, rng<:AbstractRNG, is_shuffle::Bool, max_iters::Int64, batch_size::Int64)
 
 Creates a dataset of enclosed in a AtariDataSet type and other related metadata for the `dataset` that is passed.
 The `AtariDataSet` type is an iterable that fetches batches when used in a for loop for convenience during offline training.
