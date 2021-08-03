@@ -1,7 +1,8 @@
 export ATARI_GAMES
+export atari_init
 
 const ATARI_GAMES = [
-    "adventure", "air-raid", "alien", "amidar", "assault", "asterix",
+    "air-raid", "alien", "amidar", "assault", "asterix",
     "asteroids", "atlantis", "bank-heist", "battle-zone", "beam-rider",
     "berzerk", "bowling", "boxing", "breakout", "carnival", "centipede",
     "chopper-command", "crazy-climber", "defender", "demon-attack",
@@ -23,6 +24,13 @@ function fetch_atari_ds(src, dest)
     return dest
 end
 
+function get_hash(game, index)
+    string = readchomp(`gsutil hash -h  "gs://atari-replay-datasets/dqn/$(titlecase(game))/$index/"`)
+    hash = split(string, "\t")[4][1:end-1]
+end
+
+game_name(game) = join(titlecase.(split(game, "-")))
+# use function to initialise atari
 function atari_init()
     for game in ATARI_GAMES
         for index in 1:5
@@ -44,8 +52,9 @@ function atari_init()
                     random initializations, and store all of the (state, action, reward, next state) tuples 
                     encountered during training into 5 replay datasets per game, resulting in a total of 300 datasets.
                     """,
-                    "gs://atari-replay-datasets/dqn/$(titlecase(game))/$index/replay_logs/";
-                    fetch_method = fetch_atari_ds
+                    "gs://atari-replay-datasets/dqn/$(game_name(game))/$index/replay_logs/";
+                    fetch_method = fetch_atari_ds,
+                    checksum = get_hash(game, index)
                 )
             )
         end
