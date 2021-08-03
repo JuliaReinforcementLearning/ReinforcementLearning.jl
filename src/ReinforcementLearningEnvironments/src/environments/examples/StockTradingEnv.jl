@@ -1,33 +1,42 @@
-export StockTradingEnv
+export StockTradingEnv, StockTradingEnvWithTurbulence
 
 using Pkg.Artifacts
 using DelimitedFiles
 using LinearAlgebra:dot
+using IntervalSets
 
-mutable struct StockTradingEnv <: AbstractEnv
-    turbulence_threshold::Float64
-    is_hard_reset::Bool
-    features::Matrix{Float64}
-    prices::Matrix{Float64}
-    turbulence::Vector{Float64}
-    initial_account_balance::Float64
-    day::Int
-    last_day::Int
-    daily_reward::Float32
-    state::Vector{Float32}
+function load_default_stock_data(s)
+    if s == "prices.csv" || s == "features.csv"
+        data, _ = readdlm(joinpath(artifact"stock_trading_data", s), ',', header=true)
+        collect(data')
+    elseif s == "turbulence.csv"
+        readdlm(joinpath(artifact"stock_trading_data", "turbulence.csv")) |> vec
+    else
+        @error "unknown dataset $s"
+    end
+end
+
+mutable struct StockTradingEnv{F<:AbstractMatrix{Float64}, P<:AbstractMatrix{Float64}} <: AbstractEnv
+    features::F
+    prices::P
     HMAX_NORMALIZE::Float32
     TRANSACTION_FEE_PERCENT::Float32
     REWARD_SCALING::Float32
+    initial_account_balance::Float32
+    state::Vector{Float32}
     total_cost::Float32
+    day::Int
+    first_day::Int
+    last_day::Int
+    daily_reward::Float32
 end
 
-function load_default_stock_trading_data()
-    turbulence = readdlm(joinpath(artifact"stock_trading_data", "turbulence.csv")) |> vec
-    prices, _ = readdlm(joinpath(artifact"stock_trading_data", "prices.csv"), ',', header=true)
-    features, _ = readdlm(joinpath(artifact"stock_trading_data", "features.csv"), ',', header=true)
-    # column major
-    collect(prices'), collect(features'), turbulence
-end
+_n_stocks(env::StockTradingEnv) = size(env.prices, 1)
+_prices(env::StockTradingEnv) = @view(env.state[2:1+_n_stocks(env)])
+_holds(env::StockTradingEnv) = @view(env.state[2+_n_stocks(env):_n_stocks(env)*2+1])
+_features(env::StockTradingEnv) = @view(env.state[_n_stocks(env)*2+2:end])
+_balance(env::StockTradingEnv) = @view env.state[1]
+_total_asset(env::StockTradingEnv) = env.state[1] + dot(_prices(env), _holds(env))
 
 """
     StockTradingEnv(;kw...)
@@ -36,96 +45,131 @@ This environment is originally provided in [Deep Reinforcement Learning for Auto
 
 # Keyword Arguments
 
-- `turbulence_threshold=140`, when turbulence is higher than a threshold, which
-  indicates extreme market conditions, simply halt buying and the trading agent
-  sells all shares.
-- `is_hard_reset::Bool=true`, if set to `true`, each `reset!` call will reset
-  the `asset` to the `initial_account_balance`.
 - `initial_account_balance=1_000_000`.
 """
 function StockTradingEnv(;
-    turbulence_threshold=140,
-    is_hard_reset=true,
-    initial_account_balance=1_000_000,
+    initial_account_balance=1_000_000f0,
     features=nothing,
     prices=nothing,
-    day=1,
+    first_day=nothing,
     last_day=nothing,
-    state=nothing,
-    HMAX_NORMALIZE = 100,
-    TRANSACTION_FEE_PERCENT = 0.001,
+    HMAX_NORMALIZE = 100f0,
+    TRANSACTION_FEE_PERCENT = 0.001f0,
     REWARD_SCALING = 1f-4
 )
-    if isnothing(features) && isnothing(prices)
-        prices, features, turbulence = load_default_stock_trading_data()
-    end
+    prices = isnothing(prices) ? load_default_stock_data("prices.csv") : prices
+    features = isnothing(features) ? load_default_stock_data("features.csv") : features
 
-    if isnothing(state)
-        state = zeros(Float32, 1 + size(prices, 1) * 2, size(features, 1))
-    end
+    @assert size(prices, 2) == size(features, 2)
 
-    if isnothing(last_day)
-        last_day = length(turbulence)
-    end
+    first_day = isnothing(first_day) ? 1 : first_day
+    last_day = isnothing(last_day) ? size(prices, 2) : last_day
+    day = first_day
 
-    StockTradingEnv(
-        turbulence_threshold,
-        is_hard_reset,
+    # [balance, stock_prices..., stock_holds..., features...]
+    state = zeros(Float32, 1 + size(prices, 1) * 2 + size(features, 1))
+
+    env = StockTradingEnv(
         features,
         prices,
-        turbulence,
-        initial_account_balance,
-        day,
-        last_day,
-        0.0,
-        state,
         HMAX_NORMALIZE,
         TRANSACTION_FEE_PERCENT,
+        REWARD_SCALING,
+        initial_account_balance,
+        state,
+        0f0,
+        day,
+        first_day,
+        last_day,
         0f0
     )
+
+    _balance(env)[] = initial_account_balance
+    _prices(env) .= @view prices[:, day]
+    _features(env) .= @view features[:, day]
+
+    env
 end
 
-n_stocks(env::StockTradingEnv) = size(env.prices, 1)
-prices(env::StockTradingEnv) = @view(env.state[2:1+n_stocks(env)])
-holds(env::StockTradingEnv) = @view(env.state[2+n_stocks(env):n_stocks(env)*2+1])
-features(env::StockTradingEnv) = @view(env.state[n_stocks(env)*2+2:end])
-asset(env::StockTradingEnv) = @view env.state[1]
-total_asset(env::StockTradingEnv) = env.state[1] + dot(prices(env), holds(env))
-
-
 function (env::StockTradingEnv)(actions)
-    init_asset = total_asset(env)
+    init_asset = _total_asset(env)
 
     # sell first
-    sell = clamp.(env.HMAX_NORMALIZE .* actions, .-(holds(env)), 0f0)
-    holds(env) .-= sell
-    gain = dot(sell, prices(env))
-    cost = gain * env.TRANSACTION_FEE_PERCENT
-    asset(env)[] += gain - cost
-    env.total_cost += cost
+    for (i, s) in enumerate(actions)
+        if s < 0
+            sell = min(-env.HMAX_NORMALIZE * s, _holds(env)[i])
+            _holds(env)[i] -= sell
+            gain = _prices(env)[i] * sell
+            cost = gain * env.TRANSACTION_FEE_PERCENT
+            _balance(env)[] += gain - cost
+            env.total_cost += cost
+        end
+    end
 
     # then buy
     # better to shuffle?
-    for i,b in enumerate(actions)
+    for (i,b) in enumerate(actions)
         if b > 0
-            A = asset(env)
-            max_buy = div(A[], P)
+            max_buy = div(_balance(env)[], _prices(env)[i])
             buy = min(b*env.HMAX_NORMALIZE, max_buy)
-            holds(env)[i] += buy
-            deduction = buy * prices(env)[i]
+            _holds(env)[i] += buy
+            deduction = buy * _prices(env)[i]
             cost = deduction * env.TRANSACTION_FEE_PERCENT
-            A[] -= deduction + cost
-            env.cost += cost
+            _balance(env)[] -= deduction + cost
+            env.total_cost += cost
         end
     end
 
     env.day += 1
-    prices(env) .= @view env.prices[:, env.day]
-    features(env) .= @view env.features[:, env.day]
+    _prices(env) .= @view env.prices[:, env.day]
+    _features(env) .= @view env.features[:, env.day]
 
-    env.daily_reward = total_asset(env) - init_asset
+    env.daily_reward = _total_asset(env) - init_asset
 end
 
 RLBase.reward(env::StockTradingEnv) = env.daily_reward * env.REWARD_SCALING
-RLBase.is_terminated(env::StockTradingEnv) = env.day > env.last_day
+RLBase.is_terminated(env::StockTradingEnv) = env.day >= env.last_day
 RLBase.state(env::StockTradingEnv) = env.state
+
+function RLBase.reset!(env::StockTradingEnv)
+    env.day = env.first_day
+    _balance(env)[] = env.initial_account_balance
+    _prices(env) .= @view env.prices[:, env.day]
+    _features(env) .= @view env.features[:, env.day]
+    env.total_cost = 0.
+    env.daily_reward = 0.
+end
+
+RLBase.state_space(env::StockTradingEnv) = Space(fill(-Inf32..Inf32, length(state(env))))
+RLBase.action_space(env::StockTradingEnv) = Space(fill(-1f0..1f0, length(_holds(env))))
+
+RLBase.ChanceStyle(::StockTradingEnv) = DETERMINISTIC
+
+# wrapper
+
+struct StockTradingEnvWithTurbulence{E<:StockTradingEnv} <: AbstractEnvWrapper
+    env::E
+    turbulences::Vector{Float64}
+    turbulence_threshold::Float64
+end
+
+function StockTradingEnvWithTurbulence(;
+    turbulence_threshold=140.,
+    turbulences=nothing,
+    kw...
+)
+    turbulences = isnothing(turbulences) && load_default_stock_data("turbulence.csv")
+
+    StockTradingEnvWithTurbulence(
+        StockTradingEnv(;kw...),
+        turbulences,
+        turbulence_threshold
+    )
+end
+
+function (w::StockTradingEnvWithTurbulence)(actions)
+    if w.turbulences[w.env.day] >= w.turbulence_threshold
+        actions .= ifelse.(actions .< 0, -Inf32, 0)
+    end
+    w.env(actions)
+end
