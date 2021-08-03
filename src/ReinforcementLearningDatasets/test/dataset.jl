@@ -86,7 +86,7 @@ end
     iter2 = iters[2]
 
     for iter in iters
-        @test typeof(iter) <: NamedTuple
+        @test typeof(iter) <: NamedTuple{SARTS}
     end
 
     @test iter1 != iter2
