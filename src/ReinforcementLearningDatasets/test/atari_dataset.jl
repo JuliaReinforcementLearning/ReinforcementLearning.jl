@@ -7,8 +7,6 @@ epochs = [1, 2]
 n_epochs = length(epochs)
 rng = StableRNG(123)
 
-atari_init()
-
 # TO-DO make functions to make tests modular and more widely applicable
 @testset "atari_dataset_shuffle" begin
     ds = dataset(
