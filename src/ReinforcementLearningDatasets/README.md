@@ -6,4 +6,4 @@ A package to create, manage, store and retrieve datasets for Offline Reinforceme
 
 ### Note:
 
-The package is under active development and for now it supports d4rl and d4rl-pybullet datasets.
+The package is under active development and for now it supports d4rl and d4rl-pybullet, Google Research atari DQN replay datasets.
