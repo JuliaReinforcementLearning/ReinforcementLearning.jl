@@ -98,7 +98,8 @@
         "boxoban",
         "DATADEPS",
         "umaze",
-        "pybullet"
+        "pybullet",
+        "turbulences"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
