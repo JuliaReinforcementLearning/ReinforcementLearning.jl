@@ -1,0 +1,6 @@
+[stock_trading_data]
+git-tree-sha1 = "c2ef05aa70df44749bd43b2ab9a558ea6829b32b"
+
+    [[stock_trading_data.download]]
+    url = "https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/releases/download/v0.9.0/stock_trading_data.tar.gz"
+    sha256 = "2abc589a9dfb5b2134ee531152bd361b08629938ea3bf53fe56270517d732c89"
