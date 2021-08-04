@@ -68,11 +68,11 @@ end
 #####
 
 """
-    GaussianNetwork(;pre=identity, μ, logσ)
+    GaussianNetwork(;pre=identity, μ, logσ, min_σ=0f0, max_σ=Inf32)
 
-Returns `μ` and `logσ` when called. 
-Create a distribution to sample from 
-using `Normal.(μ, exp.(logσ))`.
+Returns `μ` and `logσ` when called.  Create a distribution to sample from using
+`Normal.(μ, exp.(logσ))`. `min_σ` and `max_σ` are used to clip the output from
+`logσ`.
 """
 Base.@kwdef struct GaussianNetwork{P,U,S}
     pre::P = identity

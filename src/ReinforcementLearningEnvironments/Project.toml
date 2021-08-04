@@ -1,7 +1,7 @@
 name = "ReinforcementLearningEnvironments"
 uuid = "25e41dd2-4622-11e9-1641-f1adca772921"
 authors = ["Jun Tian <juti@microsoft.com>"]
-version = "0.6.2"
+version = "0.6.3"
 
 [deps]
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
