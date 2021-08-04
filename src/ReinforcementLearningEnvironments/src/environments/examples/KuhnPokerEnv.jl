@@ -9,7 +9,7 @@ const KUHN_POKER_STATES = (
     map(tuple, KUHN_POKER_CARDS)...,
     KUHN_POKER_CARD_COMBINATIONS...,
     (
-        (cards..., actions...) for cards in ((), map(tuple, KUHN_POKER_CARDS)...) for
+        (cards..., actions...) for cards in ((), map(tuple, KUHN_POKER_CARDS)..., KUHN_POKER_CARD_COMBINATIONS...) for
         actions in (
             (),
             (:bet,),
@@ -98,7 +98,8 @@ function RLBase.state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}
 end
 
 RLBase.state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, ::ChancePlayer) =
-    Tuple(env.cards)
+    Tuple((env.cards..., env.actions...))
+
 RLBase.state_space(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, p) =
     KUHN_POKER_STATES
 
@@ -133,7 +134,7 @@ end
 (env::KuhnPokerEnv)(action::Symbol, ::ChancePlayer) = push!(env.cards, action)
 (env::KuhnPokerEnv)(action::Symbol, ::Int) = push!(env.actions, action)
 
-RLBase.reward(::KuhnPokerEnv, ::ChancePlayer) = 0
+RLBase.reward(env::KuhnPokerEnv, ::ChancePlayer) = [reward(env, player) for player in players(env) if player != chance_player(env)]
 
 function RLBase.reward(env::KuhnPokerEnv, p)
     if is_terminated(env)
