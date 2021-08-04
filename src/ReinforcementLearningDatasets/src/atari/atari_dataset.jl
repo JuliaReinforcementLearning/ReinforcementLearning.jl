@@ -28,6 +28,7 @@ end
 
 const samples_per_epoch = Int(1e6)
 const atari_frame_size = 84
+const epochs_per_game = 50
 
 """
     dataset(dataset::String, epochs::Vector{Int}; repo::String, style::Tuple, rng<:AbstractRNG, is_shuffle::Bool, max_iters::Int64, batch_size::Int64)
@@ -85,6 +86,7 @@ function dataset(game::String,
 
     for (prefix, field) in zip(file_prefixes, fields)
         for epoch in s_epochs
+            @assert epoch <= epochs_per_game
             data = open("$folder_path/$(prefix)_ckpt.$epoch.gz") do file
                 stream = GzipDecompressorStream(file)
                 NPZ.npzreadarray(stream)
