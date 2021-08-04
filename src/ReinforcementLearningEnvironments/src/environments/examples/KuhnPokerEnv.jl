@@ -134,7 +134,8 @@ end
 (env::KuhnPokerEnv)(action::Symbol, ::ChancePlayer) = push!(env.cards, action)
 (env::KuhnPokerEnv)(action::Symbol, ::Int) = push!(env.actions, action)
 
-RLBase.reward(env::KuhnPokerEnv, ::ChancePlayer) = [reward(env, player) for player in players(env) if player != chance_player(env)]
+RLBase.reward(env::KuhnPokerEnv, ::ChancePlayer) = 0
+RLBase.reward(env::KuhnPokerEnv, players::Vector) = [reward(env, player) for player in players]
 
 function RLBase.reward(env::KuhnPokerEnv, p)
     if is_terminated(env)

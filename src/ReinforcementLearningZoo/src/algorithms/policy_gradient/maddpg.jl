@@ -60,7 +60,8 @@ function RLBase.update!(
     env::AbstractEnv,
     ::PostActStage,
 )
-    push!(trajectory[:reward], reward(env, chance_player(env)))
+    r = reward(env, [player for player in players(env) if player != chance_player(env)])
+    push!(trajectory[:reward], r)
     push!(trajectory[:terminal], is_terminated(env))
 end
 
