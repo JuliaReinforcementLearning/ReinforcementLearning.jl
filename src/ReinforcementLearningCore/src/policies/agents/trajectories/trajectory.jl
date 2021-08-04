@@ -39,6 +39,8 @@ Base.merge(a::Trajectory, b::Trajectory) = Trajectory(merge(a.traces, b.traces))
 Base.merge(a::Trajectory, b::NamedTuple) = Trajectory(merge(a.traces, b))
 Base.merge(a::NamedTuple, b::Trajectory) = Trajectory(merge(a, b.traces))
 
+Base.length(t::Trajectory) = size(t.traces[1], ndims(t.traces[1]))
+
 #####
 
 """

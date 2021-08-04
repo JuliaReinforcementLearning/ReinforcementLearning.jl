@@ -4,6 +4,7 @@
     "JuliaRL_A2C_CartPole.jl",
     "JuliaRL_A2CGAE_CartPole.jl",
     "JuliaRL_DDPG_Pendulum.jl",
+    "JuliaRL_MADDPG_KuhnPoker.jl",
     "JuliaRL_MAC_CartPole.jl",
     "JuliaRL_PPO_CartPole.jl",
     "JuliaRL_PPO_Pendulum.jl",
