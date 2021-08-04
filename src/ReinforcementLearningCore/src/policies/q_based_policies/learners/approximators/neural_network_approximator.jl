@@ -68,16 +68,18 @@ end
 #####
 
 """
-    GaussianNetwork(;pre=identity, μ, logσ)
+    GaussianNetwork(;pre=identity, μ, logσ, min_σ=0f0, max_σ=Inf32)
 
-Returns `μ` and `logσ` when called. 
-Create a distribution to sample from 
-using `Normal.(μ, exp.(logσ))`.
+Returns `μ` and `logσ` when called.  Create a distribution to sample from using
+`Normal.(μ, exp.(logσ))`. `min_σ` and `max_σ` are used to clip the output from
+`logσ`.
 """
 Base.@kwdef struct GaussianNetwork{P,U,S}
     pre::P = identity
     μ::U
     logσ::S
+    min_σ::Float32 = 0f0
+    max_σ::Float32 = Inf32
 end
 
 Flux.@functor GaussianNetwork
@@ -91,7 +93,8 @@ This function is compatible with a multidimensional action space. When outputtin
 """
 function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
     x = model.pre(state)
-    μ, logσ = model.μ(x), model.logσ(x) 
+    μ, raw_logσ = model.μ(x), model.logσ(x) 
+    logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     if is_sampling
         π_dist = Normal.(μ, exp.(logσ))
         z = rand.(rng, π_dist)

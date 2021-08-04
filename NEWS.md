@@ -27,11 +27,20 @@
 
 ### ReinforcementLearningBase.jl
 
+#### v0.9.6
+
+- Implement `Base.:(==)` for `Space`. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
+
 #### v0.9.5
 
 - Add default `Base.:(==)` and `Base.hash` method for `AbstractEnv`. [#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 
 ### ReinforcementLearningCore.jl
+
+#### v0.8.3
+
+- Add extra two optional keyword arguments (`min_σ` and `max_σ`) in
+  `GaussianNetwork` to clip the output of `logσ`. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
 
 #### v0.8.2
 
@@ -59,6 +68,14 @@
 - Moved all the experiments into a new package `ReinforcementLearningExperiments.jl`. The related dependencies are also removed (`BSON.jl`, `StableRNGs.jl`, `TensorBoardLogger.jl`).
 
 ### ReinforcementLearningEnvironments.jl
+
+#### v0.6.3
+
+- Add `StockTradingEnv` from the paper [Deep Reinforcement Learning for
+  Automated Stock Trading: An Ensemble
+  Strategy](https://github.com/AI4Finance-LLC/Deep-Reinforcement-Learning-for-Automated-Stock-Trading-Ensemble-Strategy-ICAIF-2020).
+  This environment is a good testbed for multi-continuous action space
+  algorithms. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
 
 #### v0.6.2
 
