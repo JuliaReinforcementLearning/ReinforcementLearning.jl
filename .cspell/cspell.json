@@ -119,7 +119,8 @@
         "Schuurmans",
         "Norouzi",
         "gzopen",
-        "turbulences"
+        "turbulences",
+        "Decompressor"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
