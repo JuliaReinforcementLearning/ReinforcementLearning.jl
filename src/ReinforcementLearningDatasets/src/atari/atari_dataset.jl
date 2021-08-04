@@ -1,3 +1,6 @@
+using NPZ
+using CodecZlib
+
 """
 Represents an iterable dataset of type AtariDataSet with the following fields:
 
@@ -24,6 +27,7 @@ struct AtariDataSet{T<:AbstractRNG} <:RLDataSet
 end
 
 const samples_per_epoch = Int(1e6)
+const atari_frame_size = 84
 
 """
     dataset(dataset::String, epochs::Vector{Int}; repo::String, style::Tuple, rng<:AbstractRNG, is_shuffle::Bool, max_iters::Int64, batch_size::Int64)
@@ -66,9 +70,8 @@ function dataset(game::String,
     
     folder_path = "$path/$folder_name"
     files = readdir(folder_path)
-    file_prefixes = map(x->join(split(x,"_")[1:2], "_"), files)
-    set_file_prefixes = collect(Set(file_prefixes))
-    fields = map(collect(set_file_prefixes)) do x
+    file_prefixes = collect(Set(map(x->join(split(x,"_")[1:2], "_"), files)))
+    fields = map(collect(file_prefixes)) do x
         if split(x, "_")[1] == "\$store\$"
             x = split(x, "_")[2]
         else
@@ -80,10 +83,11 @@ function dataset(game::String,
     
     dataset = Dict()
 
-    for (prefix, field) in zip(set_file_prefixes, fields)
+    for (prefix, field) in zip(file_prefixes, fields)
         for epoch in s_epochs
-            data = gzopen("$folder_path/$(prefix)_ckpt.$epoch.gz") do file
-                npzreadarray(file)
+            data = open("$folder_path/$(prefix)_ckpt.$epoch.gz") do file
+                stream = GzipDecompressorStream(file)
+                NPZ.npzreadarray(stream)
             end
 
             if field == "observation"
@@ -144,13 +148,13 @@ function iterate(ds::AtariDataSet, state = 0)
         state += 1
     end
 
-    batch = (state = copy(ds.dataset[:state][:, :, inds]),
-    action = copy(ds.dataset[:action][inds]),
-    reward = copy(ds.dataset[:reward][inds]),
-    terminal = copy(ds.dataset[:terminal][inds]))
+    batch = (state = view(ds.dataset[:state], :, :, inds),
+    action = view(ds.dataset[:action], inds),
+    reward = view(ds.dataset[:reward], inds),
+    terminal = view(ds.dataset[:terminal], inds))
 
     if style == SARTS
-        batch = merge(batch, (next_state = copy(ds.dataset[:state][:, :, (1).+(inds)]),))
+        batch = merge(batch, (next_state = view(ds.dataset[:state], :, :, (1).+(inds)),))
     end
     
     return batch, state
@@ -162,7 +166,7 @@ length(ds::AtariDataSet) = ds.size
 IteratorEltype(::Type{AtariDataSet}) = EltypeUnknown() # see if eltype can be known (not sure about carla and adroit)
 
 function atari_verify(dataset::Dict, num_epochs::Int)
-    @assert size(dataset["observation"]) == (84, 84, num_epochs*samples_per_epoch)
+    @assert size(dataset["observation"]) == (atari_frame_size, atari_frame_size, num_epochs*samples_per_epoch)
     @assert size(dataset["action"]) == (num_epochs * samples_per_epoch,)
     @assert size(dataset["reward"]) == (num_epochs * samples_per_epoch,)
     @assert size(dataset["terminal"]) == (num_epochs * samples_per_epoch,)

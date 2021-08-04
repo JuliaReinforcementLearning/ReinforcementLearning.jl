@@ -13,7 +13,7 @@ Represents an iterable dataset of type D4RLDataSet with the following fields:
 
 `dataset`: Dict{Symbol, Any}, representation of the dataset as a Dictionary with style as `style`
 `repo`: String, the repository from which the dataset is taken
-`size`: Integer, the size of the dataset
+`dataset_size`: Integer, the size of the dataset
 `batch_size`: Integer, the size of the batches returned by `iterate`.
 `style`: Tuple, the type of the NamedTuple, for now SARTS and SART is supported.
 `rng`<: AbstractRNG.
@@ -23,7 +23,7 @@ Represents an iterable dataset of type D4RLDataSet with the following fields:
 struct D4RLDataSet{T<:AbstractRNG} <: RLDataSet
     dataset::Dict{Symbol, Any}
     repo::String
-    size::Integer
+    dataset_size::Integer
     batch_size::Integer
     style::Tuple
     rng::T
@@ -98,7 +98,7 @@ end
 function iterate(ds::D4RLDataSet, state = 0)
     rng = ds.rng
     batch_size = ds.batch_size
-    size = ds.size
+    size = ds.dataset_size
     is_shuffle = ds.is_shuffle
     style = ds.style
 
@@ -128,7 +128,7 @@ end
 
 
 take(ds::D4RLDataSet, n::Integer) = take(ds.dataset, n)
-length(ds::D4RLDataSet) = ds.size
+length(ds::D4RLDataSet) = ds.dataset_size
 IteratorEltype(::Type{D4RLDataSet}) = EltypeUnknown() # see if eltype can be known (not sure about carla and adroit)
 
 
