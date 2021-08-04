@@ -13,18 +13,18 @@ using Flux
 using IntervalSets
 
 mutable struct ResultNEpisode <: AbstractHook
-episode_counter::Int
-eval_every::Int
-episode::Vector{Int}
-results::Vector{Float64}
+    episode_counter::Int
+    eval_every::Int
+    episode::Vector{Int}
+    results::Vector{Float64}
 end
 
 function (hook::ResultNEpisode)(::PostEpisodeStage, policy, env)
-hook.episode_counter += 1
-if hook.episode_counter % hook.eval_every == 0
-    push!(hook.episode, hook.episode_counter)
-    push!(hook.results, reward(env, 1))
-end
+    hook.episode_counter += 1
+    if hook.episode_counter % hook.eval_every == 0
+        push!(hook.episode, hook.episode_counter)
+        push!(hook.results, reward(env, 1))
+    end
 end
 
 function RL.Experiment(
@@ -35,7 +35,6 @@ function RL.Experiment(
     seed=123,
 )
     rng = StableRNG(seed)
-    ## Encode the KuhnPokerEnv's states for training.
     env = KuhnPokerEnv()
     wrapped_env = ActionTransformedEnv(
         StateTransformedEnv(
