@@ -7,7 +7,7 @@ Represents an iterable dataset of type AtariDataSet with the following fields:
 `dataset`: Dict{Symbol, Any}, representation of the dataset as a Dictionary with style as `style`
 `epochs`: Vector{Int}, list of epochs to load
 `repo`: String, the repository from which the dataset is taken
-`size`: Integer, the size of the dataset
+`length`: Integer, the length of the dataset
 `batch_size`: Integer, the size of the batches returned by `iterate`.
 `style`: Tuple, the type of the NamedTuple, for now SARTS and SART is supported.
 `rng`<: AbstractRNG.
@@ -18,7 +18,7 @@ struct AtariDataSet{T<:AbstractRNG} <:RLDataSet
     dataset::Dict{Symbol, Any}
     epochs::Vector{Int}
     repo::String
-    size::Integer
+    length::Integer
     batch_size::Integer
     style::Tuple
     rng::T
@@ -134,15 +134,14 @@ end
 function iterate(ds::AtariDataSet, state = 0)
     rng = ds.rng
     batch_size = ds.batch_size
-    size = ds.size
+    length = ds.length
     is_shuffle = ds.is_shuffle
     style = ds.style
 
     if is_shuffle
-        inds = rand(rng, 1:size, batch_size)
-        map((x)-> if x <= size x else 1 end, inds)
+        inds = rand(rng, 1:length-1, batch_size)
     else
-        if (state+1) * batch_size <= size
+        if (state+1) * batch_size <= length
             inds = state*batch_size+1:(state+1)*batch_size
         else
             return nothing
@@ -164,7 +163,7 @@ end
 
 
 take(ds::AtariDataSet, n::Integer) = take(ds.dataset, n)
-length(ds::AtariDataSet) = ds.size
+length(ds::AtariDataSet) = ds.length
 IteratorEltype(::Type{AtariDataSet}) = EltypeUnknown() # see if eltype can be known (not sure about carla and adroit)
 
 function atari_verify(dataset::Dict, num_epochs::Int)
