@@ -3,7 +3,7 @@ batch_size = 256
 samples_per_epoch = Int(1e6) # change this
 style = SARTS
 index = 1
-epochs = [1, 2]
+epochs = [1]
 n_epochs = length(epochs)
 rng = StableRNG(123)
 
