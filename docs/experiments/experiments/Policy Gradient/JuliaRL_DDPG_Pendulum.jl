@@ -71,7 +71,7 @@ function RL.Experiment(
             start_steps = 1000,
             start_policy = RandomPolicy(-1.0..1.0; rng = rng),
             update_after = 1000,
-            update_every = 1,
+            update_freq = 1,
             act_limit = 1.0,
             act_noise = 0.1,
             rng = rng,
