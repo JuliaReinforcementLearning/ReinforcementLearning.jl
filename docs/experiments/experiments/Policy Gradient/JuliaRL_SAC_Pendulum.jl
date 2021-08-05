@@ -71,7 +71,7 @@ function RL.Experiment(
             start_steps = 1000,
             start_policy = RandomPolicy(Space([-1.0..1.0 for _ in 1:na]); rng = rng),
             update_after = 1000,
-            update_every = 1,
+            update_freq = 1,
             automatic_entropy_tuning = true,
             lr_alpha = 0.003f0,
             action_dims = action_dims,
