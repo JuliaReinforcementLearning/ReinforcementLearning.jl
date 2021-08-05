@@ -1,3 +1,5 @@
+using CRC32c
+
 export ATARI_GAMES
 export atari_init
 
@@ -7,7 +9,7 @@ const ATARI_GAMES = [
     "air-raid", "alien", "amidar", "assault", "asterix",
     "asteroids", "atlantis", "bank-heist", "battle-zone", "beam-rider",
     "berzerk", "bowling", "boxing", "breakout", "carnival", "centipede",
-    "chopper-command", "crazy-climber", "defender", "demon-attack",
+    "chopper-command", "crazy-climber", "demon-attack",
     "double-dunk", "elevator-action", "enduro", "fishing-derby", "freeway",
     "frostbite", "gopher", "gravitar", "hero", "ice-hockey", "jamesbond",
     "journey-escape", "kangaroo", "krull", "kung-fu-master",
@@ -49,8 +51,7 @@ function atari_init()
                     random initializations, and store all of the (state, action, reward, next state) tuples 
                     encountered during training into 5 replay datasets per game, resulting in a total of 300 datasets.
                     """,
-                    "gs://atari-replay-datasets/dqn/$(game_name(game))/$index/replay_logs/",
-                    atari_checksum;
+                    "gs://atari-replay-datasets/dqn/$(game_name(game))/$index/replay_logs/";
                     fetch_method = fetch_atari_ds
                 )
             )
