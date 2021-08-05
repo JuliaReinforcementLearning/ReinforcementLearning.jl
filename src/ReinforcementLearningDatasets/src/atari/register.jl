@@ -1,5 +1,3 @@
-using CRC32c
-
 export ATARI_GAMES
 export atari_init
 
