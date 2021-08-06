@@ -2,7 +2,7 @@
 # title: JuliaRL\_MADDPG\_KuhnPoker
 # cover: assets/JuliaRL_MADDPG_KuhnPoker.png
 # description: MADDPG applied to KuhnPoker
-# date: 2021-08-05
+# date: 2021-08-07
 # author: "[Peter Chen](https://github.com/peterchen96)" 
 # ---
 
@@ -12,14 +12,14 @@ using StableRNGs
 using Flux
 using IntervalSets
 
-mutable struct ResultNEpisode <: AbstractHook
+mutable struct RewardNEpisode <: AbstractHook
     eval_freq::Int
     episode_counter::Int
     episode::Vector{Int}
     results::Vector{Float64}
 end
 
-function (hook::ResultNEpisode)(::PostEpisodeStage, policy, env)
+function (hook::RewardNEpisode)(::PostEpisodeStage, policy, env)
     hook.episode_counter += 1
     if hook.episode_counter % hook.eval_freq == 0
         push!(hook.episode, hook.episode_counter)
@@ -113,7 +113,7 @@ function RL.Experiment(
     )
 
     stop_condition = StopAfterEpisode(1_000_000, is_show_progress=!haskey(ENV, "CI"))
-    hook = ResultNEpisode(1000, 0, [], [])
+    hook = RewardNEpisode(1000, 0, [], [])
     Experiment(agents, wrapped_env, stop_condition, hook, "# run MADDPG on KuhnPokerEnv")
 end
 
