@@ -1,6 +1,5 @@
 export NFSPAgentManager
 
-
 """
     NFSPAgentManager(; agents::Dict{Any, NFSPAgent})
 
@@ -19,21 +18,17 @@ function (π::NFSPAgentManager)(env::AbstractEnv)
     end
 end
 
-function (π::NFSPAgentManager)(stage::PostEpisodeStage, env::AbstractEnv)
-    for player in players(env)
-        if player != chance_player(env)
-            π.agents[player](stage, env)
-        end
-    end
-end
-
 RLBase.prob(π::NFSPAgentManager, env::AbstractEnv, args...) = prob(π.agents[current_player(env)], env, args...)
 
 function RLBase.update!(π::NFSPAgentManager, env::AbstractEnv)
-    player = current_player(env)
-    if player == chance_player(env)
+    while current_player(env) == chance_player(env)
         env |> legal_action_space |> rand |> env
-    else
-        RLBase.update!(π.agents[player], env)
+    end
+    update!(π.agents[current_player(env)], env)
+end
+
+function (π::NFSPAgentManager)(stage::Union{PreEpisodeStage, PostEpisodeStage}, env::AbstractEnv)
+    for (player, agent) in π.agents
+        agent(stage, env, player)
     end
 end
