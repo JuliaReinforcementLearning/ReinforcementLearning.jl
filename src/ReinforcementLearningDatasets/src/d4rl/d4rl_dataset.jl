@@ -5,29 +5,25 @@ using HDF5
 import Base: iterate, length, IteratorEltype
 
 export dataset
-export SARTS
-export SART
-export DataSet
 
-const SARTS = (:state, :action, :reward, :terminal, :next_state)
-const SART = (:state, :action, :reward, :terminal)
+export D4RLDataSet
 
 """
-Represents a iterable dataset with the following fields:
+Represents an iterable dataset of type D4RLDataSet with the following fields:
 
 `dataset`: Dict{Symbol, Any}, representation of the dataset as a Dictionary with style as `style`
 `repo`: String, the repository from which the dataset is taken
-`size`: Integer, the size of the dataset
+`dataset_size`: Integer, the size of the dataset
 `batch_size`: Integer, the size of the batches returned by `iterate`.
 `style`: Tuple, the type of the NamedTuple, for now SARTS and SART is supported.
 `rng`<: AbstractRNG.
 `meta`: Dict, the metadata provided along with the dataset
 `is_shuffle`: Bool, determines if the batches returned by `iterate` are shuffled.
 """
-struct DataSet{T<:AbstractRNG}
+struct D4RLDataSet{T<:AbstractRNG} <: RLDataSet
     dataset::Dict{Symbol, Any}
     repo::String
-    size::Integer
+    dataset_size::Integer
     batch_size::Integer
     style::Tuple
     rng::T
@@ -41,12 +37,12 @@ end
 """
     dataset(dataset::String; style::Tuple, rng<:AbstractRNG, is_shuffle::Bool, max_iters::Int64, batch_size::Int64)
 
-Creates a dataset of enclosed in a DataSet type and other related metadata for the `dataset` that is passed.
-The `DataSet` type is an iterable that fetches batches when used in a for loop for convenience during offline training.
+Creates a dataset of enclosed in a D4RLDataSet type and other related metadata for the `dataset` that is passed.
+The `D4RLDataSet` type is an iterable that fetches batches when used in a for loop for convenience during offline training.
 
 `dataset`: Dict{Symbol, Any}, Name of the datset.
 `repo`: Name of the repository of the dataset.
-`style`: the style of the iterator and the Dict inside DataSet that is returned.
+`style`: the style of the iterator and the Dict inside D4RLDataSet that is returned.
 `rng`: StableRNG
 `max_iters`: maximum number of iterations for the iterator.
 `is_shuffle`: whether the dataset is shuffled or not. `true` by default.
@@ -78,7 +74,7 @@ function dataset(dataset::String;
     end
 
     # sanity checks on data
-    verify(data)
+    d4rl_verify(data)
 
     dataset = Dict{Symbol, Any}()
     meta = Dict{String, Any}()
@@ -95,14 +91,14 @@ function dataset(dataset::String;
         end
     end
 
-    return DataSet(dataset, repo, N_samples, batch_size, style, rng, meta, is_shuffle)
+    return D4RLDataSet(dataset, repo, N_samples, batch_size, style, rng, meta, is_shuffle)
 
 end
 
-function iterate(ds::DataSet, state = 0)
+function iterate(ds::D4RLDataSet, state = 0)
     rng = ds.rng
     batch_size = ds.batch_size
-    size = ds.size
+    size = ds.dataset_size
     is_shuffle = ds.is_shuffle
     style = ds.style
 
@@ -131,12 +127,12 @@ function iterate(ds::DataSet, state = 0)
 end
 
 
-take(ds::DataSet, n::Integer) = take(ds.dataset, n)
-length(ds::DataSet) = ds.size
-IteratorEltype(::Type{DataSet}) = EltypeUnknown() # see if eltype can be known (not sure about carla and adroit)
+take(ds::D4RLDataSet, n::Integer) = take(ds.dataset, n)
+length(ds::D4RLDataSet) = ds.dataset_size
+IteratorEltype(::Type{D4RLDataSet}) = EltypeUnknown() # see if eltype can be known (not sure about carla and adroit)
 
 
-function verify(data::Dict{String, Any})
+function d4rl_verify(data::Dict{String, Any})
     for key in ["observations", "actions", "rewards", "terminals"]
         @assert (key in keys(data)) "Expected keys not present in data"
     end
