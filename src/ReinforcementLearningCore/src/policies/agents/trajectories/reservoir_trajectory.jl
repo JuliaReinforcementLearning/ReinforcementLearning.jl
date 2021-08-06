@@ -32,3 +32,21 @@ function Base.push!(b::ReservoirTrajectory; kw...)
         end
     end
 end
+
+function RLBase.update!(
+    trajectory::ReservoirTrajectory,
+    policy::AbstractPolicy,
+    env::AbstractEnv,
+    ::PreActStage,
+    action,
+)
+    s = policy isa NamedPolicy ? state(env, nameof(policy)) : state(env)
+    if haskey(trajectory.buffer, :legal_actions_mask)
+        lasm =
+            policy isa NamedPolicy ? legal_action_space_mask(env, nameof(policy)) :
+            legal_action_space_mask(env)
+        push!(trajectory; :state => s, :action => action, :legal_actions_mask => lasm)
+    else
+        push!(trajectory; :state => s, :action => action)
+    end
+end

@@ -26,6 +26,7 @@ struct Space{T}
     s::T
 end
 
+Base.:(==)(x::Space, y::Space) = x.s == y.s
 Base.similar(s::Space, args...) = Space(similar(s.s, args...))
 Base.getindex(s::Space, args...) = getindex(s.s, args...)
 Base.setindex!(s::Space, args...) = setindex!(s.s, args...)

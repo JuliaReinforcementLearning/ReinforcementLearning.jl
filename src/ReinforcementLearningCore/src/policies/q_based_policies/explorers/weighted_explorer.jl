@@ -6,8 +6,8 @@ using StatsBase: sample, Weights
 """
     WeightedExplorer(;is_normalized::Bool, rng=Random.GLOBAL_RNG)
 
-`is_normalized` is used to indicate if the feeded action values
-are alrady normalized to have a sum of `1.0`.
+`is_normalized` is used to indicate if the fed action values
+are already normalized to have a sum of `1.0`.
 
 !!! warning
     Elements are assumed to be `>=0`.

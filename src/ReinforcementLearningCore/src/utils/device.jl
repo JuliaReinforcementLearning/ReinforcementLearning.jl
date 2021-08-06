@@ -46,5 +46,5 @@ function device(x::Union{Tuple,NamedTuple})
     end
 end
 
-# recoganize Torch.jl
+# recognize Torch.jl
 # device(x::Tensor) = Val(Symbol(:gpu, x.device))

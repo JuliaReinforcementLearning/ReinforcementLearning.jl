@@ -15,14 +15,15 @@ mutable struct DDPGPolicy{
     target_critic::TC
     γ::Float32
     ρ::Float32
+    na::Int
     batch_size::Int
     start_steps::Int
     start_policy::P
     update_after::Int
-    update_every::Int
+    update_freq::Int
     act_limit::Float64
     act_noise::Float64
-    step::Int
+    update_step::Int
     rng::R
     # for logging
     actor_loss::Float32
@@ -58,10 +59,10 @@ end
 - `batch_size = 32`,
 - `start_steps = 10000`,
 - `update_after = 1000`,
-- `update_every = 50`,
+- `update_freq = 50`,
 - `act_limit = 1.0`,
 - `act_noise = 0.1`,
-- `step = 0`,
+- `update_step = 0`,
 - `rng = Random.GLOBAL_RNG`,
 """
 function DDPGPolicy(;
@@ -72,13 +73,14 @@ function DDPGPolicy(;
     start_policy,
     γ = 0.99f0,
     ρ = 0.995f0,
+    na = 1,
     batch_size = 32,
     start_steps = 10000,
     update_after = 1000,
-    update_every = 50,
+    update_freq = 50,
     act_limit = 1.0,
     act_noise = 0.1,
-    step = 0,
+    update_step = 0,
     rng = Random.GLOBAL_RNG,
 )
     copyto!(behavior_actor, target_actor)  # force sync
@@ -90,14 +92,15 @@ function DDPGPolicy(;
         target_critic,
         γ,
         ρ,
+        na,
         batch_size,
         start_steps,
         start_policy,
         update_after,
-        update_every,
+        update_freq,
         act_limit,
         act_noise,
-        step,
+        update_step,
         rng,
         0.0f0,
         0.0f0,
@@ -106,16 +109,18 @@ end
 
 # TODO: handle Training/Testing mode
 function (p::DDPGPolicy)(env)
-    p.step += 1
+    p.update_step += 1
 
-    if p.step <= p.start_steps
+    if p.update_step <= p.start_steps
         p.start_policy(env)
     else
         D = device(p.behavior_actor)
         s = state(env)
         s = Flux.unsqueeze(s, ndims(s) + 1)
-        action = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
-        clamp(action[] + randn(p.rng) * p.act_noise, -p.act_limit, p.act_limit)
+        actions = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
+        c = clamp.(actions .+ randn(p.rng, p.na) .* repeat([p.act_noise], p.na), -p.act_limit, p.act_limit)
+        p.na == 1 && return c[1]
+        c
     end
 end
 
@@ -126,7 +131,7 @@ function RLBase.update!(
     ::PreActStage,
 )
     length(traj) > p.update_after || return
-    p.step % p.update_every == 0 || return
+    p.update_step % p.update_freq == 0 || return
     inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
     update!(p, batch)
 end
@@ -149,7 +154,7 @@ function RLBase.update!(p::DDPGPolicy, batch::NamedTuple{SARTS})
     a′ = Aₜ(s′)
     qₜ = Cₜ(vcat(s′, a′)) |> vec
     y = r .+ γ .* (1 .- t) .* qₜ
-    a = Flux.unsqueeze(a, 1)
+    a = Flux.unsqueeze(a, ndims(a)+1)
 
     gs1 = gradient(Flux.params(C)) do
         q = C(vcat(s, a)) |> vec

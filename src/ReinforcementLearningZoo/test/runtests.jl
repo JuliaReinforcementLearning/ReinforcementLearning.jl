@@ -9,6 +9,7 @@ using Random
 using StableRNGs
 using OpenSpiel
 
+# used for OpenSpielEnv("kuhn_poker")
 function get_optimal_kuhn_policy(α = 0.2)
     TabularRandomPolicy(
         table = Dict(
@@ -24,6 +25,26 @@ function get_optimal_kuhn_policy(α = 0.2)
             "1b" => [2.0 / 3.0, 1.0 / 3.0],
             "2p" => [0.0, 1.0],
             "2b" => [0.0, 1.0],
+        ),
+    )
+end
+
+# used for julia version KuhnPokerGame
+function get_optimal_kuhn_policy(env::KuhnPokerEnv; α = 0.2)
+    TabularRandomPolicy(
+        table = Dict(
+            (:J,) => [1 - α, α],
+            (:J, :pass, :bet) => [1.0, 0.0],
+            (:Q,) => [1.0, 0.0],
+            (:Q, :pass, :bet) => [2.0 / 3.0 - α, 1.0 / 3.0 + α],
+            (:K,) => [1 - 3 * α, 3 * α],
+            (:K, :pass, :bet) => [0.0, 1.0],
+            (:J, :pass) => [2.0 / 3.0, 1.0 / 3.0],
+            (:J, :bet) => [1.0, 0.0],
+            (:Q, :pass) => [1.0, 0.0],
+            (:Q, :bet) => [2.0 / 3.0, 1.0 / 3.0],
+            (:K, :pass) => [0.0, 1.0],
+            (:K, :bet) => [0.0, 1.0],
         ),
     )
 end

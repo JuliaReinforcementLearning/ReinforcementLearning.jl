@@ -1,12 +1,56 @@
 # ReinforcementLearning.jl Release Notes
 
+## ReinforcementLearning.jl@v0.10.0
+
+### ReinforcementLearningEnvironments.jl
+
+### ReinforcementLearningCore.jl
+
+### ReinforcementLearningZoo.jl
+
+#### v0.5.0
+
+- Update the complete SAC implementation and modify some details based on the
+  original paper. [#365](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/365)
+- Add some extra keyword parameters for `BehaviorCloningPolicy` to use it
+  online. [#390](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/390)
+
+### ReinforcementLearningDatasets.jl
+
+#### v0.1.0
+
+- Add functionality for fetching d4rl datasets as an iterable DataSet. Credits: https://arxiv.org/abs/2004.07219
+- This supports d4rl and d4rl-pybullet and Google Research DQN atari datasets.
+- Uses DataDeps for data dependency management.
+
 ## ReinforcementLearning.jl@v0.9.0
 
 ### ReinforcementLearningBase.jl
 
-No change.
+#### v0.9.6
+
+- Implement `Base.:(==)` for `Space`. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
+
+#### v0.9.5
+
+- Add default `Base.:(==)` and `Base.hash` method for `AbstractEnv`. [#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 
 ### ReinforcementLearningCore.jl
+
+#### v0.8.3
+
+- Add extra two optional keyword arguments (`min_σ` and `max_σ`) in
+  `GaussianNetwork` to clip the output of `logσ`. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
+
+#### v0.8.2
+
+- Add GaussianNetwork and DuelingNetwork into ReinforcementLearningCore.jl as general components. [#370](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/370)
+- Export `WeightedSoftmaxExplorer`.
+  [#382](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/382)
+
+#### v0.8.1
+
+- Minor bug & typo fixes
 
 #### v0.8.0
 
@@ -15,11 +59,28 @@ No change.
 
 ### ReinforcementLearningZoo.jl
 
+#### v0.4.1
+
+- Make keyword argument `n_actions` in `TabularPolicy` optional. [#300](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/300)
+
 #### v0.4.0
 
 - Moved all the experiments into a new package `ReinforcementLearningExperiments.jl`. The related dependencies are also removed (`BSON.jl`, `StableRNGs.jl`, `TensorBoardLogger.jl`).
 
 ### ReinforcementLearningEnvironments.jl
+
+#### v0.6.3
+
+- Add `StockTradingEnv` from the paper [Deep Reinforcement Learning for
+  Automated Stock Trading: An Ensemble
+  Strategy](https://github.com/AI4Finance-LLC/Deep-Reinforcement-Learning-for-Automated-Stock-Trading-Ensemble-Strategy-ICAIF-2020).
+  This environment is a good testbed for multi-continuous action space
+  algorithms. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
+
+#### v0.6.2
+
+- Add `SequentialEnv` environment wrapper to turn a simultaneous environment
+  into a sequential one.
 
 #### v0.6.1
 

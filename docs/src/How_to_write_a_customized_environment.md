@@ -233,6 +233,7 @@ explicitly define `state(::AbstractStateStyle, env::YourEnv)`. So that users can
 fetch necessary information on demand. Following are some built-in state styles:
 
 ```@repl customized_env
+using InteractiveUtils
 subtypes(RLBase.AbstractStateStyle)
 ```
 
@@ -392,7 +393,7 @@ If there's no `rng` in the environment, everything is deterministic afer taking
 each action, then we call the [`ChanceStyle`](@ref) of these environments are of
 [`Deterministic`](@ref). Otherwise, we call them [`Stochastic`](@ref). One special case is that,
 in [Extensive Form Games](https://en.wikipedia.org/wiki/Extensive-form_game), a
-chance node is envolved. And the action probability of this special player is
+chance node is involved. And the action probability of this special player is
 known. For these environments, we need to have the following methods defined:
 
 ```@repl customized_env

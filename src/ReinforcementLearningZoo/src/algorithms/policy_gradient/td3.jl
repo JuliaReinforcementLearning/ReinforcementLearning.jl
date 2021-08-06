@@ -26,13 +26,13 @@ mutable struct TD3Policy{
     start_steps::Int
     start_policy::P
     update_after::Int
-    update_every::Int
+    update_freq::Int
     policy_freq::Int
     target_act_limit::Float64
     target_act_noise::Float64
     act_limit::Float64
     act_noise::Float64
-    step::Int
+    update_step::Int
     rng::R
     replay_counter::Int
     # for logging
@@ -55,13 +55,13 @@ end
 - `batch_size = 32`,
 - `start_steps = 10000`,
 - `update_after = 1000`,
-- `update_every = 50`,
-- `policy_freq = 2` # frequency in which the actor performs a gradient step and critic target is updated
+- `update_freq = 50`,
+- `policy_freq = 2` # frequency in which the actor performs a gradient update_step and critic target is updated
 - `target_act_limit = 1.0`, # noise added to actor target
 - `target_act_noise = 0.1`, # noise added to actor target
 - `act_limit = 1.0`, # noise added when outputing action
 - `act_noise = 0.1`, # noise added when outputing action
-- `step = 0`,
+- `update_step = 0`,
 - `rng = Random.GLOBAL_RNG`,
 """
 function TD3Policy(;
@@ -75,13 +75,13 @@ function TD3Policy(;
     batch_size = 64,
     start_steps = 10000,
     update_after = 1000,
-    update_every = 50,
+    update_freq = 50,
     policy_freq = 2,
     target_act_limit = 1.0,
     target_act_noise = 0.1,
     act_limit = 1.0,
     act_noise = 0.1,
-    step = 0,
+    update_step = 0,
     rng = Random.GLOBAL_RNG,
 )
     copyto!(behavior_actor, target_actor)  # force sync
@@ -97,13 +97,13 @@ function TD3Policy(;
         start_steps,
         start_policy,
         update_after,
-        update_every,
+        update_freq,
         policy_freq,
         target_act_limit,
         target_act_noise,
         act_limit,
         act_noise,
-        step,
+        update_step,
         rng,
         1, # keep track of numbers of replay
         0.0f0,
@@ -113,9 +113,9 @@ end
 
 # TODO: handle Training/Testing mode
 function (p::TD3Policy)(env)
-    p.step += 1
+    p.update_step += 1
 
-    if p.step <= p.start_steps
+    if p.update_step <= p.start_steps
         p.start_policy(env)
     else
         D = device(p.behavior_actor)
@@ -133,7 +133,7 @@ function RLBase.update!(
     ::PreActStage,
 )
     length(traj) > p.update_after || return
-    p.step % p.update_every == 0 || return
+    p.update_step % p.update_freq == 0 || return
     inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
     update!(p, batch)
 end

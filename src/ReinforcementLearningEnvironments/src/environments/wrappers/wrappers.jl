@@ -4,9 +4,14 @@ abstract type AbstractEnvWrapper <: AbstractEnv end
 
 Base.nameof(env::AbstractEnvWrapper) = "$(nameof(env.env)) |> $(nameof(typeof(env)))"
 
+# wrapped_env[] will get the next layer, be it wrapper or env
 Base.getindex(env::AbstractEnvWrapper) = env.env
 
-(env::AbstractEnvWrapper)(args...; kwargs...) = env.env(args...; kwargs...)
+# wrapped_env[!] will remove all wrapper layers and get the env inside them
+Base.getindex(env::AbstractEnvWrapper, ::typeof(!)) = env[][!]
+Base.getindex(env::AbstractEnv, ::typeof(!)) = env
+
+(env::AbstractEnvWrapper)(args...; kwargs...) = env[](args...; kwargs...)
 
 for f in vcat(RLBase.ENV_API, RLBase.MULTI_AGENT_ENV_API)
     @eval RLBase.$f(x::AbstractEnvWrapper, args...; kwargs...) = $f(x[], args...; kwargs...)
@@ -28,3 +33,4 @@ include("RewardOverriddenEnv.jl")
 include("StateCachedEnv.jl")
 include("StateTransformedEnv.jl")
 include("StochasticEnv.jl")
+include("SequentialEnv.jl")

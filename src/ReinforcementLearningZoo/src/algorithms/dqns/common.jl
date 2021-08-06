@@ -1,12 +1,10 @@
-export DuelingNetwork
-
 #####
 # some common components for Prioritized Experience Replay based methods
 #####
 
 const PERLearners = Union{PrioritizedDQNLearner,RainbowLearner,IQNLearner}
 
-function RLBase.update!(learner::Union{DQNLearner, QRDQNLearner,REMDQNLearner,PERLearners}, t::AbstractTrajectory)
+function RLBase.update!(learner::Union{DQNLearner,QRDQNLearner,REMDQNLearner,PERLearners}, t::AbstractTrajectory)
     length(t[:terminal]) - learner.sampler.n <= learner.min_replay_history && return
 
     learner.update_step += 1
@@ -36,23 +34,4 @@ function RLBase.update!(
     push!(trajectory[:reward], reward(env))
     push!(trajectory[:terminal], is_terminated(env))
     push!(trajectory[:priority], p.learner.default_priority)
-end
-
-"""
-    DuelingNetwork(;base, val, adv)
-    
-Dueling network automatically produces separate estimates of the state value function network and advantage function network. The expected output size of val is 1, and adv is the size of the action space.
-"""
-struct DuelingNetwork{B,V,A}
-    base::B
-    val::V
-    adv::A
-end
-
-Flux.@functor DuelingNetwork
-
-function (m::DuelingNetwork)(state)
-    x = m.base(state)
-    val = m.val(x)
-    return val .+ m.adv(x) .- mean(m.adv(x), dims=1)
 end

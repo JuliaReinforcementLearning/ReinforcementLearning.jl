@@ -51,6 +51,7 @@ jobs:
             Pkg.develop(path="src/ReinforcementLearningCore")
             Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.develop(path="src/ReinforcementLearningZoo")
+            Pkg.develop(path="src/ReinforcementLearningDatasets")
             Pkg.develop(path=".")
             Pkg.develop(path="src/ReinforcementLearningExperiments")
             Pkg.build("ReinforcementLearningExperiments")
@@ -59,7 +60,8 @@ jobs:
             Pkg.test("ReinforcementLearningEnvironments")
             Pkg.test("ReinforcementLearningZoo")
             Pkg.test("ReinforcementLearning")
-            Pkg.test("ReinforcementLearningExperiments")'
+            Pkg.test("ReinforcementLearningExperiments")
+            Pkg.test("ReinforcementLearningDatasets")'
   docs:
     name: Documentation
     runs-on: ubuntu-latest
@@ -83,14 +85,14 @@ jobs:
             using Franklin;
             optimize()' > build.log
 
-    # - name: Make sure homepage is generated without error
-    #   run: |
-    #     if grep -1 "Franklin Warning" build.log; then
-    #       echo "Franklin reported a warning"
-    #       exit 1
-    #     else
-    #       echo "Franklin did not report a warning"
-    #     fi
+      - name: Make sure homepage is generated without error
+        run: |
+          if grep -1 "Franklin Warning" build.log; then
+            echo "Franklin reported a warning"
+            exit 1
+          else
+            echo "Franklin did not report a warning"
+          fi
 
       - name: Build docs
         run: |

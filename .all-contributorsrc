@@ -217,7 +217,8 @@
       "profile": "https://github.com/pilgrimygy",
       "contributions": [
         "doc",
-        "code"
+        "code",
+        "bug"
       ]
     },
     {
@@ -291,6 +292,51 @@
       "profile": "https://github.com/jamblejoe",
       "contributions": [
         "code"
+      ]
+    },
+    {
+      "login": "ultradian",
+      "name": "ultradian",
+      "avatar_url": "https://avatars.githubusercontent.com/u/14141325?v=4",
+      "profile": "https://github.com/ultradian",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "eltociear",
+      "name": "Ikko Ashimine",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22633385?v=4",
+      "profile": "https://bandism.net/",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "00krishna",
+      "name": "Krishna Bhogaonker",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2063593?v=4",
+      "profile": "https://github.com/00krishna",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "pkienscherf",
+      "name": "Philipp A. Kienscherf",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44019953?v=4",
+      "profile": "https://www.is3.uni-koeln.de/de/team/doctoral-researchers/philipp-artur-kienscherf/",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Krastanov",
+      "name": "Stefan Krastanov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/705248?v=4",
+      "profile": "http://blog.krastanov.org/",
+      "contributions": [
+        "doc"
       ]
     }
   ],

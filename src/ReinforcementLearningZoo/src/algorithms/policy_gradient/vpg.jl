@@ -1,24 +1,4 @@
-export VPGPolicy, GaussianNetwork
-
-"""
-    GaussianNetwork(;pre=identity, μ, logσ)
-
-Returns `μ` and `logσ` when called. 
-Create a distribution to sample from 
-using `Normal.(μ, exp.(logσ))`.
-"""
-Base.@kwdef struct GaussianNetwork{P,U,S}
-    pre::P = identity
-    μ::U
-    logσ::S
-end
-
-Flux.@functor GaussianNetwork
-
-function (m::GaussianNetwork)(S)
-    x = m.pre(S)
-    m.μ(x), m.logσ(x) 
-end
+export VPGPolicy
 
 """
 Vanilla Policy Gradient
@@ -128,7 +108,7 @@ function RLBase.update!(
         S = select_last_dim(states, idx) |> to_dev
         A = actions[idx]
         G = gains[idx] |> x -> Flux.unsqueeze(x, 1) |> to_dev
-        # gains is a 1 colomn array, but the ouput of flux model is 1 row, n_batch columns array. so unsqueeze it.
+        # gains is a 1 column array, but the output of flux model is 1 row, n_batch columns array. so unsqueeze it.
 
         if π.baseline isa NeuralNetworkApproximator
             gs = gradient(Flux.params(π.baseline)) do

@@ -6,7 +6,7 @@
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
-#+ tangle=true
+#+ tangle=false
 using ReinforcementLearning
 using OpenSpiel
 
@@ -26,6 +26,5 @@ function RL.Experiment(
     Experiment(π, env, StopAfterStep(300, is_show_progress=!haskey(ENV, "CI")), EmptyHook(), description)
 end
 
-#+ tangle=false
 ex = E`JuliaRL_TabularCFR_OpenSpiel(kuhn_poker)`
 run(ex)

@@ -1,13 +1,13 @@
 import .Plots.plot
 import .Plots.plot!
 
-function plot(env::CartPoleEnv)
+function plot(env::CartPoleEnv; kwargs...)
     s, a, d = env.state, env.action, env.done
     x, xdot, theta, thetadot = s
     l = 2 * env.params.halflength
     xthreshold = env.params.xthreshold
     # set the frame
-    p = plot(
+    plot(
         xlims=(-xthreshold, xthreshold),
         ylims=(-.1, l + 0.1),
         legend=false,
@@ -37,7 +37,7 @@ function plot(env::CartPoleEnv)
         )
     end
     
-    p
+    plot!(;kwargs...)
 end
 
 
@@ -46,11 +46,11 @@ height(xs) = sin(3 * xs) * 0.45 + 0.55
 rotate(xs, ys, θ) = xs * cos(θ) - ys * sin(θ), ys * cos(θ) + xs * sin(θ)
 translate(xs, ys, t) = xs .+ t[1], ys .+ t[2]
 
-function plot(env::MountainCarEnv)
+function plot(env::MountainCarEnv; kwargs...)
     s = env.state
     d = env.done
 
-    p = plot(
+    plot(
         xlims=(env.params.min_pos - 0.1, env.params.max_pos + 0.2),
         ylims=(-.1, height(env.params.max_pos) + 0.2),
         legend=false,
@@ -84,5 +84,5 @@ function plot(env::MountainCarEnv)
         )
     end
 
-    p
+    plot!(;kwargs...)
  end

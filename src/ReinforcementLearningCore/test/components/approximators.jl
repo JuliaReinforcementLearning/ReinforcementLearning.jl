@@ -26,7 +26,7 @@
         update!(NN, gs)
         new_params = collect(params(NN).params)
 
-        @assert old_params != new_params
+        @test old_params != new_params
     end
 
     @testset "ActorCritic" begin

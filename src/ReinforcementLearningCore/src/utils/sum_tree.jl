@@ -6,7 +6,7 @@ import StatsBase: sample
 """
     SumTree(capacity::Int)
 Efficiently sample and update weights.
-For more detals, see the post at [here](https://jaromiru.com/2016/11/07/lets-make-a-dqn-double-learning-and-prioritized-experience-replay/).
+For more details, see the post at [here](https://jaromiru.com/2016/11/07/lets-make-a-dqn-double-learning-and-prioritized-experience-replay/).
 Here we use a vector to represent the binary tree.
 Suppose we will have `capacity` leaves at most.
 Every time we `push!` new node into the tree, only the recent `capacity` node and their sum will be updated!

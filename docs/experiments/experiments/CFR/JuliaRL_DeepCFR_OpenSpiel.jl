@@ -6,7 +6,7 @@
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
-#+ tangle=true
+#+ tangle=false
 using ReinforcementLearning
 using OpenSpiel
 
@@ -61,6 +61,5 @@ function RL.Experiment(
         batch_size_Π = 2048,
         initializer = glorot_normal(CUDA.CURAND.default_rng()),
     )
-    # nash_conv ≈ 0.23
     Experiment(p, env, StopAfterStep(500, is_show_progress=!haskey(ENV, "CI")), EmptyHook(), "# run DeepcCFR on leduc_poker")
 end
