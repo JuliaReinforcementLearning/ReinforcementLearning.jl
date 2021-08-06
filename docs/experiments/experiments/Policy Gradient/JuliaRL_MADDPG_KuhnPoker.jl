@@ -13,15 +13,15 @@ using Flux
 using IntervalSets
 
 mutable struct ResultNEpisode <: AbstractHook
+    eval_freq::Int
     episode_counter::Int
-    eval_every::Int
     episode::Vector{Int}
     results::Vector{Float64}
 end
 
 function (hook::ResultNEpisode)(::PostEpisodeStage, policy, env)
     hook.episode_counter += 1
-    if hook.episode_counter % hook.eval_every == 0
+    if hook.episode_counter % hook.eval_freq == 0
         push!(hook.episode, hook.episode_counter)
         push!(hook.results, reward(env, 1))
     end
@@ -39,8 +39,8 @@ function RL.Experiment(
     wrapped_env = ActionTransformedEnv(
         StateTransformedEnv(
             env;
-            state_mapping = s -> [findfirst(==(s), state_space(env)) / length(state_space(env))], # for normalization
-            state_space_mapping = ss -> [[findfirst(==(s), state_space(env)) / length(state_space(env))] for s in state_space(env)]
+            state_mapping = s -> [findfirst(==(s), state_space(env))],
+            state_space_mapping = ss -> [[findfirst(==(s), state_space(env))] for s in state_space(env)]
             ),
         action_mapping = x -> current_player(env) == chance_player(env) ? x : Int(x[current_player(env)] + 1),
     )
@@ -113,7 +113,7 @@ function RL.Experiment(
     )
 
     stop_condition = StopAfterEpisode(1_000_000, is_show_progress=!haskey(ENV, "CI"))
-    hook = ResultNEpisode(0, 1000, [], [])
+    hook = ResultNEpisode(1000, 0, [], [])
     Experiment(agents, wrapped_env, stop_condition, hook, "# run MADDPG on KuhnPokerEnv")
 end
 

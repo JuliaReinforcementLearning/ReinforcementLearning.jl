@@ -12,7 +12,7 @@ See the paper https://arxiv.org/abs/1706.02275 for more details.
 - `batch_size::Int`
 - `update_after::Int`
 - `update_freq::Int`
-- `step_counter::Int`, count the step.
+- `update_step::Int`, count the step.
 - `rng::AbstractRNG`.
 """
 mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory} <: AbstractPolicy
@@ -20,7 +20,7 @@ mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory} <: AbstractPo
     batch_size::Int
     update_after::Int
     update_freq::Int
-    step_counter::Int
+    update_step::Int
     rng::AbstractRNG
 end
 
@@ -111,11 +111,11 @@ function RLBase.update!(
     policy::MADDPGManager, 
     traj::AbstractTrajectory,
     ::AbstractEnv, 
-    ::PreActStage,
+    ::Union{PreActStage, PostEpisodeStage},
 )
     length(traj) > policy.update_after || return
-    policy.step_counter += 1
-    policy.step_counter % policy.update_freq == 0 || return
+    policy.update_step += 1
+    policy.update_step % policy.update_freq == 0 || return
     
     inds, batch = sample(policy.rng, traj, BatchSampler{SARTS}(policy.batch_size))
 
