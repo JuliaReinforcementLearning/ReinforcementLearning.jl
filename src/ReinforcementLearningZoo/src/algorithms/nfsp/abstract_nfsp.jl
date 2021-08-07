@@ -15,6 +15,7 @@ function Base.run(
 
     while !is_stop
         RLBase.reset!(env)
+        policy(PRE_EPISODE_STAGE, env)
         hook(PRE_EPISODE_STAGE, policy, env)
 
         # set train mode
@@ -26,7 +27,7 @@ function Base.run(
         end
 
         while !is_terminated(env) # one episode
-            RLBase.update!(policy, env)
+            update!(policy, env) # update policy and env simultaneously.
             hook(POST_ACT_STAGE, policy, env)
 
             if stop_condition(policy, env)
