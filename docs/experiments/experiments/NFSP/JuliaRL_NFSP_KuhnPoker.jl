@@ -52,21 +52,21 @@ function RL.Experiment(
             learner = DQNLearner(
                 approximator = NeuralNetworkApproximator(
                     model = Chain(
-                        Dense(ns, 128, relu; init = glorot_normal(rng)),
-                        Dense(128, na; init = glorot_normal(rng))
+                        Dense(ns, 64, relu; init = glorot_normal(rng)),
+                        Dense(64, na; init = glorot_normal(rng))
                     ) |> cpu,
                     optimizer = Descent(0.01),
                 ),
                 target_approximator = NeuralNetworkApproximator(
                     model = Chain(
-                        Dense(ns, 128, relu; init = glorot_normal(rng)),
-                        Dense(128, na; init = glorot_normal(rng))
+                        Dense(ns, 64, relu; init = glorot_normal(rng)),
+                        Dense(64, na; init = glorot_normal(rng))
                     ) |> cpu,
                 ),
                 γ = 1.0f0,
                 loss_func = huber_loss,
                 batch_size = 128,
-                update_freq = 64,
+                update_freq = 128,
                 min_replay_history = 1000,
                 target_update_freq = 1000,
                 rng = rng,
@@ -75,7 +75,7 @@ function RL.Experiment(
                 kind = :linear,
                 ϵ_init = 0.06,
                 ϵ_stable = 0.001,
-                decay_steps = 3_000_000,
+                decay_steps = 1_000_000,
                 rng = rng,
             ),
         ),
@@ -89,8 +89,8 @@ function RL.Experiment(
         policy = BehaviorCloningPolicy(;
             approximator = NeuralNetworkApproximator(
                 model = Chain(
-                        Dense(ns, 128, relu; init = glorot_normal(rng)),
-                        Dense(128, na; init = glorot_normal(rng))
+                        Dense(ns, 64, relu; init = glorot_normal(rng)),
+                        Dense(64, na; init = glorot_normal(rng))
                     ) |> cpu,
                 optimizer = Descent(0.01),
             ),
@@ -116,14 +116,14 @@ function RL.Experiment(
                 deepcopy(sl_agent),
                 η,
                 rng,
-                64, # update_freq
+                128, # update_freq
                 0, # initial update_step
                 true, # initial NFSPAgent's learn mode
             )) for player in players(wrapped_env) if player != chance_player(wrapped_env)
         )
     )
 
-    stop_condition = StopAfterEpisode(4_000_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterEpisode(1_200_000, is_show_progress=!haskey(ENV, "CI"))
     hook = ResultNEpisode(10_000, 0, [], [])
 
     Experiment(nfsp, wrapped_env, stop_condition, hook, "# run NFSP on KuhnPokerEnv")
