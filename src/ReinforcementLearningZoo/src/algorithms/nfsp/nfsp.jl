@@ -56,9 +56,11 @@ function (π::NFSPAgent)(stage::PreActStage, env::AbstractEnv, action)
     # update policy
     π.update_step += 1
     if π.update_step % π.update_freq == 0
-        update!(sl.policy, sl.trajectory)
-        if !π.mode
-            rl_learn(rl.policy, rl.trajectory) # only update rl_policy's learner.
+        if π.mode
+            update!(sl.policy, sl.trajectory)
+        else
+            rl_learn!(rl.policy, rl.trajectory) # only update rl_policy's learner.
+            update!(sl.policy, sl.trajectory)
         end
     end
 end
@@ -87,18 +89,20 @@ function (π::NFSPAgent)(::PostEpisodeStage, env::AbstractEnv, player::Any)
         push!(rl.trajectory[:legal_actions_mask], legal_action_space_mask(env, player))
     end
     
-    # update the policy
+    # update the policy    
     π.update_step += 1
     if π.update_step % π.update_freq == 0
-        update!(sl.policy, sl.trajectory)
-        if !π.mode
-            rl_learn(rl.policy, rl.trajectory)
+        if π.mode
+            update!(sl.policy, sl.trajectory)
+        else
+            rl_learn!(rl.policy, rl.trajectory) # only update rl_policy's learner.
+            update!(sl.policy, sl.trajectory)
         end
     end
 end
 
 # the supplement function
-function rl_learn(policy::QBasedPolicy, t::AbstractTrajectory)
+function rl_learn!(policy::QBasedPolicy, t::AbstractTrajectory)
     # just learn the approximator, not update target_approximator
     learner = policy.learner
     length(t[:terminal]) - learner.sampler.n <= learner.min_replay_history && return

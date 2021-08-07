@@ -28,7 +28,7 @@ function RLBase.update!(π::NFSPAgentManager, env::AbstractEnv)
 end
 
 function (π::NFSPAgentManager)(stage::Union{PreEpisodeStage, PostEpisodeStage}, env::AbstractEnv)
-    for (player, agent) in π.agents
-        agent(stage, env, player)
+    @sync for (player, agent) in π.agents
+        @async agent(stage, env, player)
     end
 end
