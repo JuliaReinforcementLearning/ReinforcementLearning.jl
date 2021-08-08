@@ -220,6 +220,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://www.is3.uni-koeln.de/de/team/doctoral-researchers/philipp-artur-kienscherf/"><img src="https://avatars.githubusercontent.com/u/44019953?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Philipp A. Kienscherf</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Apkienscherf" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://blog.krastanov.org/"><img src="https://avatars.githubusercontent.com/u/705248?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Stefan Krastanov</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=Krastanov" title="Documentation">📖</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/LaarsOman"><img src="https://avatars.githubusercontent.com/u/88617671?v=4?s=100" width="100px;" alt=""/><br /><sub><b>LaarsOman</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=LaarsOman" title="Documentation">📖</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-restore -->
