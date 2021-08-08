@@ -36,7 +36,7 @@ In this simple game, we are interested in finding out an optimum policy for the
 agent to gain the maximum cumulative reward in an episode. The random selection
 policy above is a good benchmark. The only thing left is to calculate the total
 reward. Because such workflow is so common in reinforcement learning tasks, an
-extended `Base.run` function is provided so that we can desgin the workflow in
+extended `Base.run` function is provided so that we can design the workflow in
 a descriptive pattern.
 
 ```@repl randomwalk1d
