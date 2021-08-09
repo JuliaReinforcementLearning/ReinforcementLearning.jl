@@ -120,7 +120,9 @@
         "Norouzi",
         "gzopen",
         "turbulences",
-        "Decompressor"
+        "Decompressor",
+        "PLAS",
+        "CRR"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
