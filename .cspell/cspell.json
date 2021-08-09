@@ -122,7 +122,8 @@
         "turbulences",
         "Decompressor",
         "PLAS",
-        "CRR"
+        "CRR",
+        "reparamaterize"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
