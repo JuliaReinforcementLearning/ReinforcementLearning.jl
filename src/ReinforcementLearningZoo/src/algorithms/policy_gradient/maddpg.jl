@@ -87,7 +87,7 @@ function RLBase.update!(π::MADDPGManager)
         length(agent.trajectory) > π.batch_size || return
     end
     
-    # get trainning data
+    # get training data
     temp_player = rand(keys(π.agents))
     t = π.agents[temp_player].trajectory
     inds = rand(π.rng, 1:length(t), π.batch_size)

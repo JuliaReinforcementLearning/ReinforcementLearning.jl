@@ -106,7 +106,7 @@ function RL.Experiment(
         rng
     )
 
-    stop_condition = StopAfterEpisode(100_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterEpisode(10_000, is_show_progress=!haskey(ENV, "CI"))
     hook = ResultNEpisode(1000, 0, [], [])
     Experiment(agents, wrapped_env, stop_condition, hook, "# run MADDPG on KuhnPokerEnv")
 end
