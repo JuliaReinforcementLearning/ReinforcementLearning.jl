@@ -120,7 +120,7 @@ function (model::GaussianNetwork)(state, action)
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     π_dist = Normal.(μ, exp.(logσ))
     action = atanh.(action)
-    logp_π = sum(logpdf.(π_dist, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
+    logp_π = sum(logpdf.(π_dist, action) .- (2.0f0 .* (log(2.0f0) .- action .- softplus.(-2.0f0 .* action))), dims = 1)
     return logp_π
 end
 
