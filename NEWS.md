@@ -69,6 +69,10 @@
 
 ### ReinforcementLearningEnvironments.jl
 
+#### v0.6.4-dev
+
+- Add `GraphShortestPathEnv`. [#445](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/445)
+
 #### v0.6.3
 
 - Add `StockTradingEnv` from the paper [Deep Reinforcement Learning for
