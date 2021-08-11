@@ -6,14 +6,14 @@ Multi-agent Deep Deterministic Policy Gradient(MADDPG) implemented in Julia. Her
 See the paper https://arxiv.org/abs/1706.02275 for more details.
 
 # Keyword arguments
-- `agents::Dict{<:Any, <:Agent{<:DDPGPolicy, <:AbstractTrajectory}}`, here each agent collects its own information. While updating the policy, each `critic` will assemble all agents' trajectory to update its own network.
+- `agents::Dict{<:Any, <:NamedPolicy{<:Agent{<:DDPGPolicy, <:AbstractTrajectory}, <:Any}}`, here each agent collects its own information. While updating the policy, each `critic` will assemble all agents' trajectory to update its own network.
 - `batch_size::Int`
 - `update_freq::Int`
 - `update_step::Int`, count the step.
 - `rng::AbstractRNG`.
 """
-mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory} <: AbstractPolicy
-    agents::Dict{<:Any, <:Agent{<:P, <:T}}
+mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory, N<:Any} <: AbstractPolicy
+    agents::Dict{<:N, <:Agent{<:NamedPolicy{<:P, <:N}, <:T}}
     batch_size::Int
     update_freq::Int
     update_step::Int
@@ -28,49 +28,27 @@ function (π::MADDPGManager)(env::AbstractEnv)
     Dict((player, ceil(agent.policy(env))) for (player, agent) in π.agents)
 end
 
-function (π::MADDPGManager)(::PreEpisodeStage, ::AbstractEnv)
+function (π::MADDPGManager)(stage::Union{PreEpisodeStage, PostActStage}, env::AbstractEnv)
+    # only need to update trajectory.
     for (_, agent) in π.agents
-        if length(agent.trajectory) > 0
-            pop!(agent.trajectory[:state])
-            pop!(agent.trajectory[:action])
-            if haskey(agent.trajectory, :legal_actions_mask)
-                pop!(agent.trajectory[:legal_actions_mask])
-            end
-        end
+        update!(agent.trajectory, agent.policy, env, stage)
     end
 end
 
-function (π::MADDPGManager)(::PreActStage, env::AbstractEnv, actions)
-    # update each agent's trajectory
+function (π::MADDPGManager)(stage::PreActStage, env::AbstractEnv, actions)
+    # update each agent's trajectory.
     for (player, agent) in π.agents
-        push!(agent.trajectory[:state], state(env, player))
-        push!(agent.trajectory[:action], actions[player])
-        if haskey(agent.trajectory, :legal_actions_mask)
-            lasm = legal_action_space_mask(env, player)
-            push!(agent.trajectory[:legal_actions_mask], lasm)
-        end
+        update!(agent.trajectory, agent.policy, env, stage, actions[player])
     end
     
     # update policy
     update!(π)
 end
 
-function (π::MADDPGManager)(::PostActStage, env::AbstractEnv)
-    for (player, agent) in π.agents
-        push!(agent.trajectory[:reward], reward(env, player))
-        push!(agent.trajectory[:terminal], is_terminated(env))
-    end
-end
-
-function (π::MADDPGManager)(::PostEpisodeStage, env::AbstractEnv)
-    # collect state and dummy action to each agent's trajectory
-    for (player, agent) in π.agents
-        push!(agent.trajectory[:state], state(env, player))
-        push!(agent.trajectory[:action], rand(action_space(env)))
-        if haskey(agent.trajectory, :legal_actions_mask)
-            lasm = legal_action_space_mask(env, player)
-            push!(agent.trajectory[:legal_actions_mask], lasm)
-        end
+function (π::MADDPGManager)(stage::PostEpisodeStage, env::AbstractEnv)
+    # collect state and a dummy action to each agent's trajectory here.
+    for (_, agent) in π.agents
+        update!(agent.trajectory, agent.policy, env, stage)
     end
 
     # update policy
@@ -83,41 +61,41 @@ function RLBase.update!(π::MADDPGManager)
     π.update_step % π.update_freq == 0 || return
 
     for (_, agent) in π.agents
-        length(agent.trajectory) > agent.policy.update_after || return
+        length(agent.trajectory) > agent.policy.policy.update_after || return
         length(agent.trajectory) > π.batch_size || return
     end
     
     # get training data
-    temp_player = rand(keys(π.agents))
+    temp_player = collect(keys(π.agents))[1]
     t = π.agents[temp_player].trajectory
     inds = rand(π.rng, 1:length(t), π.batch_size)
     batches = Dict((player, RLCore.fetch!(BatchSampler{SARTS}(π.batch_size), agent.trajectory, inds)) 
                 for (player, agent) in π.agents)
     
     # get s, a, s′ for critic
-    s = vcat((batches[player][1] for (player, _) in π.agents)...)
-    a = vcat((batches[player][2] for (player, _) in π.agents)...)
-    s′ = vcat((batches[player][5] for (player, _) in π.agents)...)
+    s = Flux.stack((batches[player][:state] for (player, _) in π.agents), 1)
+    a = Flux.stack((batches[player][:action] for (player, _) in π.agents), 1)
+    s′ = Flux.stack((batches[player][:next_state] for (player, _) in π.agents), 1)
 
     # for training behavior_actor
-    mu_actions = vcat(
+    mu_actions = Flux.stack(
         ((
-            batches[player][1] |> # get personal state information
-            x -> send_to_device(device(agent.policy.behavior_actor), x) |>
-            agent.policy.behavior_actor |> send_to_host
-        ) for (player, agent) in π.agents)...
+            batches[player][:state] |> # get personal state information
+            x -> send_to_device(device(agent.policy.policy.behavior_actor), x) |>
+            agent.policy.policy.behavior_actor |> send_to_host
+        ) for (player, agent) in π.agents), 1
     )
     # for training behavior_critic
-    new_actions = vcat(
+    new_actions = Flux.stack(
         ((
-            batches[player][5] |> # batch[5] get new_state information
-            x -> send_to_device(device(agent.policy.target_actor), x) |>
-            agent.policy.target_actor |> send_to_host
-        ) for (player, agent) in π.agents)...
+            batches[player][:next_state] |> # get personal next_state information
+            x -> send_to_device(device(agent.policy.policy.target_actor), x) |>
+            agent.policy.policy.target_actor |> send_to_host
+        ) for (player, agent) in π.agents), 1
     )
 
     for (player, agent) in π.agents
-        p = agent.policy
+        p = agent.policy.policy # get DDPGPolicy struct
         A = p.behavior_actor
         C = p.behavior_critic
         Aₜ = p.target_actor
@@ -163,9 +141,5 @@ function RLBase.update!(π::MADDPGManager)
         for (dest, src) in zip(Flux.params([Aₜ, Cₜ]), Flux.params([A, C]))
             dest .= ρ .* dest .+ (1 - ρ) .* src
         end
-
-        s, a, s′ = send_to_host((s, a, s′))
-        mu_actions = send_to_host(mu_actions)
-        new_actions = send_to_host(new_actions)
     end
 end

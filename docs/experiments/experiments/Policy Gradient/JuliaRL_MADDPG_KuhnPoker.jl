@@ -62,51 +62,52 @@ function RL.Experiment(
         Dense(64, 1; init = init),
         )
 
-    agent = Agent(
-        policy = DDPGPolicy(
-            behavior_actor = NeuralNetworkApproximator(
-                model = create_actor(),
-                optimizer = ADAM(),
-            ),
-            behavior_critic = NeuralNetworkApproximator(
-                model = create_critic(),
-                optimizer = ADAM(),
-            ),
-            target_actor = NeuralNetworkApproximator(
-                model = create_actor(),
-                optimizer = ADAM(),
-            ),
-            target_critic = NeuralNetworkApproximator(
-                model = create_critic(),
-                optimizer = ADAM(),
-            ),
-            γ = 0.99f0,
-            ρ = 0.995f0,
-            na = na,
-            start_steps = 1000,
-            start_policy = RandomPolicy(-0.9..0.9; rng = rng),
-            update_after = 1000,
-            act_limit = 0.9,
-            act_noise = 0.1,
-            rng = rng,
+    
+    policy = DDPGPolicy(
+        behavior_actor = NeuralNetworkApproximator(
+            model = create_actor(),
+            optimizer = ADAM(),
         ),
-        trajectory = CircularArraySARTTrajectory(
-            capacity = 10000, # replay buffer capacity
-            state = Vector{Int} => (ns, ),
-            action = Float32 => (na, ),
+        behavior_critic = NeuralNetworkApproximator(
+            model = create_critic(),
+            optimizer = ADAM(),
         ),
+        target_actor = NeuralNetworkApproximator(
+            model = create_actor(),
+            optimizer = ADAM(),
+        ),
+        target_critic = NeuralNetworkApproximator(
+            model = create_critic(),
+            optimizer = ADAM(),
+        ),
+        γ = 0.99f0,
+        ρ = 0.995f0,
+        na = na,
+        start_steps = 1000,
+        start_policy = RandomPolicy(-0.9..0.9; rng = rng),
+        update_after = 1000,
+        act_limit = 0.9,
+        act_noise = 0.1,
+        rng = rng,
+    )
+    trajectory = CircularArraySARTTrajectory(
+        capacity = 10000, # replay buffer capacity
+        state = Vector{Int} => (ns, ),
+        action = Float32 => (na, ),
     )
 
     agents = MADDPGManager(
-        Dict((player, deepcopy(agent)) 
-            for player in players(env) if player != chance_player(env)),
+        Dict((player, Agent(
+            policy = NamedPolicy(player, deepcopy(policy)),
+            trajectory = deepcopy(trajectory),
+        )) for player in players(env) if player != chance_player(env)),
         128, # batch_size
         128, # update_freq
         0, # step_counter
         rng
     )
 
-    stop_condition = StopAfterEpisode(10_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterEpisode(100_000, is_show_progress=!haskey(ENV, "CI"))
     hook = ResultNEpisode(1000, 0, [], [])
     Experiment(agents, wrapped_env, stop_condition, hook, "# run MADDPG on KuhnPokerEnv")
 end
