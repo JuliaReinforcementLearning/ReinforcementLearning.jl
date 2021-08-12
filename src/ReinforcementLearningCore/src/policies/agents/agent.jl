@@ -137,11 +137,11 @@ function RLBase.update!(
     # the global rng. In theory it shouldn't affect the performance of specific
     # algorithm.
     # TODO: how to inject a local rng here to avoid polluting the global rng
-    action = rand(action_space(env))
 
     s = policy isa NamedPolicy ? state(env, nameof(policy)) : state(env)
+    a = policy isa NamedPolicy ? rand(action_space(env, nameof(policy))) : rand(action_space(env))
     push!(trajectory[:state], s)
-    push!(trajectory[:action], action)
+    push!(trajectory[:action], a)
     if haskey(trajectory, :legal_actions_mask)
         lasm =
             policy isa NamedPolicy ? legal_action_space_mask(env, nameof(policy)) :
