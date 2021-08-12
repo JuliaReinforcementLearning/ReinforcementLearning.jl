@@ -120,7 +120,8 @@
         "Norouzi",
         "gzopen",
         "turbulences",
-        "Decompressor"
+        "Decompressor",
+        "MADDPG"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
