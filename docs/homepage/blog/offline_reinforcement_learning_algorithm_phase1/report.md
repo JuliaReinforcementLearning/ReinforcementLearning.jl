@@ -11,11 +11,11 @@ This technical report is the first evaluation report of Project "Enriching Offli
 | The first phase |      |
 | July1 - July15  | Design and build the framework of offline RL.  |
 | July16 - July31 | Implement and experiment offline DQN and  offline SAC as benchmark. |
-| August1 - August15 | Write build-in documenation and technical report. Implement and experiment CRR.|
+| August1 - August15 | Write build-in documentation and technical report. Implement and experiment CRR.|
 | The second phase |      |
 | August16 - August31 | Implement and experiment PLAS. |
 | September1 - September15  | Research, implement and experiment new SOTA offline RL algorithms. |
-| September16 - September30 | Write build-in documenation and technical report. Buffer for unexpected delay. |
+| September16 - September30 | Write build-in documentation and technical report. Buffer for unexpected delay. |
 | After project | Carry on fixing issues and maintain implemented algorithms.   |
 
 ## Project Schedule
@@ -122,7 +122,7 @@ function decode(model::VAE, state, z)
 end
 ```
 
-#### Offline RL Algroithms
+#### Offline RL Algorithms
 We used the existing algorithms and hooks to train the offline RL algorithm to create datasets in several environments (such as CartPole, Pendulum) for training. This work can guide the subsequent development of package RLDataset.jl, for example:
 ```julia
 gen_dataset("JuliaRL-CartPole-DQN", policy, env)
@@ -267,7 +267,7 @@ The following is our future plan:
 | September1 - September7 | Implement and experiment UWAC. |
 | September8 - September15 | Read the paper and python code of FisherBRC. |
 | September16 - September23  | Implement and experiment FisherBRC. |
-| September24 - September30 | Write build-in documenation and technical report. Buffer for unexpected delay. |
+| September24 - September30 | Write build-in documentation and technical report. Buffer for unexpected delay. |
 | After project | Carry on fixing issues and maintain implemented algorithms.   |
 
 Firstly, we need to fix bugs in continuous CRR and finish action perturbation component in PLAS. The current progress is slightly faster than the originally set progress, so we can implement more of the modern offline RL algorithms. The current plan includes UWAC$^{[6]}$ and FisherBRC$^{[7]}$ published on ICML'21. Here we briefly introduce these two algorithms:
