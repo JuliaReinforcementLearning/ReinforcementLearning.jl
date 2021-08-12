@@ -39,7 +39,13 @@ function RLBase.update!(π::NFSPAgent, env::AbstractEnv)
     π(POST_ACT_STAGE, env, player)
 end
 
-(π::NFSPAgent)(stage::PreEpisodeStage, env::AbstractEnv, ::Any) = update!(π.rl_agent.trajectory, π.rl_agent.policy, env, stage)
+function (π::NFSPAgent)(stage::PreEpisodeStage, env::AbstractEnv, ::Any)
+    # delete the terminal state and dummy action.
+    update!(π.rl_agent.trajectory, π.rl_agent.policy, env, stage)
+
+    # set the train's mode before the episode.
+    π.mode = rand(π.rng) < π.η
+end
 
 function (π::NFSPAgent)(stage::PreActStage, env::AbstractEnv, action)
     rl = π.rl_agent
