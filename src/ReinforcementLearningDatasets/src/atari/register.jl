@@ -35,7 +35,7 @@ function atari_init()
                 DataDep(
                     "atari-replay-datasets-$game-$index",
                     """
-                    Dataset: The DQN Replay Dataset from Google Research,
+                    Dataset: The DQN Replay Dataset from Google Research
                     Authors: Rishabh Agarwal, Dale Schuurmans, Mohammad Norouzi
                     Publication Year: 2020
                     Related Publications: https://research.google/pubs/pub49020/

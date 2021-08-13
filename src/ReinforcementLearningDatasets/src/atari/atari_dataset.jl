@@ -48,7 +48,8 @@ The `AtariDataSet` type is an iterable that fetches batches when used in a for l
 
 The returned type is an infinite iterator which can be called using `iterate` and will return batches as specified in the dataset.
 """
-function dataset(game::String,
+function dataset(
+    game::String,
     index::Int,
     epochs::Vector{Int};
     style=SARTS,
