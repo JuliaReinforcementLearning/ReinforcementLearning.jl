@@ -20,19 +20,28 @@
 #### v0.1.0
 
 - Add functionality for fetching d4rl datasets as an iterable DataSet. Credits: https://arxiv.org/abs/2004.07219
-- This supports d4rl and d4rl-pybullet datasets.
+- This supports d4rl and d4rl-pybullet and Google Research DQN atari datasets.
 - Uses DataDeps for data dependency management.
-- Supports Google DQN Replay datasets and RL Unplugged Atari datasets.
+- This package also supports RL Unplugged Atari Datasets.
 
 ## ReinforcementLearning.jl@v0.9.0
 
 ### ReinforcementLearningBase.jl
+
+#### v0.9.6
+
+- Implement `Base.:(==)` for `Space`. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
 
 #### v0.9.5
 
 - Add default `Base.:(==)` and `Base.hash` method for `AbstractEnv`. [#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 
 ### ReinforcementLearningCore.jl
+
+#### v0.8.3
+
+- Add extra two optional keyword arguments (`min_σ` and `max_σ`) in
+  `GaussianNetwork` to clip the output of `logσ`. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
 
 #### v0.8.2
 
@@ -61,7 +70,6 @@
 
 ### ReinforcementLearningEnvironments.jl
 
-<<<<<<< Updated upstream
 #### v0.6.4-dev
 
 - Add `GraphShortestPathEnv`. [#445](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/445)
@@ -74,8 +82,6 @@
   This environment is a good testbed for multi-continuous action space
   algorithms. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
 
-=======
->>>>>>> Stashed changes
 #### v0.6.2
 
 - Add `SequentialEnv` environment wrapper to turn a simultaneous environment
