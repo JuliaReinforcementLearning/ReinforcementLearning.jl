@@ -29,3 +29,5 @@
   - [Chapter11 Counter Example.jl](/blog/notebooks_for_reinforcement_learning_an_introduction/Chapter11_Counter_Example.jl)
   - [Chapter12 Random Walk.jl](/blog/notebooks_for_reinforcement_learning_an_introduction/Chapter12_Random_Walk.jl)
   - [Chapter13 Short Corridor.jl](/blog/notebooks_for_reinforcement_learning_an_introduction/Chapter13_Short_Corridor.jl)
+
+- [Summer OSPP Project 210370190 Mid-term Report](/blog/ospp_mid-term_report_210370190)
