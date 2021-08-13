@@ -36,7 +36,7 @@ Recent advances in reinforcement learning led to many breakthroughs in artificia
 
 | Date       | Mission Content |
 | :-----------: | :---------: |
-| 07/01 - 07/14 | Refer the paper and the existing implement to get familar with the `NFSP` algorithm. |
+| 07/01 - 07/14 | Refer the paper and the existing implement to get familiar with the `NFSP` algorithm. |
 | 07/15 - 07/29 | Add `NFSP` algorithm into `RLZoo.jl`, and test it on the `KuhnPokerEnv`. |
 | 07/30 - 08/07 | Fix the existing bugs of `NFSP` and implement `MADDPG` algorithm into `RLZoo.jl`. |
 | 08/08 - 08/15 | Update the `MADDPG` algo and test it on the `KuhnPokerEnv`,  also complete the **mid-term report**. |
