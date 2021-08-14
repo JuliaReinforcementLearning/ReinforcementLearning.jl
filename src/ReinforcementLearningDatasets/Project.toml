@@ -24,8 +24,8 @@ ImageCore = "0.9"
 NPZ = "0.4"
 PNGFiles = "0.3"
 ProgressMeter = "1.7"
-TFRecord = "0.3"
 StableRNGs = "1.0"
+TFRecord = "0.3"
 julia = "1.6"
 
 [extras]
