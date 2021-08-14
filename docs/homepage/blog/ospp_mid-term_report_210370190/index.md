@@ -1,4 +1,4 @@
-@def title = "Summer OSPP Project 210370190 Mid-term Report"
+@def title = "Implement Multi-Agent Reinforcement Learning Algorithms in Julia (Summer OSPP Project 210370190) Mid-term Report"
 @def description = """
     This is a mid-term report of the summer ospp project [Implement Multi-Agent Reinforcement Learning Algorithms in Julia](https://summer.iscas.ac.cn/#/org/prodetail/210370190?lang=en). The report includes the following three components: `Project Information`, `Implementation and Usage of Algorithms` and `Reviews and Future Plan`.
     """
@@ -55,13 +55,13 @@ From July 1st to now, I mainly have implemented the `Neural Fictitious Self-play
 - [correct nfsp implementation #439](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/439)
 - [add MADDPG algorithm #444](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/444)
 
-## 2. Implementation and usage of `NFSP` and `MADDPG`
+## 2. Implementation and usage of Algorithms
 
 This section will first briefly introduce the `Agent` struct and its usage, and then introduce the details about the implementation and usage of `NFSP` and `MADDPG.`
 
 ### 2.1 Introduction of `Agent`
 
-`Agent` struct is an extended `AbstractPolicy` that includes the detailed policy and trajectory, which collect the necessary information for training the policy. In the [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/agents/agent.jl), there have been defined default behaviors(like the following) when self-playing the game, which splits the updating process of the strategy into several stages, including `PreEpisodeStage`,  `PreActStage`, `PostActStage` and `PostEpisodeStage`. 
+`Agent` struct is an extended `AbstractPolicy` that includes the detailed policy and one trajectory, which collect the necessary information for training the policy. In the existing [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/agents/agent.jl), there have been defined default behaviors(like the following) when self-playing the game, which splits the updating process of the strategy into several stages, including `PreEpisodeStage`,  `PreActStage`, `PostActStage` and `PostEpisodeStage`. 
 
 ```Julia
 function (agent::Agent)(stage::AbstractStage, env::AbstractEnv)
@@ -75,17 +75,17 @@ function (agent::Agent)(stage::PreActStage, env::AbstractEnv, action)
 end
 ```
 
-And based on the built-in [`run`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/639717388fb41199c98b90406bea76232bc6294d/src/ReinforcementLearningCore/src/core/run.jl#L16) function(or can define a new `run` function for the algo if necessary), the `agent` can update the policy based on the behaviors that we define. Thanks to the multiple dispatch,  the **main focus** when implementing the algo is only to customize the behavior within the specific stage to collect the training information and update the policy. More details can be referred to the [blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/#21_the_general_workflow).
+And when running the experiment, based on the built-in [`run`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/639717388fb41199c98b90406bea76232bc6294d/src/ReinforcementLearningCore/src/core/run.jl#L16) function(or can define a new `run` function for the algo if necessary), the `agent` can update its policy and trajectory based on the behaviors that we have defined. Thanks to the `multiple dispatch` in Julia,  the **main focus** when implementing the algo is that consider how to **customize the behavior** about collecting the training information and updating the policy when on the specific stage. More details can be referred to the [blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/#21_the_general_workflow).
 
 ### 2.2 Neural Fictitious Self-play(NFSP) algorithm
 
 #### Brief Introduction
-Neural Fictitious Self-play(NFSP)\dcite{DBLP:journals/corr/HeinrichS16} algorithm is a useful multi-agent algorithm that works well for imperfect information games. Each agent who applies the `NFSP` algo will include one `Reinforcement Learning`(RL) agent and one `Supervised Learning`(SL) agent. **RL agent** works to find the best response to the state from the self-play process, and **SL agent** works to learn the best response from RL agent's policy. What's more, `NFSP` also uses two technical innovations to ensure stability, including [reservoir sampling](https://en.wikipedia.org/wiki/Reservoir_sampling) for SL agent and anticipatory dynamics when training.
+Neural Fictitious Self-play(NFSP)\dcite{DBLP:journals/corr/HeinrichS16} algorithm is a useful multi-agent algorithm that works well for imperfect-information games. Each agent who applies the `NFSP` algo will include one `Reinforcement Learning`(RL) agent and one `Supervised Learning`(SL) agent. **RL agent** works to find the best response to the state from the self-play process, and **SL agent** works to learn the best response from RL agent's policy. What's more, `NFSP` also uses two technical innovations to ensure stability, including [reservoir sampling](https://en.wikipedia.org/wiki/Reservoir_sampling) for SL agent and anticipatory dynamics when training.
 
 #### Implementation
-In RLZoo.jl, I implement the [`NFSPAgent`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/nfsp.jl) which applies the `NFSP` algo and the [`NFSPAgentManager`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/nfsp_manager.jl) which is a special multi-agent manager that all agents use `NFSP` algo. Besides, the [`abstract_nfsp`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/abstract_nfsp.jl) define the `run` function for `NFSPAgentManager`.
+In RLZoo.jl, I implement the [`NFSPAgent`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/nfsp.jl) which define the `NFSPAgent` struct and design the behaviors about it according to the `NFSP` algo\dcite{DBLP:journals/corr/HeinrichS16}, including collecting needed information and how to update the policy. And the [`NFSPAgentManager`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/nfsp_manager.jl) is a special multi-agent manager that all agents apply `NFSP` algo. Besides, the [`abstract_nfsp`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/abstract_nfsp.jl) customize the `run` function for `NFSPAgentManager`.
 
-The structure of `NFSPAgent` as the following:
+Since the core of the algo is how to customize the `NFSPAgent`, the following content in this section will only be around it. The structure of `NFSPAgent` is as the following:
 ```Julia
 mutable struct NFSPAgent <: AbstractPolicy
     rl_agent::Agent
@@ -97,10 +97,11 @@ mutable struct NFSPAgent <: AbstractPolicy
     mode::Bool # `true` for best response mode(RL agent's policy), `false` for  average policy mode(SL agent's policy). Only used in training.
 end
 ```
-Based on 2.1, the core of the `NFSPAgent` is customized behavior of the specific stage:
+Based on 2.1, the core of the `NFSPAgent` is customized behaviors on the specific stage:
 
 - PreEpisodeStage
-Here, `NFSPAgent` should set train mode based on the anticipatory dynamics and delete the terminated state and dummy action if having gone through one episode before. Note that deleting the terminated state and dummy action is necessary for the algo(see the [note](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/4e5d258798088b1c628401b6b9de18aa8cbb3ab3/src/ReinforcementLearningCore/src/policies/agents/agent.jl#L134)).
+
+Here, `NFSPAgent` should set train mode based on the anticipatory dynamics and delete the terminated state and dummy action if having gone through one episode before. Note that here deleting the terminated state and dummy action is necessary for the algo(see the [note](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/4e5d258798088b1c628401b6b9de18aa8cbb3ab3/src/ReinforcementLearningCore/src/policies/agents/agent.jl#L134)), otherwise may occur to have some unreliable samples.
 ```Julia
 function (π::NFSPAgent)(stage::PreEpisodeStage, env::AbstractEnv, ::Any)
     # delete the terminal state and dummy action.
@@ -112,6 +113,7 @@ end
 ```
 
 - PreActStage
+
 In this stage, `NFSPAgent` should collect the personal information `state` and `action` to the RL agent's trajectory, and if on the `best response mode`, also update the SL agent's trajectory. Besides, if satisfying the condition of updating, here also need to update the inner agents. The rough code is just like the following:
 ```Julia
 function (π::NFSPAgent)(stage::PreActStage, env::AbstractEnv, action)
@@ -139,6 +141,7 @@ end
 ```
 
 - PostActStage
+
 Here, the agent needs to collect the personal `reward` and  the `is_terminated` judgment of the current state to the RL agent's trajectory.
 ```Julia
 function (π::NFSPAgent)(::PostActStage, env::AbstractEnv, player::Any)
@@ -148,7 +151,8 @@ end
 ```
 
 - PostEpisodeStage
-When one episode is terminated, the agent should collect the terminated state and a dummy action(see the [note](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/4e5d258798088b1c628401b6b9de18aa8cbb3ab3/src/ReinforcementLearningCore/src/policies/agents/agent.jl#L134)) to the RL agent's trajectory. Also, here needs to correct the reward and terminal judgment for avoiding omitting when playing the sequential or terminal_reward games.
+
+When one episode is terminated, the agent should collect the terminated state and a dummy action(see the [note](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/4e5d258798088b1c628401b6b9de18aa8cbb3ab3/src/ReinforcementLearningCore/src/policies/agents/agent.jl#L134)) to the RL agent's trajectory. Also, the reward and terminal judgment need to be corrected to avoid getting wrong samples when playing the sequential or terminal_reward games.
 ```Julia
 function (π::NFSPAgent)(::PostEpisodeStage, env::AbstractEnv, player::Any)
     rl = π.rl_agent
@@ -173,7 +177,7 @@ end
 
 #### Usage
 
-According to the paper\dcite{DBLP:journals/corr/HeinrichS16}, here the RL agent is default as `QBasedPolicy` with `CircularArraySARTTrajectory` and the SL agent is default as `BehaviorCloningPolicy` with `ReservoirTrajectory`. So you can customize the agent under the restriction and test the algo on any multi-agent game.
+According to the paper\dcite{DBLP:journals/corr/HeinrichS16}, here, the RL agent is default as `QBasedPolicy` with `CircularArraySARTTrajectory,` and the SL agent is default as `BehaviorCloningPolicy` with `ReservoirTrajectory.` So you can customize the agent under the restriction, and test the algo on any interested multi-agent game.
 
 Here is one experiment [`JuliaRL_NFSP_KuhnPoker.jl`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl) as one usage example, which tests the algo on the Kuhn Poker game. The result of the experiment is just like the following.
 
@@ -182,10 +186,10 @@ Here is one experiment [`JuliaRL_NFSP_KuhnPoker.jl`](https://github.com/JuliaRei
 ### 2.3 Multi-agent Deep Deterministic Policy Gradient(MADDPG) algorithm
 
 #### Brief Introduction
-The Multi-agent Deep Deterministic Policy Gradient(MADDPG)\dcite{DBLP:journals/corr/LoweWTHAM17} algorithm improves the Deep Deterministic Policy Gradient(DDPG), which works well on multi-agent games. Based on the DDPG, the critic of each agent in MADDPG can get all agents' policies, including their personal states and actions, which can help get a more reasonable score to their actor's policy.
+The Multi-agent Deep Deterministic Policy Gradient(MADDPG)\dcite{DBLP:journals/corr/LoweWTHAM17} algorithm improves the Deep Deterministic Policy Gradient(DDPG), which works well on multi-agent games. Based on the DDPG, the critic of each agent in MADDPG can get all agents' policies according to the paper's hypothesis\dcite{DBLP:journals/corr/LoweWTHAM17}, including their personal states and actions, which can help get a more reasonable score of the actor's policy.
 
 #### Implementation
-The structure of `MADDPGManager` as the following:
+Since there has been `DDPGPolicy` in the RLZoo, I implement the [`MADDPGManager`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/maddpg.jl) which is a special multi-agent manager that all agents apply `DDPGPolicy` with one **improved critic**. The structure of `MADDPGManager` is as the following:
 ```Julia
 mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory, N<:Any} <: AbstractPolicy
     agents::Dict{<:N, <:Agent{<:NamedPolicy{<:P, <:N}, <:T}}
@@ -195,20 +199,22 @@ mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory, N<:Any} <: Ab
     rng::AbstractRNG
 end
 ```
-where each agent in the MADDPGManager uses `DDPGPolicy` with one trajectory, which collects their own information. Apart from each agent's critic will assemble all agents' trajectories, the process of updating the policy is mainly the same as the `DDPGPolicy`.  And the process of updating trajectory is mainly the same as the above `NFSPAgent.` More details can refer to the [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/maddpg.jl).
+Where each agent in the MADDPGManager uses `DDPGPolicy` with one trajectory, which collects their own information. Here [`NamedPolicy`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/agents/named_policy.jl) is a useful substruct of `AbstractPolicy` when meeting the multi-agent games, which combine the player's name and detailed policy. So that can use `Agent` 's [default behaviors for known trajectories](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/b0b8e8236524a7af0a2da8987ae2261c257f94b2/src/ReinforcementLearningCore/src/policies/agents/agent.jl#L85) to collect the necessary information. 
+
+As for updating the policy, the process is mainly the same as the [`DDPGPolicy`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/b0b8e8236524a7af0a2da8987ae2261c257f94b2/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/ddpg.jl#L139), apart from each agent's critic will assemble all agents' personal states and actions. For more details, can refer to the [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/maddpg.jl).
 
 #### Usage
 Here is one experiment [`JuliaRL_MADDPG_KuhnPoker.jl`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl) as one usage example, which tests the algo on the Kuhn Poker game. The result of the experiment is just like the following.
 
 \dfig{body;JuliaRL_MADDPG_KuhnPoker.png;Result of the experiment.}
 
-Note that the current simple `MADDPG` still can work on the envs of `MINIMAL_ACTION_SET`, i.e., all actions in the environment's action space are legal. In the next weeks, I'll update the algo and try to test it on other games.
+**Note that** the current `MADDPG` still can only work on the envs of `MINIMAL_ACTION_SET,` i.e., all actions in the environment's action space are legal. And the Kuhn Poker game may not be suitable for the test of the algo. In the next weeks, I'll update the algo and try to test it on other games.
 
 ## 3. Reviews and Future Plan
 
 ### 3.1 Reviews
 
-From applying the project to now, I spent much time getting familiar with the algorithm and structure of `RL.jl.` In the initial weeks, my progress was slow. However, thanks to the mentor's patience in leading, I realize the convenience of the general workflow in the package and improve my comprehension of the algo.
+From applying the project to now, since spending much time on getting familiar with the algorithm and structure of RL.jl, my progress was slow in the initial weeks. However, thanks to the mentor's patience in leading, I realize the convenience of the general workflow in RL.jl and improve my comprehension of the algo.
 
 ### 3.2 Future Plan
 
