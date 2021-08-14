@@ -1,3 +1,6 @@
 {
-    "theme": "grid"
+    "theme": "grid",
+    "properties":{
+        "notebook": "false"
+    }
 }
