@@ -347,6 +347,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "burmecia",
+      "name": "Bo Lu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19306324?v=4",
+      "profile": "https://github.com/burmecia",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
