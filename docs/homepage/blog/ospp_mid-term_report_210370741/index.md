@@ -35,7 +35,7 @@ Establish a General Pipeline for Offline Reinforcement Learning Evaluation
 
 ### Background
 
-In the recent years there have been several breakthroughs in the field of Reinforcement Learning with several practical applications where RL bots have been able to achieve superhuman performance. This has also been reflected in the industry where several cutting edge solutions have been developed based on RL (Tesla Motors, AutoML, DeepMind data center cooling solutions just to name a few). 
+In the recent years there have been several breakthroughs in the field of Reinforcement Learning with numerous practical applications where RL bots have been able to achieve superhuman performance. This has also been reflected in the industry where several cutting edge solutions have been developed based on RL (Tesla Motors, AutoML, DeepMind data center cooling solutions just to name a few). 
 
 One of the most notorious challenges in RL is the lack of reliable environments for training RL agents. Offline RL has played a pivotal role in solving this problem by removing the need for the agent to interact with the environment to improve its policy over time. This brings forth the problem of having reliable tests to verify the performance of RL algorithms. Such tests are facilitated by standard datasets ([RL Unplugged](https://arxiv.org/abs/2006.13888), [D4RL](https://arxiv.org/abs/2004.07219) to name a few) that are used to train Offline RL agents and benchmark against other algorithms and implementations. [ReinforcementLearningDatasets.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningDatasets) provides a simple solution to access various standard datasets that are available for Offline RL benchmarking across a variety of tasks.
 
@@ -45,7 +45,7 @@ Another problem in Offline RL is Offline Model Selection. For this there are sev
 
 ### Objectives
 
-Create a package called **ReinforcementLearningDatasets.jl** that would aid in loading various standard datasets that are available.
+Create a package called **ReinforcementLearningDatasets.jl** that would aid in loading various standard datasets and policies that are available.
 
 Make the following datasets available in RLDatasets.
 
@@ -58,7 +58,8 @@ Make standard policies available in [Benchmarks for Deep Off-Policy Evaluation](
 
 Implement an OPE method and select between a number of standard policies for a particular task using RLDatasets.jl.
 
-Following are the future work that is possible in this project.
+Following are the future work that are possible in this project.
+
 - Parallel loading and partial loading of datasets for supported datasets.
 - Add support for envs that are not supported by GymEnvs -> Flow and CARLA.
 - Add support for datasets in Flow and CARLA envs.
@@ -80,7 +81,7 @@ Refer the following [discussion](https://github.com/JuliaReinforcementLearning/R
 | 07/21 - 07/30 | Implement loading of `d4rl` and `d4rl-pybullet` datasets |
 | 07/31 - 08/06 | Implement loading of `Google Research DQN Replay Datasets` |
 | 08/07 - 08/14 | Implement loading of `RL Unplugged atari datasets`, setup the docs, add README.md. Make the package more user friendly. Make the **mid-term report** |
-| 08/15 - 08/30 | Add the rest of RL Unplugged datasets, polish the interface, finalize the structure of the codebase. Add examples and `register the package.` |
+| 08/15 - 08/30 | Add lazy multi threaded loading support for `Google Research DQN Replay Datasets`. Add the rest of RL Unplugged datasets, polish the interface, finalize the structure of the codebase. Add examples and `register the package.` |
 | 09/01 - 09/15 | Add support for policy loading from [Benchmarks for Deep Off-Policy Evaluation](https://github.com/google-research/deep_ope) and implement and OPE method |
 | 09/16 - 09/30 | Test OPE in various environments and publish benchmarks in RLDatasets.jl. Implement other features that makes the package more user friendly. Complete the **final-term report** |
 
@@ -160,22 +161,22 @@ The type that is returned is a `Channel{RLTransition}` which returns batches of 
 - [Expand to d4rl-pybullet #416](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/416)
 - [Add Atari datasets released by Google Research #429](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/429)
 - [RL unplugged implementation with tests #452](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/452)
--[Features for Offline Reinforcement Learning Pipeline #359](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/discussions/359)
+- [Features for Offline Reinforcement Learning Pipeline #359](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/discussions/359)
 - [Fix record_type issue #24](https://github.com/JuliaReinforcementLearning/TFRecord.jl/pull/24)
 
 ## Implementation Details and Challenges Faced
 
 The challenge that was faced during the first week was to chart out a direction for RLDatasets.jl. So, I had to research implementations of the pipeline in [d3rlpy](https://github.com/takuseno/d3rlpy), [TF.data.Dataset](https://www.tensorflow.org/datasets) etc. Then I narrowed down some of the inspiring ideas in the [discussion](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/discussions/359).
 
-Later I made the [implementation](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/384) as a wrapper around d4rl python library which was discarded as it did not align with the purpose of the library. 
+Later I made the [implementation](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/384) as a wrapper around d4rl python library which was discarded as it did not align with the purpose of the library of being lightweight, not requiring a `Mujoco license` for usage of open source datasets. A wrapper would also not give the fine grained control that we could get if we load the datasets natively.
 
-It was finalized that the package was going to be a lightweight implementation without much dependencies. So, we decided to use [DataDeps.jl](https://github.com/oxinabox/DataDeps.jl) for registering, tracking and locating datasets without any hassle. The thing that I learnt here was how to make a package, manage its dependencies and choose which package would be the right fit for the job. I also had to learn about Iterator interfaces in julia to convert the type that is output by the `dataset` function into an iterator. `d4rl-pybullet` was also implemented in a similar fashion.
+ We decided to use [DataDeps.jl](https://github.com/oxinabox/DataDeps.jl) for registering, tracking and locating datasets without any hassle. The thing that I learnt here was how to make a package, manage its dependencies and choose which package would be the right fit for the job. I also had to learn about `Iterator` interfaces in julia to convert the type that is output by the `dataset` function into an `iterator`. `d4rl-pybullet` was also implemented in a similar fashion.
 
-Implementation of `Google Research Atari DQN Replay Datasets` was harder because it was quite a large dataset and even one shard didn't exactly fit into memory. One of the major things that I had to figure out was how the data was stored and how to retrieve it. Initially I planned to use `GZip.jl` to unpack the gzip files and use `NPZ.jl` to read the files. And NPZ wasn't able to read from `GZipStream` by itself so I had to adapt the functions in `NPZ` to read the stream. Later we decided to use `CodecZlib` to get a decompressed buffer channel output which was natively supported by `NPZ`. We also had to test it internally and skip the CI test because CI wouldn't be able to handle the dataset.
+Implementation of `Google Research Atari DQN Replay Datasets` was harder because it was quite a large dataset and even one shard didn't exactly fit into memory. One of the major things that I had to figure out was how the data was stored and how to retrieve it. Initially I planned to use `GZip.jl` to unpack the gzip files and use `NPZ.jl` to read the files. And NPZ wasn't able to read from `GZipStream` by itself so I had to adapt the functions in `NPZ` to read the stream. Later we decided to use `CodecZlib` to get a decompressed buffer channel output which was natively supported by `NPZ`. We also had to test it internally and skip the CI test because CI wouldn't be able to handle the dataset. Exploring the possibility of lazy loading of the files that are available and enabling it is also within the scope of the project.
 
-For supporting RL Unplugged dataset I had to learn about `.tfrecord` files, Protocol Buffers, Channels, buffered Channels and using multi threading in a lot of occasions that took a lot of time to learn, The final implementation was however based on already existing work in `TFRecord.jl`. 
+For supporting `RL Unplugged dataset` I had to learn about `.tfrecord` files, `Protocol Buffers`, `buffered Channels` and using multi threading in a lot of occasions which took a lot of time to learn. The final implementation was however based on already existing work in `TFRecord.jl`.
 
-Some of the more interesting pieces of code used in RL Unplugged dataset.
+Some of the more interesting pieces of code used in loading RL Unplugged dataset.
 
 ```julia
 ch_src = Channel{RLTransition}(n * tf_reader_sz) do ch
@@ -194,7 +195,7 @@ ch_src = Channel{RLTransition}(n * tf_reader_sz) do ch
     end
 end
 ```
-Multi threaded iteration over a Channel to `put!` into another Channel. While the implementation inside `TFRecord.read` is multi threaded in itself. Took quite a while for me to understand these nuances.
+Multi threaded iteration over a Channel to `put!` into another Channel while the implementation inside `TFRecord.read` is multi threaded in itself. It took quite a while for me to understand these nuances.
 
 ```julia
 res = Channel{RLTransition}(n_preallocations; taskref=taskref, spawn=true) do ch
@@ -205,10 +206,26 @@ end
 ```
 Multi threaded batching.
 
+All of this work wouldn't have been possible without the patient mentoring and vast knowledge that was shown by my mentor [Jun Tian](https://github.com/findmyway) who has been pivotal in the design and implementation of the package. His massive experience and beautifully written code had provided a lot of inspiration for the making of this package. His amicable nature and commitment to the users of the package providing timely and detailed explanations to any issues or queries related package despite his time constraints has provided a long standing example as a developer and as a person for the developers within and outside OSPP.
+
 ## Implications
 
-Equipping RL.jl with RLDatasets.jl is a key step in making the package more industry relevant because different Offline algorithms can be compared with respect to a variety of standard offline dataset benchmarks.
+Equipping RL.jl with RLDatasets.jl is a key step in making the package more industry relevant because different Offline algorithms can be compared with respect to a variety of standard offline dataset benchmarks. It is also meant to improve the implementations of existing offline algorithms and make it on par with the SOTA implementations. This package also provides a seamless way of downloading and accessing existing datasets. It also supports loading datasets into memory with ease which implemented separately would be difficult and not very usable for the users of the said implementation. 
+
+After the implementation of [Benchmarks for Deep Off-Policy Evaluation](https://github.com/google-research/deep_ope), testing and comparing algorithms would be much easier than before. This package would also help SOTA offline RL more accessible and reliable than ever before in ReinforcementLearning.jl.
+
 
 ## Future Plan
 
-Enabling more feature that were mentioned in [Features for Offline Reinforcement Learning Pipeline #359](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/discussions/359) would be the next obvious step after an OPE method (like FQE) has been explored. Dataset generation, storage and policy parameter storage would be great for the package.
+### Within the time frame of the project.
+
+Within the scope of the project and in the given time frame we are planning to:
+
+- Polish the package in terms of structure and make it more user friendly. 
+- Support the datasets that has not been added.
+- Support of [Benchmarks for Deep Off-Policy Evaluation](https://github.com/google-research/deep_ope) using ONNX.jl. Support possible policies that are provided for implementation within the time frame.
+- Experiments for policy selection using RLDatasets.jl to finalize and establish the usability of the package.
+
+### Ideas further down the line 
+
+Enabling more features that were mentioned in [Features for Offline Reinforcement Learning Pipeline #359](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/discussions/359) would be the next obvious step after the implementation an OPE method (like FQE) has been explored. Dataset generation, storage and policy parameter storage would also be great to implement in RLDatasets.jl.
