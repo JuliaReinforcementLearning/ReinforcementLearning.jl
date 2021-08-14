@@ -1,3 +1,29 @@
+@def title = "Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl"
+@def description = """
+    This is the phase 1 technical report of the summer OSPP project [Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl](https://summer.iscas.ac.cn/#/org/prodetail/210370539?lang=en) used for mid-term evaluation. The report is split into the following parts:
+    - `Project Information`
+    - `Project Schedule`
+    - `Future Plan`
+    """
+@def is_enable_toc = true
+@def has_code = true
+@def has_math = true
+
+@def front_matter = """
+    {
+        "authors": [
+            "author":"Guoyu Yang",
+            "authorURL":"https://github.com/pilgrimygy"
+            "affiliation":"",
+            "affiliationURL":""
+        ]
+    },
+    "publishedDate":"2021-08-14",
+    "citationText":"Guoyu Yang, 2021"
+    }"""
+
+@def bibliography = "offlineRL.bib"
+
 # Technical Report
 This technical report is the first evaluation report of Project "Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl" in OSPP. It includes three components: project information, project schedule, future plan.
 ## Project Information
@@ -89,7 +115,7 @@ end
 ##### Variational Auto-Encoder (VAE)
 In offline reinforcement learning tasks, VAE is often used to learn from datasets to approximate behavior policy.
 
-VAE$^{[1]}$ ([link](https://github.com/pilgrimygy/ReinforcementLearning.jl/blob/framework/src/ReinforcementLearningCore/src/policies/q_based_policies/learners/approximators/neural_network_approximator.jl)) consists of two neural network: `encoder` and `decoder`.
+VAE\dcite{DBLP:journals/corr/KingmaW13} ([link](https://github.com/pilgrimygy/ReinforcementLearning.jl/blob/framework/src/ReinforcementLearningCore/src/policies/q_based_policies/learners/approximators/neural_network_approximator.jl)) consists of two neural network: `encoder` and `decoder`.
 ```julia
 Base.@kwdef struct VAE{E, D}
     encoder::E
@@ -130,16 +156,15 @@ gen_dataset("JuliaRL-CartPole-DQN", policy, env)
 
 ##### Benchmark
 We implemented and experimented with offline DQN (in discrete action space) and offline SAC (in continuous action space) as benchmarks. The performance of offline DQN in Cartpole environment:
-<div  align="center">    
-<img src="JuliaRL_OfflineDQN_CartPole.png" width="50%" height="50%">
-</div>
+
+\dfig{body;JuliaRL_OfflineDQN_CartPole.png}
+
 The performance of offline SAC in Pendulum environment:
-<div  align="center">    
-<img src="JuliaRL_SAC_Pendulum.png" width="50%" height="50%">
-</div>
+
+\dfig{body;JuliaRL_SAC_Pendulum.png}
 
 ##### Conservative Q-Learning (CQL)
-CQL$^{[2]}$ is an efficient and straightforward Q-value constraint method. Other offline RL algorithms can easily use this constraint to improve performance. Therefore, we implemented CQL as a common component ([link](https://github.com/pilgrimygy/ReinforcementLearning.jl/blob/framework/src/ReinforcementLearningZoo/src/algorithms/offline_rl/common.jl)). For other algorithms, we only need to add CQL loss to their loss.
+CQL\dcite{DBLP:conf/nips/KumarZTL20} is an efficient and straightforward Q-value constraint method. Other offline RL algorithms can easily use this constraint to improve performance. Therefore, we implemented CQL as a common component ([link](https://github.com/pilgrimygy/ReinforcementLearning.jl/blob/framework/src/ReinforcementLearningZoo/src/algorithms/offline_rl/common.jl)). For other algorithms, we only need to add CQL loss to their loss.
 
 ```julia
 function calculate_CQL_loss(q_value, qa_value)
@@ -157,18 +182,15 @@ gs = gradient(params(Q)) do
     end
 ```
 After adding CQL loss, the performance of offline DQN improve.
-<div  align="center">    
-<img src="JuliaRL_OfflineDQN_CQL_CartPole.png" width="50%" height="50%">
-</div>
+
+\dfig{body;JuliaRL_OfflineDQN_CQL_CartPole.png}
 
 Currently, this function only supports discrete action space and CQL(H) method. 
 
 ##### Critic Regularizer Regression (CRR)
-CRR$^{[3]}$ is a Behavior Cloning (BC) based method. To filter out bad actions and enables learning better policies from low-quality data, CRR utilizes the advantage function to regularize the learning objective of the actor. Pseudocode is as follows:
+CRR\dcite{DBLP:conf/nips/0001NZMSRSSGHF20} is a Behavior Cloning (BC) based method. To filter out bad actions and enables learning better policies from low-quality data, CRR utilizes the advantage function to regularize the learning objective of the actor. Pseudocode is as follows:
 
-<div  align="center">    
-<img src="CRR.png" width="90%" height="90%">
-</div>
+\dfig{body;CRR.png}
 
 In different tasks, $f$ has different choices:
 $$
@@ -194,24 +216,20 @@ Different action spaces will also affect the implementation of the Actor-Critic.
 
 Performance curve of discrete CRR algorithm in CartPole:
 
-<div  align="center">    
-<img src="JuliaRL_CRR_CartPole.png" width="50%" height="50%">
-</div>
+\dfig{body;JuliaRL_CRR_CartPole.png}
 
 The continuous CRR algorithm still has some bugs and poor performance. 
 
 ##### Policy in the Latent Action Space (PLAS)
-PLAS$^{[4]}$ is a policy constrain method suitable for continuous control tasks. Unlike BCQ and BEAR, PLAS implicitly constrains the policy to output actions within the support of the behavior policy through the latent action space:
-<div  align="center">    
-<img src="PLAS1.png" width="60%" height="60%">
-</div>
+PLAS\dcite{DBLP:journals/corr/abs-2011-07213} is a policy constrain method suitable for continuous control tasks. Unlike BCQ and BEAR, PLAS implicitly constrains the policy to output actions within the support of the behavior policy through the latent action space:
+
+\dfig{body;PLAS1.png}
 
 PLAS pre-trains a CVAE (Conditional Variational Auto-Encoder) to constrain policy. In the pre-training phase, PLAS samples state-action pairs to train CVAE. PLAS needs to learn a deterministic policy mapping state to latent action and then uses CVAE mapping latent action to action in the training phase. When PLAS mapping state or latent action, it needs to use `tanh` function to limit the output range. 
 
 The advantage of pre-training VAE is that it can accelerate the convergence, and it is easier to train when encountered with complex action spaces and import existing VAE models. Its pseudocode is as follows:
-<div  align="center">    
-<img src="PLAS2.png" width="70%" height="70%">
-</div>
+
+\dfig{body;PLAS2.png}
 
 Please refer to this link for specific code ([link](https://github.com/pilgrimygy/ReinforcementLearning.jl/blob/framework/src/ReinforcementLearningZoo/src/algorithms/offline_rl/PLAS.jl)). The brief function parameters are as follows:
 ```julia
@@ -228,7 +246,25 @@ mutable struct PLASLearner{BA1, BA2, BC1, BC2, V, R} <: AbstractLearner
     pretrain_step::Int
 end
 ```
-If the algorithm requires pre-training, please specify the parameter `pretrain_step` and function `update!`. In PLAS, we use conditional statements to select training components:
+If the algorithm requires pre-training, please specify the parameter `pretrain_step` and function `update!`. We modified the run function and added an interface:
+```julia
+function (agent::Agent)(stage::PreExperimentStage, env::AbstractEnv)
+    update!(agent.policy, agent.trajectory, env, stage)
+end
+
+function RLBase.update!(p::OfflinePolicy, traj::AbstractTrajectory, ::AbstractEnv, ::PreExperimentStage)
+    l = p.learner
+    if in(:pretrain_step, fieldnames(typeof(l)))
+        println("Pretrain...")
+        for _ in 1:l.pretrain_step
+            inds, batch = sample(l.rng, p.dataset, p.batch_size)
+            update!(l, batch)
+        end
+    end
+end
+```
+
+In PLAS, we use conditional statements to select training components:
 ```julia
 function RLBase.update!(l::PLASLearner, batch::NamedTuple{SARTS})
     if l.update_step == 0
@@ -241,16 +277,14 @@ end
 `λ` is the parameter of clipped double Q-learning (used for Critic training), a small trick to reduce overestimation. Actor training uses the standard policy gradient method.
 
 Performance curve of PLAS algorithm in Pendulum (`pertrain_step=1000`):
-<div  align="center">    
-<img src="JuliaRL_PLAS_Pendulum.png" width="50%" height="50%">
-</div>
+\dfig{body;JuliaRL_PLAS_Pendulum.png}
 
 However, the action perturbation component in PLAS has not yet been completed and needs to be implemented in the second stage.
 
 #### Other Work
 In addition to the above work, we also did the following:
 - Add `copyto` function in `ActorCritic`. This function is needed to synchronize between target Actor-Critic and online Actor-Critic.
-- Add the tuning entropy component$^{[5]}$ in SAC to improve performance.
+- Add the tuning entropy component\dcite{DBLP:journals/corr/abs-1812-05905} in SAC to improve performance.
 
 #### Conclusion
 During this process, we learn a lot:
@@ -270,19 +304,8 @@ The following is our future plan:
 | September24 - September30 | Write build-in documentation and technical report. Buffer for unexpected delay. |
 | After project | Carry on fixing issues and maintain implemented algorithms.   |
 
-Firstly, we need to fix bugs in continuous CRR and finish action perturbation component in PLAS. The current progress is slightly faster than the originally set progress, so we can implement more of the modern offline RL algorithms. The current plan includes UWAC$^{[6]}$ and FisherBRC$^{[7]}$ published on ICML'21. Here we briefly introduce these two algorithms:
-- Uncertainty Weighted Actor-Critic (UWAC). The algorithm is based on the improvement of BEAR$^{[8]}$. The authors adopt a practical and effective dropout-based uncertainty estimation method, Monte Carlo (MC) dropout, to identify and ignore OOD training samples, to introduce very little overhead over existing RL algorithms.
-- Fisher Behavior Regularized Critic (Fisher-BRC). The algorithm is based on the improvement of BRAC$^{[9]}$. The authors propose an approach to parameterize the critic as the log-behavior-policy, which generated the offline data, plus a state-action value offset term. Behavior regularization then corresponds to an appropriate regularizer on the offset term. They propose using the Fisher divergence regularization for the offset term.
+Firstly, we need to fix bugs in continuous CRR and finish action perturbation component in PLAS. The current progress is slightly faster than the originally set progress, so we can implement more of the modern offline RL algorithms. The current plan includes UWAC\dcite{DBLP:conf/icml/0001ZSSZSG21} and FisherBRC\dcite{DBLP:conf/icml/KostrikovFTN21} published on ICML'21. Here we briefly introduce these two algorithms:
+- Uncertainty Weighted Actor-Critic (UWAC). The algorithm is based on the improvement of BEAR\dcite{DBLP:conf/nips/KumarFSTL19}. The authors adopt a practical and effective dropout-based uncertainty estimation method, Monte Carlo (MC) dropout, to identify and ignore OOD training samples, to introduce very little overhead over existing RL algorithms.
+- Fisher Behavior Regularized Critic (Fisher-BRC). The algorithm is based on the improvement of BRAC\dcite{DBLP:journals/corr/abs-1911-11361}. The authors propose an approach to parameterize the critic as the log-behavior-policy, which generated the offline data, plus a state-action value offset term. Behavior regularization then corresponds to an appropriate regularizer on the offset term. They propose using the Fisher divergence regularization for the offset term.
 
 In this way, the implemented algorithms basically include the mainstream of the policy constraint method in offline reinforcement learning (including distribution matching, support constrain, implicit constraint, behavior cloning).
-
-## References
-[1] Kingma, Diederik P., and Max Welling. "Auto-encoding variational bayes." arXiv preprint arXiv:1312.6114 (2013).
-[2] Kumar, Aviral, et al. "Conservative q-learning for offline reinforcement learning." Advances in neural information processing systems (NeurIPS), 2020.
-[3] Wang, Ziyu, et al. "Critic regularized regression." Advances in neural information processing systems (NeurIPS), 2020.
-[4] Zhou, Wenxuan, Sujay Bajracharya, and David Held. "PLAS: Latent action space for offline reinforcement learning.“ In Conference on Robot Learning (CoRL), 2020.
-[5] Haarnoja, Tuomas, et al. "Soft actor-critic algorithms and applications." arXiv preprint arXiv:1812.05905 (2018).
-[6] Wu, Yue, et al. "Uncertainty Weighted Actor-Critic for Offline Reinforcement Learning." International Conference on Machine Learning (ICML). PMLR, 2021.
-[7] Kostrikov, Ilya, et al. "Offline reinforcement learning with fisher divergence critic regularization." International Conference on Machine Learning (ICML). PMLR, 2021.
-[8] Kumar, A., Fu, J., Soh, M., Tucker, G., and Levine, S. Stabilizing off-policy q-learning via bootstrapping error reduction. In Advances in Neural Information Processing Systems (NeurIPS), 2019.
-[9] Wu, Yifan, George Tucker, and Ofir Nachum. "Behavior regularized offline reinforcement learning." arXiv preprint arXiv:1911.11361 (2019).
