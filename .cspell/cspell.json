@@ -121,6 +121,9 @@
         "gzopen",
         "turbulences",
         "Decompressor",
+        "PLAS",
+        "CRR",
+        "reparamaterize",
         "MADDPG"
     ],
     "ignoreWords": [],
