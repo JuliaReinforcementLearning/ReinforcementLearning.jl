@@ -1,4 +1,5 @@
 export NeuralNetworkApproximator, ActorCritic, GaussianNetwork, DuelingNetwork
+export VAE, decode, vae_loss
 
 using Flux
 using Random
@@ -113,6 +114,16 @@ function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_
     model(Random.GLOBAL_RNG, state; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
 end
 
+function (model::GaussianNetwork)(state, action)
+    x = model.pre(state)
+    μ, raw_logσ = model.μ(x), model.logσ(x) 
+    logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
+    π_dist = Normal.(μ, exp.(logσ))
+    action = atanh.(action)
+    logp_π = sum(logpdf.(π_dist, action) .- (2.0f0 .* (log(2.0f0) .- action .- softplus.(-2.0f0 .* action))), dims = 1)
+    return logp_π
+end
+
 #####
 # DuelingNetwork
 #####
@@ -134,4 +145,46 @@ function (m::DuelingNetwork)(state)
     x = m.base(state)
     val = m.val(x)
     return val .+ m.adv(x) .- mean(m.adv(x), dims=1)
+end
+
+#####
+# VAE (Variational Auto-Encoder)
+#####
+
+"""
+    VAE(;encoder, decoder)
+"""
+Base.@kwdef struct VAE{E, D}
+    encoder::E
+    decoder::D
+end
+
+Flux.@functor VAE
+
+function (model::VAE)(rng::AbstractRNG, state, action)
+    μ, logσ = model.encoder(vcat(state, action))
+    σ = exp.(logσ)
+    z = reparamaterize.(rng, μ, σ)
+    u = decode(model, state, z)
+    return u, μ, σ
+end
+
+function (model::VAE)(state, action)
+    return model(Random.GLOBAL_RNG, state, action)
+end
+
+function reparamaterize(rng, μ, σ)
+    return Float32(rand(rng, Normal(0, 1))) * σ + μ
+end
+
+function decode(model::VAE, state, z)
+    a = model.decoder(vcat(state, z))
+    return tanh.(a)
+end
+
+function vae_loss(model::VAE, state, action)
+    u, μ, σ = model(state, action)
+    recon_loss = Flux.Losses.mse(u, action)
+    kl_loss = -0.5f0 * mean(1.0f0 .+ log.(σ .^ 2) .- μ .^ 2 .- σ .^ 2)
+    return recon_loss, kl_loss
 end
