@@ -16,6 +16,7 @@ function check(policy, env) end
 function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook::AbstractHook)
 
     hook(PRE_EXPERIMENT_STAGE, policy, env)
+    policy(PRE_EXPERIMENT_STAGE, env)
     is_stop = false
     while !is_stop
         reset!(env)

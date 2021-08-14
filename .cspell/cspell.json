@@ -136,7 +136,11 @@
         "Heess",
         "Nando",
         "Freitas",
-        "bufsize"
+        "bufsize",
+        "PLAS",
+        "CRR",
+        "reparamaterize",
+        "MADDPG"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
