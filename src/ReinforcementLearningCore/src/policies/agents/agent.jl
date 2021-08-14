@@ -160,3 +160,10 @@ function RLBase.update!(
     push!(trajectory[:reward], r)
     push!(trajectory[:terminal], is_terminated(env))
 end
+
+#####
+# Pre-training
+#####
+function (agent::Agent)(stage::PreExperimentStage, env::AbstractEnv)
+    update!(agent.policy, agent.trajectory, env, stage)
+end
