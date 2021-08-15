@@ -29,5 +29,3 @@
   - [Chapter11 Counter Example.jl](/blog/notebooks_for_reinforcement_learning_an_introduction/Chapter11_Counter_Example.jl)
   - [Chapter12 Random Walk.jl](/blog/notebooks_for_reinforcement_learning_an_introduction/Chapter12_Random_Walk.jl)
   - [Chapter13 Short Corridor.jl](/blog/notebooks_for_reinforcement_learning_an_introduction/Chapter13_Short_Corridor.jl)
-
-- [Phase 1 Technical Report of Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl](/blog/offline_reinforcement_learning_algorithm_phase1)
