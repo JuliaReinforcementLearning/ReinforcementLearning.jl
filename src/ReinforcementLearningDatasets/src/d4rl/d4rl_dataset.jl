@@ -9,7 +9,7 @@ export dataset
 export D4RLDataSet
 
 """
-Represents an iterable dataset of type D4RLDataSet with the following fields:
+Represents an iterable dataset of type `D4RLDataSet` with the following fields:
 
 `dataset`: Dict{Symbol, Any}, representation of the dataset as a Dictionary with style as `style`
 `repo`: String, the repository from which the dataset is taken
