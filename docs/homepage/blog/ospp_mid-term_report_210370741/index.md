@@ -80,6 +80,14 @@ Refer the following [discussion](https://github.com/JuliaReinforcementLearning/R
 
 ## 3. Implemented datasets
 
+### Installation details
+
+To install the `ReinforcementLearningDatasets.jl` package use the following command in julia's `pkg` mode.
+
+```
+pkg> add https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl:src/ReinforcementLearningDatasets
+```
+
 ### D4RL
 
 Added support for D4RL datasets with all features loaded in the returned type.
