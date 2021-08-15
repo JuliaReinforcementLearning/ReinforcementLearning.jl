@@ -99,6 +99,9 @@ Now, you could `take` the values of the `ds` or `iterate` over it.
 
 ```
 julia> batches = Iterators.take(ds, 2)
+D4RLDataSet{StableRNGs.LehmerRNG}(Dict{Symbol, Any}(:reward => Float32[0.9236555, 0.8713692, 0.92237693, 0.9839225, 0.91540813, 0.8331875, 0.8102179, 0.78385466, 0.7304337, 0.6942671  …  5.0350657, 5.005931, 4.998442, 4.986662, 4.9730926, 4.9638906, 4.9503803, 4.9326644, 4.8952913, 4.8448896], :state => Float32[1.2521756 1.2519351 … 0.72994494 0.7145643; 0.00026937472 -0.0048946342 … 0.13946348 0.15210924; … ; 0.002733759 -1.1853988 … -0.06101464 -0.045892276; -0.0028058232 0.08466121 … -1.4235892 -1.0558393], :action => Float32[-0.67060924 -0.39061046 … -0.15234122 -0.1382414; -0.9329903 0.65977097 … 0.9518685 0.9666188; 0.010210991 -0.073685646 … 0.24721281 -0.2440847], :terminal => Int8[0, 0, 0, 0, 0, 0, 0, 0, 0, 0  …  0, 0, 0, 0, 0, 0, 0, 0, 0, 1]), "d4rl", 200919, 256, (:state, :action, :reward, :terminal, :next_state), StableRNGs.LehmerRNG(state=0x000000000000000000000000000000f7), Dict{String, Any}("timeouts" => Int8[0, 0, 0, 0, 0, 0, 0, 0, 0, 0  …  0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), true)
+
+julia> typeof(batches)
 Base.Iterators.Take{D4RLDataSet{StableRNGs.LehmerRNG}}
 
 julia> batch = collect(batches)[1]
