@@ -124,7 +124,9 @@
         "PLAS",
         "CRR",
         "reparamaterize",
-        "MADDPG"
+        "MADDPG",
+        "Guoyu",
+        "LAMDA"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
