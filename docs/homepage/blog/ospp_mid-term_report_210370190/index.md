@@ -1,6 +1,6 @@
-@def title = "Implement Multi-Agent Reinforcement Learning Algorithms in Julia (Summer OSPP Project 210370190) Mid-term Report"
+@def title = "Implement Multi-Agent Reinforcement Learning Algorithms in Julia"
 @def description = """
-    This is a mid-term report of the summer ospp project [Implement Multi-Agent Reinforcement Learning Algorithms in Julia](https://summer.iscas.ac.cn/#/org/prodetail/210370190?lang=en). The report includes the following three components: `Project Information`, `Implementation and Usage of Algorithms` and `Reviews and Future Plan`.
+    This is a technical report of the summer OSPP project [Implement Multi-Agent Reinforcement Learning Algorithms in Julia](https://summer.iscas.ac.cn/#/org/prodetail/210370190?lang=en). In this report, the following three parts are covered: the first section is a basic introduction to the project, the second section contains the implementation details of several multi-agent algorithms, and in the last section we discussed our future plan.
     """
 @def is_enable_toc = true
 @def has_code = true
@@ -12,8 +12,8 @@
             {
                 "author":"Peter Chen",
                 "authorURL":"https://github.com/peterchen96",
-                "affiliation":"",
-                "affiliationURL":""
+                "affiliation":"ECNU",
+                "affiliationURL":"http://english.ecnu.edu.cn/"
             }
         ],
         "publishedDate":"2021-08-13",
@@ -24,15 +24,9 @@
 
 ## 1. Project Information
 
-### Project Name
-
-Implement Multi-Agent Reinforcement Learning Algorithms in Julia
-
-### Scheme Description
-
 Recent advances in reinforcement learning led to many breakthroughs in artificial intelligence. Some of the latest deep reinforcement learning algorithms have been implemented in ReinforcementLearning.jl with Flux. Currently, we only have some CFR related algorithms implemented. We'd like to have more implemented, including MADDPG, COMA, NFSP, PSRO.
 
-### Time Planning
+### Schedule
 
 | Date       | Mission Content |
 | :-----------: | :---------: |
@@ -47,7 +41,7 @@ Recent advances in reinforcement learning led to many breakthroughs in artificia
 
 ### Accomplished Work
 
-From July 1st to now, I mainly have implemented the `Neural Fictitious Self-play`(NFSP) algorithm into `ReinforcementLearningZoo.jl`(RLZoo.jl) and add one relative experiment in the documentation. Also `Multi-agent Deep Deterministic Policy Gradient`(MADDPG) algorithm's semi-finished implementation has been placed into `RLZoo.jl` and will test it on more envs in the next weeks. Related commits list as the following:
+From July 1st to now, I mainly have implemented the `Neural Fictitious Self-play`(NFSP) algorithm and added it into `ReinforcementLearningZoo.jl`(RLZoo.jl). A workable experiment is also added into the documentation. Besides, `Multi-agent Deep Deterministic Policy Gradient`(MADDPG) algorithm's semi-finished implementation has been placed into `RLZoo.jl` and will test it on more envs in the next weeks. Related commits are listed below:
 
 - [add Base.:(==) and Base.hash for AbstractEnv and test nash_conv on KuhnPokerEnv#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 - [Supplement functions in ReservoirTrajectory and BehaviorCloningPolicy #390](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/390)
@@ -55,13 +49,13 @@ From July 1st to now, I mainly have implemented the `Neural Fictitious Self-play
 - [correct nfsp implementation #439](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/439)
 - [add MADDPG algorithm #444](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/444)
 
-## 2. Implementation and usage of Algorithms
+## 2. Implementation and Usage
 
-This section will first briefly introduce the `Agent` struct and its usage, and then introduce the details about the implementation and usage of `NFSP` and `MADDPG.`
+In this section I will first briefly review the `Agent` structure defined in `ReinforcementLearning.jl`. Then I'll explain how I implemented `NFSP` and `MADDPG`, followed by a short example to demonstrate how others can use them in their customized environments.
 
-### 2.1 Introduction of `Agent`
+### 2.1 An Introduction to `Agent`
 
-`Agent` struct is an extended `AbstractPolicy` that includes the detailed policy and one trajectory, which collect the necessary information for training the policy. In the existing [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/agents/agent.jl), there have been defined default behaviors(like the following) when self-playing the game, which splits the updating process of the strategy into several stages, including `PreEpisodeStage`,  `PreActStage`, `PostActStage` and `PostEpisodeStage`. 
+The `Agent` struct is an extended `AbstractPolicy` which includes a concrete policy and a trajectory. The trajectory is used to collect necessary information to train the policy. In the existing [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/agents/agent.jl),  the lifecycle of the interactions between agents and environments is split into several stages, including `PreEpisodeStage`,  `PreActStage`, `PostActStage` and `PostEpisodeStage`.
 
 ```Julia
 function (agent::Agent)(stage::AbstractStage, env::AbstractEnv)
@@ -75,14 +69,16 @@ function (agent::Agent)(stage::PreActStage, env::AbstractEnv, action)
 end
 ```
 
-And when running the experiment, based on the built-in [`run`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/639717388fb41199c98b90406bea76232bc6294d/src/ReinforcementLearningCore/src/core/run.jl#L16) function(or can define a new `run` function for the algo if necessary), the `agent` can update its policy and trajectory based on the behaviors that we have defined. Thanks to the `multiple dispatch` in Julia,  the **main focus** when implementing the algo is that consider how to **customize the behavior** about collecting the training information and updating the policy when on the specific stage. More details can be referred to the [blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/#21_the_general_workflow).
+And when running the experiment, based on the built-in [`run`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/639717388fb41199c98b90406bea76232bc6294d/src/ReinforcementLearningCore/src/core/run.jl#L16) function, the `agent` can update its policy and trajectory based on the behaviors that we have defined. Thanks to the `multiple dispatch` in Julia,  the **main focus** when implementing a new algorithm is how to **customize the behavior** of collecting the training information and updating the policy when at the specific stage. For more details you can refer this [blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/#21_the_general_workflow).
 
 ### 2.2 Neural Fictitious Self-play(NFSP) algorithm
 
 #### Brief Introduction
+
 Neural Fictitious Self-play(NFSP)\dcite{DBLP:journals/corr/HeinrichS16} algorithm is a useful multi-agent algorithm that works well for imperfect-information games. Each agent who applies the `NFSP` algo will include one `Reinforcement Learning`(RL) agent and one `Supervised Learning`(SL) agent. **RL agent** works to find the best response to the state from the self-play process, and **SL agent** works to learn the best response from RL agent's policy. What's more, `NFSP` also uses two technical innovations to ensure stability, including [reservoir sampling](https://en.wikipedia.org/wiki/Reservoir_sampling) for SL agent and anticipatory dynamics when training.
 
 #### Implementation
+
 In RLZoo.jl, I implement the [`NFSPAgent`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/nfsp.jl) which define the `NFSPAgent` struct and design the behaviors about it according to the `NFSP` algo\dcite{DBLP:journals/corr/HeinrichS16}, including collecting needed information and how to update the policy. And the [`NFSPAgentManager`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/nfsp_manager.jl) is a special multi-agent manager that all agents apply `NFSP` algo. Besides, the [`abstract_nfsp`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/abstract_nfsp.jl) customize the `run` function for `NFSPAgentManager`.
 
 Since the core of the algo is how to customize the `NFSPAgent`, the following content in this section will only be around it. The structure of `NFSPAgent` is as the following:
