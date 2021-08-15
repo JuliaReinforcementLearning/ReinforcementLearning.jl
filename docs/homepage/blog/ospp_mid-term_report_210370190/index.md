@@ -33,8 +33,8 @@ Recent advances in reinforcement learning led to many breakthroughs in artificia
 | 07/01 -- 07/14 | Refer to the paper and the existing implementation to get familiar with the `NFSP` algorithm. |
 | 07/15 -- 07/29 | Add `NFSP` algorithm into `RLZoo.jl`, and test it on the `KuhnPokerEnv`. |
 | 07/30 -- 08/07 | Fix the existing bugs of `NFSP` and implement the `MADDPG` algorithm into `RLZoo.jl`. |
-| 08/08 -- 08/15 | Update the `MADDPG` algo and test it on the `KuhnPokerEnv`,  also complete the **mid-term report**. |
-| 08/16 -- 08/30 | Test `MADDPG` algo on more envs and consider implementing the `ED` algorithm into `RLZoo.jl`. |
+| 08/08 -- 08/15 | Update the `MADDPG` algorithm and test it on the `KuhnPokerEnv`,  also complete the **mid-term report**. |
+| 08/16 -- 08/30 | Test `MADDPG` algorithm on more envs and consider implementing the `ED` algorithm into `RLZoo.jl`. |
 | 08/31 -- 09/07 | Complete the `ED` implementation, and add relative experiments. |
 | 09/08 -- 09/14 | Consider implementing `PSRO` algorithm into `RLZoo.jl`. |
 | 09/15 -- 09/30 | Complete `PSRO` implementation and add relative experiments, also complete the **final-term report**. |
@@ -79,9 +79,9 @@ Neural Fictitious Self-play(NFSP)\dcite{DBLP:journals/corr/HeinrichS16} algorith
 
 #### Implementation
 
-In RLZoo.jl, I implement the [`NFSPAgent`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/nfsp.jl) which define the `NFSPAgent` struct and design its behaviors according to the `NFSP` algo\dcite{DBLP:journals/corr/HeinrichS16}, including collecting needed information and how to update the policy. And the [`NFSPAgentManager`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/nfsp_manager.jl) is a special multi-agent manager that all agents apply `NFSP` algorithm. Besides, the [`abstract_nfsp`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/abstract_nfsp.jl) customize the `run` function for `NFSPAgentManager`.
+In RLZoo.jl, I implement the [`NFSPAgent`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/nfsp.jl) which define the `NFSPAgent` struct and design its behaviors according to the `NFSP` algorithm\dcite{DBLP:journals/corr/HeinrichS16}, including collecting needed information and how to update the policy. And the [`NFSPAgentManager`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/nfsp_manager.jl) is a special multi-agent manager that all agents apply `NFSP` algorithm. Besides, the [`abstract_nfsp`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/abstract_nfsp.jl) customize the `run` function for `NFSPAgentManager`.
 
-Since the core of the algo is how to customize the `NFSPAgent`, the following content in this section will only be around it. The structure of `NFSPAgent` is as the following:
+Since the core of the algorithm is how to customize the `NFSPAgent`, the following content in this section will only be around it. The structure of `NFSPAgent` is as the following:
 ```Julia
 mutable struct NFSPAgent <: AbstractPolicy
     rl_agent::Agent
@@ -175,7 +175,7 @@ end
 
 According to the paper\dcite{DBLP:journals/corr/HeinrichS16}, here, the RL agent is default as `QBasedPolicy` with `CircularArraySARTTrajectory.` The SL agent is default as `BehaviorCloningPolicy` with `ReservoirTrajectory.` So you can customize the agent under the restriction and test the algo on any interested multi-agent game. **Note that** if the game's states can't be used as the network's input, you need to [wrap](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/src/ReinforcementLearningEnvironments/src/environments/wrappers/StateTransformedEnv.jl#L9) them before using the algorithm.
 
-Here is one experiment [`JuliaRL_NFSP_KuhnPoker.jl`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl) as one usage example, which tests the algorithm on the Kuhn Poker game. Since the type of states in the existing [`KuhnPokerEnv`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/639717388fb41199c98b90406bea76232bc6294d/src/ReinforcementLearningEnvironments/src/environments/examples/KuhnPokerEnv.jl#L1) in `ReinforcementLearningEnvironments.jl` is `tuple`, I simply encode the state just like the following:
+Here is one experiment [`JuliaRL_NFSP_KuhnPoker.jl`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl) as one usage example, which tests the algorithm on the Kuhn Poker game. Since the type of states in the existing [`KuhnPokerEnv`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/639717388fb41199c98b90406bea76232bc6294d/src/ReinforcementLearningEnvironments/src/environments/examples/KuhnPokerEnv.jl#L1) in `ReinforcementLearningEnvironments.jl` is the `tuple` of symbols, I simply encode the state just like the following:
 ```Julia
 env = KuhnPokerEnv()
 wrapped_env = StateTransformedEnv(
@@ -388,11 +388,11 @@ Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/Rei
 
 ### 3.1 Reviews
 
-From applying the project to now, since spending much time on getting familiar with the algorithm and structure of RL.jl, my progress was slow in the initial weeks. However, thanks to the mentor's patience in leading, I realize the convenience of the general workflow in RL.jl and improve my comprehension of the algo.
+From applying the project to now, since spending much time on getting familiar with the algorithm and structure of RL.jl, my progress was slow in the initial weeks. However, thanks to the mentor's patience in leading, I realize the convenience of the general workflow in RL.jl and improve my comprehension of the algorithm.
 
 ### 3.2 Future Plan
 
-In the `Time Planning`, I have listed a draft plan for the next serval weeks. In detail, I want to complete the following missions:
+In the first section's `Schedule`, I have listed a draft plan for the next serval weeks. In detail, I want to complete the following missions:
 
 - Test `MADDPG` on more suitable envs and add relative experiments. (08/16 - 08/23)
 - Consider implementing the `Exploitability Descent`(ED) algorithm and add related experiments. (08/24 - 09/07)
