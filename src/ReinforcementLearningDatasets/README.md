@@ -3,11 +3,13 @@
 A package to create, manage, store and retrieve datasets for Offline Reinforcement Learning. This package uses [DataDeps.jl](https://github.com/oxinabox/DataDeps.jl) to fetch and track datasets.
 ## Install
 Since the package is not registered, you could install the package using the following command.
-```julia
-] add https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningDatasets
+```
+pkg> add https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl:src/ReinforcementLearningDatasets
 ```
 ## Usage
+
 ### Examples
+
 #### D4RL dataset
 ```julia
 using ReinforcementLearningDatasets
