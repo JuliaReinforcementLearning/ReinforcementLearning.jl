@@ -1,4 +1,5 @@
 using ReinforcementLearning
+using ReinforcementLearningDatasets
 using Documenter
 using Markdown
 using DemoCards
