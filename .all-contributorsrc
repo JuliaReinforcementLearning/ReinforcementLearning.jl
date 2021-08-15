@@ -356,6 +356,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "peterchen96",
+      "name": "Peter Chen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25033565?v=4",
+      "profile": "https://github.com/peterchen96",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
