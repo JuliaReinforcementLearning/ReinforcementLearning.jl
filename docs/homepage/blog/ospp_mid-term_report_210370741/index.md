@@ -35,7 +35,7 @@ Establish a General Pipeline for Offline Reinforcement Learning Evaluation
 
 ### Background
 
-In the recent years, there has been several breakthroughs in the field of Reinforcement Learning with numerous practical applications where RL bots have been able to achieve superhuman performance. This is also reflected in the industry where several cutting edge solutions have been developed based on RL (Tesla Motors, AutoML, DeepMind data center cooling solutions just to name a few). 
+In the recent years, there has been several breakthroughs in the field of Reinforcement Learning with numerous practical applications where RL bots have been able to achieve superhuman performance. This is also reflected in the industry where several cutting edge solutions have been developed based on RL (Tesla Motors, AutoML, DeepMind data center cooling solutions just to name a few).
 
 One of the most notorious challenges in RL is the lack of reliable environments for training RL agents. Offline RL has played a pivotal role in solving this problem by removing the need for the agent to interact with the environment to improve its policy over time. This brings forth the problem of having reliable tests to verify the performance of RL algorithms. Such tests are facilitated by standard datasets ([RL Unplugged](https://arxiv.org/abs/2006.13888), [D4RL](https://arxiv.org/abs/2004.07219) to name a few) that are used to train Offline RL agents and benchmark against other algorithms and implementations. [ReinforcementLearningDatasets.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningDatasets) provides a simple solution to access various standard datasets that are available for Offline RL benchmarking across a variety of tasks.
 
@@ -289,7 +289,7 @@ data = h5open(path*"/"*file_name, "r") do file
 end
 ```
 
-The the dataset is loaded into `D4RLDataSet` iterable and returned and the iteration logic is also implemented in the same file using `Iterator` interfaces.
+The dataset is loaded into `D4RLDataSet` iterable and returned. The iteration logic is also implemented in the same file using `Iterator` interfaces.
 
 #### RL Unplugged Atari
 
