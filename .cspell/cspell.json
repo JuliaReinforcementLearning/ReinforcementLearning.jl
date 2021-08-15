@@ -140,7 +140,8 @@
         "PLAS",
         "CRR",
         "reparamaterize",
-        "MADDPG"
+        "MADDPG",
+        "rldatasets"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
