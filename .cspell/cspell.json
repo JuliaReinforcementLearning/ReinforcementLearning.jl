@@ -143,7 +143,8 @@
         "CRR",
         "reparamaterize",
         "MADDPG",
-        "rldatasets"
+        "rldatasets",
+        "Trichy",
     ],
     "ignoreWords": [],
     "minWordLength": 5,
