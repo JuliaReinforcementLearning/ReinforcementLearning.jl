@@ -222,6 +222,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/LaarsOman"><img src="https://avatars.githubusercontent.com/u/88617671?v=4?s=100" width="100px;" alt=""/><br /><sub><b>LaarsOman</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=LaarsOman" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/burmecia"><img src="https://avatars.githubusercontent.com/u/19306324?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bo Lu</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=burmecia" title="Code">💻</a></td>
   </tr>
 </table>
 

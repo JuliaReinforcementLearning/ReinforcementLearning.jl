@@ -124,6 +124,10 @@
         "MADDPG",
         "Prasidh",
         "Srikumar"
+        "PLAS",
+        "CRR",
+        "reparamaterize",
+        "MADDPG"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
