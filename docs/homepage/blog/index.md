@@ -3,7 +3,7 @@
 @def is_enable_toc = false
 
 - [An Introduction to ReinforcementLearning.jl: Design, Implementations and Thoughts](/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts)
-
+- [Establish a General Pipeline for Offline Reinforcement Learning Evaluation (Summer OSPP Project 210370741) Mid-term Report](/blog/ospp_mid-term_report_210370741)
 - Notebooks for the book: [*Reinforcement Learning: an Introduction 2nd
   Edition*](https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl)
 
@@ -29,5 +29,3 @@
   - [Chapter11 Counter Example.jl](/blog/notebooks_for_reinforcement_learning_an_introduction/Chapter11_Counter_Example.jl)
   - [Chapter12 Random Walk.jl](/blog/notebooks_for_reinforcement_learning_an_introduction/Chapter12_Random_Walk.jl)
   - [Chapter13 Short Corridor.jl](/blog/notebooks_for_reinforcement_learning_an_introduction/Chapter13_Short_Corridor.jl)
-
-  - [Establish a General Pipeline for Offline Reinforcement Learning Evaluation (Summer OSPP Project 210370741) Mid-term Report](/blog/ospp_mid-term_report_210370741)
