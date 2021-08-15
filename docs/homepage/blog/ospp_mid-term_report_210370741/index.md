@@ -16,7 +16,7 @@
                 "affiliationURL":"https://www.nitt.edu/"
             }
         ],
-        "publishedDate":"2021-08-14",
+        "publishedDate":"2021-08-15",
         "citationText":"Prasidh Srikumar, 2021"
     }"""
 
