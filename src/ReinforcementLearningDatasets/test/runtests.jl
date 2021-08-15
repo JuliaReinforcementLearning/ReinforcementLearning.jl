@@ -8,5 +8,6 @@ ENV["DATADEPS_ALWAYS_ACCEPT"] = "true"
 @testset "ReinforcementLearningDatasets.jl" begin
     include("dataset.jl")
     include("d4rl_pybullet.jl")
+    include("rl_unplugged_atari.jl")
     # include("atari_dataset.jl")
 end
