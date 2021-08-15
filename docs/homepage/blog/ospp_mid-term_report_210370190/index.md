@@ -16,7 +16,7 @@
                 "affiliationURL":"http://english.ecnu.edu.cn/"
             }
         ],
-        "publishedDate":"2021-08-13",
+        "publishedDate":"2021-08-15",
         "citationText":"Peter Chen, 2021"
     }"""
 
@@ -268,7 +268,7 @@ nfsp = NFSPAgentManager(
 )
 ```
 
-Based on the setting [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L126) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L15), you can just `run(nfsp, wrapped_env, stop_condition, hook)` to perform the experiment. The **result** of the experiment is just like the following.
+Based on the setting [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L126) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L15), you can just `run(nfsp, wrapped_env, stop_condition, hook)` to perform the experiment. Use [`Plots.plot`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/66a9c7e41416c4b959c66b07d06d67915dc4b628/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L136) to get the following result: (here [`nash_conv`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/639717388fb41199c98b90406bea76232bc6294d/src/ReinforcementLearningZoo/src/algorithms/cfr/nash_conv.jl#L1) is one common metric to show the performance of a multi-agent reinforcement learning algorithm.)
 
 \dfig{body;JuliaRL_NFSP_KuhnPoker.png;Result of the experiment.}
 
@@ -378,7 +378,7 @@ agents = MADDPGManager(
 )
 ```
 
-Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L110) and [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L15), you can experiment by `run(agents, wrapped_env, stop_condition, hook)`. The **result** of the experiment is just like the following:
+Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L110) and [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L15), you can experiment by `run(agents, wrapped_env, stop_condition, hook)`. Use [`Plots.scatter`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/66a9c7e41416c4b959c66b07d06d67915dc4b628/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L119) to get the following result:
 
 \dfig{body;JuliaRL_MADDPG_KuhnPoker.png;Result of the experiment.}
 
@@ -388,7 +388,7 @@ Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/Rei
 
 ### 3.1 Reviews
 
-From applying the project to now, since spending much time on getting familiar with the algorithm and structure of RL.jl, my progress was slow in the initial weeks. However, thanks to the mentor's patience in leading, I realize the convenience of the general workflow in RL.jl and improve my comprehension of the algorithm.
+From applying the project to now, since spending much time on getting familiar with the algorithm and structure of RL.jl, my progress was slow in the initial weeks. However, thanks to the mentor's patience in leading, I realize the convenience of the general workflow in RL.jl and improve my comprehension of the algorithms.
 
 ### 3.2 Future Plan
 
