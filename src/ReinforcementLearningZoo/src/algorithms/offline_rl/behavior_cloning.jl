@@ -57,7 +57,7 @@ function RLBase.update!(p::BehaviorCloningPolicy, t::AbstractTrajectory)
     (length(t) <= p.min_reservoir_history || length(t) <= p.sampler.batch_size) && return
 
     _, batch = p.sampler(t)
-    RLBase.update!(p, send_to_device(device(p.approximator), batch))
+    update!(p, send_to_device(device(p.approximator), batch))
 end
 
 function RLBase.prob(p::BehaviorCloningPolicy, env::AbstractEnv)

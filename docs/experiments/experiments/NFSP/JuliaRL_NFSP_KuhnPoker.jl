@@ -118,7 +118,7 @@ function RL.Experiment(
                 rng,
                 128, # update_freq
                 0, # initial update_step
-                true, # initial NFSPAgent's learn mode
+                true, # initial NFSPAgent's training mode
             )) for player in players(wrapped_env) if player != chance_player(wrapped_env)
         )
     )

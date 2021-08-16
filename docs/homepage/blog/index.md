@@ -2,7 +2,13 @@
 @def description = ""
 @def is_enable_toc = false
 
+- [Implement Multi-Agent Reinforcement Learning Algorithms in Julia (Summer OSPP Project 210370190) Mid-term Report](/blog/ospp_mid-term_report_210370190)
+
 - [An Introduction to ReinforcementLearning.jl: Design, Implementations and Thoughts](/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts)
+
+- [Phase 1 Technical Report of Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl](/blog/offline_reinforcement_learning_algorithm_phase1)
+
+- [Establish a General Pipeline for Offline Reinforcement Learning Evaluation (Summer OSPP Project 210370741) Mid-term Report](/blog/ospp_mid-term_report_210370741)
 
 - Notebooks for the book: [*Reinforcement Learning: an Introduction 2nd
   Edition*](https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl)
