@@ -122,6 +122,8 @@
         "turbulences",
         "Decompressor",
         "MADDPG",
+        "Prasidh",
+        "Srikumar",
         "Caglar",
         "Gulcehre",
         "Novikov",
@@ -144,6 +146,7 @@
         "Guoyu",
         "LAMDA",
         "rldatasets",
+        "Trichy",
         "Prasidh",
         "Srikumar"
     ],
