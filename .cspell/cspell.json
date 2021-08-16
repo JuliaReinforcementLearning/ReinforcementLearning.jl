@@ -122,6 +122,8 @@
         "turbulences",
         "Decompressor",
         "MADDPG",
+        "Prasidh",
+        "Srikumar",
         "Caglar",
         "Gulcehre",
         "Novikov",
@@ -142,6 +144,7 @@
         "reparamaterize",
         "MADDPG",
         "rldatasets",
+        "Trichy",
         "Prasidh",
         "Srikumar"
     ],
