@@ -2,7 +2,7 @@ using NPZ
 using CodecZlib
 
 """
-Represents an iterable dataset` with the following fields:
+Represents an `Iterable` dataset with the following fields:
 
 # Fields
 - `dataset::Dict{Symbol, Any}`: representation of the dataset as a Dictionary with style as `style`.
