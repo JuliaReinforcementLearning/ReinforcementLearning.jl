@@ -75,11 +75,9 @@ And when running the experiment, based on the built-in [`run`](https://juliarein
 
 #### Brief Introduction
 
-**Neural Fictitious Self-play(NFSP)**\dcite{DBLP:journals/corr/HeinrichS16} algorithm is a useful multi-agent algorithm that works well on imperfect-information games. Each agent who applies the **NFSP** algorithm has two inner agents, a **Reinforcement Learning (RL)** agent and a **Supervised Learning (SL)** agent. The **RL** agent is to find the best response to the state from the self-play process, and the **SL** agent is to learn the best response from the **RL** agent's policy. More importantly, **NFSP** also uses two technical innovations to ensure stability, including [**reservoir sampling**](https://en.wikipedia.org/wiki/Reservoir_sampling) for **SL** agent and **anticipatory dynamics**\dcite{1406126} when training.
+**Neural Fictitious Self-play(NFSP)**\dcite{DBLP:journals/corr/HeinrichS16} algorithm is a useful multi-agent algorithm that works well on imperfect-information games. Each agent who applies the **NFSP** algorithm has two inner agents, a **Reinforcement Learning (RL)** agent and a **Supervised Learning (SL)** agent. The **RL** agent is to find the best response to the state from the self-play process, and the **SL** agent is to learn the best response from the **RL** agent's policy. More importantly, **NFSP** also uses two technical innovations to ensure stability, including [**reservoir sampling**](https://en.wikipedia.org/wiki/Reservoir_sampling) for **SL** agent and **anticipatory dynamics**\dcite{1406126} when training. The following figure(from the paper\dcite{DBLP:journals/corr/abs-2104-10845}) shows the overall structure of **NFSP**(one agent).
 
-The following figure(from the paper\dcite{DBLP:journals/corr/abs-2104-10845}) shows the overall structure of **NFSP**(one agent).
-
-\dfig{body;NFSP.png;the overall structure of **NFSP**(one agent).}
+\dfig{body;NFSP.png;The overall structure of **NFSP**(one agent).}
 
 #### Implementation
 
@@ -281,7 +279,9 @@ Based on the setting [`stop_condition`](https://github.com/JuliaReinforcementLea
 
 #### Brief Introduction
 
-The **Multi-agent Deep Deterministic Policy Gradient(MADDPG)**\dcite{DBLP:journals/corr/LoweWTHAM17} algorithm improves the [Deep Deterministic Policy Gradient(DDPG)](https://spinningup.openai.com/en/latest/algorithms/ddpg.html), which also works well on multi-agent games. Based on the DDPG, the critic of each agent in **MADDPG** can get all agents' policies according to the paper\dcite{DBLP:journals/corr/LoweWTHAM17}'s hypothesis, including their personal states and actions, which can help to get a more reasonable score of the actor's policy.
+The **Multi-agent Deep Deterministic Policy Gradient(MADDPG)**\dcite{DBLP:journals/corr/LoweWTHAM17} algorithm improves the [Deep Deterministic Policy Gradient(DDPG)](https://spinningup.openai.com/en/latest/algorithms/ddpg.html), which also works well on multi-agent games. Based on the DDPG, the critic of each agent in **MADDPG** can get all agents' policies according to the paper\dcite{DBLP:journals/corr/LoweWTHAM17}'s hypothesis, including their personal states and actions, which can help to get a more reasonable score of the actor's policy. The following figure(from the paper\dcite{8846699}) illustrates the framework of **MADDPG**.
+
+\dfig{body;MADDPG.png;The framework of **MADDPG**.}
 
 #### Implementation
 
