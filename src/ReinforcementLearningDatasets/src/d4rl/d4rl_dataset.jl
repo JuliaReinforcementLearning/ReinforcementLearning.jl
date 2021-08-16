@@ -55,7 +55,7 @@ the dataset, refer to [D4RL](https://github.com/rail-berkeley/d4rl).
 
 !!! note
 
-[`FLOW`](@ref) and [`CARLA`](@ref) supported by [D4RL](https://github.com/rail-berkeley/d4rl) have not 
+[`FLOW`](https://flow-project.github.io/) and [`CARLA`](https://github.com/rail-berkeley/d4rl/wiki/CARLA-Setup) supported by [D4RL](https://github.com/rail-berkeley/d4rl) have not 
 been tested in this package yet.
 """
 function dataset(
