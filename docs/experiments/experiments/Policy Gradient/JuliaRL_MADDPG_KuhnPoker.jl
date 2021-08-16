@@ -45,8 +45,8 @@ function RL.Experiment(
         ## drop the dummy action of the other agent.
         action_mapping = x -> length(x) == 1 ? x : Int(x[current_player(env)] + 1),
     )
-    ns, na = 1, 1
-    n_players = 2
+    ns, na = 1, 1 # dimension of the state and action.
+    n_players = 2 # number of players
 
     init = glorot_uniform(rng)
 
