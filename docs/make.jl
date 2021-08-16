@@ -1,4 +1,5 @@
 using ReinforcementLearning
+using ReinforcementLearningDatasets
 using Documenter
 using Markdown
 using DemoCards
@@ -27,6 +28,7 @@ makedocs(
         ReinforcementLearningCore,
         ReinforcementLearningEnvironments,
         ReinforcementLearningZoo,
+        ReinforcementLearningDatasets,
     ],
     format = Documenter.HTML(
         prettyurls = true,
@@ -52,6 +54,7 @@ makedocs(
             "RLCore" => "rlcore.md",
             "RLEnvs" => "rlenvs.md",
             "RLZoo" => "rlzoo.md",
+            "RLDatasets" => "rldatasets.md",
         ],
     ]
 )

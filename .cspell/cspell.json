@@ -143,6 +143,9 @@
         "MADDPG",
         "Guoyu",
         "LAMDA"
+        "rldatasets",
+        "Prasidh",
+        "Srikumar"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
