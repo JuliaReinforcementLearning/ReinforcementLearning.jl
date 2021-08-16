@@ -18,14 +18,6 @@ function Base.run(
         policy(PRE_EPISODE_STAGE, env)
         hook(PRE_EPISODE_STAGE, policy, env)
 
-        # set train mode
-        for player in players(env)
-            if player != chance_player(env)
-                agent = policy.agents[player]
-                agent.mode = rand(agent.rng) < agent.η
-            end
-        end
-
         while !is_terminated(env) # one episode
             update!(policy, env) # update policy and env simultaneously.
             hook(POST_ACT_STAGE, policy, env)
