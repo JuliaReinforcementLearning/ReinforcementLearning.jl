@@ -2,24 +2,26 @@ using NPZ
 using CodecZlib
 
 """
-Represents an iterable dataset of type AtariDataSet with the following fields:
+Represents an iterable dataset of type `AtariDataSet` with the following fields:
 
-`dataset`: Dict{Symbol, Any}, representation of the dataset as a Dictionary with style as `style`
-`epochs`: Vector{Int}, list of epochs to load
-`repo`: String, the repository from which the dataset is taken
-`length`: Integer, the length of the dataset
-`batch_size`: Integer, the size of the batches returned by `iterate`.
-`style`: Tuple, the type of the NamedTuple, for now SARTS and SART is supported.
-`rng`<: AbstractRNG.
-`meta`: Dict, the metadata provided along with the dataset
-`is_shuffle`: Bool, determines if the batches returned by `iterate` are shuffled.
+# Fields
+- `dataset::Dict{Symbol, Any}`: representation of the dataset as a Dictionary with style as `style`.
+- `epochs::Vector{Int}`: list of epochs to load.
+- `repo::String`: the repository from which the dataset is taken.
+- `length::Int`: the length of the dataset.
+- `batch_size::Int`: the size of the batches returned by `iterate`.
+- `style::Tuple{Symbol}`: the style of the `Iterator` that is returned, check out: [`SARTS`](@ref), [`SART`](@ref) and [`SA`](@ref)
+for types supported out of the box.
+- `rng<:AbstractRNG`.
+- `meta::Dict`: the metadata provided along with the dataset.
+- `is_shuffle::Bool`: determines if the batches returned by `iterate` are shuffled.
 """
 struct AtariDataSet{T<:AbstractRNG} <:RLDataSet
     dataset::Dict{Symbol, Any}
     epochs::Vector{Int}
     repo::String
-    length::Integer
-    batch_size::Integer
+    length::Int
+    batch_size::Int
     style::Tuple
     rng::T
     meta::Dict
@@ -31,22 +33,23 @@ const atari_frame_size = 84
 const epochs_per_game = 50
 
 """
-    dataset(dataset::String, epochs::Vector{Int}; repo::String, style::Tuple, rng<:AbstractRNG, is_shuffle::Bool, max_iters::Int64, batch_size::Int64)
+    dataset(dataset, index, epochs; <keyword arguments>)
 
-Creates a dataset of enclosed in a AtariDataSet type and other related metadata for the `dataset` that is passed.
-The `AtariDataSet` type is an iterable that fetches batches when used in a for loop for convenience during offline training.
+Create a dataset enclosed in a [`AtariDataSet`](@ref) [`Iterable`](@ref) type. Contain other related metadata
+for the `dataset` that is passed. The returned type is an infinite or a finite `Iterator` 
+respectively depnding upon whether is_shurrle is `true` or `false`. For more information regarding
+the dataset, refer to [google-research/batch_rl](https://github.com/google-research/batch_rl).
 
-`dataset`: String, name of the datset.
-`index`: Int, analogous to v
-`epochs`: Vector{Int}, list of epochs to load
-`repo`: Name of the repository of the dataset
-`style`: the style of the iterator and the Dict inside AtariDataSet that is returned.
-`rng`: StableRNG
-`max_iters`: maximum number of iterations for the iterator.
-`is_shuffle`: whether the dataset is shuffled or not. `true` by default.
-`batch_size`: batch_size that is yielded by the iterator. Defaults to 256.
-
-The returned type is an infinite iterator which can be called using `iterate` and will return batches as specified in the dataset.
+# Arguments
+- `dataset::String`: name of the datset.
+- `index::Int`: analogous to `v` and different values correspond to different `seed`s that 
+are used for data collection. can be between `[1:5]`.
+- `epochs::Vector{Int}`: list of epochs to load. included epochs should be between `[0:50]`.
+- `style::Tuple{Symbol}=SARTS`: the style of the `Iterator` that is returned. can be [`SARTS`](@ref), [`SART`](@ref) or [`SA`](@ref).
+- `repo::String="atari-replay-datasets"`: name of the repository of the dataset.
+- `rng<:AbstractRNG=StableRNG(123)`.
+- `is_shuffle::Bool=true`: determines if the dataset is shuffled or not.
+- `batch_size::Int=256` batch_size that is yielded by the iterator.
 """
 function dataset(
     game::String,
