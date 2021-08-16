@@ -31,7 +31,7 @@
 This technical report is the first evaluation report of Project "Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl" in OSPP. It includes three components: project information, project schedule, future plan.
 ## Project Information
 - Project name: Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl
-- Scheme Description: Recent advances in offline reinforcement learning make it possible to turn reinforcement learning into a data-driven discipline, such that many effective methods from the supervised learning field could be applied. Until now, the only offline method provided in ReinforcementLearning.jl is behavior cloning. We'd like to have more algorithms added like Batch Constrain Q-Learning (BCQ)\dcite{DBLP:conf/icml/FujimotoMP19}, Conservative Q-Learning (CQL)\dcite{DBLP:conf/nips/KumarZTL20}. It is expected to implement at least three to four modern offline RL algorithms.
+- Scheme Description: Recent advances in offline reinforcement learning make it possible to turn reinforcement learning into a data-driven discipline, such that many effective methods from the supervised learning field could be applied. Until now, the only offline method provided in ReinforcementLearning.jl is Behavior Cloning (BC)\dcite{michie1990cognitive}. We'd like to have more algorithms added like Batch Constrain Q-Learning (BCQ)\dcite{DBLP:conf/icml/FujimotoMP19}, Conservative Q-Learning (CQL)\dcite{DBLP:conf/nips/KumarZTL20}. It is expected to implement at least three to four modern offline RL algorithms.
 - Time planning: the following is a relatively simple time table.
   
 | Date       | Work    |
@@ -51,7 +51,7 @@ This technical report is the first evaluation report of Project "Enriching Offli
 This part mainly introduces the results of the first phase.
 
 #### Basic framework
-To run and test the offline algorithm, we first implemented `OfflinePolicy`([link](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/offline_rl/common.jl)).
+To run and test the offline algorithm, we first implemented [`OfflinePolicy`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/offline_rl/common.jl).
 ```julia
 Base.@kwdef struct OfflinePolicy{L,T} <: AbstractPolicy
     learner::L
@@ -60,28 +60,28 @@ Base.@kwdef struct OfflinePolicy{L,T} <: AbstractPolicy
     batch_size::Int
 end
 ```
-This implementation of `OfflinePolicy` refers to `QBasePolicy` ([link](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/q_based_policies/q_based_policy.jl)). It provides a parameter `continuous` to support different action space types, including continuous and discrete. `learner` is a specific algorithm for learning and providing policy. `dataset` and `batch_size` are used to sample data for learning.
+This implementation of `OfflinePolicy` refers to [`QBasePolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.QBasedPolicy). It provides a parameter `continuous` to support different action space types, including continuous and discrete. `learner` is a specific algorithm for learning and providing policy. `dataset` and `batch_size` are used to sample data for learning.
 
-Besides, we implement corresponding functions `π`, `update!` and `sample`. `π` is used to select the action, whose form is determined by the type of action space. `update!` can be used in two stages. In `PreExperiment` stage, we can call this function for pre-training algorithms with `pretrain_step` parameters (such as PLAS). In `PreAct` stage, we call this function for training the `learner`. In function `update!`, we need to call function `sample` to sample a batch of data from the dataset. With the development of RLDataset.jl, the `sample` function will be deprecated.
+Besides, we implement corresponding functions `π`, `update!` and `sample`. `π` is used to select the action, whose form is determined by the type of action space. `update!` can be used in two stages. In `PreExperiment` stage, we can call this function for pre-training algorithms with `pretrain_step` parameters. In `PreAct` stage, we call this function for training the `learner`. In function `update!`, we need to call function `sample` to sample a batch of data from the dataset. With the development of [ReinforcementLearningDataset.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningDatasets), the `sample` function will be deprecated.
 
-We can quickly call the offline version of the existing algorithms with almost no additional code with this framework. Therefore, the implementation and performance testing of offline DQN and offline SAC can be completed soon. For example:
+We can quickly call the offline version of the existing algorithms with almost no additional code with this framework. Therefore, the implementation and performance testing of offline DQN\dcite{mnih2015human} and offline SAC\dcite{DBLP:journals/corr/abs-1812-05905} can be completed soon. For example:
 
 ```julia
 offline_dqn_policy = OfflinePolicy(
-            learner = DQNLearner(
-                # Omit specific code
-            ),
-            dataset = dataset,
-            continuous = false,
-            batch_size = 64,
-        )
+    learner = DQNLearner(
+        # Omit specific code
+    ),
+    dataset = dataset,
+    continuous = false,
+    batch_size = 64,
+)
 ```
 
-Therefore, we unified the parameter name in different algorithms so that different `learner` can be compatible with `OfflinePolicy`.
+Therefore, we unify the parameter name in different algorithms so that different `learner`s can be compatible with `OfflinePolicy`.
 
 #### Useful Components
 ##### GaussianNetwork
-GaussianNetwork ([link](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/q_based_policies/learners/approximators/neural_network_approximator.jl)) models a Normal Distribution $\mathcal{N}(\mu,\sigma^2)$, which is often used in tasks with continuous action space. It consists of three neural network chains:
+[GaussianNetwork](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.GaussianNetwork) models a Normal Distribution $\mathcal{N}(\mu,\sigma^2)$, which is often used in tasks with continuous action space. It consists of three neural network chains:
 
 ```julia
 Base.@kwdef struct GaussianNetwork{P,U,S}
@@ -92,7 +92,7 @@ Base.@kwdef struct GaussianNetwork{P,U,S}
     max_σ::Float32 = Inf32
 end
 ```
-We have improved the evaluation function and inference function of `GaussianNetwork`. By evaluation function, given the state, then the mean and log-standard deviation are obtained. Furthermore, we can sample the action from distribution and get the probability of the action in a given state. When calling the inference function with parameter state and action, we get the likelihood of the action in a given state.
+We implement the evaluation function and inference function of `GaussianNetwork`. By evaluation function, given the state, then the mean and log-standard deviation are obtained. Furthermore, we can sample the action from distribution and get the probability of the action in a given state. When calling the inference function with parameter state and action, we get the likelihood of the action in a given state.
 
 ```julia
 ### Evaluation
@@ -118,16 +118,16 @@ end
 ##### Variational Auto-Encoder (VAE)
 In offline reinforcement learning tasks, VAE\dcite{DBLP:journals/corr/KingmaW13} is often used to learn from datasets to approximate behavior policy.
 
-VAE we implemented consists of two neural network: `encoder` and `decoder` ([link](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/q_based_policies/learners/approximators/neural_network_approximator.jl)).
+The VAE we implemented contains two neural networks: `encoder` and `decoder` ([link](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.VAE)).
 ```julia
 Base.@kwdef struct VAE{E, D}
     encoder::E
     decoder::D
 end
 ```
-In the encoding stage, it accepts input state and action and outputs the mean and standard deviation of the distribution. Afterward, the hidden action is obtained by sampling the distribution. In the decoding stage, state and hidden action are used as the input to reconstruct action.
+In the encoding stage, it accepts input state and action and outputs the mean and standard deviation of the distribution. Afterward, the hidden action is obtained by sampling from the resulted distribution. In the decoding stage, state and hidden action are used as the input to reconstruct action.
 
-During training, we call the `vae_loss` function to get the reconstruction loss and KL loss. The specific task determines the ratio of these two losses.
+During training, we call the `vae_loss` function to get the reconstruction loss and [KL loss](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence). The specific task determines the ratio of these two losses.
 
 ```julia
 function vae_loss(model::VAE, state, action)
@@ -152,13 +152,13 @@ end
 ```
 
 #### Offline RL Algorithms
-We used the existing algorithms and hooks to train the offline RL algorithm to create datasets in several environments (such as CartPole, Pendulum) for training. This work can guide the subsequent development of package RLDataset.jl, for example:
+We used the existing algorithms and hooks to train the offline RL algorithm to create datasets in several environments (such as [CartPole](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.CartPoleEnv-Tuple{}), [Pendulum](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.PendulumEnv-Tuple{})) for training. This work can guide the subsequent development of package ReinforcementLearningDataset.jl, for example:
 ```julia
 gen_dataset("JuliaRL-CartPole-DQN", policy, env)
 ```
 
 ##### Benchmark
-We implemented and experimented with offline DQN (in discrete action space) and offline SAC (in continuous action space) as benchmarks. The performance of offline DQN in Cartpole environment:
+We implement and experiment with offline DQN (in discrete action space) and offline SAC (in continuous action space) as benchmarks. The performance of offline DQN in Cartpole environment:
 
 \dfig{body;JuliaRL_OfflineDQN_CartPole.png}
 
@@ -167,7 +167,7 @@ The performance of offline SAC in Pendulum environment:
 \dfig{body;JuliaRL_SAC_Pendulum.png}
 
 ##### Conservative Q-Learning (CQL)
-CQL is an efficient and straightforward Q-value constraint method. Other offline RL algorithms can easily use this constraint to improve performance. Therefore, we implemented CQL as a common component ([link](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/q_based_policies/learners/approximators/neural_network_approximator.jl)). For other algorithms, we only need to add CQL loss to their loss.
+CQL is an efficient and straightforward Q-value constraint method. Other offline RL algorithms can easily use this constraint to improve performance. Therefore, we implement CQL as a common component ([link](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/q_based_policies/learners/approximators/neural_network_approximator.jl)). For other algorithms, we only need to add CQL loss to their loss.
 
 ```julia
 function calculate_CQL_loss(q_value, qa_value)
@@ -191,14 +191,14 @@ After adding CQL loss, the performance of offline DQN improve.
 Currently, this function only supports discrete action space and CQL(H) method. 
 
 ##### Critic Regularizer Regression (CRR)
-CRR\dcite{DBLP:conf/nips/0001NZMSRSSGHF20} is a Behavior Cloning (BC) based method. To filter out bad actions and enables learning better policies from low-quality data, CRR utilizes the advantage function to regularize the learning objective of the actor. Pseudocode is as follows:
+CRR\dcite{DBLP:conf/nips/0001NZMSRSSGHF20} is a Behavior Cloning based method. To filter out bad actions and enables learning better policies from low-quality data, CRR utilizes the advantage function to regularize the learning objective of the actor. Pseudocode is as follows:
 
 \dfig{body;CRR.png}
 
 In different tasks, $f$ has different choices:
 $$
 𝑓=\mathbb{I}[A_\theta(s,a)>0]\quad \mathnormal{or}\quad f=e^{A_\theta(s,a)/\beta}
-$$We implemented discrete CRR and continuous CRR ([link](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/offline_rl/CRR.jl)). The brief function parameters are as follows: 
+$$We implemented discrete CRR and continuous CRR ([link](https://juliareinforcementlearning.org/docs/rlzoo/#ReinforcementLearningZoo.CRRLearner)). The brief function parameters are as follows: 
 
 ```julia
 mutable struct CRRLearner{Aq, At, R} <: AbstractLearner
@@ -234,7 +234,7 @@ The advantage of pre-training VAE is that it can accelerate the convergence, and
 
 \dfig{body;PLAS2.png}
 
-Please refer to this link for specific code ([link](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/offline_rl/PLAS.jl)). The brief function parameters are as follows:
+Please refer to this link for specific code ([link](https://juliareinforcementlearning.org/docs/rlzoo/#ReinforcementLearningZoo.PLASLearner-Tuple{})). The brief function parameters are as follows:
 ```julia
 mutable struct PLASLearner{BA1, BA2, BC1, BC2, V, R} <: AbstractLearner
     ### Omit other parameters
@@ -287,7 +287,7 @@ However, the action perturbation component in PLAS has not yet been completed an
 #### Other Work
 In addition to the above work, we also did the following:
 - Add `copyto` function in `ActorCritic`. This function is needed to synchronize between target Actor-Critic and online Actor-Critic.
-- Add the tuning entropy component\dcite{DBLP:journals/corr/abs-1812-05905} in SAC to improve performance.
+- Add the tuning entropy component in SAC to improve performance.
 
 #### Conclusion
 During this process, we learn a lot:
