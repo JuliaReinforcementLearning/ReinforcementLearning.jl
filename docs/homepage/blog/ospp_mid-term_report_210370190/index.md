@@ -1,6 +1,6 @@
 @def title = "Implement Multi-Agent Reinforcement Learning Algorithms in Julia"
 @def description = """
-    This is a technical report of the summer OSPP project [Implement Multi-Agent Reinforcement Learning Algorithms in Julia](https://summer.iscas.ac.cn/#/org/prodetail/210370190?lang=en). In this report, the following three parts are covered: the first section is a basic introduction to the project, the second section contains the implementation details of several multi-agent algorithms, and in the last section we discussed our future plan.
+    This is a technical report of the summer OSPP project [Implement Multi-Agent Reinforcement Learning Algorithms in Julia](https://summer.iscas.ac.cn/#/org/prodetail/210370190?lang=en). In this report, the following three parts are covered: the first section is a basic introduction to the project, the second section contains the implementation details of several multi-agent algorithms, and in the last section, we discussed our future plan.
     """
 @def is_enable_toc = true
 @def has_code = true
@@ -16,7 +16,7 @@
                 "affiliationURL":"http://english.ecnu.edu.cn/"
             }
         ],
-        "publishedDate":"2021-08-15",
+        "publishedDate":"2021-08-16",
         "citationText":"Peter Chen, 2021"
     }"""
 
@@ -24,24 +24,24 @@
 
 ## 1. Project Information
 
-Recent advances in reinforcement learning led to many breakthroughs in artificial intelligence. Some of the latest deep reinforcement learning algorithms have been implemented in ReinforcementLearning.jl with Flux. Currently, we only have some CFR related algorithms implemented. We'd like to have more implemented, including MADDPG, COMA, NFSP, PSRO.
+Recent advances in reinforcement learning led to many breakthroughs in artificial intelligence. Some of the latest deep reinforcement learning algorithms have been implemented in [ReinforcementLearning.jl](https://juliareinforcementlearning.org/) with [Flux](https://fluxml.ai/). Currently, we only have some [CFR related algorithms](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningZoo/src/algorithms/cfr) implemented. We'd like to have more implemented, including **MADDPG**\dcite{DBLP:journals/corr/LoweWTHAM17}, **COMA**\dcite{DBLP:journals/corr/FoersterFANW17}, **NFSP**\dcite{DBLP:journals/corr/HeinrichS16}, **PSRO**\dcite{DBLP:journals/corr/abs-1909-12823}.
 
 ### Schedule
 
-| Date       | Mission Content |
+| Date | Mission Content |
 | :-----------: | :---------: |
-| 07/01 -- 07/14 | Refer to the paper and the existing implementation to get familiar with the `NFSP` algorithm. |
-| 07/15 -- 07/29 | Add `NFSP` algorithm into `RLZoo.jl`, and test it on the `KuhnPokerEnv`. |
-| 07/30 -- 08/07 | Fix the existing bugs of `NFSP` and implement the `MADDPG` algorithm into `RLZoo.jl`. |
-| 08/08 -- 08/15 | Update the `MADDPG` algorithm and test it on the `KuhnPokerEnv`,  also complete the **mid-term report**. |
-| 08/16 -- 08/30 | Test `MADDPG` algorithm on more envs and consider implementing the `ED` algorithm into `RLZoo.jl`. |
-| 08/31 -- 09/07 | Complete the `ED` implementation, and add relative experiments. |
-| 09/08 -- 09/14 | Consider implementing `PSRO` algorithm into `RLZoo.jl`. |
-| 09/15 -- 09/30 | Complete `PSRO` implementation and add relative experiments, also complete the **final-term report**. |
+| 07/01 -- 07/14 | Refer to the paper\dcite{DBLP:journals/corr/HeinrichS16} and the existing implementation to get familiar with the **NFSP** algorithm. |
+| 07/15 -- 07/29 | Add **NFSP** algorithm into [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/), and test it on the [`KuhnPokerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.KuhnPokerEnv). |
+| 07/30 -- 08/07 | Fix the existing bugs of **NFSP** and implement the **MADDPG** algorithm into ReinforcementLearningZoo.jl. |
+| 08/08 -- 08/15 | Update the **MADDPG** algorithm and test it on the `KuhnPokerEnv`, also complete the **mid-term report**. |
+| 08/16 -- 08/30 | Test **MADDPG** algorithm on more envs and consider implementing the **ED**\dcite{DBLP:journals/corr/abs-1903-05614} algorithm into ReinforcementLearningZoo.jl. |
+| 08/31 -- 09/07 | Complete the **ED** implementation, and add relative experiments. |
+| 09/08 -- 09/14 | Consider implementing **PSRO** algorithm into ReinforcementLearningZoo.jl. |
+| 09/15 -- 09/30 | Complete **PSRO** implementation and add relative experiments, also complete the **final-term report**. |
 
 ### Accomplished Work
 
-From July 1st to now, I mainly have implemented the `Neural Fictitious Self-play`(NFSP) algorithm and added it into `ReinforcementLearningZoo.jl`(RLZoo.jl). A workable experiment is also added to the documentation. Besides, the `Multi-agent Deep Deterministic Policy Gradient`(MADDPG) algorithm's semi-finished implementation has been placed into `RLZoo.jl` and will test it on more envs in the next weeks. Related commits are listed below:
+From July 1st to now, I mainly have implemented the **Neural Fictitious Self-play(NFSP)** algorithm and added it into [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/). A workable [experiment](https://juliareinforcementlearning.org/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker/#JuliaRL\\_NFSP\\_KuhnPoker) is also added to the documentation. Besides, the **Multi-agent Deep Deterministic Policy Gradient(MADDPG)** algorithm's semi-finished implementation has been placed into ReinforcementLearningZoo.jl, and I will test it on more envs in the next weeks. Related commits are listed below:
 
 - [add Base.:(==) and Base.hash for AbstractEnv and test nash_conv on KuhnPokerEnv#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 - [Supplement functions in ReservoirTrajectory and BehaviorCloningPolicy #390](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/390)
@@ -51,11 +51,11 @@ From July 1st to now, I mainly have implemented the `Neural Fictitious Self-play
 
 ## 2. Implementation and Usage
 
-This section will first briefly review the `Agent` structure defined in `ReinforcementLearning.jl`. Then I'll explain how I implemented `NFSP` and `MADDPG`, followed by a short example to demonstrate how others can use them in their customized environments.
+In this section, I will first briefly review the [`Agent`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.Agent) structure defined in [ReinforcementLearningCore.jl](https://juliareinforcementlearning.org/docs/rlcore/). Then I'll explain how **NFSP** and **MADDPG** are implemented, followed by a short example to demonstrate how others can use them in their customized environments.
 
 ### 2.1 An Introduction to `Agent`
 
-The `Agent` struct is an extended `AbstractPolicy` that includes a concrete policy and a trajectory. The trajectory is used to collect the necessary information to train the policy. In the existing [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/agents/agent.jl),  the lifecycle of the interactions between agents and environments is split into several stages, including `PreEpisodeStage`,  `PreActStage`, `PostActStage` and `PostEpisodeStage`.
+The [`Agent`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.Agent) struct is an extended [`AbstractPolicy`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.AbstractPolicy) that includes a concrete policy and a trajectory. The trajectory is used to collect the necessary information to train the policy. In the existing [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/agents/agent.jl),  the lifecycle of the [interactions](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.Agent-Tuple{AbstractStage,%20AbstractEnv}) between agents and environments is split into several stages, including `PreEpisodeStage`,  `PreActStage`, `PostActStage` and `PostEpisodeStage`.
 
 ```Julia
 function (agent::Agent)(stage::AbstractStage, env::AbstractEnv)
@@ -69,19 +69,23 @@ function (agent::Agent)(stage::PreActStage, env::AbstractEnv, action)
 end
 ```
 
-And when running the experiment, based on the built-in [`run`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/639717388fb41199c98b90406bea76232bc6294d/src/ReinforcementLearningCore/src/core/run.jl#L16) function, the `agent` can update its policy and trajectory based on the behaviors that we have defined. Thanks to the `multiple dispatch` in Julia,  the **main focus** when implementing a new algorithm is how to **customize the behavior** of collecting the training information and updating the policy when at the specific stage. For more details, you can refer to this [blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/#21_the_general_workflow).
+And when running the experiment, based on the built-in [`run`](https://juliareinforcementlearning.org/docs/rlzoo/#ReinforcementLearningCore._run) function, the agent can update its policy and trajectory based on the behaviors that we have defined. Thanks to the [**multiple dispatch**](https://en.wikipedia.org/wiki/Multiple_dispatch) in Julia,  the **main focus** when implementing a new algorithm is how to **customize the behavior** of collecting the training information and updating the policy when in the specific stage. For more details, you can refer to this [blog](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/#21_the_general_workflow).
 
 ### 2.2 Neural Fictitious Self-play(NFSP) algorithm
 
 #### Brief Introduction
 
-Neural Fictitious Self-play(NFSP)\dcite{DBLP:journals/corr/HeinrichS16} algorithm is a useful multi-agent algorithm that works well for imperfect-information games. Each agent who applies the `NFSP` algorithm will include one `Reinforcement Learning`(RL) agent and one `Supervised Learning`(SL) agent. **RL agent** works to find the best response to the state from the self-play process, and **SL agent** works to learn the best response from RL agent's policy. What's more, `NFSP` also uses two technical innovations to ensure stability, including [reservoir sampling](https://en.wikipedia.org/wiki/Reservoir_sampling) for SL agent and anticipatory dynamics\dcite{1406126} when training.
+**Neural Fictitious Self-play(NFSP)**\dcite{DBLP:journals/corr/HeinrichS16} algorithm is a useful multi-agent algorithm that works well on imperfect-information games. Each agent who applies the **NFSP** algorithm has two inner agents, a **Reinforcement Learning (RL)** agent and a **Supervised Learning (SL)** agent. The **RL** agent is to find the best response to the state from the self-play process, and the **SL** agent is to learn the best response from the **RL** agent's policy. More importantly, **NFSP** also uses two technical innovations to ensure stability, including [**reservoir sampling**](https://en.wikipedia.org/wiki/Reservoir_sampling) for **SL** agent and **anticipatory dynamics**\dcite{1406126} when training.
+
+The following figure(from the paper\dcite{DBLP:journals/corr/abs-2104-10845}) shows the overall structure of **NFSP**(one agent).
+
+\dfig{body;NFSP.png;the overall structure of **NFSP**(one agent).}
 
 #### Implementation
 
-In RLZoo.jl, I implement the [`NFSPAgent`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/nfsp.jl) which define the `NFSPAgent` struct and design its behaviors according to the `NFSP` algorithm\dcite{DBLP:journals/corr/HeinrichS16}, including collecting needed information and how to update the policy. And the [`NFSPAgentManager`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/nfsp_manager.jl) is a special multi-agent manager that all agents apply `NFSP` algorithm. Besides, the [`abstract_nfsp`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/abstract_nfsp.jl) customize the `run` function for `NFSPAgentManager`.
+In ReinforcementLearningZoo.jl, I implement the [`NFSPAgent`](https://juliareinforcementlearning.org/docs/rlzoo/#:~:text=ReinforcementLearningZoo.NFSPAgent) which define the `NFSPAgent` struct and design its behaviors according to the **NFSP** algorithm, including collecting needed information and how to update the policy. And the [`NFSPAgentManager`](https://juliareinforcementlearning.org/docs/rlzoo/#ReinforcementLearningZoo.NFSPAgentManager) is a special multi-agent manager that all agents apply **NFSP** algorithm. Besides, in the [`abstract_nfsp`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/nfsp/abstract_nfsp.jl), I customize the `run` function for `NFSPAgentManager`.
 
-Since the core of the algorithm is how to customize the `NFSPAgent`, the following content in this section will only be around it. The structure of `NFSPAgent` is as the following:
+Since the core of the algorithm is to define the behavior of the `NFSPAgent`, I'll explain how it is done as the following:
 ```Julia
 mutable struct NFSPAgent <: AbstractPolicy
     rl_agent::Agent
@@ -93,11 +97,12 @@ mutable struct NFSPAgent <: AbstractPolicy
     mode::Bool # `true` for best response mode(RL agent's policy), `false` for  average policy mode(SL agent's policy). Only used in training.
 end
 ```
-Based on 2.1, the core of the `NFSPAgent` is customized behaviors on the specific stage:
+
+Based on our discussion in section 2.1, the core of the `NFSPAgent` is to customize its behavior in different stages:
 
 - PreEpisodeStage
 
-Here, `NFSPAgent` should set train mode based on the anticipatory dynamics\dcite{1406126} and delete the terminated state and dummy action if having gone through one episode before. Note that here deleting the terminated state and dummy action is necessary for the algo(see the [note](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/4e5d258798088b1c628401b6b9de18aa8cbb3ab3/src/ReinforcementLearningCore/src/policies/agents/agent.jl#L134)), otherwise may occur to have some unreliable samples.
+Here, the `NFSPAgent` should be set to the training mode based on the **anticipatory dynamics**. Besides, the **terminated state** and **dummy action** of the last episode must be removed at the beginning of each episode. (see the [note](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/4e5d258798088b1c628401b6b9de18aa8cbb3ab3/src/ReinforcementLearningCore/src/policies/agents/agent.jl#L134))
 ```Julia
 function (π::NFSPAgent)(stage::PreEpisodeStage, env::AbstractEnv, ::Any)
     # delete the terminal state and dummy action.
@@ -110,7 +115,7 @@ end
 
 - PreActStage
 
-In this stage, `NFSPAgent` should collect the personal information `state` and `action` to the RL agent's trajectory, and if on the `best response mode`, also update the SL agent's trajectory. Besides, if satisfying the condition of updating, here also need to update the inner agents. The code is just like the following:
+In this stage, the `NFSPAgent` should collect the personal information of **state** and **action**, and add them into the **RL** agent's trajectory. If it is set to the `best response mode`, we also need to update the **SL** agent's trajectory. Besides, if the condition of updating is satisfied, the inner agents also need to be updated. The code is just like the following:
 ```Julia
 function (π::NFSPAgent)(stage::PreActStage, env::AbstractEnv, action)
     rl = π.rl_agent
@@ -138,7 +143,7 @@ end
 
 - PostActStage
 
-Here, the agent needs to collect the personal `reward` and  the `is_terminated` judgment of the current state to the RL agent's trajectory.
+After executing the action, the `NFSPAgent` needs to add the personal **reward** and the **is_terminated** result of the current state into the **RL** agent's trajectory.
 ```Julia
 function (π::NFSPAgent)(::PostActStage, env::AbstractEnv, player::Any)
     push!(π.rl_agent.trajectory[:reward], reward(env, player))
@@ -148,7 +153,7 @@ end
 
 - PostEpisodeStage
 
-When one episode is terminated, the agent should collect the terminated state and a dummy action(see the [note](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/4e5d258798088b1c628401b6b9de18aa8cbb3ab3/src/ReinforcementLearningCore/src/policies/agents/agent.jl#L134)) to the RL agent's trajectory. Also, the reward and terminal judgment need to be corrected to avoid getting wrong samples when playing the sequential or terminal_reward games.
+When one episode is terminated, the agent should push the **terminated state** and a **dummy action** (see also the [note](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/4e5d258798088b1c628401b6b9de18aa8cbb3ab3/src/ReinforcementLearningCore/src/policies/agents/agent.jl#L134)) into the **RL** agent's trajectory. Also, the **reward** and **is_terminated** result need to be corrected to avoid getting wrong samples when playing the [`SEQUENTIAL`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.SEQUENTIAL) or [`TERMINAL_REWARD`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.TERMINAL_REWARD) games.
 ```Julia
 function (π::NFSPAgent)(::PostEpisodeStage, env::AbstractEnv, player::Any)
     rl = π.rl_agent
@@ -167,15 +172,15 @@ function (π::NFSPAgent)(::PostEpisodeStage, env::AbstractEnv, player::Any)
     end
     
     # update the policy    
-    ...
+    ...# here is the same as PreActStage `update the policy` part.
 end
 ```
 
 #### Usage
 
-According to the paper\dcite{DBLP:journals/corr/HeinrichS16}, here, the RL agent is default as `QBasedPolicy` with `CircularArraySARTTrajectory.` The SL agent is default as `BehaviorCloningPolicy` with `ReservoirTrajectory.` So you can customize the agent under the restriction and test the algo on any interested multi-agent game. **Note that** if the game's states can't be used as the network's input, you need to [wrap](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/src/ReinforcementLearningEnvironments/src/environments/wrappers/StateTransformedEnv.jl#L9) them before using the algorithm.
+According to the paper\dcite{DBLP:journals/corr/HeinrichS16}, by default the **RL** agent is as [`QBasedPolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.QBasedPolicy) with [`CircularArraySARTTrajectory`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.CircularArraySARTTrajectory-Tuple{}). And the **SL** agent is default as [`BehaviorCloningPolicy`](https://juliareinforcementlearning.org/docs/rlzoo/#ReinforcementLearningZoo.BehaviorCloningPolicy-Union{Tuple{},%20Tuple{A}}%20where%20A) with [`ReservoirTrajectory`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/agents/trajectories/reservoir_trajectory.jl). So you can customize the agent under the restriction and test the algorithm on any interested multi-agent games. **Note that** if the game's states can't be used as the network's input, you need to add a [state-related wrapper](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.StateTransformedEnv-Tuple{Any}) to the environment before applying the algorithm.
 
-Here is one experiment [`JuliaRL_NFSP_KuhnPoker.jl`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl) as one usage example, which tests the algorithm on the Kuhn Poker game. Since the type of states in the existing [`KuhnPokerEnv`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/639717388fb41199c98b90406bea76232bc6294d/src/ReinforcementLearningEnvironments/src/environments/examples/KuhnPokerEnv.jl#L1) in `ReinforcementLearningEnvironments.jl` is the `tuple` of symbols, I simply encode the state just like the following:
+Here is one [experiment](https://juliareinforcementlearning.org/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker/#JuliaRL\\_NFSP\\_KuhnPoker) `JuliaRL_NFSP_KuhnPoker` as one usage example, which tests the algorithm on the Kuhn Poker game. Since the type of states in the existing [`KuhnPokerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.KuhnPokerEnv) is the `tuple` of symbols, I simply encode the state just like the following:
 ```Julia
 env = KuhnPokerEnv()
 wrapped_env = StateTransformedEnv(
@@ -185,7 +190,7 @@ wrapped_env = StateTransformedEnv(
     )
 ```
 
-In this experiment, `RL agent` use [`DQNLearner`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/src/ReinforcementLearningZoo/src/algorithms/dqns/dqn.jl#L23) to learn the best response:
+In this experiment, **RL** agent use [`DQNLearner`](https://juliareinforcementlearning.org/docs/rlzoo/#ReinforcementLearningZoo.DQNLearner-Union{Tuple{},%20Tuple{Tf},%20Tuple{Tt},%20Tuple{Tq}}%20where%20{Tq,%20Tt,%20Tf}) to learn the best response:
 ```Julia
 rl_agent = Agent(
     policy = QBasedPolicy(
@@ -226,7 +231,7 @@ rl_agent = Agent(
 )
 ```
 
-And the `SL agent` is defined as the following:
+And the **SL** agent is defined as the following:
 ```Julia
 sl_agent = Agent(
     policy = BehaviorCloningPolicy(;
@@ -251,7 +256,7 @@ sl_agent = Agent(
 )
 ```
 
-Based on the defined agents, the `NFSPAgentManager` can be customized as the following:
+Based on the defined inner agents, the `NFSPAgentManager` can be customized as the following:
 ```Julia
 nfsp = NFSPAgentManager(
     Dict(
@@ -262,13 +267,13 @@ nfsp = NFSPAgentManager(
             rng,
             128, # update_freq
             0, # initial update_step
-            true, # initial NFSPAgent's learn mode
+            true, # initial NFSPAgent's training mode
         )) for player in players(wrapped_env) if player != chance_player(wrapped_env)
     )
 )
 ```
 
-Based on the setting [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L126) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L15), you can just `run(nfsp, wrapped_env, stop_condition, hook)` to perform the experiment. Use [`Plots.plot`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/66a9c7e41416c4b959c66b07d06d67915dc4b628/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L136) to get the following result: (here [`nash_conv`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/639717388fb41199c98b90406bea76232bc6294d/src/ReinforcementLearningZoo/src/algorithms/cfr/nash_conv.jl#L1) is one common metric to show the performance of a multi-agent reinforcement learning algorithm.)
+Based on the setting [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L126) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L15) in the experiment, you can just `run(nfsp, wrapped_env, stop_condition, hook)` to perform the experiment. Use [`Plots.plot`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L136) to get the following result: (here [`nash_conv`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/cfr/nash_conv.jl#L1) is one common metric to show the performance of a multi-agent reinforcement learning algorithm.)
 
 \dfig{body;JuliaRL_NFSP_KuhnPoker.png;Result of the experiment.}
 
@@ -276,11 +281,11 @@ Based on the setting [`stop_condition`](https://github.com/JuliaReinforcementLea
 
 #### Brief Introduction
 
-The Multi-agent Deep Deterministic Policy Gradient(MADDPG)\dcite{DBLP:journals/corr/LoweWTHAM17} algorithm improves the [Deep Deterministic Policy Gradient(DDPG)](https://spinningup.openai.com/en/latest/algorithms/ddpg.html), which works well on multi-agent games. Based on the DDPG, the critic of each agent in MADDPG can get all agents' policies according to the paper's hypothesis\dcite{DBLP:journals/corr/LoweWTHAM17}, including their personal states and actions, which can help get a more reasonable score of the actor's policy.
+The **Multi-agent Deep Deterministic Policy Gradient(MADDPG)**\dcite{DBLP:journals/corr/LoweWTHAM17} algorithm improves the [Deep Deterministic Policy Gradient(DDPG)](https://spinningup.openai.com/en/latest/algorithms/ddpg.html), which also works well on multi-agent games. Based on the DDPG, the critic of each agent in **MADDPG** can get all agents' policies according to the paper\dcite{DBLP:journals/corr/LoweWTHAM17}'s hypothesis, including their personal states and actions, which can help to get a more reasonable score of the actor's policy.
 
 #### Implementation
 
-Since there has been [`DDPGPolicy`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/ddpg.jl#L47) in the RLZoo, I implement the [`MADDPGManager`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/maddpg.jl) which is a special multi-agent manager that all agents apply `DDPGPolicy` with one **improved critic**. The structure of `MADDPGManager` is as the following:
+Given that the [`DDPGPolicy`](https://juliareinforcementlearning.org/docs/rlzoo/#ReinforcementLearningZoo.DDPGPolicy-Tuple{}) is already implemented in the ReinforcementLearningZoo.jl, I implement the [`MADDPGManager`](https://juliareinforcementlearning.org/docs/rlzoo/#ReinforcementLearningZoo.MADDPGManager) which is a special multi-agent manager that all agents apply `DDPGPolicy` with one **improved critic**. The structure of `MADDPGManager` is as the following:
 ```Julia
 mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory, N<:Any} <: AbstractPolicy
     agents::Dict{<:N, <:Agent{<:NamedPolicy{<:P, <:N}, <:T}}
@@ -291,13 +296,13 @@ mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory, N<:Any} <: Ab
 end
 ```
 
-Each agent in the MADDPGManager uses `DDPGPolicy` with one trajectory, which collects their own information. Here [`NamedPolicy`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/agents/named_policy.jl) is a useful substruct of `AbstractPolicy` when meeting the multi-agent games, which combine the player's name and detailed policy. So that can use `Agent` 's [default behaviors for known trajectories](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/b0b8e8236524a7af0a2da8987ae2261c257f94b2/src/ReinforcementLearningCore/src/policies/agents/agent.jl#L85) to collect the necessary information. 
+Each agent in the `MADDPGManager` uses `DDPGPolicy` with one trajectory, which collects their own information. Here [`NamedPolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.NamedPolicy) is a useful substruct of `AbstractPolicy` when meeting the multi-agent games, which combine the player's name and detailed policy. So that can use `Agent` 's [default behaviors](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.Agent-Tuple{AbstractStage,%20AbstractEnv}) to collect the necessary information. 
 
-As for updating the policy, the process is mainly the same as the [`DDPGPolicy`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/b0b8e8236524a7af0a2da8987ae2261c257f94b2/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/ddpg.jl#L139), apart from each agent's critic will assemble all agents' personal states and actions. For more details, can refer to the [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/maddpg.jl).
+As for updating the policy, the process is mainly the same as the [`DDPGPolicy`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/ddpg.jl#L139), apart from each agent's critic will assemble all agents' personal states and actions. For more details, you can refer to the [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/maddpg.jl#L59).
 
 #### Usage
 
-Here `MADDPG` is used for simultaneous games, or you can drop the dummy action of other players when [wrapping](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/src/ReinforcementLearningEnvironments/src/environments/wrappers/ActionTransformedEnv.jl#L9) the sequential game. And there is one experiment [`JuliaRL_MADDPG_KuhnPoker.jl`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl) as one usage example, which tests the algorithm on the Kuhn Poker game. Since the Kuhn Poker is one sequential game, I wrap the game just like the following:
+Here `MADDPGManager` is used for simultaneous games, or you can add an [action-related wrapper](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.ActionTransformedEnv-Tuple{Any}) to the sequential game to drop the dummy action of other players. And there is one [experiment](https://juliareinforcementlearning.org/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker/#JuliaRL\\_MADDPG\\_KuhnPoker) `JuliaRL_MADDPG_KuhnPoker` as one usage example, which tests the algorithm on the Kuhn Poker game. Since the Kuhn Poker is one sequential game, I wrap the game just like the following:
 ```Julia
 wrapped_env = ActionTransformedEnv(
         StateTransformedEnv(
@@ -310,10 +315,11 @@ wrapped_env = ActionTransformedEnv(
     )
 ```
 
-And customize the actor and critic's network:
+And customize the following actor and critic's network:
 ```Julia
-ns, na = 1, 1
-n_players = 2
+rng = StableRNG(123)
+ns, na = 1, 1 # dimension of the state and action.
+n_players = 2 # the number of players
 
 create_actor() = Chain(
         Dense(ns, 64, relu; init = glorot_uniform(rng)),
@@ -328,7 +334,7 @@ create_critic() = Chain(
     )
 ```
 
-So that can design the fundamental policy and trajectory like the following:
+So that can design the inner `DDPGPolicy` and trajectory like the following:
 ```Julia
 policy = DDPGPolicy(
     behavior_actor = NeuralNetworkApproximator(
@@ -378,11 +384,11 @@ agents = MADDPGManager(
 )
 ```
 
-Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L110) and [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/50756bbe9e1925a9320d1abdbbc6255c1b4a27f1/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L15), you can experiment by `run(agents, wrapped_env, stop_condition, hook)`. Use [`Plots.scatter`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/66a9c7e41416c4b959c66b07d06d67915dc4b628/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L119) to get the following result:
+Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L110) and [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L15) in the experiment, you can also `run(agents, wrapped_env, stop_condition, hook)` to perform the experiment. Use [`Plots.scatter`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L119) to get the following result:
 
 \dfig{body;JuliaRL_MADDPG_KuhnPoker.png;Result of the experiment.}
 
-**Note that** the current `MADDPG` still can only work on the envs of `MINIMAL_ACTION_SET,` i.e., all actions in the environment's action space are legal. And the Kuhn Poker game may not be suitable for the test since `MADDPG` is one deterministic algorithm that the state's response is one deterministic action. In the next weeks, I'll update the algorithm and try to test it on other games.
+**Note that** the current `MADDPGManager` still only works on the envs of [`MINIMAL_ACTION_SET`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.MINIMAL_ACTION_SET). And since **MADDPG** is one deterministic algorithm, i.e., the state's response is one deterministic action, the Kuhn Poker game may not be suitable for testing the performance. In the next weeks, I'll update the algorithm and try to test it on other games.
 
 ## 3. Reviews and Future Plan
 
@@ -392,9 +398,9 @@ From applying the project to now, since spending much time on getting familiar w
 
 ### 3.2 Future Plan
 
-In the first section's `Schedule`, I have listed a draft plan for the next serval weeks. In detail, I want to complete the following missions:
+In the first section, I have listed a rough plan for the next serval weeks. In detail, I want to complete the following missions:
 
-- Test `MADDPG` on more suitable envs and add relative experiments. (08/16 - 08/23)
-- Consider implementing the `Exploitability Descent`(ED) algorithm and add related experiments. (08/24 - 09/07)
-- Consider implementing the `Policy-Spaced Response Oracles`(PSRO) algorithm and add related experiments. (09/08 - 09/22)
+- Test **MADDPG** on more suitable envs and add relative experiments. (08/16 - 08/23)
+- Consider implementing the **Exploitability Descent(ED)**\dcite{DBLP:journals/corr/abs-1903-05614} algorithm and add related experiments. (08/24 - 09/07)
+- Consider implementing the **Policy-Spaced Response Oracles(PSRO)**\dcite{DBLP:journals/corr/abs-1909-12823} algorithm and add related experiments. (09/08 - 09/22)
 - Fix the existing bugs of algorithms and finish the **final-term report**. (09/23 - 09/30)
