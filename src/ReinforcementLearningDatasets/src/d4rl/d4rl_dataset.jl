@@ -39,7 +39,7 @@ end
 """
     dataset(dataset; <keyword arguments>)
 
-Create a dataset enclosed in a [`D4RLDataSet`] `Iterable` type. Contain other related metadata
+Create a dataset enclosed in a [`D4RLDataSet`](@ref) `Iterable` type. Contain other related metadata
 for the `dataset` that is passed. The returned type is an infinite or a finite `Iterator` 
 respectively depnding upon whether `is_shuffle` is `true` or `false`. For more information regarding
 the dataset, refer to [D4RL](https://github.com/rail-berkeley/d4rl).
