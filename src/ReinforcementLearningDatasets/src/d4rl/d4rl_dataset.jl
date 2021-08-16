@@ -9,7 +9,7 @@ export dataset
 export D4RLDataSet
 
 """
-Represents an iterable dataset of type `D4RLDataSet` with the following fields:
+Represents an iterable dataset with the following fields:
 
 # Fields
 - `dataset::Dict{Symbol, Any}`: representation of the dataset as a Dictionary with style as `style`.
@@ -39,18 +39,24 @@ end
 """
     dataset(dataset; <keyword arguments>)
 
-Create a dataset enclosed in a AtariDataSet `Iterable` type. Contain other related metadata
+Create a dataset enclosed in a [`D4RLDataSet`] `Iterable` type. Contain other related metadata
 for the `dataset` that is passed. The returned type is an infinite or a finite `Iterator` 
-respectively depnding upon whether is_shurrle is `true` or `false`. For more information regarding
-the dataset, refer to [google-research/batch_rl](https://github.com/google-research/batch_rl).
+respectively depnding upon whether `is_shuffle` is `true` or `false`. For more information regarding
+the dataset, refer to [D4RL](https://github.com/rail-berkeley/d4rl).
 
 # Arguments
 - `dataset::String`: name of the datset.
 - `repo::String="d4rl"`: name of the repository of the dataset.
-- `style::Tuple{Symbol}=SARTS`: the style of the `Iterator` that is returned. can be [`SARTS`](@ref), [`SART`](@ref) or [`SA`](@ref).
+- `style::Tuple{Symbol}=SARTS`: the style of the `Iterator` that is returned. can be [`SARTS`](@ref),
+[`SART`](@ref) or [`SA`](@ref).
 - `rng<:AbstractRNG=StableRNG(123)`.
 - `is_shuffle::Bool=true`: determines if the dataset is shuffled or not.
 - `batch_size::Int=256` batch_size that is yielded by the iterator.
+
+!!! note
+
+[`FLOW`](@ref) and [`CARLA`](@ref) supported by [D4RL](https://github.com/rail-berkeley/d4rl) have not 
+been tested in this package yet.
 """
 function dataset(
     dataset::String;

@@ -2,7 +2,7 @@ using NPZ
 using CodecZlib
 
 """
-Represents an iterable dataset of type `AtariDataSet` with the following fields:
+Represents an iterable dataset` with the following fields:
 
 # Fields
 - `dataset::Dict{Symbol, Any}`: representation of the dataset as a Dictionary with style as `style`.
@@ -37,7 +37,7 @@ const epochs_per_game = 50
 
 Create a dataset enclosed in a [`AtariDataSet`](@ref) [`Iterable`](@ref) type. Contain other related metadata
 for the `dataset` that is passed. The returned type is an infinite or a finite `Iterator` 
-respectively depnding upon whether is_shurrle is `true` or `false`. For more information regarding
+respectively depnding upon whether is_shuffle is `true` or `false`. For more information regarding
 the dataset, refer to [google-research/batch_rl](https://github.com/google-research/batch_rl).
 
 # Arguments
@@ -45,11 +45,18 @@ the dataset, refer to [google-research/batch_rl](https://github.com/google-resea
 - `index::Int`: analogous to `v` and different values correspond to different `seed`s that 
 are used for data collection. can be between `[1:5]`.
 - `epochs::Vector{Int}`: list of epochs to load. included epochs should be between `[0:50]`.
-- `style::Tuple{Symbol}=SARTS`: the style of the `Iterator` that is returned. can be [`SARTS`](@ref), [`SART`](@ref) or [`SA`](@ref).
+- `style::Tuple{Symbol}=SARTS`: the style of the `Iterator` that is returned. can be [`SARTS`](@ref), 
+[`SART`](@ref) or [`SA`](@ref).
 - `repo::String="atari-replay-datasets"`: name of the repository of the dataset.
 - `rng<:AbstractRNG=StableRNG(123)`.
 - `is_shuffle::Bool=true`: determines if the dataset is shuffled or not.
 - `batch_size::Int=256` batch_size that is yielded by the iterator.
+
+!!! note
+
+The dataset takes up significant amount of space in RAM. Therefore it is advised to
+load even one epoch with 20GB of RAM. We are looking for ways to use lazy data loading here
+and any contributions are welcome.
 """
 function dataset(
     game::String,
