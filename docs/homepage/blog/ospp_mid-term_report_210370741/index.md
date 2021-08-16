@@ -80,6 +80,10 @@ Refer the following [discussion](https://github.com/JuliaReinforcementLearning/R
 
 ## 3. Implemented datasets
 
+### Documentation
+
+The documentation for this package is available in [RLDatasets.jl](https://juliareinforcementlearning.org/docs/rldatasets/). Do check it out for more details.
+
 ### Installation details
 
 To install the `ReinforcementLearningDatasets.jl` package use the following command in julia's `pkg` mode.
@@ -138,7 +142,7 @@ The output is similar to D4RL.
 
 ### Google Research Atari DQN Replay Datasets
 
-Added support for `Google Research Atari DQN Replay Datasets`. Currently, the datasets are directly loaded into the RAM and therefore, it is advised to be used only with sufficient amount of RAM. Support for lazy parallel loading in a `Channel` will be given soon. 
+Added support for `Google Research Atari DQN Replay Datasets`. Currently, the datasets are directly loaded into the RAM and therefore, it is advised to be used only with sufficient amount of RAM (around 20 GB of free space). Support for lazy parallel loading in a `Channel` will be given soon. 
 
 Credits: [DQN Replay Datasets](https://github.com/google-research/batch_rl)
 
@@ -156,7 +160,7 @@ The output is similar to D4RL.
 
 ### RL Unplugged Atari Dataset
 
-Added support for `RL Unplugged` atari datasets. The datasets that are stored in the form of `.tfrecord` are fetched into julia. Lazy loading with multi threading is implemented. This implementation is based on previous work in `TFRecord.jl`.
+Added support for `RL Unplugged` atari datasets. The datasets that are stored in the form of `.tfrecord` are fetched into julia. Lazy loading with multi threading is implemented. This implementation is based on previous work in [TFRecord.jl](https://github.com/JuliaReinforcementLearning/TFRecord.jl).
 
 Credits: [RL Unplugged](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged)
 
@@ -227,7 +231,7 @@ Implementation of `Google Research Atari DQN Replay Datasets` was harder because
 
 For supporting `RL Unplugged dataset` I had to learn about `.tfrecord` files, `Protocol Buffers`, `buffered Channels` and julia `multi threading` which was used in a lot of occasions. It took some time to grasp all the concepts but the final implementation, however, was based on already existing work in `TFRecord.jl`.
 
-All of this work wouldn't have been possible without the patient mentoring and vast knowledge of my mentor [Jun Tian](https://github.com/findmyway), who has been pivotal in the design and implementation of the package. His massive experience and beautifully written code has provided a lot of inspiration to the making of this package. His amicable nature and commitment to the users of the package by providing timely and detailed explanations to any issues or queries related to the package despite his time constraints, has provided a long standing example as a developer and as a person. I also thank all the developers of the packages that `RLDatasets.jl` depend upon.
+All of this work wouldn't have been possible without the patient mentoring and vast knowledge of my mentor [Jun Tian](https://github.com/findmyway), who has been pivotal in the design and implementation of the package. His massive experience and beautifully written code has provided a lot of inspiration to the making of this package. His amicable nature and commitment to the users of the package by providing timely and detailed explanations to any issues or queries related to the package despite his time constraints, has provided a long standing example as a developer and as a person. I also thank all the developers of the packages that `RLDatasets.jl` depends upon.
 
 ### Implementation details
 
