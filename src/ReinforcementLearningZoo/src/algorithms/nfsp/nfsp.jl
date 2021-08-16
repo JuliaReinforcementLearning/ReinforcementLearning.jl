@@ -110,7 +110,7 @@ end
 
 # the supplement function
 function rl_learn!(policy::QBasedPolicy, t::AbstractTrajectory)
-    # just learn the approximator, not update target_approximator
+    # just update the approximator, not update target_approximator
     learner = policy.learner
     length(t[:terminal]) - learner.sampler.n <= learner.min_replay_history && return
     
