@@ -141,7 +141,9 @@
         "CRR",
         "reparamaterize",
         "MADDPG",
-        "rldatasets"
+        "rldatasets",
+        "Prasidh",
+        "Srikumar"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
