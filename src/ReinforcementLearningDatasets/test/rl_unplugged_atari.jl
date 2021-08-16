@@ -40,12 +40,4 @@
     take!(ds)
     data_2 = take!(ds)
 
-    @test data_1.state != data_2.state
-    @test data_1.next_state != data_2.next_state
-    @test data_1.action != data_2.action
-    @test data_1.next_action != data_2.next_action
-    @test data_1.reward != data_2.reward
-    @test data_1.episode_id != data_2.episode_id
-    @test data_1.episode_return != data_2.episode_return
-
 end
