@@ -13,7 +13,7 @@ using PNGFiles
 
 Represent an RLTransition and can also represent a batch.
 """
-struct RLTransition{T} where T<:AbstractArray
+struct RLTransition where
     state
     action
     reward
