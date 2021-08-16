@@ -37,7 +37,7 @@ const epochs_per_game = 50
 
 Create a dataset enclosed in a [`AtariDataSet`](@ref) [`Iterable`](@ref) type. Contain other related metadata
 for the `dataset` that is passed. The returned type is an infinite or a finite `Iterator` 
-respectively depnding upon whether is_shuffle is `true` or `false`. For more information regarding
+respectively depending upon whether is_shuffle is `true` or `false`. For more information regarding
 the dataset, refer to [google-research/batch_rl](https://github.com/google-research/batch_rl).
 
 # Arguments
