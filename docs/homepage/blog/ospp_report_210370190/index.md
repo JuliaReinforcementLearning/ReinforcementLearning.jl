@@ -1,6 +1,6 @@
 @def title = "Implement Multi-Agent Reinforcement Learning Algorithms in Julia"
 @def description = """
-    This is a technical report of the summer OSPP project [Implement Multi-Agent Reinforcement Learning Algorithms in Julia](https://summer.iscas.ac.cn/#/org/prodetail/210370190?lang=en). In this report, the following three parts are covered: the first section is a basic introduction to the project, the second section contains the implementation details of several multi-agent algorithms, and in the last section, we discussed our future plan.
+    This is a technical report of the summer OSPP project [Implement Multi-Agent Reinforcement Learning Algorithms in Julia](https://summer.iscas.ac.cn/#/org/prodetail/210370190?lang=en). In this report, the following two parts are covered: the first section is a basic introduction to the project, and the second section contains the implementation details of several multi-agent algorithms.
     """
 @def is_enable_toc = true
 @def has_code = true
@@ -16,7 +16,7 @@
                 "affiliationURL":"http://english.ecnu.edu.cn/"
             }
         ],
-        "publishedDate":"2021-08-16",
+        "publishedDate":"2021-08-17",
         "citationText":"Peter Chen, 2021"
     }"""
 
@@ -34,24 +34,23 @@ Recent advances in reinforcement learning led to many breakthroughs in artificia
 | 07/15 -- 07/29 | Add **NFSP** algorithm into [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/), and test it on the [`KuhnPokerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.KuhnPokerEnv). |
 | 07/30 -- 08/07 | Fix the existing bugs of **NFSP** and implement the **MADDPG** algorithm into ReinforcementLearningZoo.jl. |
 | 08/08 -- 08/15 | Update the **MADDPG** algorithm and test it on the `KuhnPokerEnv`, also complete the **mid-term report**. |
-| 08/16 -- 08/30 | Test **MADDPG** algorithm on more envs and consider implementing the **ED**\dcite{DBLP:journals/corr/abs-1903-05614} algorithm into ReinforcementLearningZoo.jl. |
-| 08/31 -- 09/07 | Complete the **ED** implementation, and add relative experiments. |
-| 09/08 -- 09/14 | Consider implementing **PSRO** algorithm into ReinforcementLearningZoo.jl. |
-| 09/15 -- 09/30 | Complete **PSRO** implementation and add relative experiments, also complete the **final-term report**. |
+| 08/16 -- 08/23 | Add support for environments of [`FULL_ACTION_SET`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.FULL_ACTION_SET) in **MADDPG** and test it on more games, such as [`simple_adversary`](https://github.com/openai/multiagent-particle-envs/blob/master/multiagent/scenarios/simple_adversary.py). |
+| 08/24 -- 08/30 | ... |
 
 ### Accomplished Work
 
-From July 1st to now, I mainly have implemented the **Neural Fictitious Self-play(NFSP)** algorithm and added it into [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/). A workable [experiment](https://juliareinforcementlearning.org/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker/#JuliaRL\\_NFSP\\_KuhnPoker) is also added to the documentation. Besides, the **Multi-agent Deep Deterministic Policy Gradient(MADDPG)** algorithm's semi-finished implementation has been placed into ReinforcementLearningZoo.jl, and I will test it on more envs in the next weeks. Related commits are listed below:
+From July 1st to now, I have implemented the **Neural Fictitious Self-play(NFSP)** algorithm and added it into [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/). A workable [experiment](https://juliareinforcementlearning.org/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker/#JuliaRL\\_NFSP\\_KuhnPoker) is also added to the documentation. Besides, the **Multi-agent Deep Deterministic Policy Gradient(MADDPG)** algorithm's semi-finished implementation has been placed into ReinforcementLearningZoo.jl, and I will test it on more envs in the next weeks. Related commits are listed below:
 
 - [add Base.:(==) and Base.hash for AbstractEnv and test nash_conv on KuhnPokerEnv#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 - [Supplement functions in ReservoirTrajectory and BehaviorCloningPolicy #390](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/390)
 - [Implementation of NFSP and NFSP_KuhnPoker experiment #402](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/402)
 - [correct nfsp implementation #439](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/439)
 - [add MADDPG algorithm #444](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/444)
+- ...
 
 ## 2. Implementation and Usage
 
-In this section, I will first briefly review the [`Agent`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.Agent) structure defined in [ReinforcementLearningCore.jl](https://juliareinforcementlearning.org/docs/rlcore/). Then I'll explain how **NFSP** and **MADDPG** are implemented, followed by a short example to demonstrate how others can use them in their customized environments.
+In this section, I will first briefly review the [`Agent`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.Agent) structure defined in [ReinforcementLearningCore.jl](https://juliareinforcementlearning.org/docs/rlcore/). Then I'll explain how these multi-agent algorithms(**NFSP**, **MADDPG**, ...) are implemented, followed by a short example to demonstrate how others can use them in their customized environments.
 
 ### 2.1 An Introduction to `Agent`
 
@@ -141,7 +140,7 @@ end
 
 - PostActStage
 
-After executing the action, the `NFSPAgent` needs to add the personal **reward** and the **is_terminated** result of the current state into the **RL** agent's trajectory.
+After executing the action, the `NFSPAgent` needs to add the personal **reward** and the **is_terminated** results of the current state into the **RL** agent's trajectory.
 ```Julia
 function (π::NFSPAgent)(::PostActStage, env::AbstractEnv, player::Any)
     push!(π.rl_agent.trajectory[:reward], reward(env, player))
@@ -151,7 +150,7 @@ end
 
 - PostEpisodeStage
 
-When one episode is terminated, the agent should push the **terminated state** and a **dummy action** (see also the [note](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/4e5d258798088b1c628401b6b9de18aa8cbb3ab3/src/ReinforcementLearningCore/src/policies/agents/agent.jl#L134)) into the **RL** agent's trajectory. Also, the **reward** and **is_terminated** result need to be corrected to avoid getting wrong samples when playing the [`SEQUENTIAL`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.SEQUENTIAL) or [`TERMINAL_REWARD`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.TERMINAL_REWARD) games.
+When one episode is terminated, the agent should push the **terminated state** and a **dummy action** (see also the [note](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/4e5d258798088b1c628401b6b9de18aa8cbb3ab3/src/ReinforcementLearningCore/src/policies/agents/agent.jl#L134)) into the **RL** agent's trajectory. Also, the **reward** and **is_terminated** results need to be corrected to avoid getting the wrong samples when playing the games of [`SEQUENTIAL`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.SEQUENTIAL) or [`TERMINAL_REWARD`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.TERMINAL_REWARD).
 ```Julia
 function (π::NFSPAgent)(::PostEpisodeStage, env::AbstractEnv, player::Any)
     rl = π.rl_agent
@@ -389,18 +388,3 @@ Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/Rei
 \dfig{body;JuliaRL_MADDPG_KuhnPoker.png;Result of the experiment.}
 
 **Note that** the current `MADDPGManager` still only works on the envs of [`MINIMAL_ACTION_SET`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.MINIMAL_ACTION_SET). And since **MADDPG** is one deterministic algorithm, i.e., the state's response is one deterministic action, the Kuhn Poker game may not be suitable for testing the performance. In the next weeks, I'll update the algorithm and try to test it on other games.
-
-## 3. Reviews and Future Plan
-
-### 3.1 Reviews
-
-From applying the project to now, since spending much time on getting familiar with the algorithm and structure of RL.jl, my progress was slow in the initial weeks. However, thanks to the mentor's patience in leading, I realize the convenience of the general workflow in RL.jl and improve my comprehension of the algorithms.
-
-### 3.2 Future Plan
-
-In the first section, I have listed a rough plan for the next serval weeks. In detail, I want to complete the following missions:
-
-- Test **MADDPG** on more suitable envs and add relative experiments. (08/16 - 08/23)
-- Consider implementing the **Exploitability Descent(ED)**\dcite{DBLP:journals/corr/abs-1903-05614} algorithm and add related experiments. (08/24 - 09/07)
-- Consider implementing the **Policy-Spaced Response Oracles(PSRO)**\dcite{DBLP:journals/corr/abs-1909-12823} algorithm and add related experiments. (09/08 - 09/22)
-- Fix the existing bugs of algorithms and finish the **final-term report**. (09/23 - 09/30)
