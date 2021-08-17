@@ -9,16 +9,18 @@ export dataset
 export D4RLDataSet
 
 """
-Represents an iterable dataset of type `D4RLDataSet` with the following fields:
+Represents an `Iterable` dataset with the following fields:
 
-`dataset`: Dict{Symbol, Any}, representation of the dataset as a Dictionary with style as `style`
-`repo`: String, the repository from which the dataset is taken
-`dataset_size`: Integer, the size of the dataset
-`batch_size`: Integer, the size of the batches returned by `iterate`.
-`style`: Tuple, the type of the NamedTuple, for now SARTS and SART is supported.
-`rng`<: AbstractRNG.
-`meta`: Dict, the metadata provided along with the dataset
-`is_shuffle`: Bool, determines if the batches returned by `iterate` are shuffled.
+# Fields
+- `dataset::Dict{Symbol, Any}`: representation of the dataset as a Dictionary with style as `style`.
+- `repo::String`: the repository from which the dataset is taken.
+- `dataset_size::Int`, the number of samples in the dataset.
+- `batch_size::Int`: the size of the batches returned by `iterate`.
+- `style::Tuple{Symbol}`: the style of the `Iterator` that is returned, check out: [`SARTS`](@ref), [`SART`](@ref) and [`SA`](@ref)
+for types supported out of the box.
+- `rng<:AbstractRNG`.
+- `meta::Dict`: the metadata provided along with the dataset.
+- `is_shuffle::Bool`: determines if the batches returned by `iterate` are shuffled.
 """
 struct D4RLDataSet{T<:AbstractRNG} <: RLDataSet
     dataset::Dict{Symbol, Any}
@@ -35,24 +37,31 @@ end
 # TO-DO: enable the users providing their own paths to datasets if they already have it
 # TO-DO: add additional env arg to do complete verify function
 """
-    dataset(dataset::String; style::Tuple, rng<:AbstractRNG, is_shuffle::Bool, max_iters::Int64, batch_size::Int64)
+    dataset(dataset; <keyword arguments>)
 
-Creates a dataset of enclosed in a D4RLDataSet type and other related metadata for the `dataset` that is passed.
-The `D4RLDataSet` type is an iterable that fetches batches when used in a for loop for convenience during offline training.
+Create a dataset enclosed in a [`D4RLDataSet`](@ref) `Iterable` type. Contain other related metadata
+for the `dataset` that is passed. The returned type is an infinite or a finite `Iterator` 
+respectively depending upon whether `is_shuffle` is `true` or `false`. For more information regarding
+the dataset, refer to [D4RL](https://github.com/rail-berkeley/d4rl).
 
-`dataset`: Dict{Symbol, Any}, Name of the datset.
-`repo`: Name of the repository of the dataset.
-`style`: the style of the iterator and the Dict inside D4RLDataSet that is returned.
-`rng`: StableRNG
-`max_iters`: maximum number of iterations for the iterator.
-`is_shuffle`: whether the dataset is shuffled or not. `true` by default.
-`batch_size`: batch_size that is yielded by the iterator. Defaults to 256.
+# Arguments
+- `dataset::String`: name of the datset.
+- `repo::String="d4rl"`: name of the repository of the dataset.
+- `style::Tuple{Symbol}=SARTS`: the style of the `Iterator` that is returned. can be [`SARTS`](@ref),
+[`SART`](@ref) or [`SA`](@ref).
+- `rng<:AbstractRNG=StableRNG(123)`.
+- `is_shuffle::Bool=true`: determines if the dataset is shuffled or not.
+- `batch_size::Int=256` batch_size that is yielded by the iterator.
 
-The returned type is an infinite iterator which can be called using `iterate` and will return batches as specified in the dataset.
+!!! note
+
+[`FLOW`](https://flow-project.github.io/) and [`CARLA`](https://github.com/rail-berkeley/d4rl/wiki/CARLA-Setup) supported by [D4RL](https://github.com/rail-berkeley/d4rl) have not 
+been tested in this package yet.
 """
-function dataset(dataset::String;
-    style=SARTS,
+function dataset(
+    dataset::String;
     repo = "d4rl",
+    style=SARTS,
     rng = StableRNG(123), 
     is_shuffle = true, 
     batch_size=256

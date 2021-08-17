@@ -14,14 +14,14 @@ pkg> add https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl:
 ```julia
 using ReinforcementLearningDatasets
 ds = dataset("hopper-medium-replay-v0"; repo="d4rl")
-samples = Iterators.take!(ds)
+samples = Iterators.take(ds)
 ```
 `ds` is of the type `D4RLDataset` which consists of the entire dataset along with some other information about the dataset. `samples` are in the form of `SARTS` with batch_size 256.
 #### RL Unplugged
 ```julia
 using ReinforcementLearningDatasets
 ds = rl_unplugged_atari_dataset("pong", 1, [1, 2])
-samples = Iterators.take!(ds, 2)
+samples = take!(ds, 2)
 ```
 `ds` is a `Channel{RLTransition}` that returns batches of type `RLTransition` when `take!` is used.
 

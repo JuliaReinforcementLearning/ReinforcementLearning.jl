@@ -11,19 +11,7 @@ using PNGFiles
 """
     RLTransition
 
-Represents an RLTransition. It can also be used to represent a batch by adding another dimension.
-
-The constructor decodes the incoming `TFRecord.Example` to be ready to use.
-
-Fields:
-- `state`
-- `action`
-- `reward`
-- `terminal`
-- `next_state`
-- `next_action`
-- `episode_id`
-- `episode_return`
+Represent an RLTransition and can also represent a batch.
 """
 struct RLTransition
     state
@@ -66,21 +54,23 @@ function RLTransition(example::TFRecord.Example)
     RLTransition(s, a, r, t, s′, a′, episode_id, episode_return)
 end
 """
-    rl_unplugged_atari_dataset(game::String, run::Int, shards::Vector{Int}; (optional_args))
+    rl_unplugged_atari_dataset(game, run, shards; <keyword arguments>)
 
-Returns a buffered `Channel` of `RLTransition` batches which supports multi threading.
+Returns a buffered `Channel` of [`RLTransition`](@ref) batches which supports 
+multi threaded loading.
 
-### Arguments and optional_args:
+# Arguments
 
-- `game::String`, The name of the env.
-- `run::Int`, The run number. Can be in the range 1:5.
-- `shards::Vector{Int}` The shards that are to be loaded.
-optional_args:
-- `shuffle_buffer_size=10_000`, This is the size of the shuffle_buffer used in loading RLTransitions.
-- `tf_reader_bufsize=1*1024*1024`, The size of the buffer `bufsize` that is used internally in `TFRecord.read`.
-- `tf_reader_sz=10_000`, The size of the `Channel`, `channel_size` that is returned by `TFRecord.read`.
-- `batch_size=256`, The size of the batches that are returned by the Channel that is finally returned.
-- `n_preallocations`, The size of the buffer in the `Channel` that is returned.
+- `game::String`: name of the dataset.
+- `run::Int`: run number. can be in the range `1:5`.
+- `shards::Vector{Int}`: the shards that are to be loaded.
+- `shuffle_buffer_size::Int=10_000`: size of the shuffle_buffer used in loading RLTransitions.
+- `tf_reader_bufsize::Int=1*1024*1024`: the size of the buffer `bufsize` that is used internally 
+in `TFRecord.read`.
+- `tf_reader_sz::Int=10_000`: the size of the `Channel`, `channel_size` that is returned by 
+`TFRecord.read`.
+- `batch_size::Int=256`: The number of samples within the batches that are returned by the `Channel`.
+- `n_preallocations::Int=nthreads()*12`: the size of the buffer in the `Channel` that is returned.
 
 !!! note
 
@@ -90,11 +80,11 @@ function rl_unplugged_atari_dataset(
     game::String,
     run::Int,
     shards::Vector{Int};
-    shuffle_buffer_size = 10_000,
-    tf_reader_bufsize = 1*1024*1024,
-    tf_reader_sz = 10_000,
-    batch_size = 256,
-    n_preallocations = nthreads() * 12
+    shuffle_buffer_size=10_000,
+    tf_reader_bufsize=1*1024*1024,
+    tf_reader_sz=10_000,
+    batch_size=256,
+    n_preallocations=nthreads()*12
 )
     n = nthreads()
 
