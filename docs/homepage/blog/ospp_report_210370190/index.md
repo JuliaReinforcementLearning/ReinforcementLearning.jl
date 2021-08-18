@@ -301,7 +301,7 @@ As for updating the policy, the process is mainly the same as the [`DDPGPolicy`]
 
 #### Usage
 
-Here `MADDPGManager` is used for simultaneous games, or you can add an [action-related wrapper](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.ActionTransformedEnv-Tuple{Any}) to the sequential game to drop the dummy action of other players. And there is one [experiment](https://juliareinforcementlearning.org/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker/#JuliaRL\\_MADDPG\\_KuhnPoker) `JuliaRL_MADDPG_KuhnPoker` as one usage example, which tests the algorithm on the Kuhn Poker game. Since the Kuhn Poker is one sequential game, I wrap the game just like the following:
+Here `MADDPGManager` is used for the environments of [`SIMULTANEOUS`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.SIMULTANEOUS) and continuous action space(see the blog [Diagonal Gaussian Policies](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html#stochastic-policies)), or you can add an [action-related wrapper](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.ActionTransformedEnv-Tuple{Any}) to the environment to ensure it can work with the algorithm. There is one [experiment](https://juliareinforcementlearning.org/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker/#JuliaRL\\_MADDPG\\_KuhnPoker) `JuliaRL_MADDPG_KuhnPoker` as one usage example, which tests the algorithm on the Kuhn Poker game. Since the Kuhn Poker is one [`SEQUENTIAL`](ReinforcementLearningBase.SEQUENTIAL) game with discrete action space(see also the blog [Diagonal Gaussian Policies](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html#stochastic-policies)), I wrap the environment just like the following:
 ```Julia
 wrapped_env = ActionTransformedEnv(
         StateTransformedEnv(
@@ -310,7 +310,7 @@ wrapped_env = ActionTransformedEnv(
             state_space_mapping = ss -> [[findfirst(==(s), state_space(env))] for s in state_space(env)]
             ),
         ## drop the dummy action of the other agent.
-        action_mapping = x -> length(x) == 1 ? x : Int(x[current_player(env)] + 1),
+        action_mapping = x -> length(x) == 1 ? x : Int(ceil(x[current_player(env)]) + 1),
     )
 ```
 
@@ -387,4 +387,4 @@ Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/Rei
 
 \dfig{body;JuliaRL_MADDPG_KuhnPoker.png;Result of the experiment.}
 
-**Note that** the current `MADDPGManager` still only works on the envs of [`MINIMAL_ACTION_SET`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.MINIMAL_ACTION_SET). And since **MADDPG** is one deterministic algorithm, i.e., the state's response is one deterministic action, the Kuhn Poker game may not be suitable for testing the performance. In the next weeks, I'll update the algorithm and try to test it on other games.
+**Note that** since **MADDPG** is one deterministic algorithm, i.e., the state's response is one deterministic action, the Kuhn Poker game may not be suitable for testing the performance. In the next weeks, I'll update the algorithm and try to test it on other games.
