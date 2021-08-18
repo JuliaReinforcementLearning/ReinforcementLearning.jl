@@ -8,7 +8,7 @@
         ],
     )  # mujoco, box2d, robotics are not tested here
 
-    gym_env_names = filter(x -> x != "KellyCoinflipGeneralized-v0", gym_env_names)  # not sure why this env has outliers
+    gym_env_names = filter(x -> !(x in ["KellyCoinflipGeneralized-v0", "Blackjack-v0"]), gym_env_names)  # not sure why this env has outliers
 
     for x in gym_env_names
         env = GymEnv(x)
