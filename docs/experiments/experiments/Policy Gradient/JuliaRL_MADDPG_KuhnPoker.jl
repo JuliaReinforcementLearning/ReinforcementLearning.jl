@@ -2,7 +2,7 @@
 # title: JuliaRL\_MADDPG\_KuhnPoker
 # cover: assets/JuliaRL_MADDPG_KuhnPoker.png
 # description: MADDPG applied to KuhnPoker
-# date: 2021-08-09
+# date: 2021-08-18
 # author: "[Peter Chen](https://github.com/peterchen96)" 
 # ---
 
@@ -43,7 +43,7 @@ function RL.Experiment(
             state_space_mapping = ss -> [[findfirst(==(s), state_space(env))] for s in state_space(env)]
             ),
         ## drop the dummy action of the other agent.
-        action_mapping = x -> length(x) == 1 ? x : Int(x[current_player(env)] + 1),
+        action_mapping = x -> length(x) == 1 ? x : Int(ceil(x[current_player(env)]) + 1),
     )
     ns, na = 1, 1 # dimension of the state and action.
     n_players = 2 # number of players
@@ -101,9 +101,10 @@ function RL.Experiment(
             policy = NamedPolicy(player, deepcopy(policy)),
             trajectory = deepcopy(trajectory),
         )) for player in players(env) if player != chance_player(env)),
+        SARTS, # traces
         128, # batch_size
         128, # update_freq
-        0, # step_counter
+        0, # initial update_step
         rng
     )
 

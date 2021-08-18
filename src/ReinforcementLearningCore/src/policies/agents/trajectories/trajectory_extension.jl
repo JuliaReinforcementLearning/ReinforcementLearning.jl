@@ -85,11 +85,22 @@ function fetch!(s::BatchSampler, t::AbstractTrajectory, inds::Vector{Int})
     end
 end
 
-function fetch!(s::BatchSampler{SARTS}, t::CircularArraySARTTrajectory, inds::Vector{Int})
-    batch = NamedTuple{SARTS}((
-        (consecutive_view(t[x], inds) for x in SART)...,
-        consecutive_view(t[:state], inds .+ 1),
-    ))
+function fetch!(s::BatchSampler{traces}, t::Union{CircularArraySARTTrajectory, CircularArraySLARTTrajectory}, inds::Vector{Int}) where {traces}
+    if traces == SARTS
+        batch = NamedTuple{SARTS}((
+            (consecutive_view(t[x], inds) for x in SART)...,
+            consecutive_view(t[:state], inds .+ 1),
+        ))
+    elseif traces == SLARTSL
+        batch = NamedTuple{SLARTSL}((
+            (consecutive_view(t[x], inds) for x in SLART)...,
+            consecutive_view(t[:state], inds .+ 1),
+            consecutive_view(t[:legal_actions_mask], inds .+ 1),
+        ))
+    else
+        @error "unsupported traces $traces"
+    end
+    
     if isnothing(s.cache)
         s.cache = map(batch) do x
             convert(Array, x)
