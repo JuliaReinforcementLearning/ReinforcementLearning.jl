@@ -376,9 +376,10 @@ agents = MADDPGManager(
         policy = NamedPolicy(player, deepcopy(policy)),
         trajectory = deepcopy(trajectory),
     )) for player in players(env) if player != chance_player(env)),
+    SARTS, # traces
     128, # batch_size
     128, # update_freq
-    0, # update_step
+    0, # initial update_step
     rng
 )
 ```
