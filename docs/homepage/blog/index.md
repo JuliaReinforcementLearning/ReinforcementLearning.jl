@@ -6,7 +6,7 @@
 
 - [Phase 1 Technical Report of Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl](/blog/phase1_technical_report_of_enriching_offline_reinforcement_learning_algorithms_in_reinforcement_learning_jl)
 
-- [Phase 2 Technical Report of Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl](/blog/phase1_technical_report_of_enriching_offline_reinforcement_learning_algorithms_in_reinforcement_learning_jl)
+- [Phase 2 Technical Report of Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl](/blog/phase2_technical_report_of_enriching_offline_reinforcement_learning_algorithms_in_reinforcement_learning_jl)
 
 - [Establish a General Pipeline for Offline Reinforcement Learning Evaluation (Summer OSPP Project 210370741) Mid-term Report](/blog/ospp_mid-term_report_210370741)
 
