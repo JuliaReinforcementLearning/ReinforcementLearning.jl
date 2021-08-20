@@ -51,8 +51,8 @@ function Experiment(s::String)
     )
 end
 
-function Base.run(x::Experiment)
-    display(Markdown.parse(x.description))
+function Base.run(x::Experiment; describe::Bool=true)
+    describe && display(Markdown.parse(x.description))
     run(x.policy, x.env, x.stop_condition, x.hook)
     x
 end
