@@ -4,7 +4,9 @@
 
 - [An Introduction to ReinforcementLearning.jl: Design, Implementations and Thoughts](/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts)
 
-- [Phase 1 Technical Report of Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl](/blog/offline_reinforcement_learning_algorithm_phase1)
+- [Phase 1 Technical Report of Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl](/blog/phase1_technical_report_of_enriching_offline_reinforcement_learning_algorithms_in_reinforcement_learning_jl)
+
+- [Phase 2 Technical Report of Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl](/blog/phase1_technical_report_of_enriching_offline_reinforcement_learning_algorithms_in_reinforcement_learning_jl)
 
 - [Establish a General Pipeline for Offline Reinforcement Learning Evaluation (Summer OSPP Project 210370741) Mid-term Report](/blog/ospp_mid-term_report_210370741)
 
