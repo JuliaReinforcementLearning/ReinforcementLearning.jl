@@ -130,8 +130,8 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
 
     target = r .+ γ .* (1 .- t) .* expected_target_q
 
-    q_t = Array{Float32}(undef, 4, batch_size)
-    for i in 1:4
+    q_t = Array{Float32}(undef, learner.m, batch_size)
+    for i in 1:learner.m
         a_sample = AC.actor(s; is_sampling=true)
         q_t[i, :] = AC.critic(vcat(s, a_sample))
     end
@@ -161,7 +161,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
             error("Wrong parameter.")
         end
 
-        actor_loss = mean(-log_π)
+        actor_loss = mean(-log_π .* actor_loss_coef)
 
         ignore() do
             learner.actor_loss = actor_loss
