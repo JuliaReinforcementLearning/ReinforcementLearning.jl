@@ -389,12 +389,14 @@ rps(rand(action_space(rps)))
 
 ### [`ChanceStyle`](@ref)
 
-If there's no `rng` in the environment, everything is deterministic afer taking
+If there's no `rng` in the environment, everything is deterministic after taking
 each action, then we call the [`ChanceStyle`](@ref) of these environments are of
-[`Deterministic`](@ref). Otherwise, we call them [`Stochastic`](@ref). One special case is that,
+[`Deterministic`](@ref). Otherwise, we call them [`Stochastic`](@ref), which is the
+default return value. One special case is that,
 in [Extensive Form Games](https://en.wikipedia.org/wiki/Extensive-form_game), a
 chance node is involved. And the action probability of this special player is
-known. For these environments, we need to have the following methods defined:
+determined. We define the `ChanceStyle` of these environments as [`EXPLICIT_STOCHASTIC`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.EXPLICIT_STOCHASTIC).
+For these environments, we need to have the following methods defined:
 
 ```@repl customized_env
 kp = KuhnPokerEnv();
