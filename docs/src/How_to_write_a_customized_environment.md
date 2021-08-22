@@ -405,7 +405,7 @@ prob(kp, chance_player(kp))
 chance_player(kp) in players(kp)
 ```
 
-To explicitly specify the chance style of your custom environment, you can provide a specific dispatch of [`ChanceStyle`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.ChanceStyle-Tuple{T}%20where%20T%3C:AbstractEnv) for your custom environment.
+To explicitly specify the chance style of your custom environment, you can provide a specific dispatch of [`ChanceStyle`](@ref) for your custom environment.
 
 ## Examples
 
