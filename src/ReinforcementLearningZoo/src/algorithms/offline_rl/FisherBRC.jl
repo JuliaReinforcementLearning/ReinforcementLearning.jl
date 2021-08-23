@@ -52,7 +52,7 @@ See paper: [Offline reinforcement learning with fisher divergence critic regular
 - `target_qnetwork2`, used to estimate the target Q-values.
 - `γ::Float32 = 0.99f0`, reward discount rate.
 - `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
-- `α::Float32 = 0.0f0`, entropy term, the stochasticity of action.
+- `α::Float32 = 0.0f0`, entropy term.
 - `f_reg::Float32 = 1.0f0`, the weight of gradient penalty regularizer.
 - `batch_size::Int = 32`
 - `pretrain_step::Int = 1000`, the number of pre-training rounds.
@@ -129,7 +129,7 @@ end
 
 function update_behavior_policy!(l::EntropyBC, batch::NamedTuple{SARTS})
     s, a, _, _, _ = send_to_device(device(l.policy), batch)
-    # Update behavior poilcy with entropy
+    # Update behavior policy with entropy
     ps = Flux.params(l.policy)
     gs = gradient(ps) do
         log_π = l.policy.model(s, a)

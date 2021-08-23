@@ -43,7 +43,7 @@ end
 - `start_policy`, 
 - `γ::Float32 = 0.99f0`, reward discount rate.
 - `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
-- `α::Float32 = 0.2f0`, entropy term, the stochasticity of action.
+- `α::Float32 = 0.2f0`, entropy term.
 - `batch_size = 32`,
 - `start_steps = 10000`,
 - `update_after = 1000`,
