@@ -32,24 +32,25 @@ end
 """
     PLASLearner(;kwargs...)
 
-See [paper](https://arxiv.org/abs/2011.07213)
+See [Latent Action Space for Offline Reinforcement Learning](https://arxiv.org/abs/2011.07213)
 
 # Keyword arguments
-- `policy`,
-- `target_policy`,
-- `qnetwork1`,
-- `qnetwork2`,
-- `target_qnetwork1`,
-- `target_qnetwork2`,
-- `vae`, used for mapping hidden actions to actions.
-- `γ = 0.99f0`,
-- `τ = 0.005f0`,
-- `λ = 0.75f0`, used for Clipped Double Q-learning.
-- `batch_size = 32`,
-- `pretrain_step = 1000`, the number of pre-training rounds.
-- `update_freq = 50`,
-- `update_step = 0`,
-- `rng = Random.GLOBAL_RNG`,
+- `policy`, used to get latent action.
+- `target_policy`, similar to `policy`, but used to estimate the target.
+- `qnetwork1`, used to get Q-values.
+- `qnetwork2`, used to get Q-values.
+- `target_qnetwork1`, used to estimate the target Q-values.
+- `target_qnetwork2`, used to estimate the target Q-values.
+- `vae`, used for mapping hidden actions to actions. This
+can be implemented using a `VAE` in a `NeuralNetworkApproximator`.
+- `γ::Float32 = 0.99f0`, reward discount rate.
+- `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
+- `λ::Float32 = 0.75f0`, used for Clipped Double Q-learning.
+- `batch_size::Int = 32`
+- `pretrain_step::Int = 1000`, the number of pre-training rounds.
+- `update_freq::Int = 50`, the frequency of updating the `approximator`.
+- `update_step::Int = 0`
+- `rng = Random.GLOBAL_RNG`
 """
 function PLASLearner(;
     policy,

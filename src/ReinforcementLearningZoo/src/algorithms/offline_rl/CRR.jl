@@ -51,7 +51,7 @@ function CRRLearner(;
     target_approximator::At,
     γ::Float32 = 0.99f0,
     batch_size::Int = 32,
-    policy_improvement_mode::Symbol = :binary,
+    policy_improvement_mode::Symbol = :exp,
     ratio_upper_bound::Float32 = 20.0f0,
     beta::Float32 = 1.0f0,
     advantage_estimator::Symbol = :mean,
@@ -72,6 +72,7 @@ function CRRLearner(;
         ratio_upper_bound,
         beta,
         advantage_estimator,
+        m,
         update_freq,
         update_step,
         target_update_freq,
@@ -130,7 +131,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
 
     target = r .+ γ .* (1 .- t) .* expected_target_q
 
-    q_t = Array{Float32}(undef, learner.m, batch_size)
+    q_t = Matrix{Float32}(undef, learner.m, batch_size)
     for i in 1:learner.m
         a_sample = AC.actor(s; is_sampling=true)
         q_t[i, :] = AC.critic(vcat(s, a_sample))
@@ -200,7 +201,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
     gs = gradient(ps) do
         # Critic loss
         q_t = AC.critic(s)
-        qa_t = q_t[a]
+        qa_t = reshape(q_t[a], :, batch_size)
         critic_loss = Flux.Losses.mse(qa_t, target)
         
         # Actor loss
@@ -221,7 +222,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
         else
             error("Wrong parameter.")
         end
-
+        
         actor_loss = mean(-log.(a_t[a]) .* actor_loss_coef)
 
         ignore() do
