@@ -1,4 +1,5 @@
 include("behavior_cloning.jl")
 include("CRR.jl")
+include("FisherBRC.jl")
 include("PLAS.jl")
 include("common.jl")
