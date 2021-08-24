@@ -108,14 +108,14 @@ function DDPGPolicy(;
 end
 
 # TODO: handle Training/Testing mode
-function (p::DDPGPolicy)(env)
+function (p::DDPGPolicy)(env; player::Any = current_player(env))
     p.update_step += 1
 
     if p.update_step <= p.start_steps
         p.start_policy(env)
     else
         D = device(p.behavior_actor)
-        s = state(env)
+        s = state(env, player)
         s = Flux.unsqueeze(s, ndims(s) + 1)
         actions = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
         c = clamp.(actions .+ randn(p.rng, p.na) .* repeat([p.act_noise], p.na), -p.act_limit, p.act_limit)
