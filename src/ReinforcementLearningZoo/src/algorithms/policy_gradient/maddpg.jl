@@ -6,7 +6,8 @@ Multi-agent Deep Deterministic Policy Gradient(MADDPG) implemented in Julia. Her
 See the paper https://arxiv.org/abs/1706.02275 for more details.
 
 # Keyword arguments
-- `agents::Dict{<:Any, <:NamedPolicy{<:Agent{<:DDPGPolicy, <:AbstractTrajectory}, <:Any}}`, here each agent collects its own information. While updating the policy, each **critic** will assemble all agents' trajectory to update its own network.
+- `agents::Dict{<:Any, <:Agent}`, here each agent collects its own information. While updating the policy, each **critic** will assemble all agents' 
+  trajectory to update its own network. **Note that** here the policy of the `Agent` should be `NamedPolicy`.
 - `traces`, set to `SARTS` if you are apply to an environment of `MINIMAL_ACTION_SET`, or `SLARTSL` if you are to apply to an environment of `FULL_ACTION_SET`.
 - `batch_size::Int`
 - `update_freq::Int`
