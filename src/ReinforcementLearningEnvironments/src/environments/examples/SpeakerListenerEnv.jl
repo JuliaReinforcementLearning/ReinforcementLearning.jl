@@ -9,6 +9,7 @@ mutable struct SpeakerListenerEnv <: AbstractEnv
     landmarks_num::Int
     ε::Float64 
     damping::Float64
+    max_accel::Float64
     space_dim::Int
     init_step::Int
     play_step::Int
@@ -31,6 +32,8 @@ For more concrete description, you can refer to:
 # Keyword arguments
 - `N::Int = 3`, the number of landmarks in the environment.
 - `stop::Float64 = 0.01`, when the distance between the `Listener` and the target is smaller than `env.stop`, the game is terminated.
+- `damping::Float64 = 0.25`, for simulation of the physical space, `Listener`'s action will meet the damping in each step.
+- `max_accel::Float64 = 0.02`, the maximum acceleration of the `Listener` in each step.
 - `space_dim::Int = 2`, the dimension of the environment's space.
 - `max_steps::Int = 25`, the maximum playing steps in one episode.
 """
@@ -38,6 +41,7 @@ function SpeakerListenerEnv(;
     N::Int = 3,
     stop::Float64 = 0.01,
     damping::Float64 = 0.25,
+    max_accel::Float64 = 0.02,
     space_dim::Int = 2,
     max_steps::Int = 50)
     SpeakerListenerEnv(
@@ -49,6 +53,7 @@ function SpeakerListenerEnv(;
         N,
         stop,
         damping,
+        max_accel,
         space_dim,
         0,
         0,
@@ -70,7 +75,7 @@ function RLBase.reset!(env::SpeakerListenerEnv)
 end
 
 RLBase.is_terminated(env::SpeakerListenerEnv) = (reward(env) > - env.ε) || (env.play_step > env.max_steps)
-RLBase.players(env::SpeakerListenerEnv) = (:Speaker, :Listener, CHANCE_PLAYER)
+RLBase.players(::SpeakerListenerEnv) = (:Speaker, :Listener, CHANCE_PLAYER)
 
 RLBase.state(env::SpeakerListenerEnv, ::Observation{Any}, players::Tuple) = Dict(p => state(env, p) for p in players)
 
@@ -123,7 +128,7 @@ RLBase.action_space(env::SpeakerListenerEnv, player::Symbol) =
     if player == :Speaker
         ClosedInterval(-env.landmarks_num, env.landmarks_num)
     elseif player == :Listener
-        generate_space(env, -0.02, 0.02)
+        generate_space(env, -env.max_accel, env.max_accel)
     else
         @error "No player $player."
     end
@@ -172,7 +177,7 @@ function (env::SpeakerListenerEnv)(action::Union{Float64, Vector{Float64}}, play
     end
 end
 
-RLBase.reward(env::SpeakerListenerEnv, ::ChancePlayer) = -Inf
+RLBase.reward(::SpeakerListenerEnv, ::ChancePlayer) = -Inf
 
 function RLBase.reward(env::SpeakerListenerEnv, p)
     if env.target in Base.OneTo(env.landmarks_num)
