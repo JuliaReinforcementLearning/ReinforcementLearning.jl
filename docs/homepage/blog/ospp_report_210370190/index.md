@@ -34,18 +34,20 @@ Recent advances in reinforcement learning led to many breakthroughs in artificia
 | 07/15 -- 07/29 | Add **NFSP** algorithm into [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/), and test it on the [`KuhnPokerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.KuhnPokerEnv). |
 | 07/30 -- 08/07 | Fix the existing bugs of **NFSP** and implement the **MADDPG** algorithm into ReinforcementLearningZoo.jl. |
 | 08/08 -- 08/15 | Update the **MADDPG** algorithm and test it on the `KuhnPokerEnv`, also complete the **mid-term report**. |
-| 08/16 -- 08/23 | Add support for environments of [`FULL_ACTION_SET`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.FULL_ACTION_SET) in **MADDPG** and test it on more games, such as [`simple_adversary`](https://github.com/openai/multiagent-particle-envs/blob/master/multiagent/scenarios/simple_adversary.py). |
-| 08/24 -- 08/30 | ... |
+| 08/16 -- 08/23 | Add support for environments of [`FULL_ACTION_SET`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.FULL_ACTION_SET) in **MADDPG** and test it on more games, such as [`simple_speaker_listener`](https://github.com/openai/multiagent-particle-envs/blob/master/multiagent/scenarios/simple_speaker_listener.py). |
+| 08/24 -- 08/30 | Fine-tuning the experiment [`MADDPG_SpeakerListener`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/481) and consider implementing **ED**\dcite{DBLP:journals/corr/abs-1903-05614} algorithm.|
+| 08/31 -- 09/06 | ... |
 
 ### Accomplished Work
 
-From July 1st to now, I have implemented the **Neural Fictitious Self-play(NFSP)** algorithm and added it into [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/). A workable [experiment](https://juliareinforcementlearning.org/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker/#JuliaRL\\_NFSP\\_KuhnPoker) is also added to the documentation. Besides, the **Multi-agent Deep Deterministic Policy Gradient(MADDPG)** algorithm's semi-finished implementation has been placed into ReinforcementLearningZoo.jl, and I will test it on more envs in the next weeks. Related commits are listed below:
+From July 1st to now, I have implemented the **Neural Fictitious Self-play(NFSP)**, **Multi-agent Deep Deterministic Policy Gradient(MADDPG)** algorithms in [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/). Some workable experiments([`NFSP_KuhnPoker`](https://juliareinforcementlearning.org/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker/#JuliaRL\\_NFSP\\_KuhnPoker), [`MADDPG_KuhnPoker`](https://juliareinforcementlearning.org/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker/#JuliaRL\\_MADDPG\\_KuhnPoker), [`MADDPG_SpeakerListener`(**in progress**)], ...) are also added to the documentation. Related commits are listed below:
 
 - [add Base.:(==) and Base.hash for AbstractEnv and test nash_conv on KuhnPokerEnv#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 - [Supplement functions in ReservoirTrajectory and BehaviorCloningPolicy #390](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/390)
 - [Implementation of NFSP and NFSP_KuhnPoker experiment #402](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/402)
 - [correct nfsp implementation #439](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/439)
 - [add MADDPG algorithm #444](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/444)
+- [Update maddpg and the report #470](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/470)
 - ...
 
 ## 2. Implementation and Usage
@@ -295,7 +297,7 @@ mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory, N<:Any} <: Ab
 end
 ```
 
-Each agent in the `MADDPGManager` uses `DDPGPolicy` with one trajectory, which collects their own information. Here [`NamedPolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.NamedPolicy) is a useful substruct of `AbstractPolicy` when meeting the multi-agent games, which combine the player's name and detailed policy. So that can use `Agent` 's [default behaviors](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.Agent-Tuple{AbstractStage,%20AbstractEnv}) to collect the necessary information. 
+Each agent in the `MADDPGManager` uses `DDPGPolicy` with one trajectory, which collects their own information. Note that the policy of the `Agent` should be one `NamedPolicy`. [`NamedPolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.NamedPolicy) is a useful substruct of `AbstractPolicy` when meeting the multi-agent games, which combine the player's name and detailed policy. So that can use `Agent` 's [default behaviors](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.Agent-Tuple{AbstractStage,%20AbstractEnv}) to collect the necessary information. 
 
 As for updating the policy, the process is mainly the same as the [`DDPGPolicy`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/ddpg.jl#L139), apart from each agent's critic will assemble all agents' personal states and actions. For more details, you can refer to the [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/maddpg.jl#L59).
 

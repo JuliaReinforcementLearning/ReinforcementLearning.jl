@@ -1,6 +1,6 @@
 # ---
 # title: JuliaRL\_MADDPG\_SpeakerListener
-# cover: assets/JuliaRL_MADDPG_SpeakerListener.png
+# cover: assets/JuliaRL_MADDPG_SpeakerListenerEnv.png
 # description: MADDPG applied to SpeakerListenerEnv
 # date: 2021-08-24
 # author: "[Peter Chen](https://github.com/peterchen96)" 
@@ -9,8 +9,8 @@
 #+ tangle=true
 using ReinforcementLearning
 using StableRNGs
+using Statistics
 using Flux
-using IntervalSets
 
 mutable struct MeanRewardNEpisode <: AbstractHook
     eval_freq::Int
@@ -30,7 +30,7 @@ function (hook::MeanRewardNEpisode)(::PostEpisodeStage, policy, env)
 
     if hook.episode_counter % hook.eval_freq == 0
         push!(hook.episode, hook.episode_counter)
-        push!(hook.results, sum(hook.result_recorder) / hook.record_episodes)
+        push!(hook.results, mean(hook.result_recorder))
     end
 end
 
@@ -43,7 +43,6 @@ function RL.Experiment(
 )
     rng = StableRNG(seed)
     env = SpeakerListenerEnv(
-        max_accel = 6.0,
         max_steps = 25,
     )
 
@@ -52,7 +51,8 @@ function RL.Experiment(
     create_actor(ns, na) = Chain(
             Dense(ns, 64, relu; init = init),
             Dense(64, 64, relu; init = init),
-            Dense(64, na, tanh; init = init),
+            Dense(64, na; init = init),
+            softmax,
         )
 
     create_critic(critic_dim) = Chain(
@@ -67,11 +67,6 @@ function RL.Experiment(
     na = Dict(
         player => length(rand(action_space(env, player))) for player in (:Speaker, :Listener)
     )
-    act_limit = Dict(
-        :Speaker => Float64(env.landmarks_num),
-        :Listener => env.max_accel, # maximum acceleration of the `Listener` in each step.
-    )
-
     critic_dim = sum(ns[p] for p in (:Speaker, :Listener)) + sum(na[p] for p in (:Speaker, :Listener))
 
     create_policy(env, player) = DDPGPolicy(
@@ -95,7 +90,7 @@ function RL.Experiment(
             start_steps = 1000,
             start_policy = RandomPolicy(action_space(env, player); rng = rng),
             update_after = 1024 * env.max_steps, # batch_size * env.max_steps
-            act_limit = act_limit[player],
+            act_limit = 1.0,
             act_noise = 0.1,
             rng = rng,
         )
@@ -120,7 +115,7 @@ function RL.Experiment(
     )
 
     stop_condition = StopAfterEpisode(25_000, is_show_progress=!haskey(ENV, "CI"))
-    hook = MeanRewardNEpisode(1000, 100, 0, [], [], [])
+    hook = MeanRewardNEpisode(1000, 1000, 0, [], [], [])
     Experiment(agents, env, stop_condition, hook, "# run MADDPG on SpeakerListenerEnv")
 end
 
