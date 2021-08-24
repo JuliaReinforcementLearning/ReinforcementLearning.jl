@@ -108,7 +108,7 @@ function DDPGPolicy(;
 end
 
 # TODO: handle Training/Testing mode
-function (p::DDPGPolicy)(env; player::Any = current_player(env))
+function (p::DDPGPolicy)(env, player::Any = current_player(env))
     p.update_step += 1
 
     if p.update_step <= p.start_steps

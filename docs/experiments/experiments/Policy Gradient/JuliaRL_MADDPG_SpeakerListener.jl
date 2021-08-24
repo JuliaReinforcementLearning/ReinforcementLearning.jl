@@ -10,7 +10,6 @@
 using ReinforcementLearning
 using StableRNGs
 using Flux
-using StatsBase
 using IntervalSets
 
 mutable struct MeanRewardNEpisode <: AbstractHook
@@ -31,7 +30,7 @@ function (hook::MeanRewardNEpisode)(::PostEpisodeStage, policy, env)
 
     if hook.episode_counter % hook.eval_freq == 0
         push!(hook.episode, hook.episode_counter)
-        push!(hook.results, mean(hook.result_recorder))
+        push!(hook.results, sum(hook.result_recorder) / hook.record_episodes)
     end
 end
 
@@ -97,7 +96,7 @@ function RL.Experiment(
             start_policy = RandomPolicy(action_space(env, player); rng = rng),
             update_after = 1024 * env.max_steps, # batch_size * env.max_steps
             act_limit = act_limit[player],
-            act_noise = 0.,
+            act_noise = 0.1,
             rng = rng,
         )
     create_trajectory(player) = CircularArraySARTTrajectory(
