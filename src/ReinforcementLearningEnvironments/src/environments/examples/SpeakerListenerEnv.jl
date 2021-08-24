@@ -61,9 +61,8 @@ function SpeakerListenerEnv(;
     )
 end
 
-generate_space(env::SpeakerListenerEnv, low::T, high::T) where T<:Float64 = 
-    env.space_dim == 1 ? ClosedInterval{T}(low, high) : 
-    Space([ClosedInterval{T}(low, high) for _ in Base.OneTo(env.space_dim)])
+generate_space(low::T, high::T, dim::Int) where T<:Float64 = 
+    dim == 1 ? ClosedInterval{T}(low, high) : Space([ClosedInterval{T}(low, high) for _ in Base.OneTo(dim)])
 
 function RLBase.reset!(env::SpeakerListenerEnv)
     env.target = 0
@@ -106,7 +105,7 @@ RLBase.state_space(env::SpeakerListenerEnv, ::Observation{Any}, player::Symbol) 
         [[Float64(i)] for i in ZeroTo(env.landmarks_num)]
     elseif player == :Listener
         Space(vcat(
-            (vcat(generate_space(env, -Inf, Inf)...) for _ in Base.OneTo(env.landmarks_num + 1))...,
+            (vcat(generate_space(-Inf, Inf, env.space_dim)...) for _ in Base.OneTo(env.landmarks_num + 1))...,
             [ZeroTo(env.landmarks_num + 1)],
             ))
     else
@@ -116,8 +115,8 @@ RLBase.state_space(env::SpeakerListenerEnv, ::Observation{Any}, player::Symbol) 
 RLBase.state_space(env::SpeakerListenerEnv, ::Observation{Any}, ::ChancePlayer) = 
     Space(
         vcat(
-            (generate_space(env, -1., 1.) for _ in Base.OneTo(env.landmarks_num))...,
-            generate_space(env, -Inf, Inf),
+            (generate_space(-1., 1., env.space_dim) for _ in Base.OneTo(env.landmarks_num))...,
+            generate_space(-Inf, Inf, env.space_dim),
         )
     )
 
@@ -126,16 +125,17 @@ RLBase.action_space(env::SpeakerListenerEnv, players::Tuple) =
 
 RLBase.action_space(env::SpeakerListenerEnv, player::Symbol) = 
     if player == :Speaker
-        ClosedInterval(-env.landmarks_num, env.landmarks_num)
+        generate_space(0., 1., 1)
     elseif player == :Listener
-        generate_space(env, -env.max_accel, env.max_accel)
+        # there has two directions in each dimension.
+        generate_space(0., 1., 2 * env.space_dim)
     else
         @error "No player $player."
     end
 
 function RLBase.action_space(env::SpeakerListenerEnv, ::ChancePlayer)
     if env.init_step <= env.landmarks_num
-        generate_space(env, -1., 1.)
+        generate_space(-1., 1., env.space_dim)
     else
         Base.OneTo(env.landmarks_num)
     end
@@ -164,12 +164,13 @@ end
 function (env::SpeakerListenerEnv)(action::Union{Float64, Vector{Float64}}, player::Symbol)
     if player == :Speaker
         # update conveyed information.
-        env.content = Int(ceil(abs(action)))
+        env.content = Int(round(action * env.landmarks_num))
     elseif player == :Listener
-        @assert length(action) == env.space_dim "The dimension of Listener's action should be the same as position."
         # update velocity, here env.damping is for simulation physical rule.
+        action .= round.(action)
+        acceleration = [action[2 * i] - action[2 * i - 1] for i in 1:env.space_dim]
         env.player_vel .*= (1 - env.damping)
-        env.player_vel .+= action
+        env.player_vel .+= (acceleration * env.max_accel)
         # update position
         env.player_pos .+= env.player_vel
     else
