@@ -37,6 +37,7 @@ For more concrete description, you can refer to:
 function SpeakerListenerEnv(;
     N::Int = 3,
     stop::Float64 = 0.01,
+    damping::Float64 = 0.25,
     space_dim::Int = 2,
     max_steps::Int = 50)
     SpeakerListenerEnv(
@@ -47,7 +48,7 @@ function SpeakerListenerEnv(;
         [zeros(space_dim) for _ in Base.OneTo(N)],
         N,
         stop,
-        0.25,
+        damping,
         space_dim,
         0,
         0,
