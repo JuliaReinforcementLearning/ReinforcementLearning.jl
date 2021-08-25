@@ -219,7 +219,7 @@ a dummy action is allowed in this case.
 @api const SAMPLED_STOCHASTIC = SampledStochastic()
 
 """
-    ChanceStyle(env) = DETERMINISTIC
+    ChanceStyle(env) = STOCHASTIC
 
 Specify which role the chance plays in the `env`. Possible returns are:
 

@@ -366,6 +366,16 @@
         "code",
         "doc"
       ]
+    },
+    {
+      "login": "ShuhuaGao",
+      "name": "Shuhua Gao",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20141984?v=4",
+      "profile": "https://www.researchgate.net/profile/Shuhua_Gao2",
+      "contributions": [
+        "code",
+        "question"
+      ]
     }
   ],
   "contributorsPerLine": 7,
