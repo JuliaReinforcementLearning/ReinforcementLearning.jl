@@ -6,7 +6,8 @@ Multi-agent Deep Deterministic Policy Gradient(MADDPG) implemented in Julia. Her
 See the paper https://arxiv.org/abs/1706.02275 for more details.
 
 # Keyword arguments
-- `agents::Dict{<:Any, <:NamedPolicy{<:Agent{<:DDPGPolicy, <:AbstractTrajectory}, <:Any}}`, here each agent collects its own information. While updating the policy, each `critic` will assemble all agents' trajectory to update its own network.
+- `agents::Dict{<:Any, <:NamedPolicy{<:Agent{<:DDPGPolicy, <:AbstractTrajectory}, <:Any}}`, here each agent collects its own information. While updating the policy, each **critic** will assemble all agents' trajectory to update its own network.
+- `traces`, set to `SARTS` if you are apply to an environment of `MINIMAL_ACTION_SET`, or `SLARTSL` if you are to apply to an environment of `FULL_ACTION_SET`.
 - `batch_size::Int`
 - `update_freq::Int`
 - `update_step::Int`, count the step.
@@ -14,18 +15,19 @@ See the paper https://arxiv.org/abs/1706.02275 for more details.
 """
 mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory, N<:Any} <: AbstractPolicy
     agents::Dict{<:N, <:Agent{<:NamedPolicy{<:P, <:N}, <:T}}
+    traces
     batch_size::Int
     update_freq::Int
     update_step::Int
     rng::AbstractRNG
 end
 
-# for simultaneous game with a discrete action space.
+# used for simultaneous environments.
 function (π::MADDPGManager)(env::AbstractEnv)
     while current_player(env) == chance_player(env)
         env |> legal_action_space |> rand |> env
     end
-    Dict((player, ceil(agent.policy(env))) for (player, agent) in π.agents)
+    Dict((player, agent.policy(env)) for (player, agent) in π.agents)
 end
 
 function (π::MADDPGManager)(stage::Union{PreEpisodeStage, PostActStage}, env::AbstractEnv)
@@ -42,7 +44,7 @@ function (π::MADDPGManager)(stage::PreActStage, env::AbstractEnv, actions)
     end
     
     # update policy
-    update!(π)
+    update!(π, env)
 end
 
 function (π::MADDPGManager)(stage::PostEpisodeStage, env::AbstractEnv)
@@ -52,11 +54,11 @@ function (π::MADDPGManager)(stage::PostEpisodeStage, env::AbstractEnv)
     end
 
     # update policy
-    update!(π)
+    update!(π, env)
 end
 
 # update policy
-function RLBase.update!(π::MADDPGManager)
+function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
     π.update_step += 1
     π.update_step % π.update_freq == 0 || return
 
@@ -69,7 +71,7 @@ function RLBase.update!(π::MADDPGManager)
     temp_player = collect(keys(π.agents))[1]
     t = π.agents[temp_player].trajectory
     inds = rand(π.rng, 1:length(t), π.batch_size)
-    batches = Dict((player, RLCore.fetch!(BatchSampler{SARTS}(π.batch_size), agent.trajectory, inds)) 
+    batches = Dict((player, RLCore.fetch!(BatchSampler{π.traces}(π.batch_size), agent.trajectory, inds)) 
                 for (player, agent) in π.agents)
     
     # get s, a, s′ for critic
@@ -95,7 +97,8 @@ function RLBase.update!(π::MADDPGManager)
     )
 
     for (player, agent) in π.agents
-        p = agent.policy.policy # get DDPGPolicy struct
+        p = agent.policy.policy # get agent's concrete DDPGPolicy.
+
         A = p.behavior_actor
         C = p.behavior_critic
         Aₜ = p.target_actor
@@ -103,6 +106,28 @@ function RLBase.update!(π::MADDPGManager)
 
         γ = p.γ
         ρ = p.ρ
+
+        if π.traces == SLARTSL
+            # Note that by default **MADDPG** is used for the environments with continuous action space, and `legal_action_space_mask` is 
+            # defined in the environments with discrete action space. So we need `env.action_mapping` to transform the actions 
+            # getting from the trajectory.
+            @assert env isa ActionTransformedEnv
+
+            mask = batches[player][:next_legal_actions_mask]
+            mu_actions, new_actions = send_to_host((mu_actions, new_actions)) # make sure that the actions on cpu.
+            mu_l′ = Flux.batch(
+                (begin
+                    actions = env.action_mapping(mu_actions[:, i])
+                    mask[actions[player]]
+                end for i = 1:π.batch_size)
+            )
+            new_l′ = Flux.batch(
+                (begin
+                    actions = env.action_mapping(new_actions[:, i])
+                    mask[actions[player]]
+                end for i = 1:π.batch_size)
+            )
+        end
 
         _device(x) = send_to_device(device(A), x)
 
@@ -114,6 +139,10 @@ function RLBase.update!(π::MADDPGManager)
         t = _device(batches[player][:terminal])
 
         qₜ = Cₜ(vcat(s′, new_actions)) |> vec
+        if π.traces == SLARTSL
+            mu_l′, new_l′ = _device((mu_l′, new_l′))
+            qₜ .+= ifelse.(new_l′, 0.0f0, typemin(Float32))
+        end
         y = r .+ γ .* (1 .- t) .* qₜ
 
         gs1 = gradient(Flux.params(C)) do
@@ -128,7 +157,11 @@ function RLBase.update!(π::MADDPGManager)
         update!(C, gs1)
 
         gs2 = gradient(Flux.params(A)) do
-            loss = -mean(C(vcat(s, mu_actions)))
+            v = C(vcat(s, mu_actions)) |> vec
+            if π.traces == SLARTSL
+                v .+= ifelse.(mu_l′, 0.0f0, typemin(Float32))
+            end
+            loss = -mean(v)
             ignore() do
                 p.actor_loss = loss
             end
