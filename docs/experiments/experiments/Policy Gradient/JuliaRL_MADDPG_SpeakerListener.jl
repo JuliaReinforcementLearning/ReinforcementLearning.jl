@@ -2,7 +2,7 @@
 # title: JuliaRL\_MADDPG\_SpeakerListener
 # cover: assets/JuliaRL_MADDPG_SpeakerListenerEnv.png
 # description: MADDPG applied to SpeakerListenerEnv
-# date: 2021-08-24
+# date: 2021-08-26
 # author: "[Peter Chen](https://github.com/peterchen96)" 
 # ---
 
