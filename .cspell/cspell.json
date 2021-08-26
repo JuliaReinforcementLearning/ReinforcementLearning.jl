@@ -148,7 +148,9 @@
         "rldatasets",
         "Trichy",
         "Prasidh",
-        "Srikumar"
+        "Srikumar",
+        "bsuite",
+        "stochasticity"
     ],
     "ignoreWords": [],
     "minWordLength": 5,

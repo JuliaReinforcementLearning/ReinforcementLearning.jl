@@ -1,6 +1,6 @@
-export OfflinePolicy, RLTransition
+export OfflinePolicy, AtariRLTransition
 
-struct RLTransition
+struct AtariRLTransition
     state
     action
     reward

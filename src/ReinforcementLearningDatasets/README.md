@@ -23,7 +23,7 @@ using ReinforcementLearningDatasets
 ds = rl_unplugged_atari_dataset("pong", 1, [1, 2])
 samples = take!(ds, 2)
 ```
-`ds` is a `Channel{RLTransition}` that returns batches of type `RLTransition` when `take!` is used.
+`ds` is a `Channel{AtariRLTransition}` that returns batches of type `AtariRLTransition` when `take!` is used.
 
 For more details refer to the documentation.
 
