@@ -25,6 +25,7 @@ mutable struct FisherBRCLearner{
     τ::Float32
     α::Float32
     f_reg::Float32
+    reward_bonus::Float32
     batch_size::Int
     pretrain_step::Int
     update_freq::Int
@@ -54,6 +55,7 @@ See paper: [Offline reinforcement learning with fisher divergence critic regular
 - `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
 - `α::Float32 = 0.0f0`, entropy term.
 - `f_reg::Float32 = 1.0f0`, the weight of gradient penalty regularizer.
+- `reward_bonus::Float32 = 5.0f0`, add extra value to the reward.
 - `batch_size::Int = 32`
 - `pretrain_step::Int = 1000`, the number of pre-training rounds.
 - `update_freq::Int = 50`, the frequency of updating the `approximator`.
@@ -77,6 +79,7 @@ function FisherBRCLearner(;
     τ = 0.005f0,
     α = 0.0f0,
     f_reg = 1.0f0,
+    reward_bonus = 5.0f0,
     batch_size = 32,
     pretrain_step = 1000,
     update_freq = 50,
@@ -100,6 +103,7 @@ function FisherBRCLearner(;
         τ,
         α,
         f_reg,
+        reward_bonus,
         batch_size,
         pretrain_step,
         update_freq,
@@ -147,6 +151,7 @@ end
 
 function update_learner!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
     s, a, r, t, s′ = send_to_device(device(l.policy), batch)
+    r .+= l.reward_bonus
     γ, τ, α = l.γ, l.τ, l.α
 
     a′ = l.policy(l.rng, s′; is_sampling=true)
