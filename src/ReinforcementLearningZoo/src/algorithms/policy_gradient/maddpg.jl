@@ -6,15 +6,16 @@ Multi-agent Deep Deterministic Policy Gradient(MADDPG) implemented in Julia. Her
 See the paper https://arxiv.org/abs/1706.02275 for more details.
 
 # Keyword arguments
-- `agents::Dict{<:Any, <:NamedPolicy{<:Agent{<:DDPGPolicy, <:AbstractTrajectory}, <:Any}}`, here each agent collects its own information. While updating the policy, each **critic** will assemble all agents' trajectory to update its own network.
+- `agents::Dict{<:Any, <:Agent}`, here each agent collects its own information. While updating the policy, each **critic** will assemble all agents' 
+  trajectory to update its own network. **Note that** here the policy of the `Agent` should be `NamedPolicy`.
 - `traces`, set to `SARTS` if you are apply to an environment of `MINIMAL_ACTION_SET`, or `SLARTSL` if you are to apply to an environment of `FULL_ACTION_SET`.
 - `batch_size::Int`
 - `update_freq::Int`
 - `update_step::Int`, count the step.
 - `rng::AbstractRNG`.
 """
-mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory, N<:Any} <: AbstractPolicy
-    agents::Dict{<:N, <:Agent{<:NamedPolicy{<:P, <:N}, <:T}}
+mutable struct MADDPGManager <: AbstractPolicy
+    agents::Dict{<:Any, <:Agent}
     traces
     batch_size::Int
     update_freq::Int
@@ -75,25 +76,25 @@ function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
                 for (player, agent) in π.agents)
     
     # get s, a, s′ for critic
-    s = Flux.stack((batches[player][:state] for (player, _) in π.agents), 1)
-    a = Flux.stack((batches[player][:action] for (player, _) in π.agents), 1)
-    s′ = Flux.stack((batches[player][:next_state] for (player, _) in π.agents), 1)
+    s = vcat((batches[player][:state] for (player, _) in π.agents)...)
+    a = vcat((batches[player][:action] for (player, _) in π.agents)...)
+    s′ = vcat((batches[player][:next_state] for (player, _) in π.agents)...)
 
     # for training behavior_actor
-    mu_actions = Flux.stack(
+    mu_actions = vcat(
         ((
             batches[player][:state] |> # get personal state information
             x -> send_to_device(device(agent.policy.policy.behavior_actor), x) |>
             agent.policy.policy.behavior_actor |> send_to_host
-        ) for (player, agent) in π.agents), 1
+        ) for (player, agent) in π.agents)...
     )
     # for training behavior_critic
-    new_actions = Flux.stack(
+    new_actions = vcat(
         ((
             batches[player][:next_state] |> # get personal next_state information
             x -> send_to_device(device(agent.policy.policy.target_actor), x) |>
             agent.policy.policy.target_actor |> send_to_host
-        ) for (player, agent) in π.agents), 1
+        ) for (player, agent) in π.agents)...
     )
 
     for (player, agent) in π.agents

@@ -142,7 +142,6 @@
         "PLAS",
         "CRR",
         "reparamaterize",
-        "MADDPG",
         "Guoyu",
         "LAMDA",
         "rldatasets",
@@ -150,7 +149,8 @@
         "Prasidh",
         "Srikumar",
         "bsuite",
-        "stochasticity"
+        "stochasticity",
+        "Optimiser"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
