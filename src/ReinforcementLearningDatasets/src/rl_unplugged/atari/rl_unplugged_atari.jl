@@ -9,11 +9,11 @@ using PNGFiles
 
 # TODO: Improve naming conventions and make the package more uniform.
 """
-    RLTransition
+    AtariRLTransition
 
-Represent an RLTransition and can also represent a batch.
+Represent an AtariRLTransition and can also represent a batch.
 """
-struct RLTransition
+struct AtariRLTransition <: RLTransition
     state
     action
     reward
@@ -24,15 +24,6 @@ struct RLTransition
     episode_return
 end
 
-function batch(template::RLTransition, src::RLTransition, i::Int)
-    for fn in fieldnames(RLTransition)
-        xs = getfield(template, fn)
-        x = getfield(src, fn)
-        selectdim(xs, ndims(xs), i) .= x
-    end
-    return template
-end
-
 function decode_frame(bytes)
     bytes |> IOBuffer |> PNGFiles.load |> channelview |> rawview
 end
@@ -41,7 +32,7 @@ function decode_state(bytes)
     PermutedDimsArray(StackedView((decode_frame(x) for x in bytes)...), (2,3,1))
 end
 
-function RLTransition(example::TFRecord.Example)
+function AtariRLTransition(example::TFRecord.Example)
     f = example.features.feature
     s = decode_state(f["o_t"].bytes_list.value)
     s′ = decode_state(f["o_tp1"].bytes_list.value)
@@ -51,12 +42,12 @@ function RLTransition(example::TFRecord.Example)
     t = f["d_t"].float_list.value[] != 1.0
     episode_id = f["episode_id"].int64_list.value[]
     episode_return = f["episode_return"].float_list.value[]
-    RLTransition(s, a, r, t, s′, a′, episode_id, episode_return)
+    AtariRLTransition(s, a, r, t, s′, a′, episode_id, episode_return)
 end
 """
     rl_unplugged_atari_dataset(game, run, shards; <keyword arguments>)
 
-Returns a buffered `Channel` of [`RLTransition`](@ref) batches which supports 
+Return a `RingBuffer`(@ref) of [`AtariRLTransition`](@ref) batches which supports 
 multi threaded loading.
 
 # Arguments
@@ -64,7 +55,7 @@ multi threaded loading.
 - `game::String`: name of the dataset.
 - `run::Int`: run number. can be in the range `1:5`.
 - `shards::Vector{Int}`: the shards that are to be loaded.
-- `shuffle_buffer_size::Int=10_000`: size of the shuffle_buffer used in loading RLTransitions.
+- `shuffle_buffer_size::Int=10_000`: size of the shuffle_buffer used in loading AtariRLTransitions.
 - `tf_reader_bufsize::Int=1*1024*1024`: the size of the buffer `bufsize` that is used internally 
 in `TFRecord.read`.
 - `tf_reader_sz::Int=10_000`: the size of the `Channel`, `channel_size` that is returned by 
@@ -74,7 +65,8 @@ in `TFRecord.read`.
 
 !!! note
 
-    To enable reading records from multiple files concurrently, remember to set the number of threads correctly (See [JULIA_NUM_THREADS](https://docs.julialang.org/en/v1/manual/environment-variables/#JULIA_NUM_THREADS)).
+    To enable reading records from multiple files concurrently, remember to set the number of 
+    threads correctly (See [JULIA_NUM_THREADS](https://docs.julialang.org/en/v1/manual/environment-variables/#JULIA_NUM_THREADS)).
 """
 function rl_unplugged_atari_dataset(
     game::String,
@@ -104,7 +96,7 @@ function rl_unplugged_atari_dataset(
     
     shuffled_files = buffered_shuffle(ch_files, length(folders))
     
-    ch_src = Channel{RLTransition}(n * tf_reader_sz) do ch
+    ch_src = Channel{AtariRLTransition}(n * tf_reader_sz) do ch
         for fs in partition(shuffled_files, n)
             Threads.foreach(
                 TFRecord.read(
@@ -115,7 +107,7 @@ function rl_unplugged_atari_dataset(
                 );
                 schedule=Threads.StaticSchedule()
             ) do x
-                put!(ch, RLTransition(x))
+                put!(ch, AtariRLTransition(x))
             end
         end
     end
@@ -125,7 +117,7 @@ function rl_unplugged_atari_dataset(
         shuffle_buffer_size
     )
     
-    buffer_template = RLTransition(
+    buffer = AtariRLTransition(
         Array{UInt8, 4}(undef, 84, 84, 4, batch_size),
         Array{Int, 1}(undef, batch_size),
         Array{Float32, 1}(undef, batch_size),
@@ -138,9 +130,9 @@ function rl_unplugged_atari_dataset(
 
     taskref = Ref{Task}()
 
-    res = Channel{RLTransition}(n_preallocations; taskref=taskref, spawn=true) do ch
+    res = RingBuffer(buffer;taskref=taskref, sz=n_preallocations) do buff
         Threads.@threads for i in 1:batch_size
-            put!(ch, deepcopy(batch(buffer_template, popfirst!(transitions), i)))
+            batch!(buff, popfirst!(transitions), i)
         end
     end
 

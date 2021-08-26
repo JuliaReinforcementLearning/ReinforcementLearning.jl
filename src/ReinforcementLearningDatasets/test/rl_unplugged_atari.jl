@@ -10,13 +10,12 @@
         n_preallocations = Threads.nthreads() * 12
     )
 
-    @test typeof(ds) <: AbstractChannel
+    @test typeof(ds)<:RingBuffer
 
     data_1 = take!(ds)
 
     frame_size = 84
     stack_size = 4
-    batch_size = 256
 
     @test size(data_1.state) == (frame_size, frame_size, stack_size, batch_size)
     @test size(data_1.next_state) == (frame_size, frame_size, stack_size, batch_size)

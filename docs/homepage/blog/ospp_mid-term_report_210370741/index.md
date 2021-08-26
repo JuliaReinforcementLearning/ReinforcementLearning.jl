@@ -173,7 +173,7 @@ ds = ds = rl_unplugged_atari_dataset(
     )
 ```
 
-The type that is returned is a `Channel{RLTransition}` which returns batches with the given specifications from the buffer when `take!` is used. The point to be noted here is that it takes seconds to load the datasets into the `Channel` and the loading is highly customizable.
+The type that is returned is a `Channel{AtariRLTransition}` which returns batches with the given specifications from the buffer when `take!` is used. The point to be noted here is that it takes seconds to load the datasets into the `Channel` and the loading is highly customizable.
 
 ```
 julia> ds = ds = rl_unplugged_atari_dataset(
@@ -183,7 +183,7 @@ julia> ds = ds = rl_unplugged_atari_dataset(
            )
 [ Info: Loading the shards [1, 2] in 1 run of Pong with 4 threads
 Progress: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| Time: 0:00:08
-Channel{ReinforcementLearningDatasets.RLTransition}(12) (12 items available)
+Channel{ReinforcementLearningDatasets.AtariRLTransition}(12) (12 items available)
 ```
 
 It also supports lazy downloading of the datasets based on the `shards` that are required by the user. In this case only `gs://rl_unplugged/atari/Pong/atari_Pong_run_1-00001-of-00100` and `gs://rl_unplugged/atari/Pong/atari_Pong_run_1-00002-of-00100` will only be downloaded with permissions from the user. If it is already present the `dataset` is located using `DataDeps.jl`. 
@@ -195,7 +195,7 @@ julia> @time batch = take!(ds)
 0.000011 seconds (1 allocation: 80 bytes)
 
 julia> typeof(batch)
-ReinforcementLearningDatasets.RLTransition
+ReinforcementLearningDatasets.AtariRLTransition
 
 julia> typeof(batch.state)
 Array{UInt8, 4}
@@ -352,10 +352,10 @@ The dataset is loaded into `D4RLDataSet` `Iterator` and returned. The iteration 
 
 Some of the interesting pieces of code used in loading RL Unplugged dataset.
 
-Multi threaded iteration over a `Channel{Example}` to `put!` into another `Channel{RLTransition}`.
+Multi threaded iteration over a `Channel{Example}` to `put!` into another `Channel{AtariRLTransition}`.
 
 ```julia
-ch_src = Channel{RLTransition}(n * tf_reader_sz) do ch
+ch_src = Channel{AtariRLTransition}(n * tf_reader_sz) do ch
     for fs in partition(shuffled_files, n)
         Threads.foreach(
             TFRecord.read(
@@ -366,16 +366,16 @@ ch_src = Channel{RLTransition}(n * tf_reader_sz) do ch
             );
             schedule=Threads.StaticSchedule()
         ) do x
-            put!(ch, RLTransition(x))
+            put!(ch, AtariRLTransition(x))
         end
     end
 end
 ```
 
-Multi threaded batching using a parallel loop where each thread loads the batches into `Channel{RLTransition}`.
+Multi threaded batching using a parallel loop where each thread loads the batches into `Channel{AtariRLTransition}`.
 
 ```julia
-res = Channel{RLTransition}(n_preallocations; taskref=taskref, spawn=true) do ch
+res = Channel{AtariRLTransition}(n_preallocations; taskref=taskref, spawn=true) do ch
     Threads.@threads for i in 1:batch_size
         put!(ch, deepcopy(batch(buffer_template, popfirst!(transitions), i)))
     end
