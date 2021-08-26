@@ -14,6 +14,7 @@ mutable struct SpeakerListenerEnv{T<:Vector{Float64}} <: AbstractEnv
     init_step::Int
     play_step::Int
     max_steps::Int
+    continuous::Bool
 end
 
 """
@@ -36,14 +37,16 @@ For more concrete description, you can refer to:
 - `max_accel = 0.02`, the maximum acceleration of the `Listener` in each step.
 - `space_dim::Int = 2`, the dimension of the environment's space.
 - `max_steps::Int = 25`, the maximum playing steps in one episode.
+- `continuous::Bool = true`, set to `true` if you want the action_space of the players to be continuous. Otherwise, the action_space will be discrete.
 """
 function SpeakerListenerEnv(;
     N::Int = 3,
     stop = 0.01,
     damping = 0.25,
-    max_accel = 0.02,
+    max_accel = 0.5,
     space_dim::Int = 2,
-    max_steps::Int = 50)
+    max_steps::Int = 50,
+    continuous::Bool = true)
     SpeakerListenerEnv(
         zeros(N),
         zeros(N),
@@ -58,11 +61,9 @@ function SpeakerListenerEnv(;
         0,
         0,
         max_steps,
+        continuous,
     )
 end
-
-generate_space(low::T, high::T, dim::Int) where T<:Float64 = 
-    dim == 1 ? ClosedInterval{T}(low, high) : Space([ClosedInterval{T}(low, high) for _ in Base.OneTo(dim)])
 
 function RLBase.reset!(env::SpeakerListenerEnv)
     env.init_step = 0
@@ -106,7 +107,9 @@ RLBase.state_space(env::SpeakerListenerEnv, ::Observation{Any}, player::Symbol) 
     elseif player == :Listener
         Space(vcat(
             # relative positions of landmarks, no bounds.
-            (vcat(generate_space(-Inf, Inf, env.space_dim)...) for _ in Base.OneTo(env.landmarks_num + 1))...,
+            (vcat(
+                Space([ClosedInterval(-Inf, Inf) for _ in Base.OneTo(env.space_dim)])...
+                ) for _ in Base.OneTo(env.landmarks_num + 1))...,
             # communication content from `Speaker`
             [[0., 1.] for _ in Base.OneTo(env.landmarks_num)],
             ))
@@ -118,9 +121,9 @@ RLBase.state_space(env::SpeakerListenerEnv, ::Observation{Any}, ::ChancePlayer) 
     Space(
         vcat(
             # landmarks' positions
-            (generate_space(-1., 1., env.space_dim) for _ in Base.OneTo(env.landmarks_num))...,
+            (Space([ClosedInterval(-1, 1) for _ in Base.OneTo(env.space_dim)]) for _ in Base.OneTo(env.landmarks_num))...,
             # player's position, no bounds.
-            generate_space(-Inf, Inf, env.space_dim),
+            Space([ClosedInterval(-Inf, Inf) for _ in Base.OneTo(env.space_dim)]),
         )
     )
 
@@ -129,17 +132,17 @@ RLBase.action_space(env::SpeakerListenerEnv, players::Tuple) =
 
 RLBase.action_space(env::SpeakerListenerEnv, player::Symbol) = 
     if player == :Speaker
-        generate_space(0., 1., env.landmarks_num)
+        env.continuous ? Space([ClosedInterval(0, 1) for _ in Base.OneTo(env.landmarks_num)]) : Space([ZeroTo(1) for _ in Base.OneTo(env.landmarks_num)])
     elseif player == :Listener
         # there has two directions in each dimension.
-        generate_space(0., 1., 2 * env.space_dim)
+        env.continuous ? Space([ClosedInterval(0, 1) for _ in Base.OneTo(2 * env.space_dim)]) : Space([ZeroTo(1) for _ in Base.OneTo(2 * env.space_dim)])
     else
         @error "No player $player."
     end
 
 function RLBase.action_space(env::SpeakerListenerEnv, ::ChancePlayer)
     if env.init_step < env.landmarks_num + 1
-        generate_space(-1., 1., env.space_dim)
+        Space([ClosedInterval(-1, 1) for _ in Base.OneTo(env.space_dim)])
     else
         Base.OneTo(env.landmarks_num)
     end
@@ -168,8 +171,7 @@ end
 function (env::SpeakerListenerEnv)(action::Vector{Float64}, player::Symbol)
     if player == :Speaker
         # update conveyed information.
-        env.content = zeros(env.landmarks_num)
-        env.content[findmax(action)[2]] = 1.
+        env.content = round.(action)
     elseif player == :Listener
         # update velocity, here env.damping is for simulation physical rule.
         action = round.(action)
@@ -177,7 +179,7 @@ function (env::SpeakerListenerEnv)(action::Vector{Float64}, player::Symbol)
         env.player_vel .*= (1 - env.damping)
         env.player_vel .+= (acceleration * env.max_accel)
         # update position
-        env.player_pos .+= env.player_vel
+        env.player_pos .+= env.player_vel * 0.1 # velocity * time
     else
         @error "No player $player."
     end
