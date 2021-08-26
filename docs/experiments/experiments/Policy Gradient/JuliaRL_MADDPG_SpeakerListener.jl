@@ -13,24 +13,30 @@ using Statistics
 using Flux
 
 mutable struct MeanRewardNEpisode <: AbstractHook
+    step_reward
     eval_freq::Int
     record_episodes::Int
     episode_counter::Int
     episode::Vector{Int}
-    results::Vector{Float64}
-    result_recorder::Vector{Float64}
+    rewards::Vector # sum of step reward
+    reward_recorder::Vector
+end
+
+function (hook::MeanRewardNEpisode)(::PostActStage, policy, env)
+    hook.step_reward += reward(env)
 end
 
 function (hook::MeanRewardNEpisode)(::PostEpisodeStage, policy, env)
     hook.episode_counter += 1
-    push!(hook.result_recorder, reward(env))
-    if length(hook.result_recorder) > hook.record_episodes
-        popfirst!(hook.result_recorder)
+    push!(hook.reward_recorder, hook.step_reward)
+    hook.step_reward = 0
+    if length(hook.reward_recorder) > hook.record_episodes
+        popfirst!(hook.reward_recorder)
     end
 
     if hook.episode_counter % hook.eval_freq == 0
         push!(hook.episode, hook.episode_counter)
-        push!(hook.results, mean(hook.result_recorder))
+        push!(hook.rewards, mean(hook.reward_recorder))
     end
 end
 
@@ -48,19 +54,6 @@ function RL.Experiment(
 
     init = glorot_uniform(rng)
 
-    create_actor(ns, na) = Chain(
-            Dense(ns, 64, relu; init = init),
-            Dense(64, 64, relu; init = init),
-            Dense(64, na; init = init),
-            softmax,
-        )
-
-    create_critic(critic_dim) = Chain(
-        Dense(critic_dim, 64, relu; init = init),
-        Dense(64, 64, relu; init = init),
-        Dense(64, 1; init = init),
-        )
-    
     ns = Dict(
         player => length(state(env, player)) for player in (:Speaker, :Listener)
     )
@@ -68,18 +61,28 @@ function RL.Experiment(
         player => length(rand(action_space(env, player))) for player in (:Speaker, :Listener)
     )
     critic_dim = sum(ns[p] for p in (:Speaker, :Listener)) + sum(na[p] for p in (:Speaker, :Listener))
-
+    create_actor(player) = Chain(
+            Dense(ns[player], 64, relu; init = init),
+            Dense(64, 64, relu; init = init),
+            Dense(64, na[player]; init = init),
+            softmax
+            )
+    create_critic(critic_dim) = Chain(
+        Dense(critic_dim, 64, relu; init = init),
+        Dense(64, 64, relu; init = init),
+        Dense(64, 1; init = init),
+        )
     create_policy(env, player) = DDPGPolicy(
             behavior_actor = NeuralNetworkApproximator(
-                model = create_actor(ns[player], na[player]),
-                optimizer = ADAM(0.01),
+                model = create_actor(player),
+                optimizer = Flux.Optimise.Optimiser(ClipValue(0.5), ADAM(1e-2)),
             ),
             behavior_critic = NeuralNetworkApproximator(
                 model = create_critic(critic_dim),
-                optimizer = ADAM(0.01),
+                optimizer = Flux.Optimise.Optimiser(ClipValue(0.5), ADAM(1e-2)),
             ),
             target_actor = NeuralNetworkApproximator(
-                model = create_actor(ns[player], na[player]),
+                model = create_actor(player),
             ),
             target_critic = NeuralNetworkApproximator(
                 model = create_critic(critic_dim),
@@ -90,7 +93,7 @@ function RL.Experiment(
             start_steps = 1000,
             start_policy = RandomPolicy(action_space(env, player); rng = rng),
             update_after = 1024 * env.max_steps, # batch_size * env.max_steps
-            act_limit = 1.0,
+            act_limit = 10.0,
             act_noise = 0.1,
             rng = rng,
         )
@@ -115,7 +118,7 @@ function RL.Experiment(
     )
 
     stop_condition = StopAfterEpisode(25_000, is_show_progress=!haskey(ENV, "CI"))
-    hook = MeanRewardNEpisode(1000, 1000, 0, [], [], [])
+    hook = MeanRewardNEpisode(0, 1000, 100, 0, [], [], [])
     Experiment(agents, env, stop_condition, hook, "# run MADDPG on SpeakerListenerEnv")
 end
 
@@ -123,7 +126,7 @@ end
 using Plots
 ex = E`JuliaRL_MADDPG_SpeakerListener`
 run(ex)
-plot(ex.hook.episode, ex.hook.results, xlabel="episode", ylabel="mean reward")
+plot(ex.hook.episode, ex.hook.rewards, xlabel="episode", ylabel="mean reward")
 
 savefig("assets/JuliaRL_MADDPG_SpeakerListenerEnv.png") #hide
 
