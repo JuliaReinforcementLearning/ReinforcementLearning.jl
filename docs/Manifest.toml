@@ -1035,10 +1035,7 @@ version = "0.8.3"
 
 [[ReinforcementLearningDatasets]]
 deps = ["CodecZlib", "DataDeps", "HDF5", "ImageCore", "NPZ", "PNGFiles", "Printf", "ProgressMeter", "Random", "StableRNGs", "TFRecord"]
-git-tree-sha1 = "07e9ac16eaa9610cd87ea232fe7d3e93d36ce68e"
-repo-rev = "master"
-repo-subdir = "src/ReinforcementLearningDatasets"
-repo-url = "https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl"
+path = "../src/ReinforcementLearningDatasets"
 uuid = "dd1544ca-2576-438c-a599-ae96278fd687"
 version = "0.1.0"
 
@@ -1300,9 +1297,9 @@ version = "1.1.34+0"
 
 [[XZ_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "9f76853ea2ba894054e24640abfb73d73e5a4cb5"
+git-tree-sha1 = "a921669cd9a45c23031fd4eb904f5cc3d20de415"
 uuid = "ffd25f8a-64ca-5728-b0f7-c24cf3aae800"
-version = "5.2.5+0"
+version = "5.2.5+2"
 
 [[Xorg_libX11_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libxcb_jll", "Xorg_xtrans_jll"]
