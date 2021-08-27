@@ -2,7 +2,7 @@
 # title: JuliaRL\_MADDPG\_SpeakerListener
 # cover: assets/JuliaRL_MADDPG_SpeakerListenerEnv.png
 # description: MADDPG applied to SpeakerListenerEnv
-# date: 2021-08-26
+# date: 2021-08-28
 # author: "[Peter Chen](https://github.com/peterchen96)" 
 # ---
 
@@ -12,32 +12,30 @@ using StableRNGs
 using Statistics
 using Flux
 
-mutable struct MeanRewardNEpisode <: AbstractHook
-    step_reward
-    eval_freq::Int
-    record_episodes::Int
-    episode_counter::Int
-    episode::Vector{Int}
-    rewards::Vector # sum of step reward
-    reward_recorder::Vector
+mutable struct MeanRewardHook <: AbstractHook
+    episode::Int
+    eval_rate::Int
+    eval_episode::Int
+    episodes::Vector
+    mean_rewards::Vector
 end
 
-function (hook::MeanRewardNEpisode)(::PostActStage, policy, env)
-    hook.step_reward += reward(env)
-end
+function (hook::MeanRewardHook)(::PostEpisodeStage, policy, env)
+    if hook.episode % hook.eval_rate == 0
+        # evaluate policy's performance
+        rew = 0
+        for _ in 1:hook.eval_episode
+            reset!(env)
+            while !is_terminated(env)
+                env |> policy |> env
+                rew += reward(env)
+            end
+        end
 
-function (hook::MeanRewardNEpisode)(::PostEpisodeStage, policy, env)
-    hook.episode_counter += 1
-    push!(hook.reward_recorder, hook.step_reward)
-    hook.step_reward = 0
-    if length(hook.reward_recorder) > hook.record_episodes
-        popfirst!(hook.reward_recorder)
+        push!(hook.episodes, hook.episode)
+        push!(hook.mean_rewards, rew / hook.eval_episode)
     end
-
-    if hook.episode_counter % hook.eval_freq == 0
-        push!(hook.episode, hook.episode_counter)
-        push!(hook.rewards, mean(hook.reward_recorder))
-    end
+    hook.episode += 1
 end
 
 function RL.Experiment(
@@ -48,38 +46,29 @@ function RL.Experiment(
     seed=123,
 )
     rng = StableRNG(seed)
-    env = SpeakerListenerEnv(
-        max_steps = 25,
-    )
+    env = SpeakerListenerEnv()
 
     init = glorot_uniform(rng)
+    critic_dim = sum(length(state(env, p)) + length(action_space(env, p)) for p in (:Speaker, :Listener))
 
-    ns = Dict(
-        player => length(state(env, player)) for player in (:Speaker, :Listener)
-    )
-    na = Dict(
-        player => length(rand(action_space(env, player))) for player in (:Speaker, :Listener)
-    )
-    critic_dim = sum(ns[p] for p in (:Speaker, :Listener)) + sum(na[p] for p in (:Speaker, :Listener))
     create_actor(player) = Chain(
-            Dense(ns[player], 64, relu; init = init),
-            Dense(64, 64, relu; init = init),
-            Dense(64, na[player]; init = init),
-            softmax
-            )
+        Dense(length(state(env, player)), 64, relu; init = init),
+        Dense(64, 64, relu; init = init),
+        Dense(64, length(action_space(env, player)); init = init)
+        )
     create_critic(critic_dim) = Chain(
         Dense(critic_dim, 64, relu; init = init),
         Dense(64, 64, relu; init = init),
         Dense(64, 1; init = init),
         )
-    create_policy(env, player) = DDPGPolicy(
+    create_policy(player) = DDPGPolicy(
             behavior_actor = NeuralNetworkApproximator(
                 model = create_actor(player),
-                optimizer = Flux.Optimise.Optimiser(ClipValue(0.5), ADAM(1e-2)),
+                optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), ADAM(1e-2)),
             ),
             behavior_critic = NeuralNetworkApproximator(
                 model = create_critic(critic_dim),
-                optimizer = Flux.Optimise.Optimiser(ClipValue(0.5), ADAM(1e-2)),
+                optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), ADAM(1e-2)),
             ),
             target_actor = NeuralNetworkApproximator(
                 model = create_actor(player),
@@ -89,44 +78,43 @@ function RL.Experiment(
             ),
             γ = 0.95f0,
             ρ = 0.99f0,
-            na = na[player],
-            start_steps = 1000,
-            start_policy = RandomPolicy(action_space(env, player); rng = rng),
-            update_after = 1024 * env.max_steps, # batch_size * env.max_steps
-            act_limit = 10.0,
-            act_noise = 0.1,
-            rng = rng,
+            na = length(action_space(env, player)),
+            start_steps = 0,
+            start_policy = nothing,
+            update_after = 512 * env.max_steps, # batch_size * env.max_steps
+            act_limit = 1.0,
+            act_noise = 0.,
         )
     create_trajectory(player) = CircularArraySARTTrajectory(
             capacity = 1_000_000, # replay buffer capacity
-            state = Vector{Float64} => (ns[player], ),
-            action = Vector{Float64} => (na[player], ),
+            state = Vector{Float64} => (length(state(env, player)), ),
+            action = Vector{Float64} => (length(action_space(env, player)), ),
         )
 
     agents = MADDPGManager(
         Dict(
             player => Agent(
-                policy = NamedPolicy(player, create_policy(env, player)),
+                policy = NamedPolicy(player, create_policy(player)),
                 trajectory = create_trajectory(player),
             ) for player in (:Speaker, :Listener)
         ),
-        SARTS, # traces
-        1024, # batch_size
+        SARTS, # trace's type
+        512, # batch_size
         100, # update_freq
         0, # initial update_step
         rng
     )
 
-    stop_condition = StopAfterEpisode(25_000, is_show_progress=!haskey(ENV, "CI"))
-    hook = MeanRewardNEpisode(0, 1000, 100, 0, [], [], [])
-    Experiment(agents, env, stop_condition, hook, "# run MADDPG on SpeakerListenerEnv")
+    stop_condition = StopAfterEpisode(10_000, is_show_progress=!haskey(ENV, "CI"))
+    hook = MeanRewardHook(0, 1000, 100, [], [])
+    Experiment(agents, env, stop_condition, hook, "# play MADDPG on SpeakerListenerEnv")
 end
 
 #+ tangle=false
 using Plots
 ex = E`JuliaRL_MADDPG_SpeakerListener`
 run(ex)
-plot(ex.hook.episode, ex.hook.rewards, xlabel="episode", ylabel="mean reward")
+plot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward")
 
 savefig("assets/JuliaRL_MADDPG_SpeakerListenerEnv.png") #hide
 

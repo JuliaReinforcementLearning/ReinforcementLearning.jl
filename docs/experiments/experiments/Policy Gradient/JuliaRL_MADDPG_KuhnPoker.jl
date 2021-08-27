@@ -2,7 +2,7 @@
 # title: JuliaRL\_MADDPG\_KuhnPoker
 # cover: assets/JuliaRL_MADDPG_KuhnPoker.png
 # description: MADDPG applied to KuhnPoker
-# date: 2021-08-18
+# date: 2021-08-28
 # author: "[Peter Chen](https://github.com/peterchen96)" 
 # ---
 
@@ -80,18 +80,18 @@ function RL.Experiment(
             model = create_critic(),
             optimizer = ADAM(),
         ),
-        γ = 0.99f0,
-        ρ = 0.995f0,
+        γ = 0.95f0,
+        ρ = 0.99f0,
         na = na,
         start_steps = 1000,
-        start_policy = RandomPolicy(-0.9..0.9; rng = rng),
+        start_policy = RandomPolicy(-0.99..0.99; rng = rng),
         update_after = 1000,
-        act_limit = 0.9,
-        act_noise = 0.1,
+        act_limit = 0.99,
+        act_noise = 0.,
         rng = rng,
     )
     trajectory = CircularArraySARTTrajectory(
-        capacity = 10000, # replay buffer capacity
+        capacity = 100_000, # replay buffer capacity
         state = Vector{Int} => (ns, ),
         action = Float32 => (na, ),
     )
@@ -101,16 +101,16 @@ function RL.Experiment(
             policy = NamedPolicy(player, deepcopy(policy)),
             trajectory = deepcopy(trajectory),
         )) for player in players(env) if player != chance_player(env)),
-        SARTS, # traces
-        128, # batch_size
-        128, # update_freq
+        SARTS, # trace's type
+        512, # batch_size
+        100, # update_freq
         0, # initial update_step
         rng
     )
 
     stop_condition = StopAfterEpisode(100_000, is_show_progress=!haskey(ENV, "CI"))
     hook = ResultNEpisode(1000, 0, [], [])
-    Experiment(agents, wrapped_env, stop_condition, hook, "# run MADDPG on KuhnPokerEnv")
+    Experiment(agents, wrapped_env, stop_condition, hook, "# play MADDPG on KuhnPokerEnv")
 end
 
 #+ tangle=false
