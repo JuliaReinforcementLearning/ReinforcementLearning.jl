@@ -22,7 +22,7 @@ end
 
 function (hook::MeanRewardHook)(::PostEpisodeStage, policy, env)
     if hook.episode % hook.eval_rate == 0
-        # evaluate policy's performance
+        ## evaluate policy's performance
         rew = 0
         for _ in 1:hook.eval_episode
             reset!(env)
