@@ -97,10 +97,10 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=fal
     μ, raw_logσ = model.μ(x), model.logσ(x) 
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     if is_sampling
-        π_dist = Normal.(μ, exp.(logσ))
-        z = rand.(rng, π_dist)
+        σ = exp.(logσ)
+        z = μ .+ σ .* send_to_device(device(model), randn(rng, size(μ)))
         if is_return_log_prob
-            logp_π = sum(logpdf.(π_dist, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
+            logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
             return tanh.(z), logp_π
         else
             return tanh.(z)
