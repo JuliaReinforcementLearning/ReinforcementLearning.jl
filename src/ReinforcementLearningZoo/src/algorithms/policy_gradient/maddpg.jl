@@ -7,7 +7,8 @@ See the paper https://arxiv.org/abs/1706.02275 for more details.
 
 # Keyword arguments
 - `agents::Dict{<:Any, <:Agent}`, here each agent collects its own information. While updating the policy, each **critic** will assemble all agents' 
-  trajectory to update its own network. **Note that** here the policy of the `Agent` should be `NamedPolicy`.
+  trajectory to update its own network. **Note that** here the policy of the `Agent` should be `DDPGPolicy` wrapped by `NamedPolicy`, see the relative 
+  experiment([`MADDPG_KuhnPoker`](https://juliareinforcementlearning.org/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker/#JuliaRL\\_MADDPG\\_KuhnPoker) or [`MADDPG_SpeakerListener`](https://juliareinforcementlearning.org/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener/#JuliaRL\\_MADDPG\\_SpeakerListener)) for references.
 - `traces`, set to `SARTS` if you are apply to an environment of `MINIMAL_ACTION_SET`, or `SLARTSL` if you are to apply to an environment of `FULL_ACTION_SET`.
 - `batch_size::Int`
 - `update_freq::Int`
@@ -28,7 +29,9 @@ function (π::MADDPGManager)(env::AbstractEnv)
     while current_player(env) == chance_player(env)
         env |> legal_action_space |> rand |> env
     end
-    Dict((player, agent.policy(env)) for (player, agent) in π.agents)
+    Dict(
+        player => agent.policy(env)
+    for (player, agent) in π.agents)
 end
 
 function (π::MADDPGManager)(stage::Union{PreEpisodeStage, PostActStage}, env::AbstractEnv)
@@ -80,23 +83,6 @@ function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
     a = vcat((batches[player][:action] for (player, _) in π.agents)...)
     s′ = vcat((batches[player][:next_state] for (player, _) in π.agents)...)
 
-    # for training behavior_actor
-    mu_actions = vcat(
-        ((
-            batches[player][:state] |> # get personal state information
-            x -> send_to_device(device(agent.policy.policy.behavior_actor), x) |>
-            agent.policy.policy.behavior_actor |> send_to_host
-        ) for (player, agent) in π.agents)...
-    )
-    # for training behavior_critic
-    new_actions = vcat(
-        ((
-            batches[player][:next_state] |> # get personal next_state information
-            x -> send_to_device(device(agent.policy.policy.target_actor), x) |>
-            agent.policy.policy.target_actor |> send_to_host
-        ) for (player, agent) in π.agents)...
-    )
-
     for (player, agent) in π.agents
         p = agent.policy.policy # get agent's concrete DDPGPolicy.
 
@@ -108,6 +94,26 @@ function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
         γ = p.γ
         ρ = p.ρ
 
+        # by default A, C, Aₜ, Cₜ on the same device.
+        _device(x) = send_to_device(device(A), x)
+        batches, s, a, s′ = _device((batches, s, a, s′))
+        r = _device(batches[player][:reward])
+        t = _device(batches[player][:terminal])
+        # for training behavior_actor.
+        mu_actions = vcat(
+            ((
+                batches[p][:next_state] |>
+                a.policy.policy.behavior_actor
+            ) for (p, a) in π.agents)...
+        )
+        # for training behavior_critic.
+        new_actions = vcat(
+            ((
+                batches[p][:next_state] |> 
+                a.policy.policy.target_actor
+            ) for (p, a) in π.agents)...
+        )
+
         if π.traces == SLARTSL
             # Note that by default **MADDPG** is used for the environments with continuous action space, and `legal_action_space_mask` is 
             # defined in the environments with discrete action space. So we need `env.action_mapping` to transform the actions 
@@ -115,7 +121,6 @@ function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
             @assert env isa ActionTransformedEnv
 
             mask = batches[player][:next_legal_actions_mask]
-            mu_actions, new_actions = send_to_host((mu_actions, new_actions)) # make sure that the actions on cpu.
             mu_l′ = Flux.batch(
                 (begin
                     actions = env.action_mapping(mu_actions[:, i])
@@ -130,18 +135,8 @@ function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
             )
         end
 
-        _device(x) = send_to_device(device(A), x)
-
-        # Note that here default A, C, Aₜ, Cₜ on the same device.
-        s, a, s′ = _device((s, a, s′))
-        mu_actions = _device(mu_actions)
-        new_actions = _device(new_actions)
-        r = _device(batches[player][:reward])
-        t = _device(batches[player][:terminal])
-
         qₜ = Cₜ(vcat(s′, new_actions)) |> vec
         if π.traces == SLARTSL
-            mu_l′, new_l′ = _device((mu_l′, new_l′))
             qₜ .+= ifelse.(new_l′, 0.0f0, typemin(Float32))
         end
         y = r .+ γ .* (1 .- t) .* qₜ
@@ -162,7 +157,8 @@ function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
             if π.traces == SLARTSL
                 v .+= ifelse.(mu_l′, 0.0f0, typemin(Float32))
             end
-            loss = -mean(v)
+            reg = mean(A(batches[player][:state]) .^ 2)
+            loss = -mean(v) +  reg * 1e-3
             ignore() do
                 p.actor_loss = loss
             end

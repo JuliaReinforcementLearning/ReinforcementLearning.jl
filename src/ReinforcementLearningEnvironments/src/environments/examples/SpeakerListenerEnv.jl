@@ -37,7 +37,7 @@ For more concrete description, you can refer to:
 - `max_accel = 0.02`, the maximum acceleration of the `Listener` in each step.
 - `space_dim::Int = 2`, the dimension of the environment's space.
 - `max_steps::Int = 25`, the maximum playing steps in one episode.
-- `continuous::Bool = true`, set to `true` if you want the action_space of the players to be continuous. Otherwise, the action_space will be discrete.
+- `continuous::Bool = true`, set to `false` if you want the action_space of the players to be discrete. Otherwise, the action_space will be continuous.
 """
 function SpeakerListenerEnv(;
     N::Int = 3,
@@ -103,6 +103,7 @@ RLBase.state_space(env::SpeakerListenerEnv, ::Observation{Any}, players::Tuple) 
 
 RLBase.state_space(env::SpeakerListenerEnv, ::Observation{Any}, player::Symbol) = 
     if player == :Speaker
+        # env.target
         Space([[0., 1.] for _ in Base.OneTo(env.landmarks_num)])
     elseif player == :Listener
         Space(vcat(
@@ -168,7 +169,7 @@ function (env::SpeakerListenerEnv)(actions::Dict, players::Tuple)
     env.play_step += 1
 end
 
-function (env::SpeakerListenerEnv)(action::Vector{Float64}, player::Symbol)
+function (env::SpeakerListenerEnv)(action::Vector, player::Symbol)
     if player == :Speaker
         # update conveyed information.
         env.content = round.(action)
