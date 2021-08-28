@@ -2,6 +2,7 @@ export QBasedPolicy, TabularRandomPolicy
 
 using MacroTools: @forward
 using Flux
+using Distributions: Distribution, probs
 using Setfield: @set
 
 """
@@ -37,6 +38,9 @@ RLBase.prob(p::QBasedPolicy, env::AbstractEnv, ::FullActionSet) =
 function RLBase.prob(p::QBasedPolicy, env::AbstractEnv, action)
     A = action_space(env)
     P = prob(p, env)
+    if P isa Distribution
+        P = probs(P)
+    end
     @assert length(A) == length(P)
     if A isa Base.OneTo
         P[action]
