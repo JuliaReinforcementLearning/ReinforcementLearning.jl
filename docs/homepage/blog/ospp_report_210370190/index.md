@@ -401,7 +401,7 @@ Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/Rei
 
 \dfig{body;JuliaRL_MADDPG_KuhnPoker.png;Result of the experiment.}
 
-However, `KuhnPoker` is not good choice to show the performance of **MADDPG**. For testing the performance of the algorithm, I add [`SpeakerListenerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.SpeakerListenerEnv-Tuple{}) into [ReinforcementLearningEnvironments.jl](https://juliareinforcementlearning.org/docs/rlenvs), which is a simple cooperative multi-agent game.
+However, `KuhnPoker` is not a good choice to show the performance of **MADDPG**. For testing the algorithm, I add [`SpeakerListenerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.SpeakerListenerEnv-Tuple{}) into [ReinforcementLearningEnvironments.jl](https://juliareinforcementlearning.org/docs/rlenvs), which is a simple cooperative multi-agent game.
 
 Since two player have different dimensions of state and action in the `SpeakerListenerEnv`, the policy and the trajectory are customized as below:
 ```Julia
@@ -472,4 +472,4 @@ agents = MADDPGManager(
 
 Add the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L120) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L15), we can simply `run(agents, env, stop_condition, hook)` to run the experiment and use `Plots.plot` to the following result.
 
-\dfig{body;JuliaRL_MADDPG_SpeakerListener.png;Result of the experiment.}
+\dfig{body;JuliaRL_MADDPG_SpeakerListenerEnv.png;Result of the experiment.}
