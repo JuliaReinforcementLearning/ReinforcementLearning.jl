@@ -303,7 +303,7 @@ Each agent in the `MADDPGManager` uses `DDPGPolicy` with one trajectory, which c
 
 As for updating the policy, the process is mainly the same as the [`DDPGPolicy`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/ddpg.jl#L139), apart from each agent's critic will assemble all agents' personal states and actions. For more details, you can refer to the [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/maddpg.jl#L59).
 
-**Note that** when calculating the loss of actor's behavior network, we should plus on the `reg` term to improve the performance of the algorithm, which is different from **DDPG**.
+**Note that** when calculating the loss of actor's behavior network, we should add the `reg` term to improve the algorithm's performance, which differs from **DDPG**.
 ```Julia
 gs2 = gradient(Flux.params(A)) do
     v = C(vcat(s, mu_actions)) |> vec

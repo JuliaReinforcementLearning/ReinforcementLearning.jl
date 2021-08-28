@@ -97,8 +97,8 @@ function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
         # by default A, C, Aₜ, Cₜ on the same device.
         _device(x) = send_to_device(device(A), x)
         batches, s, a, s′ = _device((batches, s, a, s′))
-        r = _device(batches[player][:reward])
-        t = _device(batches[player][:terminal])
+        r = batches[player][:reward]
+        t = batches[player][:terminal]
         # for training behavior_actor.
         mu_actions = vcat(
             ((
