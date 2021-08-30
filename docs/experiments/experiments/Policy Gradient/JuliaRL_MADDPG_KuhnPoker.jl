@@ -110,7 +110,7 @@ function RL.Experiment(
 
     stop_condition = StopAfterEpisode(100_000, is_show_progress=!haskey(ENV, "CI"))
     hook = ResultNEpisode(1000, 0, [], [])
-    Experiment(agents, wrapped_env, stop_condition, hook, "# play MADDPG on KuhnPokerEnv")
+    Experiment(agents, wrapped_env, stop_condition, hook, "# play KuhnPoker with MADDPG")
 end
 
 #+ tangle=false

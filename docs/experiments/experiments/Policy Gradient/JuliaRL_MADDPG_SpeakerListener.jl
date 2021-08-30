@@ -46,7 +46,7 @@ function RL.Experiment(
     seed=123,
 )
     rng = StableRNG(seed)
-    env = SpeakerListenerEnv()
+    env = SpeakerListenerEnv(max_steps = 25)
 
     init = glorot_uniform(rng)
     critic_dim = sum(length(state(env, p)) + length(action_space(env, p)) for p in (:Speaker, :Listener))
@@ -105,9 +105,9 @@ function RL.Experiment(
         rng
     )
 
-    stop_condition = StopAfterEpisode(10_000, is_show_progress=!haskey(ENV, "CI"))
-    hook = MeanRewardHook(0, 1000, 100, [], [])
-    Experiment(agents, env, stop_condition, hook, "# play MADDPG on SpeakerListenerEnv")
+    stop_condition = StopAfterEpisode(8_000, is_show_progress=!haskey(ENV, "CI"))
+    hook = MeanRewardHook(0, 800, 100, [], [])
+    Experiment(agents, env, stop_condition, hook, "# play SpeakerListener with MADDPG")
 end
 
 #+ tangle=false
