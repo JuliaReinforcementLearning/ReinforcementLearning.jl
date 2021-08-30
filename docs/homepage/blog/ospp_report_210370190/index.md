@@ -1,6 +1,6 @@
 @def title = "Implement Multi-Agent Reinforcement Learning Algorithms in Julia"
 @def description = """
-    This is a technical report of the summer OSPP project [Implement Multi-Agent Reinforcement Learning Algorithms in Julia](https://summer.iscas.ac.cn/#/org/prodetail/210370190?lang=en). In this report, the following two parts are covered: the first section is a basic introduction to the project, and the second section contains the implementation details of several multi-agent algorithms.
+    This is a technical report of the summer OSPP project [Implement Multi-Agent Reinforcement Learning Algorithms in Julia](https://summer.iscas.ac.cn/#/org/prodetail/210370190?lang=en). In this report, the following two parts are covered: the first section is a basic introduction to the project, and the second section contains the implementation details of several multi-agent algorithms, followed by some workable usage examples.
     """
 @def is_enable_toc = true
 @def has_code = true
@@ -16,7 +16,7 @@
                 "affiliationURL":"http://english.ecnu.edu.cn/"
             }
         ],
-        "publishedDate":"2021-08-17",
+        "publishedDate":"2021-08-28",
         "citationText":"Peter Chen, 2021"
     }"""
 
@@ -34,18 +34,23 @@ Recent advances in reinforcement learning led to many breakthroughs in artificia
 | 07/15 -- 07/29 | Add **NFSP** algorithm into [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/), and test it on the [`KuhnPokerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.KuhnPokerEnv). |
 | 07/30 -- 08/07 | Fix the existing bugs of **NFSP** and implement the **MADDPG** algorithm into ReinforcementLearningZoo.jl. |
 | 08/08 -- 08/15 | Update the **MADDPG** algorithm and test it on the `KuhnPokerEnv`, also complete the **mid-term report**. |
-| 08/16 -- 08/23 | Add support for environments of [`FULL_ACTION_SET`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.FULL_ACTION_SET) in **MADDPG** and test it on more games, such as [`simple_adversary`](https://github.com/openai/multiagent-particle-envs/blob/master/multiagent/scenarios/simple_adversary.py). |
-| 08/24 -- 08/30 | ... |
+| 08/16 -- 08/23 | Add support for environments of [`FULL_ACTION_SET`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.FULL_ACTION_SET) in **MADDPG** and test it on more games, such as [`simple_speaker_listener`](https://github.com/openai/multiagent-particle-envs/blob/master/multiagent/scenarios/simple_speaker_listener.py). |
+| 08/24 -- 08/30 | Fine-tuning the experiment [`MADDPG_SpeakerListener`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/481) and consider implementing **ED**\dcite{DBLP:journals/corr/abs-1903-05614} algorithm.|
+| 08/31 -- 09/06 | Have a draft implementation of the **ED** algorithm and test it on the `KuhnPokerEnv`. |
+| 09/07 -- 09/13 | ... |
 
 ### Accomplished Work
 
-From July 1st to now, I have implemented the **Neural Fictitious Self-play(NFSP)** algorithm and added it into [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/). A workable [experiment](https://juliareinforcementlearning.org/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker/#JuliaRL\\_NFSP\\_KuhnPoker) is also added to the documentation. Besides, the **Multi-agent Deep Deterministic Policy Gradient(MADDPG)** algorithm's semi-finished implementation has been placed into ReinforcementLearningZoo.jl, and I will test it on more envs in the next weeks. Related commits are listed below:
+From July 1st to now, I have implemented the **Neural Fictitious Self-play(NFSP)**, **Multi-agent Deep Deterministic Policy Gradient(MADDPG)** algorithms in [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/). Some workable experiments(see **Usage** part in each algorithm's section) are also added to the documentation. Besides, for testing the performance of **MADDPG** algorithm, I implemented [`SpeakerListenerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.SpeakerListenerEnv-Tuple{}) in [ReinforcementLearningEnvironments.jl](https://juliareinforcementlearning.org/docs/rlenvs/). Related commits are listed below:
 
 - [add Base.:(==) and Base.hash for AbstractEnv and test nash_conv on KuhnPokerEnv#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 - [Supplement functions in ReservoirTrajectory and BehaviorCloningPolicy #390](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/390)
 - [Implementation of NFSP and NFSP_KuhnPoker experiment #402](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/402)
 - [correct nfsp implementation #439](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/439)
 - [add MADDPG algorithm #444](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/444)
+- [Update maddpg and the report #470](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/470)
+- [Add the experiment of MADDPG. #481](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/481)
+- [Update experiments of maddpg #487](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/487)
 - ...
 
 ## 2. Implementation and Usage
@@ -286,8 +291,9 @@ The **Multi-agent Deep Deterministic Policy Gradient(MADDPG)**\dcite{DBLP:journa
 
 Given that the [`DDPGPolicy`](https://juliareinforcementlearning.org/docs/rlzoo/#ReinforcementLearningZoo.DDPGPolicy-Tuple{}) is already implemented in the ReinforcementLearningZoo.jl, I implement the [`MADDPGManager`](https://juliareinforcementlearning.org/docs/rlzoo/#ReinforcementLearningZoo.MADDPGManager) which is a special multi-agent manager that all agents apply `DDPGPolicy` with one **improved critic**. The structure of `MADDPGManager` is as the following:
 ```Julia
-mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory, N<:Any} <: AbstractPolicy
-    agents::Dict{<:N, <:Agent{<:NamedPolicy{<:P, <:N}, <:T}}
+mutable struct MADDPGManager <: AbstractPolicy
+    agents::Dict{<:Any, <:Agent}
+    traces
     batch_size::Int
     update_freq::Int
     update_step::Int
@@ -295,9 +301,18 @@ mutable struct MADDPGManager{P<:DDPGPolicy, T<:AbstractTrajectory, N<:Any} <: Ab
 end
 ```
 
-Each agent in the `MADDPGManager` uses `DDPGPolicy` with one trajectory, which collects their own information. Here [`NamedPolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.NamedPolicy) is a useful substruct of `AbstractPolicy` when meeting the multi-agent games, which combine the player's name and detailed policy. So that can use `Agent` 's [default behaviors](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.Agent-Tuple{AbstractStage,%20AbstractEnv}) to collect the necessary information. 
+Each agent in the `MADDPGManager` uses `DDPGPolicy` with one trajectory, which collects their own information. Note that the policy of the `Agent` should be wrapped with `NamedPolicy`. [`NamedPolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.NamedPolicy) is a useful substruct of `AbstractPolicy` when meeting the multi-agent games, which combine the player's name and detailed policy. So that can use `Agent` 's [default behaviors](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.Agent-Tuple{AbstractStage,%20AbstractEnv}) to collect the necessary information. 
 
 As for updating the policy, the process is mainly the same as the [`DDPGPolicy`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/ddpg.jl#L139), apart from each agent's critic will assemble all agents' personal states and actions. For more details, you can refer to the [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/maddpg.jl#L59).
+
+**Note that** when calculating the loss of actor's behavior network, we should add the `reg` term to improve the algorithm's performance, which differs from **DDPG**.
+```Julia
+gs2 = gradient(Flux.params(A)) do
+    v = C(vcat(s, mu_actions)) |> vec
+    reg = mean(A(batches[player][:state]) .^ 2)
+    -mean(v) +  reg * 1e-3 # loss
+end
+```
 
 #### Usage
 
@@ -352,18 +367,18 @@ policy = DDPGPolicy(
         model = create_critic(),
         optimizer = ADAM(),
     ),
-    γ = 0.99f0,
-    ρ = 0.995f0,
+    γ = 0.95f0,
+    ρ = 0.99f0,
     na = na,
     start_steps = 1000,
-    start_policy = RandomPolicy(-0.9..0.9; rng = rng),
+    start_policy = RandomPolicy(-0.99..0.99; rng = rng),
     update_after = 1000,
-    act_limit = 0.9,
-    act_noise = 0.1,
+    act_limit = 0.99,
+    act_noise = 0.,
     rng = rng,
 )
 trajectory = CircularArraySARTTrajectory(
-    capacity = 10000, # replay buffer capacity
+    capacity = 100_000, # replay buffer capacity
     state = Vector{Int} => (ns, ),
     action = Float32 => (na, ),
 )
@@ -376,9 +391,9 @@ agents = MADDPGManager(
         policy = NamedPolicy(player, deepcopy(policy)),
         trajectory = deepcopy(trajectory),
     )) for player in players(env) if player != chance_player(env)),
-    SARTS, # traces
-    128, # batch_size
-    128, # update_freq
+    SARTS, # trace's type
+    512, # batch_size
+    100, # update_freq
     0, # initial update_step
     rng
 )
@@ -388,4 +403,76 @@ Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/Rei
 
 \dfig{body;JuliaRL_MADDPG_KuhnPoker.png;Result of the experiment.}
 
-**Note that** since **MADDPG** is one deterministic algorithm, i.e., the state's response is one deterministic action, the Kuhn Poker game may not be suitable for testing the performance. In the next weeks, I'll update the algorithm and try to test it on other games.
+However, `KuhnPoker` is not a good choice to show the performance of **MADDPG**. For testing the algorithm, I add [`SpeakerListenerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.SpeakerListenerEnv-Tuple{}) into [ReinforcementLearningEnvironments.jl](https://juliareinforcementlearning.org/docs/rlenvs), which is a simple cooperative multi-agent game.
+
+Since two players have different dimensions of state and action in the `SpeakerListenerEnv`, the policy and the trajectory are customized as below:
+```Julia
+# initial the game.
+env = SpeakerListenerEnv(max_steps = 25)
+# network's parameter initialization method.
+init = glorot_uniform(rng)
+# critic's input units, including both players' states and actions.
+critic_dim = sum(length(state(env, p)) + length(action_space(env, p)) for p in (:Speaker, :Listener))
+# actor and critic's network structure.
+create_actor(player) = Chain(
+    Dense(length(state(env, player)), 64, relu; init = init),
+    Dense(64, 64, relu; init = init),
+    Dense(64, length(action_space(env, player)); init = init)
+    )
+create_critic(critic_dim) = Chain(
+    Dense(critic_dim, 64, relu; init = init),
+    Dense(64, 64, relu; init = init),
+    Dense(64, 1; init = init),
+    )
+# concrete DDPGPolicy of the player.
+create_policy(player) = DDPGPolicy(
+    behavior_actor = NeuralNetworkApproximator(
+        model = create_actor(player),
+        optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), ADAM(1e-2)),
+    ),
+    behavior_critic = NeuralNetworkApproximator(
+        model = create_critic(critic_dim),
+        optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), ADAM(1e-2)),
+    ),
+    target_actor = NeuralNetworkApproximator(
+        model = create_actor(player),
+    ),
+    target_critic = NeuralNetworkApproximator(
+        model = create_critic(critic_dim),
+    ),
+    γ = 0.95f0,
+    ρ = 0.99f0,
+    na = length(action_space(env, player)),
+    start_steps = 0,
+    start_policy = nothing,
+    update_after = 512 * env.max_steps, # batch_size * env.max_steps
+    act_limit = 1.0,
+    act_noise = 0.,
+    )
+create_trajectory(player) = CircularArraySARTTrajectory(
+    capacity = 1_000_000, # replay buffer capacity
+    state = Vector{Float64} => (length(state(env, player)), ),
+    action = Vector{Float64} => (length(action_space(env, player)), ),
+    )
+```
+
+Based on the above policy and trajectory, we can design the corresponding `MADDPGManager`:
+```Julia
+agents = MADDPGManager(
+    Dict(
+        player => Agent(
+            policy = NamedPolicy(player, create_policy(player)),
+            trajectory = create_trajectory(player),
+        ) for player in (:Speaker, :Listener)
+    ),
+    SARTS, # trace's type
+    512, # batch_size
+    100, # update_freq
+    0, # initial update_step
+    rng
+)
+```
+
+Add the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L108) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L15), we can simply `run(agents, env, stop_condition, hook)` to run the experiment and use [`Plots.plot`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L117) to get the following result.
+
+\dfig{body;JuliaRL_MADDPG_SpeakerListenerEnv.png;Result of the experiment.}

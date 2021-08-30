@@ -8,6 +8,7 @@ function GymEnv(name::String)
         )
     end
     gym = pyimport_conda("gym", "gym")
+    if PyCall.pyexists("d4rl") pyimport("d4rl") end
     pyenv = try
         gym.make(name)
     catch e
@@ -131,8 +132,15 @@ function list_gym_env_names(;
         "gym.envs.robotics",
         "gym.envs.toy_text",
         "gym.envs.unittest",
+        "d4rl.pointmaze",
+        "d4rl.hand_manipulation_suite",
+        "d4rl.gym_mujoco.gym_envs",
+        "d4rl.locomotion.ant",
+        "d4rl.gym_bullet.gym_envs",
+        "d4rl.pointmaze_bullet.bullet_maze", # yet to include flow and carla
     ],
-)
+)   
+    if PyCall.pyexists("d4rl") pyimport("d4rl") end
     gym = pyimport("gym")
     [x.id for x in gym.envs.registry.all() if split(x.entry_point, ':')[1] in modules]
 end

@@ -19,13 +19,6 @@ const ATARI_GAMES = [
     "yars-revenge", "zaxxon"
 ]
 
-function fetch_atari_ds(src, dest)
-    try run(`which gsutil`) catch x throw("gsutil not found, install gsutil to proceed further") end
-    
-    run(`gsutil -m cp -r $src $dest`)
-    return dest
-end
-
 game_name(game) = join(titlecase.(split(game, "-")))
 # use function to initialise atari
 function atari_init()
@@ -50,7 +43,7 @@ function atari_init()
                     encountered during training into 5 replay datasets per game, resulting in a total of 300 datasets.
                     """,
                     "gs://atari-replay-datasets/dqn/$(game_name(game))/$index/replay_logs/";
-                    fetch_method = fetch_atari_ds
+                    fetch_method = fetch_gc_bucket
                 )
             )
         end

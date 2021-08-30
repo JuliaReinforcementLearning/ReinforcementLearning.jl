@@ -142,13 +142,15 @@
         "PLAS",
         "CRR",
         "reparamaterize",
-        "MADDPG",
         "Guoyu",
         "LAMDA",
         "rldatasets",
         "Trichy",
         "Prasidh",
-        "Srikumar"
+        "Srikumar",
+        "bsuite",
+        "stochasticity",
+        "Optimiser"
     ],
     "ignoreWords": [],
     "minWordLength": 5,

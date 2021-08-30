@@ -35,15 +35,15 @@ end
 
 # Keyword arguments
 
-- `policy`,
-- `qnetwork1`,
-- `qnetwork2`,
-- `target_qnetwork1`,
-- `target_qnetwork2`,
-- `start_policy`,
-- `γ = 0.99f0`,
-- `τ = 0.005f0`,
-- `α = 0.2f0`,
+- `policy`, used to get action.
+- `qnetwork1`, used to get Q-values.
+- `qnetwork2`, used to get Q-values.
+- `target_qnetwork1`, used to estimate the target Q-values.
+- `target_qnetwork2`, used to estimate the target Q-values.
+- `start_policy`, 
+- `γ::Float32 = 0.99f0`, reward discount rate.
+- `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
+- `α::Float32 = 0.2f0`, entropy term.
 - `batch_size = 32`,
 - `start_steps = 10000`,
 - `update_after = 1000`,
@@ -51,7 +51,7 @@ end
 - `automatic_entropy_tuning::Bool = false`, whether to automatically tune the entropy.
 - `lr_alpha::Float32 = 0.003f0`, learning rate of tuning entropy.
 - `action_dims = 0`, the dimensionality of the action. if `automatic_entropy_tuning = true`, must enter this parameter.
-- `step = 0`,
+- `update_step = 0`,
 - `rng = Random.GLOBAL_RNG`,
 
 `policy` is expected to output a tuple `(μ, logσ)` of mean and
