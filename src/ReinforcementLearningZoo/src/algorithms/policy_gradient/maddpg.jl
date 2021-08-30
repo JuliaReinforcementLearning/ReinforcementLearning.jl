@@ -2,7 +2,7 @@ export MADDPGManager
 
 """
     MADDPGManager(; agents::Dict{<:Any, <:Agent}, args...)
-Multi-agent Deep Deterministic Policy Gradient(MADDPG) implemented in Julia. Here only works for simultaneous games whose action space is discrete.
+Multi-agent Deep Deterministic Policy Gradient(MADDPG) implemented in Julia. By default, `MADDPGManager` uses for simultaneous environments with [continuous action space](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html#stochastic-policies).
 See the paper https://arxiv.org/abs/1706.02275 for more details.
 
 # Keyword arguments
