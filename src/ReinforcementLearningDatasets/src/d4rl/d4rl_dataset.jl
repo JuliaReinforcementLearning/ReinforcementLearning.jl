@@ -16,8 +16,7 @@ Represents an `Iterable` dataset with the following fields:
 - `repo::String`: the repository from which the dataset is taken.
 - `dataset_size::Int`, the number of samples in the dataset.
 - `batch_size::Int`: the size of the batches returned by `iterate`.
-- `style::Tuple{Symbol}`: the style of the `Iterator` that is returned, check out: [`SARTS`](@ref), [`SART`](@ref) and [`SA`](@ref)
-for types supported out of the box.
+- `style::Tuple{Symbol}`: the style of the `Iterator` that is returned, check out: [`SARTS`](@ref), [`SART`](@ref) and [`SA`](@ref) for types supported out of the box.
 - `rng<:AbstractRNG`.
 - `meta::Dict`: the metadata provided along with the dataset.
 - `is_shuffle::Bool`: determines if the batches returned by `iterate` are shuffled.

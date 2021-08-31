@@ -47,7 +47,7 @@ end
 """
     rl_unplugged_atari_dataset(game, run, shards; <keyword arguments>)
 
-Return a `RingBuffer`(@ref) of [`AtariRLTransition`](@ref) batches which supports 
+Return a [`RingBuffer`](@ref) of [`AtariRLTransition`](@ref) batches which supports 
 multi threaded loading.
 
 # Arguments
@@ -56,10 +56,8 @@ multi threaded loading.
 - `run::Int`: run number. can be in the range `1:5`.
 - `shards::Vector{Int}`: the shards that are to be loaded.
 - `shuffle_buffer_size::Int=10_000`: size of the shuffle_buffer used in loading AtariRLTransitions.
-- `tf_reader_bufsize::Int=1*1024*1024`: the size of the buffer `bufsize` that is used internally 
-in `TFRecord.read`.
-- `tf_reader_sz::Int=10_000`: the size of the `Channel`, `channel_size` that is returned by 
-`TFRecord.read`.
+- `tf_reader_bufsize::Int=1*1024*1024`: the size of the buffer `bufsize` that is used internally in `TFRecord.read`.
+- `tf_reader_sz::Int=10_000`: the size of the `Channel`, `channel_size` that is returned by `TFRecord.read`.
 - `batch_size::Int=256`: The number of samples within the batches that are returned by the `Channel`.
 - `n_preallocations::Int=nthreads()*12`: the size of the buffer in the `Channel` that is returned.
 
