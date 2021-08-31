@@ -1,6 +1,6 @@
 @def title = "Implement Multi-Agent Reinforcement Learning Algorithms in Julia"
 @def description = """
-    This is a technical report of the summer OSPP project [Implement Multi-Agent Reinforcement Learning Algorithms in Julia](https://summer.iscas.ac.cn/#/org/prodetail/210370190?lang=en). In this report, the following two parts are covered: the first section is a basic introduction to the project, and the second section contains the implementation details of several multi-agent algorithms.
+    This is a technical report of the summer OSPP project [Implement Multi-Agent Reinforcement Learning Algorithms in Julia](https://summer.iscas.ac.cn/#/org/prodetail/210370190?lang=en). In this report, the following two parts are covered: the first section is a basic introduction to the project, and the second section contains the implementation details of several multi-agent algorithms, followed by some workable usage examples.
     """
 @def is_enable_toc = true
 @def has_code = true
@@ -36,11 +36,12 @@ Recent advances in reinforcement learning led to many breakthroughs in artificia
 | 08/08 -- 08/15 | Update the **MADDPG** algorithm and test it on the `KuhnPokerEnv`, also complete the **mid-term report**. |
 | 08/16 -- 08/23 | Add support for environments of [`FULL_ACTION_SET`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.FULL_ACTION_SET) in **MADDPG** and test it on more games, such as [`simple_speaker_listener`](https://github.com/openai/multiagent-particle-envs/blob/master/multiagent/scenarios/simple_speaker_listener.py). |
 | 08/24 -- 08/30 | Fine-tuning the experiment [`MADDPG_SpeakerListener`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/481) and consider implementing **ED**\dcite{DBLP:journals/corr/abs-1903-05614} algorithm.|
-| 08/31 -- 09/06 | ... |
+| 08/31 -- 09/06 | Have a draft implementation of the **ED** algorithm and test it on the `KuhnPokerEnv`. |
+| 09/07 -- 09/13 | ... |
 
 ### Accomplished Work
 
-From July 1st to now, I have implemented the **Neural Fictitious Self-play(NFSP)**, **Multi-agent Deep Deterministic Policy Gradient(MADDPG)** algorithms in [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/). Some workable experiments([`NFSP_KuhnPoker`](https://juliareinforcementlearning.org/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker/#JuliaRL\\_NFSP\\_KuhnPoker), [`MADDPG_KuhnPoker`](https://juliareinforcementlearning.org/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker/#JuliaRL\\_MADDPG\\_KuhnPoker), [`MADDPG_SpeakerListener`](https://juliareinforcementlearning.org/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener/#JuliaRL\\_MADDPG\\_SpeakerListener), ...) are also added to the documentation. Besides, for testing the performance of **MADDPG** algorithm, I implemented [`SpeakerListenerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.SpeakerListenerEnv-Tuple{}) in [ReinforcementLearningEnvironments.jl](https://juliareinforcementlearning.org/docs/rlenvs/). Related commits are listed below:
+From July 1st to now, I have implemented the **Neural Fictitious Self-play(NFSP)**, **Multi-agent Deep Deterministic Policy Gradient(MADDPG)** algorithms in [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/). Some workable experiments(see **Usage** part in each algorithm's section) are also added to the documentation. Besides, for testing the performance of **MADDPG** algorithm, I implemented [`SpeakerListenerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.SpeakerListenerEnv-Tuple{}) in [ReinforcementLearningEnvironments.jl](https://juliareinforcementlearning.org/docs/rlenvs/). Related commits are listed below:
 
 - [add Base.:(==) and Base.hash for AbstractEnv and test nash_conv on KuhnPokerEnv#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 - [Supplement functions in ReservoirTrajectory and BehaviorCloningPolicy #390](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/390)
@@ -49,6 +50,7 @@ From July 1st to now, I have implemented the **Neural Fictitious Self-play(NFSP)
 - [add MADDPG algorithm #444](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/444)
 - [Update maddpg and the report #470](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/470)
 - [Add the experiment of MADDPG. #481](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/481)
+- [Update experiments of maddpg #487](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/487)
 - ...
 
 ## 2. Implementation and Usage
@@ -403,10 +405,11 @@ Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/Rei
 
 However, `KuhnPoker` is not a good choice to show the performance of **MADDPG**. For testing the algorithm, I add [`SpeakerListenerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.SpeakerListenerEnv-Tuple{}) into [ReinforcementLearningEnvironments.jl](https://juliareinforcementlearning.org/docs/rlenvs), which is a simple cooperative multi-agent game.
 
-Since two player have different dimensions of state and action in the `SpeakerListenerEnv`, the policy and the trajectory are customized as below:
+Since two players have different dimensions of state and action in the `SpeakerListenerEnv`, the policy and the trajectory are customized as below:
 ```Julia
-env = SpeakerListenerEnv()
-# network's parameter initialization method
+# initial the game.
+env = SpeakerListenerEnv(max_steps = 25)
+# network's parameter initialization method.
 init = glorot_uniform(rng)
 # critic's input units, including both players' states and actions.
 critic_dim = sum(length(state(env, p)) + length(action_space(env, p)) for p in (:Speaker, :Listener))
@@ -470,6 +473,6 @@ agents = MADDPGManager(
 )
 ```
 
-Add the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L120) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L15), we can simply `run(agents, env, stop_condition, hook)` to run the experiment and use `Plots.plot` to the following result.
+Add the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L108) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L15), we can simply `run(agents, env, stop_condition, hook)` to run the experiment and use [`Plots.plot`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L117) to get the following result.
 
 \dfig{body;JuliaRL_MADDPG_SpeakerListenerEnv.png;Result of the experiment.}

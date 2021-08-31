@@ -10,8 +10,7 @@ Represents an `Iterable` dataset with the following fields:
 - `repo::String`: the repository from which the dataset is taken.
 - `length::Int`: the length of the dataset.
 - `batch_size::Int`: the size of the batches returned by `iterate`.
-- `style::Tuple{Symbol}`: the style of the `Iterator` that is returned, check out: [`SARTS`](@ref), [`SART`](@ref) and [`SA`](@ref)
-for types supported out of the box.
+- `style::Tuple{Symbol}`: the style of the `Iterator` that is returned, check out: [`SARTS`](@ref), [`SART`](@ref) and [`SA`](@ref) for types supported out of the box.
 - `rng<:AbstractRNG`.
 - `meta::Dict`: the metadata provided along with the dataset.
 - `is_shuffle::Bool`: determines if the batches returned by `iterate` are shuffled.
@@ -54,9 +53,9 @@ are used for data collection. can be between `[1:5]`.
 
 !!! note
 
-The dataset takes up significant amount of space in RAM. Therefore it is advised to
-load even one epoch with 20GB of RAM. We are looking for ways to use lazy data loading here
-and any contributions are welcome.
+    The dataset takes up significant amount of space in RAM. Therefore it is advised to
+    load even one epoch with 20GB of RAM. We are looking for ways to use lazy data loading here
+    and any contributions are welcome.
 """
 function dataset(
     game::String,
