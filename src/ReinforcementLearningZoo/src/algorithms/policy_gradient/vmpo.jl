@@ -28,7 +28,7 @@ that performs policy iteration based on a learned state-value function.
 - `dist = Categorical`: `Categorical` - discrete, `Normal` - continuous
 - `rng = Random.GLOBAL_RNG`
 
-By default, `dist` is set to `Categorical`, which means it will only works
+By default, `dist` is set to `Categorical`, which means it will only work
 on environments of discrete actions. To work with environments of continuous
 actions `dist` should be set to `Normal` and the `actor` in the `approximator`
 should be a `GaussianNetwork`. This algorithm only supports one-dimensional
