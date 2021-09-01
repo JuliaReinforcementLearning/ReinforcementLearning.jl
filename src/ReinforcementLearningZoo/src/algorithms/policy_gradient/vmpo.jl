@@ -206,10 +206,7 @@ function _update!(p::VMPOPolicy, t::VMPOTrajectory)
 
             # loss for Lagrange multiplier α
             Lα = if is_discrete
-                π_pairs = ignore() do
-                    zip(eachcol(π_old), eachcol(π))
-                end
-                KL = [Flux.kldivergence(i...) for i in π_pairs]
+                KL = Flux.kldivergence(π_old, π, agg = identity)
                 mean(α * (p.ϵ_α .- dropgrad(KL)) + dropgrad(α) * KL)
             else
                 KLμ = 0.5f0 * (μ .- μ_old) .^ 2 ./ (σ .^ 2)
