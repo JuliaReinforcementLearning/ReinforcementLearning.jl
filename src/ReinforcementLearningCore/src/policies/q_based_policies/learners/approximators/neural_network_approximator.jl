@@ -151,11 +151,12 @@ end
 #####
 
 """
-    VAE(;encoder, decoder)
+    VAE(;encoder, decoder, latent_dims)
 """
 Base.@kwdef struct VAE{E, D}
     encoder::E
     decoder::D
+    latent_dims::Int
 end
 
 Flux.@functor VAE
@@ -176,9 +177,15 @@ function reparamaterize(rng, μ, σ)
     return Float32(rand(rng, Normal(0, 1))) * σ + μ
 end
 
-function decode(model::VAE, state, z)
+function decode(model::VAE, state, z=nothing; is_normalize::Bool=true)
+    if z === nothing
+        z = clamp.(rand(Normal(0, 1), (model.latent_dims, size(state)[2:ndims(state)]...)), -0.5, 0.5)
+    end
     a = model.decoder(vcat(state, z))
-    return tanh.(a)
+    if is_normalize
+        a = tanh.(a)
+    end
+    return a
 end
 
 function vae_loss(model::VAE, state, action)
