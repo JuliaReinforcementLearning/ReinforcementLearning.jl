@@ -75,7 +75,8 @@ end
 Returns a `RingBuffer`(@ref) of `NamedTuple` containing SARTS batches which supports 
 multi threaded loading. Also contains additional data. The data enclosed within `:state` and
 `next_state` is a NamedTuple consisting of all observations that are provided.
-
+Check out keys in `DM_LOCOMOTION_HUMANOID`, `DM_LOCOMOTION_RODENT`, `DM_CONTROL_SUITE_SIZE` for supported 
+datasets.
 # Arguments
 
 - `game::String`: name of the dataset. available datasets: `cartpole`, `mountain_car` and  `catch`. 
