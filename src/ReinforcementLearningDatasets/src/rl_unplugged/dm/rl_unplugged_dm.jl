@@ -1,7 +1,41 @@
-using Base: NamedTuple, Float32, buffer_writes
 export rl_unplugged_dm_dataset
 
 using TFRecord
+
+function make_batch_array(type::Type, feature_dims::Int, size::Tuple, batch_size::Int)
+    Array{type, feature_dims+1}(undef, size..., batch_size)
+end
+
+function dm_buffer_dict(feature_size::Dict{String, Tuple}, batch_size::Int)
+    obs_buffer = Dict{Symbol, AbstractArray}()
+
+    buffer_dict = Dict{Symbol, Any}()
+
+    for feature in keys(feature_size)
+        feature_dims = length(feature_size[feature])
+        if split(feature, "/")[1] == "observation"
+            ob_key = Symbol(chop(feature, head=length("observation")+1, tail=0))
+            if split(feature, "/")[end] == "egocentric_camera"
+                obs_buffer[ob_key] = make_batch_array(UInt8, feature_dims, feature_size[feature], batch_size)
+            else
+                obs_buffer[ob_key] = make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
+            end
+        elseif feature == "action"
+            buffer_dict[:action] = make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
+            buffer_dict[:next_action] = make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
+        elseif feature == "step_type"
+            buffer_dict[:terminal] = make_batch_array(Bool, feature_dims, feature_size[feature], batch_size)
+        else
+            ob_key = Symbol(feature)
+            buffer_dict[ob_key] = make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
+        end
+    end
+
+    buffer_dict[:state] = deepcopy(NamedTuple(obs_buffer))
+    buffer_dict[:next_state] = deepcopy(NamedTuple(obs_buffer))
+
+    buffer_dict
+end
 
 function size_dict(game::String, type::String)
     if type == "dm_locomotion_humanoid"
@@ -77,6 +111,7 @@ multi threaded loading. Also contains additional data. The data enclosed within 
 `next_state` is a NamedTuple consisting of all observations that are provided.
 Check out keys in `DM_LOCOMOTION_HUMANOID`, `DM_LOCOMOTION_RODENT`, `DM_CONTROL_SUITE_SIZE` for supported 
 datasets.
+
 # Arguments
 
 - `game::String`: name of the dataset. available datasets: `cartpole`, `mountain_car` and  `catch`. 
@@ -160,32 +195,7 @@ function rl_unplugged_dm_dataset(
     
     taskref = Ref{Task}()
     
-    obs_buffer = Dict{Symbol, AbstractArray}()
-
-    buffer_dict = Dict{Symbol, Any}()
-
-    for feature in keys(feature_size)
-        feature_dims = length(feature_size[feature])
-        if split(feature, "/")[1] == "observation"
-            ob_key = Symbol(chop(feature, head=length("observation")+1, tail=0))
-            if split(feature, "/")[end] == "egocentric_camera"
-                obs_buffer[ob_key] = Array{UInt8, feature_dims+1}(undef, feature_size[feature]..., batch_size)
-            else
-                obs_buffer[ob_key] = Array{Float32, feature_dims+1}(undef, feature_size[feature]..., batch_size)
-            end
-        elseif feature == "action"
-            buffer_dict[:action] = Array{Float32, feature_dims+1}(undef, feature_size[feature]..., batch_size)
-            buffer_dict[:next_action] = Array{Float32, feature_dims+1}(undef, feature_size[feature]..., batch_size)
-        elseif feature == "step_type"
-            buffer_dict[:terminal] = Array{Bool, feature_dims+1}(undef, feature_size[feature]..., batch_size)
-        else
-            ob_key = Symbol(feature)
-            buffer_dict[ob_key] = Array{Float32, feature_dims+1}(undef, feature_size[feature]..., batch_size)
-        end
-    end
-
-    buffer_dict[:state] = deepcopy(NamedTuple(obs_buffer))
-    buffer_dict[:next_state] = deepcopy(NamedTuple(obs_buffer))
+    buffer_dict = dm_buffer_dict(feature_size, batch_size)
 
     buffer = NamedTuple(buffer_dict)
 

@@ -2,6 +2,8 @@ import Printf.@sprintf
 export DM_LOCOMOTION
 export DM_LOCOMOTION_HUMANOID
 export DM_LOCOMOTION_RODENT
+export DM_LOCOMOTION_HUMANOID_SIZE
+export DM_LOCOMOTION_RODENT_SIZE
 export DM_CONTROL_SUITE_SIZE
 export dm_init
 

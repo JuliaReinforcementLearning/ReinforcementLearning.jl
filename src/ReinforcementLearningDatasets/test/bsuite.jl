@@ -1,6 +1,6 @@
 @testset "bsuite" begin
     @testset "bsuite_cartpole_shuffled" begin
-        ds = bsuite_dataset(
+        ds = rl_unplugged_bsuite_dataset(
             "cartpole",
             [1, 2],
             "full";
@@ -34,7 +34,7 @@
     end
 
     @testset "bsuite_cartpole" begin
-        ds = bsuite_dataset(
+        ds = rl_unplugged_bsuite_dataset(
             "cartpole",
             [1, 2],
             "full";
@@ -68,7 +68,7 @@
     end
 
     @testset "bsuite_catch_shuffle" begin
-        ds = bsuite_dataset(
+        ds = rl_unplugged_bsuite_dataset(
             "catch",
             [1, 2],
             "full";
