@@ -82,9 +82,9 @@ function rl_unplugged_atari_init()
                         from its replay during training with sticky actions Machado et al., 2018. As stated
                         in Agarwal et al., 2020, for each game we use data from five runs with 50 million 
                         transitions each. States in each transition include stacks of four frames to be able
-                        to do frame-stacking with our baselines. We release datasets for 46 Atari games. 
+                        to do frame-stacking with our baselines. Datasets for 46 Atari games has been released. 
                         For details on how the dataset was generated, please refer to the paper.
-                        Atari is a standard RL benchmark. We recommend you to try offline RL methods 
+                        Atari is a standard RL benchmark. It is recommended that you to try offline RL methods 
                         on Atari if you are interested in comparing your approach to other state of the 
                         art offline RL methods with discrete actions.
                         """,
