@@ -150,7 +150,12 @@
         "Srikumar",
         "bsuite",
         "stochasticity",
-        "Optimiser"
+        "Optimiser",
+        "zaxis",
+        "velocimeter",
+        "swingup",
+        "Tassa",
+        "Todorov"
     ],
     "ignoreWords": [],
     "minWordLength": 5,

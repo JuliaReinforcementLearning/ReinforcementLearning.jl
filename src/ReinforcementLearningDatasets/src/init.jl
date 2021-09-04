@@ -4,4 +4,5 @@ function __init__()
     RLDatasets.atari_init()
     RLDatasets.rl_unplugged_atari_init()
     RLDatasets.bsuite_init()
+    RLDatasets.dm_init()
 end

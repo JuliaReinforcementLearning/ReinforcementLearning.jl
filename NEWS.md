@@ -22,7 +22,7 @@
 - Add functionality for fetching d4rl datasets as an iterable DataSet. Credits: https://arxiv.org/abs/2004.07219
 - This supports d4rl and d4rl-pybullet and Google Research DQN atari datasets.
 - Uses DataDeps for data dependency management.
-- This package also supports RL Unplugged Atari Datasets.
+- This package also supports RL Unplugged Datasets.
 
 ## ReinforcementLearning.jl@v0.9.0
 

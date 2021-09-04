@@ -1,4 +1,4 @@
-export bsuite_dataset
+export rl_unplugged_bsuite_dataset
 
 using TFRecord
 
@@ -30,9 +30,9 @@ function BSuiteRLTransition(example::TFRecord.Example, game::String)
     BSuiteRLTransition(s, a, r, t, s′)
 end
 """
-    rl_unplugged_atari_dataset(game, shards, type; <keyword arguments>)
+    rl_unplugged_bsuite_dataset(game, shards, type; <keyword arguments>)
 
-Returns a `RingBuffer`(@ref) of [`AtariRLTransition`](@ref) batches which supports 
+Returns a `RingBuffer`(@ref) of [`BSuiteRLTransition`](@ref) batches which supports 
 multi threaded loading.
 
 # Arguments
@@ -56,7 +56,7 @@ in `TFRecord.read`.
     To enable reading records from multiple files concurrently, remember to set the number of 
     threads correctly (See [JULIA_NUM_THREADS](https://docs.julialang.org/en/v1/manual/environment-variables/#JULIA_NUM_THREADS)).
 """
-function bsuite_dataset(
+function rl_unplugged_bsuite_dataset(
     game,
     shards,
     type;
@@ -90,8 +90,6 @@ function bsuite_dataset(
         files = ch_files
     end
     
-    flag = false
-
     ch_src = Channel{BSuiteRLTransition}(n * tf_reader_sz) do ch
         for fs in partition(files, n)
             Threads.foreach(

@@ -10,5 +10,6 @@ ENV["DATADEPS_ALWAYS_ACCEPT"] = "true"
     include("d4rl_pybullet.jl")
     include("rl_unplugged_atari.jl")
     include("bsuite.jl")
+    include("rl_unplugged_dm.jl")
     # include("atari_dataset.jl")
 end
