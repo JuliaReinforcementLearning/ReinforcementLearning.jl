@@ -115,6 +115,8 @@ function RLBase.reward(env::OpenSpielEnv, player)
         rewards(env.state)
     elseif player < 0
         0
+    elseif RewardStyle(env) == RLBase.TERMINAL_REWARD && !RLBase.is_terminated(env)
+        0
     else
         player_reward(env.state, player)
     end
