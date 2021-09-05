@@ -12,14 +12,14 @@ using StableRNGs
 using Flux
 using Flux.Losses
 
-mutable struct ResultNEpisode <: AbstractHook
+mutable struct KuhnNFSPHook <: AbstractHook
     eval_freq::Int
     episode_counter::Int
     episode::Vector{Int}
     results::Vector{Float64}
 end
 
-function (hook::ResultNEpisode)(::PostEpisodeStage, policy, env)
+function (hook::KuhnNFSPHook)(::PostEpisodeStage, policy, env)
     hook.episode_counter += 1
     if hook.episode_counter % hook.eval_freq == 0
         push!(hook.episode, hook.episode_counter)
@@ -124,7 +124,7 @@ function RL.Experiment(
     )
 
     stop_condition = StopAfterEpisode(1_200_000, is_show_progress=!haskey(ENV, "CI"))
-    hook = ResultNEpisode(10_000, 0, [], [])
+    hook = KuhnNFSPHook(10_000, 0, [], [])
 
     Experiment(nfsp, wrapped_env, stop_condition, hook, "# run NFSP on KuhnPokerEnv")
 end
