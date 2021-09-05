@@ -32,7 +32,7 @@ For more concrete description, you can refer to:
 
 # Keyword arguments
 - `N::Int = 3`, the number of landmarks in the environment.
-- `stop = 0.01`, when the distance between the `Listener` and the target is smaller than `env.stop`, the game is terminated.
+- `stop = 0.01`, when the distance between the `Listener` and the target is smaller than the `stop`, the game will be terminated.
 - `damping = 0.25`, for simulation of the physical space, `Listener`'s action will meet the damping in each step.
 - `max_accel = 0.02`, the maximum acceleration of the `Listener` in each step.
 - `space_dim::Int = 2`, the dimension of the environment's space.

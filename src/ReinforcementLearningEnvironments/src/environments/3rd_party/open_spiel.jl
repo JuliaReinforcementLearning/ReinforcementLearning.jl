@@ -137,11 +137,11 @@ end
 _state(env::OpenSpielEnv, ::RLBase.InformationSet{String}, player) =
     information_state_string(env.state, player)
 _state(env::OpenSpielEnv, ::RLBase.InformationSet{Array}, player) =
-    reshape(information_state_tensor(env.state, player), reverse(information_state_tensor_shape(env.game))...)
+    reshape(information_state_tensor(env.state, player), Int.(reverse(information_state_tensor_shape(env.game)))...)
 _state(env::OpenSpielEnv, ::Observation{String}, player) =
     observation_string(env.state, player)
 _state(env::OpenSpielEnv, ::Observation{Array}, player) =
-    reshape(observation_tensor(env.state, player), reverse(observation_tensor_shape(env.game))...)
+    reshape(observation_tensor(env.state, player), Int.(reverse(observation_tensor_shape(env.game)))...)
 
 RLBase.state_space(
     env::OpenSpielEnv,

@@ -2,6 +2,8 @@ export AbstractEnvWrapper
 
 abstract type AbstractEnvWrapper <: AbstractEnv end
 
+Base.copy(env::AbstractEnvWrapper) = typeof(env)(copy(env.env), (getfield(env, field) for field in propertynames(env)[2:end])...)
+
 Base.nameof(env::AbstractEnvWrapper) = "$(nameof(env.env)) |> $(nameof(typeof(env)))"
 
 # wrapped_env[] will get the next layer, be it wrapper or env
