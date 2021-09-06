@@ -5,7 +5,6 @@ using Requires
 using StableRNGs
 using Flux
 using Flux.Losses
-using OpenSpiel
 using Setfield
 using Dates
 using TensorBoardLogger
