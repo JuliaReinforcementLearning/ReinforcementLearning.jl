@@ -132,5 +132,11 @@ function RL.Experiment(
     Experiment(nfsp, wrapped_env, stop_condition, hook, "# Play kuhn_poker in OpenSpiel with NFSP")
 end
 
+using Plots
 ex = E`JuliaRL_NFSP_OpenSpiel(kuhn_poker)`
 run(ex)
+plot(ex.hook.episode, ex.hook.results, xaxis=:log, xlabel="episode", ylabel="nash_conv")
+
+savefig("assets/JuliaRL_NFSP_OpenSpiel(kuhn_poker).png")#hide
+
+# ![](assets/JuliaRL_NFSP_OpenSpiel(kuhn_poker).png)
