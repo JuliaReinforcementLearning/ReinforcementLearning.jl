@@ -6,7 +6,7 @@
 # author: "[Peter Chen](https://github.com/peterchen96)" 
 # --- 
 
-#+ tangle=false
+#+ tangle=true
 using ReinforcementLearning
 using StableRNGs
 using OpenSpiel
@@ -132,6 +132,7 @@ function RL.Experiment(
     Experiment(nfsp, wrapped_env, stop_condition, hook, "# Play kuhn_poker in OpenSpiel with NFSP")
 end
 
+#+ tangle=false
 using Plots
 ex = E`JuliaRL_NFSP_OpenSpiel(kuhn_poker)`
 run(ex)
