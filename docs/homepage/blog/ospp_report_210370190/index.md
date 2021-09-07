@@ -26,11 +26,7 @@
 
 Recent advances in reinforcement learning led to many breakthroughs in artificial intelligence. Some of the latest deep reinforcement learning algorithms have been implemented in [ReinforcementLearning.jl](https://juliareinforcementlearning.org/) with [Flux](https://fluxml.ai/). Currently, we only have some [CFR related algorithms](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningZoo/src/algorithms/cfr) implemented. We'd like to have more implemented, including **MADDPG**\dcite{DBLP:journals/corr/LoweWTHAM17}, **COMA**\dcite{DBLP:journals/corr/FoersterFANW17}, **NFSP**\dcite{DBLP:journals/corr/HeinrichS16}, **PSRO**\dcite{DBLP:journals/corr/abs-1909-12823}.
 
-### 1.1 Terminology
-
-
-
-### 1.2 Schedule
+### 1.1 Schedule
 
 | Date | Mission Content |
 | :-----------: | :---------: |
@@ -40,10 +36,11 @@ Recent advances in reinforcement learning led to many breakthroughs in artificia
 | 08/08 -- 08/15 | Update the **MADDPG** algorithm and test it on the `KuhnPokerEnv`, also complete the **mid-term report**. |
 | 08/16 -- 08/23 | Add support for environments of [`FULL_ACTION_SET`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.FULL_ACTION_SET) in **MADDPG** and test it on more games, such as [`simple_speaker_listener`](https://github.com/openai/multiagent-particle-envs/blob/master/multiagent/scenarios/simple_speaker_listener.py). |
 | 08/24 -- 08/30 | Fine-tuning the experiment [`MADDPG_SpeakerListener`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/481) and consider implementing **ED**\dcite{DBLP:journals/corr/abs-1903-05614} algorithm.|
-| 08/31 -- 09/06 | Have a draft implementation of the **ED** algorithm and test it on the `KuhnPokerEnv`. |
-| 09/07 -- 09/13 | ... |
+| 08/31 -- 09/06 | Play games in 3rd party [`OpenSpiel`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.OpenSpielEnv) with **NFSP** algorithm. |
+| 09/07 -- 09/13 | Implement **ED** algorithm and play "kuhn_poker" in `OpenSpiel` with **ED**. |
+| 09/14 -- 09/21 | ... |
 
-### 1.3 Accomplished Work
+### 1.2 Accomplished Work
 
 From July 1st to now, I have implemented the **Neural Fictitious Self-play(NFSP)**, **Multi-agent Deep Deterministic Policy Gradient(MADDPG)** algorithms in [ReinforcementLearningZoo.jl](https://juliareinforcementlearning.org/docs/rlzoo/). Some workable experiments(see **Usage** part in each algorithm's section) are also added to the documentation. Besides, for testing the performance of **MADDPG** algorithm, I implemented [`SpeakerListenerEnv`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.SpeakerListenerEnv-Tuple{}) in [ReinforcementLearningEnvironments.jl](https://juliareinforcementlearning.org/docs/rlenvs/). Related commits are listed below:
 
@@ -55,6 +52,7 @@ From July 1st to now, I have implemented the **Neural Fictitious Self-play(NFSP)
 - [Update maddpg and the report #470](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/470)
 - [Add the experiment of MADDPG. #481](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/481)
 - [Update experiments of maddpg #487](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/487)
+- [Play OpenSpiel envs with NFSP. #496](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/496)
 - ...
 
 ## 2. Implementation and Usage
