@@ -27,6 +27,8 @@ MultiAgentManager(policies...) =
 
 (A::MultiAgentManager)(env::AbstractEnv, ::Sequential) = A[current_player(env)](env)
 
+RLBase.prob(A::MultiAgentManager, env::AbstractEnv, args...) = prob(A[current_player(env)], env, args...)
+
 function (A::MultiAgentManager)(env::AbstractEnv, ::Simultaneous)
     @error "MultiAgentManager doesn't support simultaneous environments. Please consider applying `SequentialEnv` wrapper to environment first."
 end

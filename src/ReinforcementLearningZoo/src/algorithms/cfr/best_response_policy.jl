@@ -119,3 +119,11 @@ function RLBase.prob(p::BestResponsePolicy, env::AbstractEnv)
         prob(p.policy, env)
     end
 end
+
+function RLBase.prob(p::BestResponsePolicy, env::AbstractEnv, action)
+    if current_player(env) == p.best_responder
+        action == best_response_action(p, env)
+    else
+        prob(p.policy, env, action)
+    end
+end
