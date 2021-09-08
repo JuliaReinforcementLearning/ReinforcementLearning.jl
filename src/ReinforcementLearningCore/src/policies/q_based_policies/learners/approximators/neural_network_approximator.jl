@@ -179,7 +179,7 @@ end
 
 function decode(rng::AbstractRNG, model::VAE, state, z=nothing; is_normalize::Bool=true)
     if z === nothing
-        z = clamp.(randn(rng, Float32, (model.latent_dims, size(state)[2:ndims(state)]...)), -0.5f0, 0.5f0)
+        z = clamp.(randn(rng, Float32, (model.latent_dims, size(state)[2:end]...)), -0.5f0, 0.5f0)
     end
     a = model.decoder(vcat(state, z))
     if is_normalize
