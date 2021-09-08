@@ -98,7 +98,7 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=fal
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     if is_sampling
         σ = exp.(logσ)
-        z = μ .+ σ .* send_to_device(device(model), Float32.(randn(rng, size(μ))))
+        z = μ .+ σ .* send_to_device(device(model), randn(rng, Float32, size(μ)))
         if is_return_log_prob
             logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
             return tanh.(z), logp_π
@@ -179,7 +179,7 @@ end
 
 function decode(rng::AbstractRNG, model::VAE, state, z=nothing; is_normalize::Bool=true)
     if z === nothing
-        z = clamp.(Float32.(rand(rng, Normal(0, 1), (model.latent_dims, size(state)[2:ndims(state)]...))), -0.5f0, 0.5f0)
+        z = clamp.(randn(rng, Float32, (model.latent_dims, size(state)[2:ndims(state)]...)), -0.5f0, 0.5f0)
     end
     a = model.decoder(vcat(state, z))
     if is_normalize
