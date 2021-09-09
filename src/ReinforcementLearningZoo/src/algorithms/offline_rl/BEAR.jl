@@ -181,7 +181,7 @@ function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
         raw_sample_action = decode(l.vae.model, repeat(s, outer=(1, 1, l.sample_num)); is_normalize=false)  # action_dim * batch_size * sample_num
         raw_actor_action = l.policy(repeat(s, outer=(1, 1, l.sample_num)); is_sampling=true) # action_dim * batch_size * sample_num
 
-        mmd_loss = calculate_mmd_loss(raw_sample_action, raw_actor_action, l.kernel_type, l.mmd_σ)
+        mmd_loss = maximum_mean_discrepancy_loss(raw_sample_action, raw_actor_action, l.kernel_type, l.mmd_σ)
 
         actor_loss = mean(-q .+ alpha .* mmd_loss)
         ignore() do 
@@ -218,7 +218,7 @@ function update_vae!(l::BEARLearner, s, a)
     update!(l.vae, vae_grad)
 end
 
-function calculate_mmd_loss(raw_sample_action, raw_actor_action, type::Symbol, mmd_σ::Float32=10.0f0)
+function maximum_mean_discrepancy_loss(raw_sample_action, raw_actor_action, type::Symbol, mmd_σ::Float32=10.0f0)
     A, B, N = size(raw_sample_action)
     diff_xx = reshape(raw_sample_action, A, B, N, 1) .- reshape(raw_sample_action, A, B, 1, N)
     diff_xy = reshape(raw_sample_action, A, B, N, 1) .- reshape(raw_actor_action, A, B, 1, N)
