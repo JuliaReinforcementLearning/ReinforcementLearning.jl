@@ -217,25 +217,3 @@ function update_vae!(l::BEARLearner, s, a)
     end
     update!(l.vae, vae_grad)
 end
-
-function maximum_mean_discrepancy_loss(raw_sample_action, raw_actor_action, type::Symbol, mmd_σ::Float32=10.0f0)
-    A, B, N = size(raw_sample_action)
-    diff_xx = reshape(raw_sample_action, A, B, N, 1) .- reshape(raw_sample_action, A, B, 1, N)
-    diff_xy = reshape(raw_sample_action, A, B, N, 1) .- reshape(raw_actor_action, A, B, 1, N)
-    diff_yy = reshape(raw_actor_action, A, B, N, 1) .- reshape(raw_actor_action, A, B, 1, N)
-    diff_xx = calculate_kernel(diff_xx, type, mmd_σ)
-    diff_xy = calculate_kernel(diff_xy, type, mmd_σ)
-    diff_yy = calculate_kernel(diff_yy, type, mmd_σ)
-    mmd_loss = sqrt.(diff_xx .+ diff_yy .- 2.0f0 .* diff_xy .+ 1.0f-6)
-end
-
-function calculate_kernel(diff, type::Symbol, mmd_σ::Float32)
-    if type == :gaussian
-        diff = diff .^ 2
-    elseif type == :laplacian
-        diff = abs.(diff)
-    else
-        error("Wrong parameter.")
-    end
-    return vec(mean(exp.(-sum(diff, dims=1) ./ (2.0f0 * mmd_σ)), dims=(3, 4)))
-end
