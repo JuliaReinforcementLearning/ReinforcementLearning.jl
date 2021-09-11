@@ -1,5 +1,7 @@
 import Printf.@sprintf
 
+export rl_unplugged_atari_params
+
 # 9 tuning games.
 const TUNING_SUITE = [
     "BeamRider",
@@ -56,6 +58,14 @@ const TESTING_SUITE = [
 
 # Total of 45 games.
 const ALL = cat(TUNING_SUITE, TESTING_SUITE, dims=1)
+
+function rl_unplugged_atari_params()
+    game = ALL
+    run = 1:5
+    shards = 0:99
+    
+    @info game run shards
+end
 
 num_shards = 100
 

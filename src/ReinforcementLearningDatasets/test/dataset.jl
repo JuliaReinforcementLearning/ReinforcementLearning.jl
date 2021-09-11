@@ -2,7 +2,7 @@ n_s = 11
 n_a = 3
 batch_size = 256
 style = SARTS
-rng = StableRNG(123)
+rng = MersenneTwister(123)
 
 # TO-DO make functions to make tests modular and more widely applicable
 @testset "dataset_shuffle" begin

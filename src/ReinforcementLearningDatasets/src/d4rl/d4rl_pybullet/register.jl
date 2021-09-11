@@ -1,4 +1,10 @@
-export D4RL_PYBULLET_URLS
+export d4rl_dataset_params
+
+function d4rl_pybullet_dataset_params()
+    dataset = keys(D4RL_PYBULLET_URLS)
+    repo = "d4rl-pybullet"
+    @info dataset repo
+end
 
 const D4RL_PYBULLET_URLS = Dict(
     "hopper-bullet-mixed-v0" => "https://www.dropbox.com/s/xv3p0h7dzgxt8xb/hopper-bullet-mixed-v0.hdf5?dl=1", 

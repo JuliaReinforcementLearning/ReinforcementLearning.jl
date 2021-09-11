@@ -18,7 +18,7 @@ using Base.Threads
         data = take!(ds)
         
         batch_size = 256
-        feature_size = DM_CONTROL_SUITE_SIZE["fish_swim"]
+        feature_size = ReinforcementLearningDatasets.DM_CONTROL_SUITE_SIZE["fish_swim"]
         
         @test typeof(data.state) <: NamedTuple
         @test typeof(data.next_state) <: NamedTuple
@@ -57,7 +57,7 @@ using Base.Threads
         data = take!(ds)
         
         batch_size = 256
-        feature_size = DM_LOCOMOTION_HUMANOID_SIZE
+        feature_size = ReinforcementLearningDatasets.DM_LOCOMOTION_HUMANOID_SIZE
         
         @test typeof(data.state) <: NamedTuple
         @test typeof(data.next_state) <: NamedTuple
@@ -96,7 +96,7 @@ using Base.Threads
         data = take!(ds)
         
         batch_size = 256
-        feature_size = DM_LOCOMOTION_RODENT_SIZE
+        feature_size = ReinforcementLearningDatasets.DM_LOCOMOTION_RODENT_SIZE
         
         @test typeof(data.state) <: NamedTuple
         @test typeof(data.next_state) <: NamedTuple
