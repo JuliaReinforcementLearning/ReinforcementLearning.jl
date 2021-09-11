@@ -19,7 +19,7 @@ function deep_ope_d4rl_init()
         
                 Deep OPE contains:
                 Policies for the tasks in the D4RL, DeepMind Locomotion and Control Suite datasets.
-                Policies trained with the following algorithms (D4PG, ABM, CRR, SAC, DAPG and BC) and snapshots along the training trajectory. This faciliates 
+                Policies trained with the following algorithms (D4PG, ABM, CRR, SAC, DAPG and BC) and snapshots along the training trajectory. This facilitates 
                 benchmarking offline model selection.
 
                 D4RL:
