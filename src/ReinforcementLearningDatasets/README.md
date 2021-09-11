@@ -77,7 +77,7 @@ Progress: 100%|█████████████████████�
                                  episode    
 ```
 
-`d4rl_policy` returns a model that yeilds a `Tuple` containing `a`(actions) and `μ`(the mean).
+`d4rl_policy` returns a model that yields a `Tuple` containing `a`(actions) and `μ`(the mean).
 
 ## Supported Datasets
 * [D4RL: Datasets for Deep Data-Driven Reinforcement Learning](https://github.com/rail-berkeley/d4rl)
