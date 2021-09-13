@@ -1,7 +1,6 @@
 using .PyCall
 
-# TODO: support `seed`
-function GymEnv(name::String)
+function GymEnv(name::String; seed::Union{Int, Nothing}=nothing)
     if !PyCall.pyexists("gym")
         error(
             "Cannot import module 'gym'.\n\nIf you did not yet install it, try running\n`ReinforcementLearningEnvironments.install_gym()`\n",
@@ -16,6 +15,7 @@ function GymEnv(name::String)
             "Gym environment $name not found.\n\nRun `ReinforcementLearningEnvironments.list_gym_env_names()` to find supported environments.\n",
         )
     end
+    if seed !== nothing pyenv.seed(seed) end
     obs_space = space_transform(pyenv.observation_space)
     act_space = space_transform(pyenv.action_space)
     obs_type = if obs_space isa Space{<:Union{Array{<:Interval},Array{<:ZeroTo}}}

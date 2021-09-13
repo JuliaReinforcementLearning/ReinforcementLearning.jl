@@ -2,11 +2,6 @@ export rl_unplugged_bsuite_dataset
 
 using TFRecord
 
-"""
-    BSuiteRLTransition
-
-Represent an BSuiteRLTransition and can also represent a batch.
-"""
 struct BSuiteRLTransition <: RLTransition
     state
     action
@@ -32,8 +27,8 @@ end
 """
     rl_unplugged_bsuite_dataset(game, shards, type; <keyword arguments>)
 
-Returns a `RingBuffer`(@ref) of [`BSuiteRLTransition`](@ref) batches which supports 
-multi threaded loading.
+Return a `RingBuffer`(@ref) of [`BSuiteRLTransition`](@ref) batches which supports 
+multi threaded loading. Check out `bsuite_params()` for more info on arguments.
 
 # Arguments
 
@@ -57,16 +52,16 @@ in `TFRecord.read`.
     threads correctly (See [JULIA_NUM_THREADS](https://docs.julialang.org/en/v1/manual/environment-variables/#JULIA_NUM_THREADS)).
 """
 function rl_unplugged_bsuite_dataset(
-    game,
-    shards,
-    type;
-    is_shuffle = true,
-    stochasticity =  0.0,
-    shuffle_buffer_size=10_000,
-    tf_reader_bufsize=10_000,
-    tf_reader_sz=10_000,
-    batch_size=256,
-    n_preallocations=nthreads()*12
+    game::String,
+    shards::Vector{Int},
+    type::String;
+    is_shuffle::Bool=true,
+    stochasticity::Float64=0.0,
+    shuffle_buffer_size::Int=10_000,
+    tf_reader_bufsize::Int=10_000,
+    tf_reader_sz::Int=10_000,
+    batch_size::Int=256,
+    n_preallocations::Int=nthreads()*12
 )   
     n = nthreads()
 

@@ -538,6 +538,12 @@ version = "0.5.0"
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
+[[InternedStrings]]
+deps = ["Random", "Test"]
+git-tree-sha1 = "eb05b5625bc5d821b8075a77e4c421933e20c76b"
+uuid = "7d512f48-7fb1-5a58-b986-67e6dc259f01"
+version = "0.7.0"
+
 [[Interpolations]]
 deps = ["AxisAlgorithms", "LinearAlgebra", "OffsetArrays", "Random", "Ratios", "SharedArrays", "SparseArrays", "StaticArrays", "WoodburyMatrices"]
 git-tree-sha1 = "1e0e51692a3a77f1eeb51bf741bdd0439ed210e7"
@@ -896,6 +902,17 @@ git-tree-sha1 = "477bf42b4d1496b454c10cce46645bb5b8a0cf2c"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 version = "2.0.2"
 
+[[Pickle]]
+deps = ["DataStructures", "InternedStrings", "Serialization", "SparseArrays", "Strided", "ZipFile"]
+git-tree-sha1 = "32b02a862b214ea4c7f250fab1d7af5149226191"
+uuid = "fbb45041-c46e-462f-888f-7c521cafbc2c"
+version = "0.2.7"
+
+[[Pipe]]
+git-tree-sha1 = "6842804e7867b115ca9de748a0cf6b364523c16d"
+uuid = "b98c9c47-44ae-5843-9183-064241ee97a0"
+version = "1.3.0"
+
 [[Pixman_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "b4f5d02549a10e20780a24fce72bea96b6329e29"
@@ -1034,7 +1051,7 @@ uuid = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
 version = "0.8.3"
 
 [[ReinforcementLearningDatasets]]
-deps = ["CodecZlib", "DataDeps", "HDF5", "ImageCore", "NPZ", "PNGFiles", "Printf", "ProgressMeter", "Random", "StableRNGs", "TFRecord"]
+deps = ["CodecZlib", "DataDeps", "Flux", "HDF5", "ImageCore", "NPZ", "PNGFiles", "Pickle", "Pipe", "Printf", "ProgressMeter", "PyCall", "Random", "ReinforcementLearningBase", "ReinforcementLearningEnvironments", "Setfield", "TFRecord", "UnicodePlots"]
 path = "../src/ReinforcementLearningDatasets"
 uuid = "dd1544ca-2576-438c-a599-ae96278fd687"
 version = "0.1.0"
@@ -1167,6 +1184,12 @@ git-tree-sha1 = "30cd8c360c54081f806b1ee14d2eecbef3c04c49"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 version = "0.9.8"
 
+[[Strided]]
+deps = ["LinearAlgebra", "TupleTools"]
+git-tree-sha1 = "4d581938087ca90eab9bd4bb6d270edaefd70dcd"
+uuid = "5e0ebb24-38b0-5f93-81fe-25c709ecae67"
+version = "1.1.2"
+
 [[StringEncodings]]
 deps = ["Libiconv_jll"]
 git-tree-sha1 = "50ccd5ddb00d19392577902f0079267a72c5ab04"
@@ -1241,6 +1264,11 @@ deps = ["Random", "Test"]
 git-tree-sha1 = "216b95ea110b5972db65aa90f88d8d89dcb8851c"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.9.6"
+
+[[TupleTools]]
+git-tree-sha1 = "3c712976c47707ff893cf6ba4354aa14db1d8938"
+uuid = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
+version = "1.3.0"
 
 [[URIs]]
 git-tree-sha1 = "97bbe755a53fe859669cd907f2d96aee8d2c1355"

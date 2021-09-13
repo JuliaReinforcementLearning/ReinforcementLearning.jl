@@ -155,7 +155,13 @@
         "velocimeter",
         "swingup",
         "Tassa",
-        "Todorov"
+        "Todorov",
+        "npyload",
+        "gresearch",
+        "Mengjiao",
+        "Yutian",
+        "Aviral",
+        "Kumar"
     ],
     "ignoreWords": [],
     "minWordLength": 5,

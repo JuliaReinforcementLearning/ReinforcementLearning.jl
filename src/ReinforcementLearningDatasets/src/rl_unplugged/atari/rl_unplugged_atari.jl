@@ -48,7 +48,7 @@ end
     rl_unplugged_atari_dataset(game, run, shards; <keyword arguments>)
 
 Return a [`RingBuffer`](@ref) of [`AtariRLTransition`](@ref) batches which supports 
-multi threaded loading.
+multi threaded loading. Check out `rl_unplugged_atari_params()` for more info on arguments.
 
 # Arguments
 
