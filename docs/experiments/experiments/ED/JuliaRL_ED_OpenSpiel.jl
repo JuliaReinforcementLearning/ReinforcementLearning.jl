@@ -17,10 +17,10 @@ mutable struct KuhnOpenEDHook <: AbstractHook
 end
 
 function (hook::KuhnOpenEDHook)(::PreEpisodeStage, policy, env)
-    # get nash_conv of the current policy.
+    ## get nash_conv of the current policy.
     push!(hook.results, RLZoo.nash_conv(policy, env))
     
-    # update agents' learning rate.
+    ## update agents' learning rate.
     for (_, agent) in policy.agents
         agent.learner.optimizer[2].eta = 1.0 / sqrt(length(hook.results))
     end
@@ -59,7 +59,7 @@ function RL.Experiment(
     EDmanager = EDManager(
         Dict(
             player => EDPolicy(
-                1 - player, # opponent player
+                1 - player, # opponent
                 create_learner(), # neural network learner
                 WeightedSoftmaxExplorer(), # explorer
             ) for player in players(env) if player != chance_player(env)
