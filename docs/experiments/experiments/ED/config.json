@@ -1,0 +1,6 @@
+{
+    "description": "Exploitability Descent algorithm related experiments.",
+    "order": [
+      "JuliaRL_ED_OpenSpiel.jl"
+    ]
+  }
