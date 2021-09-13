@@ -17,7 +17,7 @@ using Random
 using Random: shuffle
 using CUDA
 using Zygote
-using Zygote: ignore
+using Zygote: ignore, @ignore
 using Flux
 using Flux: onehot, normalise
 using StatsBase
