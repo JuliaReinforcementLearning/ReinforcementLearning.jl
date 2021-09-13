@@ -53,7 +53,6 @@ From July 1st to now, I have implemented the **Neural Fictitious Self-play(NFSP)
 - [Update maddpg and the report #470](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/470)
 - [Add the experiment of MADDPG. #481](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/481)
 - [Update experiments of maddpg #487](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/487)
-- [Play OpenSpiel envs with NFSP. #496](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/496)
 - ...
 
 ## 2. Implementation and Usage
