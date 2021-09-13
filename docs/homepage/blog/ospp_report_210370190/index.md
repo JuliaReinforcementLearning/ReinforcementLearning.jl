@@ -16,7 +16,7 @@
                 "affiliationURL":"http://english.ecnu.edu.cn/"
             }
         ],
-        "publishedDate":"2021-08-28",
+        "publishedDate":"2021-09-13",
         "citationText":"Peter Chen, 2021"
     }"""
 
@@ -38,7 +38,8 @@ Recent advances in reinforcement learning led to many breakthroughs in artificia
 | 08/24 -- 08/30 | Fine-tuning the experiment [`MADDPG_SpeakerListener`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/481) and consider implementing **ED**\dcite{DBLP:journals/corr/abs-1903-05614} algorithm.|
 | 08/31 -- 09/06 | Play games in 3rd party [`OpenSpiel`](https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.OpenSpielEnv) with **NFSP** algorithm. |
 | 09/07 -- 09/13 | Implement **ED** algorithm and play "kuhn_poker" in `OpenSpiel` with **ED**. |
-| 09/14 -- 09/21 | ... |
+| 09/14 -- 09/20 | Fix the existing problems in the implemented **ED** algorithm and update the report. |
+| 09/22 -- 09/30 | ... |
 
 ### 1.2 Accomplished Work
 
@@ -496,3 +497,17 @@ agents = MADDPGManager(
 Add the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L108) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L15), we can simply `run(agents, env, stop_condition, hook)` to run the experiment and use [`Plots.plot`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L117) to get the following result.
 
 \dfig{body;JuliaRL_MADDPG_SpeakerListenerEnv.png;Play SpeakerListenerEnv with MADDPG.}
+
+### 2.4 Exploitability Descent(ED) algorithm
+
+#### Brief Introduction
+
+...
+#### Implementation
+
+...
+#### Usage
+
+...
+
+\dfig{body;JuliaRL_ED_OpenSpiel(kuhn_poker).png;Play "kuhn_poker" in OpenSpiel with ED.}
