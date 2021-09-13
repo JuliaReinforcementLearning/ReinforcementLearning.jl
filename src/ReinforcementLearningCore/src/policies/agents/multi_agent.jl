@@ -23,11 +23,11 @@ of `SIMULTANEOUS` style, please wrap it with [`SequentialEnv`](@ref) first.
 MultiAgentManager(policies...) =
     MultiAgentManager(Dict{Any,Any}(nameof(p) => p for p in policies))
 
+RLBase.prob(A::MultiAgentManager, env::AbstractEnv, args...) = prob(A[current_player(env)].policy, env, args...)
+
 (A::MultiAgentManager)(env::AbstractEnv) = A(env, DynamicStyle(env))
 
 (A::MultiAgentManager)(env::AbstractEnv, ::Sequential) = A[current_player(env)](env)
-
-RLBase.prob(A::MultiAgentManager, env::AbstractEnv, args...) = prob(A[current_player(env)], env, args...)
 
 function (A::MultiAgentManager)(env::AbstractEnv, ::Simultaneous)
     @error "MultiAgentManager doesn't support simultaneous environments. Please consider applying `SequentialEnv` wrapper to environment first."
