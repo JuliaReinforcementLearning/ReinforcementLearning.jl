@@ -1,11 +1,16 @@
 import Printf.@sprintf
-export DM_LOCOMOTION
-export DM_LOCOMOTION_HUMANOID
-export DM_LOCOMOTION_RODENT
-export DM_LOCOMOTION_HUMANOID_SIZE
-export DM_LOCOMOTION_RODENT_SIZE
-export DM_CONTROL_SUITE_SIZE
-export dm_init
+export dm_params
+
+function dm_params()
+    rodent = keys(DM_LOCOMOTION_RODENT)
+    humanoid = keys(DM_LOCOMOTION_HUMANOID)
+    dm_control = keys(DM_CONTROL_SUITE_SIZE)
+
+    game = Dict("rodent" => rodent, "humanoid" => humanoid, "dm_control" => dm_control)
+    shards = 0:4
+
+    @info game shards
+end
 
 const DM_LOCOMOTION_RODENT = Dict{String, String}(
     "rodent_gaps" => "dm_locomotion/rodent_gaps/seq2",

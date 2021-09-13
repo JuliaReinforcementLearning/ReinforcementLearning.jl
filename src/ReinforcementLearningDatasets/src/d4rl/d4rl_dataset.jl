@@ -1,5 +1,4 @@
 using Random
-using StableRNGs
 using HDF5
 
 import Base: iterate, length, IteratorEltype
@@ -41,16 +40,16 @@ end
 Create a dataset enclosed in a [`D4RLDataSet`](@ref) `Iterable` type. Contain other related metadata
 for the `dataset` that is passed. The returned type is an infinite or a finite `Iterator` 
 respectively depending upon whether `is_shuffle` is `true` or `false`. For more information regarding
-the dataset, refer to [D4RL](https://github.com/rail-berkeley/d4rl).
+the dataset, refer to [D4RL](https://github.com/rail-berkeley/d4rl). Check out d4rl_pybullet_dataset_params() or d4rl_dataset_params().
 
 # Arguments
+
 - `dataset::String`: name of the datset.
-- `repo::String="d4rl"`: name of the repository of the dataset.
-- `style::Tuple{Symbol}=SARTS`: the style of the `Iterator` that is returned. can be [`SARTS`](@ref),
-[`SART`](@ref) or [`SA`](@ref).
+- `repo::String="d4rl"`: name of the repository of the dataset. can be "d4rl" or "d4rl-pybullet".
+- `style::Tuple{Symbol}=SARTS`: the style of the `Iterator` that is returned. can be [`SARTS`](@ref), [`SART`](@ref) or [`SA`](@ref).
 - `rng<:AbstractRNG=StableRNG(123)`.
 - `is_shuffle::Bool=true`: determines if the dataset is shuffled or not.
-- `batch_size::Int=256` batch_size that is yielded by the iterator.
+- `batch_size::Int=256`: batch_size that is yielded by the iterator.
 
 !!! note
 
@@ -59,17 +58,19 @@ been tested in this package yet.
 """
 function dataset(
     dataset::String;
-    repo = "d4rl",
-    style=SARTS,
-    rng = StableRNG(123), 
-    is_shuffle = true, 
-    batch_size=256
+    repo::String="d4rl",
+    style::NTuple=SARTS,
+    rng::AbstractRNG=MersenneTwister(123), 
+    is_shuffle::Bool=true, 
+    batch_size::Int=256
 )
     
     try 
         @datadep_str repo*"-"*dataset 
-    catch 
-        throw("The provided dataset is not available") 
+    catch e
+        if isa(e, KeyError)
+            throw("Invalid params, check out d4rl_pybullet_dataset_params() or d4rl_dataset_params()")
+        end
     end
         
     path = @datadep_str repo*"-"*dataset 

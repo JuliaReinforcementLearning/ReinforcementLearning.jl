@@ -110,7 +110,7 @@ Returns a `RingBuffer`(@ref) of `NamedTuple` containing SARTS batches which supp
 multi threaded loading. Also contains additional data. The data enclosed within `:state` and
 `next_state` is a NamedTuple consisting of all observations that are provided.
 Check out keys in `DM_LOCOMOTION_HUMANOID`, `DM_LOCOMOTION_RODENT`, `DM_CONTROL_SUITE_SIZE` for supported 
-datasets.
+datasets. Also check out `dm_params()` for more info on arguments.
 
 # Arguments
 
