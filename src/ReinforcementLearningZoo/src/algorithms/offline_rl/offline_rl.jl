@@ -1,3 +1,4 @@
+include("BCQ.jl")
 include("BEAR.jl")
 include("behavior_cloning.jl")
 include("CRR.jl")

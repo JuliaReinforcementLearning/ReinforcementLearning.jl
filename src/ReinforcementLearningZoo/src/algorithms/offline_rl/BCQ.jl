@@ -1,6 +1,6 @@
-export PLASLearner
+export BCQLearner
 
-mutable struct PLASLearner{
+mutable struct BCQLearner{
     BA1<:NeuralNetworkApproximator,
     BA2<:NeuralNetworkApproximator,
     BC1<:NeuralNetworkApproximator,
@@ -8,18 +8,17 @@ mutable struct PLASLearner{
     V<:NeuralNetworkApproximator,
     R<:AbstractRNG,
 } <: AbstractLearner
-    policy::BA1
-    target_policy::BA2
-    qnetwork1::BC1
-    qnetwork2::BC2
+    qnetwork1::BQ1
+    qnetwork2::BQ2
     target_qnetwork1::BC1
     target_qnetwork2::BC2
     vae::V
     γ::Float32
     τ::Float32
     λ::Float32
+    p::Int
     batch_size::Int
-    pretrain_step::Int
+    start_step::Int
     update_freq::Int
     update_step::Int
     rng::R
@@ -29,29 +28,30 @@ mutable struct PLASLearner{
 end
 
 """
-    PLASLearner(;kwargs...)
+    BCQLearner(;kwargs...)
 
-See [Latent Action Space for Offline Reinforcement Learning](https://arxiv.org/abs/2011.07213)
+See [Off-Policy Deep Reinforcement Learning without Exploration](https://arxiv.org/abs/1812.02900)
 
 # Keyword arguments
-- `policy`, used to get latent action.
-- `target_policy`, similar to `policy`, but used to estimate the target.
+- `policy`, used to get action with perturbation. This can be implemented using a `PerturbationNetwork` in a `NeuralNetworkApproximator`.
+- `target_policy`, similar to `policy`, but used to estimate the target. This can be implemented using a `PerturbationNetwork` in a `NeuralNetworkApproximator`.
 - `qnetwork1`, used to get Q-values.
 - `qnetwork2`, used to get Q-values.
 - `target_qnetwork1`, used to estimate the target Q-values.
 - `target_qnetwork2`, used to estimate the target Q-values.
-- `vae`, used for mapping hidden actions to actions. This
+- `vae`, used for sampling actions. This
 can be implemented using a `VAE` in a `NeuralNetworkApproximator`.
 - `γ::Float32 = 0.99f0`, reward discount rate.
 - `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
 - `λ::Float32 = 0.75f0`, used for Clipped Double Q-learning.
+- `p::Int = 10`, the number of state-action pairs used when calculating the Q value.
 - `batch_size::Int = 32`
-- `pretrain_step::Int = 1000`, the number of pre-training rounds.
+- `start_step::Int = 1000`
 - `update_freq::Int = 50`, the frequency of updating the `approximator`.
 - `update_step::Int = 0`
 - `rng = Random.GLOBAL_RNG`
 """
-function PLASLearner(;
+function BCQLearner(;
     policy,
     target_policy,
     qnetwork1,
@@ -62,8 +62,9 @@ function PLASLearner(;
     γ = 0.99f0,
     τ = 0.005f0,
     λ = 0.75f0,
+    p = 10,
     batch_size = 32,
-    pretrain_step = 10000,
+    start_step = 1000,
     update_freq = 50,
     update_step = 0,
     rng = Random.GLOBAL_RNG,
@@ -71,7 +72,7 @@ function PLASLearner(;
     copyto!(policy, target_policy)  # force sync
     copyto!(qnetwork1, target_qnetwork1)  # force sync
     copyto!(qnetwork2, target_qnetwork2)  # force sync
-    PLASLearner(
+    BCQLearner(
         policy,
         target_policy,
         qnetwork1,
@@ -82,8 +83,9 @@ function PLASLearner(;
         γ,
         τ,
         λ,
+        p,
         batch_size,
-        pretrain_step,
+        start_step,
         update_freq,
         update_step,
         rng,
@@ -92,22 +94,24 @@ function PLASLearner(;
     )
 end
 
-function (l::PLASLearner)(env)
+function (l::BCQLearner)(env)
     s = send_to_device(device(l.policy), state(env))
     s = Flux.unsqueeze(s, ndims(s) + 1)
-    latent_action = tanh.(l.policy(s))
-    action = dropdims(decode(l.vae.model, s, latent_action), dims=2)
+    s = repeat(s, outer=(1, 1, l.p))
+    action = l.policy(s, decode(l.vae.model, s))
+    q_value = l.qnetwork1(vcat(s, action))
+    idx = argmax(q_value)
+    action[idx]
 end
 
-function RLBase.update!(l::PLASLearner, batch::NamedTuple{SARTS})
-    if l.update_step == 0
-        update_vae!(l, batch)
-    else
+function RLBase.update!(l::BCQLearner, batch::NamedTuple{SARTS})
+    update_vae!(l, batch)
+    if l.update_step >= l.start_step
         update_learner!(l, batch)
     end
 end
 
-function update_vae!(l::PLASLearner, batch::NamedTuple{SARTS})
+function update_vae!(l::BCQLearner, batch::NamedTuple{SARTS})
     s, a, r, t, s′ = send_to_device(device(l.vae), batch)
     a = reshape(a, :, l.batch_size)
     vae_grad = gradient(Flux.params(l.vae)) do
@@ -117,15 +121,16 @@ function update_vae!(l::PLASLearner, batch::NamedTuple{SARTS})
     update!(l.vae, vae_grad)
 end
 
-function update_learner!(l::PLASLearner, batch::NamedTuple{SARTS})
+function update_learner!(l::BCQLearner, batch::NamedTuple{SARTS})
     s, a, r, t, s′ = send_to_device(device(l.qnetwork1), batch)
 
     γ, τ, λ = l.γ, l.τ, l.λ
 
-    latent_action′ = tanh.(l.target_policy(s′))
-    action′ = decode(l.vae.model, s′, latent_action′)
-    q′_input = vcat(s′, action′)
-    q′ = λ .* min.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)) + (1 - λ) .* max.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input))
+    repeat_s′ = repeat(s′, outer=(1, 1, l.p))
+    repeat_a′ = l.target_policy(repeat_s′, decode(l.vae.model, repeat_s′))
+
+    q′_input = vcat(repeat_s′, repeat_a′)
+    q′ = maximum(λ .* min.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)) + (1 - λ) .* max.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)), dims=3)
 
     y = r .+ γ .* (1 .- t) .* vec(q′)
 
@@ -155,9 +160,9 @@ function update_learner!(l::PLASLearner, batch::NamedTuple{SARTS})
 
     # Train Policy
     p_grad = gradient(Flux.params(l.policy)) do
-        latent_action = tanh.(l.policy(s))
-        action = decode(l.vae.model, s, latent_action)
-        actor_loss = -mean(l.qnetwork1(vcat(s, action)))
+        sampled_action = decode(l.vae.model, s)
+        perturbed_action = l.policy(s, sampled_action)
+        actor_loss = -mean(l.qnetwork1(vcat(s, perturbed_action)))
         ignore() do 
             l.actor_loss = actor_loss
         end

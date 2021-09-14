@@ -1,4 +1,4 @@
-export NeuralNetworkApproximator, ActorCritic, GaussianNetwork, DuelingNetwork
+export NeuralNetworkApproximator, ActorCritic, GaussianNetwork, DuelingNetwork, PerturbationNetwork
 export VAE, decode, vae_loss
 
 using Flux
@@ -132,7 +132,7 @@ end
     
 Dueling network automatically produces separate estimates of the state value function network and advantage function network. The expected output size of val is 1, and adv is the size of the action space.
 """
-struct DuelingNetwork{B,V,A}
+Base.@kwdef struct DuelingNetwork{B,V,A}
     base::B
     val::V
     adv::A
@@ -144,6 +144,29 @@ function (m::DuelingNetwork)(state)
     x = m.base(state)
     val = m.val(x)
     return val .+ m.adv(x) .- mean(m.adv(x), dims=1)
+end
+
+#####
+# PerturbationNetwork 
+#####
+
+"""
+    PerturbationNetwork(;linear, ϕ)
+
+Perturbation network outputs an adjustment to an action in the range [-ϕ, ϕ] to increase the diversity of seen actions.
+"""
+
+Base.@kwdef struct PerturbationNetwork{L}
+    linear::L
+    ϕ::Float32
+end
+
+Flux.@functor PerturbationNetwork
+
+function (model::PerturbationNetwork)(state, action)
+    x = model.linear(vcat(state, action))
+    x = model.ϕ * tanh.(x)
+    clamp.(x + action, -1.0f0, 1.0f0)
 end
 
 #####
