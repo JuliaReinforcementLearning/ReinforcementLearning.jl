@@ -8,8 +8,10 @@ mutable struct BCQLearner{
     V<:NeuralNetworkApproximator,
     R<:AbstractRNG,
 } <: AbstractLearner
-    qnetwork1::BQ1
-    qnetwork2::BQ2
+    policy::BA1
+    target_policy::BA2
+    qnetwork1::BC1
+    qnetwork2::BC2
     target_qnetwork1::BC1
     target_qnetwork2::BC2
     vae::V
@@ -39,7 +41,7 @@ See [Off-Policy Deep Reinforcement Learning without Exploration](https://arxiv.o
 - `qnetwork2`, used to get Q-values.
 - `target_qnetwork1`, used to estimate the target Q-values.
 - `target_qnetwork2`, used to estimate the target Q-values.
-- `vae`, used for sampling actions. This
+- `vae`, used for sampling action. This
 can be implemented using a `VAE` in a `NeuralNetworkApproximator`.
 - `γ::Float32 = 0.99f0`, reward discount rate.
 - `τ::Float32 = 0.005f0`, the speed at which the target network is updated.

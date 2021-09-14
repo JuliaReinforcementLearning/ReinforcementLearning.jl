@@ -151,18 +151,25 @@ end
 #####
 
 """
-    PerturbationNetwork(;linear, ϕ)
+    PerturbationNetwork(;, ϕ)
 
 Perturbation network outputs an adjustment to an action in the range [-ϕ, ϕ] to increase the diversity of seen actions.
+
+# Keyword arguments
+- `base`, a Flux based DNN model.
+- `ϕ::Float32 = 0.05f0`
 """
 
-Base.@kwdef struct PerturbationNetwork{L}
-    linear::L
-    ϕ::Float32
+Base.@kwdef struct PerturbationNetwork{N}
+    base::N
+    ϕ::Float32 = 0.05f0
 end
 
 Flux.@functor PerturbationNetwork
 
+"""
+This function accepts `state` and `action`, and then outputs actions after disturbance.
+"""
 function (model::PerturbationNetwork)(state, action)
     x = model.linear(vcat(state, action))
     x = model.ϕ * tanh.(x)
