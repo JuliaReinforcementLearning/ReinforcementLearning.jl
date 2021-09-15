@@ -16,6 +16,13 @@ feeding it into `env`.
 ActionTransformedEnv(env; action_mapping = identity, action_space_mapping = identity) = 
     ActionTransformedEnv(env, action_mapping, action_space_mapping)
 
+Base.copy(env::ActionTransformedEnv) = 
+    ActionTransformedEnv(
+        copy(env.env), 
+        action_mapping = env.action_mapping, 
+        action_space_mapping = env.action_space_mapping
+    )
+
 RLBase.action_space(env::ActionTransformedEnv, args...) =
     env.action_space_mapping(action_space(env.env, args...))
 

@@ -1,5 +1,6 @@
 export NFSPAgentManager
 
+## definition
 """
     NFSPAgentManager(; agents::Dict{Any, NFSPAgent})
 
@@ -9,17 +10,19 @@ mutable struct NFSPAgentManager <: AbstractPolicy
     agents::Dict{Any, NFSPAgent}
 end
 
+## interactions between the policy and env.
 function (π::NFSPAgentManager)(env::AbstractEnv)
     player = current_player(env)
     if player == chance_player(env)
-        env |> legal_action_space |> rand |> env
+        env |> legal_action_space |> rand
     else
-        env |> π.agents[player] |> env
+        env |> π.agents[player]
     end
 end
 
 RLBase.prob(π::NFSPAgentManager, env::AbstractEnv, args...) = prob(π.agents[current_player(env)], env, args...)
 
+## update NFSPAgentManager
 function RLBase.update!(π::NFSPAgentManager, env::AbstractEnv)
     while current_player(env) == chance_player(env)
         env |> legal_action_space |> rand |> env
