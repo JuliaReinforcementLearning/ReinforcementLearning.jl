@@ -2,6 +2,7 @@ export buffered_shuffle
 export RLTransition
 export batch!
 export RingBuffer
+export gen_JuliaRL_dataset
 
 import Base.take!
 import Base.iterate
