@@ -28,6 +28,6 @@ end
 RLBase.prob(s::WeightedSoftmaxExplorer, values) = softmax(values)
 
 function RLBase.prob(s::WeightedSoftmaxExplorer, values::AbstractVector{T}, mask) where {T}
-    values[.!mask] .= typemin(T)
-    prob(s, values)
+    p = prob(s, values) .* mask
+    p / sum(p)
 end

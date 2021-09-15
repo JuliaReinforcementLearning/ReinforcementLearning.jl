@@ -1,25 +1,27 @@
 # --- 
-# title: JuliaRL\_NFSP\_KuhnPoker 
+# title: JuliaRL\_NFSP\_OpenSpiel(kuhn_poker) 
 # cover: assets/logo.svg 
-# description: NFSP applied to KuhnPokerEnv 
-# date: 2021-08-07
+# description: play "kuhn_poker" in OpenSpiel with NFSP
+# date: 2021-09-06
 # author: "[Peter Chen](https://github.com/peterchen96)" 
 # --- 
 
-#+ tangle=true
+#+ tangle=false
 using ReinforcementLearning
 using StableRNGs
+using OpenSpiel
 using Flux
 using Flux.Losses
 
-mutable struct KuhnNFSPHook <: AbstractHook
+mutable struct KuhnOpenNFSPHook <: AbstractHook
     eval_freq::Int
     episode_counter::Int
     episode::Vector{Int}
     results::Vector{Float64}
 end
 
-function (hook::KuhnNFSPHook)(::PostEpisodeStage, policy, env)
+function (hook::KuhnOpenNFSPHook)(::PostEpisodeStage, policy, env)
+    RLBase.reset!(env)
     hook.episode_counter += 1
     if hook.episode_counter % hook.eval_freq == 0
         push!(hook.episode, hook.episode_counter)
@@ -30,20 +32,21 @@ end
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:NFSP},
-    ::Val{:KuhnPoker},
-    ::Nothing;
+    ::Val{:OpenSpiel},
+    game;
     seed = 123,
 )
     rng = StableRNG(seed)
     
-    ## Encode the KuhnPokerEnv's states for training.
-    env = KuhnPokerEnv()
-    wrapped_env = StateTransformedEnv(
-        env;
-        state_mapping = s -> [findfirst(==(s), state_space(env))],
-        state_space_mapping = ss -> [[findfirst(==(s), state_space(env))] for s in state_space(env)]
-        )
-    player = 1 # or 2
+    env = OpenSpielEnv(game)
+    wrapped_env = ActionTransformedEnv(
+        env,
+        action_mapping = a -> RLBase.current_player(env) == chance_player(env) ? a : Int(a - 1),
+        action_space_mapping = as -> RLBase.current_player(env) == chance_player(env) ? 
+            as : Base.OneTo(num_distinct_actions(env.game)),
+    )
+    wrapped_env = DefaultStateStyleEnv{InformationSet{Array}()}(wrapped_env)
+    player = 0 # or 1
     ns, na = length(state(wrapped_env, player)), length(action_space(wrapped_env, player))
 
     ## construct rl_agent(use `DQN`) and sl_agent(use `BehaviorCloningPolicy`)
@@ -52,23 +55,23 @@ function RL.Experiment(
             learner = DQNLearner(
                 approximator = NeuralNetworkApproximator(
                     model = Chain(
-                        Dense(ns, 64, relu; init = glorot_normal(rng)),
-                        Dense(64, na; init = glorot_normal(rng))
+                        Dense(ns, 128, relu; init = glorot_normal(rng)),
+                        Dense(128, na; init = glorot_normal(rng))
                     ) |> cpu,
                     optimizer = Descent(0.01),
                 ),
                 target_approximator = NeuralNetworkApproximator(
                     model = Chain(
-                        Dense(ns, 64, relu; init = glorot_normal(rng)),
-                        Dense(64, na; init = glorot_normal(rng))
+                        Dense(ns, 128, relu; init = glorot_normal(rng)),
+                        Dense(128, na; init = glorot_normal(rng))
                     ) |> cpu,
                 ),
                 γ = 1.0f0,
-                loss_func = huber_loss,
+                loss_func = mse,
                 batch_size = 128,
                 update_freq = 128,
                 min_replay_history = 1000,
-                target_update_freq = 1000,
+                target_update_freq = 19500,
                 rng = rng,
             ),
             explorer = EpsilonGreedyExplorer(
@@ -81,7 +84,7 @@ function RL.Experiment(
         ),
         trajectory = CircularArraySARTTrajectory(
             capacity = 200_000,
-            state = Vector{Int} => (ns, ),
+            state = Vector{Float64} => (ns, ),
         ),
     )
 
@@ -89,8 +92,8 @@ function RL.Experiment(
         policy = BehaviorCloningPolicy(;
             approximator = NeuralNetworkApproximator(
                 model = Chain(
-                        Dense(ns, 64, relu; init = glorot_normal(rng)),
-                        Dense(64, na; init = glorot_normal(rng))
+                        Dense(ns, 128, relu; init = glorot_normal(rng)),
+                        Dense(128, na; init = glorot_normal(rng))
                     ) |> cpu,
                 optimizer = Descent(0.01),
             ),
@@ -102,7 +105,7 @@ function RL.Experiment(
         trajectory = ReservoirTrajectory(
             2_000_000;# reservoir capacity
             rng = rng,
-            :state => Vector{Int},
+            :state => Vector{Float64},
             :action => Int,
         ),
     )
@@ -124,17 +127,16 @@ function RL.Experiment(
     )
 
     stop_condition = StopAfterEpisode(1_200_000, is_show_progress=!haskey(ENV, "CI"))
-    hook = KuhnNFSPHook(10_000, 0, [], [])
+    hook = KuhnOpenNFSPHook(10_000, 0, [], [])
 
-    Experiment(nfsp, wrapped_env, stop_condition, hook, "# run NFSP on KuhnPokerEnv")
+    Experiment(nfsp, wrapped_env, stop_condition, hook, "# Play kuhn_poker in OpenSpiel with NFSP")
 end
 
-#+ tangle=false
 using Plots
-ex = E`JuliaRL_NFSP_KuhnPoker`
+ex = E`JuliaRL_NFSP_OpenSpiel(kuhn_poker)`
 run(ex)
 plot(ex.hook.episode, ex.hook.results, xaxis=:log, xlabel="episode", ylabel="nash_conv")
 
-savefig("assets/JuliaRL_NFSP_KuhnPoker.png")#hide
+savefig("assets/JuliaRL_NFSP_OpenSpiel(kuhn_poker).png")#hide
 
-# ![](assets/JuliaRL_NFSP_KuhnPoker.png)
+# ![](assets/JuliaRL_NFSP_OpenSpiel(kuhn_poker).png)

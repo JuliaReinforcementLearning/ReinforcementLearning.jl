@@ -2,7 +2,7 @@ export BehaviorCloningPolicy
 
 mutable struct BehaviorCloningPolicy{A} <: AbstractPolicy
     approximator::A
-    explorer::Any
+    explorer::AbstractExplorer
     sampler::BatchSampler{(:state, :action)}
     min_reservoir_history::Int
 end
@@ -20,7 +20,7 @@ end
 """
 function BehaviorCloningPolicy(;
         approximator::A,
-        explorer::Any = GreedyExplorer(),
+        explorer::AbstractExplorer = GreedyExplorer(),
         batch_size::Int = 32,
         min_reservoir_history::Int = 100,
         rng = Random.GLOBAL_RNG

@@ -1,5 +1,6 @@
 export NFSPAgent
 
+## definition
 """
     NFSPAgent(; rl_agent::Agent, sl_agent::Agent, args...)
 
@@ -26,12 +27,12 @@ mutable struct NFSPAgent <: AbstractPolicy
     mode::Bool
 end
 
-# used for evaluation.
+## interactions when evaluation.
 (π::NFSPAgent)(env::AbstractEnv) = π.sl_agent(env)
 
 RLBase.prob(π::NFSPAgent, env::AbstractEnv, args...) = prob(π.sl_agent.policy, env, args...)
 
-# update env and policy.
+## update nfsp(also the env) when training.
 function RLBase.update!(π::NFSPAgent, env::AbstractEnv)
     player = current_player(env)
     action = π.mode ? π.rl_agent(env) : π.sl_agent(env)
@@ -108,9 +109,8 @@ function (π::NFSPAgent)(::PostEpisodeStage, env::AbstractEnv, player::Any)
     end
 end
 
-# the supplement function
+# here just update the rl's approximator, not update target_approximator.
 function rl_learn!(policy::QBasedPolicy, t::AbstractTrajectory)
-    # just update the approximator, not update target_approximator
     learner = policy.learner
     length(t[:terminal]) - learner.sampler.n <= learner.min_replay_history && return
     
