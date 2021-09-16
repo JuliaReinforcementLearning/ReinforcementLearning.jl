@@ -2,6 +2,8 @@ export OfflinePolicy, AtariRLTransition
 
 export calculate_CQL_loss, maximum_mean_discrepancy_loss
 
+using ProfileView
+
 struct AtariRLTransition
     state
     action
@@ -46,11 +48,15 @@ function RLBase.update!(
     l = p.learner
     if in(:pretrain_step, fieldnames(typeof(l)))
         println("Pretrain...")
-        for _ in 1:l.pretrain_step
-            inds, batch = sample(l.rng, p.dataset, p.batch_size)
+        @profview for _ in 1:l.pretrain_step
+            #inds, batch = sample(l.rng, p.dataset, p.batch_size)
+            batch_data = take!(p.dataset)
+            batch = NamedTuple{SARTS}((batch_data.state, batch_data.action, batch_data.reward, batch_data.terminal, batch_data.next_state))
             update!(l, batch)
         end
     end
+    Profile.print()
+    @assert 1 == 2
 end
 
 function RLBase.update!(

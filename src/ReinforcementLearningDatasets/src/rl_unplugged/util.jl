@@ -132,3 +132,66 @@ function batch!(dest::RLTransition, src::RLTransition, i::Int)
         selectdim(xs, ndims(xs), i) .= x
     end
 end
+
+"""
+    JuliaRLTransition
+Represent an JuliaRLTransition and can also represent a batch.
+"""
+
+struct JuliaRLTransition <: RLTransition
+    state
+    action
+    reward
+    terminal
+    next_state
+end
+
+function gen_JuliaRL_dataset(
+    trajectory::NamedTuple; 
+    is_shuffle=true, 
+    trajectory_num::Int=10000,
+    repeat_size::Int=200,
+    batch_size::Int=64
+)
+    s, a, r, t = trajectory
+
+    ch_src = Channel{JuliaRLTransition}(repeat_size*trajectory_num, spawn=true) do ch
+        for _ in 1:repeat_size
+            for i in 1:trajectory_num
+                put!(ch, JuliaRLTransition(s[:, i], a[i], r[i], t[i], s[:, i+1]))
+            end
+        end
+    end
+
+    if is_shuffle
+        transitions = buffered_shuffle(
+        ch_src,
+        repeat_size*trajectory_num
+        )
+    else
+        transitions = ch_src
+    end
+
+    ob_size = size(s)[1]
+
+    taskref = Ref{Task}()
+
+    obs_template = Array{Float32, 2}(undef, ob_size, batch_size)
+
+    buffer = JuliaRLTransition(
+        copy(obs_template),
+        Array{Union{Float32, Int}, 1}(undef, batch_size),
+        Array{Float32, 1}(undef, batch_size),
+        Array{Bool, 1}(undef, batch_size),
+        copy(obs_template),
+    )
+
+    res = RingBuffer(buffer; taskref=taskref) do buff
+        Threads.@threads for i in 1:batch_size
+            batch!(buff, take!(transitions), i)
+        end
+    end
+
+    bind(ch_src, taskref[])
+    res
+end
