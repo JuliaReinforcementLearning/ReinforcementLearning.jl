@@ -12,14 +12,14 @@ using StableRNGs
 using Flux
 using IntervalSets
 
-mutable struct ResultNEpisode <: AbstractHook
+mutable struct KuhnMADDPGHook <: AbstractHook
     eval_freq::Int
     episode_counter::Int
     episode::Vector{Int}
     results::Vector{Float64}
 end
 
-function (hook::ResultNEpisode)(::PostEpisodeStage, policy, env)
+function (hook::KuhnMADDPGHook)(::PostEpisodeStage, policy, env)
     hook.episode_counter += 1
     if hook.episode_counter % hook.eval_freq == 0
         push!(hook.episode, hook.episode_counter)
@@ -109,7 +109,7 @@ function RL.Experiment(
     )
 
     stop_condition = StopAfterEpisode(100_000, is_show_progress=!haskey(ENV, "CI"))
-    hook = ResultNEpisode(1000, 0, [], [])
+    hook = KuhnMADDPGHook(1000, 0, [], [])
     Experiment(agents, wrapped_env, stop_condition, hook, "# play KuhnPoker with MADDPG")
 end
 
