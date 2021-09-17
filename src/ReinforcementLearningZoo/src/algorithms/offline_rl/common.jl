@@ -1,8 +1,8 @@
-export OfflinePolicy, AtariRLTransition
+export OfflinePolicy, JuliaRLTransition
 
 export calculate_CQL_loss, maximum_mean_discrepancy_loss
 
-struct AtariRLTransition
+struct JuliaRLTransition
     state
     action
     reward
