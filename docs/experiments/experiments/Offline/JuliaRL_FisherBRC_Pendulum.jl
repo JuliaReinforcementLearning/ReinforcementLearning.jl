@@ -1,7 +1,7 @@
 # ---
-# title: JuliaRL\_PLAS\_Pendulum
-# cover: assets/JuliaRL_PLAS_Pendulum_medium.png
-# description: PLAS applied to Pendulum
+# title: JuliaRL\_FisherBRC\_Pendulum
+# cover: assets/JuliaRL_FisherBRC_Pendulum_medium.png
+# description: FisherBRC applied to Pendulum
 # date: 2021-09-17
 # author: "[Guoyu Yang](https://github.com/pilgrimygy)"
 # ---
@@ -14,7 +14,7 @@ using Flux.Losses
 
 function RL.Experiment(
     ::Val{:JuliaRL},
-    ::Val{:PLAS},
+    ::Val{:FisherBRC},
     ::Val{:Pendulum},
     type::AbstractString;
     save_dir = nothing,
@@ -27,8 +27,7 @@ function RL.Experiment(
     high = A.right
     ns = length(state(inner_env))
     na = 1
-    latent_dims = 2
-    
+
     trajectory_num = 10000
     dataset_size = 10000
     batch_size = 64
@@ -40,10 +39,13 @@ function RL.Experiment(
     init = glorot_uniform(rng)
 
     create_policy_net() = NeuralNetworkApproximator(
-        model = Chain(
-            Dense(ns, 64, relu; init = glorot_uniform(rng)),
-            Dense(64, 64, relu; init = glorot_uniform(rng)),
-            Dense(64, latent_dims; init = glorot_uniform(rng))
+        model = GaussianNetwork(
+            pre = Chain(
+                Dense(ns, 64, relu), 
+                Dense(64, 64, relu),
+            ),
+            μ = Chain(Dense(64, na, init = init)),
+            logσ = Chain(Dense(64, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),
         ),
         optimizer = ADAM(0.003),
     )
@@ -57,39 +59,27 @@ function RL.Experiment(
         optimizer = ADAM(0.003),
     )
 
-    create_vae_net() = NeuralNetworkApproximator(
-        model = VAE(
-            encoder = GaussianNetwork(
-                pre = Chain(
-                    Dense(ns + na, 64, relu), 
-                    Dense(64, 64, relu),
-                ),
-                μ = Chain(Dense(64, latent_dims, init = init)),
-                logσ = Chain(Dense(64, latent_dims, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),
-            ),
-            decoder = Chain(
-                Dense(ns + latent_dims, 64, relu; init = init),
-                Dense(64, 64, relu; init = init),
-                Dense(64, na; init = init),
-            ),
-            latent_dims = latent_dims,
-        ),
-        optimizer = ADAM(0.003),
-    )
-
     agent = Agent(
         policy = OfflinePolicy(
-            learner = PLASLearner(
-                policy = create_policy_net() |> cpu,
-                target_policy = create_policy_net() |> cpu,
-                qnetwork1 = create_q_net() |> cpu,
-                qnetwork2 = create_q_net() |> cpu,
-                target_qnetwork1 = create_q_net() |> cpu,
-                target_qnetwork2 = create_q_net() |> cpu,
-                vae = create_vae_net() |> cpu,
+            learner = FisherBRCLearner(
+                policy = create_policy_net(),
+                behavior_policy = create_policy_net(),
+                qnetwork1 = create_q_net(),
+                qnetwork2 = create_q_net(),
+                target_qnetwork1 = create_q_net(),
+                target_qnetwork2 = create_q_net(),
+                γ = 0.99f0,
+                τ = 0.005f0,
+                α = 0.0f0,
+                f_reg = 1.0f0,
+                reward_bonus = 5.0f0,
                 batch_size = batch_size,
-                pretrain_step = 1500,
+                pretrain_step = 100,
                 update_freq = 1,
+                lr_alpha = 0.003f0,
+                behavior_lr_alpha = 0.001f0,
+                action_dims = 1,
+                rng = rng,
             ),
             dataset = gen_JuliaRL_dataset(:SAC, :Pendulum, type; dataset_size = dataset_size),
             continuous = true,
@@ -104,15 +94,15 @@ function RL.Experiment(
 
     stop_condition = StopAfterStep(trajectory_num, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
-    Experiment(agent, env, stop_condition, hook, "PLAS <-> Pendulum ($type dataset)")
+    Experiment(agent, env, stop_condition, hook, "FisherBRC <-> Pendulum ($type dataset)")
 end
 
 #+ tangle=false
 using Plots
 pyplot() #hide
-ex = E`JuliaRL_PLAS_Pendulum(medium)`
+ex = E`JuliaRL_FisherBRC_Pendulum(medium)`
 run(ex)
 plot(ex.hook.rewards)
-savefig("assets/JuliaRL_PLAS_Pendulum_medium.png") #hide
+savefig("assets/JuliaRL_FisherBRC_Pendulum_medium.png") #hide
 
-# ![](assets/JuliaRL_PLAS_Pendulum.png)
+# ![](assets/JuliaRL_FisherBRC_Pendulum.png)

@@ -42,7 +42,7 @@ function BCQDLearner(;
     approximator::Aq,
     target_approximator::At,
     γ::Float32 = 0.99f0,
-    τ::Float32 = 0.05f0,
+    τ::Float32 = 0.005f0,
     θ::Float32 = 1f-2,
     threshold::Float32 = 0.3f0,
     batch_size::Int = 32,
