@@ -87,7 +87,7 @@ function RL.Experiment(
                 pretrain_step = 1500,
                 update_freq = 1,
             ),
-            dataset = gen_JuliaRL_dataset(dataset_size, type),
+            dataset = gen_JuliaRL_dataset(:SAC, :Pendulum, type; dataset_size = dataset_size),
             continuous = true,
             batch_size = batch_size,
         ),
