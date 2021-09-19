@@ -171,7 +171,7 @@ Flux.@functor PerturbationNetwork
 This function accepts `state` and `action`, and then outputs actions after disturbance.
 """
 function (model::PerturbationNetwork)(state, action)
-    x = model.linear(vcat(state, action))
+    x = model.base(vcat(state, action))
     x = model.ϕ * tanh.(x)
     clamp.(x + action, -1.0f0, 1.0f0)
 end

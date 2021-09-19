@@ -1,8 +1,8 @@
-export OfflinePolicy, AtariRLTransition
+export OfflinePolicy, JuliaRLTransition, gen_JuliaRL_dataset
 
 export calculate_CQL_loss, maximum_mean_discrepancy_loss
 
-struct AtariRLTransition
+struct JuliaRLTransition
     state
     action
     reward
@@ -71,6 +71,29 @@ function RLBase.update!(
     inds, batch = sample(l.rng, p.dataset, p.batch_size)
 
     update!(l, batch)
+end
+
+"""
+    gen_JuliaRL_dataset(alg::Symbol, env::Symbol, type::AbstractString; dataset_size)
+
+Generate the dataset by trajectory from the trajectory obtained from the experiment (`alg` + `env`). `type` represents the method of collecting data. Possible values: random/medium/expert. `dataset_size` is the size of the generated dataset.
+"""
+function gen_JuliaRL_dataset(alg::Symbol, env::Symbol, type::AbstractString; dataset_size::Int)
+    dataset_ex = Experiment(
+            Val(:GenDataset),
+            Val(alg),
+            Val(env),
+            type;
+            dataset_size = dataset_size)
+    
+    run(dataset_ex)
+
+    dataset = []
+    s, a, r, t = dataset_ex.policy.trajectory.traces
+    for i in 1:dataset_size
+        push!(dataset, JuliaRLTransition(s[:, i], a[i], r[i], t[i], s[:, i+1]))
+    end
+    dataset
 end
 
 function StatsBase.sample(rng::AbstractRNG, dataset::Vector{T}, batch_size::Int) where {T}

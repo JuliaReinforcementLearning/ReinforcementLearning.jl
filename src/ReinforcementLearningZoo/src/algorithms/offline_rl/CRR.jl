@@ -13,7 +13,7 @@ See paper: [Critic Regularized Regression](https://arxiv.org/abs/2006.15134).
 - `batch_size::Int=32`
 - `policy_improvement_mode::Symbol=:exp`, type of the weight function f. Possible values: :binary/:exp.
 - `ratio_upper_bound::Float32`, when `policy_improvement_mode` is ":exp", the value of the exp function is upper-bounded by this parameter.
-- `beta::Float32`,  when `policy_improvement_mode` is ":exp", this is the denominator of the exp function.
+- `β::Float32`,  when `policy_improvement_mode` is ":exp", this is the denominator of the exp function.
 - `advantage_estimator::Symbol=:mean`, type of the advantage estimate \\hat{A}. Possible values: :mean/:max.
 - `m::Int=4`, when `continuous=true`, sample `m` action to estimate \\hat{A}.
 - `update_freq::Int`: the frequency of updating the `approximator`.
@@ -33,7 +33,7 @@ mutable struct CRRLearner{
     batch_size::Int
     policy_improvement_mode::Symbol
     ratio_upper_bound::Float32
-    beta::Float32
+    β::Float32
     advantage_estimator::Symbol
     m::Int
     update_freq::Int
@@ -53,7 +53,7 @@ function CRRLearner(;
     batch_size::Int = 32,
     policy_improvement_mode::Symbol = :exp,
     ratio_upper_bound::Float32 = 20.0f0,
-    beta::Float32 = 1.0f0,
+    β::Float32 = 1.0f0,
     advantage_estimator::Symbol = :mean,
     m::Int = 4,
     update_freq::Int = 10,
@@ -70,7 +70,7 @@ function CRRLearner(;
         batch_size,
         policy_improvement_mode,
         ratio_upper_bound,
-        beta,
+        β,
         advantage_estimator,
         m,
         update_freq,
@@ -113,7 +113,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
     AC = learner.approximator
     target_AC = learner.target_approximator
     γ = learner.γ
-    beta = learner.beta
+    β = learner.β
     batch_size = learner.batch_size
     policy_improvement_mode = learner.policy_improvement_mode
     ratio_upper_bound = learner.ratio_upper_bound
@@ -157,7 +157,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
         if policy_improvement_mode == :binary
             actor_loss_coef = (advantage .> 0.0f0)
         elseif policy_improvement_mode == :exp
-            actor_loss_coef = clamp.(exp.(advantage ./ beta), 0, ratio_upper_bound)
+            actor_loss_coef = clamp.(exp.(advantage ./ β), 0, ratio_upper_bound)
         else
             error("Wrong parameter.")
         end
@@ -179,7 +179,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
     AC = learner.approximator
     target_AC = learner.target_approximator
     γ = learner.γ
-    beta = learner.beta
+    β = learner.β
     batch_size = learner.batch_size
     policy_improvement_mode = learner.policy_improvement_mode
     ratio_upper_bound = learner.ratio_upper_bound
@@ -218,7 +218,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
         if policy_improvement_mode == :binary
             actor_loss_coef = (advantage .> 0.0f0)
         elseif policy_improvement_mode == :exp
-            actor_loss_coef = clamp.(exp.(advantage ./ beta), 0, ratio_upper_bound)
+            actor_loss_coef = clamp.(exp.(advantage ./ β), 0, ratio_upper_bound)
         else
             error("Wrong parameter.")
         end
