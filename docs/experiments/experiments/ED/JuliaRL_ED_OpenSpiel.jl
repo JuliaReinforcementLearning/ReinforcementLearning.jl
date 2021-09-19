@@ -1,8 +1,8 @@
 # --- 
 # title: JuliaRL\_ED\_OpenSpiel(kuhn_poker) 
 # cover: assets/logo.svg 
-# description: play "kuhn_poker" in OpenSpiel with ED
-# date: 2021-09-12
+# description: play "kuhn_poker" in OpenSpiel with Exploitability Descent(ED) algorithm.
+# date: 2021-09-20
 # author: "[Peter Chen](https://github.com/peterchen96)" 
 # --- 
 
@@ -24,6 +24,13 @@ function (hook::KuhnOpenEDHook)(::PreEpisodeStage, policy, env)
     for (_, agent) in policy.agents
         agent.learner.optimizer[2].eta = 1.0 / sqrt(length(hook.results))
     end
+end
+
+function (hook::KuhnOpenEDHook)(::PostExperimentStage, policy, env)
+    reset!(env)
+
+    ## get nash_conv of the latest model.
+    push!(hook.results, RLZoo.nash_conv(policy, env))
 end
 
 function RL.Experiment(
