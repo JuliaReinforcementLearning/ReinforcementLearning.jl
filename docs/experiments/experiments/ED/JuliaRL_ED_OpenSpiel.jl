@@ -81,9 +81,9 @@ end
 
 using Plots
 ex = E`JuliaRL_ED_OpenSpiel(kuhn_poker)`
-results = run(ex)
+run(ex)
 plot(ex.hook.results, xlabel="episode", ylabel="nash_conv")
 
 savefig("assets/JuliaRL_ED_OpenSpiel(kuhn_poker).png")#hide
 
-# ![](assets/JuliaRL_NFSP_OpenSpiel(kuhn_poker).png)
+# ![](assets/JuliaRL_ED_OpenSpiel(kuhn_poker).png)
