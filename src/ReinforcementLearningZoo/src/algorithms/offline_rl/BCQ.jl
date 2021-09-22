@@ -114,7 +114,8 @@ function RLBase.update!(l::BCQLearner, batch::NamedTuple{SARTS})
 end
 
 function update_vae!(l::BCQLearner, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(l.vae), batch)
+    D = device(l.vae)
+    s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     a = reshape(a, :, l.batch_size)
     vae_grad = gradient(Flux.params(l.vae)) do
         recon_loss, kl_loss = vae_loss(l.vae.model, s, a)
@@ -124,7 +125,8 @@ function update_vae!(l::BCQLearner, batch::NamedTuple{SARTS})
 end
 
 function update_learner!(l::BCQLearner, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(l.qnetwork1), batch)
+    D = device(l.qnetwork1)
+    s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
 
     γ, τ, λ = l.γ, l.τ, l.λ
 

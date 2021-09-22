@@ -132,10 +132,10 @@ function RLBase.update!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
 end
 
 function update_behavior_policy!(l::EntropyBC, batch::NamedTuple{SARTS})
-    s, a, _, _, _ = send_to_device(device(l.policy), batch)
+    D = device(l.policy)
+    s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     # Update behavior policy with entropy
-    ps = Flux.params(l.policy)
-    gs = gradient(ps) do
+    gs = gradient(Flux.params(l.policy)) do
         log_π = l.policy.model(s, a)
         _, entropy = l.policy.model(s; is_sampling=true, is_return_log_prob=true)
         loss = mean(l.α .* entropy .- log_π)
@@ -150,7 +150,8 @@ function update_behavior_policy!(l::EntropyBC, batch::NamedTuple{SARTS})
 end
 
 function update_learner!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(l.policy), batch)
+    D = device(l.policy)
+    s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     r .+= l.reward_bonus
     γ, τ, α = l.γ, l.τ, l.α
 

@@ -101,18 +101,19 @@ function StatsBase.sample(rng::AbstractRNG, dataset::Vector{T}, batch_size::Int)
     inds = rand(rng, valid_range, batch_size)
     batch_data = dataset[inds]
     s_length = size(batch_data[1].state)[1]
+    a_type = typeof(batch_data[1].action)
 
     s = Array{Float32}(undef, s_length, batch_size)
     s′ = Array{Float32}(undef, s_length, batch_size)
-    a = []
-    r = []
-    t = []
+    a = Array{a_type}(undef, batch_size)
+    r = Array{Float32}(undef, batch_size)
+    t = Array{Float32}(undef, batch_size)
     for (i, data) in enumerate(batch_data)
         s[:, i] = data.state
-        push!(a, data.action)
+        a[i] = data.action
         s′[:, i] = data.next_state
-        push!(r, data.reward)
-        push!(t, data.terminal)
+        r[i] = data.reward
+        t[i] = data.terminal
     end
     batch = NamedTuple{SARTS}((s, a, r, t, s′))
     inds, batch

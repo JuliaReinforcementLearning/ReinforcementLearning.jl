@@ -68,7 +68,7 @@ function RL.Experiment(
                     Dense(64, 64, relu),
                 ),
                 μ = Chain(Dense(64, latent_dims, init = init)),
-                logσ = Chain(Dense(64, latent_dims, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),
+                logσ = Chain(Dense(64, latent_dims, init = init)),
             ),
             decoder = Chain(
                 Dense(ns + latent_dims, 64, relu; init = init),

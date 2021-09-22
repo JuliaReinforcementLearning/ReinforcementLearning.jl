@@ -23,6 +23,7 @@ mutable struct BEARLearner{
     ε::Float32
     p::Int
     max_log_α::Float32
+    min_log_α::Float32
     sample_num::Int
     kernel_type::Symbol
     mmd_σ::Float32
@@ -57,6 +58,7 @@ can be implemented using a `VAE` in a `NeuralNetworkApproximator`.
 - `ε::Float32 = 0.05f0`, threshold of MMD loss.
 - `p::Int = 10`, the number of state-action pairs used when calculating the Q value.
 - `max_log_α::Float32 = 10.0f0`, maximum value of `log_α`.
+- `min_log_α::Float32 = 10.0f0`, minimum value of `log_α`.
 - `sample_num::Int = 10`, the number of sample action to calculate MMD loss.
 - `kernel_type::Symbol = :laplacian`, the method of calculating MMD loss. Possible values: :laplacian/:gaussian.
 - `mmd_σ::Float32 = 10.0f0`, the parameter used for calculating MMD loss.
@@ -80,6 +82,7 @@ function BEARLearner(;
     ε = 0.05f0,
     p = 10,
     max_log_α = 10.0f0,
+    min_log_α = -5.0f0,
     sample_num = 10,
     kernel_type = :laplacian,
     mmd_σ = 10.0f0,
@@ -106,6 +109,7 @@ function BEARLearner(;
         ε,
         p,
         max_log_α,
+        min_log_α,
         sample_num,
         kernel_type,
         mmd_σ,
@@ -130,7 +134,8 @@ function (l::BEARLearner)(env)
 end
 
 function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(l.qnetwork1), batch)
+    D = device(l.qnetwork1)
+    s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     γ, τ, λ = l.γ, l.τ, l.λ
 
     update_vae!(l, s, a)
@@ -198,8 +203,8 @@ function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
     end
     update!(l.log_α, l_grad)
     
-    clamp!(l.log_α.model, -5.0f0, l.max_log_α)
-
+    clamp!(l.log_α.model, l.min_log_α, l.max_log_α)
+    
     # polyak averaging
     for (dest, src) in zip(
         Flux.params([l.target_policy, l.target_qnetwork1, l.target_qnetwork2]),

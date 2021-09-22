@@ -94,8 +94,6 @@ function RLBase.update!(learner::BCQDLearner, batch::NamedTuple)
 
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     a = CartesianIndex.(a, 1:batch_size)
-    r = reshape(r, :, batch_size)
-    t = reshape(t, :, batch_size)
 
     prob = softmax(AC.actor(s′))
     mask = Float32.((prob ./ maximum(prob, dims=1)) .> learner.threshold)
@@ -103,14 +101,13 @@ function RLBase.update!(learner::BCQDLearner, batch::NamedTuple)
     a′ = argmax(q′ .* mask .+ (1.0f0 .- mask) .* -1f8, dims=1)
     target_q = target_AC.critic(s′)
 
-    target = r .+ γ .* (1 .- t) .* target_q[a′]
+    target = r .+ γ .* (1 .- t) .* vec(target_q[a′])
 
     ps = Flux.params(AC)
     gs = gradient(ps) do
         # Critic loss
         q_t = AC.critic(s)
-        qa_t = reshape(q_t[a], :, batch_size)
-        critic_loss = Flux.Losses.huber_loss(qa_t, target)
+        critic_loss = Flux.Losses.huber_loss(q_t[a], target)
         
         # Actor loss
         logit = AC.actor(s)

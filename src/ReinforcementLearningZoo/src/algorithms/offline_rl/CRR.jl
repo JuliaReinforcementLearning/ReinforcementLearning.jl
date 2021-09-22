@@ -131,7 +131,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
 
     target = r .+ γ .* (1 .- t) .* expected_target_q
 
-    q_t = Matrix{Float32}(undef, learner.m, batch_size)
+    q_t = send_to_device(D, Matrix{Float32}(undef, learner.m, batch_size))
     for i in 1:learner.m
         a_sample = AC.actor(s; is_sampling=true)
         q_t[i, :] = AC.critic(vcat(s, a_sample))
@@ -144,7 +144,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
         critic_loss = Flux.Losses.mse(qa_t, target)
         
         # Actor loss
-        log_π = AC.actor.model(s, a)
+        log_π = AC.actor(s, a)
 
         if advantage_estimator == :max
             advantage = qa_t .- maximum(q_t, dims=1)
@@ -188,8 +188,8 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
 
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     a = CartesianIndex.(a, 1:batch_size)
-    r = reshape(r, :, batch_size)
-    t = reshape(t, :, batch_size)
+    r = send_to_device(D, reshape(r, :, batch_size))
+    t = send_to_device(D, reshape(t, :, batch_size))
 
     target_a_t = softmax(target_AC.actor(s′))
     target_q_t = target_AC.critic(s′)
