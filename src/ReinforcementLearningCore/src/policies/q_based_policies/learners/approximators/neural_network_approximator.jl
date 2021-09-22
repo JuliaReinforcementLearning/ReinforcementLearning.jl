@@ -94,7 +94,7 @@ This function is compatible with a multidimensional action space. When outputtin
 """
 function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
     x = model.pre(state)
-    μ, raw_logσ = model.μ(x), model.logσ(x) 
+    μ, raw_logσ = model.μ(x), model.logσ(x)
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     if is_sampling
         σ = exp.(logσ)
@@ -194,7 +194,7 @@ Flux.@functor VAE
 function (model::VAE)(rng::AbstractRNG, state, action)
     μ, logσ = model.encoder(vcat(state, action))
     σ = exp.(logσ)
-    z = reparamaterize.(rng, μ, σ)
+    z = μ .+ σ .* send_to_device(device(model), randn(rng, Float32, size(μ)))
     u = decode(model, state, z)
     return u, μ, σ
 end
@@ -203,13 +203,10 @@ function (model::VAE)(state, action)
     return model(Random.GLOBAL_RNG, state, action)
 end
 
-function reparamaterize(rng, μ, σ)
-    return Float32(rand(rng, Normal(0, 1))) * σ + μ
-end
-
 function decode(rng::AbstractRNG, model::VAE, state, z=nothing; is_normalize::Bool=true)
     if z === nothing
         z = clamp.(randn(rng, Float32, (model.latent_dims, size(state)[2:end]...)), -0.5f0, 0.5f0)
+        z = send_to_device(device(model), z)
     end
     a = model.decoder(vcat(state, z))
     if is_normalize

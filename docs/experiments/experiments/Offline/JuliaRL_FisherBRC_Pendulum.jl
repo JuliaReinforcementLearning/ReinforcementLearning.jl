@@ -45,7 +45,7 @@ function RL.Experiment(
                 Dense(64, 64, relu),
             ),
             μ = Chain(Dense(64, na, init = init)),
-            logσ = Chain(Dense(64, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),
+            logσ = Chain(Dense(64, na, init = init)),
         ),
         optimizer = ADAM(0.003),
     )
@@ -62,12 +62,12 @@ function RL.Experiment(
     agent = Agent(
         policy = OfflinePolicy(
             learner = FisherBRCLearner(
-                policy = create_policy_net(),
-                behavior_policy = create_policy_net(),
-                qnetwork1 = create_q_net(),
-                qnetwork2 = create_q_net(),
-                target_qnetwork1 = create_q_net(),
-                target_qnetwork2 = create_q_net(),
+                policy = create_policy_net() |> cpu,
+                behavior_policy = create_policy_net() |> cpu,
+                qnetwork1 = create_q_net() |> cpu,
+                qnetwork2 = create_q_net() |> cpu,
+                target_qnetwork1 = create_q_net() |> cpu,
+                target_qnetwork2 = create_q_net() |> cpu,
                 γ = 0.99f0,
                 τ = 0.005f0,
                 α = 0.0f0,

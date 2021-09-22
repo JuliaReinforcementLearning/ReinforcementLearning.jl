@@ -38,25 +38,19 @@ function RL.Experiment(
     )
     init = glorot_uniform(rng)
 
-    create_policy_net() = NeuralNetworkApproximator(
-        model = GaussianNetwork(
-            pre = Chain(
-                Dense(ns, 64, relu), 
-                Dense(64, 64, relu),
-            ),
-            μ = Chain(Dense(64, na, init = init)),
-            logσ = Chain(Dense(64, na, init = init)),
+    create_policy_net() = GaussianNetwork(
+        pre = Chain(
+            Dense(ns, 64, relu), 
+            Dense(64, 64, relu),
         ),
-        optimizer = ADAM(0.003),
+        μ = Chain(Dense(64, na, init = init)),
+        logσ = Chain(Dense(64, na, init = init)),
     )
 
-    create_q_net() = NeuralNetworkApproximator(
-        model = Chain(
-            Dense(ns + na, 64, relu; init = init),
-            Dense(64, 64, relu; init = init),
-            Dense(64, 1; init = init),
-        ),
-        optimizer = ADAM(0.003),
+    create_q_net() = Chain(
+        Dense(ns + na, 64, relu; init = init),
+        Dense(64, 64, relu; init = init),
+        Dense(64, 1; init = init),
     )
 
     agent = Agent(
@@ -65,12 +59,12 @@ function RL.Experiment(
                 approximator = ActorCritic(
                     actor = create_policy_net() |> cpu,
                     critic = create_q_net() |> cpu,
-                    optimizer = ADAM(1e-3),
+                    optimizer = ADAM(3e-3),
                 ),
                 target_approximator = ActorCritic(
                     actor = create_policy_net() |> cpu,
                     critic = create_q_net() |> cpu,
-                    optimizer = ADAM(1e-3),
+                    optimizer = ADAM(3e-3),
                 ),
                 γ = 0.99f0,
                 batch_size = batch_size,

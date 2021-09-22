@@ -68,7 +68,7 @@ function RL.Experiment(
                     Dense(64, 64, relu),
                 ),
                 μ = Chain(Dense(64, latent_dims, init = init)),
-                logσ = Chain(Dense(64, latent_dims, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),
+                logσ = Chain(Dense(64, latent_dims, init = init)),
             ),
             decoder = Chain(
                 Dense(ns + latent_dims, 64, relu; init = init),
@@ -80,7 +80,7 @@ function RL.Experiment(
         optimizer = ADAM(0.003),
     )
 
-    lagrange_multiplier = NeuralNetworkApproximator(
+    lagrange_multiplier() = NeuralNetworkApproximator(
         model = Float32.(rand(Normal(), 1)),
         optimizer = ADAM(0.003),
     )
@@ -95,7 +95,7 @@ function RL.Experiment(
                 target_qnetwork1 = create_q_net() |> cpu,
                 target_qnetwork2 = create_q_net() |> cpu,
                 vae = create_vae_net() |> cpu,
-                log_α = lagrange_multiplier |> cpu,
+                log_α = lagrange_multiplier() |> cpu,
                 γ = 0.99f0,
                 τ = 0.005f0,
                 λ = 0.75f0,

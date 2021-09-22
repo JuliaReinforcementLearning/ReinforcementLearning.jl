@@ -16,7 +16,7 @@
                 "affiliationURL":"https://www.lamda.nju.edu.cn"
             }
         ],
-        "publishedDate":"2021-08-20",
+        "publishedDate":"2021-09-21",
         "citationText":"Guoyu Yang, 2021"
     }"""
 
@@ -28,7 +28,7 @@
 @def bibliography = "bibliography.bib"
 
 # Technical Report
-This technical report is the second phase technical report of Project "Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl" in OSPP. Now, it includes two components: weekly plans and completed work.
+This technical report is the second phase technical report of Project "Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl" in OSPP. It summarizes all the results of the second phase.
 
 ## Weekly Plans
 #### Week 7
