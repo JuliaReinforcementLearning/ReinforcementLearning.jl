@@ -2,11 +2,11 @@ export is_discrete_space, discrete2standard_discrete
 
 is_discrete_space(x) = is_discrete_space(typeof(x))
 
-is_discrete_space(::Type{AbstractVector}) = true
-is_discrete_space(::Type{Tuple}) = true
-is_discrete_space(::Type{NamedTuple}) = true
+is_discrete_space(::Type{<:AbstractVector}) = true
+is_discrete_space(::Type{<:Tuple}) = true
+is_discrete_space(::Type{<:NamedTuple}) = true
 
-is_discrete_space(::Type{Space}) = false
+is_discrete_space(::Type{<:Space}) = false
 
 """
     discrete2standard_discrete(env)
