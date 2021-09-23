@@ -376,6 +376,15 @@
         "code",
         "question"
       ]
+    },
+    {
+      "login": "johannes-fischer",
+      "name": "johannes-fischer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/42044738?v=4",
+      "profile": "https://github.com/johannes-fischer",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
