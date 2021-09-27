@@ -132,7 +132,8 @@ Discrete BCQ\dcite{fujimoto2019benchmarking} is a simple offline RL algorithm in
 
 \dfig{body;DBCQ.png}
 
-The core of Discrete BCQ is calculating a mask of actions. We calculate the probability of actions in a given state, and divide by the maximum probability value. Then, we compare this value with thershold. If this value is less than the threshold, the corresponding action will not be selected.
+The core of Discrete BCQ is calculating a mask of actions. We calculate the probability of actions in a given state, and divide by the maximum probability value. Then, we compare this value with 
+threshold. If this value is less than the threshold, the corresponding action will not be selected.
 
 ```julia
 prob = softmax(learner.approximator.actor(s), dims=1)
