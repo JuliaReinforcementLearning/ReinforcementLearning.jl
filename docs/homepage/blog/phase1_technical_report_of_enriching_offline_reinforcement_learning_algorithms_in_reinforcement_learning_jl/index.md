@@ -213,6 +213,8 @@ mutable struct CRRLearner{Aq, At, R} <: AbstractLearner
     continuous::Bool
 end
 ```
+In CRR, we use the Actor-Critic structure. In the case of discrete action space, the Critic is modeled as $Q(s,\cdot)$, and the Actor is modeled as $L(s,\cdot)$ (likelihood of the state). In the case of continuous action space, we use $Q(s, a)$ to model the Critic, and use gaussian network to model the Actor.
+
 Parameter `continuous` stands for the type of action space. `policy_improvement_mode` is the type of the weight function $f$. If `policy_improvement_mode=:binary`, we use the first $f$ function. Otherwise, we use the second $f$ function, which needs parameter `ratio_upper_bound` (Upper bound of $f$ value) and `beta`. Besides, we provide two methods to estimate advantage function, specifing `advantage_estimator=:mean/:max`. In the discrete case, we can calculate $A(s,a)$ directly. In the continuous case, we need to sample `m` Q-values to calculate advantage function.
 
 Different action spaces will also affect the implementation of the Actor-Critic. In the discrete case, the Actor outputs logits of all actions in a given state. Gaussian networks are used to model the Actor in the continuous case.
@@ -221,7 +223,9 @@ Performance curve of discrete CRR algorithm in CartPole:
 
 \dfig{body;JuliaRL_CRR_CartPole.png}
 
-The continuous CRR algorithm still has some bugs and poor performance. 
+Performance curve of continuous CRR algorithm in Pendulum:
+
+\dfig{body;JuliaRL_CRR_Pendulum.png}
 
 ##### Policy in the Latent Action Space (PLAS)
 PLAS\dcite{DBLP:journals/corr/abs-2011-07213} is a policy constrain method suitable for continuous control tasks. Unlike BCQ and BEAR, PLAS implicitly constrains the policy to output actions within the support of the behavior policy through the latent action space:
@@ -249,6 +253,8 @@ mutable struct PLASLearner{BA1, BA2, BC1, BC2, V, R} <: AbstractLearner
     pretrain_step::Int
 end
 ```
+In PLAS, Q-network is modeled as $Q(s, a)$ and policy is modeled as deterministic policy: $\pi(s)\rightarrow a_{latent}$. 
+
 If the algorithm requires pre-training, please specify the parameter `pretrain_step` and function `update!`. We modified the run function and added an interface:
 ```julia
 function (agent::Agent)(stage::PreExperimentStage, env::AbstractEnv)
