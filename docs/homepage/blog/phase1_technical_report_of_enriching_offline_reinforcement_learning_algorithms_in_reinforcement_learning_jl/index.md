@@ -1,6 +1,6 @@
 @def title = "Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl"
 @def description = """
-    This is the phase 1 technical report of the summer OSPP project [Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl](https://summer.iscas.ac.cn/#/org/prodetail/210370539?lang=en) used for mid-term evaluation. The report is split into the following parts: [**Project Information**](/blog/offline_reinforcement_learning_algorithm_phase1/#project_information), [**Project Schedule**](/blog/offline_reinforcement_learning_algorithm_phase1/#project_schedule) and [**Future Plan**](/blog/offline_reinforcement_learning_algorithm_phase1/#future_plan).
+    This is the phase 1 technical report of the summer OSPP project [Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl](https://summer.iscas.ac.cn/#/org/prodetail/210370539?lang=en) used for mid-term evaluation. The report is split into the following parts: [**Project Information**](/blog/phase1_technical_report_of_enriching_offline_reinforcement_learning_algorithms_in_reinforcement_learning_jl/#project_information), [**Project Schedule**](/blog/phase1_technical_report_of_enriching_offline_reinforcement_learning_algorithms_in_reinforcement_learning_jl/#project_schedule) and [**Future Plan**](/blog/phase1_technical_report_of_enriching_offline_reinforcement_learning_algorithms_in_reinforcement_learning_jl/#future_plan).
     """
 @def is_enable_toc = true
 @def has_code = true
@@ -45,7 +45,7 @@ This technical report is the first evaluation report of Project "Enriching Offli
 | August16 - August31 | Implement and experiment PLAS. |
 | September1 - September15  | Research, implement and experiment new SOTA offline RL algorithms. |
 | September16 - September30 | Write build-in documentation and technical report. Buffer for unexpected delay. |
-| After project | Carry on fixing issues and maintain implemented algorithms.   |
+| After project | Carry on fixing issues and maintaining implemented algorithms.   |
 
 ## Project Schedule
 This part mainly introduces the results of the first phase.
@@ -318,4 +318,4 @@ Firstly, we need to fix bugs in continuous CRR and finish action perturbation co
 - Uncertainty Weighted Actor-Critic (UWAC). The algorithm is based on the improvement of BEAR\dcite{DBLP:conf/nips/KumarFSTL19}. The authors adopt a practical and effective dropout-based uncertainty estimation method, Monte Carlo (MC) dropout, to identify and ignore OOD training samples, to introduce very little overhead over existing RL algorithms.
 - Fisher Behavior Regularized Critic (Fisher-BRC). The algorithm is based on the improvement of BRAC\dcite{DBLP:journals/corr/abs-1911-11361}. The authors propose an approach to parameterize the critic as the log-behavior-policy, which generated the offline data, plus a state-action value offset term. Behavior regularization then corresponds to an appropriate regularizer on the offset term. They propose using the Fisher divergence regularization for the offset term.
 
-In this way, the implemented algorithms basically include the mainstream of the policy constraint method in offline reinforcement learning (including distribution matching, support constrain, implicit constraint, behavior cloning).
+In this way, the implemented algorithms basically include the mainstream of the policy constraint methods in offline reinforcement learning (including distribution matching, support constrain, implicit constraint, behavior cloning).
