@@ -1,4 +1,4 @@
-export glorot_uniform, glorot_normal, orthogonal
+export glorot_uniform, glorot_normal, orthogonal, softclamp
 
 import Flux: glorot_uniform, glorot_normal
 
@@ -28,4 +28,10 @@ function batch!(data, xs)
         data[Flux.batchindex(data, i)...] = x
     end
     data
+end
+
+function softclamp(x, xmin, xmax)
+    x = xmax - softplus(xmax - x)
+    x = xmin + softplus(x - xmin)
+    return x
 end

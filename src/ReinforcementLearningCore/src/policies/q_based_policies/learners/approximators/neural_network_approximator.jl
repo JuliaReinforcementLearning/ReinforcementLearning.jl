@@ -69,18 +69,19 @@ end
 #####
 
 """
-    GaussianNetwork(;pre=identity, μ, logσ, min_σ=0f0, max_σ=Inf32)
+    GaussianNetwork(;pre=identity, μ, logσ, min_σ=0f0, max_σ=Inf32, clampfun=clamp)
 
 Returns `μ` and `logσ` when called.  Create a distribution to sample from using
 `Normal.(μ, exp.(logσ))`. `min_σ` and `max_σ` are used to clip the output from
-`logσ`.
+`logσ` using `clampfun` (typically `clamp` or `softclamp`).
 """
-Base.@kwdef struct GaussianNetwork{P,U,S}
+Base.@kwdef struct GaussianNetwork{P,U,S,F}
     pre::P = identity
     μ::U
     logσ::S
     min_σ::Float32 = 0f0
     max_σ::Float32 = Inf32
+    clampfun::F = clamp
 end
 
 Flux.@functor GaussianNetwork
@@ -94,8 +95,8 @@ This function is compatible with a multidimensional action space. When outputtin
 """
 function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
     x = model.pre(state)
-    μ, raw_logσ = model.μ(x), model.logσ(x)
-    logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
+    μ, raw_logσ = model.μ(x), model.logσ(x) 
+    logσ = model.clampfun.(raw_logσ, log(model.min_σ), log(model.max_σ))
     if is_sampling
         σ = exp.(logσ)
         z = μ .+ σ .* send_to_device(device(model), randn(rng, Float32, size(μ)))
