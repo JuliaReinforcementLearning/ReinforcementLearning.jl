@@ -24,7 +24,7 @@ using StatsBase
 using StatsBase: sample, Weights, mean
 using LinearAlgebra: dot
 using MacroTools
-using Distributions: Categorical, Normal, logpdf
+using Distributions: Categorical, Normal, TruncatedNormal, logpdf
 using StructArrays
 
 
