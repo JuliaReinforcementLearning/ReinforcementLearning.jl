@@ -65,7 +65,7 @@ The following is the summary of the project work.
 
 - Polished and finalized the structure of the package. Improved usability by updating the [docs](https://juliareinforcementlearning.org/docs/rldatasets/) accordingly.
 - Fixed the `run` error that was shown in windows.
-- Added `Bsuite` and all `DM` environements including [`DeepMind Control Suite Dataset`](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged#deepmind-control-suite-dataset), [`DeepMind Lab Dataset`](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged#deepmind-lab-dataset) and [`DeepMind Locomotion Dataset`](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged#deepmind-locomotion-dataset_) in RL Unplugged Datasets\dcite{DBLP:journals/corr/abs-2006-13888}.
+- Added `Bsuite` and all `DM` environments including [`DeepMind Control Suite Dataset`](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged#deepmind-control-suite-dataset), [`DeepMind Lab Dataset`](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged#deepmind-lab-dataset) and [`DeepMind Locomotion Dataset`](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged#deepmind-locomotion-dataset_) in RL Unplugged Datasets\dcite{DBLP:journals/corr/abs-2006-13888}.
 - Added [Deep OPE](https://github.com/google-research/deep_ope)\dcite{DBLP:journals/corr/abs-2103-16596} models for D4RL datasets.
 - Researched and implemented FQE\dcite{DBLP:journals/corr/abs-2007-09055} for which the basic implementation works. There are some flaws that need to be fixed.
 
@@ -280,7 +280,7 @@ D4RLGaussianNetwork{Flux.Chain{Tuple{Flux.Dense{typeof(NNlib.relu), Matrix{Float
 
 The policy will return the `a` and `μ` for a state that is given.
 
-`deep_ope_d4rl_evaluate` is a helper function that helps visualise the performance of the agent. The more the epoch number, the better the performance.
+`deep_ope_d4rl_evaluate` is a helper function that helps visualize the performance of the agent. The more the epoch number, the better the performance.
 ```julia
 julia> deep_ope_d4rl_evaluate("halfcheetah", "online", 3)
 Progress: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| Time: 0:00:01
@@ -347,7 +347,7 @@ The pseudocode for the implementation and the objective function are as follows.
 \dfig{body;FQE_Objective.png}
 
 #### Implementation
-Function parameters for the implemenation.
+Function parameters for the implementation.
 
 ```julia
 mutable struct FQE{
