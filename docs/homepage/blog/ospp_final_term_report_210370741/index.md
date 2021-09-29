@@ -51,11 +51,11 @@ With more advancement happening in Offline Reinforcement Learning in recent year
 | 07/21 - 07/30 |                                                Implemented `d4rl` and `d4rl-pybullet` datasets                                                |
 | 07/31 - 08/06 |                                              Implemented  `Google Research DQN Replay Datasets`                                               |
 | 08/07 - 08/14 | Implemented `RL Unplugged atari datasets`, setup the docs, added README.md. Made the package more user friendly. Make the **mid-term report** |
-| 08/15 - 08/30 |                  Add bsuite datasets, polish the interface, finalize the structure of the codebase. Fix problem with windows                  |
-| 09/01 - 09/15 |         Add support for policy loading from [Benchmarks for Deep Off-Policy Evaluation](https://github.com/google-research/deep_ope)          |
-| 09/16 - 09/30 |                   Research about OPE methods, implement FQE and test basic performance. Complete the **final-term report**                    |
+| 08/15 - 08/30 |              Added bsuite datasets, polished the interface, finalized the structure of the codebase. Fixed problem with windows               |
+| 09/01 - 09/15 |        Added support for policy loading from [Benchmarks for Deep Off-Policy Evaluation](https://github.com/google-research/deep_ope)         |
+| 09/16 - 09/30 |                 Researched about OPE methods, implemented FQE and test basic performance. Completed the **final-term report**                 |
 
-There are some changes to the original timeline planned but the basic objectives of the project are accomplished.
+There are some changes to the original timeline but the basic objectives of the project are accomplished.
 
 ## Completed Work
 The following work has been done post mid-term evaluation.
@@ -145,7 +145,7 @@ res = RingBuffer(buffer;taskref=taskref, sz=n_preallocations) do buff
 end
 ```
 #### Working
-The `bsuite_params` function can be used to get the possible arguments can be passed into the function.
+The `bsuite_params` function can be used to get the possible arguments that can be passed into the function.
 ```julia
 julia> bsuite_params()
 ┌ Info: ["cartpole", "catch", "mountain_car"]
@@ -165,7 +165,7 @@ ReinforcementLearningDatasets.BSuiteRLTransition(Float32[-0.3289344 0.26131696 �
 ```
 ### DM Datasets
 
-The DM datasets load and work similarly to Bsuite datasets. Since, I made one file to manage `DM Control`, `DM Lab` and `DM Locomotion`, there had to be a lot of post processing work to handle all the edge cases presented by each of the dataset.
+The DM datasets load and work similarly to bsuite datasets. Since, I made one file to manage `DM Control`, `DM Lab` and `DM Locomotion`, there had to be a lot of post processing work to handle all the edge cases presented by each of the dataset.
 
 The types also had to be created based on the individual datasets so that the code is good at loading efficiently.
 
@@ -330,7 +330,7 @@ Progress: 100%|█████████████████████�
 ### FQE
 A major amount of time was spent on researching about OPE methods of which `FQE` was the most appropriate given that the use case is Deep Reinforcement Learning.
 
-[Batch Policy Learning under Constraints](https://arxiv.org/pdf/1903.08738.pdf)\dcite{DBLP:journals/corr/abs-1903-08738} introduces the FQE and uses it for offline reinforcement learning under constraints and achieves remarkable results by calculating new constraint cost functions with the datasets. The algorithm that is implemented is similar to the one that is proposed here.
+[Batch Policy Learning under Constraints](https://arxiv.org/pdf/1903.08738.pdf)\dcite{DBLP:journals/corr/abs-1903-08738} introduces the FQE and uses it for offline reinforcement learning under constraints and achieves remarkable results by calculating new constraint cost functions with the datasets. The algorithm that is implemented in RLZoo is similar to the one that is proposed here.
 
 \dfig{body;FQE_Original.png}
 
@@ -414,9 +414,9 @@ The [implementation](https://github.com/JuliaReinforcementLearning/Reinforcement
 -  optimizer => ADAM(0.005)
 -  loss => Flux.Losses.mse
 -  γ => 0.99
--  batch_size = 256
--  update_freq, update_step = 1
--  tar_update_freq = 256
+-  batch_size => 256
+-  update_freq, update_step => 1
+-  tar_update_freq => 256
 
 ##### Evaluation Results
 
@@ -428,7 +428,7 @@ mean=-243.0258f0
 
 /dfig{body;Actual_Evaluation_Result.png}
 
-mean = -265.7068139137983
+mean=-265.7068139137983
 
 ### Relevant Commits and PRs
 
@@ -453,5 +453,5 @@ There are several exciting work that are possible from this point.
 - Implementing more OPE algorithms proposed in [Empirical Study of Off-Policy Policy Evaluation for Reinforcement Learning paper](https://arxiv.org/pdf/1911.06854.pdf)\dcite{DBLP:journals/corr/abs-1911-06854} for use in Deep RL and Tabular RL.
 - Implementation of other FQE methods like DiscreteFQE, [FQE-L2 (Statistical Bootstrapping for Uncertainty Estimation in Off-Policy Evaluation)](https://arxiv.org/pdf/2007.13609.pdf)\dcite{DBLP:journals/corr/abs-2007-13609}.
 - Adding standard difficult benchmarks for existing Offline RL methods.
-- Adding environments to work out of the box for evaluation OPE methods.
+- Adding environments to work out of the box for evaluation of OPE methods.
 - Adding Scikit learn like [features](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/discussions/359) on top of RLDataset.jl. 
