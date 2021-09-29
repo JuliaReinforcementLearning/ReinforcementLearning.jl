@@ -10,6 +10,8 @@
 
 - [Establish a General Pipeline for Offline Reinforcement Learning Evaluation (Summer OSPP Project 210370741) Mid-term Report](/blog/ospp_mid-term_report_210370741)
 
+- [Establish a General Pipeline for Offline Reinforcement Learning Evaluation (Summer OSPP Project 210370741) Final Report](/blog/ospp_final_term_report_210370741)
+
 - [Implement Multi-Agent Reinforcement Learning Algorithms in Julia (Summer OSPP Project 210370190) Report](/blog/ospp_report_210370190)
 
 - Notebooks for the book: [*Reinforcement Learning: an Introduction 2nd

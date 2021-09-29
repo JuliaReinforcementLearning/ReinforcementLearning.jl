@@ -36,7 +36,7 @@ The following is the final term evaluation report of "General Pipeline for Offli
 General Pipeline for Offline Reinforcement Learning Evaluation
 
 #### Background
-With more advancement happening in Offline Reinforcement Learning in recent years and more availability of data, it is vital to implement Offline RL algorithms in RL.jl. Besides, It is also important for Offline Reinforcement Learning algrithms to have Datasets that helps in benchmarkeing algorithms and policies that are useful in benchmarking Off Policy Evaluation Methods. Off Policy Evaluation is important for reliable algorithms to be developed in a completely Offline setting. This project aims at providing reliable datasets and policies that are based on the latest research in the field of Offline Reinforcement Learning.
+With more advancement happening in Offline Reinforcement Learning in recent years and more availability of data, it is vital to implement Offline RL algorithms in RL.jl. Besides, It is also important for Offline Reinforcement Learning algrithms to have Datasets that helps in benchmarking algorithms and policies that are useful in benchmarking Off Policy Evaluation Methods. Off Policy Evaluation is important for reliable algorithms to be developed in a completely Offline setting. This project aims at providing reliable datasets and policies that are based on the latest research in the field of Offline Reinforcement Learning.
 
 #### Objectives
 - Create a package called **ReinforcementLearningDatasets.jl** that would aid in loading various standard datasets and policies that are available.
@@ -63,7 +63,7 @@ The following work has been done post mid-term evaluation.
 ### Summary
 The following is the summary of the project work.
 
-- Polished and finalised the structure of the package. Improved usability by updating the [docs](https://juliareinforcementlearning.org/docs/rldatasets/) accordingly.
+- Polished and finalized the structure of the package. Improved usability by updating the [docs](https://juliareinforcementlearning.org/docs/rldatasets/) accordingly.
 - Fixed the `run` error that was shown in windows.
 - Added `Bsuite` and all `DM` environements including [`DeepMind Control Suite Dataset`](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged#deepmind-control-suite-dataset), [`DeepMind Lab Dataset`](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged#deepmind-lab-dataset) and [`DeepMind Locomotion Dataset`](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged#deepmind-locomotion-dataset_) in RL Unplugged Datasets\dcite{DBLP:journals/corr/abs-2006-13888}.
 - Added [Deep OPE](https://github.com/google-research/deep_ope)\dcite{DBLP:journals/corr/abs-2103-16596} models for D4RL datasets.
