@@ -81,7 +81,7 @@ where $\boldsymbol{\pi}_{i}$ is the policy of the player $i$, $\boldsymbol{\pi}_
 
 - [**Nash Equilibrium**](https://en.wikipedia.org/wiki/Nash_equilibrium):
 
-A **Nash Equilibrium** is a joint policy $\boldsymbol{\pi}$ such the each player's policy in $\boldsymbol{\pi}$ is a best reponse to the other policies. A common metric to measure the distance to **Nash Equilibrium** is [`nash_conv`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/cfr/nash_conv.jl#L29).
+A **Nash Equilibrium** is a joint policy $\boldsymbol{\pi}$ such the each player's policy in $\boldsymbol{\pi}$ is a best reponse to the other policies. A common metric to measure the distance to **Nash Equilibrium** is [`nash_conv`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/src/ReinforcementLearningZoo/src/algorithms/cfr/nash_conv.jl#L29).
 
 Given a joint policy $\boldsymbol{\pi}$, the **exploitability** for the player $i$ is the respective incentives to deviate from the current policy to the best response, denoted $\delta_{i}(\boldsymbol{\pi})=v_{i, \left(\boldsymbol{\pi}_{i}^{\prime}, \boldsymbol{\pi}_{-i}\right)} - v_{i, \boldsymbol{\pi}}$ where $\boldsymbol{\pi}_{i}^{\prime} \in \mathrm{BR}\left(\boldsymbol{\pi}_{-i}\right)$. In two-player [**zero-sum**](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.ZERO_SUM) games, an **$\epsilon$-Nash Equilibrium** policy is one where $\max _{i} \delta_{i}(\boldsymbol{\pi}) \leq \epsilon$. A **Nash Equilibrium** is achieved when $\epsilon = 0$. And the `nash_conv`$(\boldsymbol{\pi}) = \sum_{i} \delta_{i}\left(\boldsymbol{\pi}\right)$.
 
@@ -312,7 +312,7 @@ nfsp = NFSPAgentManager(
 )
 ```
 
-Based on the setting [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L126) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L15) in the experiment, you can just `run(nfsp, wrapped_env, stop_condition, hook)` to perform the experiment. Use [`Plots.plot`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L136) to get the following result:
+Based on the setting [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L126) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L15) in the experiment, you can just `run(nfsp, wrapped_env, stop_condition, hook)` to perform the experiment. Use [`Plots.plot`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/docs/experiments/experiments/NFSP/JuliaRL_NFSP_KuhnPoker.jl#L136) to get the following result:
 
 \dfig{body;JuliaRL_NFSP_KuhnPoker.png;Play KuhnPoker with NFSP.}
 
@@ -358,9 +358,9 @@ mutable struct MADDPGManager <: AbstractPolicy
 end
 ```
 
-Each agent in the `MADDPGManager` uses `DDPGPolicy` with one trajectory, which collects their own information. Note that the policy of the `Agent` should be wrapped with `NamedPolicy`. [`NamedPolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.NamedPolicy) is a useful substruct of `AbstractPolicy` when meeting the multi-agent games, which combine the player's name and detailed policy. So that can use `Agent` 's [default behaviors](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.Agent-Tuple{AbstractStage,%20AbstractEnv}) to collect the necessary information. 
+Each agent in the `MADDPGManager` uses `DDPGPolicy` with one trajectory, which collects their own information. Note that the policy of the `Agent` should be wrapped with `NamedPolicy`. [`NamedPolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.NamedPolicy) is a useful substruct of `AbstractPolicy` when meeting the multi-agent games, which combine the player's name and detailed policy. So that can use `Agent` 's [default behaviors](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.Agent-Tuple{AbstractStage,%20AbstractEnv}) to collect the necessary information.
 
-As for updating the policy, the process is mainly the same as the [`DDPGPolicy`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/ddpg.jl#L139), apart from each agent's critic will assemble all agents' personal states and actions. For more details, you can refer to the [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/maddpg.jl#L59).
+As for updating the policy, the process is mainly the same as the [`DDPGPolicy`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/ddpg.jl#L127), apart from each agent's critic will assemble all agents' personal states and actions. For more details, you can refer to the [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/src/ReinforcementLearningZoo/src/algorithms/policy_gradient/maddpg.jl#L64).
 
 **Note that** when calculating the loss of actor's behavior network, we should add the `reg` term to improve the algorithm's performance, which differs from **DDPG**.
 
@@ -461,7 +461,7 @@ agents = MADDPGManager(
 )
 ```
 
-Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L110) and [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L15) in the experiment, you can also `run(agents, wrapped_env, stop_condition, hook)` to perform the experiment. Use [`Plots.scatter`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L119) to get the following result:
+Plus on the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L111) and [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L15) in the experiment, you can also `run(agents, wrapped_env, stop_condition, hook)` to perform the experiment. Use [`Plots.scatter`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker.jl#L120) to get the following result:
 
 \dfig{body;JuliaRL_MADDPG_KuhnPoker.png;Play KuhnPoker with MADDPG.}
 
@@ -537,7 +537,7 @@ agents = MADDPGManager(
 )
 ```
 
-Add the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L108) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L15), we can simply `run(agents, env, stop_condition, hook)` to run the experiment and use [`Plots.plot`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L117) to get the following result.
+Add the [`stop_condition`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L108) and designed [`hook`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L15), we can simply `run(agents, env, stop_condition, hook)` to run the experiment and use [`Plots.plot`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener.jl#L117) to get the following result.
 
 \dfig{body;JuliaRL_MADDPG_SpeakerListenerEnv.png;Play SpeakerListenerEnv with MADDPG.}
 
@@ -599,7 +599,7 @@ function RLBase.prob(π::EDPolicy, env::AbstractEnv, action)
 end
 ```
 
-Here I use many macro operators [`@ignore`](https://fluxml.ai/Zygote.jl/latest/utils/#Zygote.ignore) for being able to compute the gradient of the parameters. Also, I design the [`update!`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/exploitability_descent/EDPolicy.jl#L71) function for `EDPolicy` when getting the opponent's **best response** policy:
+Here I use many macro operators [`@ignore`](https://fluxml.ai/Zygote.jl/latest/utils/#Zygote.ignore) for being able to compute the gradient of the parameters. Also, I design the [`update!`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/src/ReinforcementLearningZoo/src/algorithms/exploitability_descent/EDPolicy.jl#L73) function for `EDPolicy` when getting the opponent's **best response** policy:
 
 ```Julia
 function RLBase.update!(
@@ -647,9 +647,9 @@ function RLBase.update!(
 end
 ```
 
-Here I implement one [`PolicyVsBestResponse`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/exploitability_descent/EDPolicy.jl#L118) struct for computing related values, such as the [probabilities](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/exploitability_descent/EDPolicy.jl#L140) of opponent's reaching one particular environment in playing, and the [expected reward](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningZoo/src/algorithms/exploitability_descent/EDPolicy.jl#L161) from the start of a specific environment when against the opponent's **best response**.
+Here I implement one [`PolicyVsBestResponse`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/src/ReinforcementLearningZoo/src/algorithms/exploitability_descent/EDPolicy.jl#L118) struct for computing related values, such as the [probabilities](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/src/ReinforcementLearningZoo/src/algorithms/exploitability_descent/EDPolicy.jl#L140) of opponent's reaching one particular environment in playing, and the [expected reward](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/src/ReinforcementLearningZoo/src/algorithms/exploitability_descent/EDPolicy.jl#L161) from the start of a specific environment when against the opponent's **best response**.
 
-Besides, I implement the [`EDManager`](https://juliareinforcementlearning.org/docs/rlzoo/#ReinforcementLearningZoo.EDManager), which is a special multi-agent manager that all agents utilize the **ED** algorithm, and set the particular `run` function for running the experiment:
+Besides, I implement the [`EDManager`](https://juliareinforcementlearning.org/docs/rlzoo/#ReinforcementLearningZoo.EDManager), which is a special multi-agent manager that all agents utilize the **ED** algorithm, and set the particular [`run`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/3851546ec2ce529a490bb5dacc1b6e0ddaaea941/src/ReinforcementLearningZoo/src/algorithms/exploitability_descent/exploitability_descent.jl#L27) function for running the experiment:
 
 ```Julia
 ## run function
