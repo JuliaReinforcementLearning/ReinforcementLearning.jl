@@ -112,8 +112,7 @@ function iterate(ds::D4RLDataSet, state = 0)
     style = ds.style
 
     if is_shuffle
-        inds = rand(rng, 1:size, batch_size)
-        map((x)-> if x <= size x else 1 end, inds)
+        inds = rand(rng, 1:size-1, batch_size)
     else
         if (state+1) * batch_size <= size
             inds = state*batch_size+1:(state+1)*batch_size
@@ -123,13 +122,13 @@ function iterate(ds::D4RLDataSet, state = 0)
         state += 1
     end
 
-    batch = (state = copy(ds.dataset[:state][:, inds]),
-    action = copy(ds.dataset[:action][:, inds]),
-    reward = copy(ds.dataset[:reward][inds]),
-    terminal = copy(ds.dataset[:terminal][inds]))
+    batch = (state = ds.dataset[:state][:, inds],
+    action = ds.dataset[:action][:, inds],
+    reward = ds.dataset[:reward][inds],
+    terminal = ds.dataset[:terminal][inds])
 
     if style == SARTS
-        batch = merge(batch, (next_state = copy(ds.dataset[:state][:, (1).+(inds)]),))
+        batch = merge(batch, (next_state = ds.dataset[:state][:, (1).+(inds)],))
     end
     
     return batch, state
