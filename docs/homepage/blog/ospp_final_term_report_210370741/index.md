@@ -768,7 +768,7 @@ The values obtained by running the agent in the environemnt for 100 iterations.
 
 mean=-265.7068139137983
 
-### Relevant Commits and PRs
+## Relevant Commits and PRs
 
 - [Fix RLDatasets.jl documentation (#467)](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commit/b29c9f01240d6aae9e6f7acc28a0a1e95cf29f76#diff-d7a7b3de8d5eedecb629c4d80b6b249d68d15d6f66a7ef768bf4eb937fd5a5d7)
 - [Add bsuite datasets (#482)](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commit/4326df59296a6edc488b77f29c4968853280db85#diff-d7a7b3de8d5eedecb629c4d80b6b249d68d15d6f66a7ef768bf4eb937fd5a5d7)
@@ -776,18 +776,18 @@ mean=-265.7068139137983
 - [Add support for deep ope in RLDatasets.jl (#500)](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commit/1a00766e9df3edc19cd7377a595b4563261a0356#diff-d7a7b3de8d5eedecb629c4d80b6b249d68d15d6f66a7ef768bf4eb937fd5a5d7)
 - [WIP to implement FQE #515](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/515)
 
-### Conclusion
+## Conclusion
 The foundations of RLDatasets.jl package has been laid during the course of the project. The basic datasets except for Real World Datasets from RL Unplugged have been supported. Furthermore, D4RL policies have been successfully loaded and tested. The algorithm for FQE has been tried out with a minor implementation detail pending. 
 
 With the completion of FQE the four requirements of OPE as laid out by [Deep OPE](https://github.com/google-research/deep_ope)\dcite{DBLP:journals/corr/abs-2103-16596} will be completed for D4RL.
 
 \dfig{body;OPE_Requirements.png}
 
-#### Implications
+### Implications
 
 Equipping RL.jl with RLDatasets.jl is a key step in making the package more industry relevant because different offline algorithms can be compared with respect to a variety of standard offline dataset benchmarks. It is also meant to improve the implementations of existing offline algorithms and make it on par with the SOTA implementations. This package provides a seamless way of downloading and accessing existing datasets and also supports loading datasets into memory with ease, which if implemented separately, would be tedious for the user. It also incorporates policies that can be useful for testing Off Policy Evaluation Methods.
 
-#### Future Scope
+### Future Scope
 There are several exciting work that are possible from this point.
 
 - Testing and improvement of already existing Offline Algorithms in RLZoo.jl.
