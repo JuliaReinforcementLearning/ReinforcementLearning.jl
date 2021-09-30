@@ -1,6 +1,7 @@
 @def title = "General Pipeline for Offline Reinforcement Learning Evaluation Report"
 @def description = """
-    This is a technical report of the Summer OSPP project [Establish a General Pipeline for Offline Reinforcement Learning Evaluation](https://summer.iscas.ac.cn/#/org/prodetail/210370741?lang=en) used for final term evaluation. It provides an overview of the work done during mid-term and during final evaluation phases.
+    This is a technical report of the Summer OSPP project [Establish a General Pipeline for Offline Reinforcement Learning Evaluation](https://summer.iscas.ac.cn/#/org/prodetail/210370741?lang=en) used for final term evaluation. It provides an overview of the work done during mid-term and the final evaluation phases.
+    """
 @def is_enable_toc = true
 @def has_code = true
 @def has_math = true
@@ -15,19 +16,23 @@
                 "affiliationURL":"https://www.nitt.edu/"
             }
         ],
-        "publishedDate":"2021-08-15",
+        "publishedDate":"2021-09-30",
         "citationText":"Prasidh Srikumar, 2021"
     }"""
 
+@def appendix = """
+    ### Corrections
+    If you see mistakes or want to suggest changes, please [create an issue](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues) in the source repository.
+    """
+
 @def bibliography = "bibliography.bib"
 
-## 1. Introduction
+# Introduction
 
-### Project Name
-
+## Project Name
 Establish a General Pipeline for Offline Reinforcement Learning Evaluation
 
-### Background
+## Background
 
 In recent years, there have been several breakthroughs in the field of Reinforcement Learning with numerous practical applications where RL bots have been able to achieve superhuman performance. This is also reflected in the industry where several cutting edge solutions have been developed based on RL ([Tesla Motors](https://www.tesla.com/), [AutoML](https://cloud.google.com/automl), [DeepMind data center cooling solutions](https://deepmind.com/blog/article/deepmind-ai-reduces-google-data-centre-cooling-bill-40) just to name a few).
 
@@ -35,7 +40,7 @@ One of the most prominent challenges in RL is the lack of reliable environments 
 
 Another problem in Offline RL is Offline Model Selection. For this, there are numerous policies that are available in [Benchmarks for Deep Off-Policy Evaluation](https://openreview.net/forum?id=kWSeGEeHvF8)\dcite{DBLP:journals/corr/abs-2103-16596}. ReinforcementLearningDatasets.jl will also help in loading policies that will aid in model selection in ReinforcementLearning.jl package.
 
-## 2. Project Overview
+## Project Overview
 
 ### Objectives
 
@@ -80,7 +85,7 @@ Refer the following [discussion](https://github.com/JuliaReinforcementLearning/R
 
 There are some changes to the original timeline based on a few time constraints but the basic objectives of the project are accomplished.
 
-## 3. Implementation datasets
+## Datasets
 
 ### Documentation
 
@@ -177,7 +182,7 @@ ds = ds = rl_unplugged_atari_dataset(
 
 The type that is returned is a `Channel{AtariRLTransition}` which returns batches with the given specifications from the buffer when `take!` is used. The point to be noted here is that it takes seconds to load the datasets into the `Channel` and the loading is highly customizable.
 
-```
+```julia
 julia> ds = ds = rl_unplugged_atari_dataset(
                "Pong",
                1,
@@ -210,7 +215,7 @@ julia> size(batch.reward)
 ```
 
 
-### Relevant commits, discussions and PRs
+## Relevant commits, discussions and PRs
 
 - [Updated RLDatasets.jl #403](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/403)
 - [Expand to d4rl-pybullet #416](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/416)
@@ -219,7 +224,7 @@ julia> size(batch.reward)
 - [Features for Offline Reinforcement Learning Pipeline #359](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/discussions/359)
 - [Fix record_type issue #24](https://github.com/JuliaReinforcementLearning/TFRecord.jl/pull/24)
 
-## 4. Implementation Details and Challenges Faced
+## Implementation Details and Challenges Faced
 
 The challenge that was faced during the first week was to chart out a direction for RLDatasets.jl. I researched the implementations of the pipeline in [d3rlpy](https://github.com/takuseno/d3rlpy), [TF.data.Dataset](https://www.tensorflow.org/datasets) etc and then narrowed down some inspiring ideas in the [discussion](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/discussions/359).
 
@@ -384,27 +389,19 @@ res = Channel{AtariRLTransition}(n_preallocations; taskref=taskref, spawn=true) 
 end
 ```
 
-## 5. Implications
-
-Equipping RL.jl with RLDatasets.jl is a key step in making the package more industry relevant because different offline algorithms can be compared with respect to a variety of standard offline dataset benchmarks. It is also meant to improve the implementations of existing offline algorithms and make it on par with the SOTA implementations. This package provides a seamless way of downloading and accessing existing datasets and also supports loading datasets into memory with ease, which if implemented separately, would be tedious for the user.
-
-After the implementation of [Benchmarks for Deep Off-Policy Evaluation](https://github.com/google-research/deep_ope), testing and comparing algorithms would be much easier than before. This package would also make SOTA offline RL more accessible and reliable than ever before in ReinforcementLearning.jl.
-
 # Technical report (final term evaluation)
-The following is the final term evaluation report of "General Pipeline for Offline Reinforcement Learning Evaluation Report" in OSPP. Details of all the work that has been done after the mid-term evaluation and some explanation on the current status of the Package are given. Some exciting work that is possible based on this project is also given.
+The following is the final term evaluation report of "General Pipeline for Offline Reinforcement Learning Evaluation Report" in OSPP. Details of all the work that has been done after the mid-term evaluation and some explanation on the current status of the package are given. Some exciting work that is possible based on this project is also given.
 
-## Completed Work
-The following work has been done post mid-term evaluation.
-
-### Summary
-The following is the summary of the project work.
+## Summary
 
 - Polished and finalized the structure of the package. Improved usability by updating the [docs](https://juliareinforcementlearning.org/docs/rldatasets/) accordingly.
 - Fixed the `run` error that was shown in windows.
 - Added `Bsuite` and all `DM` environments including [`DeepMind Control Suite Dataset`](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged#deepmind-control-suite-dataset), [`DeepMind Lab Dataset`](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged#deepmind-lab-dataset) and [`DeepMind Locomotion Dataset`](https://github.com/deepmind/deepmind-research/tree/master/rl_unplugged#deepmind-locomotion-dataset_) in RL Unplugged Datasets\dcite{DBLP:journals/corr/abs-2006-13888}.
 - Added [Deep OPE](https://github.com/google-research/deep_ope)\dcite{DBLP:journals/corr/abs-2103-16596} models for D4RL datasets.
-- Researched and implemented FQE\dcite{DBLP:journals/corr/abs-2007-09055} for which the basic implementation works. There are some flaws that need to be fixed.
+- Researched and implemented FQE\dcite{DBLP:journals/corr/abs-2007-09055} for which the basic implementation works but there are some flaws that need to be fixed.
 
+## Completed Work
+The following work has been done post mid-term evaluation.
 
 ### Bsuite Datasets
 It involved work similar to RL Unplugged Atari Datasets which involves multi threaded dataloading. It is implemented using a [`Ring Buffer`](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/f1837a93c4c061925d92167c3480a423007dae5c/src/ReinforcementLearningDatasets/src/rl_unplugged/util.jl#L89) for storing and loading batches of data.
@@ -561,7 +558,7 @@ RingBuffer{NamedTuple{(:reward, :episodic_reward, :discount, :state, :next_state
 ```
 ### Deep OPE
 
-Support is given for D4RL policies provided in [Deep OPE](https://github.com/google-research/deep_ope).
+Support is given for D4RL policies provided in [Deep OPE](https://github.com/google-research/deep_ope)\dcite{DBLP:journals/corr/abs-2103-16596}.
 
 #### Implementation
 The policies that are given [here](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningDatasets/src/deep_ope/d4rl/d4rl_policies.jl) are loaded using `d4rl_policy` function.
@@ -674,7 +671,7 @@ The implementation in RLZoo is based on [Hyperparameter Selection for Offline Re
 
 \dfig{body;OPE_and_Online_Hyperparameter_Selection.png}
 
-The average of values chosen by the policies based on initial states can be taken as the reward that the policy would gain from the environment. So, the same can be used for online hyper parameter selection.
+The average of values calculated by FQE based on initial states can be taken as the reward that the policy would gain from the environment. So, the same can be used for online hyper parameter selection.
 
 The pseudocode for the implementation and the objective function are as follows.
 
@@ -743,30 +740,35 @@ end
 #### Results
 The [implementation](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/515) is still a work in progress because of some sampling error. But the algorithm that I implemented without RL.jl framework works as expected. 
 
-##### Parameter Values:
+##### Parameter Values
 -  Policy => CRR Policy
 -  Env => PendulumEnv
 -  q_networks => Two 64 neuron layers with `n_s+n_a` input neurons and `1` output neuron.
 -  optimizer => ADAM(0.005)
 -  loss => Flux.Losses.mse
 -  γ => 0.99
--  batch_size => 256
--  update_freq, update_step => 1
--  tar_update_freq => 256
+-  batch\_size => 256
+-  update\_freq, update\_step => 1
+-  tar\_update\_freq => 256
+-  number of training steps => 40_000
 
 ##### Evaluation Results
 
-/dfig{body;FQE_Evaluation_Result.png}
+The values evaluated by FQE for 100 initial states.
+
+\dfig{body;FQE_Evaluation_Result.png}
 
 mean=-243.0258f0
 
 ##### Actual Values
 
-/dfig{body;Actual_Evaluation_Result.png}
+The values obtained by running the agent in the environment for 100 iterations.
+
+\dfig{body;Actual_Evaluation_Result.png}
 
 mean=-265.7068139137983
 
-### Relevant Commits and PRs
+## Relevant Commits and PRs
 
 - [Fix RLDatasets.jl documentation (#467)](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commit/b29c9f01240d6aae9e6f7acc28a0a1e95cf29f76#diff-d7a7b3de8d5eedecb629c4d80b6b249d68d15d6f66a7ef768bf4eb937fd5a5d7)
 - [Add bsuite datasets (#482)](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commit/4326df59296a6edc488b77f29c4968853280db85#diff-d7a7b3de8d5eedecb629c4d80b6b249d68d15d6f66a7ef768bf4eb937fd5a5d7)
@@ -774,14 +776,18 @@ mean=-265.7068139137983
 - [Add support for deep ope in RLDatasets.jl (#500)](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commit/1a00766e9df3edc19cd7377a595b4563261a0356#diff-d7a7b3de8d5eedecb629c4d80b6b249d68d15d6f66a7ef768bf4eb937fd5a5d7)
 - [WIP to implement FQE #515](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/515)
 
-### Conclusion
+## Conclusion
 The foundations of RLDatasets.jl package has been laid during the course of the project. The basic datasets except for Real World Datasets from RL Unplugged have been supported. Furthermore, D4RL policies have been successfully loaded and tested. The algorithm for FQE has been tried out with a minor implementation detail pending. 
 
 With the completion of FQE the four requirements of OPE as laid out by [Deep OPE](https://github.com/google-research/deep_ope)\dcite{DBLP:journals/corr/abs-2103-16596} will be completed for D4RL.
 
 \dfig{body;OPE_Requirements.png}
 
-#### Future Scope
+### Implications
+
+Equipping RL.jl with RLDatasets.jl is a key step in making the package more industry relevant because different offline algorithms can be compared with respect to a variety of standard offline dataset benchmarks. It is also meant to improve the implementations of existing offline algorithms and make it on par with the SOTA implementations. This package provides a seamless way of downloading and accessing existing datasets and also supports loading datasets into memory with ease, which if implemented separately, would be tedious for the user. It also incorporates policies that can be useful for testing Off Policy Evaluation Methods.
+
+### Future Scope
 There are several exciting work that are possible from this point.
 
 - Testing and improvement of already existing Offline Algorithms in RLZoo.jl.
