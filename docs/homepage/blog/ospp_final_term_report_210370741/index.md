@@ -671,7 +671,7 @@ The implementation in RLZoo is based on [Hyperparameter Selection for Offline Re
 
 \dfig{body;OPE_and_Online_Hyperparameter_Selection.png}
 
-The average of values caldulated by FQE based on initial states can be taken as the reward that the policy would gain from the environment. So, the same can be used for online hyper parameter selection.
+The average of values calculated by FQE based on initial states can be taken as the reward that the policy would gain from the environment. So, the same can be used for online hyper parameter selection.
 
 The pseudocode for the implementation and the objective function are as follows.
 
@@ -762,7 +762,7 @@ mean=-243.0258f0
 
 ##### Actual Values
 
-The values obtained by running the agent in the environemnt for 100 iterations.
+The values obtained by running the agent in the environment for 100 iterations.
 
 \dfig{body;Actual_Evaluation_Result.png}
 
