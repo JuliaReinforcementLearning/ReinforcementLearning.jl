@@ -1,9 +1,15 @@
 using ReinforcementLearning
 using StableRNGs
 using Flux
-using Flux.Losses
 using IntervalSets
-using Distributions
+
+function cartpole_reward_function(env; action=env.last_action, nstate=state(env))
+    arm_length = 2 * env.params.halflength
+    x, xvel, theta, thetavel = nstate
+    reward = exp(-(x / arm_length - sin(theta))^2 - (1 + cos(theta))^2)
+    reward -= 0.01 * sum(action^2)
+    return reward
+end
 
 function RL.Experiment(
     ::Val{:JuliaRL},
@@ -15,18 +21,25 @@ function RL.Experiment(
 )
     rng = StableRNG(seed)
     inner_env = CartPoleEnv(T = Float32, continuous = true, rng = rng)
+
     A = action_space(inner_env)
     low = A.left
     high = A.right
-    ns = length(state(inner_env))
-    na = 1
-
-    ensamble_size = 5
 
     env = ActionTransformedEnv(
-        inner_env;
-        action_mapping = x -> low + (x[1] + 1) * 0.5 * (high - low),
+        StateTransformedEnv(
+            RewardTransformedEnv(
+                inner_env;
+                reward_mapping = cartpole_reward_function,
+            );
+            state_mapping = x -> [x[1:2]; sin(x[3]); cos(x[3]); x[4]], # TODO: this does not seem very efficient?
+        );
+        action_mapping = x -> low + (x[1] + 1) * 0.5 * (high - low), 
     )
+
+    ns = length(state(env))
+    na = 1
+
     init = glorot_uniform(rng)
 
     agent = Agent(
@@ -39,7 +52,6 @@ function RL.Experiment(
                 iterations = 5,
                 horizon = 15,
                 α = 0.1,
-                return_mean_elites = true,
                 rng = rng,
             ),
             ensamble = [
@@ -57,24 +69,24 @@ function RL.Experiment(
                         min_σ = 1f-5,
                         max_σ = 1f2, 
                     ),
-                    optimizer = ADAM(0.003),
-                ) for i in 1:ensamble_size
+                    optimizer = ADAM(7.5e-4),
+                ) for _ in 1:5
             ],
-            batch_size = 64,
-            start_steps = 100,
+            batch_size = 256,
+            start_steps = 200,
             start_policy = RandomPolicy(Space([-1.0..1.0 for _ in 1:na]); rng = rng),
-            update_after = 100,
-            update_freq = 100,
+            update_after = 200,
+            update_freq = 50,
             rng = rng,
         ),
         trajectory = CircularArraySARTTrajectory(
-            capacity = 10000,
+            capacity = 5000,
             state = Vector{Float32} => (ns,),
             action = Vector{Float32} => (na,),
         ),
     )
 
-    stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(5000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "# Play CartPole with PETS")
 end

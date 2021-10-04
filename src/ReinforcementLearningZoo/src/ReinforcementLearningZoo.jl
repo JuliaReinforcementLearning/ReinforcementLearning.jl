@@ -21,7 +21,7 @@ using Zygote: ignore, @ignore
 using Flux
 using Flux: onehot, normalise
 using StatsBase
-using StatsBase: sample, Weights, mean
+using StatsBase: sample, Weights, mean, std
 using LinearAlgebra: dot
 using MacroTools
 using Distributions: Categorical, Normal, TruncatedNormal, logpdf

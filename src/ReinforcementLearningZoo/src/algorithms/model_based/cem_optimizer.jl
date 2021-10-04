@@ -1,6 +1,6 @@
 export CEMTrajectoryOptimizer
 
-struct CEMTrajectoryOptimizer{T, R<:AbstractRNG} 
+mutable struct CEMTrajectoryOptimizer{T, R<:AbstractRNG} 
     iterations::Int
     population::Int
     elites::Int
@@ -18,7 +18,7 @@ function CEMTrajectoryOptimizer(;
     upper_bound::Vector,
     iterations = 5,
     elite_ratio = 0.1,
-    population = 500,
+    population = 350,
     α = 0.1,
     horizon = 15, 
     rng = Random.GLOBAL_RNG,
@@ -62,7 +62,7 @@ function (opt::CEMTrajectoryOptimizer)(fopt::F) where F
 
         # Step μ and var towards new elites 
         μ = opt.α .* μ .+ (1 .- opt.α) .* mean(elite)
-        σ = opt.α .* σ .+ (1 .- opt.α) .* var(elite, corrected=false)
+        σ = opt.α .* σ .+ (1 .- opt.α) .* std(elite, corrected=false)
 
         if best_values[1] > best_value
             best_value = best_values[1]
