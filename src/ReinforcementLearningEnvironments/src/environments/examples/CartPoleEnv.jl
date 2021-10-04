@@ -24,6 +24,7 @@ mutable struct CartPoleEnv{A,T,R<:AbstractRNG} <: AbstractEnv
     action_space::A
     observation_space::Space{Vector{ClosedInterval{T}}}
     state::Array{T,1}
+    last_action::T
     done::Bool
     t::Int
     rng::R
@@ -69,12 +70,13 @@ function CartPoleEnv(;
         max_steps,
     )
     high = T.([2 * params.xthreshold, 1e38, 2 * params.thetathreshold, 1e38])
-    action_space = continuous ? -1.0..1.0 : Base.OneTo(2)
+    action_space = continuous ? -forcemag..forcemag : Base.OneTo(2)
     env = CartPoleEnv(
         params, 
         action_space,
         Space(ClosedInterval{T}.(-high, high)),
         zeros(T, 4), 
+        zero(T),
         false, 
         0, 
         rng,
@@ -102,8 +104,7 @@ RLBase.state(env::CartPoleEnv) = env.state
 
 function (env::CartPoleEnv{<:ClosedInterval})(a)
     @assert a in env.action_space
-    force = env.params.forcemag * a
-    _step!(env, force)
+    _step!(env, a)
 end
 
 function (env::CartPoleEnv{<:Base.OneTo})(a)
@@ -113,6 +114,7 @@ function (env::CartPoleEnv{<:Base.OneTo})(a)
 end
 
 function _step!(env::CartPoleEnv, force)
+    env.last_action = force
     env.t += 1
     x, xdot, theta, thetadot = env.state
     costheta = cos(theta)
