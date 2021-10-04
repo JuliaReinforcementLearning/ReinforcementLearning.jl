@@ -105,7 +105,7 @@ function atari_env_factory(
                     ),
                     state_space_mapping= _ -> Space(fill(0..256, state_size..., n_frames))
                 )
-            ),
+            );
             reward_mapping = r -> clamp(r, -1, 1)
         )
 
