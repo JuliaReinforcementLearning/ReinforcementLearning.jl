@@ -24,8 +24,8 @@ function RL.Experiment(
 
     env = GridWorlds.SingleRoomUndirectedModule.SingleRoomUndirected(rng=rng)
     env = GridWorlds.RLBaseEnv(env)
-    env = RLEnvs.StateTransformedEnv(env;state_mapping=x -> vec(Float32.(x)))
-    env = RewardOverriddenEnv(env, x -> x - convert(typeof(x), 0.01))
+    env = RLEnvs.StateTransformedEnv(env; state_mapping=x -> vec(Float32.(x)))
+    env = RewardTransformedEnv(env; reward_mapping = x -> x - convert(typeof(x), 0.01))
     env = MaxTimeoutEnv(env, 240)
 
     ns, na = length(state(env)), length(action_space(env))

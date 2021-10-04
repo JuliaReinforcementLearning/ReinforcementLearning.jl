@@ -85,7 +85,7 @@ function atari_env_factory(
     n_replica = nothing,
 )
     init(seed) =
-        RewardOverriddenEnv(
+        RewardTransformedEnv(
             StateCachedEnv(
                 StateTransformedEnv(
                     AtariEnv(;
@@ -107,7 +107,7 @@ function atari_env_factory(
                     state_space_mapping= _ -> Space(fill(0..256, state_size..., n_frames))
                 )
             ),
-            r -> clamp(r, -1, 1)
+            reward_mapping = r -> clamp(r, -1, 1)
         )
 
     if isnothing(n_replica)
@@ -135,7 +135,7 @@ end
 function (hook::TotalOriginalRewardPerEpisode)(
     ::PostActStage,
     agent,
-    env::RewardOverriddenEnv,
+    env::RewardTransformedEnv,
 )
     hook.reward += reward(env.env)
 end
@@ -158,7 +158,7 @@ end
 function (hook::TotalBatchOriginalRewardPerEpisode)(
     ::PostActStage,
     agent,
-    env::MultiThreadEnv{<:RewardOverriddenEnv},
+    env::MultiThreadEnv{<:RewardTransformedEnv},
 )
     for (i, e) in enumerate(env.envs)
         hook.reward[i] += reward(e.env)
