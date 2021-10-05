@@ -39,8 +39,8 @@ function RL.Experiment(
     create_policy_net() = NeuralNetworkApproximator(
         model = GaussianNetwork(
             pre = Chain(
-                Dense(ns, 30, relu), 
-                Dense(30, 30, relu),
+                Dense(ns, 30, relu, init = init), 
+                Dense(30, 30, relu, init = init),
             ),
             μ = Chain(Dense(30, na, init = init)),
             logσ = Chain(Dense(30, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),

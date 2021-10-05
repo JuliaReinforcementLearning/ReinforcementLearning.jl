@@ -10,6 +10,7 @@
     "JuliaRL_CRR_CartPole.jl",
     "JuliaRL_CRR_Pendulum.jl",
     "JuliaRL_FisherBRC_Pendulum.jl",
-    "JuliaRL_PLAS_Pendulum.jl"
+    "JuliaRL_PLAS_Pendulum.jl",
+    "JuliaRL_FQE_Pendulum.jl"
   ]
 }
