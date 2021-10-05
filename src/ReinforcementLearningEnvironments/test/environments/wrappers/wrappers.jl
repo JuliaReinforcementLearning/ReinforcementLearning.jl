@@ -53,10 +53,24 @@
         @test is_terminated(env′) == false
     end
 
+    @testset "RewardTransformedEnv" begin
+        rng = StableRNG(123)
+        env = TigerProblemEnv(; rng=rng)
+        env′ = RewardTransformedEnv(env; reward_mapping = x -> sign(x))
+
+        RLBase.test_interfaces!(env′)
+        RLBase.test_runnable!(env′)
+
+        while !is_terminated(env′)
+            env′(rand(rng, legal_action_space(env′)))
+            @test reward(env′) ∈ (-1, 0, 1)
+        end
+    end
+
     @testset "RewardOverriddenEnv" begin
         rng = StableRNG(123)
         env = TigerProblemEnv(; rng=rng)
-        env′ = RewardOverriddenEnv(env, x -> sign(x))
+        env′ = RewardOverriddenEnv(env, e -> sign(reward(e)))
 
         RLBase.test_interfaces!(env′)
         RLBase.test_runnable!(env′)
