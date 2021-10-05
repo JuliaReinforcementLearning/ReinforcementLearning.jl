@@ -104,7 +104,7 @@ function make_transition(example::TFRecord.Example, feature_size::Dict{String, T
     merge(transition, state_nt, next_state_nt)
 end
 """
-    rl_unplugged_dm_dataset(game, shards, type; <keyword arguments>)
+    rl_unplugged_dm_dataset(game, shards; <keyword arguments>)
 
 Returns a `RingBuffer`(@ref) of `NamedTuple` containing SARTS batches which supports 
 multi threaded loading. Also contains additional data. The data enclosed within `:state` and
@@ -114,7 +114,7 @@ datasets. Also check out `dm_params()` for more info on arguments.
 
 # Arguments
 
-- `game::String`: name of the dataset. available datasets: `cartpole`, `mountain_car` and  `catch`. 
+- `game::String`: name of the dataset.
 - `shards::Vector{Int}`: the shards that are to be loaded.
 - `type::String`: type of the dm_env. can be `dm_control_suite`, `dm_locomotion_humanoid`, `dm_locomotion_rodent`.
 - `is_shuffle::Bool`
