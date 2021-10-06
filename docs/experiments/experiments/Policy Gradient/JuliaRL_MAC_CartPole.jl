@@ -64,7 +64,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(50_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(50_000, is_show_progress = !haskey(ENV, "CI"))
     hook = TotalBatchRewardPerEpisode(N_ENV)
     Experiment(agent, env, stop_condition, hook, "# MAC with CartPole")
 end
@@ -78,7 +78,7 @@ run(ex)
 n = minimum(map(length, ex.hook.rewards))
 m = mean([@view(x[1:n]) for x in ex.hook.rewards])
 s = std([@view(x[1:n]) for x in ex.hook.rewards])
-plot(m,ribbon=s)
+plot(m, ribbon = s)
 savefig("assets/JuliaRL_MAC_CartPole.png") #hide
 
 # ![](assets/JuliaRL_MAC_CartPole.png)

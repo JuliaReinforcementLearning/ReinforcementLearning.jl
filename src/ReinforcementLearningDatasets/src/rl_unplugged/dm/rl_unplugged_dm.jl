@@ -3,31 +3,41 @@ export rl_unplugged_dm_dataset
 using TFRecord
 
 function make_batch_array(type::Type, feature_dims::Int, size::Tuple, batch_size::Int)
-    Array{type, feature_dims+1}(undef, size..., batch_size)
+    Array{type,feature_dims + 1}(undef, size..., batch_size)
 end
 
-function dm_buffer_dict(feature_size::Dict{String, Tuple}, batch_size::Int)
-    obs_buffer = Dict{Symbol, AbstractArray}()
+function dm_buffer_dict(feature_size::Dict{String,Tuple}, batch_size::Int)
+    obs_buffer = Dict{Symbol,AbstractArray}()
 
-    buffer_dict = Dict{Symbol, Any}()
+    buffer_dict = Dict{Symbol,Any}()
 
     for feature in keys(feature_size)
         feature_dims = length(feature_size[feature])
         if split(feature, "/")[1] == "observation"
-            ob_key = Symbol(chop(feature, head=length("observation")+1, tail=0))
+            ob_key = Symbol(chop(feature, head = length("observation") + 1, tail = 0))
             if split(feature, "/")[end] == "egocentric_camera"
-                obs_buffer[ob_key] = make_batch_array(UInt8, feature_dims, feature_size[feature], batch_size)
+                obs_buffer[ob_key] =
+                    make_batch_array(UInt8, feature_dims, feature_size[feature], batch_size)
             else
-                obs_buffer[ob_key] = make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
+                obs_buffer[ob_key] = make_batch_array(
+                    Float32,
+                    feature_dims,
+                    feature_size[feature],
+                    batch_size,
+                )
             end
         elseif feature == "action"
-            buffer_dict[:action] = make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
-            buffer_dict[:next_action] = make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
+            buffer_dict[:action] =
+                make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
+            buffer_dict[:next_action] =
+                make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
         elseif feature == "step_type"
-            buffer_dict[:terminal] = make_batch_array(Bool, feature_dims, feature_size[feature], batch_size)
+            buffer_dict[:terminal] =
+                make_batch_array(Bool, feature_dims, feature_size[feature], batch_size)
         else
             ob_key = Symbol(feature)
-            buffer_dict[ob_key] = make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
+            buffer_dict[ob_key] =
+                make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
         end
     end
 
@@ -61,28 +71,33 @@ function batch_named_tuple!(dest::NamedTuple, src::NamedTuple, i::Int)
     end
 end
 
-function make_transition(example::TFRecord.Example, feature_size::Dict{String, Tuple})
+function make_transition(example::TFRecord.Example, feature_size::Dict{String,Tuple})
     f = example.features.feature
-    
-    observation_dict = Dict{Symbol, AbstractArray}()
-    next_observation_dict = Dict{Symbol, AbstractArray}()
-    transition_dict = Dict{Symbol, Any}()
+
+    observation_dict = Dict{Symbol,AbstractArray}()
+    next_observation_dict = Dict{Symbol,AbstractArray}()
+    transition_dict = Dict{Symbol,Any}()
 
     for feature in keys(feature_size)
         if split(feature, "/")[1] == "observation"
-            ob_key = Symbol(chop(feature, head = length("observation")+1, tail=0))
+            ob_key = Symbol(chop(feature, head = length("observation") + 1, tail = 0))
             if split(feature, "/")[end] == "egocentric_camera"
                 cam_feature_size = feature_size[feature]
                 ob_size = prod(cam_feature_size)
-                observation_dict[ob_key] = reshape(f[feature].bytes_list.value[1][1:ob_size], cam_feature_size...)
-                next_observation_dict[ob_key] = reshape(f[feature].bytes_list.value[1][ob_size+1:end], cam_feature_size...)
+                observation_dict[ob_key] =
+                    reshape(f[feature].bytes_list.value[1][1:ob_size], cam_feature_size...)
+                next_observation_dict[ob_key] = reshape(
+                    f[feature].bytes_list.value[1][ob_size+1:end],
+                    cam_feature_size...,
+                )
             else
                 if feature_size[feature] == ()
                     observation_dict[ob_key] = f[feature].float_list.value
                 else
                     ob_size = feature_size[feature][1]
                     observation_dict[ob_key] = f[feature].float_list.value[1:ob_size]
-                    next_observation_dict[ob_key] = f[feature].float_list.value[ob_size+1:end]
+                    next_observation_dict[ob_key] =
+                        f[feature].float_list.value[ob_size+1:end]
                 end
             end
         elseif feature == "action"
@@ -138,28 +153,25 @@ function rl_unplugged_dm_dataset(
     shards;
     type = "dm_control_suite",
     is_shuffle = true,
-    shuffle_buffer_size=10_000,
-    tf_reader_bufsize=10_000,
-    tf_reader_sz=10_000,
-    batch_size=256,
-    n_preallocations=nthreads()*12
-)   
+    shuffle_buffer_size = 10_000,
+    tf_reader_bufsize = 10_000,
+    tf_reader_sz = 10_000,
+    batch_size = 256,
+    n_preallocations = nthreads() * 12,
+)
     n = nthreads()
 
     repo = "rl-unplugged-dm"
-    
-    folders= [
-        @datadep_str "$repo-$game-$shard" 
-        for shard in shards
-    ]
-    
+
+    folders = [@datadep_str "$repo-$game-$shard" for shard in shards]
+
     ch_files = Channel{String}(length(folders)) do ch
         for folder in cycle(folders)
             file = folder * "/$(readdir(folder)[1])"
             put!(ch, file)
         end
     end
-    
+
     if is_shuffle
         files = buffered_shuffle(ch_files, length(folders))
     else
@@ -173,11 +185,11 @@ function rl_unplugged_dm_dataset(
             Threads.foreach(
                 TFRecord.read(
                     fs;
-                    compression=:gzip,
-                    bufsize=tf_reader_bufsize,
-                    channel_size=tf_reader_sz,
+                    compression = :gzip,
+                    bufsize = tf_reader_bufsize,
+                    channel_size = tf_reader_sz,
                 );
-                schedule=Threads.StaticSchedule()
+                schedule = Threads.StaticSchedule(),
             ) do x
                 put!(ch, make_transition(x, feature_size))
             end
@@ -185,21 +197,18 @@ function rl_unplugged_dm_dataset(
     end
 
     if is_shuffle
-        transitions = buffered_shuffle(
-        ch_src,
-        shuffle_buffer_size
-        )
+        transitions = buffered_shuffle(ch_src, shuffle_buffer_size)
     else
         transitions = ch_src
     end
-    
+
     taskref = Ref{Task}()
-    
+
     buffer_dict = dm_buffer_dict(feature_size, batch_size)
 
     buffer = NamedTuple(buffer_dict)
 
-    res = RingBuffer(buffer;taskref=taskref, sz=n_preallocations) do buff
+    res = RingBuffer(buffer; taskref = taskref, sz = n_preallocations) do buff
         Threads.@threads for i in 1:batch_size
             batch_named_tuple!(buff, take!(transitions), i)
         end

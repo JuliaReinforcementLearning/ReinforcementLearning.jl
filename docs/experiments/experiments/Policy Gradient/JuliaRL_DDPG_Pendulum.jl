@@ -69,7 +69,7 @@ function RL.Experiment(
             na = 1,
             batch_size = 64,
             start_steps = 1000,
-            start_policy = RandomPolicy(-1.0..1.0; rng = rng),
+            start_policy = RandomPolicy(-1.0 .. 1.0; rng = rng),
             update_after = 1000,
             update_freq = 1,
             act_limit = 1.0,
@@ -79,11 +79,11 @@ function RL.Experiment(
         trajectory = CircularArraySARTTrajectory(
             capacity = 10000,
             state = Vector{Float32} => (ns,),
-            action = Float32 => (na, ),
+            action = Float32 => (na,),
         ),
     )
 
-    stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(10_000, is_show_progress = !haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "# Play Pendulum with DDPG")
 end

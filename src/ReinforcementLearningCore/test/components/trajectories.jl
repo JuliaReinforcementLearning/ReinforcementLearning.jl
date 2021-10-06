@@ -52,9 +52,9 @@
         t = CircularArraySLARTTrajectory(
             capacity = 3,
             state = Vector{Int} => (4,),
-            legal_actions_mask = Vector{Bool} => (4, ),
+            legal_actions_mask = Vector{Bool} => (4,),
         )
-        
+
         # test instance type is same as type
         @test isa(t, CircularArraySLARTTrajectory)
 

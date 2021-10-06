@@ -24,7 +24,7 @@ function RL.Experiment(
     UPDATE_FREQ = 10
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(state(env)), length(action_space(env))
-    
+
     trajectory_num = 10000
     dataset_size = 10000
     batch_size = 64
@@ -60,7 +60,12 @@ function RL.Experiment(
                 m = 4,
                 update_freq = UPDATE_FREQ,
             ),
-            dataset = gen_JuliaRL_dataset(:BasicDQN, :CartPole, type; dataset_size = dataset_size),
+            dataset = gen_JuliaRL_dataset(
+                :BasicDQN,
+                :CartPole,
+                type;
+                dataset_size = dataset_size,
+            ),
             continuous = false,
             batch_size = batch_size,
         ),
@@ -70,7 +75,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(trajectory_num, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(trajectory_num, is_show_progress = !haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "CRR <-> CartPole ($type dataset)")
 end

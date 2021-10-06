@@ -1,19 +1,12 @@
-export AbstractMessage,
-    StartMsg,
-    StopMsg,
-    PingMsg,
-    PongMsg,
-    ProxyMsg,
-    actor,
-    self
+export AbstractMessage, StartMsg, StopMsg, PingMsg, PongMsg, ProxyMsg, actor, self
 
 
 abstract type AbstractMessage end
 
-struct StartMsg{A, K} <: AbstractMessage
+struct StartMsg{A,K} <: AbstractMessage
     args::A
     kwargs::K
-    StartMsg(args...;kwargs...) = new{typeof(args), typeof(kwargs)}(args, kwargs)
+    StartMsg(args...; kwargs...) = new{typeof(args),typeof(kwargs)}(args, kwargs)
 end
 
 struct StopMsg <: AbstractMessage end
@@ -45,9 +38,9 @@ const DEFAULT_MAILBOX_SIZE = 32
 Create a task to handle messages one-by-one by calling `f(msg)`.
 A mailbox (`RemoteChannel`) is returned.
 """
-function actor(f;sz=DEFAULT_MAILBOX_SIZE)
+function actor(f; sz = DEFAULT_MAILBOX_SIZE)
     RemoteChannel() do
-        Channel(sz;spawn=true) do ch
+        Channel(sz; spawn = true) do ch
             task_local_storage("MAILBOX", RemoteChannel(() -> ch))
             while true
                 msg = take!(ch)

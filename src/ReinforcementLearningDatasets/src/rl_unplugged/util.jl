@@ -27,7 +27,7 @@ Therefore, it acts as a channel that holds a shuffled buffer which is of type Ve
 - `buffer::Vector{T}`, The shuffled buffer.
 - `rng<:AbstractRNG`.
 """
-struct BufferedShuffle{T, R<:AbstractRNG} <: AbstractChannel{T}
+struct BufferedShuffle{T,R<:AbstractRNG} <: AbstractChannel{T}
     src::Channel{T}
     buffer::Vector{T}
     rng::R
@@ -43,7 +43,11 @@ Arguments:
 - `buffer_size::Int`. The size of the buffered channel.
 - `rng<:AbstractRNG` = Random.GLOBAL_RNG.
 """
-function buffered_shuffle(src::Channel{T}, buffer_size::Int;rng=Random.GLOBAL_RNG) where T
+function buffered_shuffle(
+    src::Channel{T},
+    buffer_size::Int;
+    rng = Random.GLOBAL_RNG,
+) where {T}
     buffer = Array{T}(undef, buffer_size)
     p = Progress(buffer_size)
     Threads.@threads for i in 1:buffer_size
@@ -70,7 +74,7 @@ function Base.take!(b::BufferedShuffle)
     end
 end
 
-function Base.iterate(b::BufferedShuffle, state=nothing)
+function Base.iterate(b::BufferedShuffle, state = nothing)
     try
         return (popfirst!(b), nothing)
     catch e
@@ -104,14 +108,14 @@ Return a RingBuffer that gives batches with the specs in `buffer`.
 - `buffer::T`: the type containing the batch.
 - `sz::Int`:size of the internal buffers.
 """
-function RingBuffer(f!, buffer::T;sz=Threads.nthreads(), taskref=nothing) where T
+function RingBuffer(f!, buffer::T; sz = Threads.nthreads(), taskref = nothing) where {T}
     buffers = Channel{T}(sz)
     for _ in 1:sz
         put!(buffers, deepcopy(buffer))
     end
-    results = Channel{T}(sz, spawn=true, taskref=taskref) do ch
-        Threads.foreach(buffers;schedule=Threads.StaticSchedule()) do x
-        # for x in buffers
+    results = Channel{T}(sz, spawn = true, taskref = taskref) do ch
+        Threads.foreach(buffers; schedule = Threads.StaticSchedule()) do x
+            # for x in buffers
             f!(x)  # in-place operation
             put!(ch, x)
         end

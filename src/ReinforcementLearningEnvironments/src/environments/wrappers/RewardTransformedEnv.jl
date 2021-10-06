@@ -10,7 +10,7 @@ struct RewardTransformedEnv{F,E<:AbstractEnv} <: AbstractEnvWrapper
     reward_mapping::F
 end
 
-RewardTransformedEnv(env; reward_mapping=identity) = 
+RewardTransformedEnv(env; reward_mapping = identity) =
     RewardTransformedEnv(env, reward_mapping)
 
 RLBase.reward(env::RewardTransformedEnv, args...; kwargs...) =

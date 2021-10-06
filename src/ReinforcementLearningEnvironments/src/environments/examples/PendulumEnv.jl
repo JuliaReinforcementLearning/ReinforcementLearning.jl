@@ -53,7 +53,7 @@ function PendulumEnv(;
     rng = Random.GLOBAL_RNG,
 )
     high = T.([1, 1, max_speed])
-    action_space = continuous ? -2.0..2.0 : Base.OneTo(n_actions)
+    action_space = continuous ? -2.0 .. 2.0 : Base.OneTo(n_actions)
     env = PendulumEnv(
         PendulumEnvParams(max_speed, max_torque, g, m, l, dt, max_steps),
         action_space,

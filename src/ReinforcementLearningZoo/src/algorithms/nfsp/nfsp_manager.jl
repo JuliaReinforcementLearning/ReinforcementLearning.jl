@@ -7,7 +7,7 @@ export NFSPAgentManager
 A special MultiAgentManager in which all agents use NFSP policy to play the game.
 """
 mutable struct NFSPAgentManager <: AbstractPolicy
-    agents::Dict{Any, NFSPAgent}
+    agents::Dict{Any,NFSPAgent}
 end
 
 ## interactions between the policy and env.
@@ -20,7 +20,8 @@ function (π::NFSPAgentManager)(env::AbstractEnv)
     end
 end
 
-RLBase.prob(π::NFSPAgentManager, env::AbstractEnv, args...) = prob(π.agents[current_player(env)], env, args...)
+RLBase.prob(π::NFSPAgentManager, env::AbstractEnv, args...) =
+    prob(π.agents[current_player(env)], env, args...)
 
 ## update NFSPAgentManager
 function RLBase.update!(π::NFSPAgentManager, env::AbstractEnv)
@@ -30,7 +31,10 @@ function RLBase.update!(π::NFSPAgentManager, env::AbstractEnv)
     update!(π.agents[current_player(env)], env)
 end
 
-function (π::NFSPAgentManager)(stage::Union{PreEpisodeStage, PostEpisodeStage}, env::AbstractEnv)
+function (π::NFSPAgentManager)(
+    stage::Union{PreEpisodeStage,PostEpisodeStage},
+    env::AbstractEnv,
+)
     @sync for (player, agent) in π.agents
         @async agent(stage, env, player)
     end

@@ -24,7 +24,7 @@ end
 
 function Base.show(io::IO, x::Experiment)
     display(Markdown.parse(x.description))
-    AbstractTrees.print_tree(io, StructTree(x), maxdepth=get(io, :max_depth, 10))
+    AbstractTrees.print_tree(io, StructTree(x), maxdepth = get(io, :max_depth, 10))
 end
 
 macro experiment_cmd(s)
@@ -51,7 +51,7 @@ function Experiment(s::String)
     )
 end
 
-function Base.run(x::Experiment; describe::Bool=true)
+function Base.run(x::Experiment; describe::Bool = true)
     describe && display(Markdown.parse(x.description))
     run(x.policy, x.env, x.stop_condition, x.hook)
     x

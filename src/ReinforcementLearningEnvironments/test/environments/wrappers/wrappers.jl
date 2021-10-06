@@ -1,11 +1,11 @@
 @testset "wrappers" begin
 
     @testset "ActionTransformedEnv" begin
-        env = TigerProblemEnv(; rng=StableRNG(123))
+        env = TigerProblemEnv(; rng = StableRNG(123))
         env′ = ActionTransformedEnv(
             env;
-            action_space_mapping=x -> Base.OneTo(3),
-            action_mapping=i -> action_space(env)[i],
+            action_space_mapping = x -> Base.OneTo(3),
+            action_mapping = i -> action_space(env)[i],
         )
 
         RLBase.test_interfaces!(env′)
@@ -14,7 +14,7 @@
 
     @testset "DefaultStateStyleEnv" begin
         rng = StableRNG(123)
-        env = TigerProblemEnv(; rng=rng)
+        env = TigerProblemEnv(; rng = rng)
         S = InternalState{Int}()
         env′ = DefaultStateStyleEnv{S}(env)
         @test DefaultStateStyle(env′) === S
@@ -35,7 +35,7 @@
 
     @testset "MaxTimeoutEnv" begin
         rng = StableRNG(123)
-        env = TigerProblemEnv(; rng=rng)
+        env = TigerProblemEnv(; rng = rng)
         n = 100
         env′ = MaxTimeoutEnv(env, n)
 
@@ -55,7 +55,7 @@
 
     @testset "RewardTransformedEnv" begin
         rng = StableRNG(123)
-        env = TigerProblemEnv(; rng=rng)
+        env = TigerProblemEnv(; rng = rng)
         env′ = RewardTransformedEnv(env; reward_mapping = x -> sign(x))
 
         RLBase.test_interfaces!(env′)
@@ -69,7 +69,7 @@
 
     @testset "RewardOverriddenEnv" begin
         rng = StableRNG(123)
-        env = TigerProblemEnv(; rng=rng)
+        env = TigerProblemEnv(; rng = rng)
         env′ = RewardOverriddenEnv(env, e -> sign(reward(e)))
 
         RLBase.test_interfaces!(env′)
@@ -83,7 +83,7 @@
 
     @testset "StateCachedEnv" begin
         rng = StableRNG(123)
-        env = CartPoleEnv(; rng=rng)
+        env = CartPoleEnv(; rng = rng)
         env′ = StateCachedEnv(env)
 
         RLBase.test_interfaces!(env′)
@@ -99,7 +99,7 @@
 
     @testset "StateTransformedEnv" begin
         rng = StableRNG(123)
-        env = TigerProblemEnv(; rng=rng)
+        env = TigerProblemEnv(; rng = rng)
         # S = (:door1, :door2, :door3, :none)
         # env′ = StateTransformedEnv(env, state_mapping=s -> s+1)
         # RLBase.state_space(env::typeof(env′), ::RLBase.AbstractStateStyle, ::Any) = S
@@ -111,14 +111,14 @@
     @testset "StochasticEnv" begin
         env = KuhnPokerEnv()
         rng = StableRNG(123)
-        env′ = StochasticEnv(env; rng=rng)
+        env′ = StochasticEnv(env; rng = rng)
 
         RLBase.test_interfaces!(env′)
         RLBase.test_runnable!(env′)
     end
 
     @testset "SequentialEnv" begin
-        env =  RockPaperScissorsEnv()
+        env = RockPaperScissorsEnv()
         env′ = SequentialEnv(env)
         RLBase.test_interfaces!(env′)
         RLBase.test_runnable!(env′)

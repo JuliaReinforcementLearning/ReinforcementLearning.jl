@@ -9,7 +9,7 @@ using Flux
 
 @testset "DistributedReinforcementLearning.jl" begin
 
-include("actor.jl")
-include("core.jl")
+    include("actor.jl")
+    include("core.jl")
 
 end

@@ -410,12 +410,13 @@ Make an independent copy of `env`,
 !!! warning
     Only check the state of all players in the env.
 """
-function Base.:(==)(env1::T, env2::T) where T<:AbstractEnv
+function Base.:(==)(env1::T, env2::T) where {T<:AbstractEnv}
     len = length(players(env1))
-    len == length(players(env2)) && 
-    all(state(env1, player) == state(env2, player) for player in players(env1))
+    len == length(players(env2)) &&
+        all(state(env1, player) == state(env2, player) for player in players(env1))
 end
-Base.hash(env::AbstractEnv, h::UInt) = hash([state(env, player) for player in players(env)], h)
+Base.hash(env::AbstractEnv, h::UInt) =
+    hash([state(env, player) for player in players(env)], h)
 
 @api nameof(env::AbstractEnv) = nameof(typeof(env))
 

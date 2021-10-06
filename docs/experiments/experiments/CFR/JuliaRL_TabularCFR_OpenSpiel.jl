@@ -23,7 +23,13 @@ function RL.Experiment(
     π = TabularCFRPolicy(; rng = rng)
 
     description = "# Play `$game` in OpenSpiel with TabularCFRPolicy"
-    Experiment(π, env, StopAfterStep(300, is_show_progress=!haskey(ENV, "CI")), EmptyHook(), description)
+    Experiment(
+        π,
+        env,
+        StopAfterStep(300, is_show_progress = !haskey(ENV, "CI")),
+        EmptyHook(),
+        description,
+    )
 end
 
 ex = E`JuliaRL_TabularCFR_OpenSpiel(kuhn_poker)`

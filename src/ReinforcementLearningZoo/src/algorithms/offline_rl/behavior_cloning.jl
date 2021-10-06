@@ -19,19 +19,14 @@ end
 - `rng = Random.GLOBAL_RNG`
 """
 function BehaviorCloningPolicy(;
-        approximator::A,
-        explorer::AbstractExplorer = GreedyExplorer(),
-        batch_size::Int = 32,
-        min_reservoir_history::Int = 100,
-        rng = Random.GLOBAL_RNG
+    approximator::A,
+    explorer::AbstractExplorer = GreedyExplorer(),
+    batch_size::Int = 32,
+    min_reservoir_history::Int = 100,
+    rng = Random.GLOBAL_RNG,
 ) where {A}
     sampler = BatchSampler{(:state, :action)}(batch_size; rng = rng)
-    BehaviorCloningPolicy(
-        approximator,
-        explorer,
-        sampler,
-        min_reservoir_history,
-    )
+    BehaviorCloningPolicy(approximator, explorer, sampler, min_reservoir_history)
 end
 
 function (p::BehaviorCloningPolicy)(env::AbstractEnv)
@@ -39,7 +34,8 @@ function (p::BehaviorCloningPolicy)(env::AbstractEnv)
     s_batch = Flux.unsqueeze(s, ndims(s) + 1)
     s_batch = send_to_device(device(p.approximator), s_batch)
     logits = p.approximator(s_batch) |> vec |> send_to_host # drop dimension
-    typeof(ActionStyle(env)) == MinimalActionSet ? p.explorer(logits) : p.explorer(logits, legal_action_space_mask(env))
+    typeof(ActionStyle(env)) == MinimalActionSet ? p.explorer(logits) :
+    p.explorer(logits, legal_action_space_mask(env))
 end
 
 function RLBase.update!(p::BehaviorCloningPolicy, batch::NamedTuple{(:state, :action)})
@@ -65,7 +61,8 @@ function RLBase.prob(p::BehaviorCloningPolicy, env::AbstractEnv)
     m = p.approximator
     s_batch = send_to_device(device(m), Flux.unsqueeze(s, ndims(s) + 1))
     values = m(s_batch) |> vec |> send_to_host
-    typeof(ActionStyle(env)) == MinimalActionSet ? prob(p.explorer, values) : prob(p.explorer, values, legal_action_space_mask(env))
+    typeof(ActionStyle(env)) == MinimalActionSet ? prob(p.explorer, values) :
+    prob(p.explorer, values, legal_action_space_mask(env))
 end
 
 function RLBase.prob(p::BehaviorCloningPolicy, env::AbstractEnv, action)

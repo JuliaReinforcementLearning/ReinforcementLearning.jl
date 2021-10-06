@@ -61,7 +61,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(10_000, is_show_progress = !haskey(ENV, "CI"))
     hook = RecordStateAction()
     run(agent, env, stop_condition, hook)
 
@@ -84,7 +84,13 @@ function RL.Experiment(
     end
 
     hook = TotalRewardPerEpisode()
-    Experiment(bc, env, StopAfterEpisode(100, is_show_progress=!haskey(ENV, "CI")), hook, "BehaviorCloning <-> CartPole")
+    Experiment(
+        bc,
+        env,
+        StopAfterEpisode(100, is_show_progress = !haskey(ENV, "CI")),
+        hook,
+        "BehaviorCloning <-> CartPole",
+    )
 end
 
 #+ tangle=false

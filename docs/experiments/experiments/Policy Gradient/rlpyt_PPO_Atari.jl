@@ -85,7 +85,7 @@ function RL.Experiment(
     hook = ComposedHook(
         total_batch_reward_per_episode,
         batch_steps_per_episode,
-        DoEveryNStep(;n=UPDATE_FREQ) do t, agent, env
+        DoEveryNStep(; n = UPDATE_FREQ) do t, agent, env
             p = agent.policy
             with_logger(lg) do
                 @info "training" loss = mean(p.loss) actor_loss = mean(p.actor_loss) critic_loss =
@@ -93,7 +93,7 @@ function RL.Experiment(
                     mean(p.norm) log_step_increment = UPDATE_FREQ
             end
         end,
-        DoEveryNStep(;n=UPDATE_FREQ) do t, agent, env
+        DoEveryNStep(; n = UPDATE_FREQ) do t, agent, env
             decay = (N_TRAINING_STEPS - t) / N_TRAINING_STEPS
             agent.policy.approximator.optimizer.eta = INIT_LEARNING_RATE * decay
             agent.policy.clip_range = INIT_CLIP_RANGE * Float32(decay)
@@ -101,20 +101,22 @@ function RL.Experiment(
         DoEveryNStep() do t, agent, env
             with_logger(lg) do
                 rewards = [
-                    total_batch_reward_per_episode.rewards[i][end] for i in 1:length(env) if is_terminated(env[i])
+                    total_batch_reward_per_episode.rewards[i][end] for
+                    i in 1:length(env) if is_terminated(env[i])
                 ]
                 if length(rewards) > 0
                     @info "training" rewards = mean(rewards) log_step_increment = 0
                 end
                 steps = [
-                    batch_steps_per_episode.steps[i][end] for i in 1:length(env) if is_terminated(env[i])
+                    batch_steps_per_episode.steps[i][end] for
+                    i in 1:length(env) if is_terminated(env[i])
                 ]
                 if length(steps) > 0
                     @info "training" steps = mean(steps) log_step_increment = 0
                 end
             end
         end,
-        DoEveryNStep(;n=EVALUATION_FREQ) do t, agent, env
+        DoEveryNStep(; n = EVALUATION_FREQ) do t, agent, env
             @info "evaluating agent at $t step..."
             ## switch to GreedyExplorer?
             h = TotalBatchRewardPerEpisode(N_ENV)

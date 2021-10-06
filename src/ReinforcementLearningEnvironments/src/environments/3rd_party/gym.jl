@@ -1,13 +1,15 @@
 using .PyCall
 
-function GymEnv(name::String; seed::Union{Int, Nothing}=nothing)
+function GymEnv(name::String; seed::Union{Int,Nothing} = nothing)
     if !PyCall.pyexists("gym")
         error(
             "Cannot import module 'gym'.\n\nIf you did not yet install it, try running\n`ReinforcementLearningEnvironments.install_gym()`\n",
         )
     end
     gym = pyimport_conda("gym", "gym")
-    if PyCall.pyexists("d4rl") pyimport("d4rl") end
+    if PyCall.pyexists("d4rl")
+        pyimport("d4rl")
+    end
     pyenv = try
         gym.make(name)
     catch e
@@ -15,7 +17,9 @@ function GymEnv(name::String; seed::Union{Int, Nothing}=nothing)
             "Gym environment $name not found.\n\nRun `ReinforcementLearningEnvironments.list_gym_env_names()` to find supported environments.\n",
         )
     end
-    if seed !== nothing pyenv.seed(seed) end
+    if seed !== nothing
+        pyenv.seed(seed)
+    end
     obs_space = space_transform(pyenv.observation_space)
     act_space = space_transform(pyenv.action_space)
     obs_type = if obs_space isa Space{<:Union{Array{<:Interval},Array{<:ZeroTo}}}
@@ -139,8 +143,10 @@ function list_gym_env_names(;
         "d4rl.gym_bullet.gym_envs",
         "d4rl.pointmaze_bullet.bullet_maze", # yet to include flow and carla
     ],
-)   
-    if PyCall.pyexists("d4rl") pyimport("d4rl") end
+)
+    if PyCall.pyexists("d4rl")
+        pyimport("d4rl")
+    end
     gym = pyimport("gym")
     [x.id for x in gym.envs.registry.all() if split(x.entry_point, ':')[1] in modules]
 end

@@ -20,8 +20,8 @@ See the paper https://arxiv.org/abs/1603.01121 for more details.
 mutable struct NFSPAgent <: AbstractPolicy
     rl_agent::Agent
     sl_agent::Agent
-    η
-    rng
+    η::Any
+    rng::Any
     update_freq::Int
     update_step::Int
     mode::Bool
@@ -96,7 +96,7 @@ function (π::NFSPAgent)(::PostEpisodeStage, env::AbstractEnv, player::Any)
     if haskey(rl.trajectory, :legal_actions_mask)
         push!(rl.trajectory[:legal_actions_mask], legal_action_space_mask(env, player))
     end
-    
+
     # update the policy    
     π.update_step += 1
     if π.update_step % π.update_freq == 0
@@ -113,7 +113,7 @@ end
 function rl_learn!(policy::QBasedPolicy, t::AbstractTrajectory)
     learner = policy.learner
     length(t[:terminal]) - learner.sampler.n <= learner.min_replay_history && return
-    
+
     _, batch = sample(learner.rng, t, learner.sampler)
 
     if t isa PrioritizedTrajectory

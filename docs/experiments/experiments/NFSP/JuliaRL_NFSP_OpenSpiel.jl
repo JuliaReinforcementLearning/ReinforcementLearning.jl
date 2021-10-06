@@ -29,21 +29,17 @@ function (hook::KuhnOpenNFSPHook)(::PostEpisodeStage, policy, env)
     end
 end
 
-function RL.Experiment(
-    ::Val{:JuliaRL},
-    ::Val{:NFSP},
-    ::Val{:OpenSpiel},
-    game;
-    seed = 123,
-)
+function RL.Experiment(::Val{:JuliaRL}, ::Val{:NFSP}, ::Val{:OpenSpiel}, game; seed = 123)
     rng = StableRNG(seed)
-    
+
     env = OpenSpielEnv(game)
     wrapped_env = ActionTransformedEnv(
         env,
-        action_mapping = a -> RLBase.current_player(env) == chance_player(env) ? a : Int(a - 1),
-        action_space_mapping = as -> RLBase.current_player(env) == chance_player(env) ? 
-            as : Base.OneTo(num_distinct_actions(env.game)),
+        action_mapping = a ->
+            RLBase.current_player(env) == chance_player(env) ? a : Int(a - 1),
+        action_space_mapping = as ->
+            RLBase.current_player(env) == chance_player(env) ? as :
+            Base.OneTo(num_distinct_actions(env.game)),
     )
     wrapped_env = DefaultStateStyleEnv{InformationSet{Array}()}(wrapped_env)
     player = 0 # or 1
@@ -56,14 +52,14 @@ function RL.Experiment(
                 approximator = NeuralNetworkApproximator(
                     model = Chain(
                         Dense(ns, 128, relu; init = glorot_normal(rng)),
-                        Dense(128, na; init = glorot_normal(rng))
+                        Dense(128, na; init = glorot_normal(rng)),
                     ) |> cpu,
                     optimizer = Descent(0.01),
                 ),
                 target_approximator = NeuralNetworkApproximator(
                     model = Chain(
                         Dense(ns, 128, relu; init = glorot_normal(rng)),
-                        Dense(128, na; init = glorot_normal(rng))
+                        Dense(128, na; init = glorot_normal(rng)),
                     ) |> cpu,
                 ),
                 γ = 1.0f0,
@@ -84,7 +80,7 @@ function RL.Experiment(
         ),
         trajectory = CircularArraySARTTrajectory(
             capacity = 200_000,
-            state = Vector{Float64} => (ns, ),
+            state = Vector{Float64} => (ns,),
         ),
     )
 
@@ -92,9 +88,9 @@ function RL.Experiment(
         policy = BehaviorCloningPolicy(;
             approximator = NeuralNetworkApproximator(
                 model = Chain(
-                        Dense(ns, 128, relu; init = glorot_normal(rng)),
-                        Dense(128, na; init = glorot_normal(rng))
-                    ) |> cpu,
+                    Dense(ns, 128, relu; init = glorot_normal(rng)),
+                    Dense(128, na; init = glorot_normal(rng)),
+                ) |> cpu,
                 optimizer = Descent(0.01),
             ),
             explorer = WeightedSoftmaxExplorer(),
@@ -114,28 +110,43 @@ function RL.Experiment(
     η = 0.1 # anticipatory parameter
     nfsp = NFSPAgentManager(
         Dict(
-            (player, NFSPAgent(
-                deepcopy(rl_agent),
-                deepcopy(sl_agent),
-                η,
-                rng,
-                128, # update_freq
-                0, # initial update_step
-                true, # initial NFSPAgent's training mode
-            )) for player in players(wrapped_env) if player != chance_player(wrapped_env)
-        )
+            (
+                player,
+                NFSPAgent(
+                    deepcopy(rl_agent),
+                    deepcopy(sl_agent),
+                    η,
+                    rng,
+                    128, # update_freq
+                    0, # initial update_step
+                    true, # initial NFSPAgent's training mode
+                ),
+            ) for player in players(wrapped_env) if player != chance_player(wrapped_env)
+        ),
     )
 
-    stop_condition = StopAfterEpisode(1_200_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterEpisode(1_200_000, is_show_progress = !haskey(ENV, "CI"))
     hook = KuhnOpenNFSPHook(10_000, 0, [], [])
 
-    Experiment(nfsp, wrapped_env, stop_condition, hook, "# Play kuhn_poker in OpenSpiel with NFSP")
+    Experiment(
+        nfsp,
+        wrapped_env,
+        stop_condition,
+        hook,
+        "# Play kuhn_poker in OpenSpiel with NFSP",
+    )
 end
 
 using Plots
 ex = E`JuliaRL_NFSP_OpenSpiel(kuhn_poker)`
 run(ex)
-plot(ex.hook.episode, ex.hook.results, xaxis=:log, xlabel="episode", ylabel="nash_conv")
+plot(
+    ex.hook.episode,
+    ex.hook.results,
+    xaxis = :log,
+    xlabel = "episode",
+    ylabel = "nash_conv",
+)
 
 savefig("assets/JuliaRL_NFSP_OpenSpiel(kuhn_poker).png")#hide
 

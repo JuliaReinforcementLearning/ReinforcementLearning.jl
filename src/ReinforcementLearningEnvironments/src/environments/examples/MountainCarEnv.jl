@@ -77,7 +77,7 @@ function MountainCarEnv(;
     env = MountainCarEnv(
         params,
         action_space,
-        Space([params.min_pos..params.max_pos, -params.max_speed..params.max_speed]),
+        Space([params.min_pos .. params.max_pos, -params.max_speed .. params.max_speed]),
         zeros(T, 2),
         rand(action_space),
         false,

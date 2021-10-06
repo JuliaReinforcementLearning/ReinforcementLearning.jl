@@ -91,7 +91,8 @@ function FisherBRCLearner(;
 )
     copyto!(qnetwork1, target_qnetwork1)  # force sync
     copyto!(qnetwork2, target_qnetwork2)  # force sync
-    entropy_behavior_policy = EntropyBC(behavior_policy, 0.0f0, behavior_lr_alpha, Float32(-action_dims), 0.0f0)
+    entropy_behavior_policy =
+        EntropyBC(behavior_policy, 0.0f0, behavior_lr_alpha, Float32(-action_dims), 0.0f0)
     FisherBRCLearner(
         policy,
         entropy_behavior_policy,
@@ -111,8 +112,8 @@ function FisherBRCLearner(;
         lr_alpha,
         Float32(-action_dims),
         rng,
-        0f0,
-        0f0,
+        0.0f0,
+        0.0f0,
     )
 end
 
@@ -120,7 +121,7 @@ function (l::FisherBRCLearner)(env)
     D = device(l.policy)
     s = send_to_device(D, state(env))
     s = Flux.unsqueeze(s, ndims(s) + 1)
-    action = dropdims(l.policy(l.rng, s; is_sampling=true), dims=2)
+    action = dropdims(l.policy(l.rng, s; is_sampling = true), dims = 2)
 end
 
 function RLBase.update!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
@@ -137,7 +138,7 @@ function update_behavior_policy!(l::EntropyBC, batch::NamedTuple{SARTS})
     # Update behavior policy with entropy
     gs = gradient(Flux.params(l.policy)) do
         log_π = l.policy.model(s, a)
-        _, entropy = l.policy.model(s; is_sampling=true, is_return_log_prob=true)
+        _, entropy = l.policy.model(s; is_sampling = true, is_return_log_prob = true)
         loss = mean(l.α .* entropy .- log_π)
         # Update entropy
         ignore() do
@@ -155,7 +156,7 @@ function update_learner!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
     r .+= l.reward_bonus
     γ, τ, α = l.γ, l.τ, l.α
 
-    a′ = l.policy(l.rng, s′; is_sampling=true)
+    a′ = l.policy(l.rng, s′; is_sampling = true)
     q′_input = vcat(s′, a′)
     target_q′ = min.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input))
 
@@ -165,16 +166,16 @@ function update_learner!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
     a = reshape(a, :, l.batch_size)
     q_input = vcat(s, a)
     log_μ = l.behavior_policy.policy.model(s, a) |> vec
-    a_policy = l.policy(l.rng, s; is_sampling=true)
+    a_policy = l.policy(l.rng, s; is_sampling = true)
 
     q_grad_1 = gradient(Flux.params(l.qnetwork1)) do
         q1 = l.qnetwork1(q_input) |> vec
-        q1_grad_norm = gradient(Flux.params([a_policy])) do 
+        q1_grad_norm = gradient(Flux.params([a_policy])) do
             q1_reg = mean(l.qnetwork1(vcat(s, a_policy)))
         end
         reg = mean(q1_grad_norm[a_policy] .^ 2)
         loss = mse(q1 .+ log_μ, y) + l.f_reg * reg
-        ignore() do 
+        ignore() do
             l.qnetwork_loss = loss
         end
         loss
@@ -183,12 +184,12 @@ function update_learner!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
 
     q_grad_2 = gradient(Flux.params(l.qnetwork2)) do
         q2 = l.qnetwork2(q_input) |> vec
-        q2_grad_norm = gradient(Flux.params([a_policy])) do 
+        q2_grad_norm = gradient(Flux.params([a_policy])) do
             q2_reg = mean(l.qnetwork2(vcat(s, a_policy)))
         end
         reg = mean(q2_grad_norm[a_policy] .^ 2)
         loss = mse(q2 .+ log_μ, y) + l.f_reg * reg
-        ignore() do 
+        ignore() do
             l.qnetwork_loss += loss
         end
         loss
@@ -197,7 +198,7 @@ function update_learner!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
 
     # Train Policy
     p_grad = gradient(Flux.params(l.policy)) do
-        a, log_π = l.policy(l.rng, s; is_sampling=true, is_return_log_prob=true)
+        a, log_π = l.policy(l.rng, s; is_sampling = true, is_return_log_prob = true)
         q_input = vcat(s, a)
         q = min.(l.qnetwork1(q_input), l.qnetwork2(q_input)) .+ log_μ
         policy_loss = mean(α .* log_π .- q)

@@ -42,6 +42,7 @@ function RLBase.update!(
 end
 
 
-(p::NamedPolicy)(env::AbstractEnv) = DynamicStyle(env) == SEQUENTIAL ? p.policy(env) : p.policy(env, p.name)
+(p::NamedPolicy)(env::AbstractEnv) =
+    DynamicStyle(env) == SEQUENTIAL ? p.policy(env) : p.policy(env, p.name)
 (p::NamedPolicy)(s::AbstractStage, env::AbstractEnv) = p.policy(s, env)
 (p::NamedPolicy)(s::PreActStage, env::AbstractEnv, action) = p.policy(s, env, action)

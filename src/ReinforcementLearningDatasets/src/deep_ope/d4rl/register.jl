@@ -1,11 +1,11 @@
 gcs_prefix = "gs://gresearch/deep-ope/d4rl"
-folder_prefix = "deep-ope-d4rl" 
+folder_prefix = "deep-ope-d4rl"
 policies = D4RL_POLICIES
 
 function deep_ope_d4rl_init()
     for policy in policies
         gcs_policy_folder = policy["policy_path"]
-        local_policy_folder = chop(split(gcs_policy_folder, "/")[end], head=0, tail=4)
+        local_policy_folder = chop(split(gcs_policy_folder, "/")[end], head = 0, tail = 4)
         register(
             DataDep(
                 "$(folder_prefix)-$(local_policy_folder)",
@@ -16,7 +16,7 @@ function deep_ope_d4rl_init()
                 Authors: Justin Fu, Mohammad Norouzi, Ofir Nachum, George Tucker, ziyu wang, Alexander Novikov, Mengjiao Yang, Michael R Zhang, 
                 Yutian Chen, Aviral Kumar, Cosmin Paduraru, Sergey Levine, Thomas Paine
                 Year: 2021
-        
+
                 Deep OPE contains:
                 Policies for the tasks in the D4RL, DeepMind Locomotion and Control Suite datasets.
                 Policies trained with the following algorithms (D4PG, ABM, CRR, SAC, DAPG and BC) and snapshots along the training trajectory. This facilitates 
@@ -29,8 +29,8 @@ function deep_ope_d4rl_init()
                 what datasets are available, please refer to D4RL: Datasets for Deep Data-Driven Reinforcement Learning.
                 """,
                 "$(gcs_prefix)/$(gcs_policy_folder)";
-                fetch_method=fetch_gc_file
-            )
+                fetch_method = fetch_gc_file,
+            ),
         )
     end
 end

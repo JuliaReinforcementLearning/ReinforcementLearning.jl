@@ -1,5 +1,5 @@
 @testset "test StopAfterNoImprovement" begin
-    env = StateTransformedEnv(CartPoleEnv{Float32}();state_mapping=deepcopy)
+    env = StateTransformedEnv(CartPoleEnv{Float32}(); state_mapping = deepcopy)
     policy = RandomPolicy(action_space(env))
 
     total_reward_per_episode = TotalRewardPerEpisode()
@@ -14,7 +14,8 @@
     hook = ComposedHook(total_reward_per_episode)
     run(policy, env, stop_condition, hook)
 
-    @test argmax(total_reward_per_episode.rewards) + patience == length(total_reward_per_episode.rewards)
+    @test argmax(total_reward_per_episode.rewards) + patience ==
+          length(total_reward_per_episode.rewards)
 end
 
 @testset "StopAfterNSeconds" begin

@@ -52,7 +52,7 @@ function RL.Experiment(
                 update_freq = 1,
                 target_update_freq = 100,
                 ensemble_num = ensemble_num,
-                ensemble_method = :rand, 
+                ensemble_method = :rand,
                 rng = rng,
             ),
             explorer = EpsilonGreedyExplorer(
@@ -68,7 +68,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(10_000, is_show_progress = !haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "")
 end

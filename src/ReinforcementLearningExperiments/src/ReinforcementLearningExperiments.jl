@@ -23,7 +23,6 @@ for f in readdir(EXPERIMENTS_DIR)
 end
 
 # dynamic loading environments
-function __init__()
-end
+function __init__() end
 
 end # module

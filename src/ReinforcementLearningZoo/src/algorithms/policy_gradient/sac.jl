@@ -104,8 +104,8 @@ function SACPolicy(;
         Float32(-action_dims),
         update_step,
         rng,
-        0f0,
-        0f0,
+        0.0f0,
+        0.0f0,
     )
 end
 
@@ -120,7 +120,7 @@ function (p::SACPolicy)(env)
         s = state(env)
         s = Flux.unsqueeze(s, ndims(s) + 1)
         # trainmode:
-        action = dropdims(p.policy(p.rng, s; is_sampling=true), dims=2) # Single action vec, drop second dim
+        action = dropdims(p.policy(p.rng, s; is_sampling = true), dims = 2) # Single action vec, drop second dim
 
         # testmode:
         # if testing dont sample an action, but act deterministically by
@@ -146,7 +146,7 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
 
     γ, τ, α = p.γ, p.τ, p.α
 
-    a′, log_π = p.policy(p.rng, s′; is_sampling=true, is_return_log_prob=true)
+    a′, log_π = p.policy(p.rng, s′; is_sampling = true, is_return_log_prob = true)
     q′_input = vcat(s′, a′)
     q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
@@ -168,12 +168,12 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
 
     # Train Policy
     p_grad = gradient(Flux.params(p.policy)) do
-        a, log_π = p.policy(p.rng, s; is_sampling=true, is_return_log_prob=true)
+        a, log_π = p.policy(p.rng, s; is_sampling = true, is_return_log_prob = true)
         q_input = vcat(s, a)
         q = min.(p.qnetwork1(q_input), p.qnetwork2(q_input))
         reward = mean(q)
         entropy = mean(log_π)
-        ignore() do 
+        ignore() do
             p.reward_term = reward
             p.entropy_term = entropy
         end

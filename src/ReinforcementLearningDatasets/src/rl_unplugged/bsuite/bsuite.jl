@@ -3,11 +3,11 @@ export rl_unplugged_bsuite_dataset
 using TFRecord
 
 struct BSuiteRLTransition <: RLTransition
-    state
-    action
-    reward
-    terminal
-    next_state
+    state::Any
+    action::Any
+    reward::Any
+    terminal::Any
+    next_state::Any
 end
 
 function BSuiteRLTransition(example::TFRecord.Example, game::String)
@@ -55,46 +55,43 @@ function rl_unplugged_bsuite_dataset(
     game::String,
     shards::Vector{Int},
     type::String;
-    is_shuffle::Bool=true,
-    stochasticity::Float64=0.0,
-    shuffle_buffer_size::Int=10_000,
-    tf_reader_bufsize::Int=10_000,
-    tf_reader_sz::Int=10_000,
-    batch_size::Int=256,
-    n_preallocations::Int=nthreads()*12
-)   
+    is_shuffle::Bool = true,
+    stochasticity::Float64 = 0.0,
+    shuffle_buffer_size::Int = 10_000,
+    tf_reader_bufsize::Int = 10_000,
+    tf_reader_sz::Int = 10_000,
+    batch_size::Int = 256,
+    n_preallocations::Int = nthreads() * 12,
+)
     n = nthreads()
 
     repo = "rl-unplugged-bsuite"
-    
-    folders= [
-        @datadep_str "$repo-$game-$stochasticity-$shard-$type" 
-        for shard in shards
-    ]
-    
+
+    folders = [@datadep_str "$repo-$game-$stochasticity-$shard-$type" for shard in shards]
+
     ch_files = Channel{String}(length(folders)) do ch
         for folder in cycle(folders)
             file = folder * "/$(readdir(folder)[1])"
             put!(ch, file)
         end
     end
-    
+
     if is_shuffle
         files = buffered_shuffle(ch_files, length(folders))
     else
         files = ch_files
     end
-    
+
     ch_src = Channel{BSuiteRLTransition}(n * tf_reader_sz) do ch
         for fs in partition(files, n)
             Threads.foreach(
                 TFRecord.read(
                     fs;
-                    compression=:gzip,
-                    bufsize=tf_reader_bufsize,
-                    channel_size=tf_reader_sz,
+                    compression = :gzip,
+                    bufsize = tf_reader_bufsize,
+                    channel_size = tf_reader_sz,
                 );
-                schedule=Threads.StaticSchedule()
+                schedule = Threads.StaticSchedule(),
             ) do x
                 put!(ch, BSuiteRLTransition(x, game))
             end
@@ -102,33 +99,30 @@ function rl_unplugged_bsuite_dataset(
     end
 
     if is_shuffle
-        transitions = buffered_shuffle(
-        ch_src,
-        shuffle_buffer_size
-        )
+        transitions = buffered_shuffle(ch_src, shuffle_buffer_size)
     else
         transitions = ch_src
     end
-    
+
     taskref = Ref{Task}()
 
-    ob_size = game=="mountain_car" ? 3 : 6 
+    ob_size = game == "mountain_car" ? 3 : 6
 
     if game == "catch"
-        obs_template = Array{Float32, 3}(undef, 10, 5, batch_size)
+        obs_template = Array{Float32,3}(undef, 10, 5, batch_size)
     else
-        obs_template = Array{Float32, 2}(undef, ob_size, batch_size)
+        obs_template = Array{Float32,2}(undef, ob_size, batch_size)
     end
 
     buffer = BSuiteRLTransition(
         copy(obs_template),
-        Array{Int, 1}(undef, batch_size),
-        Array{Float32, 1}(undef, batch_size),
-        Array{Bool, 1}(undef, batch_size),
+        Array{Int,1}(undef, batch_size),
+        Array{Float32,1}(undef, batch_size),
+        Array{Bool,1}(undef, batch_size),
         copy(obs_template),
     )
 
-    res = RingBuffer(buffer;taskref=taskref, sz=n_preallocations) do buff
+    res = RingBuffer(buffer; taskref = taskref, sz = n_preallocations) do buff
         Threads.@threads for i in 1:batch_size
             batch!(buff, take!(transitions), i)
         end

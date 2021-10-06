@@ -1,5 +1,4 @@
 using Test
 using ReinforcementLearning
 
-@testset "ReinforcementLearning" begin
-end
+@testset "ReinforcementLearning" begin end

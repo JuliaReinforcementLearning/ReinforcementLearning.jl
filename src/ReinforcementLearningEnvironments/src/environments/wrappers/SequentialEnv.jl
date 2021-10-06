@@ -9,7 +9,7 @@ mutable struct SequentialEnv{E<:AbstractEnv} <: AbstractEnvWrapper
     env::E
     current_player_idx::Int
     actions::Vector{Any}
-    function SequentialEnv(env::T) where T<:AbstractEnv
+    function SequentialEnv(env::T) where {T<:AbstractEnv}
         @assert DynamicStyle(env) === SIMULTANEOUS "The SequentialEnv wrapper can only be applied to SIMULTANEOUS environments"
         new{T}(env, 1, Vector{Any}(undef, length(players(env))))
     end
@@ -32,7 +32,8 @@ end
 
 RLBase.reward(env::SequentialEnv) = reward(env, current_player(env))
 
-RLBase.reward(env::SequentialEnv, player) = current_player(env) == 1 ? reward(env.env, player) : 0
+RLBase.reward(env::SequentialEnv, player) =
+    current_player(env) == 1 ? reward(env.env, player) : 0
 
 function (env::SequentialEnv)(action)
     env.actions[env.current_player_idx] = action
@@ -43,4 +44,3 @@ function (env::SequentialEnv)(action)
         env.current_player_idx += 1
     end
 end
-

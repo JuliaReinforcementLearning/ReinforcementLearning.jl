@@ -32,7 +32,8 @@ function RL.Experiment(
     UPDATE_FREQ = 2048
     env = MultiThreadEnv([
         PendulumEnv(T = Float32, rng = StableRNG(hash(seed + i))) |>
-        env -> ActionTransformedEnv(env, action_mapping = x -> clamp(x * 2, low, high)) for i in 1:N_ENV
+        env -> ActionTransformedEnv(env, action_mapping = x -> clamp(x * 2, low, high))
+        for i in 1:N_ENV
     ])
 
     init = glorot_uniform(rng)
@@ -78,7 +79,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(50_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(50_000, is_show_progress = !haskey(ENV, "CI"))
     hook = TotalBatchRewardPerEpisode(N_ENV)
     Experiment(agent, env, stop_condition, hook, "# Play Pendulum with PPO")
 end
@@ -92,7 +93,7 @@ run(ex)
 n = minimum(map(length, ex.hook.rewards))
 m = mean([@view(x[1:n]) for x in ex.hook.rewards])
 s = std([@view(x[1:n]) for x in ex.hook.rewards])
-plot(m,ribbon=s)
+plot(m, ribbon = s)
 savefig("assets/JuliaRL_PPO_Pendulum.png") #hide
 
 # ![](assets/JuliaRL_PPO_Pendulum.png)

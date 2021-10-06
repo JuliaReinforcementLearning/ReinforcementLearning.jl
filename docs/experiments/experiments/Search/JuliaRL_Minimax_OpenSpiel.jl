@@ -18,7 +18,13 @@ function RL.Experiment(::Val{:JuliaRL}, ::Val{:Minimax}, ::Val{:OpenSpiel}, game
     )
     hooks = MultiAgentHook(0 => TotalRewardPerEpisode(), 1 => TotalRewardPerEpisode())
     description = "# Play `$game` in OpenSpiel with Minimax"
-    Experiment(agents, env, StopAfterEpisode(1, is_show_progress=!haskey(ENV, "CI")), hooks, description)
+    Experiment(
+        agents,
+        env,
+        StopAfterEpisode(1, is_show_progress = !haskey(ENV, "CI")),
+        hooks,
+        description,
+    )
 end
 
 using Plots

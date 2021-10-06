@@ -5,7 +5,7 @@ using SparseArrays
 using LinearAlgebra
 
 
-mutable struct GraphShortestPathEnv{G, R} <: AbstractEnv
+mutable struct GraphShortestPathEnv{G,R} <: AbstractEnv
     graph::G
     pos::Int
     goal::Int
@@ -31,7 +31,12 @@ Quoted **A.3** in the the paper [Decision Transformer: Reinforcement Learning vi
 > lengths and maximizing them corresponds to generating shortest paths.
 
 """
-function GraphShortestPathEnv(rng=Random.GLOBAL_RNG; n=20, sparsity=0.1, max_steps=10)
+function GraphShortestPathEnv(
+    rng = Random.GLOBAL_RNG;
+    n = 20,
+    sparsity = 0.1,
+    max_steps = 10,
+)
     graph = sprand(rng, Bool, n, n, sparsity) .| I(n)
 
     goal = rand(rng, 1:n)
@@ -55,7 +60,8 @@ RLBase.state_space(env::GraphShortestPathEnv) = axes(env.graph, 2)
 RLBase.action_space(env::GraphShortestPathEnv) = axes(env.graph, 2)
 RLBase.legal_action_space(env::GraphShortestPathEnv) = (env.graph[:, env.pos]).nzind
 RLBase.reward(env::GraphShortestPathEnv) = env.reward
-RLBase.is_terminated(env::GraphShortestPathEnv) = env.pos == env.goal || env.step >= env.max_steps
+RLBase.is_terminated(env::GraphShortestPathEnv) =
+    env.pos == env.goal || env.step >= env.max_steps
 
 function RLBase.reset!(env::GraphShortestPathEnv)
     env.step = 0

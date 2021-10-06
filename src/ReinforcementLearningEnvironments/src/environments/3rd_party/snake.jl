@@ -43,7 +43,7 @@ end
 
 RLBase.action_space(env::SnakeGameEnv) = 1:4
 RLBase.state(env::SnakeGameEnv) = env.game.board
-RLBase.state_space(env::SnakeGameEnv) = Space(fill(false..true, size(env.game.board)))
+RLBase.state_space(env::SnakeGameEnv) = Space(fill(false .. true, size(env.game.board)))
 RLBase.reward(env::SnakeGameEnv{<:Any,SINGLE_AGENT}) =
     length(env.game.snakes[]) - env.latest_snakes_length[]
 RLBase.reward(env::SnakeGameEnv) = length.(env.game.snakes) .- env.latest_snakes_length

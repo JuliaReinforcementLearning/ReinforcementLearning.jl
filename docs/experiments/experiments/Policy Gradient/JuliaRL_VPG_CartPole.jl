@@ -49,7 +49,7 @@ function RL.Experiment(
         ),
         trajectory = ElasticSARTTrajectory(state = Vector{Float32} => (ns,)),
     )
-    stop_condition = StopAfterEpisode(500, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterEpisode(500, is_show_progress = !haskey(ENV, "CI"))
 
     hook = TotalRewardPerEpisode()
     description = "# Play CartPole with VPG"

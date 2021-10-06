@@ -118,7 +118,12 @@ function (p::DDPGPolicy)(env, player::Any = nothing)
         s = DynamicStyle(env) == SEQUENTIAL ? state(env) : state(env, player)
         s = Flux.unsqueeze(s, ndims(s) + 1)
         actions = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
-        c = clamp.(actions .+ randn(p.rng, p.na) .* repeat([p.act_noise], p.na), -p.act_limit, p.act_limit)
+        c =
+            clamp.(
+                actions .+ randn(p.rng, p.na) .* repeat([p.act_noise], p.na),
+                -p.act_limit,
+                p.act_limit,
+            )
         p.na == 1 && return c[1]
         c
     end
@@ -154,7 +159,7 @@ function RLBase.update!(p::DDPGPolicy, batch::NamedTuple{SARTS})
     a′ = Aₜ(s′)
     qₜ = Cₜ(vcat(s′, a′)) |> vec
     y = r .+ γ .* (1 .- t) .* qₜ
-    a = Flux.unsqueeze(a, ndims(a)+1)
+    a = Flux.unsqueeze(a, ndims(a) + 1)
 
     gs1 = gradient(Flux.params(C)) do
         q = C(vcat(s, a)) |> vec

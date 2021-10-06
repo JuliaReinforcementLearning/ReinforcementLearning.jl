@@ -2,12 +2,12 @@ export StockTradingEnv, StockTradingEnvWithTurbulence
 
 using Pkg.Artifacts
 using DelimitedFiles
-using LinearAlgebra:dot
+using LinearAlgebra: dot
 using IntervalSets
 
 function load_default_stock_data(s)
     if s == "prices.csv" || s == "features.csv"
-        data, _ = readdlm(joinpath(artifact"stock_trading_data", s), ',', header=true)
+        data, _ = readdlm(joinpath(artifact"stock_trading_data", s), ',', header = true)
         collect(data')
     elseif s == "turbulence.csv"
         readdlm(joinpath(artifact"stock_trading_data", "turbulence.csv")) |> vec
@@ -16,7 +16,8 @@ function load_default_stock_data(s)
     end
 end
 
-mutable struct StockTradingEnv{F<:AbstractMatrix{Float64}, P<:AbstractMatrix{Float64}} <: AbstractEnv
+mutable struct StockTradingEnv{F<:AbstractMatrix{Float64},P<:AbstractMatrix{Float64}} <:
+               AbstractEnv
     features::F
     prices::P
     HMAX_NORMALIZE::Float32
@@ -48,14 +49,14 @@ This environment is originally provided in [Deep Reinforcement Learning for Auto
 - `initial_account_balance=1_000_000`.
 """
 function StockTradingEnv(;
-    initial_account_balance=1_000_000f0,
-    features=nothing,
-    prices=nothing,
-    first_day=nothing,
-    last_day=nothing,
-    HMAX_NORMALIZE = 100f0,
+    initial_account_balance = 1_000_000.0f0,
+    features = nothing,
+    prices = nothing,
+    first_day = nothing,
+    last_day = nothing,
+    HMAX_NORMALIZE = 100.0f0,
     TRANSACTION_FEE_PERCENT = 0.001f0,
-    REWARD_SCALING = 1f-4
+    REWARD_SCALING = 1f-4,
 )
     prices = isnothing(prices) ? load_default_stock_data("prices.csv") : prices
     features = isnothing(features) ? load_default_stock_data("features.csv") : features
@@ -77,11 +78,11 @@ function StockTradingEnv(;
         REWARD_SCALING,
         initial_account_balance,
         state,
-        0f0,
+        0.0f0,
         day,
         first_day,
         last_day,
-        0f0
+        0.0f0,
     )
 
     _balance(env)[] = initial_account_balance
@@ -108,10 +109,10 @@ function (env::StockTradingEnv)(actions)
 
     # then buy
     # better to shuffle?
-    for (i,b) in enumerate(actions)
+    for (i, b) in enumerate(actions)
         if b > 0
             max_buy = div(_balance(env)[], _prices(env)[i])
-            buy = min(b*env.HMAX_NORMALIZE, max_buy)
+            buy = min(b * env.HMAX_NORMALIZE, max_buy)
             _holds(env)[i] += buy
             deduction = buy * _prices(env)[i]
             cost = deduction * env.TRANSACTION_FEE_PERCENT
@@ -136,12 +137,13 @@ function RLBase.reset!(env::StockTradingEnv)
     _balance(env)[] = env.initial_account_balance
     _prices(env) .= @view env.prices[:, env.day]
     _features(env) .= @view env.features[:, env.day]
-    env.total_cost = 0.
-    env.daily_reward = 0.
+    env.total_cost = 0.0
+    env.daily_reward = 0.0
 end
 
-RLBase.state_space(env::StockTradingEnv) = Space(fill(-Inf32..Inf32, length(state(env))))
-RLBase.action_space(env::StockTradingEnv) = Space(fill(-1f0..1f0, length(_holds(env))))
+RLBase.state_space(env::StockTradingEnv) = Space(fill(-Inf32 .. Inf32, length(state(env))))
+RLBase.action_space(env::StockTradingEnv) =
+    Space(fill(-1.0f0 .. 1.0f0, length(_holds(env))))
 
 RLBase.ChanceStyle(::StockTradingEnv) = DETERMINISTIC
 
@@ -154,16 +156,16 @@ struct StockTradingEnvWithTurbulence{E<:StockTradingEnv} <: AbstractEnvWrapper
 end
 
 function StockTradingEnvWithTurbulence(;
-    turbulence_threshold=140.,
-    turbulences=nothing,
-    kw...
+    turbulence_threshold = 140.0,
+    turbulences = nothing,
+    kw...,
 )
     turbulences = isnothing(turbulences) && load_default_stock_data("turbulence.csv")
 
     StockTradingEnvWithTurbulence(
-        StockTradingEnv(;kw...),
+        StockTradingEnv(; kw...),
         turbulences,
-        turbulence_threshold
+        turbulence_threshold,
     )
 end
 

@@ -1,4 +1,4 @@
-push!(LOAD_PATH,"../src/")
+push!(LOAD_PATH, "../src/")
 using Documenter, ReinforcementLearningDatasets
 
-makedocs(sitename="ReinforcementLearningDatasets")
+makedocs(sitename = "ReinforcementLearningDatasets")

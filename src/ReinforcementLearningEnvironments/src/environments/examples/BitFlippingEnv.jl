@@ -41,8 +41,8 @@ end
 RLBase.state(env::BitFlippingEnv) = state(env::BitFlippingEnv, Observation{BitArray{1}}())
 RLBase.state(env::BitFlippingEnv, ::Observation) = env.state
 RLBase.state(env::BitFlippingEnv, ::GoalState) = env.goal_state
-RLBase.state_space(env::BitFlippingEnv, ::Observation) = Space(fill(false..true, env.N))
-RLBase.state_space(env::BitFlippingEnv, ::GoalState) = Space(fill(false..true, env.N))
+RLBase.state_space(env::BitFlippingEnv, ::Observation) = Space(fill(false .. true, env.N))
+RLBase.state_space(env::BitFlippingEnv, ::GoalState) = Space(fill(false .. true, env.N))
 RLBase.is_terminated(env::BitFlippingEnv) =
     (env.state == env.goal_state) || (env.t >= env.max_steps)
 

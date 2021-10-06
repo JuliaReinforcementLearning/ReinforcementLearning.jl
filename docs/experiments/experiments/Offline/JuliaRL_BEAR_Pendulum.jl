@@ -28,7 +28,7 @@ function RL.Experiment(
     ns = length(state(inner_env))
     na = 1
     latent_dims = 10
-    
+
     trajectory_num = 10000
     dataset_size = 10000
     batch_size = 64
@@ -41,12 +41,11 @@ function RL.Experiment(
 
     create_policy_net() = NeuralNetworkApproximator(
         model = GaussianNetwork(
-            pre = Chain(
-                Dense(ns, 64, relu), 
-                Dense(64, 64, relu),
-            ),
+            pre = Chain(Dense(ns, 64, relu), Dense(64, 64, relu)),
             μ = Chain(Dense(64, na, init = init)),
-            logσ = Chain(Dense(64, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),
+            logσ = Chain(
+                Dense(64, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init),
+            ),
         ),
         optimizer = ADAM(0.003),
     )
@@ -63,10 +62,7 @@ function RL.Experiment(
     create_vae_net() = NeuralNetworkApproximator(
         model = VAE(
             encoder = GaussianNetwork(
-                pre = Chain(
-                    Dense(ns + na, 64, relu), 
-                    Dense(64, 64, relu),
-                ),
+                pre = Chain(Dense(ns + na, 64, relu), Dense(64, 64, relu)),
                 μ = Chain(Dense(64, latent_dims, init = init)),
                 logσ = Chain(Dense(64, latent_dims, init = init)),
             ),
@@ -108,7 +104,12 @@ function RL.Experiment(
                 batch_size = batch_size,
                 update_freq = 2,
             ),
-            dataset = gen_JuliaRL_dataset(:SAC, :Pendulum, type; dataset_size = dataset_size),
+            dataset = gen_JuliaRL_dataset(
+                :SAC,
+                :Pendulum,
+                type;
+                dataset_size = dataset_size,
+            ),
             continuous = true,
             batch_size = batch_size,
         ),
@@ -119,7 +120,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(trajectory_num, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(trajectory_num, is_show_progress = !haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "BEAR <-> Pendulum ($type dataset)")
 end

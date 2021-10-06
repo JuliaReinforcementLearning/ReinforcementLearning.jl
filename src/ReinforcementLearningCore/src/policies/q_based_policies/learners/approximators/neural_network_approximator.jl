@@ -1,4 +1,5 @@
-export NeuralNetworkApproximator, ActorCritic, GaussianNetwork, DuelingNetwork, PerturbationNetwork
+export NeuralNetworkApproximator,
+    ActorCritic, GaussianNetwork, DuelingNetwork, PerturbationNetwork
 export VAE, decode, vae_loss
 
 using Flux
@@ -79,7 +80,7 @@ Base.@kwdef struct GaussianNetwork{P,U,S}
     pre::P = identity
     μ::U
     logσ::S
-    min_σ::Float32 = 0f0
+    min_σ::Float32 = 0.0f0
     max_σ::Float32 = Inf32
 end
 
@@ -92,7 +93,12 @@ This function is compatible with a multidimensional action space. When outputtin
 - `is_sampling::Bool=false`, whether to sample from the obtained normal distribution. 
 - `is_return_log_prob::Bool=false`, whether to calculate the conditional probability of getting actions in the given state.
 """
-function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+function (model::GaussianNetwork)(
+    rng::AbstractRNG,
+    state;
+    is_sampling::Bool = false,
+    is_return_log_prob::Bool = false,
+)
     x = model.pre(state)
     μ, raw_logσ = model.μ(x), model.logσ(x)
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
@@ -100,7 +106,11 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=fal
         σ = exp.(logσ)
         z = μ .+ σ .* send_to_device(device(model), randn(rng, Float32, size(μ)))
         if is_return_log_prob
-            logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
+            logp_π = sum(
+                normlogpdf(μ, σ, z) .-
+                (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))),
+                dims = 1,
+            )
             return tanh.(z), logp_π
         else
             return tanh.(z)
@@ -110,16 +120,29 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=fal
     end
 end
 
-function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
-    model(Random.GLOBAL_RNG, state; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
+function (model::GaussianNetwork)(
+    state;
+    is_sampling::Bool = false,
+    is_return_log_prob::Bool = false,
+)
+    model(
+        Random.GLOBAL_RNG,
+        state;
+        is_sampling = is_sampling,
+        is_return_log_prob = is_return_log_prob,
+    )
 end
 
 function (model::GaussianNetwork)(state, action)
     x = model.pre(state)
-    μ, raw_logσ = model.μ(x), model.logσ(x) 
+    μ, raw_logσ = model.μ(x), model.logσ(x)
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     σ = exp.(logσ)
-    logp_π = sum(normlogpdf(μ, σ, action) .- (2.0f0 .* (log(2.0f0) .- action .- softplus.(-2.0f0 .* action))), dims = 1)
+    logp_π = sum(
+        normlogpdf(μ, σ, action) .-
+        (2.0f0 .* (log(2.0f0) .- action .- softplus.(-2.0f0 .* action))),
+        dims = 1,
+    )
     return logp_π
 end
 
@@ -143,7 +166,7 @@ Flux.@functor DuelingNetwork
 function (m::DuelingNetwork)(state)
     x = m.base(state)
     val = m.val(x)
-    return val .+ m.adv(x) .- mean(m.adv(x), dims=1)
+    return val .+ m.adv(x) .- mean(m.adv(x), dims = 1)
 end
 
 #####
@@ -183,7 +206,7 @@ end
 """
     VAE(;encoder, decoder, latent_dims)
 """
-Base.@kwdef struct VAE{E, D}
+Base.@kwdef struct VAE{E,D}
     encoder::E
     decoder::D
     latent_dims::Int
@@ -203,9 +226,14 @@ function (model::VAE)(state, action)
     return model(Random.GLOBAL_RNG, state, action)
 end
 
-function decode(rng::AbstractRNG, model::VAE, state, z=nothing; is_normalize::Bool=true)
+function decode(rng::AbstractRNG, model::VAE, state, z = nothing; is_normalize::Bool = true)
     if z === nothing
-        z = clamp.(randn(rng, Float32, (model.latent_dims, size(state)[2:end]...)), -0.5f0, 0.5f0)
+        z =
+            clamp.(
+                randn(rng, Float32, (model.latent_dims, size(state)[2:end]...)),
+                -0.5f0,
+                0.5f0,
+            )
         z = send_to_device(device(model), z)
     end
     a = model.decoder(vcat(state, z))
@@ -215,7 +243,7 @@ function decode(rng::AbstractRNG, model::VAE, state, z=nothing; is_normalize::Bo
     return a
 end
 
-function decode(model::VAE, state, z=nothing; is_normalize::Bool=true)
+function decode(model::VAE, state, z = nothing; is_normalize::Bool = true)
     decode(Random.GLOBAL_RNG, model, state, z; is_normalize)
 end
 

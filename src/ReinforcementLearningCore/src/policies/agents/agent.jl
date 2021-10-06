@@ -139,7 +139,9 @@ function RLBase.update!(
     # TODO: how to inject a local rng here to avoid polluting the global rng
 
     s = policy isa NamedPolicy ? state(env, nameof(policy)) : state(env)
-    a = policy isa NamedPolicy ? rand(action_space(env, nameof(policy))) : rand(action_space(env))
+    a =
+        policy isa NamedPolicy ? rand(action_space(env, nameof(policy))) :
+        rand(action_space(env))
     push!(trajectory[:state], s)
     push!(trajectory[:action], a)
     if haskey(trajectory, :legal_actions_mask)

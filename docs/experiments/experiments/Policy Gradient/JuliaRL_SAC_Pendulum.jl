@@ -38,12 +38,11 @@ function RL.Experiment(
 
     create_policy_net() = NeuralNetworkApproximator(
         model = GaussianNetwork(
-            pre = Chain(
-                Dense(ns, 30, relu, init = init), 
-                Dense(30, 30, relu, init = init),
-            ),
+            pre = Chain(Dense(ns, 30, relu, init = init), Dense(30, 30, relu, init = init)),
             μ = Chain(Dense(30, na, init = init)),
-            logσ = Chain(Dense(30, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),
+            logσ = Chain(
+                Dense(30, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init),
+            ),
         ),
         optimizer = ADAM(0.003),
     )
@@ -69,7 +68,7 @@ function RL.Experiment(
             α = 0.2f0,
             batch_size = 64,
             start_steps = 1000,
-            start_policy = RandomPolicy(Space([-1.0..1.0 for _ in 1:na]); rng = rng),
+            start_policy = RandomPolicy(Space([-1.0 .. 1.0 for _ in 1:na]); rng = rng),
             update_after = 1000,
             update_freq = 1,
             automatic_entropy_tuning = true,
@@ -84,7 +83,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(10_000, is_show_progress = !haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "# Play Pendulum with SAC")
 end

@@ -57,7 +57,12 @@ function RL.Experiment(
                 batch_size = batch_size,
                 update_freq = UPDATE_FREQ,
             ),
-            dataset = gen_JuliaRL_dataset(:BasicDQN, :CartPole, type; dataset_size = dataset_size),
+            dataset = gen_JuliaRL_dataset(
+                :BasicDQN,
+                :CartPole,
+                type;
+                dataset_size = dataset_size,
+            ),
             continuous = false,
             batch_size = batch_size,
         ),
@@ -67,7 +72,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(trajectory_num, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(trajectory_num, is_show_progress = !haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "BCQD <-> CartPole ($type dataset)")
 end

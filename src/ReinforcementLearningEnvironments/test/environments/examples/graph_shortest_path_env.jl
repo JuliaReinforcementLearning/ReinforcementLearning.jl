@@ -6,4 +6,3 @@
     RLBase.test_runnable!(env)
 
 end
-

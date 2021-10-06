@@ -61,5 +61,11 @@ function RL.Experiment(
         batch_size_Π = 2048,
         initializer = glorot_normal(CUDA.CURAND.default_rng()),
     )
-    Experiment(p, env, StopAfterStep(500, is_show_progress=!haskey(ENV, "CI")), EmptyHook(), "# run DeepcCFR on leduc_poker")
+    Experiment(
+        p,
+        env,
+        StopAfterStep(500, is_show_progress = !haskey(ENV, "CI")),
+        EmptyHook(),
+        "# run DeepcCFR on leduc_poker",
+    )
 end

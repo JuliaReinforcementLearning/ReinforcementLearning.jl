@@ -99,7 +99,7 @@ end
 function (l::BCQLearner)(env)
     s = send_to_device(device(l.policy), state(env))
     s = Flux.unsqueeze(s, ndims(s) + 1)
-    s = repeat(s, outer=(1, 1, l.p))
+    s = repeat(s, outer = (1, 1, l.p))
     action = l.policy(s, decode(l.vae.model, s))
     q_value = l.qnetwork1(vcat(s, action))
     idx = argmax(q_value)
@@ -130,11 +130,15 @@ function update_learner!(l::BCQLearner, batch::NamedTuple{SARTS})
 
     γ, τ, λ = l.γ, l.τ, l.λ
 
-    repeat_s′ = repeat(s′, outer=(1, 1, l.p))
+    repeat_s′ = repeat(s′, outer = (1, 1, l.p))
     repeat_a′ = l.target_policy(repeat_s′, decode(l.vae.model, repeat_s′))
 
     q′_input = vcat(repeat_s′, repeat_a′)
-    q′ = maximum(λ .* min.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)) + (1 - λ) .* max.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)), dims=3)
+    q′ = maximum(
+        λ .* min.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)) +
+        (1 - λ) .* max.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)),
+        dims = 3,
+    )
 
     y = r .+ γ .* (1 .- t) .* vec(q′)
 
@@ -145,7 +149,7 @@ function update_learner!(l::BCQLearner, batch::NamedTuple{SARTS})
     q_grad_1 = gradient(Flux.params(l.qnetwork1)) do
         q1 = l.qnetwork1(q_input) |> vec
         loss = mse(q1, y)
-        ignore() do 
+        ignore() do
             l.critic_loss = loss
         end
         loss
@@ -155,7 +159,7 @@ function update_learner!(l::BCQLearner, batch::NamedTuple{SARTS})
     q_grad_2 = gradient(Flux.params(l.qnetwork2)) do
         q2 = l.qnetwork2(q_input) |> vec
         loss = mse(q2, y)
-        ignore() do 
+        ignore() do
             l.critic_loss += loss
         end
         loss
@@ -167,7 +171,7 @@ function update_learner!(l::BCQLearner, batch::NamedTuple{SARTS})
         sampled_action = decode(l.vae.model, s)
         perturbed_action = l.policy(s, sampled_action)
         actor_loss = -mean(l.qnetwork1(vcat(s, perturbed_action)))
-        ignore() do 
+        ignore() do
             l.actor_loss = actor_loss
         end
         actor_loss

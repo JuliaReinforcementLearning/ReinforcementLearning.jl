@@ -22,11 +22,7 @@ See paper: [Critic Regularized Regression](https://arxiv.org/abs/2006.15134).
 - `continuous::Bool`: type of action space.
 - `rng = Random.GLOBAL_RNG`
 """
-mutable struct CRRLearner{
-    Aq<:ActorCritic,
-    At<:ActorCritic,
-    R<:AbstractRNG,
-} <: AbstractLearner
+mutable struct CRRLearner{Aq<:ActorCritic,At<:ActorCritic,R<:AbstractRNG} <: AbstractLearner
     approximator::Aq
     target_approximator::At
     γ::Float32
@@ -61,7 +57,7 @@ function CRRLearner(;
     target_update_freq::Int = 100,
     continuous::Bool,
     rng = Random.GLOBAL_RNG,
-) where {Aq<:ActorCritic, At<:ActorCritic}
+) where {Aq<:ActorCritic,At<:ActorCritic}
     copyto!(approximator, target_approximator)
     CRRLearner(
         approximator,
@@ -95,7 +91,7 @@ function (learner::CRRLearner)(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
     s = send_to_device(device(learner), s)
     if learner.continuous
-        learner.approximator.actor(s; is_sampling=true) |> vec |> send_to_host
+        learner.approximator.actor(s; is_sampling = true) |> vec |> send_to_host
     else
         learner.approximator.actor(s) |> vec |> send_to_host
     end
@@ -125,7 +121,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
     r = reshape(r, :, batch_size)
     t = reshape(t, :, batch_size)
 
-    target_a_t = target_AC.actor(s′; is_sampling=true)
+    target_a_t = target_AC.actor(s′; is_sampling = true)
     target_q_input = vcat(s′, target_a_t)
     expected_target_q = target_AC.critic(target_q_input)
 
@@ -133,7 +129,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
 
     q_t = send_to_device(D, Matrix{Float32}(undef, learner.m, batch_size))
     for i in 1:learner.m
-        a_sample = AC.actor(s; is_sampling=true)
+        a_sample = AC.actor(s; is_sampling = true)
         q_t[i, :] = AC.critic(vcat(s, a_sample))
     end
 
@@ -142,14 +138,14 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
         # Critic loss
         qa_t = AC.critic(vcat(s, a))
         critic_loss = Flux.Losses.mse(qa_t, target)
-        
+
         # Actor loss
         log_π = AC.actor(s, a)
 
         if advantage_estimator == :max
-            advantage = qa_t .- maximum(q_t, dims=1)
+            advantage = qa_t .- maximum(q_t, dims = 1)
         elseif advantage_estimator == :mean
-            advantage = qa_t .- mean(q_t, dims=1)
+            advantage = qa_t .- mean(q_t, dims = 1)
         else
             error("Wrong parameter.")
         end
@@ -168,7 +164,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
             learner.actor_loss = actor_loss
             learner.critic_loss = critic_loss
         end
-        
+
         actor_loss + critic_loss
     end
 
@@ -193,7 +189,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
 
     target_a_t = softmax(target_AC.actor(s′))
     target_q_t = target_AC.critic(s′)
-    expected_target_q = sum(target_a_t .* target_q_t, dims=1)
+    expected_target_q = sum(target_a_t .* target_q_t, dims = 1)
 
     target = r .+ γ .* (1 .- t) .* expected_target_q
 
@@ -203,14 +199,14 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
         q_t = AC.critic(s)
         qa_t = reshape(q_t[a], :, batch_size)
         critic_loss = Flux.Losses.mse(qa_t, target)
-        
+
         # Actor loss
         a_t = softmax(AC.actor(s))
 
         if advantage_estimator == :max
-            advantage = qa_t .- maximum(q_t, dims=1)
+            advantage = qa_t .- maximum(q_t, dims = 1)
         elseif advantage_estimator == :mean
-            advantage = qa_t .- mean(q_t, dims=1)
+            advantage = qa_t .- mean(q_t, dims = 1)
         else
             error("Wrong parameter.")
         end
@@ -222,14 +218,14 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
         else
             error("Wrong parameter.")
         end
-        
+
         actor_loss = mean(-log.(a_t[a]) .* actor_loss_coef)
 
         ignore() do
             learner.actor_loss = actor_loss
             learner.critic_loss = critic_loss
         end
-        
+
         actor_loss + critic_loss
     end
 

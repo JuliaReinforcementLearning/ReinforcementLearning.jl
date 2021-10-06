@@ -34,7 +34,7 @@ mutable struct BEARLearner{
     # Logging
     actor_loss::Float32
     critic_loss::Float32
-    mmd_loss
+    mmd_loss::Any
 end
 
 """
@@ -126,8 +126,8 @@ end
 function (l::BEARLearner)(env)
     s = send_to_device(device(l.policy), state(env))
     s = Flux.unsqueeze(s, ndims(s) + 1)
-    s = repeat(s, outer=(1, 1, l.p))
-    action = l.policy(l.rng, s; is_sampling=true)
+    s = repeat(s, outer = (1, 1, l.p))
+    action = l.policy(l.rng, s; is_sampling = true)
     q_value = l.qnetwork1(vcat(s, action))
     idx = argmax(q_value)
     action[idx]
@@ -139,13 +139,17 @@ function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
     γ, τ, λ = l.γ, l.τ, l.λ
 
     update_vae!(l, s, a)
-    
-    repeat_s′ = repeat(s′, outer=(1, 1, l.p))
-    repeat_action′ = l.target_policy(l.rng, repeat_s′, is_sampling=true)
+
+    repeat_s′ = repeat(s′, outer = (1, 1, l.p))
+    repeat_action′ = l.target_policy(l.rng, repeat_s′, is_sampling = true)
 
     q′_input = vcat(repeat_s′, repeat_action′)
 
-    q′ = maximum(λ .* min.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)) + (1 - λ) .* max.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)), dims=3)
+    q′ = maximum(
+        λ .* min.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)) +
+        (1 - λ) .* max.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)),
+        dims = 3,
+    )
 
     y = r .+ γ .* (1 .- t) .* vec(q′)
 
@@ -156,7 +160,7 @@ function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
     q_grad_1 = gradient(Flux.params(l.qnetwork1)) do
         q1 = l.qnetwork1(q_input) |> vec
         loss = mse(q1, y)
-        ignore() do 
+        ignore() do
             l.critic_loss = loss
         end
         loss
@@ -166,30 +170,40 @@ function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
     q_grad_2 = gradient(Flux.params(l.qnetwork2)) do
         q2 = l.qnetwork2(q_input) |> vec
         loss = mse(q2, y)
-        ignore() do 
+        ignore() do
             l.critic_loss += loss
         end
         loss
     end
     update!(l.qnetwork2, q_grad_2)
 
-    repeat_s = repeat(s, outer=(1, 1, l.p))
-    repeat_a = repeat(a, outer=(1, 1, l.p))
-    repeat_q1 = mean(l.target_qnetwork1(vcat(repeat_s, repeat_a)), dims=(1, 3))
-    repeat_q2 = mean(l.target_qnetwork2(vcat(repeat_s, repeat_a)), dims=(1, 3))
+    repeat_s = repeat(s, outer = (1, 1, l.p))
+    repeat_a = repeat(a, outer = (1, 1, l.p))
+    repeat_q1 = mean(l.target_qnetwork1(vcat(repeat_s, repeat_a)), dims = (1, 3))
+    repeat_q2 = mean(l.target_qnetwork2(vcat(repeat_s, repeat_a)), dims = (1, 3))
     q = vec(min.(repeat_q1, repeat_q2))
 
     alpha = exp(l.log_α.model[1])
 
     # Train Policy
     p_grad = gradient(Flux.params(l.policy)) do
-        raw_sample_action = decode(l.vae.model, repeat(s, outer=(1, 1, l.sample_num)); is_normalize=false)  # action_dim * batch_size * sample_num
-        raw_actor_action = l.policy(repeat(s, outer=(1, 1, l.sample_num)); is_sampling=true) # action_dim * batch_size * sample_num
+        raw_sample_action = decode(
+            l.vae.model,
+            repeat(s, outer = (1, 1, l.sample_num));
+            is_normalize = false,
+        )  # action_dim * batch_size * sample_num
+        raw_actor_action =
+            l.policy(repeat(s, outer = (1, 1, l.sample_num)); is_sampling = true) # action_dim * batch_size * sample_num
 
-        mmd_loss = maximum_mean_discrepancy_loss(raw_sample_action, raw_actor_action, l.kernel_type, l.mmd_σ)
+        mmd_loss = maximum_mean_discrepancy_loss(
+            raw_sample_action,
+            raw_actor_action,
+            l.kernel_type,
+            l.mmd_σ,
+        )
 
         actor_loss = mean(-q .+ alpha .* mmd_loss)
-        ignore() do 
+        ignore() do
             l.actor_loss = actor_loss
             l.mmd_loss = mmd_loss
         end
@@ -198,13 +212,13 @@ function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
     update!(l.policy, p_grad)
 
     # Update lagrange multiplier
-    l_grad = gradient(Flux.params(l.log_α)) do 
+    l_grad = gradient(Flux.params(l.log_α)) do
         mean(-q .+ alpha .* (l.mmd_loss .- l.ε))
     end
     update!(l.log_α, l_grad)
-    
+
     clamp!(l.log_α.model, l.min_log_α, l.max_log_α)
-    
+
     # polyak averaging
     for (dest, src) in zip(
         Flux.params([l.target_policy, l.target_qnetwork1, l.target_qnetwork2]),

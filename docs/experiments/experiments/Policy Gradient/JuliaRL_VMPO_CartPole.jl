@@ -55,7 +55,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(50_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(50_000, is_show_progress = !haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
 
     Experiment(agent, env, stop_condition, hook, "# VMPO with CartPole")

@@ -40,10 +40,7 @@ function RL.Experiment(
 
     create_policy_net() = NeuralNetworkApproximator(
         model = GaussianNetwork(
-            pre = Chain(
-                Dense(ns, 64, relu), 
-                Dense(64, 64, relu),
-            ),
+            pre = Chain(Dense(ns, 64, relu), Dense(64, 64, relu)),
             μ = Chain(Dense(64, na, init = init)),
             logσ = Chain(Dense(64, na, init = init)),
         ),
@@ -81,7 +78,12 @@ function RL.Experiment(
                 action_dims = 1,
                 rng = rng,
             ),
-            dataset = gen_JuliaRL_dataset(:SAC, :Pendulum, type; dataset_size = dataset_size),
+            dataset = gen_JuliaRL_dataset(
+                :SAC,
+                :Pendulum,
+                type;
+                dataset_size = dataset_size,
+            ),
             continuous = true,
             batch_size = batch_size,
         ),
@@ -92,7 +94,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(trajectory_num, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(trajectory_num, is_show_progress = !haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "FisherBRC <-> Pendulum ($type dataset)")
 end

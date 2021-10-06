@@ -31,10 +31,18 @@ fetch a gc bucket from `src` to `dest`.
 """
 function fetch_gc_bucket(src, dest)
     if Sys.iswindows()
-        try run(`cmd /C gsutil -v`) catch x throw("gsutil not found, install gsutil to proceed further") end
+        try
+            run(`cmd /C gsutil -v`)
+        catch x
+            throw("gsutil not found, install gsutil to proceed further")
+        end
         run(`cmd /C gsutil -m cp -r $src $dest`)
     else
-        try run(`gsutil -v`) catch x throw("gsutil not found, install gsutil to proceed further") end
+        try
+            run(`gsutil -v`)
+        catch x
+            throw("gsutil not found, install gsutil to proceed further")
+        end
         run(`gsutil -m cp -r $src $dest`)
     end
     return dest
@@ -45,10 +53,18 @@ fetch a gc file from `src` to `dest`.
 """
 function fetch_gc_file(src, dest)
     if Sys.iswindows()
-        try run(`cmd /C gsutil -v`) catch x throw("gsutil not found, install gsutil to proceed further") end
+        try
+            run(`cmd /C gsutil -v`)
+        catch x
+            throw("gsutil not found, install gsutil to proceed further")
+        end
         run(`cmd /C gsutil -m cp $src $dest`)
     else
-        try run(`gsutil -v`) catch x throw("gsutil not found, install gsutil to proceed further") end
+        try
+            run(`gsutil -v`)
+        catch x
+            throw("gsutil not found, install gsutil to proceed further")
+        end
         run(`gsutil -m cp $src $dest`)
     end
     return dest

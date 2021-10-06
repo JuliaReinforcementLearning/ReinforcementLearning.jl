@@ -19,7 +19,7 @@ function RL.Experiment(
     type::AbstractString;
     save_dir = nothing,
     seed = 123,
-)   
+)
     rng = StableRNG(seed)
     inner_env = PendulumEnv(T = Float32, rng = rng)
     A = action_space(inner_env)
@@ -31,9 +31,9 @@ function RL.Experiment(
     trajectory_num = 10000
     dataset_size = 10000
     batch_size = 128
-    
-    dataset=gen_JuliaRL_dataset(:SAC, :Pendulum, type; dataset_size = dataset_size)
-    
+
+    dataset = gen_JuliaRL_dataset(:SAC, :Pendulum, type; dataset_size = dataset_size)
+
     env = ActionTransformedEnv(
         inner_env;
         action_mapping = x -> low + (x[1] + 1) * 0.5 * (high - low),
@@ -41,10 +41,7 @@ function RL.Experiment(
     init = glorot_uniform(rng)
 
     create_policy_net() = GaussianNetwork(
-        pre = Chain(
-            Dense(ns, 64, relu), 
-            Dense(64, 64, relu),
-        ),
+        pre = Chain(Dense(ns, 64, relu), Dense(64, 64, relu)),
         μ = Chain(Dense(64, na, init = init)),
         logσ = Chain(Dense(64, na, init = init)),
     )
@@ -89,10 +86,10 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(trajectory_num, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(trajectory_num, is_show_progress = !haskey(ENV, "CI"))
     hook = EmptyHook()
     run(crr_agent, env, stop_condition, hook)
-    
+
     crr_policy = crr_agent.policy.learner.approximator.actor
 
     create_fqe_q_net() = NeuralNetworkApproximator(
@@ -103,20 +100,20 @@ function RL.Experiment(
         ),
         optimizer = ADAM(0.003),
     )
-    
+
     fqe = Agent(
         policy = OfflinePolicy(
             learner = FQE(
-                policy=crr_policy |> cpu,
+                policy = crr_policy |> cpu,
                 q_network = create_fqe_q_net() |> cpu,
                 target_q_network = create_fqe_q_net() |> cpu,
                 n_evals = 50,
                 γ = 0.99f0,
                 batch_size = batch_size,
-                update_freq=1,
-                update_step=1,
-                tar_update_freq=50,
-                rng=rng,
+                update_freq = 1,
+                update_step = 1,
+                tar_update_freq = 50,
+                rng = rng,
             ),
             dataset = dataset,
             continuous = true,
@@ -128,7 +125,7 @@ function RL.Experiment(
             action = Vector{Float32} => (na,),
         ),
     )
-    stop_condition = StopAfterStep(trajectory_num, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(trajectory_num, is_show_progress = !haskey(ENV, "CI"))
     Experiment(fqe, env, stop_condition, hook, "FQE <-> CRR <-> Pendulum ($type dataset)")
 end
 

@@ -13,7 +13,7 @@ export AbstractHook,
     UploadTrajectoryEveryNStep,
     MultiAgentHook
 
-using UnicodePlots:lineplot, lineplot!
+using UnicodePlots: lineplot, lineplot!
 using Statistics
 
 """
@@ -155,7 +155,14 @@ end
 
 function (hook::TotalRewardPerEpisode)(::PostExperimentStage, agent, env)
     if hook.is_display_on_exit
-        println(lineplot(hook.rewards, title="Total reward per episode", xlabel="Episode", ylabel="Score"))
+        println(
+            lineplot(
+                hook.rewards,
+                title = "Total reward per episode",
+                xlabel = "Episode",
+                ylabel = "Score",
+            ),
+        )
     end
 end
 
@@ -178,8 +185,12 @@ which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 If `is_display_on_exit` is set to `true`, a ribbon plot will be shown to reflect
 the mean and std of rewards.
 """
-function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit=true)
-    TotalBatchRewardPerEpisode([Float64[] for _ in 1:batch_size], zeros(batch_size), is_display_on_exit)
+function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit = true)
+    TotalBatchRewardPerEpisode(
+        [Float64[] for _ in 1:batch_size],
+        zeros(batch_size),
+        is_display_on_exit,
+    )
 end
 
 function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env)
@@ -198,7 +209,12 @@ function (hook::TotalBatchRewardPerEpisode)(::PostExperimentStage, agent, env)
         n = minimum(map(length, hook.rewards))
         m = mean([@view(x[1:n]) for x in hook.rewards])
         s = std([@view(x[1:n]) for x in hook.rewards])
-        p = lineplot(m, title="Avg total reward per episode", xlabel="Episode", ylabel="Score")
+        p = lineplot(
+            m,
+            title = "Avg total reward per episode",
+            xlabel = "Episode",
+            ylabel = "Score",
+        )
         lineplot!(p, m .- s)
         lineplot!(p, m .+ s)
         println(p)
@@ -288,8 +304,7 @@ end
 Execute `f(t, agent, env)` every `n` episode.
 `t` is a counter of episodes.
 """
-mutable struct DoEveryNEpisode{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <:
-                           AbstractHook
+mutable struct DoEveryNEpisode{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <: AbstractHook
     f::F
     n::Int
     t::Int

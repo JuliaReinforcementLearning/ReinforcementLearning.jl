@@ -13,11 +13,11 @@ rng = StableRNG(123)
         "pong",
         index,
         epochs;
-        repo="atari-replay-datasets",
+        repo = "atari-replay-datasets",
         style = style,
         rng = rng,
         is_shuffle = true,
-        batch_size = batch_size
+        batch_size = batch_size,
     )
 
     data_dict = ds.dataset
@@ -64,11 +64,11 @@ end
         "pong",
         index,
         epochs;
-        repo="atari-replay-datasets",
+        repo = "atari-replay-datasets",
         style = style,
         rng = rng,
         is_shuffle = false,
-        batch_size = batch_size
+        batch_size = batch_size,
     )
 
     data_dict = ds.dataset

@@ -51,7 +51,7 @@ function RL.Experiment(
             state = Vector{Float32} => (ns,),
         ),
     )
-    stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(10_000, is_show_progress = !haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(policy, env, stop_condition, hook, "# BasicDQN <-> CartPole")
 end

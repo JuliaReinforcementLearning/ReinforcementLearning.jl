@@ -8,11 +8,11 @@ rng = MersenneTwister(123)
 @testset "dataset_shuffle" begin
     ds = dataset(
         "hopper-medium-replay-v0";
-        repo="d4rl",
+        repo = "d4rl",
         style = style,
         rng = rng,
         is_shuffle = true,
-        batch_size = batch_size
+        batch_size = batch_size,
     )
 
     data_dict = ds.dataset
@@ -58,7 +58,7 @@ end
         style = style,
         rng = rng,
         is_shuffle = false,
-        batch_size = batch_size
+        batch_size = batch_size,
     )
 
     data_dict = ds.dataset

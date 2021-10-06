@@ -51,7 +51,7 @@ Base.@kwdef struct Trainer{P,S}
     sealer::S = deepcopy
 end
 
-Trainer(p) = Trainer(;policy=p)
+Trainer(p) = Trainer(; policy = p)
 
 function (trainer::Trainer)(msg::BatchDataMsg)
     update!(trainer.policy, msg.data)
@@ -94,7 +94,7 @@ mutable struct Worker
 end
 
 function (w::Worker)(msg::StartMsg)
-    w.experiment = w.init(msg.args...;msg.kwargs...)
+    w.experiment = w.init(msg.args...; msg.kwargs...)
     w.task = Threads.@spawn run(w.experiment)
 end
 
@@ -128,7 +128,7 @@ end
 function (wp::WorkerProxy)(::FetchParamMsg)
     if !wp.is_fetch_msg_sent[]
         put!(wp.target, FetchParamMsg(self()))
-        wp.is_fetch_msg_sent[] = true 
+        wp.is_fetch_msg_sent[] = true
     end
 end
 
@@ -172,7 +172,10 @@ function (orc::Orchestrator)(msg::InsertTrajectoryMsg)
             put!(orc.trajectory_proxy, BatchSampleMsg(orc.trainer))
             L.n_sample += 1
             if L.n_sample == (L.n_load + 1) * L.sample_load_ratio
-                put!(orc.trajectory_proxy, ProxyMsg(to=orc.trainer, msg=FetchParamMsg(orc.worker)))
+                put!(
+                    orc.trajectory_proxy,
+                    ProxyMsg(to = orc.trainer, msg = FetchParamMsg(orc.worker)),
+                )
                 L.n_load += 1
             end
         end

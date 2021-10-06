@@ -84,44 +84,41 @@ function atari_env_factory(
     repeat_action_probability = 0.25,
     n_replica = nothing,
 )
-    init(seed) =
-        RewardTransformedEnv(
-            StateCachedEnv(
-                StateTransformedEnv(
-                    AtariEnv(;
-                        name = string(name),
-                        grayscale_obs = true,
-                        noop_max = 30,
-                        frame_skip = 4,
-                        terminal_on_life_loss = false,
-                        repeat_action_probability = repeat_action_probability,
-                        max_num_frames_per_episode = n_frames * max_episode_steps,
-                        color_averaging = false,
-                        full_action_space = false,
-                        seed = seed,
-                    );
-                    state_mapping=Chain(
-                        ResizeImage(state_size...),
-                        StackFrames(state_size..., n_frames)
-                    ),
-                    state_space_mapping= _ -> Space(fill(0..256, state_size..., n_frames))
-                )
-            );
-            reward_mapping = r -> clamp(r, -1, 1)
-        )
+    init(seed) = RewardTransformedEnv(
+        StateCachedEnv(
+            StateTransformedEnv(
+                AtariEnv(;
+                    name = string(name),
+                    grayscale_obs = true,
+                    noop_max = 30,
+                    frame_skip = 4,
+                    terminal_on_life_loss = false,
+                    repeat_action_probability = repeat_action_probability,
+                    max_num_frames_per_episode = n_frames * max_episode_steps,
+                    color_averaging = false,
+                    full_action_space = false,
+                    seed = seed,
+                );
+                state_mapping = Chain(
+                    ResizeImage(state_size...),
+                    StackFrames(state_size..., n_frames),
+                ),
+                state_space_mapping = _ ->
+                    Space(fill(0 .. 256, state_size..., n_frames)),
+            ),
+        );
+        reward_mapping = r -> clamp(r, -1, 1),
+    )
 
     if isnothing(n_replica)
         init(seed)
     else
-        envs = [
-            init(isnothing(seed) ? nothing : hash(seed + i))
-            for i in 1:n_replica
-        ]
+        envs = [init(isnothing(seed) ? nothing : hash(seed + i)) for i in 1:n_replica]
         states = Flux.batch(state.(envs))
         rewards = reward.(envs)
         terminals = is_terminated.(envs)
         A = Space([action_space(x) for x in envs])
-        S = Space(fill(0..255, size(states)))
+        S = Space(fill(0 .. 255, size(states)))
         MultiThreadEnv(envs, states, rewards, terminals, A, S, nothing)
     end
 end
@@ -195,7 +192,12 @@ function RL.Experiment(
     N_FRAMES = 4
     STATE_SIZE = (84, 84)
 
-    env = atari_env_factory(name, STATE_SIZE, N_FRAMES; seed = isnothing(seed) ? nothing : hash(seed + 2))
+    env = atari_env_factory(
+        name,
+        STATE_SIZE,
+        N_FRAMES;
+        seed = isnothing(seed) ? nothing : hash(seed + 2),
+    )
     N_ACTIONS = length(action_space(env))
     Nₑₘ = 64
 
@@ -250,7 +252,7 @@ function RL.Experiment(
             ),
         ),
         trajectory = CircularArraySARTTrajectory(
-            capacity = haskey(ENV, "CI") : 1_000 : 1_000_000,
+            capacity = haskey(ENV, "CI"):1_000:1_000_000,
             state = Matrix{Float32} => STATE_SIZE,
         ),
     )
@@ -274,7 +276,7 @@ function RL.Experiment(
                     steps_per_episode.steps[end] log_step_increment = 0
             end
         end,
-        DoEveryNStep(;n=EVALUATION_FREQ) do t, agent, env
+        DoEveryNStep(; n = EVALUATION_FREQ) do t, agent, env
             @info "evaluating agent at $t step..."
             p = agent.policy
             p = @set p.explorer = EpsilonGreedyExplorer(0.001; rng = rng)  # set evaluation epsilon
@@ -286,7 +288,7 @@ function RL.Experiment(
                     STATE_SIZE,
                     N_FRAMES,
                     MAX_EPISODE_STEPS_EVAL;
-                    seed = isnothing(seed) ? nothing : hash(seed + t)
+                    seed = isnothing(seed) ? nothing : hash(seed + t),
                 ),
                 StopAfterStep(125_000; is_show_progress = false),
                 h,
@@ -295,16 +297,18 @@ function RL.Experiment(
             avg_score = mean(h[1].rewards[1:end-1])
             avg_length = mean(h[2].steps[1:end-1])
 
-            @info "finished evaluating agent in $s seconds" avg_length = avg_length avg_score = avg_score
+            @info "finished evaluating agent in $s seconds" avg_length = avg_length avg_score =
+                avg_score
             with_logger(lg) do
-                @info "evaluating" avg_length = avg_length avg_score = avg_score log_step_increment = 0
+                @info "evaluating" avg_length = avg_length avg_score = avg_score log_step_increment =
+                    0
             end
         end,
     )
 
     stop_condition = StopAfterStep(
         haskey(ENV, "CI") ? 10_000 : 50_000_000,
-        is_show_progress=!haskey(ENV, "CI")
+        is_show_progress = !haskey(ENV, "CI"),
     )
     Experiment(agent, env, stop_condition, hook, "# IQN <-> Atari($name)")
 end

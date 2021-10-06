@@ -11,7 +11,7 @@ A `Dict` is used internally to store the mapping from state to action.
 """
 Base.@kwdef struct TabularPolicy{S,A} <: AbstractPolicy
     table::Dict{S,A} = Dict{Int,Int}()
-    n_action::Union{Int, Nothing} = nothing
+    n_action::Union{Int,Nothing} = nothing
 end
 
 (p::TabularPolicy)(env::AbstractEnv) = p(state(env))

@@ -3,11 +3,11 @@ export OfflinePolicy, JuliaRLTransition, gen_JuliaRL_dataset
 export calculate_CQL_loss, maximum_mean_discrepancy_loss
 
 struct JuliaRLTransition
-    state
-    action
-    reward
-    terminal
-    next_state
+    state::Any
+    action::Any
+    reward::Any
+    terminal::Any
+    next_state::Any
 end
 
 Base.@kwdef struct OfflinePolicy{L,T} <: AbstractPolicy
@@ -26,7 +26,8 @@ function (π::OfflinePolicy)(env, ::MinimalActionSet, ::Base.OneTo)
         findmax(π.learner(env))[2]
     end
 end
-(π::OfflinePolicy)(env, ::FullActionSet, ::Base.OneTo) = findmax(π.learner(env), legal_action_space_mask(env))[2]
+(π::OfflinePolicy)(env, ::FullActionSet, ::Base.OneTo) =
+    findmax(π.learner(env), legal_action_space_mask(env))[2]
 
 function (π::OfflinePolicy)(env, ::MinimalActionSet, A)
     if π.continuous
@@ -35,7 +36,8 @@ function (π::OfflinePolicy)(env, ::MinimalActionSet, A)
         A[findmax(π.learner(env))[2]]
     end
 end
-(π::OfflinePolicy)(env, ::FullActionSet, A) = A[findmax(π.learner(env), legal_action_space_mask(env))[2]]
+(π::OfflinePolicy)(env, ::FullActionSet, A) =
+    A[findmax(π.learner(env), legal_action_space_mask(env))[2]]
 
 function RLBase.update!(
     p::OfflinePolicy,
@@ -62,7 +64,8 @@ function RLBase.update!(
     l = p.learner
     l.update_step += 1
 
-    if in(:target_update_freq, fieldnames(typeof(l))) && l.update_step % l.target_update_freq == 0
+    if in(:target_update_freq, fieldnames(typeof(l))) &&
+       l.update_step % l.target_update_freq == 0
         copyto!(l.target_approximator, l.approximator)
     end
 
@@ -78,14 +81,15 @@ end
 
 Generate the dataset by trajectory from the trajectory obtained from the experiment (`alg` + `env`). `type` represents the method of collecting data. Possible values: random/medium/expert. `dataset_size` is the size of the generated dataset.
 """
-function gen_JuliaRL_dataset(alg::Symbol, env::Symbol, type::AbstractString; dataset_size::Int)
-    dataset_ex = Experiment(
-            Val(:GenDataset),
-            Val(alg),
-            Val(env),
-            type;
-            dataset_size = dataset_size)
-    
+function gen_JuliaRL_dataset(
+    alg::Symbol,
+    env::Symbol,
+    type::AbstractString;
+    dataset_size::Int,
+)
+    dataset_ex =
+        Experiment(Val(:GenDataset), Val(alg), Val(env), type; dataset_size = dataset_size)
+
     run(dataset_ex)
 
     dataset = []
@@ -123,19 +127,30 @@ end
     calculate_CQL_loss(q_value, action; method)
 See paper: [Conservative Q-Learning for Offline Reinforcement Learning](https://arxiv.org/abs/2006.04779)
 """
-function calculate_CQL_loss(q_value::Matrix{T}, action::Vector{R}; method = "CQL(H)") where {T, R}
+function calculate_CQL_loss(
+    q_value::Matrix{T},
+    action::Vector{R};
+    method = "CQL(H)",
+) where {T,R}
     if method == "CQL(H)"
-        cql_loss = mean(log.(sum(exp.(q_value), dims=1)) .- q_value[action])
+        cql_loss = mean(log.(sum(exp.(q_value), dims = 1)) .- q_value[action])
     else
         @error Wrong method parameter
     end
     return cql_loss
 end
 
-function maximum_mean_discrepancy_loss(raw_sample_action, raw_actor_action, type::Symbol, mmd_σ::Float32=10.0f0)
+function maximum_mean_discrepancy_loss(
+    raw_sample_action,
+    raw_actor_action,
+    type::Symbol,
+    mmd_σ::Float32 = 10.0f0,
+)
     A, B, N = size(raw_sample_action)
-    diff_xx = reshape(raw_sample_action, A, B, N, 1) .- reshape(raw_sample_action, A, B, 1, N)
-    diff_xy = reshape(raw_sample_action, A, B, N, 1) .- reshape(raw_actor_action, A, B, 1, N)
+    diff_xx =
+        reshape(raw_sample_action, A, B, N, 1) .- reshape(raw_sample_action, A, B, 1, N)
+    diff_xy =
+        reshape(raw_sample_action, A, B, N, 1) .- reshape(raw_actor_action, A, B, 1, N)
     diff_yy = reshape(raw_actor_action, A, B, N, 1) .- reshape(raw_actor_action, A, B, 1, N)
     diff_xx = calculate_sample_distance(diff_xx, type, mmd_σ)
     diff_xy = calculate_sample_distance(diff_xy, type, mmd_σ)
@@ -151,5 +166,5 @@ function calculate_sample_distance(diff, type::Symbol, mmd_σ::Float32)
     else
         error("Wrong parameter.")
     end
-    return vec(mean(exp.(-sum(diff, dims=1) ./ (2.0f0 * mmd_σ)), dims=(3, 4)))
+    return vec(mean(exp.(-sum(diff, dims = 1) ./ (2.0f0 * mmd_σ)), dims = (3, 4)))
 end

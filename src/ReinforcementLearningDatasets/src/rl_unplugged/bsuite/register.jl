@@ -1,17 +1,9 @@
 repo = "bsuite"
 export bsuite_params
 
-const BSUITE_DATASETS = [
-    "cartpole",
-    "catch",
-    "mountain_car"
-]
+const BSUITE_DATASETS = ["cartpole", "catch", "mountain_car"]
 
-types = [
-    "full", 
-    "full_train",
-    "full_valid"
-]
+types = ["full", "full_train", "full_valid"]
 
 function bsuite_params()
     game = BSUITE_DATASETS
@@ -47,8 +39,8 @@ function bsuite_init()
                             where the stochasticity of the environment is easy to control.
                             """,
                             "gs://rl_unplugged/$repo/$env/0_$stochasticity/$(index)_$type-00000-of-00001",
-                            fetch_method = fetch_gc_file
-                        )
+                            fetch_method = fetch_gc_file,
+                        ),
                     )
                 end
             end

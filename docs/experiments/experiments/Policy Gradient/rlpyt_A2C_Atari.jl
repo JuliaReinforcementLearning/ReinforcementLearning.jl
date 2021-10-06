@@ -83,7 +83,7 @@ function RL.Experiment(
     hook = ComposedHook(
         total_batch_reward_per_episode,
         batch_steps_per_episode,
-        DoEveryNStep(;n=UPDATE_FREQ) do t, agent, env
+        DoEveryNStep(; n = UPDATE_FREQ) do t, agent, env
             learner = agent.policy.policy.learner
             with_logger(lg) do
                 @info "training" loss = learner.loss actor_loss = learner.actor_loss critic_loss =
@@ -94,20 +94,22 @@ function RL.Experiment(
         DoEveryNStep() do t, agent, env
             with_logger(lg) do
                 rewards = [
-                    total_batch_reward_per_episode.rewards[i][end] for i in 1:length(env) if is_terminated(env[i])
+                    total_batch_reward_per_episode.rewards[i][end] for
+                    i in 1:length(env) if is_terminated(env[i])
                 ]
                 if length(rewards) > 0
                     @info "training" rewards = mean(rewards) log_step_increment = 0
                 end
                 steps = [
-                    batch_steps_per_episode.steps[i][end] for i in 1:length(env) if is_terminated(env[i])
+                    batch_steps_per_episode.steps[i][end] for
+                    i in 1:length(env) if is_terminated(env[i])
                 ]
                 if length(steps) > 0
                     @info "training" steps = mean(steps) log_step_increment = 0
                 end
             end
         end,
-        DoEveryNStep(;n=EVALUATION_FREQ) do t, agent, env
+        DoEveryNStep(; n = EVALUATION_FREQ) do t, agent, env
             @info "evaluating agent at $t step..."
             h = TotalBatchOriginalRewardPerEpisode(N_ENV)
             s = @elapsed run(

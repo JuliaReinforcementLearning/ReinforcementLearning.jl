@@ -28,7 +28,7 @@ function RL.Experiment(
     ns = length(state(inner_env))
     na = 1
     latent_dims = 2
-    
+
     trajectory_num = 10000
     dataset_size = 10000
     batch_size = 64
@@ -43,7 +43,7 @@ function RL.Experiment(
         model = Chain(
             Dense(ns, 64, relu; init = glorot_uniform(rng)),
             Dense(64, 64, relu; init = glorot_uniform(rng)),
-            Dense(64, latent_dims; init = glorot_uniform(rng))
+            Dense(64, latent_dims; init = glorot_uniform(rng)),
         ),
         optimizer = ADAM(0.003),
     )
@@ -60,10 +60,7 @@ function RL.Experiment(
     create_vae_net() = NeuralNetworkApproximator(
         model = VAE(
             encoder = GaussianNetwork(
-                pre = Chain(
-                    Dense(ns + na, 64, relu), 
-                    Dense(64, 64, relu),
-                ),
+                pre = Chain(Dense(ns + na, 64, relu), Dense(64, 64, relu)),
                 μ = Chain(Dense(64, latent_dims, init = init)),
                 logσ = Chain(Dense(64, latent_dims, init = init)),
             ),
@@ -91,7 +88,12 @@ function RL.Experiment(
                 pretrain_step = 1500,
                 update_freq = 1,
             ),
-            dataset = gen_JuliaRL_dataset(:SAC, :Pendulum, type; dataset_size = dataset_size),
+            dataset = gen_JuliaRL_dataset(
+                :SAC,
+                :Pendulum,
+                type;
+                dataset_size = dataset_size,
+            ),
             continuous = true,
             batch_size = batch_size,
         ),
@@ -102,7 +104,7 @@ function RL.Experiment(
         ),
     )
 
-    stop_condition = StopAfterStep(trajectory_num, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterStep(trajectory_num, is_show_progress = !haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "PLAS <-> Pendulum ($type dataset)")
 end
