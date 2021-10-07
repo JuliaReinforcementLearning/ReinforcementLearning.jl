@@ -149,7 +149,7 @@ end
 # _rf_findmax((fm, m), (fx, x)) = isless(fm, fx) ? (fx, x) : (fm, m)
 
 # !!! type piracy
-Base.findmax(A::AbstractVector, mask::AbstractVector{Bool}) = findmax(map( x -> !mask[x[1]] ? -Inf : x[2], enumerate(A)))
+Base.findmax(A::AbstractVector{T}, mask::AbstractVector{Bool}) where T = findmax(ifelse.(mask, A, typemin(T)))
 
 
 const VectorOrMatrix = Union{AbstractMatrix,AbstractVector}
