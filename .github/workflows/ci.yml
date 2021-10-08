@@ -121,7 +121,7 @@ jobs:
       - uses: marceloprado/has-changed-path@v1
         id: RLExperiments-changed
         with:
-          paths: docs/experiments
+          paths: src/ReinforcementLearningExperiments
 
       - name: Test RLExperiments
         if: (steps.RLExperiments-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
