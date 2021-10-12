@@ -36,7 +36,7 @@ Base.show(io::IO, r::ZeroTo) = print(io, "ZeroTo(", r.stop, ")")
 Base.length(r::ZeroTo{T}) where {T} = T(r.stop + one(r.stop))
 Base.first(r::ZeroTo{T}) where {T} = zero(r.stop)
 
-function getindex(v::ZeroTo{T}, i::Integer) where {T}
+function Base.getindex(v::ZeroTo{T}, i::Integer) where {T}
     Base.@_inline_meta
     @boundscheck ((i >= 0) & (i <= v.stop)) || throw_boundserror(v, i)
     convert(T, i)
