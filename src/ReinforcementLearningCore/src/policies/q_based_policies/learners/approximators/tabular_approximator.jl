@@ -3,8 +3,12 @@ export TabularApproximator, TabularVApproximator, TabularQApproximator
 """
     TabularApproximator(table<:AbstractArray, opt)
 
-For `table` of 1-d, it will serve as a state value approximator.
-For `table` of 2-d, it will serve as a state-action value approximator.
+For `table` of 1-d, it will serve as a state value approximator. See [`TabularVApproximator`](@ref).
+For `table` of 2-d, it will serve as a state-action value approximator. See [`TabularQApproximator`](@ref).
+
+Note that actions and states should be presented to `TabularApproximator` as integers starting from 
+1 to be used as the index of the table. That is, e.g., [`RLBase.state_space`](@ref) is expected to 
+return `Base.OneTo(n_state)`, where `n_state` is the number of states.
 
 !!! warning
     For `table` of 2-d, the first dimension is action and the second dimension is state.
