@@ -24,6 +24,9 @@ mutable struct PETSPolicy{
     # Settings
     predict_reward::Bool
 
+    # Logging
+    model_loss::Vector{Float32} # TODO should this be hardcoded?
+
     # Rng
     rng::R
 end
@@ -37,7 +40,7 @@ function PETSPolicy(;
     update_after=200,
     update_freq=50,
     predict_reward=false,
-    rng = Random.GLOBAL_RNG,
+    rng=Random.GLOBAL_RNG,
 )
     PETSPolicy(
         optimizer,
@@ -49,6 +52,7 @@ function PETSPolicy(;
         update_freq,
         0,
         predict_reward,
+        zeros(Float32, length(ensamble)),
         rng
     )
 end
@@ -57,8 +61,7 @@ function (p::PETSPolicy)(env)
     p.update_step += 1
 
     if p.update_step <= p.start_steps
-        a = p.start_policy(env)
-        return a
+        p.start_policy(env)
     else
         # TODO: This creates a closure? Remember there was something undesirable with closures, but not what...
         p.optimizer() do action_sequence
@@ -76,10 +79,11 @@ function (p::PETSPolicy)(env)
                     s = s + ens_mean
                     # TODO: this is not nice, forces users to have rewardoverridden env with specific pattern
                     # or an env that is specifically designed for this
-                    rtot += reward(env; action=action_sequence[:, i], nstate=s)
+                    is_terminated(env; current_state=s, future_steps=i) && break
+                    rtot += reward(env; last_action=action_sequence[:, i], current_state=s)
                 end
             end
-            return rtot
+            rtot
         end
     end
 end
@@ -100,13 +104,20 @@ function RLBase.update!(p::PETSPolicy, batch::NamedTuple{SARTS})
     s, a, r, t, s′ = send_to_device(device(p.ensamble[1]), batch) # TODO merge ensamble to type?
 
     state_action = vcat(s, a)
+    # Predict change in state
+    # Predict absolute reward if predict_reward
     target = p.predict_reward ? vcat(s′ - s, Flux.unsqueeze(r, 1)) : s′ - s
 
     # Train each model
-    for m in p.ensamble
+    for (i, m) in enumerate(p.ensamble)
+        # TODO should this loop?
         grad = gradient(Flux.params(m)) do
             μ, logσ = m(p.rng, state_action) 
-            mean(((target .- μ) ./ exp.(logσ)) .^ 2 ./ 2 .+ logσ)
+            loss = mean(((target .- μ) ./ exp.(logσ)) .^ 2 ./ 2 .+ logσ)
+            ignore() do 
+                p.model_loss[i] = loss
+            end
+            loss
         end
         update!(m, grad)
     end
