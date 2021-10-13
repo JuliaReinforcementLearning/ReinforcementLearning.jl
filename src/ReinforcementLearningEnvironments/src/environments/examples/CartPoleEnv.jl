@@ -22,7 +22,7 @@ Base.show(io::IO, params::CartPoleEnvParams) = print(
 mutable struct CartPoleEnv{A,T,R<:AbstractRNG} <: AbstractEnv
     params::CartPoleEnvParams{T}
     action_space::A
-    observation_space::Space{Vector{ClosedInterval{T}}}
+    state_space::Space{Vector{ClosedInterval{T}}}
     state::Array{T,1}
     last_action::T
     done::Bool
@@ -88,7 +88,7 @@ end
 CartPoleEnv{T}(; kwargs...) where {T} = CartPoleEnv(; T = T, kwargs...)
 
 function RLBase.reset!(env::CartPoleEnv{A,T}) where {A,T<:Number}
-    env.state[:] = T(0.1) * rand(env.rng, T, 4) .- T(0.05)
+    env.state .= T(0.1) .* rand(env.rng, T, 4) .- T(0.05)
     env.t = 0
     env.done = false
     nothing
