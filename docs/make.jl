@@ -13,6 +13,10 @@ open(joinpath(@__DIR__, "..", "README.md"), "r") do f_src
     end
 end
 
+exp_src_dir = joinpath(@__DIR__, "..", "src", "ReinforcementLearningExperiments", "deps", "experiments")
+exp_dest_dir = joinpath(@__DIR__, "experiments")
+cp(exp_src_dir, exp_dest_dir;force=true)
+
 experiments, postprocess_cb, experiments_assets = makedemos("experiments")
 
 assets = [

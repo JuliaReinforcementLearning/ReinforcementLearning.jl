@@ -3,6 +3,12 @@ on:
   pull_request:
     branches:
       - master
+    types:
+      - labeled
+      - opened
+      - edited
+      - reopened
+      - synchronize
   push:
     branches:
       - master
@@ -24,6 +30,8 @@ jobs:
           - '3.8'
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 100
       - name: Setup python
         uses: actions/setup-python@v1
         with:
@@ -44,24 +52,86 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
-      - run: |
+
+      - uses: marceloprado/has-changed-path@v1
+        id: RLBase-changed
+        with:
+          paths: src/ReinforcementLearningBase
+
+      - name: Test RLBase
+        if: (steps.RLBase-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        run: |
           julia --color=yes -e '
             using Pkg;
             Pkg.develop(path="src/ReinforcementLearningBase")
+            Pkg.test("ReinforcementLearningBase")'
+
+      - uses: marceloprado/has-changed-path@v1
+        id: RLCore-changed
+        with:
+          paths: src/ReinforcementLearningCore
+
+      - name: Test RLCore
+        if: (steps.RLCore-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        run: |
+          julia --color=yes -e '
+            using Pkg;
             Pkg.develop(path="src/ReinforcementLearningCore")
-            Pkg.develop(path="src/ReinforcementLearningEnvironments")
+            Pkg.test("ReinforcementLearningCore")'
+
+      - uses: marceloprado/has-changed-path@v1
+        id: RLZoo-changed
+        with:
+          paths: src/ReinforcementLearningZoo
+
+      - name: Test RLZoo
+        if: (steps.RLZoo-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        run: |
+          julia --color=yes -e '
+            using Pkg;
             Pkg.develop(path="src/ReinforcementLearningZoo")
+            Pkg.test("ReinforcementLearningZoo")'
+
+      - uses: marceloprado/has-changed-path@v1
+        id: RLEnvironments-changed
+        with:
+          paths: src/ReinforcementLearningEnvironments
+
+      - name: Test RLEnvironments
+        if: (steps.RLEnvironments-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        run: |
+          julia --color=yes -e '
+            using Pkg;
+            Pkg.develop(path="src/ReinforcementLearningEnvironments")
+            Pkg.test("ReinforcementLearningEnvironments")'
+
+      - uses: marceloprado/has-changed-path@v1
+        id: RLDatasets-changed
+        with:
+          paths: src/ReinforcementLearningDatasets
+
+      - name: Test RLDatasets
+        if: (steps.RLDatasets-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        run: |
+          julia --color=yes -e '
+            using Pkg;
             Pkg.develop(path="src/ReinforcementLearningDatasets")
-            Pkg.develop(path=".")
+            Pkg.test("ReinforcementLearningDatasets")'
+
+      - uses: marceloprado/has-changed-path@v1
+        id: RLExperiments-changed
+        with:
+          paths: src/ReinforcementLearningExperiments
+
+      - name: Test RLExperiments
+        if: (steps.RLExperiments-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        run: |
+          julia --color=yes -e '
+            using Pkg;
             Pkg.develop(path="src/ReinforcementLearningExperiments")
             Pkg.build("ReinforcementLearningExperiments")
-            Pkg.test("ReinforcementLearningBase")
-            Pkg.test("ReinforcementLearningCore")
-            Pkg.test("ReinforcementLearningEnvironments")
-            Pkg.test("ReinforcementLearningZoo")
-            Pkg.test("ReinforcementLearning")
-            Pkg.test("ReinforcementLearningExperiments")
-            Pkg.test("ReinforcementLearningDatasets")'
+            Pkg.test("ReinforcementLearningExperiments")'
+
   docs:
     name: Documentation
     runs-on: ubuntu-latest

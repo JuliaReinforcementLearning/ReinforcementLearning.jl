@@ -385,6 +385,26 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "3rdCore",
+      "name": "Tom Marty",
+      "avatar_url": "https://avatars.githubusercontent.com/u/59280588?v=4",
+      "profile": "https://github.com/3rdCore",
+      "contributions": [
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "bhatiaabhinav",
+      "name": "Abhinav Bhatia",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6555124?v=4",
+      "profile": "https://bhatiaabhinav.github.io/",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
