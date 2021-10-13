@@ -13,7 +13,7 @@ return `Base.OneTo(n_state)`, where `n_state` is the number of states.
 !!! warning
     For `table` of 2-d, the first dimension is action and the second dimension is state.
 """
-struct TabularApproximator{N,T<:AbstractArray{Float64, N},O} <: AbstractApproximator
+struct TabularApproximator{N,T<:AbstractArray{<:AbstractFloat, N},O} <: AbstractApproximator
     table::T
     optimizer::O
     function TabularApproximator(table::T, opt::O) where {T<:AbstractArray,O}
