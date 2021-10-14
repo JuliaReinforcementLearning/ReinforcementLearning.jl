@@ -4,6 +4,10 @@
 
 ### ReinforcementLearningEnvironments.jl
 
+#### v0.6.6
+
+- Bugfix with `ZeroTo` [#534](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/534)
+
 ### ReinforcementLearningCore.jl
 
 ### ReinforcementLearningZoo.jl
