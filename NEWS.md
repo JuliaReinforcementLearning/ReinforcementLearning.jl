@@ -12,6 +12,10 @@
 
 ### ReinforcementLearningZoo.jl
 
+#### v0.5.2
+
+- Fixed the bug with MaskedPPOTrajectory reported [here](https://discourse.julialang.org/t/using-ppopolicy-with-custom-environment-with-action-masking-in-reinforcementlearning-jl/69625/6)
+
 #### v0.5.0
 
 - Update the complete SAC implementation and modify some details based on the
