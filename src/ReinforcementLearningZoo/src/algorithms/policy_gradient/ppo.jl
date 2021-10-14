@@ -179,7 +179,7 @@ function RLBase.prob(p::PPOPolicy, env::AbstractEnv)
     s = state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
     mask =  ActionStyle(env) === FULL_ACTION_SET ? legal_action_space_mask(env) : nothing
-    prob(p, s, mask)[]
+    prob(p, s, mask)
 end
 
 (p::PPOPolicy)(env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
