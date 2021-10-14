@@ -124,7 +124,7 @@ jobs:
           paths: src/ReinforcementLearningExperiments
 
       - name: Test RLExperiments
-        if: (steps.RLExperiments-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        if: (steps.RLZoo-changed.outputs.changed == 'true') || (steps.RLExperiments-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
           julia --color=yes -e '
             using Pkg;
