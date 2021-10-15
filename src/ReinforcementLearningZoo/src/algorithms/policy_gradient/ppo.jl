@@ -144,6 +144,7 @@ end
 function RLBase.prob(
     p::PPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal},
     state::AbstractArray,
+    mask,
 )
     if p.update_step < p.n_random_start
         @error "todo"
@@ -153,11 +154,12 @@ function RLBase.prob(
     end
 end
 
-function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArray)
-    logits =
-        p.approximator.actor(send_to_device(device(p.approximator), state)) |>
-        softmax |>
-        send_to_host
+function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArray, mask)
+    logits = p.approximator.actor(send_to_device(device(p.approximator), state))
+    if !isnothing(mask)
+        logits .+= ifelse.(mask, 0f0, typemin(Float32))
+    end
+    logits = logits |> softmax |> send_to_host
     if p.update_step < p.n_random_start
         [
             Categorical(fill(1 / length(x), length(x)); check_args = false) for
@@ -168,15 +170,21 @@ function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArr
     end
 end
 
-RLBase.prob(p::PPOPolicy, env::MultiThreadEnv) = prob(p, state(env))
+function RLBase.prob(p::PPOPolicy, env::MultiThreadEnv)
+    mask =  ActionStyle(env) === FULL_ACTION_SET ? legal_action_space_mask(env) : nothing
+    prob(p, state(env), mask)
+end
 
 function RLBase.prob(p::PPOPolicy, env::AbstractEnv)
     s = state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
-    prob(p, s)
+    mask =  ActionStyle(env) === FULL_ACTION_SET ? legal_action_space_mask(env) : nothing
+    prob(p, s, mask)
 end
 
 (p::PPOPolicy)(env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
+
+# !!! https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/533/files#r728920324
 (p::PPOPolicy)(env::AbstractEnv) = rand.(p.rng, prob(p, env))
 
 function (agent::Agent{<:PPOPolicy})(env::MultiThreadEnv)
@@ -248,11 +256,12 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
                 lam = send_to_device(
                     D,
                     select_last_dim(
-                        flatten_batch(select_last_dim(t[:legal_actions_mask], 1:n)),
+                        flatten_batch(select_last_dim(t[:legal_actions_mask], 2:n+1)),
                         inds,
                     ),
                 )
-                @error "TODO:"
+            else
+                lam = nothing
             end
             s = send_to_device(D, select_last_dim(states_flatten, inds))  # !!! performance critical
             a = send_to_device(D, select_last_dim(actions_flatten, inds))
@@ -278,7 +287,12 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
                     entropy_loss = mean(size(logσ, 1) * (log(2.0f0π) + 1) .+ sum(logσ; dims = 1)) / 2
                 else
                     # actor is assumed to return discrete logits
-                    logit′ = AC.actor(s)
+                    raw_logit′ = AC.actor(s)
+                    if isnothing(lam)
+                        logit′ = raw_logit′
+                    else
+                        logit′ = raw_logit′ .+ ifelse.(lam, 0.0f0, typemin(Float32))
+                    end
                     p′ = softmax(logit′)
                     log_p′ = logsoftmax(logit′)
                     log_p′ₐ = log_p′[a]

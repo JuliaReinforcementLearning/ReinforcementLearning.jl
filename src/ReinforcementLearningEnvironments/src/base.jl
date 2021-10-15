@@ -38,8 +38,8 @@ Base.first(r::ZeroTo{T}) where {T} = zero(r.stop)
 
 function Base.getindex(v::ZeroTo{T}, i::Integer) where {T}
     Base.@_inline_meta
-    @boundscheck ((i >= 0) & (i <= v.stop)) || throw_boundserror(v, i)
-    convert(T, i)
+    @boundscheck ((i > 0) & (i <= v.stop+1)) || Base.throw_boundserror(v, i)
+    convert(T, i-1)
 end
 
 #####

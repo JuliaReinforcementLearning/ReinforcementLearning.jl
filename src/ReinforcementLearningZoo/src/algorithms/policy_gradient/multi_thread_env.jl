@@ -66,7 +66,7 @@ function MultiThreadEnv(envs::Vector{<:AbstractEnv})
     r_batch = reward.(envs)
     t_batch = is_terminated.(envs)
     if ActionStyle(envs[1]) === FULL_ACTION_SET
-        m_batch = BitArray(undef, size(A_batch))
+        m_batch = BitArray(undef, size(A)..., n)
         for j in 1:n
             L = legal_action_space_mask(envs[j])
             for i in CartesianIndices(size(A))
