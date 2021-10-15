@@ -26,19 +26,19 @@ end
 const TabularVApproximator = TabularApproximator{1}
 const TabularQApproximator = TabularApproximator{2}
 
-```
+"""
     TabularVApproximator(; n_state, init = 0.0, opt = InvDecay(1.0))
 
 A state value approximator represented by a 1-d table. `init` is the initial value of each state.
-```
+"""
 TabularVApproximator(; n_state, init = 0.0, opt = InvDecay(1.0)) =
     TabularApproximator(fill(init, n_state), opt)
-```
+"""
     TabularQApproximator(; n_state, n_action, init = 0.0, opt = InvDecay(1.0))
 
 An action-state value approximator represented by a 2-d table. `init` is the initial value of each
 pair of action-state.
-```
+"""
 TabularQApproximator(; n_state, n_action, init = 0.0, opt = InvDecay(1.0)) =
     TabularApproximator(fill(init, n_action, n_state), opt)
 
