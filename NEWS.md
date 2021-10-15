@@ -12,6 +12,10 @@
 
 ### ReinforcementLearningZoo.jl
 
+#### v0.5.3
+
+- Revert part of the unexpected change of PPO in the last PR.
+
 #### v0.5.2
 
 - Fixed the bug with MaskedPPOTrajectory reported [here](https://discourse.julialang.org/t/using-ppopolicy-with-custom-environment-with-action-masking-in-reinforcementlearning-jl/69625/6)
