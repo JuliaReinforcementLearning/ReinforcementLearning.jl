@@ -10,6 +10,10 @@
 
 ### ReinforcementLearningCore.jl
 
+#### v0.8.5
+
+- Fixed the method overwritten warning of `device` from `CUDA.jl`.
+
 ### ReinforcementLearningZoo.jl
 
 #### v0.5.3
