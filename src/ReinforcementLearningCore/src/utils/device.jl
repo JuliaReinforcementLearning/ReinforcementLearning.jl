@@ -11,7 +11,9 @@ import CUDA: device
 send_to_host(x) = send_to_device(Val(:cpu), x)
 
 send_to_device(::Val{:cpu}, m) = fmap(x -> adapt(Array, x), m)
-send_to_device(::Val{:gpu}, m) = fmap(CUDA.cu, m)
+
+# TODO: handle multi-devices
+send_to_device(::CuDevice, m) = fmap(CUDA.cu, m)
 
 """
     device(model)
@@ -21,7 +23,6 @@ Return `Val(:cpu)` by default.
 """
 device(x) = device(Flux.trainable(x))
 device(x::Function) = nothing
-device(::CuArray) = Val(:gpu)
 device(::Array) = Val(:cpu)
 device(x::Tuple{}) = nothing
 device(x::NamedTuple{(),Tuple{}}) = nothing
@@ -31,7 +32,7 @@ device(x::Base.ReshapedArray) = device(parent(x))
 
 function device(x::Random.AbstractRNG)
     if x isa CUDA.CURAND.RNG
-        Val(:gpu)
+        device()
     else
         Val(:cpu)
     end

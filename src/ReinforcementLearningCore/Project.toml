@@ -1,7 +1,7 @@
 name = "ReinforcementLearningCore"
 uuid = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
 authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
-version = "0.8.4"
+version = "0.8.5"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -33,7 +33,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 AbstractTrees = "0.3"
 Adapt = "2, 3"
 ArrayInterface = "3"
-CUDA = "3"
+CUDA = "3.5"
 CircularArrayBuffers = "0.1"
 Compat = "3"
 Distributions = "0.24, 0.25"
