@@ -11,7 +11,9 @@ export AbstractHook,
     DoEveryNStep,
     DoOnExit,
     UploadTrajectoryEveryNStep,
-    MultiAgentHook
+    MultiAgentHook,
+    PeriodicRolloutHook,
+    RolloutHook
 
 using UnicodePlots:lineplot, lineplot!
 using Statistics
@@ -315,7 +317,7 @@ struct DoOnExit{F} <: AbstractHook
 end
 
 function (h::DoOnExit)(::PostExperimentStage, agent, env)
-    h.f()
+    h.f(agent, env)
 end
 
 """
@@ -356,3 +358,36 @@ function (hook::MultiAgentHook)(
         h(s, p, env, args...)
     end
 end
+
+"""
+    PeriodicRolloutHook(env_fn, render, close; n = n)
+
+Run a rollout every `n` episodes. Each rollout is run with a `RolloutHook`
+with parameters `render`, `close`.
+"""
+
+function PeriodicRolloutHook(env_fn, render, close; n = 100)
+    ComposedHook(DoEveryNEpisode(; n = n) do t, agent, env
+                     run(agent, env_fn(), StopWhenDone(), RolloutHook(render, close))
+                 end,
+                 DoOnExit() do agent, env
+                     run(agent, env_fn(), StopWhenDone(), RolloutHook(render, close))
+                 end
+                 )
+end
+
+"""
+    RolloutHook(render, close)
+
+Convenience hook for callbacks on every frame of an environment rollout.
+The hook `RolloutHook(render, close)` will execute `render(env::AbstractEnv)`
+after each action, and will execute `close()` after the episode.
+"""
+
+struct RolloutHook{F, G} <: AbstractHook
+    render::F
+    close::G
+end
+
+(h::RolloutHook)(::PostActStage, agent, env) = isnothing(h.render) ? nothing : h.render(env)
+(h::RolloutHook)(::PostEpisodeStage, agent, env) = isnothing(h.close) ? nothing : h.close()

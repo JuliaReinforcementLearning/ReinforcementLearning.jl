@@ -65,4 +65,16 @@ run(ex)
 plot(ex.hook.rewards)
 savefig("assets/JuliaRL_BasicDQN_MountainCar.png") #hide
 
+"""
+## Watch a demo episode with the trained agent
+
+    demo = Experiment(ex.policy,
+                      MountainCarEnv(),
+                      StopWhenDone(),
+                      RolloutHook(plot, closeall),
+                      "DQN <-> Demo")
+    run(demo)
+
+"""
+
 # ![](assets/JuliaRL_BasicDQN_MountainCar.png)
