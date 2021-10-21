@@ -3,6 +3,7 @@
   "order": [
     "JuliaRL_BasicDQN_CartPole.jl",
     "JuliaRL_BasicDQN_MountainCar.jl",
+    "JuliaRL_BasicDQN_PendulumDiscrete.jl",
     "JuliaRL_BasicDQN_SingleRoomUndirected.jl",
     "JuliaRL_DQN_CartPole.jl",
     "JuliaRL_PrioritizedDQN_CartPole.jl",

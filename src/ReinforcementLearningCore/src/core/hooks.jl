@@ -12,7 +12,7 @@ export AbstractHook,
     DoOnExit,
     UploadTrajectoryEveryNStep,
     MultiAgentHook,
-    PeriodicRolloutHook,
+    period_rollout_hook,
     RolloutHook
 
 using UnicodePlots:lineplot, lineplot!
@@ -360,13 +360,13 @@ function (hook::MultiAgentHook)(
 end
 
 """
-    PeriodicRolloutHook(env_fn, render, close; n = n)
+    period_rollout_hook(env_fn, render, close; n = n)
 
 Run a rollout every `n` episodes. Each rollout is run with a `RolloutHook`
 with parameters `render`, `close`.
 """
 
-function PeriodicRolloutHook(env_fn, render, close; n = 100)
+function period_rollout_hook(env_fn, render, close; n = 100)
     ComposedHook(DoEveryNEpisode(; n = n) do t, agent, env
                      run(agent, env_fn(), StopWhenDone(), RolloutHook(render, close))
                  end,
