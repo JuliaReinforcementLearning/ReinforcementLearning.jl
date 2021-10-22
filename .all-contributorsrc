@@ -405,6 +405,16 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "harwiltz",
+      "name": "Harley Wiltzer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/56648659?v=4",
+      "profile": "http://harwiltz.github.io/about",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
