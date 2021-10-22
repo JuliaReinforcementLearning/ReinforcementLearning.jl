@@ -58,7 +58,7 @@ function PendulumEnv(;
     env = PendulumEnv(
         PendulumEnvParams(max_speed, max_torque, g, m, l, dt, max_steps),
         action_space,
-        0.0,
+        zero(T),
         Space(ClosedInterval{T}.(-high, high)),
         zeros(T, 2),
         false,
