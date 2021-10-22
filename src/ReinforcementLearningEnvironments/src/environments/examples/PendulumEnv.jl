@@ -85,7 +85,7 @@ RLBase.state(env::PendulumEnv) = pendulum_observation(env.state)
 function RLBase.reset!(env::PendulumEnv{A,T}) where {A,T}
     env.state[1] = 2 * π * (rand(env.rng, T) .- 1)
     env.state[2] = 2 * (rand(env.rng, T) .- 1)
-    env.action = 0.0
+    env.action = zero(T)
     env.t = 0
     env.done = false
     env.reward = zero(T)
