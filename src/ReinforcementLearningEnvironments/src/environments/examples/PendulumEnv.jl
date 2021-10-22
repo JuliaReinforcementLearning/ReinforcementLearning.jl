@@ -13,6 +13,7 @@ end
 mutable struct PendulumEnv{A,T,R<:AbstractRNG} <: AbstractEnv
     params::PendulumEnvParams{T}
     action_space::A
+    action::T
     observation_space::Space{Vector{ClosedInterval{T}}}
     state::Vector{T}
     done::Bool
@@ -57,6 +58,7 @@ function PendulumEnv(;
     env = PendulumEnv(
         PendulumEnvParams(max_speed, max_torque, g, m, l, dt, max_steps),
         action_space,
+        zero(T),
         Space(ClosedInterval{T}.(-high, high)),
         zeros(T, 2),
         false,
@@ -83,21 +85,17 @@ RLBase.state(env::PendulumEnv) = pendulum_observation(env.state)
 function RLBase.reset!(env::PendulumEnv{A,T}) where {A,T}
     env.state[1] = 2 * π * (rand(env.rng, T) .- 1)
     env.state[2] = 2 * (rand(env.rng, T) .- 1)
+    env.action = zero(T)
     env.t = 0
     env.done = false
     env.reward = zero(T)
     nothing
 end
 
-function (env::PendulumEnv{<:ClosedInterval})(a::AbstractFloat)
+function (env::PendulumEnv)(a::Union{Int, AbstractFloat})
     @assert a in env.action_space
-    _step!(env, a)
-end
-
-function (env::PendulumEnv{<:Base.OneTo})(a::Int)
-    @assert a in env.action_space
-    float_a = (4 / (env.n_actions - 1)) * (a - (env.n_actions - 1) / 2 - 1)
-    _step!(env, float_a)
+    env.action = torque(env, a)
+    _step!(env, env.action)
 end
 
 function _step!(env::PendulumEnv, a)
@@ -119,3 +117,9 @@ function _step!(env::PendulumEnv, a)
     env.reward = -costs
     nothing
 end
+
+function torque(env::PendulumEnv{<:Base.OneTo}, a::Int)
+    return (4 / (env.n_actions - 1)) * (a - (env.n_actions - 1) / 2 - 1)
+end
+
+torque(env::PendulumEnv{<:ClosedInterval}, a::AbstractFloat) = a

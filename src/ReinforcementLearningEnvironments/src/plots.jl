@@ -1,3 +1,5 @@
+import .Plots.closeall
+import .Plots.gui
 import .Plots.plot
 import .Plots.plot!
 
@@ -37,7 +39,9 @@ function plot(env::CartPoleEnv; kwargs...)
         )
     end
     
-    plot!(;kwargs...)
+    p = plot!(;kwargs...)
+    gui(p)
+    p
 end
 
 
@@ -52,7 +56,7 @@ function plot(env::MountainCarEnv; kwargs...)
 
     plot(
         xlims=(env.params.min_pos - 0.1, env.params.max_pos + 0.2),
-        ylims=(-.1, height(env.params.max_pos) + 0.2),
+        ylims=(-.1, height(env.params.max_pos) + 0.1),
         legend=false,
         border=:none,
     )
@@ -76,7 +80,7 @@ function plot(env::MountainCarEnv; kwargs...)
 
     # if done plot pink circle in top right
     if d
-        plot!([xthreshold - 0.2], [l];
+      plot!([env.params.max_pos - 0.2], [height(env.params.max_pos) + 0.1];
             marker=:circle,
             markersize=20,
             markerstrokewidth=0.,
@@ -84,5 +88,68 @@ function plot(env::MountainCarEnv; kwargs...)
         )
     end
 
-    plot!(;kwargs...)
- end
+    p = plot!(;kwargs...)
+    gui(p)
+    p
+end
+
+function plot(env::PendulumEnv; kwargs...)
+    size = 1.0
+    width = 0.01
+    height = 1.3 * size
+    s = env.state
+    d = env.done
+    cθ, sθ, ω = pendulum_observation(s)
+
+    plot(
+        xlims=(-size, size),
+        ylims=(-size, size),
+        legend=false,
+        border=:none,
+    )
+
+    # Plot pendulum
+    xs = [-width, -width, width, width]
+    ys = [0, height, height, 0]
+
+    plot!(xs * cθ - ys * sθ, ys * cθ + xs * sθ;
+          seriestype=:shape,
+          color=6,
+          )
+
+    # Plot anchor
+    plot!([0.0], [0.0];
+          marker=:circle,
+          markersize=20,
+          markerstrokewidth=2.,
+          color=4,
+          )
+
+    # Plot arrow
+    arrow_radius = 0.2
+    torque = env.action
+    xs = LinRange(2*arrow_radius/3, -2*arrow_radius/3, 100)
+    if torque > 0
+        xs = -xs
+    end
+    ys = sqrt.(arrow_radius^2 .- xs.^2)
+    plot!(xs, ys;
+          arrow=true,
+          linewidth=2,
+          color=2,
+          fillalpha = abs(torque) / env.params.max_torque,
+          )
+
+    if d
+      plot!([size - 0.2], [size + 0.1];
+            marker=:circle,
+            markersize=20,
+            markerstrokewidth=0.,
+            color=:pink,
+        )
+    end
+
+    p = plot!(;kwargs...)
+    gui(p)
+    p
+end

@@ -1,9 +1,9 @@
 # ---
-# title: JuliaRL\_BasicDQN\_CartPole
-# cover: assets/JuliaRL_BasicDQN_CartPole.png
-# description: The simplest example to demonstrate how to use BasicDQN
-# date: 2021-05-22
-# author: "[Jun Tian](https://github.com/findmyway)"
+# title: JuliaRL\_BasicDQN\_PendulumDiscrete
+# cover: assets/JuliaRL_BasicDQN_PendulumDiscrete.png
+# description: BasicDQN can also be applied to discrete Pendulum
+# date: 2021-10-20
+# author: "[Harley Wiltzer](https://github.com/harwiltz)"
 # ---
 
 #+ tangle=true
@@ -15,22 +15,21 @@ using Flux.Losses
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BasicDQN},
-    ::Val{:CartPole},
+    ::Val{:PendulumDiscrete},
     ::Nothing;
     seed = 123,
 )
     rng = StableRNG(seed)
-    env = CartPoleEnv(; T = Float32, rng = rng)
+    env = PendulumEnv(continuous = false, max_steps = 5000, rng = rng)
     ns, na = length(state(env)), length(action_space(env))
-
-    policy = Agent(
+    agent = Agent(
         policy = QBasedPolicy(
             learner = BasicDQNLearner(
                 approximator = NeuralNetworkApproximator(
                     model = Chain(
-                        Dense(ns, 128, relu; init = glorot_uniform(rng)),
-                        Dense(128, 128, relu; init = glorot_uniform(rng)),
-                        Dense(128, na; init = glorot_uniform(rng)),
+                        Dense(ns, 64, relu; init = glorot_uniform(rng)),
+                        Dense(64, 64, relu; init = glorot_uniform(rng)),
+                        Dense(64, na; init = glorot_uniform(rng)),
                     ) |> cpu,
                     optimizer = ADAM(),
                 ),
@@ -47,29 +46,31 @@ function RL.Experiment(
             ),
         ),
         trajectory = CircularArraySARTTrajectory(
-            capacity = 1000,
+            capacity = 5_000,
             state = Vector{Float32} => (ns,),
         ),
     )
-    stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
+
+    stop_condition = StopAfterStep(50_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
-    Experiment(policy, env, stop_condition, hook, "# BasicDQN <-> CartPole")
+
+    Experiment(agent, env, stop_condition, hook, "")
 end
 
 #+ tangle=false
 using Plots
 pyplot() #hide
-ex = E`JuliaRL_BasicDQN_CartPole`
+ex = E`JuliaRL_BasicDQN_PendulumDiscrete`
 run(ex)
 plot(ex.hook.rewards)
-savefig("assets/JuliaRL_BasicDQN_CartPole.png") #hide
+savefig("assets/JuliaRL_BasicDQN_PendulumDiscrete.png") #hide
 
 #=
 ## Watch a demo episode with the trained agent
 
 ```julia
 demo = Experiment(ex.policy,
-                  CartPoleEnv(),
+                  PendulumEnv(continuous=false, max_steps = 1000),
                   StopWhenDone(),
                   RolloutHook(plot, closeall),
                   "DQN <-> Demo")
@@ -77,4 +78,4 @@ run(demo)
 ```
 =#
 
-# ![](assets/JuliaRL_BasicDQN_CartPole.png)
+# ![](assets/JuliaRL_BasicDQN_PendulumDiscrete.png)
