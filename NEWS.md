@@ -2,13 +2,29 @@
 
 ## ReinforcementLearning.jl@v0.10.0
 
+### ReinforcementLearningExperiments.jl
+
+#### v0.1.2
+
+- Added an experiment for DQN training on discrete `PendulumEnv` (#537)
+
 ### ReinforcementLearningEnvironments.jl
+
+#### v0.6.7
+
+- Fixed bugs in plotting `MountainCarEnv` (#537)
+- Implemented plotting for `PendulumEnv` (#537)
 
 #### v0.6.6
 
 - Bugfix with `ZeroTo` [#534](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/534)
 
 ### ReinforcementLearningCore.jl
+
+#### v0.8.6
+
+- Fixed a bug [1] with the `DoOnExit` hook (#537)
+- Added some convenience hooks for rendering rollout episodes (#537)
 
 #### v0.8.5
 
