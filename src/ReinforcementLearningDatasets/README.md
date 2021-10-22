@@ -83,7 +83,7 @@ Progress: 100%|█████████████████████�
 * [D4RL: Datasets for Deep Data-Driven Reinforcement Learning](https://github.com/rail-berkeley/d4rl)
     * Mujoco datases and Pybullet datasets provided by D4RL are actively supported.
     * Flow and CARLA datasets have not been tested yet.
-    * Mujoco Licence is not needed to access these datasets but will be required for online evaluation.
+    * Mujoco License is not needed to access these datasets but will be required for online evaluation.
 * [d4rl-pybullet](https://github.com/takuseno/d4rl-pybullet)
 * [Google Research atari DQN replay datasets](https://github.com/google-research/batch_rl)
     * This directly loads the entire dataset into the RAM and should be used with caution as it takes up more than 20 GB of RAM for even a single epoch.
