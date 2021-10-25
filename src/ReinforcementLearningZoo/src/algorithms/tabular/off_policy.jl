@@ -25,6 +25,8 @@ function VectorWSARTTrajectory(;
     )
 end
 
+Base.length(t::VectorWSARTTrajectory) = length(t[:terminal])
+
 function RLBase.update!(
     p::OffPolicy,
     t::VectorWSARTTrajectory,

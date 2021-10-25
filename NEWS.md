@@ -32,6 +32,10 @@
 
 ### ReinforcementLearningZoo.jl
 
+#### v0.5.4
+
+- Support `length` method for `VectorWSARTTrajectory`.
+
 #### v0.5.3
 
 - Revert part of the unexpected change of PPO in the last PR.
