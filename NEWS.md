@@ -10,6 +10,10 @@
 
 ### ReinforcementLearningEnvironments.jl
 
+#### v0.6.8
+
+- Support `action_space(::TicTacToeEnv, player)`.
+
 #### v0.6.7
 
 - Fixed bugs in plotting `MountainCarEnv` (#537)
