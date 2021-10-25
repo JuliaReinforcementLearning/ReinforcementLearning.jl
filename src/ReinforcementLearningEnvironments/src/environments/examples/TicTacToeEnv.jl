@@ -51,7 +51,7 @@ Base.isequal(a::TicTacToeEnv, b::TicTacToeEnv) = isequal(a.board, b.board)
 Base.to_index(::TicTacToeEnv, ::Cross) = 2
 Base.to_index(::TicTacToeEnv, ::Nought) = 3
 
-RLBase.action_space(::TicTacToeEnv) = Base.OneTo(9)
+RLBase.action_space(::TicTacToeEnv, player) = Base.OneTo(9)
 
 RLBase.legal_action_space(env::TicTacToeEnv, p) = findall(legal_action_space_mask(env))
 
