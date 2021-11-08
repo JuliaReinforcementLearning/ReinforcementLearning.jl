@@ -415,6 +415,15 @@
         "code",
         "doc"
       ]
+    },
+    {
+      "login": "dylan-asmar",
+      "name": "Dylan Asmar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/91484811?v=4",
+      "profile": "https://github.com/dylan-asmar",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
