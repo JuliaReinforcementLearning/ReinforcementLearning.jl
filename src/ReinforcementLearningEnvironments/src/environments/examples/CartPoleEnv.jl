@@ -19,30 +19,7 @@ Base.show(io::IO, params::CartPoleEnvParams) = print(
     join(["$p=$(getfield(params, p))" for p in fieldnames(CartPoleEnvParams)], ","),
 )
 
-mutable struct CartPoleEnv{T,R<:AbstractRNG} <: AbstractEnv
-    params::CartPoleEnvParams{T}
-    state::Array{T,1}
-    action::Int
-    done::Bool
-    t::Int
-    rng::R
-end
-
-"""
-    CartPoleEnv(;kwargs...)
-
-# Keyword arguments
-- `T = Float64`
-- `gravity = T(9.8)`
-- `masscart = T(1.0)`
-- `masspole = T(0.1)`
-- `halflength = T(0.5)`
-- `forcemag = T(10.0)`
-- `max_steps = 200`
-- 'dt = 0.02'
-- `rng = Random.GLOBAL_RNG`
-"""
-function CartPoleEnv(;
+function CartPoleEnvParams(;
     T = Float64,
     gravity = 9.8,
     masscart = 1.0,
@@ -51,9 +28,10 @@ function CartPoleEnv(;
     forcemag = 10.0,
     max_steps = 200,
     dt = 0.02,
-    rng = Random.GLOBAL_RNG,
+    thetathreshold = 12.0,
+    xthreshold = 2.4,
 )
-    params = CartPoleEnvParams{T}(
+    CartPoleEnvParams{T}(
         gravity,
         masscart,
         masspole,
@@ -62,45 +40,102 @@ function CartPoleEnv(;
         masspole * halflength,
         forcemag,
         dt,
-        2 * 12 * π / 360,
-        2.4,
+        thetathreshold * π / 180,
+        xthreshold,
         max_steps,
     )
-    high = cp = CartPoleEnv(params, zeros(T, 4), 2, false, 0, rng)
-    reset!(cp)
-    cp
 end
 
-CartPoleEnv{T}(; kwargs...) where {T} = CartPoleEnv(; T = T, kwargs...)
+    mutable struct CartPoleEnv{A,T,ACT,R<:AbstractRNG} <: AbstractEnv
+        params::CartPoleEnvParams{T}
+        action_space::A
+        observation_space::Space{Vector{ClosedInterval{T}}}
+        state::Vector{T}
+        action::ACT
+        done::Bool
+        t::Int
+        rng::R
+    end
 
-function RLBase.reset!(env::CartPoleEnv{T}) where {T<:Number}
+"""
+    CartPoleEnv(;kwargs...)
+
+# Keyword arguments
+- `T = Float64`
+- `continuous = false`
+- `rng = Random.GLOBAL_RNG`
+- `gravity = T(9.8)`
+- `masscart = T(1.0)`
+- `masspole = T(0.1)`
+- `halflength = T(0.5)`
+- `forcemag = T(10.0)`
+- `max_steps = 200`
+- 'dt = 0.02'
+- `thetathreshold = 12.0 # degrees`
+- `xthreshold` = 2.4``
+"""
+function CartPoleEnv(;
+    T = Float64,
+    continuous = false,
+    rng = Random.GLOBAL_RNG,
+    kwargs...,
+)
+    params = CartPoleEnvParams(kwargs...)
+    action_space = continuous ? ClosedInterval{T}(-1.0, 1.0) : Base.OneTo(2)
+    state_space = Space(
+        ClosedInterval{T}[
+            (-2*params.xthreshold)..(2*params.xthreshold),
+            -1e38..1e38,
+            (-2*params.thetathreshold)..(2*params.thetathreshold),
+            -1e38..1e38,
+        ],
+    )
+    env = CartPoleEnv(
+        params, 
+        action_space,
+        state_space,
+        zeros(T, 4),
+        rand(action_space),
+        false,
+        0,
+        rng,
+    )
+    reset!(env)
+    env
+end
+
+CartPoleEnv{T}(; kwargs...) where {T} = CartPoleEnv(T=T, kwargs...)
+
+Random.seed!(env::CartPoleEnv, seed) = Random.seed!(env.rng, seed)
+RLBase.action_space(env::CartPoleEnv) = env.action_space
+RLBase.state_space(env::CartPoleEnv) = env.observation_space
+RLBase.reward(env::CartPoleEnv{A,T}) where {A,T} = env.done ? zero(T) : one(T)
+RLBase.is_terminated(env::CartPoleEnv) = env.done
+RLBase.state(env::CartPoleEnv) = env.state
+
+function RLBase.reset!(env::CartPoleEnv{A,T}) where {A,T}
     env.state[:] = T(0.1) * rand(env.rng, T, 4) .- T(0.05)
     env.t = 0
-    env.action = 2
+    env.action = rand(env.rng, env.action_space)
     env.done = false
     nothing
 end
 
-RLBase.action_space(env::CartPoleEnv) = Base.OneTo(2)
-
-RLBase.state_space(env::CartPoleEnv{T}) where {T} = Space(
-    ClosedInterval{T}[
-        (-2*env.params.xthreshold)..(2*env.params.xthreshold),
-        -1e38..1e38,
-        (-2*env.params.thetathreshold)..(2*env.params.thetathreshold),
-        -1e38..1e38,
-    ],
-)
-
-RLBase.reward(env::CartPoleEnv{T}) where {T} = env.done ? zero(T) : one(T)
-RLBase.is_terminated(env::CartPoleEnv) = env.done
-RLBase.state(env::CartPoleEnv) = env.state
-
-function (env::CartPoleEnv)(a)
-    @assert a in (1, 2)
+function (env::CartPoleEnv{<:ClosedInterval})(a::AbstractFloat)
+    @assert a in env.action_space
     env.action = a
+    _step!(env, a)
+end
+
+function (env::CartPoleEnv{<:Base.OneTo{Int}})(a::Int)
+    @assert a in env.action_space
+    env.action = a
+    _step!(env, a == 2 ? 1 : -1)
+end
+
+function _step!(env::CartPoleEnv, a)
     env.t += 1
-    force = a == 2 ? env.params.forcemag : -env.params.forcemag
+    force = a * env.params.forcemag
     x, xdot, theta, thetadot = env.state
     costheta = cos(theta)
     sintheta = sin(theta)
@@ -121,5 +156,3 @@ function (env::CartPoleEnv)(a)
         env.t > env.params.max_steps
     nothing
 end
-
-Random.seed!(env::CartPoleEnv, seed) = Random.seed!(env.rng, seed)

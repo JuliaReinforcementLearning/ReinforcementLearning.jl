@@ -11,16 +11,21 @@ struct MountainCarEnvParams{T}
     max_steps::Int
 end
 
+Base.show(io::IO, params::MountainCarEnvParams) = print(
+    io,
+    join(["$p=$(getfield(params, p))" for p in fieldnames(MountainCarEnvParams)], ","),
+)
+
 function MountainCarEnvParams(;
     T = Float64,
     min_pos = -1.2,
     max_pos = 0.6,
     max_speed = 0.07,
     goal_pos = 0.5,
-    max_steps = 200,
     goal_velocity = 0.0,
     power = 0.001,
     gravity = 0.0025,
+    max_steps = 200,
 )
     MountainCarEnvParams{T}(
         min_pos,
@@ -49,7 +54,6 @@ end
     MountainCarEnv(;kwargs...)
 
 # Keyword arguments
-
 - `T = Float64`
 - `continuous = false`
 - `rng = Random.GLOBAL_RNG`
@@ -135,3 +139,4 @@ function _step!(env::MountainCarEnv, force)
     env.state[2] = v
     nothing
 end
+
