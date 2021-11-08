@@ -116,7 +116,7 @@ RLBase.state(env::CartPoleEnv) = env.state
 function RLBase.reset!(env::CartPoleEnv{A,T}) where {A,T}
     env.state[:] = T(0.1) * rand(env.rng, T, 4) .- T(0.05)
     env.t = 0
-    env.action = rand(env.action_space)
+    env.action = rand(env.rng, env.action_space)
     env.done = false
     nothing
 end
