@@ -231,6 +231,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="http://harwiltz.github.io/about"><img src="https://avatars.githubusercontent.com/u/56648659?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Harley Wiltzer</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=harwiltz" title="Code">💻</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=harwiltz" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/dylan-asmar"><img src="https://avatars.githubusercontent.com/u/91484811?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Dylan Asmar</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=dylan-asmar" title="Code">💻</a></td>
   </tr>
 </table>
 
