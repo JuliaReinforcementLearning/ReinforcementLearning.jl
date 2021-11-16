@@ -10,6 +10,10 @@
 
 ### ReinforcementLearningEnvironments.jl
 
+#### v0.6.10
+
+- Bugfix of CartPoleEnv with Float32
+
 #### v0.6.9
 
 - Added a continuous option for CartPoleEnv [#543](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/543).

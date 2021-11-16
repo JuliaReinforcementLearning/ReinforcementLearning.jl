@@ -78,20 +78,20 @@ function CartPoleEnv(;
     T = Float64,
     continuous = false,
     rng = Random.GLOBAL_RNG,
-    kwargs...,
+    kwargs...
 )
-    params = CartPoleEnvParams(kwargs...)
+    params = CartPoleEnvParams(T = T, kwargs...)
     action_space = continuous ? ClosedInterval{T}(-1.0, 1.0) : Base.OneTo(2)
     state_space = Space(
         ClosedInterval{T}[
             (-2*params.xthreshold)..(2*params.xthreshold),
-            -1e38..1e38,
+            typemin(T)..typemax(T),
             (-2*params.thetathreshold)..(2*params.thetathreshold),
-            -1e38..1e38,
+            typemin(T)..typemax(T),
         ],
     )
     env = CartPoleEnv(
-        params, 
+        params,
         action_space,
         state_space,
         zeros(T, 4),
