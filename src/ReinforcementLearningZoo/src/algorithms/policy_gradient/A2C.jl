@@ -60,15 +60,15 @@ function _update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
     w₃ = learner.entropy_loss_weight
     to_device = x -> send_to_device(device(AC), x)
 
-    states = select_last_dim(t[:state], 1:n)
-    states_flattened = flatten_batch(states) |> to_device # (state_size..., n_thread * update_freq)
+    S = t[:state] |> to_device
+    states = select_last_dim(S, 1:n)
+    states_flattened = flatten_batch(states) # (state_size..., n_thread * update_freq)
 
     actions = select_last_dim(t[:action], 1:n)
     actions = flatten_batch(actions)
     actions = CartesianIndex.(actions, 1:length(actions))
 
-    next_state_values =
-        t[:state] |> select_last_frame |> Array |> to_device |> AC.critic |> send_to_host
+    next_state_values = S |> select_last_frame |> AC.critic |> send_to_host
 
     gains =
         discount_rewards(
