@@ -1,7 +1,7 @@
 name = "ReinforcementLearningExperiments"
 uuid = "6bd458e5-1694-412f-b601-3a888375c491"
 authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
-version = "0.1.2"
+version = "0.1.3"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
