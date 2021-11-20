@@ -52,6 +52,7 @@ Setfield = "0.7, 0.8"
 StableRNGs = "1"
 TensorBoardLogger = "0.1"
 Weave = "0.10"
+Zygote = "0.6"
 julia = "1.6"
 
 [extras]
