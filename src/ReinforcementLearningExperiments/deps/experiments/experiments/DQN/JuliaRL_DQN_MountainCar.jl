@@ -31,7 +31,7 @@ function RL.Experiment(
                         Dense(ns, 64, relu; init = glorot_uniform(rng)),
                         Dense(64, 64, relu; init = glorot_uniform(rng)),
                         Dense(64, na; init = glorot_uniform(rng)),
-                    ) |> cpu,
+                    ) |> gpu,
                     optimizer = ADAM(),
                 ),
                 target_approximator = NeuralNetworkApproximator(
@@ -39,7 +39,7 @@ function RL.Experiment(
                         Dense(ns, 64, relu; init = glorot_uniform(rng)),
                         Dense(64, 64, relu; init = glorot_uniform(rng)),
                         Dense(64, na; init = glorot_uniform(rng)),
-                    ) |> cpu,
+                    ) |> gpu,
                     optimizer = ADAM(),
                 ),
                 loss_func = huber_loss,

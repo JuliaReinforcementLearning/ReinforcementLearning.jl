@@ -117,10 +117,11 @@ function (p::SACPolicy)(env)
         p.start_policy(env)
     else
         D = device(p.policy)
-        s = state(env)
+        s = send_to_device(D, state(env))
         s = Flux.unsqueeze(s, ndims(s) + 1)
         # trainmode:
         action = dropdims(p.policy(p.rng, s; is_sampling=true), dims=2) # Single action vec, drop second dim
+        send_to_host(action)
 
         # testmode:
         # if testing dont sample an action, but act deterministically by

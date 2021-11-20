@@ -4,6 +4,10 @@
 
 ### ReinforcementLearningExperiments.jl
 
+#### v0.1.3
+
+- Test experiments on GPU by default [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
+
 #### v0.1.2
 
 - Added an experiment for DQN training on discrete `PendulumEnv` (#537)
@@ -33,6 +37,10 @@
 
 ### ReinforcementLearningCore.jl
 
+#### v0.8.7
+
+- Make `GaussianNetwork` differentiable. [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
+
 #### v0.8.6
 
 - Fixed a bug [1] with the `DoOnExit` hook (#537)
@@ -43,6 +51,10 @@
 - Fixed the method overwritten warning of `device` from `CUDA.jl`.
 
 ### ReinforcementLearningZoo.jl
+
+#### v0.5.5
+
+- Make most algorithms GPU compatible [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
 
 #### v0.5.4
 

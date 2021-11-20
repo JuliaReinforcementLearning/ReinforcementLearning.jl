@@ -1,4 +1,7 @@
 using ReinforcementLearningExperiments
+using CUDA
+
+CUDA.allowscalar(false)
 
 run(E`JuliaRL_BasicDQN_CartPole`)
 run(E`JuliaRL_BC_CartPole`)

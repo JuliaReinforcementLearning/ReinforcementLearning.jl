@@ -139,7 +139,8 @@ function RLBase.update!(
 end
 
 function RLBase.update!(p::TD3Policy, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(p.behavior_actor), batch)
+    to_device(x) = send_to_device(device(p.behavior_actor), x)
+    s, a, r, t, s′ = to_device(batch)
 
     actor = p.behavior_actor
     critic = p.behavior_critic
@@ -152,7 +153,7 @@ function RLBase.update!(p::TD3Policy, batch::NamedTuple{SARTS})
             randn(p.rng, Float32, 1, p.batch_size) .* p.target_act_noise,
             -p.target_act_limit,
             p.target_act_limit,
-        )
+        ) |> to_device
     # add noise and clip to tanh bounds
     a′ = clamp.(p.target_actor(s′) + target_noise, -1.0f0, 1.0f0)
 

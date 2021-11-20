@@ -1,3 +1,4 @@
+
 # ---
 # title: JuliaRL\_DQN\_CartPole
 # cover: assets/JuliaRL_DQN_CartPole.png
@@ -6,7 +7,7 @@
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
-#+ tangle=true
+
 using ReinforcementLearning
 using StableRNGs
 using Flux
@@ -34,22 +35,31 @@ function RL.Experiment(
     rng = StableRNG(seed)
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(state(env)), length(action_space(env))
-    base_model = Chain(
-        Dense(ns, 128, relu; init = glorot_uniform(rng)),
-        Dense(128, 128, relu; init = glorot_uniform(rng)),
-        Dense(128, na; init = glorot_uniform(rng))
-        )
 
     agent = Agent(
         policy = QBasedPolicy(
             learner = DQNLearner(
                 approximator = NeuralNetworkApproximator(
-                    model = build_dueling_network(base_model) |> cpu,
+                    model = DuelingNetwork(
+                        base = Chain(
+                            Dense(ns, 128, relu; init = glorot_uniform(rng)),
+                            Dense(128, 128, relu; init = glorot_uniform(rng)),
+                        ),
+                        val = Dense(128, 1; init = glorot_uniform(rng)),
+                        adv = Dense(128, na; init = glorot_uniform(rng)),
+                    ),
                     optimizer = ADAM(),
-                ),
+                ) |> gpu,
                 target_approximator = NeuralNetworkApproximator(
-                    model = build_dueling_network(base_model) |> cpu,
-                ),
+                    model = DuelingNetwork(
+                        base = Chain(
+                            Dense(ns, 128, relu; init = glorot_uniform(rng)),
+                            Dense(128, 128, relu; init = glorot_uniform(rng)),
+                        ),
+                        val = Dense(128, 1; init = glorot_uniform(rng)),
+                        adv = Dense(128, na; init = glorot_uniform(rng)),
+                    ),
+                ) |> gpu,
                 loss_func = huber_loss,
                 stack_size = nothing,
                 batch_size = 32,

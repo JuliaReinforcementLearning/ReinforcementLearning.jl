@@ -40,7 +40,7 @@ function RL.Experiment(
                     Dense(256, 1; init = glorot_uniform(rng)),
                 ),
                 optimizer = ADAM(1e-3),
-            ) |> cpu,
+            ) |> gpu,
             γ = 0.99f0,
             λ = 0.95f0,
             clip_range = 0.1f0,
