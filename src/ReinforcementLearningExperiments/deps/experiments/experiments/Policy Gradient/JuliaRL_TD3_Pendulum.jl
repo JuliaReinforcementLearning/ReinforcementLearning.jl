@@ -37,13 +37,13 @@ function RL.Experiment(
         Dense(ns, 30, relu; init = init),
         Dense(30, 30, relu; init = init),
         Dense(30, 1, tanh; init = init),
-    )
+    ) |> gpu
 
     create_critic_model() = Chain(
         Dense(ns + 1, 30, relu; init = init),
         Dense(30, 30, relu; init = init),
         Dense(30, 1; init = init),
-    )
+    ) |> gpu
 
     create_critic() = TD3Critic(create_critic_model(), create_critic_model())
 

@@ -33,7 +33,7 @@ function RL.Experiment(
                     Dense(128, na; init = glorot_uniform(rng)),
                 ),
                 optimizer = ADAM(),
-            ) |> cpu,
+            ) |> gpu,
             baseline = NeuralNetworkApproximator(
                 model = Chain(
                     Dense(ns, 128, relu; init = glorot_uniform(rng)),
@@ -41,7 +41,7 @@ function RL.Experiment(
                     Dense(128, 1; init = glorot_uniform(rng)),
                 ),
                 optimizer = ADAM(),
-            ) |> cpu,
+            ) |> gpu,
             action_space = action_space(env),
             dist = Categorical,
             γ = 0.99f0,

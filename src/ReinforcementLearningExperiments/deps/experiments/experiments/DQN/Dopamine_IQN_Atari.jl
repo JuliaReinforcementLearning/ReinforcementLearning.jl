@@ -182,7 +182,7 @@ function RL.Experiment(
 )
     rng = Random.GLOBAL_RNG
     Random.seed!(rng, seed)
-    device_rng = CUDA.functional() ? CUDA.CURAND.RNG() : device_rng
+    device_rng = CUDA.functional() ? CUDA.CURAND.RNG() : rng
     Random.seed!(device_rng, isnothing(seed) ? nothing : hash(seed + 1))
 
     if isnothing(save_dir)

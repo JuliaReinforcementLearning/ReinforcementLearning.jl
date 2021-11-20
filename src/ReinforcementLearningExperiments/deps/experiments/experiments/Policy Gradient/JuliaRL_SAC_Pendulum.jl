@@ -43,10 +43,10 @@ function RL.Experiment(
                 Dense(30, 30, relu, init = init),
             ),
             μ = Chain(Dense(30, na, init = init)),
-            logσ = Chain(Dense(30, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),
+            logσ = Chain(Dense(30, na, x -> clamp(x, typeof(x)(-10), typeof(x)(2)), init = init)),
         ),
         optimizer = ADAM(0.003),
-    )
+    ) |> gpu
 
     create_q_net() = NeuralNetworkApproximator(
         model = Chain(
@@ -55,7 +55,7 @@ function RL.Experiment(
             Dense(30, 1; init = init),
         ),
         optimizer = ADAM(0.003),
-    )
+    ) |> gpu
 
     agent = Agent(
         policy = SACPolicy(

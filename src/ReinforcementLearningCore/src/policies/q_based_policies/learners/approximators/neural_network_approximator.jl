@@ -98,7 +98,10 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=fal
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     if is_sampling
         σ = exp.(logσ)
-        z = μ .+ σ .* send_to_device(device(model), randn(rng, Float32, size(μ)))
+        noise = Zygote.ignore() do
+            send_to_device(device(model), randn(rng, Float32, size(μ)))
+        end
+        z = μ .+ σ .* noise
         if is_return_log_prob
             logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
             return tanh.(z), logp_π
