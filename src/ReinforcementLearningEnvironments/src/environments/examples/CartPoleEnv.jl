@@ -29,7 +29,7 @@ function CartPoleEnvParams(;
     max_steps = 200,
     dt = 0.02,
     thetathreshold = 12.0,
-    xthreshold = 2.4,
+    xthreshold = 2.4
 )
     CartPoleEnvParams{T}(
         gravity,
@@ -46,16 +46,16 @@ function CartPoleEnvParams(;
     )
 end
 
-    mutable struct CartPoleEnv{A,T,ACT,R<:AbstractRNG} <: AbstractEnv
-        params::CartPoleEnvParams{T}
-        action_space::A
-        observation_space::Space{Vector{ClosedInterval{T}}}
-        state::Vector{T}
-        action::ACT
-        done::Bool
-        t::Int
-        rng::R
-    end
+mutable struct CartPoleEnv{A,T,ACT,R<:AbstractRNG} <: AbstractEnv
+    params::CartPoleEnvParams{T}
+    action_space::A
+    observation_space::Space{Vector{ClosedInterval{T}}}
+    state::Vector{T}
+    action::ACT
+    done::Bool
+    t::Int
+    rng::R
+end
 
 """
     CartPoleEnv(;kwargs...)
@@ -80,7 +80,7 @@ function CartPoleEnv(;
     rng = Random.GLOBAL_RNG,
     kwargs...
 )
-    params = CartPoleEnvParams(T = T, kwargs...)
+    params = CartPoleEnvParams(; T = T, kwargs...)
     action_space = continuous ? ClosedInterval{T}(-1.0, 1.0) : Base.OneTo(2)
     state_space = Space(
         ClosedInterval{T}[
@@ -104,7 +104,7 @@ function CartPoleEnv(;
     env
 end
 
-CartPoleEnv{T}(; kwargs...) where {T} = CartPoleEnv(T=T, kwargs...)
+CartPoleEnv{T}(; kwargs...) where {T} = CartPoleEnv(T = T, kwargs...)
 
 Random.seed!(env::CartPoleEnv, seed) = Random.seed!(env.rng, seed)
 RLBase.action_space(env::CartPoleEnv) = env.action_space

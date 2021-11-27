@@ -14,6 +14,10 @@
 
 ### ReinforcementLearningEnvironments.jl
 
+#### v0.6.11
+
+- Bugfix of CartPoleEnv with keyword arguments
+
 #### v0.6.10
 
 - Bugfix of CartPoleEnv with Float32
