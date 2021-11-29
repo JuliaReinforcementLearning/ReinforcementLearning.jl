@@ -43,11 +43,12 @@ function (p::BehaviorCloningPolicy)(env::AbstractEnv)
 end
 
 function RLBase.update!(p::BehaviorCloningPolicy, batch::NamedTuple{(:state, :action)})
-    s, a = batch.state, batch.action
+    s = send_to_device(device(p.approximator), batch.state)
+    a = send_to_device(device(p.approximator), batch.action)
     m = p.approximator
     gs = gradient(params(m)) do
         ŷ = m(s)
-        y = Flux.onehotbatch(a, axes(ŷ, 1))
+        y = Flux.OneHotMatrix(a, size(ŷ, 1))
         logitcrossentropy(ŷ, y)
     end
     update!(m, gs)
@@ -57,7 +58,7 @@ function RLBase.update!(p::BehaviorCloningPolicy, t::AbstractTrajectory)
     (length(t) <= p.min_reservoir_history || length(t) <= p.sampler.batch_size) && return
 
     _, batch = p.sampler(t)
-    update!(p, send_to_device(device(p.approximator), batch))
+    update!(p, batch)
 end
 
 function RLBase.prob(p::BehaviorCloningPolicy, env::AbstractEnv)
