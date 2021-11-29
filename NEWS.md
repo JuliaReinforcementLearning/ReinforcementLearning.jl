@@ -56,6 +56,10 @@
 
 ### ReinforcementLearningZoo.jl
 
+#### v0.5.6
+
+- Make BC GPU compatible [#553](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/553)
+
 #### v0.5.5
 
 - Make most algorithms GPU compatible [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
