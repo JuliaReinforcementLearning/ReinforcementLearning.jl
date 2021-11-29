@@ -424,6 +424,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "andreyzhitnikov",
+      "name": "andreyzhitnikov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20877529?v=4",
+      "profile": "https://github.com/andreyzhitnikov",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
