@@ -367,7 +367,7 @@ This is useful for environments which provide more than one kind of state.
 @env_api StateStyle(env::AbstractEnv) = Observation{Any}()
 
 """
-Specify the defalt state style when calling `state(env)`.
+Specify the default state style when calling `state(env)`.
 """
 @env_api DefaultStateStyle(env::AbstractEnv) = DefaultStateStyle(StateStyle(env))
 DefaultStateStyle(ss::AbstractStateStyle) = ss
