@@ -433,6 +433,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "kir0ul",
+      "name": "Andrea PIERRÉ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6053592?v=4",
+      "profile": "https://github.com/kir0ul",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
