@@ -133,13 +133,10 @@ function RLBase.update!(
 )
     # Note that for trajectories like `CircularArraySARTTrajectory`, data are
     # stored in a SARSA format, which means we still need to generate a dummy
-    # action at the end of an episode. Here we simply select a random one using
-    # the global rng. In theory it shouldn't affect the performance of specific
-    # algorithm.
-    # TODO: how to inject a local rng here to avoid polluting the global rng
+    # action at the end of an episode. Here, we simply select the first action.
 
     s = policy isa NamedPolicy ? state(env, nameof(policy)) : state(env)
-    a = policy isa NamedPolicy ? rand(action_space(env, nameof(policy))) : rand(action_space(env))
+    a = policy isa NamedPolicy ? action_space(env, nameof(policy))[1] : action_space(env)[1]
     push!(trajectory[:state], s)
     push!(trajectory[:action], a)
     if haskey(trajectory, :legal_actions_mask)
