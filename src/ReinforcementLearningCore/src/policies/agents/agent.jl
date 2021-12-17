@@ -26,7 +26,7 @@ functor(x::Agent) = (policy = x.policy,), y -> @set x.policy = y.policy
 function check(agent::Agent, env::AbstractEnv)
     if ActionStyle(env) === FULL_ACTION_SET &&
        !haskey(agent.trajectory, :legal_actions_mask)
-        #     @warn "The env[$(nameof(env))] is of FULL_ACTION_SET, but I can not find a trace named :legal_actions_mask in the trajectory"
+        # @warn "The env[$(nameof(env))] is of FULL_ACTION_SET, but I can not find a trace named :legal_actions_mask in the trajectory"
     end
     check(agent.policy, env)
 end
@@ -66,6 +66,10 @@ The default behaviors for `Agent` are:
 """
 function (agent::Agent)(stage::AbstractStage, env::AbstractEnv)
     update!(agent.trajectory, agent.policy, env, stage)
+    update!(agent.policy, agent.trajectory, env, stage)
+end
+
+function (agent::Agent)(stage::PreExperimentStage, env::AbstractEnv)
     update!(agent.policy, agent.trajectory, env, stage)
 end
 
@@ -129,6 +133,17 @@ function RLBase.update!(
     trajectory::AbstractTrajectory,
     policy::AbstractPolicy,
     env::AbstractEnv,
+    ::PostActStage,
+)
+    r = policy isa NamedPolicy ? reward(env, nameof(policy)) : reward(env)
+    push!(trajectory[:reward], r)
+    push!(trajectory[:terminal], is_terminated(env))
+end
+
+function RLBase.update!(
+    trajectory::AbstractTrajectory,
+    policy::AbstractPolicy,
+    env::AbstractEnv,
     ::PostEpisodeStage,
 )
     # Note that for trajectories like `CircularArraySARTTrajectory`, data are
@@ -145,22 +160,4 @@ function RLBase.update!(
             legal_action_space_mask(env)
         push!(trajectory[:legal_actions_mask], lasm)
     end
-end
-
-function RLBase.update!(
-    trajectory::AbstractTrajectory,
-    policy::AbstractPolicy,
-    env::AbstractEnv,
-    ::PostActStage,
-)
-    r = policy isa NamedPolicy ? reward(env, nameof(policy)) : reward(env)
-    push!(trajectory[:reward], r)
-    push!(trajectory[:terminal], is_terminated(env))
-end
-
-#####
-# Pre-training
-#####
-function (agent::Agent)(stage::PreExperimentStage, env::AbstractEnv)
-    update!(agent.policy, agent.trajectory, env, stage)
 end
