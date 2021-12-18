@@ -152,6 +152,14 @@ function get_dummy_action(action_space::AbstractVector)
     return action_space[1]
 end
 
+function get_dummy_action(action_space::Interval{:open, :closed})
+    return action_space.right
+end
+
+function get_dummy_action(action_space::Union{Interval{:closed, :open}, Interval{:closed, :closed}})
+    return action_space.left
+end
+
 function RLBase.update!(
     trajectory::AbstractTrajectory,
     policy::AbstractPolicy,
