@@ -31,7 +31,7 @@ struct Trajectory{T} <: AbstractTrajectory
     traces::T
 end
 
-Trajectory(; kwargs...) = Trajectory(kwargs.data)
+Trajectory(; kwargs...) = Trajectory(values(kwargs))
 
 @forward Trajectory.traces Base.getindex, Base.keys
 
@@ -54,7 +54,7 @@ See also [`CircularArraySARTTrajectory`](@ref),
 [`CircularArraySLARTTrajectory`](@ref), [`CircularArrayPSARTTrajectory`](@ref).
 """
 function CircularArrayTrajectory(; capacity, kwargs...)
-    Trajectory(map(kwargs.data) do x
+    Trajectory(map(values(kwargs)) do x
         CircularArrayBuffer{eltype(first(x))}(last(x)..., capacity)
     end)
 end
@@ -73,7 +73,7 @@ Similar to [`CircularArrayTrajectory`](@ref), except that the underlying storage
 See also [`CircularVectorSARTTrajectory`](@ref), [`CircularVectorSARTSATrajectory`](@ref).
 """
 function CircularVectorTrajectory(; capacity, kwargs...)
-    Trajectory(map(kwargs.data) do x
+    Trajectory(map(values(kwargs)) do x
         CircularVectorBuffer{x}(capacity)
     end)
 end
@@ -337,7 +337,7 @@ A specialized [`Trajectory`](@ref) which uses [`ElasticArray`](https://github.co
 storage. See also [`ElasticSARTTrajectory`](@ref).
 """
 function ElasticArrayTrajectory(; kwargs...)
-    Trajectory(map(kwargs.data) do x
+    Trajectory(map(values(kwargs)) do x
         ElasticArray{eltype(first(x))}(undef, last(x)..., 0)
     end)
 end
@@ -452,7 +452,7 @@ end
 A [`Trajectory`](@ref) with each trace using a `Vector` as the storage.
 """
 function VectorTrajectory(; kwargs...)
-    Trajectory(map(kwargs.data) do x
+    Trajectory(map(values(kwargs)) do x
         Vector{x}()
     end)
 end
