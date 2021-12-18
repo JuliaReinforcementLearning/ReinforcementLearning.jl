@@ -140,6 +140,18 @@ function RLBase.update!(
     push!(trajectory[:terminal], is_terminated(env))
 end
 
+function get_dummy_action(action_space)
+    # For the general case, but especially for continuous action spaces,
+    # we select a random action.
+    # TODO: how to inject a local RNG here to avoid polluting the global RNG
+    return rand(action_space)
+end
+
+function get_dummy_action(action_space::AbstractVector)
+    # For discrete action spaces, we select the first action as dummy action.
+    return action_space[1]
+end
+
 function RLBase.update!(
     trajectory::AbstractTrajectory,
     policy::AbstractPolicy,
@@ -148,10 +160,13 @@ function RLBase.update!(
 )
     # Note that for trajectories like `CircularArraySARTTrajectory`, data are
     # stored in a SARSA format, which means we still need to generate a dummy
-    # action at the end of an episode. Here, we simply select the first action.
+    # action at the end of an episode.
 
     s = policy isa NamedPolicy ? state(env, nameof(policy)) : state(env)
-    a = policy isa NamedPolicy ? action_space(env, nameof(policy))[1] : action_space(env)[1]
+
+    action_space = policy isa NamedPolicy ? action_space(env, nameof(policy)) : action_space(env)
+    a = get_dummy_action(action_space)
+
     push!(trajectory[:state], s)
     push!(trajectory[:action], a)
     if haskey(trajectory, :legal_actions_mask)
