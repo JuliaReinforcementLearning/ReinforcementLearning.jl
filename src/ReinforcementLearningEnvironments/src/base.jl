@@ -12,7 +12,7 @@ function Random.rand(rng::AbstractRNG, s::Interval)
     r = rand(rng)
     
     # Check to prevent choosing an excluded endpoint
-    # of an (half-)open interval
+    # of (half-)open intervals
     while (r == 0.0) || (r == 1.0)
         r = rand(rng)
     end
