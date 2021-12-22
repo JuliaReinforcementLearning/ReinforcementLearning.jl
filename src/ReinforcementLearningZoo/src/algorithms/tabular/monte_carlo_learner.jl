@@ -61,13 +61,6 @@ function RLBase.update!(
     L::MonteCarloLearner,
     t::AbstractTrajectory,
     e::AbstractEnv,
-    s::PreActStage,
-) end
-
-function RLBase.update!(
-    L::MonteCarloLearner,
-    t::AbstractTrajectory,
-    e::AbstractEnv,
     s::PostEpisodeStage,
 )
     update!(L, t)
