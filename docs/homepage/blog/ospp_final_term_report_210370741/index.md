@@ -592,7 +592,7 @@ end
 ```
 The weights are loaded using the following [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningDatasets/src/deep_ope/d4rl/d4rl_policy.jl).
 
-To know the real life performance of the networks an auxillary function `deep_ope_d4rl_evaluate` is also given which gives the unicode plot showing the performance of the policy. The code is given [here](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningDatasets/src/deep_ope/d4rl/evaluate.jl).
+To know the real life performance of the networks an auxiliary function `deep_ope_d4rl_evaluate` is also given which gives the unicode plot showing the performance of the policy. The code is given [here](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningDatasets/src/deep_ope/d4rl/evaluate.jl).
 
 #### Working
 The params needed for loading the policies can be obtained using `d4rl_policy_params`
