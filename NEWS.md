@@ -14,6 +14,10 @@
 
 ### ReinforcementLearningEnvironments.jl
 
+#### v0.6.12
+
+- Bugfix bug with `is_discrete_space` [#566](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/566)
+
 #### v0.6.11
 
 - Bugfix of CartPoleEnv with keyword arguments
