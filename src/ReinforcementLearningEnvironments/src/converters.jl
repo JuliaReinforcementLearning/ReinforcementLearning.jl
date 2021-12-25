@@ -6,7 +6,7 @@ is_discrete_space(::Type{<:AbstractVector}) = true
 is_discrete_space(::Type{<:Tuple}) = true
 is_discrete_space(::Type{<:NamedTuple}) = true
 
-is_discrete_space(::Type{<:Space}) = false
+is_discrete_space(::Type) = false
 
 """
     discrete2standard_discrete(env)
