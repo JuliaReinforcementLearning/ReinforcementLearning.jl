@@ -6,10 +6,18 @@ using MacroTools: @forward
 
 using IntervalSets
 
-Random.rand(s::Union{Interval,Array{<:Interval}}) = rand(Random.GLOBAL_RNG, s)
+Random.rand(s::Interval) = rand(Random.GLOBAL_RNG, s)
 
 function Random.rand(rng::AbstractRNG, s::Interval)
-    rand(rng) * (s.right - s.left) + s.left
+    r = rand(rng)
+    
+    # Check to prevent choosing an excluded endpoint
+    # of (half-)open intervals
+    while (r == 0.0) || (r == 1.0)
+        r = rand(rng)
+    end
+
+    return r * (s.right - s.left) + s.left
 end
 
 #####

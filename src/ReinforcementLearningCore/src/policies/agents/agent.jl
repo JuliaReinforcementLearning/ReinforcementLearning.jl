@@ -26,7 +26,7 @@ functor(x::Agent) = (policy = x.policy,), y -> @set x.policy = y.policy
 function check(agent::Agent, env::AbstractEnv)
     if ActionStyle(env) === FULL_ACTION_SET &&
        !haskey(agent.trajectory, :legal_actions_mask)
-        #     @warn "The env[$(nameof(env))] is of FULL_ACTION_SET, but I can not find a trace named :legal_actions_mask in the trajectory"
+        # @warn "The env[$(nameof(env))] is of FULL_ACTION_SET, but I can not find a trace named :legal_actions_mask in the trajectory"
     end
     check(agent.policy, env)
 end
@@ -66,6 +66,10 @@ The default behaviors for `Agent` are:
 """
 function (agent::Agent)(stage::AbstractStage, env::AbstractEnv)
     update!(agent.trajectory, agent.policy, env, stage)
+    update!(agent.policy, agent.trajectory, env, stage)
+end
+
+function (agent::Agent)(stage::PreExperimentStage, env::AbstractEnv)
     update!(agent.policy, agent.trajectory, env, stage)
 end
 
@@ -129,17 +133,40 @@ function RLBase.update!(
     trajectory::AbstractTrajectory,
     policy::AbstractPolicy,
     env::AbstractEnv,
+    ::PostActStage,
+)
+    r = policy isa NamedPolicy ? reward(env, nameof(policy)) : reward(env)
+    push!(trajectory[:reward], r)
+    push!(trajectory[:terminal], is_terminated(env))
+end
+
+function get_dummy_action(action_space)
+    # For the general case, but especially for continuous action spaces,
+    # we select a random action.
+    # TODO: how to inject a local RNG here to avoid polluting the global RNG
+    return rand(action_space)
+end
+
+function get_dummy_action(action_space::AbstractVector)
+    # For discrete action spaces, we select the first action as dummy action.
+    return action_space[1]
+end
+
+function RLBase.update!(
+    trajectory::AbstractTrajectory,
+    policy::AbstractPolicy,
+    env::AbstractEnv,
     ::PostEpisodeStage,
 )
     # Note that for trajectories like `CircularArraySARTTrajectory`, data are
     # stored in a SARSA format, which means we still need to generate a dummy
-    # action at the end of an episode. Here we simply select a random one using
-    # the global rng. In theory it shouldn't affect the performance of specific
-    # algorithm.
-    # TODO: how to inject a local rng here to avoid polluting the global rng
+    # action at the end of an episode.
 
     s = policy isa NamedPolicy ? state(env, nameof(policy)) : state(env)
-    a = policy isa NamedPolicy ? rand(action_space(env, nameof(policy))) : rand(action_space(env))
+
+    action_space = policy isa NamedPolicy ? action_space(env, nameof(policy)) : action_space(env)
+    a = get_dummy_action(action_space)
+
     push!(trajectory[:state], s)
     push!(trajectory[:action], a)
     if haskey(trajectory, :legal_actions_mask)
@@ -148,22 +175,4 @@ function RLBase.update!(
             legal_action_space_mask(env)
         push!(trajectory[:legal_actions_mask], lasm)
     end
-end
-
-function RLBase.update!(
-    trajectory::AbstractTrajectory,
-    policy::AbstractPolicy,
-    env::AbstractEnv,
-    ::PostActStage,
-)
-    r = policy isa NamedPolicy ? reward(env, nameof(policy)) : reward(env)
-    push!(trajectory[:reward], r)
-    push!(trajectory[:terminal], is_terminated(env))
-end
-
-#####
-# Pre-training
-#####
-function (agent::Agent)(stage::PreExperimentStage, env::AbstractEnv)
-    update!(agent.policy, agent.trajectory, env, stage)
 end

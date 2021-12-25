@@ -424,6 +424,33 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "andreyzhitnikov",
+      "name": "andreyzhitnikov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20877529?v=4",
+      "profile": "https://github.com/andreyzhitnikov",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "kir0ul",
+      "name": "Andrea PIERRÉ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6053592?v=4",
+      "profile": "https://github.com/kir0ul",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "Mo8it",
+      "name": "Mo8it",
+      "avatar_url": "https://avatars.githubusercontent.com/u/76752051?v=4",
+      "profile": "https://github.com/Mo8it",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
