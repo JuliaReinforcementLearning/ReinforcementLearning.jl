@@ -31,6 +31,11 @@ struct TinyHanabiEnv <: AbstractEnv
     actions::Vector{Int}
 end
 
+"""
+    TinyHanabiEnv()
+
+See https://arxiv.org/abs/1902.00506.
+"""
 TinyHanabiEnv() = TinyHanabiEnv(TINY_HANABI_REWARD_TABLE, Int[], Int[])
 
 function RLBase.reset!(env::TinyHanabiEnv)
