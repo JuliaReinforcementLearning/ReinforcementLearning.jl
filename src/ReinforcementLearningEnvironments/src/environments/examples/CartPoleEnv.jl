@@ -70,9 +70,9 @@ end
 - `halflength = T(0.5)`
 - `forcemag = T(10.0)`
 - `max_steps = 200`
-- 'dt = 0.02'
+- `dt = 0.02`
 - `thetathreshold = 12.0 # degrees`
-- `xthreshold` = 2.4``
+- `xthreshold` = 2.4`
 """
 function CartPoleEnv(;
     T = Float64,

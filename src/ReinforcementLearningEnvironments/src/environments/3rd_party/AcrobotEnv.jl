@@ -1,5 +1,6 @@
 """
-AcrobotEnv(;kwargs...)
+    AcrobotEnv(;kwargs...)
+
 # Keyword arguments
 - `T = Float64`
 - `link_length_a = T(1.)`

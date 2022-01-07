@@ -60,6 +60,11 @@ const KUHN_POKER_REWARD_TABLE = Dict(
     (:K, :Q, :pass, :bet, :bet) => 2,
 )
 
+struct KuhnPokerEnv <: AbstractEnv
+    cards::Vector{Symbol}
+    actions::Vector{Symbol}
+end
+
 """
     KuhnPokerEnv()
 
@@ -72,11 +77,6 @@ Here we demonstrate how to write a typical [`ZERO_SUM`](@ref),
 TODO: add public state for [`SPECTOR`](@ref).
 Ref: https://arxiv.org/abs/1906.11110
 """
-struct KuhnPokerEnv <: AbstractEnv
-    cards::Vector{Symbol}
-    actions::Vector{Symbol}
-end
-
 KuhnPokerEnv() = KuhnPokerEnv(Symbol[], Symbol[])
 
 function RLBase.reset!(env::KuhnPokerEnv)
