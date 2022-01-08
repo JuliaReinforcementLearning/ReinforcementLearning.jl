@@ -164,8 +164,8 @@ function RLBase.update!(
 
     s = policy isa NamedPolicy ? state(env, nameof(policy)) : state(env)
 
-    action_space = policy isa NamedPolicy ? action_space(env, nameof(policy)) : action_space(env)
-    a = get_dummy_action(action_space)
+    A = policy isa NamedPolicy ? action_space(env, nameof(policy)) : action_space(env)
+    a = get_dummy_action(A)
 
     push!(trajectory[:state], s)
     push!(trajectory[:action], a)
