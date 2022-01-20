@@ -45,7 +45,7 @@
 
 ### ReinforcementLearningCore.jl
 
-#### v0.8.7
+#### v0.8.8
 
 - Fix warning about `vararg.data` in Julia@v1.7 [#560](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/560)
 
