@@ -29,14 +29,14 @@ Two kinds of epsilon-decreasing strategy are implemented here (`linear` and `exp
 # Example
 
 ```julia
-s = EpsilonGreedyExplorer{:linear}(ϵ_init=0.9, ϵ_stable=0.1, warmup_steps=100, decay_steps=100)
-plot([RL.get_ϵ(s, i) for i in 1:500], label="linear epsilon")
+s = EpsilonGreedyExplorer(kind=:linear, ϵ_init=0.9, ϵ_stable=0.1, warmup_steps=100, decay_steps=100)
+plot([RLCore.get_ϵ(s, i) for i in 1:500], label="linear epsilon")
 ```
 ![](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/img/linear_epsilon_greedy_selector.png)
 
 ```julia
-s = EpsilonGreedyExplorer{:exp}(ϵ_init=0.9, ϵ_stable=0.1, warmup_steps=100, decay_steps=100)
-plot([RL.get_ϵ(s, i) for i in 1:500], label="exp epsilon")
+s = EpsilonGreedyExplorer(kind=:exp, ϵ_init=0.9, ϵ_stable=0.1, warmup_steps=100, decay_steps=100)
+plot!([RLCore.get_ϵ(s, i) for i in 1:500], label="exp epsilon")
 ```
 ![](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/img/exp_epsilon_greedy_selector.png)
 """
