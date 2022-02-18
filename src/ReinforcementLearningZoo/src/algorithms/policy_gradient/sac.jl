@@ -38,8 +38,8 @@ end
 - `policy`, used to get action.
 - `qnetwork1`, used to get Q-values.
 - `qnetwork2`, used to get Q-values.
-- `target_qnetwork1`, used to estimate the target Q-values.
-- `target_qnetwork2`, used to estimate the target Q-values.
+- `target_qnetwork1 = deepcopy(qnetwork1)`, used to estimate the target Q-values.
+- `target_qnetwork2 = deepcopy(qnetwork2)`, used to estimate the target Q-values.
 - `start_policy`, 
 - `γ::Float32 = 0.99f0`, reward discount rate.
 - `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
@@ -64,9 +64,8 @@ function SACPolicy(;
     policy,
     qnetwork1,
     qnetwork2,
-    target_qnetwork1,
-    target_qnetwork2,
-    start_policy,
+    target_qnetwork1 = deepcopy(qnetwork1),
+    target_qnetwork2 = deepcopy(qnetwork2),
     γ = 0.99f0,
     τ = 0.005f0,
     α = 0.2f0,
@@ -78,10 +77,9 @@ function SACPolicy(;
     lr_alpha = 0.003f0,
     action_dims = 0,
     update_step = 0,
+    start_policy = update_step == 0 ? identity : policy,
     rng = Random.GLOBAL_RNG,
 )
-    copyto!(qnetwork1, target_qnetwork1)  # force sync
-    copyto!(qnetwork2, target_qnetwork2)  # force sync
     if automatic_entropy_tuning
         @assert action_dims != 0
     end
