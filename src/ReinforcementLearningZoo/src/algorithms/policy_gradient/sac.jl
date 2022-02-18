@@ -45,10 +45,10 @@ end
 - `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
 - `α::Float32 = 0.2f0`, entropy term.
 - `batch_size = 32`,
-- `start_steps = 10000`,
-- `update_after = 1000`,
-- `update_freq = 50`,
-- `automatic_entropy_tuning::Bool = false`, whether to automatically tune the entropy.
+- `start_steps = 10000`, number of steps where start_policy is used to sample actions
+- `update_after = 1000`, number of steps before starting to update policy
+- `update_freq = 50`, number of steps between each update
+- `automatic_entropy_tuning::Bool = true`, whether to automatically tune the entropy.
 - `lr_alpha::Float32 = 0.003f0`, learning rate of tuning entropy.
 - `action_dims = 0`, the dimensionality of the action. if `automatic_entropy_tuning = true`, must enter this parameter.
 - `update_step = 0`,
