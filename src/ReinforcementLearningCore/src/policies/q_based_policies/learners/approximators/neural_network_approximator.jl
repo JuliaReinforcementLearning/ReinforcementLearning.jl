@@ -69,24 +69,25 @@ end
 #####
 
 """
-    GaussianNetwork(;pre=identity, μ, logσ, min_σ=0f0, max_σ=Inf32)
+    GaussianNetwork(;pre=identity, μ, logσ, min_σ=0f0, max_σ=Inf32, normalizer = tanh)
 
 Returns `μ` and `logσ` when called.  Create a distribution to sample from using
 `Normal.(μ, exp.(logσ))`. `min_σ` and `max_σ` are used to clip the output from
 `logσ`.
 """
-Base.@kwdef struct GaussianNetwork{P,U,S}
+Base.@kwdef struct GaussianNetwork{P,U,S,F}
     pre::P = identity
     μ::U
     logσ::S
     min_σ::Float32 = 0f0
     max_σ::Float32 = Inf32
+    normalizer::F = tanh
 end
 
 Flux.@functor GaussianNetwork
 
 """
-This function is compatible with a multidimensional action space. When outputting an action, it uses `tanh` to normalize it.
+This function is compatible with a multidimensional action space. When outputting an action, it uses the `normalizer` function to normalize it elementwise.
 
 - `rng::AbstractRNG=Random.GLOBAL_RNG`
 - `is_sampling::Bool=false`, whether to sample from the obtained normal distribution. 
@@ -104,9 +105,9 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=fal
         z = μ .+ σ .* noise
         if is_return_log_prob
             logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
-            return tanh.(z), logp_π
+            return model.normalizer.(z), logp_π
         else
-            return tanh.(z)
+            return model.normalizer.(z)
         end
     else
         return μ, logσ
