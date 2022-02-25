@@ -114,6 +114,21 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=fal
     end
 end
 
+#sample `action_samples` actions from each state. 
+function (model::GaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
+    x = model.pre(state)
+    μ, raw_logσ = model.μ(x), model.logσ(x)
+    logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
+    
+    σ = exp.(logσ)
+    noise = Zygote.ignore() do
+        send_to_device(device(model), randn(rng, Float32, (size(μ,1), action_samples, size(μ,2))...))
+    end
+    z = model.normalizer.(μ .+ σ .* noise)
+    logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
+    return z, logp_π
+end
+
 function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
     model(Random.GLOBAL_RNG, state; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
 end
