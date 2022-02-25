@@ -73,7 +73,7 @@ end
 
 Returns `μ` and `logσ` when called.  Create a distribution to sample from using
 `Normal.(μ, exp.(logσ))`. `min_σ` and `max_σ` are used to clip the output from
-`logσ`.
+`logσ`. Actions are normalized according to the specified normalizer function.
 """
 Base.@kwdef struct GaussianNetwork{P,U,S,F}
     pre::P = identity
