@@ -64,9 +64,8 @@ function SACPolicy(;
     policy,
     qnetwork1,
     qnetwork2,
-    target_qnetwork1,
-    target_qnetwork2,
-    start_policy,
+    target_qnetwork1 = deepcopy(qnetwork1),
+    target_qnetwork2 = deepcopy(qnetwork2),
     γ = 0.99f0,
     τ = 0.005f0,
     α = 0.2f0,
@@ -78,6 +77,7 @@ function SACPolicy(;
     lr_alpha = 0.003f0,
     action_dims = 0,
     update_step = 0,
+    start_policy = update_step == 0 ? identity : policy,
     rng = Random.GLOBAL_RNG,
 )
     copyto!(qnetwork1, target_qnetwork1)  # force sync
