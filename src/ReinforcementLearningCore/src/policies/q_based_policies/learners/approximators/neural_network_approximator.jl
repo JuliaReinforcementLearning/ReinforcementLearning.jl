@@ -104,12 +104,12 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=fal
         noise = Zygote.ignore() do
             send_to_device(device(model), randn(rng, Float32, size(μ)))
         end
-        z = μ .+ σ .* noise
+        z = model.normalizer.(μ .+ σ .* noise)
         if is_return_log_prob
             logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
-            return model.normalizer.(z), logp_π
+            return z, logp_π
         else
-            return model.normalizer.(z)
+            return z
         end
     else
         return μ, logσ
