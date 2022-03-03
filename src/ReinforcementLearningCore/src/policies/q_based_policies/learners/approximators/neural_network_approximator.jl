@@ -138,6 +138,10 @@ function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_
     model(Random.GLOBAL_RNG, state; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
 end
 
+function (model::GaussianNetwork)(state, action_samples::Int)
+    model(Random.GLOBAL_RNG, state, action_samples)
+end
+
 function (model::GaussianNetwork)(state, action)
     x = model.pre(state)
     μ, raw_logσ = model.μ(x), model.logσ(x) 
