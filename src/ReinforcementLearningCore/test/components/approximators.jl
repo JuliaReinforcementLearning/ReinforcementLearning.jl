@@ -61,13 +61,13 @@
             a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
             @test size(a) == (10,3)
             @test size(logp) == (1,3)
-            @test logp == sum(normlogpdf(m, exp.(s), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
-            @test logp == gn(state, a)
+            @test logp ≈ sum(normlogpdf(m, exp.(s), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
+            @test logp ≈ gn(state, a)
             as, logps = gn(Flux.unsqueeze(state,2), 5) #sample 5 actions
             @test size(as) == (10,5,3)
             @test size(logps) == (1,5,3)
             logps2 = gn(Flux.unsqueeze(state,2), as)
-            @test logps2 == logps
+            @test logps2 ≈ logps
             g = Flux.gradient(Flux.params(gn)) do 
                 a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
                 sum(logp)
@@ -89,13 +89,13 @@
             a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
             @test size(a) == (10,3)
             @test size(logp) == (1,3)
-            @test logp == sum(normlogpdf(m, exp.(s), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
-            @test logp == gn(state, a) #this was broken
+            @test logp ≈ sum(normlogpdf(m, exp.(s), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
+            @test logp ≈ gn(state, a) #this was broken
             as, logps = gn(Flux.unsqueeze(state,2), 5) #sample 5 actions
             @test size(as) == (10,5,3)
             @test size(logps) == (1,5,3)
             logps2 = gn(Flux.unsqueeze(state,2), as)
-            @test logps2 == logps
+            @test logps2 ≈ logps
             g = Flux.gradient(Flux.params(gn)) do 
                 a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
                 sum(logp)
@@ -118,13 +118,13 @@
                 a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
                 @test size(a) == (10,3)
                 @test size(logp) == (1,3)
-                @test logp == sum(normlogpdf(m, exp.(s), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
-                @test logp == gn(state, a) #this was broken
+                @test logp ≈ sum(normlogpdf(m, exp.(s), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
+                @test logp ≈ gn(state, a) #this was broken
                 as, logps = gn(Flux.unsqueeze(state,2), 5) #sample 5 actions
                 @test size(as) == (10,5,3)
                 @test size(logps) == (1,5,3)
                 logps2 = gn(Flux.unsqueeze(state,2), as)
-                @test logps2 == logps
+                @test logps2 ≈ logps
                 g = Flux.gradient(Flux.params(gn)) do 
                     a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
                     sum(logp)
