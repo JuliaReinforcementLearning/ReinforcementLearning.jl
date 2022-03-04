@@ -127,7 +127,7 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
     
     σ = exp.(logσ)
     noise = Zygote.ignore() do
-        send_to_device(device(model), randn(rng, Float32, (size(μ,1), action_samples, size(μ,3))...))
+        randn(rng, Float32, (size(μ,1), action_samples, size(μ,3))...)
     end
     z = model.normalizer.(μ .+ σ .* noise)
     logp_π = sum(normlogpdf(μ, σ, z).- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
