@@ -163,12 +163,15 @@
         "Aviral",
         "Kumar",
         "Mobius",
-        "Wiltzer"
+        "Wiltzer",
+        "logps"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
     "allowCompoundWords": true,
-    "ignorePaths": ["CHANGELOG.md"],
+    "ignorePaths": [
+        "CHANGELOG.md"
+    ],
     "dictionaries": [
         "julia"
     ],
