@@ -460,6 +460,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "NPLawrence",
+      "name": "NPLawrence",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61165981?v=4",
+      "profile": "https://nplawrence.com",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
