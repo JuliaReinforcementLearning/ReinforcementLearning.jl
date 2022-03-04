@@ -115,7 +115,7 @@
                 state = rand(20,3)  |> gpu #batch of 3 states
                 m, s = gn(state)
                 @test size(m) == size(s) == (10,3)
-                a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
+                a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
                 @test size(a) == (10,3)
                 @test size(logp) == (1,3)
                 @test logp ≈ sum(normlogpdf(m, exp.(s), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
