@@ -102,7 +102,7 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=fal
     if is_sampling
         σ = exp.(logσ)
         noise = Zygote.ignore() do
-            send_to_device(device(model), randn(rng, Float32, size(μ)))
+            randn(rng, Float32, size(μ))
         end
         z = model.normalizer.(μ .+ σ .* noise)
         if is_return_log_prob
@@ -222,7 +222,7 @@ Flux.@functor VAE
 function (model::VAE)(rng::AbstractRNG, state, action)
     μ, logσ = model.encoder(vcat(state, action))
     σ = exp.(logσ)
-    z = μ .+ σ .* send_to_device(device(model), randn(rng, Float32, size(μ)))
+    z = μ .+ σ .* randn(rng, Float32, size(μ))
     u = decode(model, state, z)
     return u, μ, σ
 end
@@ -234,7 +234,6 @@ end
 function decode(rng::AbstractRNG, model::VAE, state, z=nothing; is_normalize::Bool=true)
     if z === nothing
         z = clamp.(randn(rng, Float32, (model.latent_dims, size(state)[2:end]...)), -0.5f0, 0.5f0)
-        z = send_to_device(device(model), z)
     end
     a = model.decoder(vcat(state, z))
     if is_normalize
