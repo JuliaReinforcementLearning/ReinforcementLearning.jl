@@ -126,7 +126,7 @@
                 logps2 = gn(Flux.unsqueeze(state,2), as)
                 @test logps2 ≈ logps
                 g = Flux.gradient(Flux.params(gn)) do 
-                    a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
+                    a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
                     sum(logp)
                 end
                 g2 = Flux.gradient(Flux.params(gn)) do 
