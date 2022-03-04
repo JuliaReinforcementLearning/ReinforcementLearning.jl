@@ -90,7 +90,7 @@
             @test size(a) == (10,3)
             @test size(logp) == (1,3)
             @test logp ≈ sum(normlogpdf(m, exp.(s), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
-            @test logp ≈ gn(state, a) #this was broken
+            @test logp ≈ gn(state, a)
             as, logps = gn(Flux.unsqueeze(state,2), 5) #sample 5 actions
             @test size(as) == (10,5,3)
             @test size(logps) == (1,5,3)
@@ -106,7 +106,7 @@
             end
         end
         @testset "CUDA" begin
-            if CUDA.is_functional()
+            if CUDA.functional()
                 pre = Dense(20,15) |> gpu
                 μ = Dense(15,10) |> gpu
                 logσ = Dense(15,10) |> gpu
@@ -119,7 +119,7 @@
                 @test size(a) == (10,3)
                 @test size(logp) == (1,3)
                 @test logp ≈ sum(normlogpdf(m, exp.(s), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
-                @test logp ≈ gn(state, a) #this was broken
+                @test logp ≈ gn(state, a)
                 as, logps = gn(Flux.unsqueeze(state,2), 5) #sample 5 actions
                 @test size(as) == (10,5,3)
                 @test size(logps) == (1,5,3)
