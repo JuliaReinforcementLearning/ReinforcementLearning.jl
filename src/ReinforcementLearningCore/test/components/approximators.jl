@@ -253,6 +253,7 @@
         end
         @testset "CUDA" begin
             if CUDA.functional()
+                CUDA.allowscalar(false) 
                 rng = CUDA.CURAND.RNG()
                 pre = Dense(20,15) |> gpu
                 μ = Dense(15,10) |> gpu
@@ -310,6 +311,7 @@
                 for (grad1, grad2) in zip(g4,g3)
                     @test grad1 ≈ grad2
                 end
+                CUDA.allowscalar(true) #to avoid breaking other tests 
             end
         end
     end
