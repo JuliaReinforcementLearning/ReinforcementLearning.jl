@@ -154,8 +154,8 @@ function RLBase.update!(p::TD3Policy, batch::NamedTuple{SARTS})
             -p.target_act_limit,
             p.target_act_limit,
         ) |> to_device
-    # add noise and clip to tanh bounds
-    a′ = clamp.(p.target_actor(s′) + target_noise, -1.0f0, 1.0f0)
+    # add noise and clip to act_limit bounds
+    a′ = clamp.(p.target_actor(s′) + target_noise, -p.act_limit, p.act_limit)
 
     q_1′, q_2′ = p.target_critic(s′, a′)
     y = r .+ p.γ .* (1 .- t) .* (min.(q_1′, q_2′) |> vec)

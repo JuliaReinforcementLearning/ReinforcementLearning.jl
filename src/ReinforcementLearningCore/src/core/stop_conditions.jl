@@ -187,7 +187,7 @@ Base.setindex!(s::StopSignal, v::Bool) = s.is_stop[] = v
 StopAfterNSeconds
 
 parameter:
-1. time badget
+1. time budget
 
 stop training after N seconds
 

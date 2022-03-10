@@ -4,11 +4,12 @@ using ReinforcementLearningCore
 using Random
 using Test
 using StatsBase
-using Distributions: probs, Normal, logpdf
+using Distributions: probs, Normal, logpdf, MvNormal
 using ReinforcementLearningEnvironments
 using Flux
 using Zygote
 using CUDA
+using LinearAlgebra
 
 @testset "ReinforcementLearningCore.jl" begin
     include("core/core.jl")
