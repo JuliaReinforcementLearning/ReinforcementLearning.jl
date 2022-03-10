@@ -144,10 +144,20 @@
             gn = CovGaussianNetwork(pre, μ, Σ, identity)
             @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, Σ.W, Σ.b])
             state = rand(20,3) #batch of 3 states
+            #Check that it works in 2D
             m, s = gn(state)
-            @test size(m) == (10,1,3)
+            @test size(m) == (10,3)
             @test size(s) == (10, 10,3)
             a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
+            @test size(a) == (10,3)
+            @test size(logp) == (1,3)
+            logp2d = gn(state,a)
+            @test size(logp2d) == (1,3)
+            #rest is 3D
+            m, s = gn(Flux.unsqueeze(state,2))
+            @test size(m) == (10,1,3)
+            @test size(s) == (10, 10,3)
+            a, logp = gn(Flux.unsqueeze(state,2), is_sampling = true, is_return_log_prob = true)
             @test size(a) == (10,1,3)
             @test size(logp) == (1,1,3)
             C = Flux.stack(map(x-> cholesky(x).L |> Array, eachslice(s, dims=3)),3)
@@ -201,10 +211,10 @@
             gn = CovGaussianNetwork(pre, μ, Σ)
             @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, Σ.W, Σ.b])
             state = rand(20,3) #batch of 3 states
-            m, s = gn(state)
+            m, s = gn(Flux.unsqueeze(state,2))
             @test size(m) == (10,1,3)
             @test size(s) == (10, 10,3)
-            a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
+            a, logp = gn(Flux.unsqueeze(state,2), is_sampling = true, is_return_log_prob = true)
             @test size(a) == (10,1,3)
             @test size(logp) == (1,1,3)
             C = Flux.stack(map(x-> cholesky(x).L |> Array, eachslice(s, dims=3)),3)
@@ -261,10 +271,10 @@
                 gn = CovGaussianNetwork(pre, μ, Σ, identity)
                 @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, Σ.W, Σ.b])
                 state = rand(20,3)|> gpu #batch of 3 states
-                m, s = gn(state)
+                m, s = gn(Flux.unsqueeze(state,2))
                 @test size(m) == (10,1,3)
                 @test size(s) == (10, 10,3)
-                a, logp = gn(rng, state, is_sampling = true, is_return_log_prob = true)
+                a, logp = gn(rng, Flux.unsqueeze(state,2), is_sampling = true, is_return_log_prob = true)
                 @test size(a) == (10,1,3)
                 @test size(logp) == (1,1,3)
                 C = Flux.stack(map(x-> cholesky(x).L |> Array, eachslice(s, dims=3)),3) |> gpu

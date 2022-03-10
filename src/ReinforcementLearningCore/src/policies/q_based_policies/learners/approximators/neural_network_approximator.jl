@@ -218,7 +218,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractMatrix; is
     output = model(rng, Flux.unsqueeze(state,2); is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
     if output isa Tuple && is_sampling
         dropdims(output[1],dims = 2), dropdims(output[2], dims = 2)
-    elseif output isa Typle
+    elseif output isa Tuple
         dropdims(output[1],dims = 2), output[2] #can't reduce the dims of the covariance tensor
     else
         dropdims(output, dims = 2)
@@ -246,16 +246,6 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::In
     end
     logp_π = mvnormlogpdf(μ, L, z)
     return z, logp_π
-end
-
-"""
-    (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractMatrix, action_samples::Int)
-    
-    Given a Matrix of states, will return actions, logpdf in matrix format.
-"""
-function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractMatrix, action_samples::Int)
-    output = model(rng, Flux.unsqueeze(state,2), action_samples)
-    dropdims(output[1],dims = 2), dropdims(output[2], dims = 2)
 end
 
 function (model::CovGaussianNetwork)(state::AbstractArray, args...; kwargs...)
