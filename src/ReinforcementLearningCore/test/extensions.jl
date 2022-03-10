@@ -85,7 +85,7 @@ end
 end
 
 @testset "logdetLorU" begin
-    L = tril(rand(Float32,5,5) .^ 2)
+    L = tril(sqrt.(rand(Float32,5,5) .^2))
     Σ = L*L'
     @test logdet(Σ) ≈ RLCore.logdetLorU(L)
     if CUDA.functional()
