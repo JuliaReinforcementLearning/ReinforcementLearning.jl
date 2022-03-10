@@ -92,3 +92,17 @@ Base.setindex!(
     v::Fill{T},
     indices::CuArray{CartesianIndex{N}},
 ) where {T,N} = setindex!(xs, v.value, indices)
+
+
+#Used for mvnormlogpdf in extensions/Distributions.jl
+"""
+`logdetLorU(LorU::AbstractMatrix)`
+Log-determinant of the Positive-Semi-Definite matrix A = L*U (cholesky lower and upper triangulars), given L or U. 
+Has a sign uncertainty for non PSD matrices.
+"""
+function logdetLorU(LorU::CuArray)
+    return 2*sum(log.(diag(LorU)))
+end
+
+#Cpu fallback
+logdetLorU(LorU::AbstractMatrix) = logdet(LorU)*2
