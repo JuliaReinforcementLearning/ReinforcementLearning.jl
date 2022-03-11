@@ -47,7 +47,6 @@
         ac.actor(A)
         ac.critic(A)
     end
-    
     @testset "GaussianNetwork" begin
         @testset "identity normalizer" begin
             pre = Dense(20,15)
