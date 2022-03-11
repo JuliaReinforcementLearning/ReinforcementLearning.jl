@@ -284,7 +284,7 @@ RLBase.update!(
     ::AbstractEnv,
     ::PostEpisodeStage
 )
-    # update inner tabular appxorimator
+    # update inner tabular approximator
 end
 ```
 
@@ -415,7 +415,7 @@ It's hard to imagine that it's been years since we created this package. The fol
 
 3. ”Premature optimization is the root of all evil!“
 
-    In most cases, the overall simplicity is more important then speed. With
+    In most cases, the overall simplicity is more important than speed. With
     multiple dispatch, it's always relatively easy to come up with a more
     efficient implementation without loss of generality.
 
