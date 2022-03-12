@@ -160,6 +160,9 @@ resource, which is unaffordable for individual contributors. So if you or your
 organization could provide the computing resource in some degree and would like
 to cooperate in some way, please contact us!
 
+This package is written in pure Julia. Please consider [supporting the JuliaLang org](https://github.com/sponsors/JuliaLang)
+if you find this package useful. ❤
+
 ## ✍️ Citing
 
 If you use `ReinforcementLearning.jl` in a scientific publication, we would
