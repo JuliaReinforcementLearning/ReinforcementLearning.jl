@@ -45,6 +45,10 @@
 
 ### ReinforcementLearningCore.jl
 
+#### v0.8.8
+
+- Fix warning about `vararg.data` in Julia@v1.7 [#560](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/560)
+
 #### v0.8.7
 
 - Make `GaussianNetwork` differentiable. [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
@@ -59,6 +63,10 @@
 - Fixed the method overwritten warning of `device` from `CUDA.jl`.
 
 ### ReinforcementLearningZoo.jl
+
+#### v0.5.7
+
+- Fix warning about `vararg.data` in Julia@v1.7 [#560](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/560)
 
 #### v0.5.6
 
