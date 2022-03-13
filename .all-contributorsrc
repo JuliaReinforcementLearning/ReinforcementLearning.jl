@@ -413,7 +413,8 @@
       "profile": "http://harwiltz.github.io/about",
       "contributions": [
         "code",
-        "doc"
+        "doc",
+        "bug"
       ]
     }
   ],
