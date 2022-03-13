@@ -230,7 +230,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://bhatiaabhinav.github.io/"><img src="https://avatars.githubusercontent.com/u/6555124?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Abhinav Bhatia</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Abhatiaabhinav" title="Bug reports">🐛</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=bhatiaabhinav" title="Code">💻</a></td>
   </tr>
   <tr>
-    <td align="center"><a href="http://harwiltz.github.io/about"><img src="https://avatars.githubusercontent.com/u/56648659?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Harley Wiltzer</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=harwiltz" title="Code">💻</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=harwiltz" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://harwiltz.github.io/about"><img src="https://avatars.githubusercontent.com/u/56648659?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Harley Wiltzer</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=harwiltz" title="Code">💻</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=harwiltz" title="Documentation">📖</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Aharwiltz" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
