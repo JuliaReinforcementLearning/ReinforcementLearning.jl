@@ -254,6 +254,7 @@ end
 
 """
     (model::CovGaussianNetwork)(state, action)
+    
 Return the logpdf of the model sampling `action` when in `state`. 
 State must be a 3D tensor with dimensions (state_size x 1 x batch_size).
 Multiple actions may be taken per state, `action` must have dimensions (action_size x action_samples_per_state x batch_size)
