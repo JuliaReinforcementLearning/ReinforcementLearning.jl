@@ -38,13 +38,13 @@ function RL.Experiment(
         Dense(ns, 30, relu; init = init),
         Dense(30, 30, relu; init = init),
         Dense(30, 1, tanh; init = init),
-    )
+    ) |> gpu
 
     create_critic() = Chain(
         Dense(ns + na, 30, relu; init = init),
         Dense(30, 30, relu; init = init),
         Dense(30, 1; init = init),
-    )
+    ) |> gpu
 
     agent = Agent(
         policy = DDPGPolicy(

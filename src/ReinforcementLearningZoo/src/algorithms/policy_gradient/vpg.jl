@@ -50,7 +50,7 @@ About continuous action space, see
 function (π::VPGPolicy)(env::AbstractEnv)
     to_dev(x) = send_to_device(device(π.approximator), x)
 
-    logits = env |> state |> to_dev |> π.approximator
+    logits = env |> state |> to_dev |> π.approximator |> send_to_host
 
     if π.action_space isa AbstractVector
         dist = logits |> softmax |> π.dist
@@ -105,7 +105,7 @@ function RLBase.update!(
     gains = traj[:reward] |> x -> discount_rewards(x, π.γ)
 
     for idx in Iterators.partition(shuffle(1:length(traj[:terminal])), π.batch_size)
-        S = select_last_dim(states, idx) |> to_dev
+        S = select_last_dim(states, idx) |> Array |> to_dev
         A = actions[idx]
         G = gains[idx] |> x -> Flux.unsqueeze(x, 1) |> to_dev
         # gains is a 1 column array, but the output of flux model is 1 row, n_batch columns array. so unsqueeze it.

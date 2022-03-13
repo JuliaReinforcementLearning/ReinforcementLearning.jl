@@ -416,6 +416,79 @@
         "doc",
         "bug"
       ]
+    },
+    {
+      "login": "dylan-asmar",
+      "name": "Dylan Asmar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/91484811?v=4",
+      "profile": "https://github.com/dylan-asmar",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "andreyzhitnikov",
+      "name": "andreyzhitnikov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20877529?v=4",
+      "profile": "https://github.com/andreyzhitnikov",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "kir0ul",
+      "name": "Andrea PIERRÉ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6053592?v=4",
+      "profile": "https://github.com/kir0ul",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "Mo8it",
+      "name": "Mo8it",
+      "avatar_url": "https://avatars.githubusercontent.com/u/76752051?v=4",
+      "profile": "https://github.com/Mo8it",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "blegat",
+      "name": "Benoît Legat",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1048205?v=4",
+      "profile": "http://blegat.github.io",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "HenriDeh",
+      "name": "Henri Dehaybe",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47037088?v=4",
+      "profile": "https://github.com/HenriDeh",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "NPLawrence",
+      "name": "NPLawrence",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61165981?v=4",
+      "profile": "https://nplawrence.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "bileamScheuvens",
+      "name": "Bileam Scheuvens",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36153336?v=4",
+      "profile": "https://github.com/bileamScheuvens",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

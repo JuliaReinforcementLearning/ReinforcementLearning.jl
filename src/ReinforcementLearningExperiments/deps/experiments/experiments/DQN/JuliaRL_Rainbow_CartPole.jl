@@ -33,7 +33,7 @@ function RL.Experiment(
                         Dense(ns, 128, relu; init = glorot_uniform(rng)),
                         Dense(128, 128, relu; init = glorot_uniform(rng)),
                         Dense(128, na * n_atoms; init = glorot_uniform(rng)),
-                    ) |> cpu,
+                    ) |> gpu,
                     optimizer = ADAM(0.0005),
                 ),
                 target_approximator = NeuralNetworkApproximator(
@@ -41,7 +41,7 @@ function RL.Experiment(
                         Dense(ns, 128, relu; init = glorot_uniform(rng)),
                         Dense(128, 128, relu; init = glorot_uniform(rng)),
                         Dense(128, na * n_atoms; init = glorot_uniform(rng)),
-                    ) |> cpu,
+                    ) |> gpu,
                     optimizer = ADAM(0.0005),
                 ),
                 n_actions = na,

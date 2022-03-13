@@ -1,3 +1,4 @@
+
 # ---
 # title: JuliaRL\_IQN\_CartPole
 # cover: assets/JuliaRL_IQN_CartPole.png
@@ -6,11 +7,12 @@
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
-#+ tangle=true
+
 using ReinforcementLearning
 using StableRNGs
 using Flux
 using Flux.Losses
+using CUDA
 
 function RL.Experiment(
     ::Val{:JuliaRL},
@@ -20,6 +22,7 @@ function RL.Experiment(
     seed = 123,
 )
     rng = StableRNG(seed)
+    device_rng = CUDA.functional() ? CUDA.CURAND.RNG() : rng
     env = CartPoleEnv(; T = Float32, rng = rng)
     ns, na = length(state(env)), length(action_space(env))
     init = glorot_uniform(rng)
@@ -32,7 +35,7 @@ function RL.Experiment(
             ψ = Dense(ns, n_hidden, relu; init = init),
             ϕ = Dense(Nₑₘ, n_hidden, relu; init = init),
             header = Dense(n_hidden, na; init = init),
-        ) |> cpu
+        ) |> gpu
 
     agent = Agent(
         policy = QBasedPolicy(
@@ -56,7 +59,7 @@ function RL.Experiment(
                 target_update_freq = 100,
                 default_priority = 1.0f2,
                 rng = rng,
-                device_rng = rng,
+                device_rng = device_rng,
             ),
             explorer = EpsilonGreedyExplorer(
                 kind = :exp,
@@ -75,6 +78,7 @@ function RL.Experiment(
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook, "")
 end
+
 
 #+ tangle=false
 using Plots

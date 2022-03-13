@@ -2,7 +2,42 @@
 
 ## ReinforcementLearning.jl@v0.10.0
 
+### ReinforcementLearningExperiments.jl
+
+#### v0.1.3
+
+- Test experiments on GPU by default [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
+
+#### v0.1.2
+
+- Added an experiment for DQN training on discrete `PendulumEnv` (#537)
+
 ### ReinforcementLearningEnvironments.jl
+
+#### v0.6.12
+
+- Bugfix bug with `is_discrete_space` [#566](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/566)
+
+#### v0.6.11
+
+- Bugfix of CartPoleEnv with keyword arguments
+
+#### v0.6.10
+
+- Bugfix of CartPoleEnv with Float32
+
+#### v0.6.9
+
+- Added a continuous option for CartPoleEnv [#543](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/543).
+
+#### v0.6.8
+
+- Support `action_space(::TicTacToeEnv, player)`.
+
+#### v0.6.7
+
+- Fixed bugs in plotting `MountainCarEnv` (#537)
+- Implemented plotting for `PendulumEnv` (#537)
 
 #### v0.6.6
 
@@ -10,11 +45,40 @@
 
 ### ReinforcementLearningCore.jl
 
+#### v0.8.8
+
+- Fix warning about `vararg.data` in Julia@v1.7 [#560](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/560)
+
+#### v0.8.7
+
+- Make `GaussianNetwork` differentiable. [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
+
+#### v0.8.6
+
+- Fixed a bug [1] with the `DoOnExit` hook (#537)
+- Added some convenience hooks for rendering rollout episodes (#537)
+
 #### v0.8.5
 
 - Fixed the method overwritten warning of `device` from `CUDA.jl`.
 
 ### ReinforcementLearningZoo.jl
+
+#### v0.5.7
+
+- Fix warning about `vararg.data` in Julia@v1.7 [#560](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/560)
+
+#### v0.5.6
+
+- Make BC GPU compatible [#553](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/553)
+
+#### v0.5.5
+
+- Make most algorithms GPU compatible [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
+
+#### v0.5.4
+
+- Support `length` method for `VectorWSARTTrajectory`.
 
 #### v0.5.3
 

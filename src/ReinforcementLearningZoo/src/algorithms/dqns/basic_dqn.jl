@@ -78,7 +78,7 @@ function RLBase.update!(learner::BasicDQNLearner, batch::NamedTuple{SARTS})
     gs = gradient(params(Q)) do
         q = Q(s)[a]
         q′ = vec(maximum(Q(s′); dims = 1))
-        G = r .+ γ .* (1 .- t) .* q′
+        G = @. r + γ * (1 - t) * q′
         loss = loss_func(G, q)
         ignore() do
             learner.loss = loss

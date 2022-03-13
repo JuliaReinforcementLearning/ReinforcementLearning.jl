@@ -8,7 +8,9 @@ function quantile_huber_loss(ŷ, y; κ=1.0f0)
     linear = abs_error .- quadratic
     huber_loss = 0.5f0 .* quadratic .* quadratic .+ κ .* linear
 
-    cum_prob = send_to_device(device(y), range(0.5f0 / N; length=N, step=1.0f0 / N))
+    cum_prob = Zygote.ignore() do
+        send_to_device(device(y), range(0.5f0 / N; length=N, step=1.0f0 / N))
+    end
     loss = Zygote.dropgrad(abs.(cum_prob .- (Δ .< 0))) .* huber_loss
     mean(sum(loss;dims=1))
 end

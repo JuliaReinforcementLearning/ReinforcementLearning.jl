@@ -52,9 +52,9 @@ function _update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
     w₂ = learner.critic_loss_weight
     w₃ = learner.entropy_loss_weight
 
+    S = t[:state] |> to_device
     # (state_size..., n_thread * update_step)
-    states_flattened =
-        t[:state] |> x -> select_last_dim(x, 1:n) |> flatten_batch |> to_device
+    states_flattened = select_last_dim(S, 1:n) |> flatten_batch
 
     actions =
         t[:action] |>
@@ -62,11 +62,11 @@ function _update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
             select_last_dim(x, 1:n) |> flatten_batch |> a -> CartesianIndex.(a, 1:length(a))
 
     rollout_values =
-        t[:state] |>
+        S |>
         flatten_batch |>
-        to_device |>
         AC.critic |>
-        x -> reshape(x, :, n + 1) |> send_to_host
+        x -> reshape(x, :, n + 1) |>
+        send_to_host
 
     advantages = generalized_advantage_estimation(
         t[:reward],

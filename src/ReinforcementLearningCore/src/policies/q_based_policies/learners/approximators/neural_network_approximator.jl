@@ -69,24 +69,27 @@ end
 #####
 
 """
-    GaussianNetwork(;pre=identity, μ, logσ, min_σ=0f0, max_σ=Inf32)
+    GaussianNetwork(;pre=identity, μ, logσ, min_σ=0f0, max_σ=Inf32, normalizer = tanh)
 
 Returns `μ` and `logσ` when called.  Create a distribution to sample from using
 `Normal.(μ, exp.(logσ))`. `min_σ` and `max_σ` are used to clip the output from
-`logσ`.
+`logσ`. Actions are normalized according to the specified normalizer function.
 """
-Base.@kwdef struct GaussianNetwork{P,U,S}
+Base.@kwdef struct GaussianNetwork{P,U,S,F}
     pre::P = identity
     μ::U
     logσ::S
     min_σ::Float32 = 0f0
     max_σ::Float32 = Inf32
+    normalizer::F = tanh
 end
+
+GaussianNetwork(pre, μ, logσ, normalizer = tanh) = GaussianNetwork(pre, μ, logσ, 0f0, Inf32, normalizer)
 
 Flux.@functor GaussianNetwork
 
 """
-This function is compatible with a multidimensional action space. When outputting an action, it uses `tanh` to normalize it.
+This function is compatible with a multidimensional action space. When outputting an action, it uses the `normalizer` function to normalize it elementwise.
 
 - `rng::AbstractRNG=Random.GLOBAL_RNG`
 - `is_sampling::Bool=false`, whether to sample from the obtained normal distribution. 
@@ -98,20 +101,45 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=fal
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     if is_sampling
         σ = exp.(logσ)
-        z = μ .+ σ .* send_to_device(device(model), randn(rng, Float32, size(μ)))
+        z =  Zygote.ignore() do
+            noise = randn(rng, Float32, size(μ))
+            model.normalizer.(μ .+ σ .* noise)
+        end
         if is_return_log_prob
             logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
-            return tanh.(z), logp_π
+            return z, logp_π
         else
-            return tanh.(z)
+            return z
         end
     else
         return μ, logσ
     end
 end
 
+"""
+Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions (action_size x action_samples x batch_size).
+`state` must be 3D tensor with dimensions (state_size x 1 x batch_size). Always returns the logpdf of each action along.
+"""
+function (model::GaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
+    x = model.pre(state)
+    μ, raw_logσ = model.μ(x), model.logσ(x)
+    logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
+    
+    σ = exp.(logσ)
+    z = Zygote.ignore() do
+        noise = randn(rng, Float32, (size(μ,1), action_samples, size(μ,3))...)
+        model.normalizer.(μ .+ σ .* noise)
+    end
+    logp_π = sum(normlogpdf(μ, σ, z).- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
+    return z, logp_π
+end
+
 function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
     model(Random.GLOBAL_RNG, state; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
+end
+
+function (model::GaussianNetwork)(state, action_samples::Int)
+    model(Random.GLOBAL_RNG, state, action_samples)
 end
 
 function (model::GaussianNetwork)(state, action)
@@ -194,7 +222,7 @@ Flux.@functor VAE
 function (model::VAE)(rng::AbstractRNG, state, action)
     μ, logσ = model.encoder(vcat(state, action))
     σ = exp.(logσ)
-    z = μ .+ σ .* send_to_device(device(model), randn(rng, Float32, size(μ)))
+    z = μ .+ σ .* randn(rng, Float32, size(μ))
     u = decode(model, state, z)
     return u, μ, σ
 end
@@ -206,7 +234,6 @@ end
 function decode(rng::AbstractRNG, model::VAE, state, z=nothing; is_normalize::Bool=true)
     if z === nothing
         z = clamp.(randn(rng, Float32, (model.latent_dims, size(state)[2:end]...)), -0.5f0, 0.5f0)
-        z = send_to_device(device(model), z)
     end
     a = model.decoder(vcat(state, z))
     if is_normalize

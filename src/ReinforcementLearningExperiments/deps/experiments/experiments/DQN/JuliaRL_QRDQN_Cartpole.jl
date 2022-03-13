@@ -36,7 +36,7 @@ function RL.Experiment(
                         Dense(ns, 128, relu; init = init),
                         Dense(128, 128, relu; init = init),
                         Dense(128, N * na; init = init),
-                    ) |> cpu,
+                    ) |> gpu,
                     optimizer=ADAM(),
                 ),
                 target_approximator=NeuralNetworkApproximator(
@@ -44,7 +44,7 @@ function RL.Experiment(
                         Dense(ns, 128, relu; init = init),
                         Dense(128, 128, relu; init = init),
                         Dense(128, N * na; init = init),
-                    ) |> cpu,
+                    ) |> gpu,
                 ),
                 stack_size=nothing,
                 batch_size=32,
