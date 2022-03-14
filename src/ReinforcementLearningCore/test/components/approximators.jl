@@ -68,13 +68,37 @@
             @test size(logps) == (1,5,3)
             logps2 = gn(Flux.unsqueeze(state,2), as)
             @test logps2 ≈ logps
+            action_saver = []
             g = Flux.gradient(Flux.params(gn)) do 
                 a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
+                Flux.Zygote.ignore() do 
+                    push!(action_saver, a)
+                end
                 sum(logp)
             end
             g2 = Flux.gradient(Flux.params(gn)) do 
-                logp = gn(state, a)
+                logp = gn(state, only(action_saver))
                 sum(logp)
+            end
+            #Check that gradients are identical
+            for (grad1, grad2) in zip(g,g2)
+                @test grad1 ≈ grad2
+            end
+            #Same with multiple actions sampled
+            empty!(action_saver)
+            g = Flux.gradient(Flux.params(gn)) do 
+                a, logp = gn(state, 3)
+                Flux.Zygote.ignore() do 
+                    push!(action_saver, a)
+                end
+                sum(logp)
+            end
+            g2 = Flux.gradient(Flux.params(gn)) do 
+                logp = gn(state, only(action_saver))
+                sum(logp)
+            end
+            for (grad1, grad2) in zip(g,g2)
+                @test grad1 ≈ grad2
             end
         end
         @testset "tanh normalizer" begin
@@ -96,13 +120,37 @@
             @test size(logps) == (1,5,3)
             logps2 = gn(Flux.unsqueeze(state,2), as)
             @test logps2 ≈ logps
+            action_saver = []
             g = Flux.gradient(Flux.params(gn)) do 
                 a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
+                Flux.Zygote.ignore() do 
+                    push!(action_saver, a)
+                end
                 sum(logp)
             end
             g2 = Flux.gradient(Flux.params(gn)) do 
-                logp = gn(state, a)
+                logp = gn(state, only(action_saver))
                 sum(logp)
+            end
+            #Check that gradients are identical
+            for (grad1, grad2) in zip(g,g2)
+                @test grad1 ≈ grad2
+            end
+            #Same with multiple actions sampled
+            empty!(action_saver)
+            g = Flux.gradient(Flux.params(gn)) do 
+                a, logp = gn(state, 3)
+                Flux.Zygote.ignore() do 
+                    push!(action_saver, a)
+                end
+                sum(logp)
+            end
+            g2 = Flux.gradient(Flux.params(gn)) do 
+                logp = gn(state, only(action_saver))
+                sum(logp)
+            end
+            for (grad1, grad2) in zip(g,g2)
+                @test grad1 ≈ grad2
             end
         end
         @testset "CUDA" begin
@@ -125,13 +173,37 @@
                 @test size(logps) == (1,5,3)
                 logps2 = gn(Flux.unsqueeze(state,2), as)
                 @test logps2 ≈ logps
+                action_saver = []
                 g = Flux.gradient(Flux.params(gn)) do 
                     a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
+                    Flux.Zygote.ignore() do 
+                        push!(action_saver, a)
+                    end
                     sum(logp)
                 end
                 g2 = Flux.gradient(Flux.params(gn)) do 
-                    logp = gn(state, a)
+                    logp = gn(state, only(action_saver))
                     sum(logp)
+                end
+                #Check that gradients are identical
+                for (grad1, grad2) in zip(g,g2)
+                    @test grad1 ≈ grad2
+                end
+                #Same with multiple actions sampled
+                empty!(action_saver)
+                g = Flux.gradient(Flux.params(gn)) do 
+                    a, logp = gn(CUDA.CURAND.RNG(), state, 3)
+                    Flux.Zygote.ignore() do 
+                        push!(action_saver, a)
+                    end
+                    sum(logp)
+                end
+                g2 = Flux.gradient(Flux.params(gn)) do 
+                    logp = gn(state, only(action_saver))
+                    sum(logp)
+                end
+                for (grad1, grad2) in zip(g,g2)
+                    @test grad1 ≈ grad2
                 end
             end
         end

@@ -160,6 +160,9 @@ resource, which is unaffordable for individual contributors. So if you or your
 organization could provide the computing resource in some degree and would like
 to cooperate in some way, please contact us!
 
+This package is written in pure Julia. Please consider [supporting the JuliaLang org](https://github.com/sponsors/JuliaLang)
+if you find this package useful. ❤
+
 ## ✍️ Citing
 
 If you use `ReinforcementLearning.jl` in a scientific publication, we would
@@ -230,7 +233,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://bhatiaabhinav.github.io/"><img src="https://avatars.githubusercontent.com/u/6555124?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Abhinav Bhatia</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Abhatiaabhinav" title="Bug reports">🐛</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=bhatiaabhinav" title="Code">💻</a></td>
   </tr>
   <tr>
-    <td align="center"><a href="http://harwiltz.github.io/about"><img src="https://avatars.githubusercontent.com/u/56648659?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Harley Wiltzer</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=harwiltz" title="Code">💻</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=harwiltz" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://harwiltz.github.io/about"><img src="https://avatars.githubusercontent.com/u/56648659?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Harley Wiltzer</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=harwiltz" title="Code">💻</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=harwiltz" title="Documentation">📖</a> <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Aharwiltz" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/dylan-asmar"><img src="https://avatars.githubusercontent.com/u/91484811?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Dylan Asmar</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=dylan-asmar" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/andreyzhitnikov"><img src="https://avatars.githubusercontent.com/u/20877529?v=4?s=100" width="100px;" alt=""/><br /><sub><b>andreyzhitnikov</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Aandreyzhitnikov" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/kir0ul"><img src="https://avatars.githubusercontent.com/u/6053592?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Andrea PIERRÉ</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=kir0ul" title="Documentation">📖</a></td>

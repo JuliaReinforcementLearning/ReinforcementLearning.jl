@@ -102,10 +102,10 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=fal
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     if is_sampling
         σ = exp.(logσ)
-        noise = Zygote.ignore() do
-            randn(rng, Float32, size(μ))
+        z =  Zygote.ignore() do
+            noise = randn(rng, Float32, size(μ))
+            model.normalizer.(μ .+ σ .* noise)
         end
-        z = model.normalizer.(μ .+ σ .* noise)
         if is_return_log_prob
             logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
             return z, logp_π
@@ -128,10 +128,10 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     
     σ = exp.(logσ)
-    noise = Zygote.ignore() do
-        randn(rng, Float32, (size(μ,1), action_samples, size(μ,3))...)
+    z = Zygote.ignore() do
+        noise = randn(rng, Float32, (size(μ,1), action_samples, size(μ,3))...)
+        model.normalizer.(μ .+ σ .* noise)
     end
-    z = model.normalizer.(μ .+ σ .* noise)
     logp_π = sum(normlogpdf(μ, σ, z).- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
     return z, logp_π
 end
