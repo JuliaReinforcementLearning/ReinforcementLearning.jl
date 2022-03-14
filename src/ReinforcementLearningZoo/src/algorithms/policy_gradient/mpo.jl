@@ -70,7 +70,7 @@ function RLBase.update!(p::MPOPolicy, batch::NamedTuple{SARTS})
 
     #Fit non-parametric variational distribution
     states = Flux.unsqueeze(s,2) #3D tensor with dimensions (state_size x 1 x batch_size)
-    action_samples, logp_π = p.policy(p.rng, s, p.action_sample_size) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
+    action_samples, logp_π = p.policy(p.rng, states, p.action_sample_size) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
     input = vcat(repeat(states, outer = (1, p.action_sample_size, 1)), action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
     Q = p.qnetwork1(input)
     η = solve_mpodual(Q, p.ϵ, p.policy)
