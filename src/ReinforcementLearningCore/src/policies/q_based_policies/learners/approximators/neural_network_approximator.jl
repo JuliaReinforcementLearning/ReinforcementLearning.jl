@@ -190,7 +190,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
     da = size(μ,1)
-    L = trilcol(cholesky_vec,da)
+    L = vec_to_tril(cholesky_vec,da)
  
     if is_sampling
         z = Zygote.ignore() do
@@ -264,7 +264,7 @@ function (model::CovGaussianNetwork)(state::AbstractArray, action::AbstractArray
     da = size(action,1)
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
-    L = trilcol(cholesky_vec,da)
+    L = vec_to_tril(cholesky_vec,da)
     logp_π = mvnormlogpdf(μ, L, action)
     return logp_π
 end
