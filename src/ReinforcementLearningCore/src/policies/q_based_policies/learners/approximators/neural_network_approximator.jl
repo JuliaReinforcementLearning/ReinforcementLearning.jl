@@ -190,7 +190,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
     da = size(μ,1)
-    L = trilcol(cholesky_vec,da)
+    L = vec_to_tril(cholesky_vec,da)
  
     if is_sampling
         z = Zygote.ignore() do
@@ -209,6 +209,22 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
     end
 end
 
+"""
+    (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractMatrix; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    
+Given a Matrix of states, will return actions, μ and logpdf in matrix format. The batch of Σ remains a 3D tensor.
+"""
+function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractMatrix; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    output = model(rng, Flux.unsqueeze(state,2); is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
+    if output isa Tuple && is_sampling
+        dropdims(output[1],dims = 2), dropdims(output[2], dims = 2)
+    elseif output isa Tuple
+        dropdims(output[1],dims = 2), output[2] #can't reduce the dims of the covariance tensor
+    else
+        dropdims(output, dims = 2)
+    end
+end
+
 
 
 """
@@ -223,7 +239,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::In
     x = model.pre(state) 
     μ, cholesky_vec = model.μ(x), model.Σ(x)
     da = size(μ,1)
-    L = trilcol(cholesky_vec,da)
+    L = vec_to_tril(cholesky_vec,da)
     z = Zygote.ignore() do
         noise = randn(rng, eltype(μ), da, action_samples, batch_size)
         model.normalizer.(Flux.stack(map(.+, eachslice(μ,dims=3), eachslice(L, dims=3) .* eachslice(noise,dims=3)),3)) 
@@ -232,17 +248,15 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::In
     return z, logp_π
 end
 
-function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractMatrix, args...; kwargs...)
-    model(rng, Flux.unsqueeze(state,2), args...; kwargs...)
-end
-
 function (model::CovGaussianNetwork)(state::AbstractArray, args...; kwargs...)
     model(Random.GLOBAL_RNG, state, args...; kwargs...)
 end
 
 """
     (model::CovGaussianNetwork)(state, action)
-Return the logpdf of the model sampling `action` when in `state`. State must be 3D tensor with dimensions (state_size x 1 x batch_size).
+    
+Return the logpdf of the model sampling `action` when in `state`. 
+State must be a 3D tensor with dimensions (state_size x 1 x batch_size).
 Multiple actions may be taken per state, `action` must have dimensions (action_size x action_samples_per_state x batch_size)
 Returns a 3D tensor with dimensions (1 x action_samples_per_state x batch_size)
 """
@@ -250,36 +264,32 @@ function (model::CovGaussianNetwork)(state::AbstractArray, action::AbstractArray
     da = size(action,1)
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
-    L = trilcol(cholesky_vec,da)
+    L = vec_to_tril(cholesky_vec,da)
     logp_π = mvnormlogpdf(μ, L, action)
     return logp_π
 end
 
 """
-Transform a vector containing the non-zero elements of a lower triangular da x da matrix into that matrix.
+If given 2D matrices as input, will return a 2D matrix of logpdf. States and actions are paired column-wise, one action per state.
 """
-function trilcol(cholesky_vec,da)
-    batch_size = size(cholesky_vec, 3)
-    c2idx(i,j) = ((2da-j)*(j-1))÷2+i #return the position in cholesky_vec of the element of the triangular matrix at coordinates (i,j)
-    function f(j) #return a slice (da x 1 x batchsize) containing the jth columns of the lower triangular cholesky decomposition of the covariance
-        tc_diag = softplus.(cholesky_vec[c2idx(j,j):c2idx(j,j),:,:])
-        tc_other = cholesky_vec[c2idx(j,j)+1:c2idx(j+1,j+1)-1,:,:]
-        zs = Flux.Zygote.ignore() do 
-            zeros(eltype(tc_diag), da - size(tc_other,1) - 1,1,batch_size)
-        end
-        [zs; tc_diag; tc_other]
-    end
-    return mapreduce(f, hcat, 1:da)
+function (model::CovGaussianNetwork)(state::AbstractMatrix, action::AbstractMatrix)
+    output = model(Flux.unsqueeze(state,2), Flux.unsqueeze(action,2))
+    return dropdims(output, dims = 2)
 end
 
-function trilcol(cholesky_vec::CuArray,da)
+"""
+Transform a vector containing the non-zero elements of a lower triangular da x da matrix into that matrix.
+"""
+function vec_to_tril(cholesky_vec,da)
     batch_size = size(cholesky_vec, 3)
     c2idx(i,j) = ((2da-j)*(j-1))÷2+i #return the position in cholesky_vec of the element of the triangular matrix at coordinates (i,j)
     function f(j) #return a slice (da x 1 x batchsize) containing the jth columns of the lower triangular cholesky decomposition of the covariance
         tc_diag = softplus.(cholesky_vec[c2idx(j,j):c2idx(j,j),:,:])
         tc_other = cholesky_vec[c2idx(j,j)+1:c2idx(j+1,j+1)-1,:,:]
         zs = Flux.Zygote.ignore() do 
-            CUDA.zeros(eltype(tc_diag), da - size(tc_other,1) - 1,1,batch_size) 
+            zs = similar(cholesky_vec, da - size(tc_other,1) - 1,1,batch_size)
+            zs .= zero(eltype(cholesky_vec))
+            return zs
         end
         [zs; tc_diag; tc_other]
     end
