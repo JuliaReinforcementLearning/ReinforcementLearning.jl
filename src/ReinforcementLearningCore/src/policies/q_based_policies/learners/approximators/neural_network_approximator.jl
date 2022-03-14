@@ -239,7 +239,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::In
     x = model.pre(state) 
     μ, cholesky_vec = model.μ(x), model.Σ(x)
     da = size(μ,1)
-    L = trilcol(cholesky_vec,da)
+    L = vec_to_tril(cholesky_vec,da)
     z = Zygote.ignore() do
         noise = randn(rng, eltype(μ), da, action_samples, batch_size)
         model.normalizer.(Flux.stack(map(.+, eachslice(μ,dims=3), eachslice(L, dims=3) .* eachslice(noise,dims=3)),3)) 
@@ -279,7 +279,7 @@ end
 """
 Transform a vector containing the non-zero elements of a lower triangular da x da matrix into that matrix.
 """
-function trilcol(cholesky_vec,da)
+function vec_to_tril(cholesky_vec,da)
     batch_size = size(cholesky_vec, 3)
     c2idx(i,j) = ((2da-j)*(j-1))÷2+i #return the position in cholesky_vec of the element of the triangular matrix at coordinates (i,j)
     function f(j) #return a slice (da x 1 x batchsize) containing the jth columns of the lower triangular cholesky decomposition of the covariance
