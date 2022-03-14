@@ -294,7 +294,6 @@ function vec_to_tril(cholesky_vec,da)
     return mapreduce(f, hcat, 1:da)
 end
 
-
 #####
 # DuelingNetwork
 #####
