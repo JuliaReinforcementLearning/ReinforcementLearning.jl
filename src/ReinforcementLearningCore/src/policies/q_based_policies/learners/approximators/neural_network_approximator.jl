@@ -287,7 +287,9 @@ function vec_to_tril(cholesky_vec,da)
         tc_diag = softplus.(cholesky_vec[c2idx(j,j):c2idx(j,j),:,:])
         tc_other = cholesky_vec[c2idx(j,j)+1:c2idx(j+1,j+1)-1,:,:]
         zs = Flux.Zygote.ignore() do 
-            similar(cholesky_vec, da - size(tc_other,1) - 1,1,batch_size) .* zero(eltype(cholesky_vec))
+            zs = similar(cholesky_vec, da - size(tc_other,1) - 1,1,batch_size)
+            zs .= zero(eltype(cholesky_vec))
+            return zs
         end
         [zs; tc_diag; tc_other]
     end
