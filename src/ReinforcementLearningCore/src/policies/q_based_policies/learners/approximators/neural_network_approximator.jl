@@ -179,7 +179,8 @@ Flux.@functor CovGaussianNetwork
 This function is compatible with a multidimensional action space. When outputting a sampled action, it uses the `normalizer` function to normalize it elementwise.
 To work with covariance matrices, the outputs are 3D tensors. 
 If sampling, return an actions tensor with dimensions (action_size x action_samples x batch_size) and logp_π (1 x action_samples x batch_size)
-If not, returns μ with dimensions (action_size x 1 x batch_size) and Σ (the covariance matrix) with dimensions (action_size x action_size x batch_size)
+If not, returns μ with dimensions (action_size x 1 x batch_size) and L, the lower triangular of the cholesky decomposition of the covariance matrix, with dimensions (action_size x action_size x batch_size)
+The covariance matrices can be retrieved with `Σ = Flux.stack(map(l -> l*l', eachslice(L, dims=3)),3)`
 
 - `rng::AbstractRNG=Random.GLOBAL_RNG`
 - `is_sampling::Bool=false`, whether to sample from the obtained normal distribution. 
@@ -204,8 +205,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
             return z
         end
     else
-        Σ = Flux.stack(map(l -> l*l', eachslice(L, dims=3)),3)
-        return μ, Σ
+        return μ, L
     end
 end
 
