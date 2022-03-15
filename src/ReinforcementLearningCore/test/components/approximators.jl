@@ -55,12 +55,12 @@
             gn = GaussianNetwork(pre, μ, logσ, identity)
             @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, logσ.W, logσ.b])
             state = rand(20,3) #batch of 3 states
-            m, s = gn(state)
-            @test size(m) == size(s) == (10,3)
+            m, L = gn(state)
+            @test size(m) == size(L) == (10,3)
             a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
             @test size(a) == (10,3)
             @test size(logp) == (1,3)
-            @test logp ≈ sum(normlogpdf(m, exp.(s), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
+            @test logp ≈ sum(normlogpdf(m, exp.(L), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
             @test logp ≈ gn(state, a)
             as, logps = gn(Flux.unsqueeze(state,2), 5) #sample 5 actions
             @test size(as) == (10,5,3)
@@ -107,12 +107,12 @@
             gn = GaussianNetwork(pre, μ, logσ)
             @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, logσ.W, logσ.b])
             state = rand(20,3) #batch of 3 states
-            m, s = gn(state)
-            @test size(m) == size(s) == (10,3)
+            m, L = gn(state)
+            @test size(m) == size(L) == (10,3)
             a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
             @test size(a) == (10,3)
             @test size(logp) == (1,3)
-            @test logp ≈ sum(normlogpdf(m, exp.(s), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
+            @test logp ≈ sum(normlogpdf(m, exp.(L), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
             @test logp ≈ gn(state, a)
             as, logps = gn(Flux.unsqueeze(state,2), 5) #sample 5 actions
             @test size(as) == (10,5,3)
@@ -160,12 +160,12 @@
                 gn = GaussianNetwork(pre, μ, logσ)
                 @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, logσ.W, logσ.b])
                 state = rand(20,3)  |> gpu #batch of 3 states
-                m, s = gn(state)
-                @test size(m) == size(s) == (10,3)
+                m, L = gn(state)
+                @test size(m) == size(L) == (10,3)
                 a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
                 @test size(a) == (10,3)
                 @test size(logp) == (1,3)
-                @test logp ≈ sum(normlogpdf(m, exp.(s), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
+                @test logp ≈ sum(normlogpdf(m, exp.(L), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
                 @test logp ≈ gn(state, a)
                 as, logps = gn(CUDA.CURAND.RNG(), Flux.unsqueeze(state,2), 5) #sample 5 actions
                 @test size(as) == (10,5,3)
@@ -216,31 +216,30 @@
             @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, Σ.W, Σ.b])
             state = rand(20,3) #batch of 3 states
             #Check that it works in 2D
-            m, s = gn(state)
+            m, L = gn(state)
             @test size(m) == (10,3)
-            @test size(s) == (10, 10,3)
+            @test size(L) == (10, 10,3)
             a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
             @test size(a) == (10,3)
             @test size(logp) == (1,3)
             logp2d = gn(state,a)
             @test size(logp2d) == (1,3)
             #rest is 3D
-            m, s = gn(Flux.unsqueeze(state,2))
+            m, L = gn(Flux.unsqueeze(state,2))
             @test size(m) == (10,1,3)
-            @test size(s) == (10, 10,3)
+            @test size(L) == (10, 10,3)
             a, logp = gn(Flux.unsqueeze(state,2), is_sampling = true, is_return_log_prob = true)
             @test size(a) == (10,1,3)
             @test size(logp) == (1,1,3)
-            C = Flux.stack(map(x-> cholesky(x).L |> Array, eachslice(s, dims=3)),3)
 
-            @test logp ≈ mvnormlogpdf(m, C, a)
+            @test logp ≈ mvnormlogpdf(m, L, a)
             @test logp ≈ gn(Flux.unsqueeze(state,2), a)
             as, logps = gn(Flux.unsqueeze(state,2), 5) #sample 5 actions
             @test size(as) == (10,5,3)
             @test size(logps) == (1,5,3)
             logps2 = gn(Flux.unsqueeze(state,2), as)
             @test logps2 ≈ logps
-            
+            s = Flux.stack(map(l -> l*l', eachslice(L, dims=3)),3)
             mvnormals = map(z -> MvNormal(Array(vec(z[1])), Array(z[2])), zip(eachslice(m, dims = 3), eachslice(s, dims = 3)))
             logp_truth = [logpdf(mvn, a) for (mvn, a) in zip(mvnormals, eachslice(as, dims = 3))]
             @test Flux.stack(logp_truth,2) ≈ dropdims(logps,dims = 1) #test against ground truth
@@ -282,22 +281,21 @@
             gn = CovGaussianNetwork(pre, μ, Σ)
             @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, Σ.W, Σ.b])
             state = rand(20,3) #batch of 3 states
-            m, s = gn(Flux.unsqueeze(state,2))
+            m, L = gn(Flux.unsqueeze(state,2))
             @test size(m) == (10,1,3)
-            @test size(s) == (10, 10,3)
+            @test size(L) == (10, 10,3)
             a, logp = gn(Flux.unsqueeze(state,2), is_sampling = true, is_return_log_prob = true)
             @test size(a) == (10,1,3)
             @test size(logp) == (1,1,3)
-            C = Flux.stack(map(x-> cholesky(x).L |> Array, eachslice(s, dims=3)),3)
 
-            @test logp ≈ mvnormlogpdf(m, C, a)
+            @test logp ≈ mvnormlogpdf(m, L, a)
             @test logp ≈ gn(Flux.unsqueeze(state,2), a)
             as, logps = gn(Flux.unsqueeze(state,2), 5) #sample 5 actions
             @test size(as) == (10,5,3)
             @test size(logps) == (1,5,3)
             logps2 = gn(Flux.unsqueeze(state,2), as)
             @test logps2 ≈ logps
-            
+            s = Flux.stack(map(l -> l*l', eachslice(L, dims=3)),3)
             mvnormals = map(z -> MvNormal(Array(vec(z[1])), Array(z[2])), zip(eachslice(m, dims = 3), eachslice(s, dims = 3)))
             logp_truth = [logpdf(mvn, a) for (mvn, a) in zip(mvnormals, eachslice(as, dims = 3))]
             @test Flux.stack(logp_truth,2) ≈ dropdims(logps,dims = 1) #test against ground truth
@@ -342,22 +340,21 @@
                 gn = CovGaussianNetwork(pre, μ, Σ, identity)
                 @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, Σ.W, Σ.b])
                 state = rand(20,3)|> gpu #batch of 3 states
-                m, s = gn(Flux.unsqueeze(state,2))
+                m, L = gn(Flux.unsqueeze(state,2))
                 @test size(m) == (10,1,3)
-                @test size(s) == (10, 10,3)
+                @test size(L) == (10, 10,3)
                 a, logp = gn(rng, Flux.unsqueeze(state,2), is_sampling = true, is_return_log_prob = true)
                 @test size(a) == (10,1,3)
                 @test size(logp) == (1,1,3)
-                C = Flux.stack(map(x-> cholesky(x).L |> Array, eachslice(s, dims=3)),3) |> gpu
 
-                @test logp ≈ mvnormlogpdf(m, C, a)
+                @test logp ≈ mvnormlogpdf(m, L, a)
                 @test logp ≈ gn(Flux.unsqueeze(state,2), a)
                 as, logps = gn(rng,Flux.unsqueeze(state,2), 5) #sample 5 actions
                 @test size(as) == (10,5,3)
                 @test size(logps) == (1,5,3)
                 logps2 = gn(Flux.unsqueeze(state,2), as)
                 @test logps2 ≈ logps
-                
+                s = Flux.stack(map(l -> l*l', eachslice(L, dims=3)),3)
                 mvnormals = map(z -> MvNormal(Array(vec(z[1])), Array(z[2])), zip(eachslice(m, dims = 3), eachslice(s, dims = 3)))
                 logp_truth = [logpdf(mvn, cpu(a)) for (mvn, a) in zip(mvnormals, eachslice(as, dims = 3))]
                 @test Flux.stack(logp_truth,2) ≈ dropdims(cpu(logps),dims = 1) #test against ground truth
