@@ -1,7 +1,7 @@
 using LinearAlgebra, Flux, Optim
 using Zygote: ignore, dropgrad
 
-#Note: we use two Q networks, this is not advocated in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
+#Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
 Base.@kwdef mutable struct MPOPolicy{P,Q,R}
     policy::P
     qnetwork1::Q,
