@@ -2,25 +2,27 @@ using LinearAlgebra, Flux, Optim
 using Zygote: ignore, dropgrad
 
 #Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
-Base.@kwdef mutable struct MPOPolicy{P,Q,R}
+mutable struct MPOPolicy{P,Q,R}
     policy::P
     qnetwork1::Q,
     qnetwork2::Q,
-    target_qnetwork1::Q = deepcopy(qnetwork1),
-    target_qnetwork2::Q = deepcopy(qnetwork2),
+    target_qnetwork1::Q
+    target_qnetwork2::Q 
     γ::Float32 = 0.99f0
     batch_size::Int #N
     action_sample_size::Int #K 
     ϵ::Float32  #KL bound on the non-parametric variational approximation to the policy
     ϵμ::Float32 #KL bound for the parametric policy training of mean estimations
     ϵΣ::Float32 #KL bound for the parametric policy training of (co)variance estimations
-    αμ::Vector{Float32} = [0f0] #must be vectors for gradient
-    αΣ::Vector{Float32} = [0f0]
+    αμ::Float32
+    αΣ::Float32
     update_freq::Int
     update_after::Int
-    update_step::Int = 0
-    τ::Float32 = 1f-3 #Polyak avering parameter of target networks
-    rng::R = Random.GLOBAL_RNG
+    update_step::Int
+    batches_per_update::Int
+    τ::Float32 #Polyak avering parameter of target networks
+    rng::R
+end
 end
 
 function (p::MPOPolicy)(env)
