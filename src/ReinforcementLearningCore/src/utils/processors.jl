@@ -20,11 +20,9 @@ Base.IndexStyle(x::StackFrames) = IndexStyle(x.buffer)
 StackFrames(d::Int...) = StackFrames(Float32, d...)
 
 function StackFrames(::Type{T}, d::Vararg{Int,N}) where {T,N}
-    p = StackFrames(CircularArrayBuffer{T}(d...))
-    for _ in 1:CircularArrayBuffers.capacity(p.buffer)
-        push!(p.buffer, zeros(T, size(p.buffer)[1:N-1]))
-    end
-    p
+    b = CircularArrayBuffer{T}(d...)
+    append!(b, zeros(T, d...))
+    StackFrames(b)
 end
 
 function (p::StackFrames{T,N})(state::AbstractArray) where {T,N}
