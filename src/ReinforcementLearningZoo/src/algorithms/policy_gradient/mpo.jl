@@ -37,24 +37,39 @@ function (p::MPOPolicy)(env)
     send_to_host(action)
 end
 
+#Update of the NNs happens here. This function is called at every environment step but will only update every `update_freq` calls. A low update_freq makes for a strongly offpolicy algorithm that will reuse data from far in the past.
+#A high `update_freq` will use more recent transitions, but less times. To work only with transitions sampled from the current policy, use a trajectory with a length equal to `update_freq`. If you work with N multiple parallel environment, 
+#use `update_freq = length(traj) ÷ N` (remainder should be zero) otherwise some transitions will never be used at all. 
+
 function RLBase.update!(
     p::MPOPolicy,
     traj::CircularArraySARTTrajectory,
     ::AbstractEnv,
-    ::PreActStage,
+    ::PostActStage
 )
+    p.update_step += 1
     length(traj) > p.update_after || return
     p.update_step % p.update_freq == 0 || return
-    inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
-    update!(p, batch)
+    for _ in p.batches_per_update
+        inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
+        s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
+        update_critic!(p, s, a, r, t, s′)
+        update_actor!(p, s, a, r, t, s′)
+    end
+    #TODO: make sampler a field of MPOPolicy to accomodate Nstep and Epoch sampling as suits the user.
+    #Later I would like this to be 
+    #=
+    for (inds, batch) in p.trajectory_sampler 
+        update!(p, batch)
+    end
+    =#
 end
 
-function RLBase.update!(p::MPOPolicy, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
+#Here we apply the TD3 Q network approach. This could be customizable by the user in a new p.critic <: AbstractCritic field. 
+function update_critic!(p::MPOPolicy, s, a, r, t, s′)
+    γ, τ = p.γ, p.τ
 
-    γ, τ, α = p.γ, p.τ, p.α
-
-    a′, log_π = p.policy(p.rng, s′; is_sampling=true, is_return_log_prob=true)
+    a′ = p.policy(p.rng, s′; is_sampling=true, is_return_log_prob=false)
     q′_input = vcat(s′, a′)
     q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
@@ -74,65 +89,83 @@ function RLBase.update!(p::MPOPolicy, batch::NamedTuple{SARTS})
     end
     update!(p.qnetwork2, q_grad_2)
 
+    for (dest, src) in zip(
+        Flux.params([p.target_qnetwork1, p.target_qnetwork2]),
+        Flux.params([p.qnetwork1, p.qnetwork2]),
+    )
+        dest .= (1 - τ) .* dest .+ τ .* src
+    end
+end
+
+function RLBase.update_actor!(p::MPOPolicy, s, a, r, t, s′)
     #Fit non-parametric variational distribution
     states = Flux.unsqueeze(s,2) #3D tensor with dimensions (state_size x 1 x batch_size)
     action_samples, logp_π = p.policy(p.rng, states, p.action_sample_size) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
     input = vcat(repeat(states, outer = (1, p.action_sample_size, 1)), action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
-    Q = p.qnetwork1(input)
-    η = solve_mpodual(Q, p.ϵ, p.policy)
+    Q = p.qnetwork1(input) 
+    η = solve_mpodual(send_to_host(Q), p.ϵ, p.policy) #this must be done on the CPU
     qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batch_size)
 
-
     #Improve policy towards qij
-    μ_old, Σ_old = p.policy(p.rng, states, is_sampling = false)
-    ps = Flux.params(p.policy, p.αμ, p.αΣ)
+    μ_old, L_old = p.policy(p.rng, states, is_sampling = false)
+    ps = Flux.params(p.policy, [p.αμ], [p.αΣ])
     gs = gradient(ps) do 
-        loss_decoupled(p, qij, states, actions, μ_old, Σ_old)
+        loss_decoupled(p, qij, states, actions, μ_old, L_old)
     end
     
     if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), gs)
         error("Gradient contains NaN of Inf")
     end
 
-    gs[p.αμ] .*= -1 #negative of gradient since we minimize w.r.t. α
-    gs[p.αΣ] .*= -1 
+    gs[[p.αμ]] .*= -1 #negative of gradient since we minimize w.r.t. α
+    gs[[p.αΣ]] .*= -1 
 
     Flux.Optimise.update!(p.optimizer, ps, gs)
-    clamp!(p.αμ, 0f0, Inf32) #maybe add an upperbound ?
-    clamp!(p.αΣ, 0f0, Inf32)
+    p.αμ = clamp(p.αμ, 0f0, Inf32) #maybe add an upperbound ?
+    p.αΣ = clamp(p.αΣ, 0f0, Inf32)
+
 end
 
+function solve_mpodual(Q, ϵ, nna::NeuralNetworkApproximator)
+    solve_mpodual(Q, ϵ, nna.model)
+end
 
-function solve_mpodual(Q, ϵ, ::GaussianNetwork)
+function solve_mpodual(Q, ϵ, ::Union{GaussianNetwork, CovGaussianNetwork})
     max_Q = maximum(Q, dims = 1) #needed for numerical stability
     g(η) = only(η .* p.ϵ .+ mean(max_q) .+ η .* mean(log.(mean(exp.((Q .- max_Q)./η),dims = 1)),dims = 2))
-    η = only(Optim.minimizer(optimize(g, [eps(ϵ)]))) #uses Nelder-Mead's algorithm, a more efficient way to optimize a convex scalar function than Adam
+    η = only(Optim.minimizer(optimize(g, [eps(ϵ)]))) #this uses Nelder-Mead's algorithm, other GD algorithms may be used. Make this a field in MPO struct ?
 end
 
-#TODO: Dual for the Discrete case, needs probability vector
-function solve_mpodual(Q, ϵ, ::NeuralNetworkApproximator)
-    max_Q = maximum(Q, dims = 1) #needed for numerical stability
-    g(η) = only(η .* p.ϵ .+ mean(max_q) .+ η .* mean(log.(mean(exp.((Q .- max_Q)./η),dims = 1)),dims = 2))
-    only(Optim.minimizer(optimize(g, [eps(ϵ)]))) #uses Nelder-Mead's algorithm, a more efficient way to optimize a convex scalar function than Adam
-end
-
-function loss_decoupled(p::MPOPolicy, qij, states, actions, μ_old, σ_old)
-    μ, logσ = p.policy(p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x action_size x batch_size)
-    σ = exp.(logσ)
-    σ_d = Zygote.ignore(σ) #decoupling
+#For CovGaussianNetwork
+function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:CovGaussianNetwork}}, qij, states, actions, μ_old, L_old)
+    μ, L = p.policy(p.rng, states, is_sampling = false)
+    #decoupling
+    L_d = Zygote.ignore(L) 
     μ_d = Zygote.ignore(μ)
-    #decoupled logp for mu and sigma
-    logp_π_new_μ = sum(normlogpdf(μ, σ_d, actions) .- (2.0f0 .* (log(2.0f0) .- actions .- softplus.(-2.0f0 .* actions))), dims = 1)
-    logp_π_new_σ = sum(normlogpdf(μ_d, σ, actions) .- (2.0f0 .* (log(2.0f0) .- actions .- softplus.(-2.0f0 .* actions))), dims = 1)
-    policy_loss = sum(qij .* (logp_π_new_μ .+ logp_π_new_σ)) 
-    lagrangeloss = p.αμ * (p.ϵμ - mean(gaussiankl(μ_old, σ_old, μ, σ_d))) + p.αΣ *(p.ϵΣ - mean(gaussiankl(μ_old, σ_old, μ_d, σ)))
+    #decoupled logp for mu and L
+    logp_π_new_μ = mvnormlogpdf(μ, L_d, actions) 
+    logp_π_new_L = mvnormlogpdf(μ_d, L, actions)
+    policy_loss = sum(qij .* (logp_π_new_μ .+ logp_π_new_L))
+
+    μ_old_s, L_old_s, μ_s, L_d_s, μ_d_s, L_s = map(x->eachslices(x, dims =3), (μ_old, L_old, μ, L_d, μ_d, L)) #slice all tensors along 3rd dim
     
-    return policy_loss + lagrangeloss
+    lagrangeμ = p.αμ * (p.ϵμ - mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_s, L_d_s))) 
+    lagrangeΣ = p.αΣ * (p.ϵΣ - mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_d_s, L_s)))
+    
+    return policy_loss + lagrangeμ + lagrangeΣ
 end
 
-#In the case of diagonal covariance (with GaussianNetwork), the diagonals are squeezed to Matrix column vectors 
-function loss_decoupled(p::MPOPolicy{GaussianNetwork}, qij, states, actions, μ_old, σ_old)
-    μ, logσ = p.policy(p.rng, dropdims(states,dims = 2), is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
+function mvnorm_kl_divergence(μ1, L1, μ2, L2)
+    d = size(μ1,1)
+    logdet = logdetLorU(L2) - logdetLorU(L1) 
+    trace = tr((L2*L2')\(L1*L1')) # trace of inv(Σ2) * Σ1
+    sqmahal = sum(abs2.(L2\(μ2 .- μ1))) #mahalanobis square distance
+    return (logdet - d + trace + sqmahal)/2
+end
+
+#In the case of diagonal covariance (with GaussianNetwork), 
+function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:GaussianNetwork}}, qij, states, actions, μ_old, σ_old)
+    μ, logσ = p.policy(p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
     σ = exp.(logσ)
     σ_d = Zygote.ignore(σ) #decoupling
     μ_d = Zygote.ignore(μ)
@@ -140,38 +173,22 @@ function loss_decoupled(p::MPOPolicy{GaussianNetwork}, qij, states, actions, μ_
     logp_π_new_μ = sum(normlogpdf(μ, σ_d, actions) .- (2.0f0 .* (log(2.0f0) .- actions .- softplus.(-2.0f0 .* actions))), dims = 1)
     logp_π_new_σ = sum(normlogpdf(μ_d, σ, actions) .- (2.0f0 .* (log(2.0f0) .- actions .- softplus.(-2.0f0 .* actions))), dims = 1)
     policy_loss = sum(qij .* (logp_π_new_μ .+ logp_π_new_σ))
-    tomatrix = m -> dropdims(m, dims = 2)
-    lagrangeloss =  p.αμ * (p.ϵμ - mean(gaussiankl(tomatrix(μ_old), tomatrix(σ_old), tomatrix(μ), tomatrix(σ_d)))) + 
-                    p.αΣ * (p.ϵΣ - mean(gaussiankl(tomatrix(μ_old), tomatrix(σ_old), tomatrix(μ_d), tomatrix(σ))))
+    μ_old_s, σ_old_s, μ_s, σ_d_s, μ_d_s, σ_s = map(x->eachslices(x, dims =3), (μ_old, σ_old, μ, σ_d, μ_d, σ)) #slice all tensors along 3rd dim
+    lagrangeμ = p.αμ * (p.ϵμ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))) 
+    lagrangeΣ = p.αΣ * (p.ϵΣ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_d_s, σ_s)))
+    
+    return policy_loss + lagrangeμ + lagrangeΣ
     
     return policy_loss + lagrangeloss
 end
 
-#computes the KL divergence between two multivariate gaussians with diagonal variances. Parameters must be input as Matrices
-function gaussiankl(μ1::AbstractVecOrMat, σ1::AbstractVecOrMat, μ2::AbstractVecOrMat, σ2::AbstractVecOrMat)
-    d = size(μ,1)
-    square_diff = (μ2 .- μ1) .^2
-    1/2 .*(log.(prod(σ2, dims = 1)/prod(σ1, dims = 1)) .- d .+ prod(σ1 ./ σ2, dims = 1) .+ sum(square_diff .* 1 ./ σ2, dims = 1))
+#computes the KL divergence between two multivariate gaussians with diagonal covariances. Parameters must be input as Matrices
+function norm_kl_divergence(μ1::AbstractVecOrMat, σ1::AbstractVecOrMat, μ2::AbstractVecOrMat, σ2::AbstractVecOrMat)
+    d = size(μ1,1)
+    logdet = sum(log.(σ2)) - sum(log.(σ1)) 
+    trace = sum(σ1 ./ σ2)
+    sqmahal = sum((μ2 .- μ1) .^2 ./ σ2)
+    return (logdet - d + trace + sqmahal)/2
 end
 
-#gaussian KL with triangular or full covariance, so with 3D Σ inputs mapslices(det, Σ, dims = (1,2))
-function gaussiankl(μ1, Σ1::AbstractArray, μ2, Σ2::AbstractArray)
-    mapslices3(f, t) = t -> mapslices(f,t, dims = (1,2)) #apply function f to all matrices along the 3rd dimension of tensor t
-    d = size(μ,1)
-    diffs = μ2 .- μ1 #action_size x 1 x batch_size
-    
-    logdet = log.(mapslices3(det, Σ2) ./ mapslices3(det, Σ1)) .- d #(1x1xbatchsize)
-    Σ2i = mapslices3(inv, Σ2)
-    mult = similar(Σ1)
-    for i in 1:size(Σ1,3)
-        mult[:,:,i] = Σ2i[:,:,i]*Σ1[:,:,i]
-    end
-    trace = mapslices3(tr, Σ2i*Σ1) #1 x 1 x batchsize
-    div = similar(trace)
-    for i in 1:size(Σ1,3)
-        div[:,:,i] = diffs[:,:,i]'*Σ2i[:,:,i]*diffs[:,:,i]
-    end
-    1/2 .* (logdet .+ trace .+ div)
-end
-
-
+#TODO: handle Categorical actor. Add a CategoricalNetwork that has the same api than Gaussians ?
