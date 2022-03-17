@@ -23,6 +23,11 @@ mutable struct MPOPolicy{P,Q,R}
     τ::Float32 #Polyak avering parameter of target networks
     rng::R
 end
+
+function MPOPolicy(policy, qnetwork1::Q, qnetwork2::Q; γ = 0.99f0, batch_size, action_sample_size, ϵ, ϵμ, ϵΣ, αμ = 0f0, αΣ = 0f0, update_freq, update_after, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q
+    @assert device(policy) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
+    @assert device(policy) == device(rng) "The specified rng does not generate on the same device as the policy. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
+    MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, batch_size, action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, update_freq, update_after, 0, τ, rng)
 end
 
 function (p::MPOPolicy)(env)
