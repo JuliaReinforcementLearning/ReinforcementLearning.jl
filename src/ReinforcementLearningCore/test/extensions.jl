@@ -90,6 +90,6 @@ end
     L = cholesky(Σ).L
     @test logdet(Σ) ≈ RLCore.logdetLorU(L)
     if CUDA.functional()
-        @test logdet(Σ) ≈ RLCore.logdetLorU(cu(L))
+        @test logdet(Σ) ≈ RLCore.logdetLorU(cu(L)) atol = 1f-4
     end
 end
