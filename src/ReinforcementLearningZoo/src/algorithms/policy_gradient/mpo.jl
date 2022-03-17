@@ -33,8 +33,7 @@ end
 function (p::MPOPolicy)(env)
     D = device(p.policy)
     s = send_to_device(D, state(env))
-    s = Flux.unsqueeze(s, ndims(s) + 1)
-    action = dropdims(p.policy(p.rng, s; is_sampling=true), dims=2) # Single action vec, drop second dim
+    action = p.policy(p.rng, s; is_sampling=true)
     send_to_host(action)
 end
 
