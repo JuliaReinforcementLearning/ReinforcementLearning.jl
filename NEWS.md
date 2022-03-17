@@ -45,6 +45,10 @@
 
 ### ReinforcementLearningCore.jl
 
+#### v0.8.10
+
+- Update dependency of `CircularArrayBuffers` to `v0.1.9`. [#602](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/602)
+- Add `CovGaussianNetwork`. [#597](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/597)
 #### v0.8.8
 
 - Fix warning about `vararg.data` in Julia@v1.7 [#560](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/560)
