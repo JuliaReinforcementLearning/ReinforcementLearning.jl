@@ -1,5 +1,6 @@
 using LinearAlgebra, Flux, Optim
 using Zygote: ignore, dropgrad
+export MPOPolicy
 
 #Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
 mutable struct MPOPolicy{P,Q,R}
@@ -8,7 +9,7 @@ mutable struct MPOPolicy{P,Q,R}
     qnetwork2::Q,
     target_qnetwork1::Q
     target_qnetwork2::Q 
-    γ::Float32 = 0.99f0
+    γ::Float32
     batch_size::Int #N
     action_sample_size::Int #K 
     ϵ::Float32  #KL bound on the non-parametric variational approximation to the policy
