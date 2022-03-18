@@ -31,6 +31,7 @@ function MPOPolicy(policy, qnetwork1::Q, qnetwork2::Q; γ = 0.99f0, batch_size, 
 end
 
 function (p::MPOPolicy)(env)
+    p.update_step += 1
     D = device(p.policy)
     s = send_to_device(D, state(env))
     action = p.policy(p.rng, s; is_sampling=true)
@@ -47,7 +48,6 @@ function RLBase.update!(
     ::AbstractEnv,
     ::PostActStage
 )
-    p.update_step += 1
     length(traj) > p.update_after || return
     p.update_step % p.update_freq == 0 || return
     for _ in p.batches_per_update
