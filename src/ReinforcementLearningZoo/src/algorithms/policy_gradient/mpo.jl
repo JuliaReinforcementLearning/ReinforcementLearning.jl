@@ -74,7 +74,7 @@ function update_critic!(p::MPOPolicy, s, a, r, t, s′)
     q′_input = vcat(s′, a′)
     q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
-    y = r .+ γ .* (1 .- t) .* vec(q′ .- α .* log_π)
+    y = r .+ γ .* (1 .- t) .* q′ 
 
     # Train Q Networks
     q_input = vcat(s, a)
