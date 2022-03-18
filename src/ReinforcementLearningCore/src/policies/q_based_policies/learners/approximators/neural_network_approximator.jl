@@ -214,8 +214,8 @@ end
     
 Given a Matrix of states, will return actions, μ and logpdf in matrix format. The batch of Σ remains a 3D tensor.
 """
-function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractMatrix; is_sampling::Bool=false, is_return_log_prob::Bool=false)
-    output = model(rng, Flux.unsqueeze(state,2); is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
+function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractVecOrMat; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    output = model(rng, reshape(state,first(size(state)),1,:); is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
     if output isa Tuple && is_sampling
         dropdims(output[1],dims = 2), dropdims(output[2], dims = 2)
     elseif output isa Tuple
@@ -235,7 +235,7 @@ This function is compatible with a multidimensional action space. When outputtin
 The outputs are 3D tensors with dimensions (action_size x action_samples x batch_size) and (1 x action_samples x batch_size) for `actions` and `logdpf` respectively.
 """
 function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
-    batch_size = size(state, 3) #3
+    batch_size = size(state, 3)
     x = model.pre(state) 
     μ, cholesky_vec = model.μ(x), model.Σ(x)
     da = size(μ,1)
