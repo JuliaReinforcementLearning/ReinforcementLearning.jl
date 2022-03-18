@@ -3,7 +3,7 @@ using LinearAlgebra, Flux, Optim
 using Zygote: ignore, dropgrad
 
 #Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
-mutable struct MPOPolicy{P,Q,R}
+mutable struct MPOPolicy{P,Q,R} <: AbstractPolicy
     policy::P
     qnetwork1::Q
     qnetwork2::Q
@@ -25,10 +25,10 @@ mutable struct MPOPolicy{P,Q,R}
     rng::R
 end
 
-function MPOPolicy(policy, qnetwork1::Q, qnetwork2::Q; γ = 0.99f0, batch_size, action_sample_size, ϵ, ϵμ, ϵΣ, αμ = 0f0, αΣ = 0f0, update_freq, update_after, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q
+function MPOPolicy(;policy, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, batch_size, action_sample_size, ϵ, ϵμ, ϵΣ, αμ = 0f0, αΣ = 0f0, update_freq, update_after, batches_per_update = 1, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q
     @assert device(policy) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(policy) == device(rng) "The specified rng does not generate on the same device as the policy. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
-    MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, batch_size, action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, update_freq, update_after, 0, τ, rng)
+    MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, batch_size, action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, update_freq, update_after, 0, batches_per_update, τ, rng)
 end
 
 function (p::MPOPolicy)(env)
@@ -98,7 +98,7 @@ function update_critic!(p::MPOPolicy, s, a, r, t, s′)
     end
 end
 
-function RLBase.update_actor!(p::MPOPolicy, s, a, r, t, s′)
+function update_actor!(p::MPOPolicy, s, a, r, t, s′)
     #Fit non-parametric variational distribution
     states = Flux.unsqueeze(s,2) #3D tensor with dimensions (state_size x 1 x batch_size)
     action_samples, logp_π = p.policy(p.rng, states, p.action_sample_size) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
