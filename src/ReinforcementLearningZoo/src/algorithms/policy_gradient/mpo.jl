@@ -1,12 +1,12 @@
+export MPOPolicy
 using LinearAlgebra, Flux, Optim
 using Zygote: ignore, dropgrad
-export MPOPolicy
 
 #Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
 mutable struct MPOPolicy{P,Q,R}
     policy::P
-    qnetwork1::Q,
-    qnetwork2::Q,
+    qnetwork1::Q
+    qnetwork2::Q
     target_qnetwork1::Q
     target_qnetwork2::Q 
     γ::Float32
