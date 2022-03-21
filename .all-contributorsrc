@@ -489,6 +489,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "jarbus",
+      "name": "Jarbus",
+      "avatar_url": "https://avatars.githubusercontent.com/u/42819002?v=4",
+      "profile": "http://jarbus.net",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
