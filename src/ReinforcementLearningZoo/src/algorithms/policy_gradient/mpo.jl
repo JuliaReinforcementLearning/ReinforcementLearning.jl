@@ -35,6 +35,8 @@ function MPOPolicy(;policy::NeuralNetworkApproximator, qnetwork1::Q, qnetwork2::
     MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, batch_size, action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, update_freq, update_after, 0, critic_batches, policy_batches, τ, rng)
 end
 
+Flux.@functor MPOPolicy
+
 function (p::MPOPolicy)(env)
     p.update_step += 1
     D = device(p.policy)
@@ -202,3 +204,74 @@ function norm_kl_divergence(μ1::AbstractVecOrMat, σ1::AbstractVecOrMat, μ2::A
 end
 
 #TODO: handle Categorical actor. Add a CategoricalNetwork that has the same api than Gaussians ?
+
+#=
+    Flux.gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
+
+Apply Flux.gpu to all neural nets of the policy. 
+`rng` can be used to specificy a particular rng if desired, make sure this rng generates numbers on the correct device.
+=#
+function Flux.gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
+    MPOPolicy(
+        p.policy |> gpu, 
+        p.qnetwork1 |> gpu, 
+        p.qnetwork2 |> gpu, 
+        p.target_qnetwork1 |> gpu, 
+        p.target_qnetwork2 |> gpu, 
+        p.γ, 
+        p.batch_size, 
+        p.action_sample_size, 
+        p.ϵ, 
+        p.ϵμ, 
+        p.ϵΣ, 
+        p.αμ |> gpu, 
+        p.αΣ |> gpu, 
+        p.update_freq, 
+        p.update_after, 
+        p.update_step,
+        p.critic_batches, 
+        p.policy_batches, 
+        p.τ, 
+        rng)
+end
+
+#=
+    send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ? CUDA.CURAND.RNG() : GLOBAL_RNG)
+
+Send all neural nets of the policy to a specified device.
+`rng` can be used to specificy a particular rng if desired, make sure this rng generates numbers on `device`. 
+=#
+function send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ? CUDA.CURAND.RNG() : GLOBAL_RNG)
+    sd(x) = send_to_device(device, x) 
+    MPOPolicy(
+        p.policy |> sd, 
+        p.qnetwork1 |> sd, 
+        p.qnetwork2 |> sd, 
+        p.target_qnetwork1 |> sd, 
+        p.target_qnetwork2 |> sd, 
+        p.γ, 
+        p.batch_size, 
+        p.action_sample_size, 
+        p.ϵ, 
+        p.ϵμ, 
+        p.ϵΣ, 
+        p.αμ |> sd, 
+        p.αΣ |> sd, 
+        p.update_freq, 
+        p.update_after, 
+        p.update_step,
+        p.critic_batches, 
+        p.policy_batches, 
+        p.τ, 
+        rng)
+end
+
+#=
+    send_to_host(p::MPOPolicy; rng = GLOBAL_RNG)
+
+Send all neural nets of the policy to the cpu.
+`rng` can be used to specificy a particular rng if desired. 
+=#
+function send_to_host(p::MPOPolicy; rng = GLOBAL_RNG)
+    send_to_device(Val{:cpu}, p, rng = rng)
+end
