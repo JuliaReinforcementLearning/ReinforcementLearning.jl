@@ -49,3 +49,10 @@ end
 
 # recognize Torch.jl
 # device(x::Tensor) = Val(Symbol(:gpu, x.device))
+
+# Since v0.1.10 CircularArrayBuffer will adapt internal buffer into GPU
+# But in RL.jl, we don't need that feature as far as I know
+
+import CircularArrayBuffers: CircularArrayBuffer
+
+send_to_device(d::CuDevice, m::CircularArrayBuffer) = send_to_device(d, collect(m))

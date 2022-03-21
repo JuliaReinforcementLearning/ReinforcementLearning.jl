@@ -32,7 +32,7 @@ Flux.params,
 device
 
 functor(x::NeuralNetworkApproximator) =
-    (model = x.model,), y -> NeuralNetworkApproximator(y.model, x.optimizer)
+    (model=x.model,), y -> NeuralNetworkApproximator(y.model, x.optimizer)
 
 RLBase.update!(app::NeuralNetworkApproximator, gs) =
     Flux.Optimise.update!(app.optimizer, params(app), gs)
@@ -56,7 +56,7 @@ Base.@kwdef struct ActorCritic{A,C,O} <: AbstractApproximator
 end
 
 functor(x::ActorCritic) =
-    (actor = x.actor, critic = x.critic), y -> ActorCritic(y.actor, y.critic, x.optimizer)
+    (actor=x.actor, critic=x.critic), y -> ActorCritic(y.actor, y.critic, x.optimizer)
 
 RLBase.update!(app::ActorCritic, gs) = Flux.Optimise.update!(app.optimizer, params(app), gs)
 
@@ -80,12 +80,12 @@ Base.@kwdef struct GaussianNetwork{P,U,S,F}
     pre::P = identity
     μ::U
     logσ::S
-    min_σ::Float32 = 0f0
+    min_σ::Float32 = 0.0f0
     max_σ::Float32 = Inf32
     normalizer::F = tanh
 end
 
-GaussianNetwork(pre, μ, logσ, normalizer = tanh) = GaussianNetwork(pre, μ, logσ, 0f0, Inf32, normalizer)
+GaussianNetwork(pre, μ, logσ, normalizer=tanh) = GaussianNetwork(pre, μ, logσ, 0.0f0, Inf32, normalizer)
 
 Flux.@functor GaussianNetwork
 
@@ -96,18 +96,18 @@ This function is compatible with a multidimensional action space. When outputtin
 - `is_sampling::Bool=false`, whether to sample from the obtained normal distribution. 
 - `is_return_log_prob::Bool=false`, whether to calculate the conditional probability of getting actions in the given state.
 """
-function (model::GaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
-    x = model.pre(state)
+function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    x = model.pre(s)
     μ, raw_logσ = model.μ(x), model.logσ(x)
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     if is_sampling
         σ = exp.(logσ)
-        z =  Zygote.ignore() do
+        z = Zygote.ignore() do
             noise = randn(rng, Float32, size(μ))
             model.normalizer.(μ .+ σ .* noise)
         end
         if is_return_log_prob
-            logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
+            logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
             return z, logp_π
         else
             return z
@@ -122,17 +122,17 @@ end
 Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions (action_size x action_samples x batch_size).
 `state` must be 3D tensor with dimensions (state_size x 1 x batch_size). Always returns the logpdf of each action along.
 """
-function (model::GaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
-    x = model.pre(state)
+function (model::GaussianNetwork)(rng::AbstractRNG, s, action_samples::Int)
+    x = model.pre(s)
     μ, raw_logσ = model.μ(x), model.logσ(x)
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
-    
+
     σ = exp.(logσ)
     z = Zygote.ignore() do
-        noise = randn(rng, Float32, (size(μ,1), action_samples, size(μ,3))...)
+        noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
         model.normalizer.(μ .+ σ .* noise)
     end
-    logp_π = sum(normlogpdf(μ, σ, z).- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
+    logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
     return z, logp_π
 end
 
@@ -146,10 +146,10 @@ end
 
 function (model::GaussianNetwork)(state, action)
     x = model.pre(state)
-    μ, raw_logσ = model.μ(x), model.logσ(x) 
+    μ, raw_logσ = model.μ(x), model.logσ(x)
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     σ = exp.(logσ)
-    logp_π = sum(normlogpdf(μ, σ, action) .- (2.0f0 .* (log(2.0f0) .- action .- softplus.(-2.0f0 .* action))), dims = 1)
+    logp_π = sum(normlogpdf(μ, σ, action) .- (2.0f0 .* (log(2.0f0) .- action .- softplus.(-2.0f0 .* action))), dims=1)
     return logp_π
 end
 
@@ -190,13 +190,13 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
     batch_size = size(state, 3)
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
-    da = size(μ,1)
-    L = vec_to_tril(cholesky_vec,da)
- 
+    da = size(μ, 1)
+    L = vec_to_tril(cholesky_vec, da)
+
     if is_sampling
         z = Zygote.ignore() do
             noise = randn(rng, eltype(μ), da, 1, batch_size)
-            model.normalizer.(Flux.stack(map(.+, eachslice(μ,dims=3), eachslice(L, dims=3) .* eachslice(noise,dims=3)),3)) 
+            model.normalizer.(Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3))
         end
         if is_return_log_prob
             logp_π = mvnormlogpdf(μ, L, z)
@@ -215,13 +215,13 @@ end
 Given a Matrix of states, will return actions, μ and logpdf in matrix format. The batch of Σ remains a 3D tensor.
 """
 function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractMatrix; is_sampling::Bool=false, is_return_log_prob::Bool=false)
-    output = model(rng, Flux.unsqueeze(state,2); is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
+    output = model(rng, Flux.unsqueeze(state, 2); is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
     if output isa Tuple && is_sampling
-        dropdims(output[1],dims = 2), dropdims(output[2], dims = 2)
+        dropdims(output[1], dims=2), dropdims(output[2], dims=2)
     elseif output isa Tuple
-        dropdims(output[1],dims = 2), output[2] #can't reduce the dims of the covariance tensor
+        dropdims(output[1], dims=2), output[2] #can't reduce the dims of the covariance tensor
     else
-        dropdims(output, dims = 2)
+        dropdims(output, dims=2)
     end
 end
 
@@ -236,13 +236,13 @@ The outputs are 3D tensors with dimensions (action_size x action_samples x batch
 """
 function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
     batch_size = size(state, 3) #3
-    x = model.pre(state) 
+    x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
-    da = size(μ,1)
-    L = vec_to_tril(cholesky_vec,da)
+    da = size(μ, 1)
+    L = vec_to_tril(cholesky_vec, da)
     z = Zygote.ignore() do
         noise = randn(rng, eltype(μ), da, action_samples, batch_size)
-        model.normalizer.(Flux.stack(map(.+, eachslice(μ,dims=3), eachslice(L, dims=3) .* eachslice(noise,dims=3)),3)) 
+        model.normalizer.(Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3))
     end
     logp_π = mvnormlogpdf(μ, L, z)
     return z, logp_π
@@ -261,10 +261,10 @@ Multiple actions may be taken per state, `action` must have dimensions (action_s
 Returns a 3D tensor with dimensions (1 x action_samples_per_state x batch_size)
 """
 function (model::CovGaussianNetwork)(state::AbstractArray, action::AbstractArray)
-    da = size(action,1)
+    da = size(action, 1)
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
-    L = vec_to_tril(cholesky_vec,da)
+    L = vec_to_tril(cholesky_vec, da)
     logp_π = mvnormlogpdf(μ, L, action)
     return logp_π
 end
@@ -273,21 +273,21 @@ end
 If given 2D matrices as input, will return a 2D matrix of logpdf. States and actions are paired column-wise, one action per state.
 """
 function (model::CovGaussianNetwork)(state::AbstractMatrix, action::AbstractMatrix)
-    output = model(Flux.unsqueeze(state,2), Flux.unsqueeze(action,2))
-    return dropdims(output, dims = 2)
+    output = model(Flux.unsqueeze(state, 2), Flux.unsqueeze(action, 2))
+    return dropdims(output, dims=2)
 end
 
 """
 Transform a vector containing the non-zero elements of a lower triangular da x da matrix into that matrix.
 """
-function vec_to_tril(cholesky_vec,da)
+function vec_to_tril(cholesky_vec, da)
     batch_size = size(cholesky_vec, 3)
-    c2idx(i,j) = ((2da-j)*(j-1))÷2+i #return the position in cholesky_vec of the element of the triangular matrix at coordinates (i,j)
+    c2idx(i, j) = ((2da - j) * (j - 1)) ÷ 2 + i #return the position in cholesky_vec of the element of the triangular matrix at coordinates (i,j)
     function f(j) #return a slice (da x 1 x batchsize) containing the jth columns of the lower triangular cholesky decomposition of the covariance
-        tc_diag = softplus.(cholesky_vec[c2idx(j,j):c2idx(j,j),:,:])
-        tc_other = cholesky_vec[c2idx(j,j)+1:c2idx(j+1,j+1)-1,:,:]
-        zs = Flux.Zygote.ignore() do 
-            zs = similar(cholesky_vec, da - size(tc_other,1) - 1,1,batch_size)
+        tc_diag = softplus.(cholesky_vec[c2idx(j, j):c2idx(j, j), :, :])
+        tc_other = cholesky_vec[c2idx(j, j)+1:c2idx(j + 1, j + 1)-1, :, :]
+        zs = Flux.Zygote.ignore() do
+            zs = similar(cholesky_vec, da - size(tc_other, 1) - 1, 1, batch_size)
             zs .= zero(eltype(cholesky_vec))
             return zs
         end
@@ -356,7 +356,7 @@ end
 """
     VAE(;encoder, decoder, latent_dims)
 """
-Base.@kwdef struct VAE{E, D}
+Base.@kwdef struct VAE{E,D}
     encoder::E
     decoder::D
     latent_dims::Int
