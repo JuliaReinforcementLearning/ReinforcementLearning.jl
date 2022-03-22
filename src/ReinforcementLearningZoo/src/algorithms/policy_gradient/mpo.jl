@@ -151,7 +151,7 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:CovGaussianNe
     #decoupled logp for mu and L
     logp_π_new_μ = mvnormlogpdf(μ, L_d, actions) 
     logp_π_new_L = mvnormlogpdf(μ_d, L, actions)
-    policy_loss = sum(qij .* (logp_π_new_μ .+ logp_π_new_L))
+    policy_loss = mean(qij .* (logp_π_new_μ .+ logp_π_new_L))
 
     μ_old_s, L_old_s, μ_s, L_d_s, μ_d_s, L_s = map(x->eachslice(x, dims =3), (μ_old, L_old, μ, L_d, μ_d, L)) #slice all tensors along 3rd dim
     
