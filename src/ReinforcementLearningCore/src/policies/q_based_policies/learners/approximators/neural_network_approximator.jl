@@ -219,7 +219,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractVecOrMat; 
     if output isa Tuple && is_sampling
         dropdims(output[1],dims = 2), dropdims(output[2], dims = 2)
     elseif output isa Tuple
-        dropdims(output[1],dims = 2), output[2] #can't reduce the dims of the covariance tensor
+        ouput #can't reduce the dims of the covariance tensor
     else
         dropdims(output, dims = 2)
     end
