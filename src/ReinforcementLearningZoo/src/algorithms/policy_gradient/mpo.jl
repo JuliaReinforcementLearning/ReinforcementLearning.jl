@@ -11,7 +11,7 @@ mutable struct MPOPolicy{P<:NeuralNetworkApproximator,Q<:NeuralNetworkApproximat
     target_qnetwork1::Q
     target_qnetwork2::Q 
     γ::Float32
-    batch_size::Int #N
+    batch_sampler::BatchSampler{SARTS} #can't directly specify a batch_size because trajectory sampling may need its own rng (e.g. if working on gpu). Eventually, we could split this into critic/policy samplers to use multi-steps like vtrace/retrace.
     action_sample_size::Int #K 
     ϵ::Float32  #KL bound on the non-parametric variational approximation to the policy
     ϵμ::Float32 #KL bound for the parametric policy training of mean estimations
@@ -27,12 +27,12 @@ mutable struct MPOPolicy{P<:NeuralNetworkApproximator,Q<:NeuralNetworkApproximat
     rng::R
 end
 
-function MPOPolicy(;policy::NeuralNetworkApproximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, batch_size, action_sample_size, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, update_freq = 1, update_after = 0, critic_batches = 1, policy_batches = 1, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q <: NeuralNetworkApproximator
+function MPOPolicy(;policy::NeuralNetworkApproximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, batch_sampler::BatchSampler{SARTS}, action_sample_size, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, update_freq = 1, update_after = 0, critic_batches = 1, policy_batches = 1, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q <: NeuralNetworkApproximator
     @assert device(policy) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(policy) == device(rng) "The specified rng does not generate on the same device as the policy. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     αμ = send_to_device(device(policy), [0f0])
     αΣ = send_to_device(device(policy), [0f0])
-    MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, batch_size, action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, update_freq, update_after, 0, critic_batches, policy_batches, τ, rng)
+    MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, batch_sampler, action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, update_freq, update_after, 0, critic_batches, policy_batches, τ, rng)
 end
 
 Flux.@functor MPOPolicy
@@ -53,87 +53,82 @@ function RLBase.update!(
     p::MPOPolicy,
     traj::CircularArraySARTTrajectory,
     ::AbstractEnv,
-    ::PostActStage
+    ::PreActStage
 )
-    length(traj) > p.update_after || return
+    length(traj) >= p.update_after || return
     p.update_step % p.update_freq == 0 || return
-    for _ in p.critic_batches
-        inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
-        s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
-        update_critic!(p, s, a, r, t, s′)
-    end
-    for _ in p.policy_batches
-        inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
-        s = send_to_device(device(p.qnetwork1), first(batch))
-        update_policy!(p, s)
-    end
-    #TODO: make sampler a field of MPOPolicy to accomodate Nstep and Epoch sampling as suits the user.
-    #Later I would like this to be 
-    #=
-    for (inds, batch) in p.trajectory_sampler 
-        update!(p, batch)
-    end
-    =#
+    update_critic!(p, traj)
+    update_policy!(p, traj)
 end
 
 #Here we apply the TD3 Q network approach. This could be customizable by the user in a new p.critic <: AbstractCritic field. 
-function update_critic!(p::MPOPolicy, s, a, r, t, s′)
-    γ, τ = p.γ, p.τ
+function update_critic!(p::MPOPolicy, traj)
+    for _ in 1:p.critic_batches
+        inds, batch = p.batch_sampler(traj)
+        s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
+        γ, τ = p.γ, p.τ
 
-    a′ = p.policy(p.rng, s′; is_sampling=true, is_return_log_prob=false)
-    q′_input = vcat(s′, a′)
-    q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
+        a′ = p.policy(p.rng, s′; is_sampling=true, is_return_log_prob=false)
+        q′_input = vcat(s′, a′)
+        q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
-    y = r .+ γ .* (1 .- t) .* vec(q′) 
+        y = r .+ γ .* (1 .- t) .* vec(q′) 
 
-    # Train Q Networks
-    q_input = vcat(s, a)
+        # Train Q Networks
+        q_input = vcat(s, a)
 
-    q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
-        q1 = p.qnetwork1(q_input) |> vec
-        mse(q1, y)
-    end
-    update!(p.qnetwork1, q_grad_1)
-    q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
-        q2 = p.qnetwork2(q_input) |> vec
-        mse(q2, y)
-    end
-    update!(p.qnetwork2, q_grad_2)
+        q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
+            q1 = p.qnetwork1(q_input) |> vec
+            mse(q1, y)
+        end
+        update!(p.qnetwork1, q_grad_1)
+        q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
+            q2 = p.qnetwork2(q_input) |> vec
+            mse(q2, y)
+        end
+        update!(p.qnetwork2, q_grad_2)
 
-    for (dest, src) in zip(
-        Flux.params([p.target_qnetwork1, p.target_qnetwork2]),
-        Flux.params([p.qnetwork1, p.qnetwork2]),
-    )
-        dest .= (1 - τ) .* dest .+ τ .* src
+        for (dest, src) in zip(
+            Flux.params([p.target_qnetwork1, p.target_qnetwork2]),
+            Flux.params([p.qnetwork1, p.qnetwork2]),
+        )
+            dest .= (1 - τ) .* dest .+ τ .* src
+        end
     end
 end
 
-function update_policy!(p::MPOPolicy, s)
-    #Fit non-parametric variational distribution
-    states = reshape(s, first(size(s)), 1, :) #3D tensor with dimensions (state_size x 1 x batch_size)
-    action_samples, logp_π = p.policy(p.rng, states, p.action_sample_size) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
-    input = vcat(repeat(states, outer = (1, p.action_sample_size, 1)), action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
-    Q = p.qnetwork1(input) 
-    η = map(q -> solve_mpodual(q, p.ϵ, p.policy), eachslice(send_to_host(Q), dims = 3)) #this must be done on the CPU
-    qij = softmax(Q./reshape(η, 1, :, p.batch_size), dims = 2) # dims = (1 x actions_sample_size x batch_size)
+function update_policy!(p::MPOPolicy, traj)
+    sd(x) = send_to_device(device(p.policy), x)
+    tmp = [first(last(p.batch_sampler(traj))) for _ in 1:p.policy_batches]
+    states_batches = map(s -> reshape(sd(s), first(size(s)), 1, :), tmp) #3D tensors with dimensions (state_size x 1 x batch_size), sent to device
+    batches = [(states, p.policy(p.rng, states, is_sampling = false)...) for states in states_batches]
 
-    #Improve policy towards qij
-    μ_old, L_old = p.policy(p.rng, states, is_sampling = false)
-    ps = Flux.params(p.policy, p.αμ, p.αΣ)
-    gs = gradient(ps) do 
-        loss_decoupled(p, qij, states, action_samples, μ_old, L_old)
+    for (states, μ_old, L_old) in batches 
+        #Fit non-parametric variational distribution
+        action_samples, logp_π = p.policy(p.rng, states, p.action_sample_size) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
+        input = vcat(repeat(states, outer = (1, p.action_sample_size, 1)), action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
+        Q = p.qnetwork1(input) 
+        η = map(q -> solve_mpodual(q, p.ϵ, p.policy), eachslice(send_to_host(Q), dims = 3)) #this must be done on the CPU
+        η_d = reshape(send_to_device(device(p), η), 1, :, p.batch_sampler.batch_size)
+        qij = softmax(Q./η_d, dims = 2) # dims = (1 x actions_sample_size x batch_size)
+
+        #Improve policy towards qij
+        ps = Flux.params(p.policy, p.αμ, p.αΣ)
+        gs = gradient(ps) do 
+            loss_decoupled(p, qij, states, action_samples, μ_old, L_old)
+        end
+        
+        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), gs)
+            error("Gradient contains NaN of Inf")
+        end
+
+        gs[p.αμ] *= -1 #negative of gradient since we minimize w.r.t. α
+        gs[p.αΣ] *= -1 
+
+        Flux.Optimise.update!(p.policy.optimizer, ps, gs)
+        p.αμ = clamp.(p.αμ, 0f0, Inf32) #maybe add an upperbound ?
+        p.αΣ = clamp.(p.αΣ, 0f0, Inf32)
     end
-    
-    if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), gs)
-        error("Gradient contains NaN of Inf")
-    end
-
-    gs[p.αμ] *= -1 #negative of gradient since we minimize w.r.t. α
-    gs[p.αΣ] *= -1 
-
-    Flux.Optimise.update!(p.policy.optimizer, ps, gs)
-    p.αμ = clamp.(p.αμ, 0f0, Inf32) #maybe add an upperbound ?
-    p.αΣ = clamp.(p.αΣ, 0f0, Inf32)
 end
 
 function solve_mpodual(Q, ϵ, nna::NeuralNetworkApproximator)
@@ -168,7 +163,7 @@ end
 
 function mvnorm_kl_divergence(μ1::AbstractMatrix, L1::AbstractMatrix, μ2::AbstractMatrix, L2::AbstractMatrix)
     d = size(μ1,1)
-    logdet = logdetLorU(L2) - logdetLorU(L1) 
+    logdet = logdetLorU(L2) - logdetLorU(L1)
     trace = tr((L2*L2')\(L1*L1')) # trace of inv(Σ2) * Σ1
     sqmahal = sum(abs2.(L2\(μ2 .- μ1))) #mahalanobis square distance
     return (logdet - d + trace + sqmahal)/2
@@ -219,7 +214,7 @@ function Flux.gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
         p.target_qnetwork1 |> gpu, 
         p.target_qnetwork2 |> gpu, 
         p.γ, 
-        p.batch_size, 
+        p.batch_sampler, 
         p.action_sample_size, 
         p.ϵ, 
         p.ϵμ, 
@@ -241,7 +236,7 @@ end
 Send all neural nets of the policy to a specified device.
 `rng` can be used to specificy a particular rng if desired, make sure this rng generates numbers on `device`. 
 =#
-function send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ? CUDA.CURAND.RNG() : GLOBAL_RNG)
+function RLCore.send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ? CUDA.CURAND.RNG() : GLOBAL_RNG)
     sd(x) = send_to_device(device, x) 
     MPOPolicy(
         p.policy |> sd, 
@@ -250,7 +245,7 @@ function send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ? CUDA.C
         p.target_qnetwork1 |> sd, 
         p.target_qnetwork2 |> sd, 
         p.γ, 
-        p.batch_size, 
+        p.batch_sampler.batch_size, 
         p.action_sample_size, 
         p.ϵ, 
         p.ϵμ, 
@@ -272,6 +267,6 @@ end
 Send all neural nets of the policy to the cpu.
 `rng` can be used to specificy a particular rng if desired. 
 =#
-function send_to_host(p::MPOPolicy; rng = GLOBAL_RNG)
+function RLCore.send_to_host(p::MPOPolicy; rng = GLOBAL_RNG)
     send_to_device(Val{:cpu}, p, rng = rng)
 end
