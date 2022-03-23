@@ -161,23 +161,6 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:CovGaussianNe
     return policy_loss + lagrangeμ + lagrangeΣ
 end
 
-function mvnorm_kl_divergence(μ1::M, L1M::M, μ2::M, L2M::M) where M <: AbstractMatrix
-    L1 = LowerTriangular(L1M)
-    L2 = LowerTriangular(L2M)
-    U1 = UpperTriangular(permutedims(L1M))
-    U2 = UpperTriangular(permutedims(L2M))
-    d = size(μ1,1)
-    logdet = logdetLorU(L2M) - logdetLorU(L1M)
-    M1 = L1*U1
-    L2i = inv(L2)
-    U2i = inv(U2)
-    M2i = U2i*L2i
-    X = M2i*M1
-    trace = tr(X) # trace of inv(Σ2) * Σ1
-    sqmahal = sum(abs2.(L2i*(μ2 .- μ1))) #mahalanobis square distance
-    return (logdet - d + trace + sqmahal)/2
-end
-
 #In the case of diagonal covariance (with GaussianNetwork), 
 function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:GaussianNetwork}}, qij, states, actions, μ_old, σ_old)
     μ, logσ = p.policy(p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
@@ -196,15 +179,6 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:GaussianNetwo
     return policy_loss + lagrangeμ + lagrangeΣ
     
     return policy_loss + lagrangeloss
-end
-
-#computes the KL divergence between two multivariate gaussians with diagonal covariances. Parameters must be input as Matrices
-function norm_kl_divergence(μ1::AbstractVecOrMat, σ1::AbstractVecOrMat, μ2::AbstractVecOrMat, σ2::AbstractVecOrMat)
-    d = size(μ1,1)
-    logdet = sum(log.(σ2)) - sum(log.(σ1)) 
-    trace = sum(σ1 ./ σ2)
-    sqmahal = sum((μ2 .- μ1) .^2 ./ σ2)
-    return (logdet - d + trace + sqmahal)/2
 end
 
 #TODO: handle Categorical actor. Add a CategoricalNetwork that has the same api than Gaussians ?
