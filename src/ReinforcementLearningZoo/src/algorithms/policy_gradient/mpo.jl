@@ -164,12 +164,17 @@ end
 function mvnorm_kl_divergence(μ1::M, L1M::M, μ2::M, L2M::M) where M <: AbstractMatrix
     L1 = LowerTriangular(L1M)
     L2 = LowerTriangular(L2M)
+    U1 = UpperTriangular(permutedims(L1M))
+    U2 = UpperTriangular(permutedims(L2M))
     d = size(μ1,1)
-    logdet = logdetLorU(L2) - logdetLorU(L1)
-    Y = L2 \ (L1*L1') #forward substitution
-    X = L2' \ Y #backward substitution
+    logdet = logdetLorU(L2M) - logdetLorU(L1M)
+    M1 = L1*U1
+    L2i = inv(L2)
+    U2i = inv(U2)
+    M2i = U2i*L2i
+    X = M2i*M1
     trace = tr(X) # trace of inv(Σ2) * Σ1
-    sqmahal = sum(abs2.(L2\(μ2 .- μ1))) #mahalanobis square distance
+    sqmahal = sum(abs2.(L2i*(μ2 .- μ1))) #mahalanobis square distance
     return (logdet - d + trace + sqmahal)/2
 end
 
