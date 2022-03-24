@@ -152,10 +152,13 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:CovGaussianNe
     #decoupled logp for mu and L
     logp_π_new_μ = mvnormlogpdf(μ, L_d, actions) 
     logp_π_new_L = mvnormlogpdf(μ_d, L, actions)
-    policy_loss = mean(qij .* (logp_π_new_μ .+ logp_π_new_L))
+    policy_loss = - mean(qij .* (logp_π_new_μ .+ logp_π_new_L))
     μ_old_s, L_old_s, μ_s, L_d_s, μ_d_s, L_s = map(x->eachslice(x, dims =3), (μ_old, L_old, μ, L_d, μ_d, L)) #slice all tensors along 3rd dim
-    lagrangeμ = mean(p.αμ) * (p.ϵμ - mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_s, L_d_s))) 
-    lagrangeΣ = mean(p.αΣ) * (p.ϵΣ - mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_d_s, L_s)))
+
+    klμ = mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_s, L_d_s) 
+    klΣ = mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_d_s, L_s)))
+    lagrangeμ = mean(p.αμ) * (p.ϵμ - klμ) 
+    lagrangeΣ = mean(p.αΣ) * (p.ϵΣ - klΣ)
     return policy_loss + lagrangeμ + lagrangeΣ
 end
 
@@ -169,14 +172,12 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:GaussianNetwo
     #decoupled logp for mu and sigma
     logp_π_new_μ = sum(normlogpdf(μ, σ_d, actions) .- (2.0f0 .* (log(2.0f0) .- actions .- softplus.(-2.0f0 .* actions))), dims = 1)
     logp_π_new_σ = sum(normlogpdf(μ_d, σ, actions) .- (2.0f0 .* (log(2.0f0) .- actions .- softplus.(-2.0f0 .* actions))), dims = 1)
-    policy_loss = sum(qij .* (logp_π_new_μ .+ logp_π_new_σ))
+    policy_loss = -mean(qij .* (logp_π_new_μ .+ logp_π_new_σ))
     μ_old_s, σ_old_s, μ_s, σ_d_s, μ_d_s, σ_s = map(x->eachslice(x, dims =3), (μ_old, σ_old, μ, σ_d, μ_d, σ)) #slice all tensors along 3rd dim
-    lagrangeμ = only(p.αμ) * (p.ϵμ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))) 
-    lagrangeΣ = only(p.αΣ) * (p.ϵΣ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_d_s, σ_s)))
+    lagrangeμ = mean(p.αμ) * (p.ϵμ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))) 
+    lagrangeΣ = mean(p.αΣ) * (p.ϵΣ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_d_s, σ_s)))
     
     return policy_loss + lagrangeμ + lagrangeΣ
-    
-    return policy_loss + lagrangeloss
 end
 
 #TODO: handle Categorical actor. Add a CategoricalNetwork that has the same api than Gaussians ?
