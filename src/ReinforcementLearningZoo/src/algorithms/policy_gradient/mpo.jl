@@ -81,10 +81,16 @@ function update_critic!(p::MPOPolicy, traj)
             q1 = p.qnetwork1(q_input) |> vec
             mse(q1, y)
         end
+        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
+            error("Gradient of Q_1 contains NaN of Inf")
+        end
         update!(p.qnetwork1, q_grad_1)
         q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
             q2 = p.qnetwork2(q_input) |> vec
             mse(q2, y)
+        end
+        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_2)
+            error("Gradient of Q_2 contains NaN of Inf")
         end
         update!(p.qnetwork2, q_grad_2)
 
@@ -112,6 +118,10 @@ function update_policy!(p::MPOPolicy, traj)
         η = map(q -> solve_mpodual(q, p.ϵ, p.policy), eachslice(send_to_host(Q), dims = 3)) #this must be done on the CPU
         η_d = reshape(send_to_device(device(p), η), 1, :, p.batch_sampler.batch_size)
         qij = softmax(Q./η_d, dims = 2) # dims = (1 x actions_sample_size x batch_size)
+
+        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), qij)
+            error("qij contains NaN of Inf")
+        end
 
         #Improve policy towards qij
         ps = Flux.params(p.policy, p.αμ, p.αΣ)
