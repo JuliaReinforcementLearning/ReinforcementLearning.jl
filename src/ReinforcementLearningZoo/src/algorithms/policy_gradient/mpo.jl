@@ -106,7 +106,8 @@ function update_policy!(p::MPOPolicy, traj)
     for (states, μ_old, L_old) in batches 
         #Fit non-parametric variational distribution
         action_samples, logp_π = p.policy(p.rng, states, p.action_sample_size) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
-        input = vcat(repeat(states, outer = (1, p.action_sample_size, 1)), action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
+        repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
+        input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
         Q = p.qnetwork1(input) 
         η = map(q -> solve_mpodual(q, p.ϵ, p.policy), eachslice(send_to_host(Q), dims = 3)) #this must be done on the CPU
         η_d = reshape(send_to_device(device(p), η), 1, :, p.batch_sampler.batch_size)
@@ -152,12 +153,9 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:CovGaussianNe
     logp_π_new_μ = mvnormlogpdf(μ, L_d, actions) 
     logp_π_new_L = mvnormlogpdf(μ_d, L, actions)
     policy_loss = mean(qij .* (logp_π_new_μ .+ logp_π_new_L))
-
     μ_old_s, L_old_s, μ_s, L_d_s, μ_d_s, L_s = map(x->eachslice(x, dims =3), (μ_old, L_old, μ, L_d, μ_d, L)) #slice all tensors along 3rd dim
-    
-    lagrangeμ = only(p.αμ) * (p.ϵμ - mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_s, L_d_s))) 
-    lagrangeΣ = only(p.αΣ) * (p.ϵΣ - mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_d_s, L_s)))
-    
+    lagrangeμ = mean(p.αμ) * (p.ϵμ - mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_s, L_d_s))) 
+    lagrangeΣ = mean(p.αΣ) * (p.ϵΣ - mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_d_s, L_s)))
     return policy_loss + lagrangeμ + lagrangeΣ
 end
 
