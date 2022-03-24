@@ -165,8 +165,8 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:CovGaussianNe
     policy_loss = - mean(qij .* (logp_π_new_μ .+ logp_π_new_L))
     μ_old_s, L_old_s, μ_s, L_d_s, μ_d_s, L_s = map(x->eachslice(x, dims =3), (μ_old, L_old, μ, L_d, μ_d, L)) #slice all tensors along 3rd dim
 
-    klμ = mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_s, L_d_s) 
-    klΣ = mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_d_s, L_s)))
+    klμ = mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_s, L_d_s))
+    klΣ = mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_d_s, L_s))
     lagrangeμ = mean(p.αμ) * (p.ϵμ - klμ) 
     lagrangeΣ = mean(p.αΣ) * (p.ϵΣ - klΣ)
     return policy_loss + lagrangeμ + lagrangeΣ
