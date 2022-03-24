@@ -1,4 +1,4 @@
-export normlogpdf, mvnormlogpdf
+export normlogpdf, mvnormlogpdf, norm_kl_divergence, mvnorm_kl_divergence
 
 using Distributions: DiscreteNonParametric, support, probs
 using Flux, LinearAlgebra
