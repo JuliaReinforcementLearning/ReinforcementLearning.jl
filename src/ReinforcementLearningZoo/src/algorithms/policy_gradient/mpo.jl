@@ -129,10 +129,9 @@ function update_policy!(p::MPOPolicy, traj)
         repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
         input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
         Q = p.qnetwork1(input) 
-        η = map(q -> solve_mpodual(q, p.ϵ, p.policy), eachslice(send_to_host(Q), dims = 3)) #this must be done on the CPU, can it be done once instead of batch_size times? 
-        append!(p.logs[:η], η)
-        η_d = reshape(send_to_device(device(p), η), 1, :, p.batch_sampler.batch_size)
-        qij = softmax(Q./η_d, dims = 2) # dims = (1 x actions_sample_size x batch_size)
+        η = solve_mpodual(send_to_host(Q), p.ϵ, p.policy)
+        push!(p.logs[:η], η)
+        qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batch_size)
 
         if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), qij)
             error("qij contains NaN of Inf")
@@ -165,10 +164,10 @@ function solve_mpodual(Q, ϵ, nna::NeuralNetworkApproximator)
     solve_mpodual(Q, ϵ, nna.model)
 end
 
-function solve_mpodual(Q::AbstractMatrix, ϵ, ::Union{GaussianNetwork, CovGaussianNetwork})
-    max_Q = maximum(Q, dims = 1) #needed for numerical stability
-    g(η) = only(η .* ϵ .+ mean(max_Q) .+ η .* mean(log.(mean(exp.((Q .- max_Q)./η),dims = 1)),dims = 2))
-    η = only(Optim.minimizer(optimize(g, [eps(ϵ)]))) #this uses Nelder-Mead's algorithm, other GD algorithms may be used. Make this a field in MPO struct ?
+function solve_mpodual(Q::AbstractArray, ϵ, ::Union{GaussianNetwork, CovGaussianNetwork})
+    max_Q = maximum(Q) #needed for numerical stability
+    g(η) = η * ϵ + max_Q + η * mean(log.(mean(exp.((Q .- max_Q)./η),dims = 2)))
+    Optim.minimizer(optimize(g, eps(ϵ), 10f0))
 end
 
 #For CovGaussianNetwork
