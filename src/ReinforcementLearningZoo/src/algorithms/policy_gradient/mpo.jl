@@ -25,14 +25,16 @@ mutable struct MPOPolicy{P<:NeuralNetworkApproximator,Q<:NeuralNetworkApproximat
     policy_batches::Int
     τ::Float32 #Polyak avering parameter of target networks
     rng::R
+    logs::Dict{Symbol, Vector{Float32}}
 end
 
-function MPOPolicy(;policy::NeuralNetworkApproximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, batch_sampler::BatchSampler{SARTS}, action_sample_size, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, update_freq = 1, update_after = 0, critic_batches = 1, policy_batches = 1, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q <: NeuralNetworkApproximator
+function MPOPolicy(;policy::NeuralNetworkApproximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, batch_size::Int, action_sample_size, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, update_freq = 1, update_after = 0, critic_batches = 1, policy_batches = 1, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q <: NeuralNetworkApproximator
     @assert device(policy) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(policy) == device(rng) "The specified rng does not generate on the same device as the policy. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     αμ = send_to_device(device(policy), [0f0])
     αΣ = send_to_device(device(policy), [0f0])
-    MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, batch_sampler, action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, update_freq, update_after, 0, critic_batches, policy_batches, τ, rng)
+    logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :policy_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :αμ, :αΣ))
+    MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, BatchSampler{SARTS}(batch_size), action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, update_freq, update_after, 0, critic_batches, policy_batches, τ, rng, logs)
 end
 
 Flux.@functor MPOPolicy
@@ -83,7 +85,11 @@ function update_critic!(p::MPOPolicy, traj)
 
         q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
             q1 = p.qnetwork1(q_input) |> vec
-            mse(q1, y)
+            l = mse(q1, y)
+            Zygote.ignore() do 
+                push!(p.logs[:qnetwork1_loss], l)
+            end
+            return l
         end
         if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
             error("Gradient of Q_1 contains NaN of Inf")
@@ -91,7 +97,11 @@ function update_critic!(p::MPOPolicy, traj)
         update!(p.qnetwork1, q_grad_1)
         q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
             q2 = p.qnetwork2(q_input) |> vec
-            mse(q2, y)
+            l = mse(q2, y)
+            Zygote.ignore() do 
+                push!(p.logs[:qnetwork2_loss], l)
+            end
+            return l
         end
         if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_2)
             error("Gradient of Q_2 contains NaN of Inf")
@@ -119,7 +129,8 @@ function update_policy!(p::MPOPolicy, traj)
         repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
         input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
         Q = p.qnetwork1(input) 
-        η = map(q -> solve_mpodual(q, p.ϵ, p.policy), eachslice(send_to_host(Q), dims = 3)) #this must be done on the CPU
+        η = map(q -> solve_mpodual(q, p.ϵ, p.policy), eachslice(send_to_host(Q), dims = 3)) #this must be done on the CPU, can it be done once instead of batch_size times? 
+        append!(p.logs[:η], η)
         η_d = reshape(send_to_device(device(p), η), 1, :, p.batch_sampler.batch_size)
         qij = softmax(Q./η_d, dims = 2) # dims = (1 x actions_sample_size x batch_size)
 
@@ -143,6 +154,10 @@ function update_policy!(p::MPOPolicy, traj)
         Flux.Optimise.update!(p.policy.optimizer, ps, gs)
         p.αμ = clamp.(p.αμ, 0f0, Inf32) #maybe add an upperbound ?
         p.αΣ = clamp.(p.αΣ, 0f0, Inf32)
+        Zygote.ignore() do 
+            push!(p.logs[:αμ],sum(p.αμ))
+            push!(p.logs[:αΣ],sum(p.αΣ))
+        end
     end
 end
 
@@ -171,8 +186,13 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:CovGaussianNe
 
     klμ = mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_s, L_d_s))
     klΣ = mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_d_s, L_s))
-    lagrangeμ = mean(p.αμ) * (p.ϵμ - klμ) 
-    lagrangeΣ = mean(p.αΣ) * (p.ϵΣ - klΣ)
+    lagrangeμ = - mean(p.αμ) * (p.ϵμ - klμ) 
+    lagrangeΣ = - mean(p.αΣ) * (p.ϵΣ - klΣ)
+    Zygote.ignore() do 
+        push!(p.logs[:policy_loss],policy_loss)
+        push!(p.logs[:lagrangeμ_loss], lagrangeμ)
+        push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
+    end
     return policy_loss + lagrangeμ + lagrangeΣ
 end
 
@@ -223,7 +243,8 @@ function Flux.gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
         p.critic_batches, 
         p.policy_batches, 
         p.τ, 
-        rng)
+        rng,
+        p.logs)
 end
 
 #=
@@ -254,7 +275,8 @@ function RLCore.send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ?
         p.critic_batches, 
         p.policy_batches, 
         p.τ, 
-        rng)
+        rng,
+        p.logs)
 end
 
 #=
