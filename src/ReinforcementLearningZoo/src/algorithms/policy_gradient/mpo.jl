@@ -37,11 +37,15 @@ end
 
 Flux.@functor MPOPolicy
 
-function (p::MPOPolicy)(env)
+function (p::MPOPolicy)(env; testmode = false)
     p.update_step += 1
     D = device(p.policy)
     s = send_to_device(D, state(env))
-    action = p.policy(p.rng, s; is_sampling=true)
+    if !testmode
+        action = p.policy(p.rng, s; is_sampling=!testmode)
+    else
+        action, _ = p.policy(p.rng, s; is_sampling=!testmode)
+    end
     send_to_host(action)
 end
 

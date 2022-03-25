@@ -21,7 +21,7 @@ end
 
 functor(x::Agent) = (policy = x.policy,), y -> @set x.policy = y.policy
 
-(agent::Agent)(env) = agent.policy(env)
+(agent::Agent)(env; kwargs...) = agent.policy(env; kwargs...)
 
 function check(agent::Agent, env::AbstractEnv)
     if ActionStyle(env) === FULL_ACTION_SET &&
