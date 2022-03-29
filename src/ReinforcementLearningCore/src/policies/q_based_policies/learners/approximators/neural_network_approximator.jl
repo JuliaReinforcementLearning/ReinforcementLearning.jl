@@ -122,7 +122,7 @@ end
 Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions (action_size x action_samples x batch_size).
 `state` must be 3D tensor with dimensions (state_size x 1 x batch_size). Always returns the logpdf of each action along.
 """
-function (model::GaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
+function (model::GaussianNetwork)(rng::AbstractRNG, state, action_samples::Int; is_return_log_prob::Bool=false)
     x = model.pre(state)
     μ, raw_logσ = model.μ(x), model.logσ(x)
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
@@ -132,16 +132,20 @@ function (model::GaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
         noise = randn(rng, Float32, (size(μ,1), action_samples, size(μ,3))...)
         model.normalizer.(μ .+ σ .* noise)
     end
-    logp_π = sum(normlogpdf(μ, σ, z).- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
-    return z, logp_π
+    if is_return_log_prob
+        logp_π = sum(normlogpdf(μ, σ, z).- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims = 1)
+        return z, logp_π   
+    else
+        return z
+    end 
 end
 
 function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
     model(Random.GLOBAL_RNG, state; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
 end
 
-function (model::GaussianNetwork)(state, action_samples::Int)
-    model(Random.GLOBAL_RNG, state, action_samples)
+function (model::GaussianNetwork)(state, action_samples::Int; is_return_log_prob::Bool=false)
+    model(Random.GLOBAL_RNG, state, action_samples, is_return_log_prob = is_return_log_prob)
 end
 
 function (model::GaussianNetwork)(state, action)
@@ -234,7 +238,7 @@ Sample `action_samples` actions given `state` and return the `actions, logpdf(ac
 This function is compatible with a multidimensional action space. When outputting a sampled action, it uses the `normalizer` function to normalize it elementwise.
 The outputs are 3D tensors with dimensions (action_size x action_samples x batch_size) and (1 x action_samples x batch_size) for `actions` and `logdpf` respectively.
 """
-function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::Int; is_return_log_prob = true)
+function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::Int; is_return_log_prob = false)
     batch_size = size(state, 3)
     x = model.pre(state) 
     μ, cholesky_vec = model.μ(x), model.Σ(x)
