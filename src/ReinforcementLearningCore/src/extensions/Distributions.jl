@@ -21,10 +21,11 @@ end
 
 GPU automatic differentiable version for the logpdf function of multivariate normal distributions. 
 Takes as inputs `mu` the mean vector, `L` the lower triangular matrix of the cholesky decomposition of the covariance matrix, and `x` a matrix of samples where each column is a sample.
-Return a Vector containing the logpdf of each column of x for the `MvNormal` parametrized by `μ` and `Σ = L*L'`.
+Return a row vector containing the logpdf of each column of x for the `MvNormal` parametrized by `μ` and `Σ = L*L'`.
 """
-function mvnormlogpdf(μ::AbstractVecOrMat, L::AbstractMatrix, x::AbstractVecOrMat)
-    return -((size(x, 1) * log2π + logdetLorU(L)) .+ vec(sum(abs2.(L\(x .- μ)), dims=1))) ./ 2
+function mvnormlogpdf(μ::AbstractVecOrMat, LM::AbstractMatrix, x::AbstractVecOrMat)
+    L = LowerTriangular(LM)
+    return -((size(x, 1) * log2π + logdetLorU(LM)) .+ (sum(abs2.(inv(L)*(x .- μ)), dims=1))) ./ 2
 end
 
 
@@ -35,9 +36,10 @@ Batch version that takes 3D tensors as input where each slice along the 3rd dime
 `μ` is a (action_size x 1 x batch_size) matrix, `L` is a (action_size x action_size x batch_size), x is a (action_size x action_samples x batch_size).
 Return a 3D matrix of size (1 x action_samples x batch_size). 
 """
-function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ = 1f-8) where A <: AbstractArray 
-    logp = [mvnormlogpdf(μ[:,:,k], LorU[:,:,k], x[:,:,k]) for k in 1:size(x, 3)]
-    return Flux.unsqueeze(Flux.stack(logp, 2),1) #returns a 3D vector 
+function mvnormlogpdf(μ::A, LorU::A, x::A) where A <: AbstractArray
+    μ_s,l_s,x_s = eachslice.((μ, LorU, x), dims = 3)
+    lp = mvnormlogpdf.(μ_s,l_s,x_s)
+    Flux.stack(lp, 3)
 end
 
 """
