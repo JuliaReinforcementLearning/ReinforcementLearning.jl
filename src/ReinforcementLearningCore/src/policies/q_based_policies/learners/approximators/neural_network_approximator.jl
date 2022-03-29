@@ -234,7 +234,7 @@ Sample `action_samples` actions given `state` and return the `actions, logpdf(ac
 This function is compatible with a multidimensional action space. When outputting a sampled action, it uses the `normalizer` function to normalize it elementwise.
 The outputs are 3D tensors with dimensions (action_size x action_samples x batch_size) and (1 x action_samples x batch_size) for `actions` and `logdpf` respectively.
 """
-function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
+function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::Int; is_return_log_prob = true)
     batch_size = size(state, 3)
     x = model.pre(state) 
     μ, cholesky_vec = model.μ(x), model.Σ(x)
@@ -244,8 +244,12 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::In
         noise = randn(rng, eltype(μ), da, action_samples, batch_size)
         model.normalizer.(Flux.stack(map(.+, eachslice(μ,dims=3), eachslice(L, dims=3) .* eachslice(noise,dims=3)),3)) 
     end
-    logp_π = mvnormlogpdf(μ, L, z)
-    return z, logp_π
+    if is_return_log_prob
+        logp_π = mvnormlogpdf(μ, L, z)
+        return z, logp_π
+    else
+        return z
+    end
 end
 
 function (model::CovGaussianNetwork)(state::AbstractArray, args...; kwargs...)
