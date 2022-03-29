@@ -125,7 +125,7 @@ function update_policy!(p::MPOPolicy, traj)
 
     for (states, μ_old, L_old) in batches 
         #Fit non-parametric variational distribution
-        action_samples, logp_π = p.policy(p.rng, states, p.action_sample_size) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
+        action_samples = p.policy(p.rng, states, p.action_sample_size, is_return_log_prob = false) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
         repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
         input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
         Q = p.qnetwork1(input) 
@@ -147,7 +147,7 @@ function update_policy!(p::MPOPolicy, traj)
             error("Gradient contains NaN of Inf")
         end
 
-        gs[p.αμ] *= -1 #negative of gradient since we minimize w.r.t. α
+        gs[p.αμ] *= -1 #negative of gradient since we maximize w.r.t. α
         gs[p.αΣ] *= -1 
 
         Flux.Optimise.update!(p.policy.optimizer, ps, gs)
@@ -167,7 +167,7 @@ end
 function solve_mpodual(Q::AbstractArray, ϵ, ::Union{GaussianNetwork, CovGaussianNetwork})
     max_Q = maximum(Q) #needed for numerical stability
     g(η) = η * ϵ + max_Q + η * mean(log.(mean(exp.((Q .- max_Q)./η),dims = 2)))
-    Optim.minimizer(optimize(g, eps(ϵ), 10f0))
+    Optim.minimizer(optimize(g, eps(ϵ), 1000f0))
 end
 
 #For CovGaussianNetwork
