@@ -29,6 +29,8 @@ function (rn::RewardNormalizer)(rewards)
 end
 
 #= it is pretty useless to track the evolution of a reward that is normalized to be 0. So we track the actual rewards.
+# This cannot be implemented at the moment because Hooks are defined in RLCore, which is not a dependency of RLEnvs. 
+# You can copy the code below to override the behavior of the hook localy. 
 function (hook::RewardsPerEpisode)(::PostActStage, agent, env::RewardTransformedEnv{<:AbstractEnv, <:RewardNormalizer})
     push!(hook.rewards[end], reward(env.env))
 end
