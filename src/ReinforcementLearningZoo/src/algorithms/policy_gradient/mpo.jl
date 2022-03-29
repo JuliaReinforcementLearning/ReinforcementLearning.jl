@@ -196,7 +196,8 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:CovGaussianNe
 end
 
 #In the case of diagonal covariance (with GaussianNetwork), 
-function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:GaussianNetwork}}, qij, states, actions, μ_old, σ_old)
+function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:GaussianNetwork}}, qij, states, actions, μ_old, logσ_old)
+    σ_old = exp.(logσ_old)
     μ, logσ = p.policy(p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
     σ = exp.(logσ)
     μ_d, σ_d = Zygote.ignore() do
@@ -207,9 +208,13 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:GaussianNetwo
     logp_π_new_σ = sum(normlogpdf(μ_d, σ, actions) .- (2.0f0 .* (log(2.0f0) .- actions .- softplus.(-2.0f0 .* actions))), dims = 1)
     policy_loss = -mean(qij .* (logp_π_new_μ .+ logp_π_new_σ))
     μ_old_s, σ_old_s, μ_s, σ_d_s, μ_d_s, σ_s = map(x->eachslice(x, dims =3), (μ_old, σ_old, μ, σ_d, μ_d, σ)) #slice all tensors along 3rd dim
-    lagrangeμ = mean(p.αμ) * (p.ϵμ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))) 
-    lagrangeΣ = mean(p.αΣ) * (p.ϵΣ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_d_s, σ_s)))
-    
+    lagrangeμ = - mean(p.αμ) * (p.ϵμ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))) 
+    lagrangeΣ = - mean(p.αΣ) * (p.ϵΣ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_d_s, σ_s)))
+    Zygote.ignore() do 
+        push!(p.logs[:policy_loss],policy_loss)
+        push!(p.logs[:lagrangeμ_loss], lagrangeμ)
+        push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
+    end
     return policy_loss + lagrangeμ + lagrangeΣ
 end
 
