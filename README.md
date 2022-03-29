@@ -244,6 +244,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://nplawrence.com"><img src="https://avatars.githubusercontent.com/u/61165981?v=4?s=100" width="100px;" alt=""/><br /><sub><b>NPLawrence</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=NPLawrence" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/bileamScheuvens"><img src="https://avatars.githubusercontent.com/u/36153336?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bileam Scheuvens</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=bileamScheuvens" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://jarbus.net"><img src="https://avatars.githubusercontent.com/u/42819002?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jarbus</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues?q=author%3Ajarbus" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

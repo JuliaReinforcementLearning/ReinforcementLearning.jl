@@ -4,6 +4,10 @@
 
 ### ReinforcementLearningExperiments.jl
 
+#### v0.1.4
+
+- Support `device_rng` in SAC [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
+
 #### v0.1.3
 
 - Test experiments on GPU by default [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
@@ -45,6 +49,10 @@
 
 ### ReinforcementLearningCore.jl
 
+#### v0.8.11
+
+- When sending a `CircularArrayBuffer` to GPU devices, convert `CircularArrayBuffer` into `CuArray` instead of the adapted `CircularArrayBuffer` of `CuArray`. [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
+
 #### v0.8.10
 
 - Update dependency of `CircularArrayBuffers` to `v0.1.9`. [#602](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/602)
@@ -67,6 +75,10 @@
 - Fixed the method overwritten warning of `device` from `CUDA.jl`.
 
 ### ReinforcementLearningZoo.jl
+
+#### v0.5.10
+
+- Support `device_rng` in SAC [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
 
 #### v0.5.7
 

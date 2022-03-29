@@ -56,14 +56,14 @@ end
 function VMPOPolicy(;
     approximator,
     update_freq,
-    γ = 0.99f0,
-    ϵ_η = 0.02f0,
-    ϵ_α = 0.1f0,
-    ϵ_αμ = 0.005f0,
-    ϵ_ασ = 0.00005f0,
-    n_epochs = 8,
-    dist = Categorical,
-    rng = Random.GLOBAL_RNG,
+    γ=0.99f0,
+    ϵ_η=0.02f0,
+    ϵ_α=0.1f0,
+    ϵ_αμ=0.005f0,
+    ϵ_ασ=0.00005f0,
+    n_epochs=8,
+    dist=Categorical,
+    rng=Random.GLOBAL_RNG
 )
     VMPOPolicy{typeof(approximator),dist,typeof(rng)}(
         approximator,
@@ -88,7 +88,7 @@ end
 function RLBase.prob(policy::VMPOPolicy{<:ActorCritic,Categorical}, env::AbstractEnv)
     s = send_to_device(device(policy.approximator), state(env))
     p = policy.approximator.actor(s) |> softmax |> send_to_host
-    Categorical(p; check_args = false)
+    Categorical(p; check_args=false)
 end
 
 function (agent::Agent{<:VMPOPolicy{<:ActorCritic,Categorical}})(env::AbstractEnv)
@@ -125,7 +125,7 @@ function (agent::Agent{<:VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal}})(
     s = send_to_device(device(agent.policy.approximator), state(env))
     # the action is an output of GaussianNetwork which is normalised by tanh(),
     # we increase its stability by limiting it to [-1 + eps, 1 - eps]
-    a = agent.policy.approximator.actor(agent.policy.rng, s, is_sampling = true)
+    a = agent.policy.approximator.actor(agent.policy.rng, s, is_sampling=true)
     m = one(eltype(a)) - eps(eltype(a))
     clamp.(a, -m, m) |> send_to_host |> first
 end
@@ -154,8 +154,8 @@ end
 function _update!(p::VMPOPolicy, t::VMPOTrajectory)
     AC = p.approximator
     D = device(AC)
-    s = send_to_device(D, @view t[:state][:, 1:end-1])  # drop the last extra state
-    a = send_to_device(D, @view t[:action][1:end-1])  # drop the last extra action
+    s = send_to_device(D, t[:state][:, 1:end-1])  # drop the last extra state
+    a = send_to_device(D, t[:action][1:end-1])  # drop the last extra action
     is_discrete = isa(p, VMPOPolicy{<:ActorCritic,Categorical})
     π_old = is_discrete ? AC.actor(s) |> softmax : nothing
     μ_old, σ_old = is_discrete ? (nothing, nothing) : begin
@@ -174,12 +174,12 @@ function _update!(p::VMPOPolicy, t::VMPOTrajectory)
         collect
 
     # calculate discounted rewards
-    rewards = discount_rewards(rewards, p.γ, terminal = t[:terminal])
+    rewards = discount_rewards(rewards, p.γ, terminal=t[:terminal])
     rewards = send_to_device(D, rewards)
 
     # calculate advantages and sample top half of it
     advantages = rewards .- AC.critic(s)[1, :]
-    top_k_idx = sortperm(advantages |> send_to_host, rev = true)[1:length(advantages)÷2]
+    top_k_idx = sortperm(advantages |> send_to_host, rev=true)[1:length(advantages)÷2]
     top_k_advs = advantages[top_k_idx]
 
     for epoch in 1:p.n_epochs
@@ -206,7 +206,7 @@ function _update!(p::VMPOPolicy, t::VMPOTrajectory)
 
             # loss for Lagrange multiplier α
             Lα = if is_discrete
-                KL = Flux.kldivergence(π_old, π, agg = identity)
+                KL = Flux.kldivergence(π_old, π, agg=identity)
                 mean(α * (p.ϵ_α .- dropgrad(KL)) + dropgrad(α) * KL)
             else
                 KLμ = 0.5f0 * (μ .- μ_old) .^ 2 ./ (σ .^ 2)
