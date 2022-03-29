@@ -97,11 +97,13 @@ Base.setindex!(
 #Used for mvnormlogpdf in extensions/Distributions.jl
 """
 `logdetLorU(LorU::AbstractMatrix)`
+
 Log-determinant of the Positive-Semi-Definite matrix A = L*U (cholesky lower and upper triangulars), given L or U. 
-Has a sign uncertainty for non PSD matrices.
+Has a sign uncertainty for non PSD matrices. Currently this is crazy slow and the major performance bottleneck for mpo using a GPU, 
+a proper implementation of `logdet` in CUDA is needed to remove this and keep only the fallback.
 """
-function logdetLorU(LorU::CuArray)
-    return 2*sum(log.(diag(LorU)))
+function logdetLorU(LorU::Union{CuArray, LowerTriangular{<:Number, <:CuArray}, UpperTriangular{<:Number, <:CuArray}})
+    return 2*mapreduce(log, +, diag(LorU), init = 0f0)
 end
 
 #Cpu fallback
