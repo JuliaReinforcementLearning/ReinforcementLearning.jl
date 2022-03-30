@@ -1,4 +1,7 @@
-export RewardNormalizer
+export RewardNormalizer, ExpRewardNormalizer, AbstractRewardNormalizer
+
+abstract type AbstractRewardNormalizer end
+
 """
     RewardNormalizer()
 
@@ -12,7 +15,7 @@ For a version that uses an exponential estimate, a more suited approach for non-
 normalized_env = RewardTransformedEnv(env, RewardNormalizer())   
 ```
 """
-mutable struct RewardNormalizer{T}
+mutable struct RewardNormalizer{T} <: AbstractRewardNormalizer
     mean::T
     moment2::T
     std::T
@@ -46,7 +49,7 @@ For a version that does not use an exponential estimate, see `RewardNormalizer`.
 normalized_env = RewardTransformedEnv(env, RewardNormalizer())   
 ```
 """
-mutable struct ExpRewardNormalizer{T}
+mutable struct ExpRewardNormalizer{T} <: AbstractRewardNormalizer
     mean::T
     var::T
     std::T
@@ -70,34 +73,32 @@ function (rn::ExpRewardNormalizer)(rewards; update = true)
     return (rewards .- rn.std)./rn.std
 end
 
-#= it is pretty useless to track the evolution of a reward that is normalized to be 0. So we track the actual rewards.
-# This cannot be implemented at the moment because Hooks are defined in RLCore, which is not a dependency of RLEnvs. 
-# You can copy the code below to override the behavior of the hook locally. 
-function (hook::RewardsPerEpisode)(::PostActStage, agent, env::RewardTransformedEnv{<:AbstractEnv, <:RewardNormalizer})
+# it is pretty useless to track the evolution of a reward that is normalized to be 0. So we track the actual rewards.
+function (hook::RewardsPerEpisode)(::PostActStage, agent, env::RewardTransformedEnv{<:AbstractEnv, <:AbstractRewardNormalizer})
     push!(hook.rewards[end], reward(env.env))
 end
 
-function (hook::RewardsPerEpisode)(::PostActStage, agent::NamedPolicy, env::RewardTransformedEnv{<:AbstractEnv, <:RewardNormalizer})
+function (hook::RewardsPerEpisode)(::PostActStage, agent::NamedPolicy, env::RewardTransformedEnv{<:AbstractEnv, <:AbstractRewardNormalizer})
     push!(hook.rewards[end], reward(env.env, nameof(agent)))
 end
 
-function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env::RewardTransformedEnv{<:AbstractEnv, <:RewardNormalizer})
+function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env::RewardTransformedEnv{<:AbstractEnv, <:AbstractRewardNormalizer})
     hook.reward += reward(env.env)
 end
 
-function (hook::TotalRewardPerEpisode)(::PostActStage, agent::NamedPolicy, env::RewardTransformedEnv{<:AbstractEnv, <:RewardNormalizer})
+function (hook::TotalRewardPerEpisode)(::PostActStage, agent::NamedPolicy, env::RewardTransformedEnv{<:AbstractEnv, <:AbstractRewardNormalizer})
     hook.reward += reward(env.env, nameof(agent))
 end
 
-function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env::RewardTransformedEnv{<:AbstractEnv, <:RewardNormalizer})
+function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env::RewardTransformedEnv{<:AbstractEnv, <:AbstractRewardNormalizer})
     hook.reward += reward(env.env)
 end
 
-function (hook::TotalRewardPerEpisode)(::PostActStage, agent::NamedPolicy, env::RewardTransformedEnv{<:AbstractEnv, <:RewardNormalizer})
+function (hook::TotalRewardPerEpisode)(::PostActStage, agent::NamedPolicy, env::RewardTransformedEnv{<:AbstractEnv, <:AbstractRewardNormalizer})
     hook.reward += reward(env.env, nameof(agent))
 end
 
-function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env::RewardTransformedEnv{<:AbstractEnv, <:RewardNormalizer})
+function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env::RewardTransformedEnv{<:AbstractEnv, <:AbstractRewardNormalizer})
     R = agent isa NamedPolicy ? reward(env.env, nameof(agent)) : reward(env.env)
     for (i, (t, r)) in enumerate(zip(is_terminated(env), R))
         hook.reward[i] += r
@@ -106,4 +107,4 @@ function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env::RewardTr
             hook.reward[i] = 0.0
         end
     end
-end=#
+end

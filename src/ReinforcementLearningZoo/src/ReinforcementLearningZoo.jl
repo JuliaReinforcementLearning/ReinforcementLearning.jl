@@ -30,5 +30,6 @@ using StructArrays
 
 include("patch.jl")
 include("algorithms/algorithms.jl")
+include("utils/utils.jl")
 
 end # module
