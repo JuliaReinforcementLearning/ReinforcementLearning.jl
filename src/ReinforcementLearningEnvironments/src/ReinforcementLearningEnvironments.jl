@@ -13,7 +13,6 @@ export RLEnvs
 include("base.jl")
 include("environments/environments.jl")
 include("converters.jl")
-include("rewardnormalizer.jl")
 
 # dynamic loading environments
 function __init__()
