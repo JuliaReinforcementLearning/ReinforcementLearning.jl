@@ -4,7 +4,7 @@ using Zygote: ignore, dropgrad
 using ReinforcementLearningCore: logdetLorU
 
 #Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
-mutable struct MPOPolicy{P<:NeuralNetworkApproximator,Q<:NeuralNetworkApproximator,R,AV<:AbstractVector} <: AbstractPolicy
+mutable struct MPOPolicy{P<:NeuralNetworkApproximator,Q<:NeuralNetworkApproximator,R,AV<:AbstractVector, N} <: AbstractPolicy
     policy::P
     qnetwork1::Q
     qnetwork2::Q
@@ -26,15 +26,23 @@ mutable struct MPOPolicy{P<:NeuralNetworkApproximator,Q<:NeuralNetworkApproximat
     τ::Float32 #Polyak avering parameter of target networks
     rng::R
     logs::Dict{Symbol, Vector{Float32}}
+    reward_normalizer::N
 end
 
-function MPOPolicy(;policy::NeuralNetworkApproximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, batch_size::Int, action_sample_size, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, update_freq = 1, update_after = 0, critic_batches = 1, policy_batches = 1, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q <: NeuralNetworkApproximator
+function MPOPolicy(;policy::NeuralNetworkApproximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, batch_size::Int, action_sample_size, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, update_freq = 1, update_after = 0, critic_batches = 1, policy_batches = 1, τ = 1f-3, rng = Random.GLOBAL_RNG, reward_normalizer:: Union{Bool, AbstractRewardNormalizer} = false) where Q <: NeuralNetworkApproximator
     @assert device(policy) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(policy) == device(rng) "The specified rng does not generate on the same device as the policy. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     αμ = send_to_device(device(policy), [0f0])
     αΣ = send_to_device(device(policy), [0f0])
     logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :policy_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :αμ, :αΣ))
-    MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, BatchSampler{SARTS}(batch_size), action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, update_freq, update_after, 0, critic_batches, policy_batches, τ, rng, logs)
+    if reward_normalizer == false
+        normalizer_ = n(x, kwargs...) = identity(x)
+    elseif reward_normalizer == true
+        normalizer_ = ExpRewardNormalizer(0.2f0)
+    else
+        normalizer_ = reward_normalizer
+    end
+    MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, BatchSampler{SARTS}(batch_size), action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, update_freq, update_after, 0, critic_batches, policy_batches, τ, rng, logs, normalizer_)
 end
 
 Flux.@functor MPOPolicy
@@ -67,6 +75,19 @@ function RLBase.update!(
     update_policy!(p, traj)
 end
 
+#Need to update the normalizer, unnormalized rewards are kept in memory to use the latest estimate when sampling.
+function RLBase.update!(
+    trajectory::AbstractTrajectory,
+    policy::MPOPolicy,
+    env::AbstractEnv,
+    ::PostActStage,
+)
+    r = policy isa NamedPolicy ? reward(env, nameof(policy)) : reward(env)
+    policy.reward_normalizer(r)
+    push!(trajectory[:reward], r)
+    push!(trajectory[:terminal], is_terminated(env))
+end
+
 #Here we apply the TD3 Q network approach. This could be customizable by the user in a new p.critic <: AbstractCritic field. 
 function update_critic!(p::MPOPolicy, traj)
     for _ in 1:p.critic_batches
@@ -78,7 +99,7 @@ function update_critic!(p::MPOPolicy, traj)
         q′_input = vcat(s′, a′)
         q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
-        y = r .+ γ .* (1 .- t) .* vec(q′) 
+        y =  p.reward_normalizer(r, update = false) .+ γ .* (1 .- t) .* vec(q′) 
 
         # Train Q Networks
         q_input = vcat(s, a)
