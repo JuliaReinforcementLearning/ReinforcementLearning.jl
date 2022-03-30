@@ -36,7 +36,7 @@ function MPOPolicy(;policy::NeuralNetworkApproximator, qnetwork1::Q, qnetwork2::
     αΣ = send_to_device(device(policy), [0f0])
     logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :policy_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :αμ, :αΣ))
     if reward_normalizer == false
-        normalizer_ = n(x, kwargs...) = identity(x)
+        normalizer_ = n(x; kwargs...) = identity(x)
     elseif reward_normalizer == true
         normalizer_ = ExpRewardNormalizer(0.2f0)
     else
