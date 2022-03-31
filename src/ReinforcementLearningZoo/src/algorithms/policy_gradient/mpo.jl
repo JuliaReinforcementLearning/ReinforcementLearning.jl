@@ -2,6 +2,7 @@ export MPOPolicy
 using LinearAlgebra, Flux, Optim
 using Zygote: ignore, dropgrad
 using ReinforcementLearningCore: logdetLorU
+import LogExpFunctions.logsumexp
 
 #Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
 mutable struct MPOPolicy{P<:NeuralNetworkApproximator,Q<:NeuralNetworkApproximator,R,AV<:AbstractVector, N} <: AbstractPolicy
@@ -34,11 +35,11 @@ function MPOPolicy(;policy::NeuralNetworkApproximator, qnetwork1::Q, qnetwork2::
     @assert device(policy) == device(rng) "The specified rng does not generate on the same device as the policy. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     αμ = send_to_device(device(policy), [0f0])
     αΣ = send_to_device(device(policy), [0f0])
-    logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :policy_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :αμ, :αΣ))
+    logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :policy_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :αμ, :αΣ, :klμ, :klΣ))
     if reward_normalizer == false
         normalizer_ = n(x; kwargs...) = identity(x)
     elseif reward_normalizer == true
-        normalizer_ = ExpRewardNormalizer(0.2f0)
+        normalizer_ = ExpRewardNormalizer(0.1f0)
     else
         normalizer_ = reward_normalizer
     end
@@ -187,8 +188,9 @@ end
 
 function solve_mpodual(Q::AbstractArray, ϵ, ::Union{GaussianNetwork, CovGaussianNetwork})
     max_Q = maximum(Q) #needed for numerical stability
-    g(η) = η * ϵ + max_Q + η * mean(log.(mean(exp.((Q .- max_Q)./η),dims = 2)))
-    Optim.minimizer(optimize(g, eps(ϵ), 1000f0))
+    
+    g(η) = η * ϵ + η * mean(logsumexp( Q ./η .- log(size(Q, 2)*1f0), dims = 2))
+    Optim.minimizer(optimize(g, eps(ϵ), 10f0))
 end
 
 #For CovGaussianNetwork
@@ -212,6 +214,8 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:CovGaussianNe
         push!(p.logs[:policy_loss],policy_loss)
         push!(p.logs[:lagrangeμ_loss], lagrangeμ)
         push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
+        push!(p.logs[:klμ], klμ)
+        push!(p.logs[:klΣ], klΣ)
     end
     return policy_loss + lagrangeμ + lagrangeΣ
 end
