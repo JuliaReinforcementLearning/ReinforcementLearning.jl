@@ -22,22 +22,23 @@ using CircularArrayBuffers: CircularArrayBuffer, CircularVectorBuffer
 #####
 
 """
-    Trajectory(;[trace_name=trace_container]...)
+    Trajectory(;[trace_name=trace_container]..., is_episodic = true)
 
-A simple wrapper of `NamedTuple`.
-Define our own type here to avoid type piracy with `NamedTuple`
+Mainly a simple wrapper of `NamedTuple`. 
+Set `is_episodic = false` when working with non-episodic environments (i.e. infinite horizon) that stop after a given number of steps to avoid multiplying the value if the last state by 0 when bootstrapping TD targets
 """
 struct Trajectory{T} <: AbstractTrajectory
     traces::T
+    is_episodic::Bool
 end
 
-Trajectory(; kwargs...) = Trajectory(values(kwargs))
+Trajectory(; is_episodic = true, kwargs...) = Trajectory(values(kwargs), is_episodic)
 
 @forward Trajectory.traces Base.getindex, Base.keys
 
-Base.merge(a::Trajectory, b::Trajectory) = Trajectory(merge(a.traces, b.traces))
-Base.merge(a::Trajectory, b::NamedTuple) = Trajectory(merge(a.traces, b))
-Base.merge(a::NamedTuple, b::Trajectory) = Trajectory(merge(a, b.traces))
+Base.merge(a::Trajectory, b::Trajectory) = Trajectory(merge(a.traces, b.traces), a.is_episodic)
+Base.merge(a::Trajectory, b::NamedTuple) = Trajectory(merge(a.traces, b), a.is_episodic)
+Base.merge(a::NamedTuple, b::Trajectory) = Trajectory(merge(a, b.traces), b.is_episodic)
 
 #####
 
@@ -53,10 +54,11 @@ underlying buffer.
 See also [`CircularArraySARTTrajectory`](@ref),
 [`CircularArraySLARTTrajectory`](@ref), [`CircularArrayPSARTTrajectory`](@ref).
 """
-function CircularArrayTrajectory(; capacity, kwargs...)
+function CircularArrayTrajectory(; capacity, is_episodic = true, kwargs...)
     Trajectory(map(values(kwargs)) do x
         CircularArrayBuffer{eltype(first(x))}(last(x)..., capacity)
-    end)
+    end, 
+    is_episodic)
 end
 
 """
@@ -72,10 +74,11 @@ Similar to [`CircularArrayTrajectory`](@ref), except that the underlying storage
 
 See also [`CircularVectorSARTTrajectory`](@ref), [`CircularVectorSARTSATrajectory`](@ref).
 """
-function CircularVectorTrajectory(; capacity, kwargs...)
+function CircularVectorTrajectory(; capacity, is_episodic = true, kwargs...)
     Trajectory(map(values(kwargs)) do x
         CircularVectorBuffer{x}(capacity)
-    end)
+    end,
+    is_episodic)
 end
 
 #####
@@ -165,9 +168,9 @@ CircularArraySARTTrajectory(;
     action = Int => (),
     reward = Float32 => (),
     terminal = Bool => (),
-) = merge(
-    CircularArrayTrajectory(; capacity = capacity + 1, state = state, action = action),
-    CircularArrayTrajectory(; capacity = capacity, reward = reward, terminal = terminal),
+    is_episodic = true) = merge(
+    CircularArrayTrajectory(; capacity = capacity + 1, state = state, action = action, is_episodic = is_episodic),
+    CircularArrayTrajectory(; capacity = capacity, reward = reward, terminal = terminal, is_episodic = is_episodic),
 )
 
 const CircularArraySLARTTrajectory = Trajectory{
@@ -191,14 +194,16 @@ CircularArraySLARTTrajectory(;
     action = Int => (),
     reward = Float32 => (),
     terminal = Bool => (),
+    is_episodic = true
 ) = merge(
     CircularArrayTrajectory(;
         capacity = capacity + 1,
         state = state,
         legal_actions_mask = legal_actions_mask,
         action = action,
+        is_episodic = is_episodic
     ),
-    CircularArrayTrajectory(; capacity = capacity, reward = reward, terminal = terminal),
+    CircularArrayTrajectory(; capacity = capacity, reward = reward, terminal = terminal, is_episodic = is_episodic),
 )
 
 #####
@@ -288,9 +293,10 @@ CircularVectorSARTTrajectory(;
     action = Int,
     reward = Float32,
     terminal = Bool,
+    is_episodic = true
 ) = merge(
-    CircularVectorTrajectory(; capacity = capacity + 1, state = state, action = action),
-    CircularVectorTrajectory(; capacity = capacity, reward = reward, terminal = terminal),
+    CircularVectorTrajectory(; capacity = capacity + 1, state = state, action = action, is_episodic = is_episodic),
+    CircularVectorTrajectory(; capacity = capacity, reward = reward, terminal = terminal, is_episodic = is_episodic),
 )
 
 #####
@@ -318,6 +324,7 @@ CircularVectorSARTSATrajectory(;
     terminal = Bool,
     next_state = state,
     next_action = action,
+    is_episodic = true
 ) = CircularVectorTrajectory(;
     capacity = capacity,
     state = state,
@@ -326,6 +333,7 @@ CircularVectorSARTSATrajectory(;
     terminal = terminal,
     next_state = next_state,
     next_action = next_action,
+    is_episodic = is_episodic
 )
 
 #####
@@ -336,10 +344,11 @@ CircularVectorSARTSATrajectory(;
 A specialized [`Trajectory`](@ref) which uses [`ElasticArray`](https://github.com/JuliaArrays/ElasticArrays.jl) as the underlying
 storage. See also [`ElasticSARTTrajectory`](@ref).
 """
-function ElasticArrayTrajectory(; kwargs...)
+function ElasticArrayTrajectory(; is_episodic = true, kwargs...)
     Trajectory(map(values(kwargs)) do x
         ElasticArray{eltype(first(x))}(undef, last(x)..., 0)
-    end)
+    end,
+    is_episodic)
 end
 
 const ElasticSARTTrajectory = Trajectory{
@@ -433,12 +442,14 @@ function ElasticSARTTrajectory(;
     action = Int => (),
     reward = Float32 => (),
     terminal = Bool => (),
+    is_episodic = true
 )
     ElasticArrayTrajectory(;
         state = state,
         action = action,
         reward = reward,
         terminal = terminal,
+        is_episodic = is_episodic
     )
 end
 
@@ -451,10 +462,11 @@ end
 
 A [`Trajectory`](@ref) with each trace using a `Vector` as the storage.
 """
-function VectorTrajectory(; kwargs...)
+function VectorTrajectory(; is_episodic = true, kwargs...)
     Trajectory(map(values(kwargs)) do x
         Vector{x}()
-    end)
+    end,
+    is_episodic)
 end
 
 const VectorSARTTrajectory =
@@ -477,8 +489,9 @@ function VectorSARTTrajectory(;
     action = Int,
     reward = Float32,
     terminal = Bool,
+    is_episodic = true
 )
-    VectorTrajectory(; state = state, action = action, reward = reward, terminal = terminal)
+    VectorTrajectory(; state = state, action = action, reward = reward, terminal = terminal, is_episodic = is_episodic)
 end
 
 const VectorSATrajectory =
@@ -494,8 +507,8 @@ A specialized [`VectorTrajectory`] with traces of `(:state, :action)`.
 - `state::DataType = Int`
 - `action::DataType = Int`
 """
-function VectorSATrajectory(; state = Int, action = Int)
-    VectorTrajectory(; state = state, action = action)
+function VectorSATrajectory(; state = Int, action = Int, is_episodic = true)
+    VectorTrajectory(; state = state, action = action, is_episodic = is_episodic)
 end
 #####
 
@@ -518,8 +531,8 @@ Base.getindex(t::PrioritizedTrajectory, s::Symbol) =
 const CircularArrayPSARTTrajectory =
     PrioritizedTrajectory{<:SumTree,<:CircularArraySARTTrajectory}
 
-CircularArrayPSARTTrajectory(; capacity, kwargs...) = PrioritizedTrajectory(
-    CircularArraySARTTrajectory(; capacity = capacity, kwargs...),
+CircularArrayPSARTTrajectory(; capacity, is_episodic = true, kwargs...) = PrioritizedTrajectory(
+    CircularArraySARTTrajectory(; capacity = capacity, is_episodic = is_episodic, kwargs...),
     SumTree(capacity),
 )
 

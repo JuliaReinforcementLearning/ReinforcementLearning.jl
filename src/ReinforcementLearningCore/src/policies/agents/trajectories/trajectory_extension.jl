@@ -101,6 +101,10 @@ function fetch!(s::BatchSampler{traces}, t::Union{CircularArraySARTTrajectory, C
         @error "unsupported traces $traces"
     end
     
+    if !t.is_episodic
+        batch.terminal .= false
+    end
+
     if isnothing(s.cache)
         s.cache = map(batch) do x
             convert(Array, x)
@@ -187,6 +191,10 @@ function fetch!(
         batch = NamedTuple{SLARTSL}((s, l, a, r, t, s′, l′))
     else
         @error "unsupported traces $traces"
+    end
+
+    if !t.is_episodic
+        batch.terminal .= false
     end
 
     if isnothing(sampler.cache)
