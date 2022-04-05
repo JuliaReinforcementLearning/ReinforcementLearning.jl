@@ -6,8 +6,29 @@ export AbstractQNetwork, QNetwork, TwinQNetwork
 
 abstract type AbstractQNetwork <: AbstractApproximator end
 
-#An AbstractQNetwork is updated given `states, actions` to minimise `mse(targets, Q(states,actions)`
-function update!(qnetwork::AbstractQNetwork, states, actions, targets)
+#An algorithm that uses a QNetwork can call this function to update it. This will dispatch depending on the type of QNetwork used (twin or not)
+function update_qnetwork!(p::AbstractPolicy, t::AbstractTrajectory)
+    update!(p, t, p.qnetwork)
+end
+
+#QNetwork is a combination of two identical NNs, one being a target of bootstrapping. tau is the polyak averaging update weight or a boolean, if false, no target network is used (target will point to the main network). 
+mutable struct QNetwork{Q <: NeuralNetworkApproximator, T<:Union{Float32, Bool}, F} <: AbstractQNetwork
+    qnetwork::Q
+    target_qnetwork::Q
+    τ::T
+    loss::F
+end
+
+@functor QNetwork
+
+Flux.trainable(q::QNetwork) = (q.qnetwork,)
+
+QNetwork(nn; τ = 0.01f0, target = false, loss = Flux.mse) = QNetwork(nn, target ? deepcopy(nn) : nn, target ? τ : false, loss)
+
+(qnetwork::QNetwork)(states, actions) = qnetwork.qnetwork([states; actions]) #how do we handle image states? Can't concatenate with actions.
+
+#A QNetwork is updated given `states, actions` to minimise `mse(targets, Q(states,actions)`
+function update!(qnetwork::QNetwork, states, actions, targets)
     τ = qnetwork.τ
     ps = Flux.params(qnetwork)
     gs = gradient(ps) do 
@@ -26,27 +47,8 @@ function update!(qnetwork::AbstractQNetwork, states, actions, targets)
     end
 end
 
-mutable struct QNetwork{Q <: NeuralNetworkApproximator, T<:Union{Float32, Bool}, F} <: AbstractQNetwork
-    qnetwork::Q
-    target_qnetwork::Q
-    τ::T
-    loss::F
-end
-
-@functor QNetwork
-
-Flux.trainable(q::QNetwork) = (q.qnetwork,)
-
-QNetwork(nn; τ = 0.01f0, target = false, loss = Flux.mse) = QNetwork(nn, target ? deepcopy(nn) : nn, target ? τ : false, loss)
-
-(qnetwork::QNetwork)(states, actions) = qnetwork.qnetwork([states; actions]) #how do we handle image states? Can't concatenate with actions.
-
-#An algorithm that uses a QNetwork can call this function to update it.
-function update_qnetwork!(p::AbstractPolicy, t::AbstractTrajectory)
-    update_qnetwork!(p, t, p.qnetwork)
-end
 #called by the function above, or directly in-algorithm
-function update_qnetwork!(p, t, qnetwork::QNetwork)
+function update!(p, t, qnetwork::QNetwork)
     inds, batch = p.batch_sampler(t) #use the policy's batch_sampler to get a batch
     y = q_targets(p, t, qnetwork, batch) #compute targets for qnetwork, can be specialised by overloading on a trajectory or policy type
     update!(qnetwork, batch.state, batch.action, y)
@@ -74,7 +76,8 @@ end
 
 (qnetwork::TwinQNetwork)(states, actions) = qnetwork.qnetwork1(states, actions) #how do we handle image states? Can't concatenate with actions.
 
-function update_qnetwork!(p, t, twinqnetwork::TwinQNetwork)
+#when we have twins, we must update each one
+function update!(p, t, twinqnetwork::TwinQNetwork)
     inds, batch = p.batch_sampler(t)
     y = q_targets(p, t, twinqnetwork.qnetwork1, twinqnetwork.qnetwork2, batch...)
     s = batch.state

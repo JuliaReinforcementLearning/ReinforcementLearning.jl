@@ -1,12 +1,11 @@
 export RetraceTrajectory
 
-mutable struct RetraceTrajectory{T, S <: AbstractSampler} <: AbstractTrajectory
+mutable struct RetraceTrajectory{T} <: AbstractTrajectory
     traces::T
     λ::Float32
-    batch_sampler::S
 end
 
-function RetraceTrajectory(;capacity, batch_size, λ = 0.9f0, nsteps, stack_size = nothing, action_log_prob, rng = Random.GLOBAL_RNG, kwargs...)
+function RetraceTrajectory(λ = 0.9f0; capacity, action_log_prob, kwargs...)
     traj = merge(
         CircularArrayTrajectory(;
             capacity = capacity + 1,
@@ -14,9 +13,10 @@ function RetraceTrajectory(;capacity, batch_size, λ = 0.9f0, nsteps, stack_size
         ),
         CircularArraySARTTrajectory(; capacity = capacity, kwargs...),
     )
-    sampler = NStepBatchSampler(γ = 1f0, n= nsteps, batch_size = batch_size, stack_size = stack_size, rng = rng)
-    RetraceTrajectory(traj.traces, λ, sampler)
+    RetraceTrajectory(traj.traces, λ)
 end
+
+retrace_sampler(batch_size, nsteps; stack_size = nothing, rng = Random.GLOBAL_RNG) = NStepBatchSampler(γ = 1f0, n= nsteps, batch_size = batch_size, stack_size = stack_size, rng = rng)
 
 function fetch!(sampler::AbstractSampler, traj::RetraceTrajectory, inds::Vector{Int})
     n, bz, sz = sampler.γ, sampler.n, sampler.batch_size, sampler.stack_size
@@ -51,7 +51,7 @@ function fetch!(sampler::AbstractSampler, traj::RetraceTrajectory, inds::Vector{
     end
     return sampler.cache, k
 end
-
+#overload for RetraceTrajectories
 function q_targets(p::AbstractPolicy, traj::RetraceTrajectory, qnetwork::QNetwork, batch, k)
     states, actions, rewards, terminals, logμs = batch
     s = send_to_device(device(p), states) 
@@ -73,7 +73,7 @@ function q_targets(p::AbstractPolicy, traj::RetraceTrajectory, qnetwork::QNetwor
     end
     return targets
 end
-
+#and for twin networks
 function q_targets(p::AbstractPolicy, traj::RetraceTrajectory, qnetwork::QNetwork, twinqnetwork::QNetwork, batch, k)
     states, actions, rewards, terminals, logμs = batch
     s = send_to_device(device(p), states) 
