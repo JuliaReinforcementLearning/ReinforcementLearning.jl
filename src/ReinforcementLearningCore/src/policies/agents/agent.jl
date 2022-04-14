@@ -98,27 +98,17 @@ function RLBase.update!(
 
 function RLBase.update!(
     trajectory::AbstractTrajectory,
-    ::AbstractPolicy,
-    ::AbstractEnv,
-    ::PreEpisodeStage,
-)
-    if length(trajectory) > 0
-        pop!(trajectory[:state])
-        pop!(trajectory[:action])
-        if haskey(trajectory, :legal_actions_mask)
-            pop!(trajectory[:legal_actions_mask])
-        end
-    end
-end
-
-function RLBase.update!(
-    trajectory::AbstractTrajectory,
     policy::AbstractPolicy,
     env::AbstractEnv,
     ::PreActStage,
     action,
 )
     s = policy isa NamedPolicy ? state(env, nameof(policy)) : state(env)
+    #remove this state from the last_state_idx list since this one is not.
+    idx = current_idx(trajectory[:state])
+    if idx in trajectory.last_states_idxs
+        pop!(trajectory.last_states_idxs, idx)
+    end
     push!(trajectory[:state], s)
     push!(trajectory[:action], action)
     if haskey(trajectory, :legal_actions_mask)
@@ -166,9 +156,11 @@ function RLBase.update!(
 
     A = policy isa NamedPolicy ? action_space(env, nameof(policy)) : action_space(env)
     a = get_dummy_action(A)
-
+    push!(trajectory.last_states_idxs, current_idx(trajectory[:terminal]))
     push!(trajectory[:state], s)
     push!(trajectory[:action], a)
+    push!(trajectory[:reward], zero(eltype(trajectory[:reward])))
+    push!(trajectory[:terminal], true)
     if haskey(trajectory, :legal_actions_mask)
         lasm =
             policy isa NamedPolicy ? legal_action_space_mask(env, nameof(policy)) :
@@ -176,3 +168,12 @@ function RLBase.update!(
         push!(trajectory[:legal_actions_mask], lasm)
     end
 end
+
+#This could be added to CircularArrayBuffer.jl instead.
+function current_idx(cb::CircularArrayBuffer)
+    if cb.nframes == length(cb.buffer)
+        cb.first
+    else
+        cb.nframes + 1
+    end
+end 
