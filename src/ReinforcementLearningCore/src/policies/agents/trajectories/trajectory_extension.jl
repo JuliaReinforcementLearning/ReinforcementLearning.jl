@@ -69,7 +69,15 @@ BatchSampler{T}(batch_size::Int; cache = nothing, rng = Random.GLOBAL_RNG) where
 
 # TODO: deprecate
 function StatsBase.sample(rng::AbstractRNG, t::AbstractTrajectory, s::BatchSampler)
-    inds = rand(rng, 1:length(t), s.batch_size)
+    inds = zeros(Int, s.batch_size)
+    for i in eachindex(inds)
+        inds[i] = rand(rng, 1:length(t))
+        #reject samples that are terminal states. This could be inneficient if an environment has very short episodes.
+        #An alternative is to create a list of acceptable inds equal to {1:length(t) \ last_state_idx}. That however necessitates to store a potentially long list of valid indices.
+        while inds[i] in t.last_state_idx
+            inds[i] = rand(rng, 1:length(t))
+        end
+    end
     fetch!(s, t, inds)
     inds, s.cache
 end
@@ -131,9 +139,17 @@ end
 
 # TODO:deprecate
 function StatsBase.sample(rng::AbstractRNG, t::AbstractTrajectory, s::NStepBatchSampler)
-    valid_range =
-        isnothing(s.stack_size) ? (1:(length(t)-s.n+1)) : (s.stack_size:(length(t)-s.n+1))
-    inds = rand(rng, valid_range, s.batch_size)
+    ss : isnothing(s.stack_size) ? 1 : s.stack_size
+    valid_range = ss:(length(t)-s.n+1)
+    inds = zeros(Int, s.batch_size)
+    for i in eachindex(inds)
+        inds[i] = rand(rng, valid_range)
+        #reject samples that are terminal states. This could be inneficient if an environment has very short episodes.
+        #An alternative is to create a list of acceptable inds equal to {1:length(t) \ last_state_idx}. That however necessitates to store a potentially long list of valid indices.
+        while inds[i] in t.last_state_idx
+            inds[i] = rand(rng, valid_range)
+        end
+    end
     inds, fetch!(s, t, inds)
 end
 
