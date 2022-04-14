@@ -156,8 +156,9 @@ function RLBase.update!(
 
     A = policy isa NamedPolicy ? action_space(env, nameof(policy)) : action_space(env)
     a = get_dummy_action(A)
-    push!(trajectory.last_states_idxs, current_idx(trajectory[:terminal]))
+    push!(trajectory.last_states_idxs, current_idx(trajectory[:terminal])) #note that this state is terminal and should not be sampled
     push!(trajectory[:state], s)
+    #dummies to keep buffers of the same length
     push!(trajectory[:action], a)
     push!(trajectory[:reward], zero(eltype(trajectory[:reward])))
     push!(trajectory[:terminal], true)
