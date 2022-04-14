@@ -31,6 +31,7 @@ function Base.empty!(t::AbstractTrajectory)
     for k in keys(t)
         empty!(t[k])
     end
+    empty!(t.last_states_idxs)
 end
 
 function Base.push!(t::AbstractTrajectory; kwargs...)
@@ -40,9 +41,11 @@ function Base.push!(t::AbstractTrajectory; kwargs...)
 end
 
 function Base.pop!(t::AbstractTrajectory)
+    idx = current_idx(t[first(keys(t))])
     for k in keys(t)
         pop!(t[k])
     end
+    idx in t.last_state_idx && pop!(t.last_states_idxs, idx)
 end
 
 function Base.show(io::IO, t::AbstractTrajectory)

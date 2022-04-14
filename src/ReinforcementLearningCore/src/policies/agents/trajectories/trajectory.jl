@@ -16,6 +16,7 @@ export Trajectory,
 using MacroTools: @forward
 using ElasticArrays
 using CircularArrayBuffers: CircularArrayBuffer, CircularVectorBuffer
+import DataStructures.Set
 
 #####
 # Trajectory
@@ -30,15 +31,16 @@ Set `is_episodic = false` when working with non-episodic environments (i.e. infi
 struct Trajectory{T} <: AbstractTrajectory
     traces::T
     is_episodic::Bool
+    last_states_idxs::Set{Int}
 end
 
-Trajectory(; is_episodic = true, kwargs...) = Trajectory(values(kwargs), is_episodic)
+Trajectory(; is_episodic = true, kwargs...) = Trajectory(values(kwargs), is_episodic, Set{Int64}())
 
 @forward Trajectory.traces Base.getindex, Base.keys
 
-Base.merge(a::Trajectory, b::Trajectory) = Trajectory(merge(a.traces, b.traces), a.is_episodic)
-Base.merge(a::Trajectory, b::NamedTuple) = Trajectory(merge(a.traces, b), a.is_episodic)
-Base.merge(a::NamedTuple, b::Trajectory) = Trajectory(merge(a, b.traces), b.is_episodic)
+Base.merge(a::Trajectory, b::Trajectory) = Trajectory(merge(a.traces, b.traces), a.is_episodic, Set{Int64}())
+Base.merge(a::Trajectory, b::NamedTuple) = Trajectory(merge(a.traces, b), a.is_episodic, Set{Int64}())
+Base.merge(a::NamedTuple, b::Trajectory) = Trajectory(merge(a, b.traces), b.is_episodic, Set{Int64}())
 
 #####
 
@@ -58,7 +60,7 @@ function CircularArrayTrajectory(; capacity, is_episodic = true, kwargs...)
     Trajectory(map(values(kwargs)) do x
         CircularArrayBuffer{eltype(first(x))}(last(x)..., capacity)
     end, 
-    is_episodic)
+    is_episodic, Set{Int64}())
 end
 
 """
@@ -78,7 +80,7 @@ function CircularVectorTrajectory(; capacity, is_episodic = true, kwargs...)
     Trajectory(map(values(kwargs)) do x
         CircularVectorBuffer{x}(capacity)
     end,
-    is_episodic)
+    is_episodic, Set{Int64}())
 end
 
 #####
@@ -169,7 +171,7 @@ CircularArraySARTTrajectory(;
     reward = Float32 => (),
     terminal = Bool => (),
     is_episodic = true) = merge(
-    CircularArrayTrajectory(; capacity = capacity + 1, state = state, action = action, is_episodic = is_episodic),
+    CircularArrayTrajectory(; capacity = capacity , state = state, action = action, is_episodic = is_episodic),
     CircularArrayTrajectory(; capacity = capacity, reward = reward, terminal = terminal, is_episodic = is_episodic),
 )
 
@@ -197,7 +199,7 @@ CircularArraySLARTTrajectory(;
     is_episodic = true
 ) = merge(
     CircularArrayTrajectory(;
-        capacity = capacity + 1,
+        capacity = capacity ,
         state = state,
         legal_actions_mask = legal_actions_mask,
         action = action,
@@ -295,7 +297,7 @@ CircularVectorSARTTrajectory(;
     terminal = Bool,
     is_episodic = true
 ) = merge(
-    CircularVectorTrajectory(; capacity = capacity + 1, state = state, action = action, is_episodic = is_episodic),
+    CircularVectorTrajectory(; capacity = capacity , state = state, action = action, is_episodic = is_episodic),
     CircularVectorTrajectory(; capacity = capacity, reward = reward, terminal = terminal, is_episodic = is_episodic),
 )
 
@@ -348,7 +350,7 @@ function ElasticArrayTrajectory(; is_episodic = true, kwargs...)
     Trajectory(map(values(kwargs)) do x
         ElasticArray{eltype(first(x))}(undef, last(x)..., 0)
     end,
-    is_episodic)
+    is_episodic, Set{Int64}())
 end
 
 const ElasticSARTTrajectory = Trajectory{
@@ -466,7 +468,7 @@ function VectorTrajectory(; is_episodic = true, kwargs...)
     Trajectory(map(values(kwargs)) do x
         Vector{x}()
     end,
-    is_episodic)
+    is_episodic, Set{Int64}())
 end
 
 const VectorSARTTrajectory =
