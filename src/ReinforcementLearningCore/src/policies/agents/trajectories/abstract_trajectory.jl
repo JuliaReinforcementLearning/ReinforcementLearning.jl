@@ -42,10 +42,12 @@ end
 
 function Base.pop!(t::AbstractTrajectory)
     idx = current_idx(t[first(keys(t))])
+    if idx in t.last_states_idxs 
+        pop!(t.last_states_idxs, idx)
+    end
     for k in keys(t)
         pop!(t[k])
     end
-    idx in t.last_state_idx && pop!(t.last_states_idxs, idx)
 end
 
 function Base.show(io::IO, t::AbstractTrajectory)
