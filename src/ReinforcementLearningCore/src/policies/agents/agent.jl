@@ -168,13 +168,4 @@ function RLBase.update!(
             legal_action_space_mask(env)
         push!(trajectory[:legal_actions_mask], lasm)
     end
-end
-
-#This could be added to CircularArrayBuffer.jl instead.
-function current_idx(cb::CircularArrayBuffer)
-    if cb.nframes == length(cb.buffer)
-        cb.first
-    else
-        cb.nframes + 1
-    end
 end 

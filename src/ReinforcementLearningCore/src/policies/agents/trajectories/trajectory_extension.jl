@@ -223,3 +223,14 @@ function fetch!(
         end
     end
 end
+
+#This could be added to CircularArrayBuffer.jl instead.
+function current_idx(cb::CircularArrayBuffer)
+    if cb.nframes == length(cb.buffer)
+        cb.first
+    else
+        cb.nframes + 1
+    end
+end 
+
+current_idx(a::Array) = size(a, ndims(a)) 
