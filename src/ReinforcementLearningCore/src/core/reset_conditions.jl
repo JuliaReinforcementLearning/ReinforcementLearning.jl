@@ -7,7 +7,7 @@ A reset condition that resets if is_terminated(env) is true.
 """
 struct ResetAtTerminal end
 
-(::ResetAtTerminal)(policy, env) = is_terminal(env)
+(::ResetAtTerminal)(policy, env) = is_terminated(env)
 
 """
     ResetAfterNSteps(n)
