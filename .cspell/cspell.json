@@ -167,7 +167,8 @@
         "logps",
         "trilcol",
         "mvnormlogpdf",
-        "mvnormals"
+        "mvnormals",
+        "Optimise"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
