@@ -1,9 +1,19 @@
 export ResetAtTerminal, ResetAfterNSteps
 
+"""
+    ResetAtTerminal()
+
+A reset condition that resets if is_terminated(env) is true.
+"""
 struct ResetAtTerminal end
 
 (::ResetAtTerminal)(policy, env) = is_terminal(env)
 
+"""
+    ResetAfterNSteps(n)
+
+A reset condition that resets after `n` steps in the environment.
+"""
 mutable struct ResetAfterNSteps
     t::Int
     n::Int
