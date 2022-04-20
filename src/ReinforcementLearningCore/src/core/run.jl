@@ -24,7 +24,7 @@ function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook::Ab
         policy(PRE_EPISODE_STAGE, env)
         hook(PRE_EPISODE_STAGE, policy, env)
 
-        while !is_terminated(env) # one episode
+        while !reset_condition(policy, env) # one episode
             action = policy(env)
 
             policy(PRE_ACT_STAGE, env, action)
@@ -35,10 +35,6 @@ function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook::Ab
             policy(POST_ACT_STAGE, env)
             hook(POST_ACT_STAGE, policy, env)
 
-            if reset_condition(policy, env)
-                is_stop = stop_condition(policy, env) 
-                break
-            end
             if stop_condition(policy, env)
                 is_stop = true
                 break
