@@ -5,15 +5,16 @@ function run(
     env::AbstractEnv,
     stop_condition = StopAfterEpisode(1),
     hook = EmptyHook(),
+    reset_condition = ResetAtTerminal()
 )
     check(policy, env)
-    _run(policy, env, stop_condition, hook)
+    _run(policy, env, stop_condition, hook, reset_condition)
 end
 
 "Inject some customized checkings here by overwriting this function"
 function check(policy, env) end
 
-function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook::AbstractHook)
+function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook::AbstractHook, reset_condition)
 
     hook(PRE_EXPERIMENT_STAGE, policy, env)
     policy(PRE_EXPERIMENT_STAGE, env)
@@ -34,6 +35,10 @@ function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook::Ab
             policy(POST_ACT_STAGE, env)
             hook(POST_ACT_STAGE, policy, env)
 
+            if reset_condition(policy, env)
+                is_stop = stop_condition(policy, env) 
+                break
+            end
             if stop_condition(policy, env)
                 is_stop = true
                 break
