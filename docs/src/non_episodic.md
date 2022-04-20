@@ -27,4 +27,20 @@ end
 run(agent, env, stop_condition, hook, my_condition)
 ```
 
-We could also have made a struct to avoid the global struct. 
+We can instead make a callable struct instead of a function to avoid the global `reset_n_step`. 
+
+```julia
+mutable struct MyCondition
+reset_after
+end
+
+(c::MyCondition)(policy, env) = is_terminated(env) || c.reset_after(policy, env)
+
+run(agent, env, stop_condition, hook, MyCondition(ResetAfterNSteps(10000)))
+```
+
+A last possibility is to use an anonymous function. For example here is alternative way to implement ResetAtTerminal:
+
+```julia
+run(agent, env, stop_condition, hook, (p,e) -> is_terminated(e))
+```
