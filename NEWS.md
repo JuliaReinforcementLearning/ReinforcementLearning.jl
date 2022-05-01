@@ -76,9 +76,10 @@
 
 ### ReinforcementLearningZoo.jl
 
-#### v0.5.10
+#### v0.5.11
 
 - Fix multi-dimension action space in TD3. [#624](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/624)
+
 #### v0.5.10
 
 - Support `device_rng` in SAC [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
