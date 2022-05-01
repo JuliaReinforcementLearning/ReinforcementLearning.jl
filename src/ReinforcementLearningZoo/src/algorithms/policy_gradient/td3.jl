@@ -159,7 +159,11 @@ function RLBase.update!(p::TD3Policy, batch::NamedTuple{SARTS})
 
     q_1′, q_2′ = p.target_critic(s′, a′)
     y = r .+ p.γ .* (1 .- t) .* (min.(q_1′, q_2′) |> vec)
-    a = Flux.unsqueeze(a, 1)
+
+    # ad-hoc fix to https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/624
+    if ndims(a) == 1
+        a = Flux.unsqueeze(a, 1)
+    end
 
     gs1 = gradient(Flux.params(critic)) do
         q1, q2 = critic(s, a)
