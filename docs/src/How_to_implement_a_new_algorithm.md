@@ -64,7 +64,7 @@ Finally, you need to implement the learning function by implementing `(your_poli
 
 ### Learners
 
-RL algorithms typically differ partially but broadly use the same mechanisms. The subpackage RLCore contains a lot of utilies that you can reuse to implement your algorithm. These are implemented as types that you can impose on certain fields of your own policy type.
+RL algorithms typically differ partially but broadly use the same mechanisms. The subpackage RLCore contains a lot of utilities that you can reuse to implement your algorithm. These are implemented as types that you can impose on certain fields of your own policy type.
 
 `QBasedPolicy` wraps a policy that relies on a Q-Value _learner_ (tabular or approximated) and an _explorer_ . 
 RLCore provides several pre-implemented learners and the most common explorers (such as epsilon-greedy, UCB, etc.). 
