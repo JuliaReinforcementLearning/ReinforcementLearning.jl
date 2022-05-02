@@ -38,7 +38,7 @@ end
 Implementing a new algorithm mainly consists of creating your own `AbstractPolicy` subtype, its action sampling function `(policy)(env)` and implementing its behavior at each stage. However, ReinforcemementLearning.jl provides plenty pre-implemented utilities that you should use to 1) have less code to write 2) lower the chances of bugs and 3) make your code more understandable and maintainable (if you intend to contribute your algorithm). 
 
 ## Using Agents
-A better way is to use the policy wrapper `Agent`. An agent is an AbstractPolicy that wraps a policy and a trajectory (also called Experience Replay Buffer in RL literature). Agent comes with default implementations of `Agent(stage, agent, env)` that will probably fit what you need at most stages so that you don't have to write them again. Looking at the [source code](./../../src/ReinforcementLearningCore/src/policies/agents/agent.jl/), we can see that the default Agent calls are  
+A better way is to use the policy wrapper `Agent`. An agent is an AbstractPolicy that wraps a policy and a trajectory (also called Experience Replay Buffer in RL literature). Agent comes with default implementations of `Agent(stage, agent, env)` that will probably fit what you need at most stages so that you don't have to write them again. Looking at the [source code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningCore/src/policies/agents/agent.jl/), we can see that the default Agent calls are  
 
 ```julia
 function (agent::Agent)(stage::AbstractStage, env::AbstractEnv [, action])
