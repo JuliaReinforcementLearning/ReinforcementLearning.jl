@@ -125,6 +125,8 @@ Base.@kwdef mutable struct NStepBatchSampler{traces} <: AbstractSampler{traces}
     cache::Any = nothing
 end
 
+(s::NStepBatchSampler)(t::AbstractTrajectory) = sample(s.rng, t, s)
+
 # TODO:deprecate
 function StatsBase.sample(rng::AbstractRNG, t::AbstractTrajectory, s::NStepBatchSampler)
     valid_range =
