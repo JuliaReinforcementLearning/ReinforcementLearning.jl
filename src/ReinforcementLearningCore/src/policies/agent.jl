@@ -18,11 +18,32 @@ update the trajectory and policy appropriately in different stages.
 Base.@kwdef struct Agent{P,T} <: AbstractPolicy
     policy::P
     trajectory::T
+    task_ref::Ref{Task}
 
     function Agent(p::P, t::T) where {P,T}
-        agent = new{P,T}(p, t)
-        bind(t, @spawn(optimise!(agent)))
+        agent = new{P,T}(p, t, Ref{Task}())
+        optimise!(agent)
         agent
+    end
+end
+
+optimise!(::AbstractPolicy) = nothing
+
+function optimise!(agent::Agent)
+    if TrajectoryStyle(agent.trajectory) isa SyncTrajectoryStyle
+        optimise!(agent.policy, agent.trajectory)
+    else
+        if !isassigned(agent.task_ref)
+            t = @spawn optimise!(agent.policy, agent.trajectory)
+            bind(agent.trajectory, t)
+            agent.task_ref[] = t
+        end
+    end
+end
+
+function optimise!(policy::AbstractPolicy, trajectory::Trajectory)
+    for batch in trajectory
+        optimise!(policy, batch)
     end
 end
 
@@ -39,15 +60,5 @@ functor(x::Agent) = (policy = x.policy,), y -> @set x.policy = y.policy
 (agent::Agent)(::PostActStage, env) =
     push!(agent.trajectory; reward = reward(env), terminal = is_terminated(env))
 
-function (agent::Agent)(::PreActStage, env, action)
+(agent::Agent)(::PreActStage, env, action) =
     push!(agent.trajectory; state = state(env), action = action)
-    if TrajectoryStyle(agent.trajectory) === SyncTrajectoryStyle()
-        optimise!(agent)
-    end
-end
-
-function optimise!(agent::Agent)
-    for batch in agent.trajectory
-        optimise!(agent.policy, batch)
-    end
-end

@@ -29,6 +29,7 @@ function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook::Ab
             policy(PRE_ACT_STAGE, env, action)
             hook(PRE_ACT_STAGE, policy, env, action)
 
+            optimise!(policy)
             env(action)
 
             policy(POST_ACT_STAGE, env)
