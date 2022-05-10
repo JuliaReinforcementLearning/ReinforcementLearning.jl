@@ -9,8 +9,6 @@ export StopAfterStep,
 using ProgressMeter
 using CircularArrayBuffers: CircularArrayBuffer, isfull
 
-const update! = ReinforcementLearningBase.update!
-
 #####
 # ComposedStopCondition
 #####

@@ -1,6 +1,2 @@
-include("base.jl")
-include("q_based_policies/q_based_policies.jl")
-include("v_based_policies.jl")
-include("tabular_random_policy.jl")
+include("agent.jl")
 include("random_policy.jl")
-include("random_start_policy.jl")

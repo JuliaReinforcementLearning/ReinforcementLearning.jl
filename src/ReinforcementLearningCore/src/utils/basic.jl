@@ -1,5 +1,4 @@
-export nframes,
-    select_last_dim,
+export select_last_dim,
     select_last_frame,
     consecutive_view,
     find_all_max,
@@ -12,8 +11,6 @@ export nframes,
 
 using StatsBase
 using Compat
-
-nframes(a::AbstractArray{T,N}) where {T,N} = size(a, N)
 
 select_last_dim(xs::AbstractArray{T,N}, inds) where {T,N} =
     @views xs[ntuple(_ -> (:), N - 1)..., inds]
@@ -149,7 +146,8 @@ end
 # _rf_findmax((fm, m), (fx, x)) = isless(fm, fx) ? (fx, x) : (fm, m)
 
 # !!! type piracy
-Base.findmax(A::AbstractVector{T}, mask::AbstractVector{Bool}) where T = findmax(ifelse.(mask, A, typemin(T)))
+Base.findmax(A::AbstractVector{T}, mask::AbstractVector{Bool}) where {T} =
+    findmax(ifelse.(mask, A, typemin(T)))
 
 
 const VectorOrMatrix = Union{AbstractMatrix,AbstractVector}
