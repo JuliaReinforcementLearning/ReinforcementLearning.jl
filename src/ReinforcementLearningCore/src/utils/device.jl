@@ -4,7 +4,6 @@ using Flux
 using CUDA
 using Adapt
 using Random
-using ElasticArrays
 
 import CUDA: device
 
@@ -26,9 +25,7 @@ device(x::Function) = nothing
 device(::Array) = Val(:cpu)
 device(x::Tuple{}) = nothing
 device(x::NamedTuple{(),Tuple{}}) = nothing
-device(x::ElasticArray) = device(x.data)
-device(x::SubArray) = device(parent(x))
-device(x::Base.ReshapedArray) = device(parent(x))
+device(x::AbstractArray) = device(parent(x))
 
 function device(x::Random.AbstractRNG)
     if x isa CUDA.CURAND.RNG

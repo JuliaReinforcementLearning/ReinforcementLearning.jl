@@ -1,9 +1,8 @@
 export normlogpdf, mvnormlogpdf
 
-using Distributions: DiscreteNonParametric, support, probs
 using Flux, LinearAlgebra
 # watch https://github.com/JuliaStats/Distributions.jl/issues/1183
-const log2π = log(2f0π)
+const log2π = log(2.0f0π)
 """
      normlogpdf(μ, σ, x; ϵ = 1.0f-8)
 GPU automatic differentiable version for the logpdf function of normal distributions.
@@ -22,7 +21,9 @@ Takes as inputs `mu` the mean vector, `L` the lower triangular matrix of the cho
 Return a Vector containing the logpdf of each column of x for the `MvNormal` parametrized by `μ` and `Σ = L*L'`.
 """
 function mvnormlogpdf(μ::AbstractVecOrMat, L::AbstractMatrix, x::AbstractVecOrMat)
-    return -((size(x, 1) * log2π + logdetLorU(L)) .+ vec(sum(abs2.(L\(x .- μ)), dims=1))) ./ 2
+    return -(
+        (size(x, 1) * log2π + logdetLorU(L)) .+ vec(sum(abs2.(L \ (x .- μ)), dims = 1))
+    ) ./ 2
 end
 
 
@@ -32,7 +33,7 @@ Batch version that takes 3D tensors as input where each slice along the 3rd dime
 `μ` is a (action_size x 1 x batch_size) matrix, `L` is a (action_size x action_size x batch_size), x is a (action_size x action_samples x batch_size).
 Return a 3D matrix of size (1 x action_samples x batch_size). 
 """
-function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ = 1f-8) where A <: AbstractArray 
-    logp = [mvnormlogpdf(μ[:,:,k], LorU[:,:,k], x[:,:,k]) for k in 1:size(x, 3)]
-    return Flux.unsqueeze(Flux.stack(logp, 2),1) #returns a 3D vector 
+function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ = 1.0f-8) where {A<:AbstractArray}
+    logp = [mvnormlogpdf(μ[:, :, k], LorU[:, :, k], x[:, :, k]) for k in 1:size(x, 3)]
+    return Flux.unsqueeze(Flux.stack(logp, 2), 1) #returns a 3D vector 
 end

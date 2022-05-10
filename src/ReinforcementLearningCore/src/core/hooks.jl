@@ -1,5 +1,4 @@
 export AbstractHook,
-    ComposedHook,
     EmptyHook,
     StepsPerEpisode,
     RewardsPerEpisode,
@@ -15,7 +14,7 @@ export AbstractHook,
     period_rollout_hook,
     RolloutHook
 
-using UnicodePlots:lineplot, lineplot!
+using UnicodePlots: lineplot, lineplot!
 using Statistics
 
 """
@@ -27,52 +26,23 @@ By default, a `AbstractHook` will do nothing. One can override the behavior by i
 - `(hook::YourHook)(::PreEpisodeStage, agent, env)`
 - `(hook::YourHook)(::PostEpisodeStage, agent, env)`
 - `(hook::YourHook)(::PostExperimentStage, agent, env)`
+
+By convention, the `Base.getindex(h::YourHook)` is implemented to extract the metrics we are interested in.
 """
 abstract type AbstractHook end
 
 (hook::AbstractHook)(args...) = nothing
-
-# https://github.com/JuliaLang/julia/issues/14919
-# function (f::Function)(stage::T, args...;kw...) where T<: AbstractStage end
-
-#####
-# ComposedHook
-#####
-
-"""
-    ComposedHook(hooks::AbstractHook...)
-
-Compose different hooks into a single hook.
-"""
-struct ComposedHook{T<:Tuple} <: AbstractHook
-    hooks::T
-    ComposedHook(hooks...) = new{typeof(hooks)}(hooks)
-end
-
-function (hook::ComposedHook)(stage::AbstractStage, args...; kw...)
-    for h in hook.hooks
-        h(stage, args...; kw...)
-    end
-end
-
-Base.getindex(hook::ComposedHook, inds...) = getindex(hook.hooks, inds...)
 
 #####
 # EmptyHook
 #####
 
 """
-Do nothing
+Nothing but a placeholder.
 """
 struct EmptyHook <: AbstractHook end
 
 const EMPTY_HOOK = EmptyHook()
-
-#####
-# display
-#####
-
-Base.display(::AbstractStage, agent, env, args...; kwargs...) = display(env)
 
 #####
 # StepsPerEpisode
@@ -112,17 +82,8 @@ end
 
 Base.getindex(h::RewardsPerEpisode) = h.rewards
 
-function (hook::RewardsPerEpisode)(::PreEpisodeStage, agent, env)
-    push!(hook.rewards, [])
-end
-
-function (hook::RewardsPerEpisode)(::PostActStage, agent, env)
-    push!(hook.rewards[end], reward(env))
-end
-
-function (hook::RewardsPerEpisode)(::PostActStage, agent::NamedPolicy, env)
-    push!(hook.rewards[end], reward(env, nameof(agent)))
-end
+(h::RewardsPerEpisode)(::PreEpisodeStage, agent, env) = push!(h.rewards, [])
+(h::RewardsPerEpisode)(::PostActStage, agent, env) = push!(h.rewards[end], reward(env))
 
 #####
 # TotalRewardPerEpisode
@@ -142,13 +103,7 @@ end
 
 Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
-function (hook::TotalRewardPerEpisode)(::PostActStage, agent, env)
-    hook.reward += reward(env)
-end
-
-function (hook::TotalRewardPerEpisode)(::PostActStage, agent::NamedPolicy, env)
-    hook.reward += reward(env, nameof(agent))
-end
+(h::TotalRewardPerEpisode)(::PostActStage, agent, env) = h.reward += reward(env)
 
 function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env)
     push!(hook.rewards, hook.reward)
@@ -157,7 +112,14 @@ end
 
 function (hook::TotalRewardPerEpisode)(::PostExperimentStage, agent, env)
     if hook.is_display_on_exit
-        println(lineplot(hook.rewards, title="Total reward per episode", xlabel="Episode", ylabel="Score"))
+        println(
+            lineplot(
+                hook.rewards,
+                title = "Total reward per episode",
+                xlabel = "Episode",
+                ylabel = "Score",
+            ),
+        )
     end
 end
 
@@ -180,12 +142,16 @@ which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 If `is_display_on_exit` is set to `true`, a ribbon plot will be shown to reflect
 the mean and std of rewards.
 """
-function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit=true)
-    TotalBatchRewardPerEpisode([Float64[] for _ in 1:batch_size], zeros(batch_size), is_display_on_exit)
+function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit = true)
+    TotalBatchRewardPerEpisode(
+        [Float64[] for _ in 1:batch_size],
+        zeros(batch_size),
+        is_display_on_exit,
+    )
 end
 
 function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env)
-    R = agent isa NamedPolicy ? reward(env, nameof(agent)) : reward(env)
+    R = reward(env)
     for (i, (t, r)) in enumerate(zip(is_terminated(env), R))
         hook.reward[i] += r
         if t
@@ -200,7 +166,12 @@ function (hook::TotalBatchRewardPerEpisode)(::PostExperimentStage, agent, env)
         n = minimum(map(length, hook.rewards))
         m = mean([@view(x[1:n]) for x in hook.rewards])
         s = std([@view(x[1:n]) for x in hook.rewards])
-        p = lineplot(m, title="Avg total reward per episode", xlabel="Episode", ylabel="Score")
+        p = lineplot(
+            m,
+            title = "Avg total reward per episode",
+            xlabel = "Episode",
+            ylabel = "Score",
+        )
         lineplot!(p, m .- s)
         lineplot!(p, m .+ s)
         println(p)
@@ -290,8 +261,7 @@ end
 Execute `f(t, agent, env)` every `n` episode.
 `t` is a counter of episodes.
 """
-mutable struct DoEveryNEpisode{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <:
-                           AbstractHook
+mutable struct DoEveryNEpisode{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <: AbstractHook
     f::F
     n::Int
     t::Int
@@ -319,75 +289,3 @@ end
 function (h::DoOnExit)(::PostExperimentStage, agent, env)
     h.f(agent, env)
 end
-
-"""
-    UploadTrajectoryEveryNStep(;mailbox, n, sealer=deepcopy)
-"""
-Base.@kwdef mutable struct UploadTrajectoryEveryNStep{M,S} <: AbstractHook
-    mailbox::M
-    n::Int
-    t::Int = -1
-    sealer::S = deepcopy
-end
-
-function (hook::UploadTrajectoryEveryNStep)(::PostActStage, agent::Agent, env)
-    hook.t += 1
-    if hook.t > 0 && hook.t % hook.n == 0
-        put!(hook.mailbox, hook.sealer(agent.trajectory))
-    end
-end
-
-"""
-    MultiAgentHook(player=>hook...)
-"""
-struct MultiAgentHook <: AbstractHook
-    hooks::Dict{Any,Any}
-end
-
-MultiAgentHook(player_hook_pair::Pair...) = MultiAgentHook(Dict(player_hook_pair...))
-
-Base.getindex(h::MultiAgentHook, p) = getindex(h.hooks, p)
-
-function (hook::MultiAgentHook)(
-    s::AbstractStage,
-    m::MultiAgentManager,
-    env::AbstractEnv,
-    args...,
-)
-    for (p, h) in zip(values(m.agents), values(hook.hooks))
-        h(s, p, env, args...)
-    end
-end
-
-"""
-    period_rollout_hook(env_fn, render, close; n = n)
-
-Run a rollout every `n` episodes. Each rollout is run with a `RolloutHook`
-with parameters `render`, `close`.
-"""
-
-function period_rollout_hook(env_fn, render, close; n = 100)
-    ComposedHook(DoEveryNEpisode(; n = n) do t, agent, env
-                     run(agent, env_fn(), StopWhenDone(), RolloutHook(render, close))
-                 end,
-                 DoOnExit() do agent, env
-                     run(agent, env_fn(), StopWhenDone(), RolloutHook(render, close))
-                 end
-                 )
-end
-
-"""
-    RolloutHook(render, close)
-
-Convenience hook for callbacks on every frame of an environment rollout.
-The hook `RolloutHook(render, close)` will execute `render(env::AbstractEnv)`
-after each action, and will execute `close()` after the episode.
-"""
-
-struct RolloutHook{F, G} <: AbstractHook
-    render::F
-    close::G
-end
-
-(h::RolloutHook)(::PostActStage, agent, env) = isnothing(h.render) ? nothing : h.render(env)
-(h::RolloutHook)(::PostEpisodeStage, agent, env) = isnothing(h.close) ? nothing : h.close()

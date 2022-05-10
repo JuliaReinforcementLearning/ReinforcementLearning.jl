@@ -7,10 +7,52 @@ export select_last_dim,
     discount_rewards_reduced,
     generalized_advantage_estimation,
     generalized_advantage_estimation!,
-    flatten_batch
+    flatten_batch,
+    orthogonal
 
 using StatsBase
-using Compat
+
+#####
+# Zygote
+#####
+
+global_norm(gs, ps) = sqrt(sum(mapreduce(x -> x^2, +, gs[p]) for p in ps))
+
+function clip_by_global_norm!(gs, ps, clip_norm::Float32)
+    gn = global_norm(gs, ps)
+    if clip_norm <= gn
+        for p in ps
+            gs[p] .*= clip_norm / max(clip_norm, gn)
+        end
+    end
+    gn
+end
+
+#####
+# Flux
+#####
+
+# https://github.com/FluxML/Flux.jl/pull/1171/
+# https://www.tensorflow.org/api_docs/python/tf/keras/initializers/Orthogonal
+function orthogonal_matrix(rng::AbstractRNG, nrow, ncol)
+    shape = reverse(minmax(nrow, ncol))
+    a = randn(rng, Float32, shape)
+    q, r = qr(a)
+    q = Matrix(q) * diagm(sign.(diag(r)))
+    nrow < ncol ? permutedims(q) : q
+end
+
+function orthogonal(rng::AbstractRNG, d1, rest_dims...)
+    m = orthogonal_matrix(rng, d1, *(rest_dims...))
+    reshape(m, d1, rest_dims...)
+end
+
+orthogonal(dims...) = orthogonal(Random.GLOBAL_RNG, dims...)
+orthogonal(rng::AbstractRNG) = (dims...) -> orthogonal(rng, dims...)
+
+#####
+# MLUtils
+#####
 
 select_last_dim(xs::AbstractArray{T,N}, inds) where {T,N} =
     @views xs[ntuple(_ -> (:), N - 1)..., inds]
@@ -46,6 +88,10 @@ julia> flatten_batch(x)
 ```
 """
 flatten_batch(x::AbstractArray) = reshape(x, size(x)[1:end-2]..., :)
+
+#####
+# RLUtils
+#####
 
 """
     consecutive_view(x::AbstractArray, inds; n_stack = nothing, n_horizon = nothing)

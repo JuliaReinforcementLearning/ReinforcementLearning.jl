@@ -3,6 +3,7 @@ export Agent
 using Base.Threads
 import Functors: functor
 using Setfield: @set
+using Trajectories
 
 """
     Agent(;policy, trajectory)
@@ -29,7 +30,6 @@ Base.@kwdef struct Agent{P,T} <: AbstractPolicy
     end
 end
 
-optimise!(::AbstractPolicy) = nothing
 optimise!(agent::Agent) = optimise!(TrajectoryStyle(agent.trajectory), agent)
 optimise!(::SyncTrajectoryStyle, agent::Agent) = optimise!(agent.policy, agent.trajectory)
 optimise!(::AsyncTrajectoryStyle, agent::Agent) = nothing
@@ -52,6 +52,3 @@ functor(x::Agent) = (policy = x.policy,), y -> @set x.policy = y.policy
 
 (agent::Agent)(::PostActStage, env) =
     push!(agent.trajectory; reward = reward(env), terminal = is_terminated(env))
-
-(agent::Agent)(::PreActStage, env, action) =
-    push!(agent.trajectory; state = state(env), action = action)

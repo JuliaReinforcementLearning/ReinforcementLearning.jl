@@ -49,35 +49,6 @@
         @test find_all_max([0, 1, 2, 1, 2, 1, 0], Bool[1, 1, 0, 0, 0, 1, 1]) == (1, [2, 6])
     end
 
-    @testset "sum_tree" begin
-        t = SumTree(8)
-
-        @test RLCore.capacity(t) == 8
-
-        for i in 1:4
-            push!(t, i)
-        end
-
-        @test length(t) == 4
-        @test size(t) == (4,)
-
-        for i in 5:16
-            push!(t, i)
-        end
-
-        @test length(t) == 8
-        @test size(t) == (8,)
-        @test t == 9:16
-
-        t[:] .= 1
-        @test t == ones(8)
-        @test all([get(t, v)[1] == i for (i, v) in enumerate(0.5:1.0:8)])
-
-        empty!(t)
-        @test RLCore.capacity(t) == 8
-        @test length(t) == 0
-    end
-
     @testset "flatten_batch" begin
         x = rand(2, 3, 4)
         y = flatten_batch(x)
