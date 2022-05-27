@@ -18,11 +18,7 @@ See paper: [Benchmarking Batch Deep Reinforcement Learning Algorithms](https://a
 - `update_step::Int = 0`
 - `rng = Random.GLOBAL_RNG`
 """
-mutable struct BCQDLearner{
-    Aq<:ActorCritic,
-    At<:ActorCritic,
-    R<:AbstractRNG,
-} <: AbstractLearner
+mutable struct BCQDLearner{Aq<:ActorCritic,At<:ActorCritic,R<:AbstractRNG} <: Any
     approximator::Aq
     target_approximator::At
     γ::Float32
@@ -43,13 +39,13 @@ function BCQDLearner(;
     target_approximator::At,
     γ::Float32 = 0.99f0,
     τ::Float32 = 0.005f0,
-    θ::Float32 = 1f-2,
+    θ::Float32 = 1.0f-2,
     threshold::Float32 = 0.3f0,
     batch_size::Int = 32,
     update_freq::Int = 10,
     update_step::Int = 0,
     rng = Random.GLOBAL_RNG,
-) where {Aq<:ActorCritic, At<:ActorCritic}
+) where {Aq<:ActorCritic,At<:ActorCritic}
     copyto!(approximator, target_approximator)
     BCQDLearner(
         approximator,
@@ -67,7 +63,7 @@ function BCQDLearner(;
     )
 end
 
-Flux.functor(x::BCQDLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
+Functors.functor(x::BCQDLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
 y -> begin
     x = @set x.approximator = y.Q
     x = @set x.target_approximator = y.Qₜ
@@ -79,9 +75,9 @@ function (learner::BCQDLearner)(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
     s = send_to_device(device(learner), s)
     q = learner.approximator.critic(s)
-    prob = softmax(learner.approximator.actor(s), dims=1)
-    mask = Float32.((prob ./ maximum(prob, dims=1)) .> learner.threshold)
-    new_q = q .* mask .+ (1.0f0 .- mask) .* -1f8
+    prob = softmax(learner.approximator.actor(s), dims = 1)
+    mask = Float32.((prob ./ maximum(prob, dims = 1)) .> learner.threshold)
+    new_q = q .* mask .+ (1.0f0 .- mask) .* -1.0f8
     new_q |> vec |> send_to_host
 end
 
@@ -96,9 +92,9 @@ function RLBase.update!(learner::BCQDLearner, batch::NamedTuple)
     a = CartesianIndex.(a, 1:batch_size)
 
     prob = softmax(AC.actor(s′))
-    mask = Float32.((prob ./ maximum(prob, dims=1)) .> learner.threshold)
+    mask = Float32.((prob ./ maximum(prob, dims = 1)) .> learner.threshold)
     q′ = AC.critic(s′)
-    a′ = argmax(q′ .* mask .+ (1.0f0 .- mask) .* -1f8, dims=1)
+    a′ = argmax(q′ .* mask .+ (1.0f0 .- mask) .* -1.0f8, dims = 1)
     target_q = target_AC.critic(s′)
 
     target = r .+ γ .* (1 .- t) .* vec(target_q[a′])
@@ -108,27 +104,25 @@ function RLBase.update!(learner::BCQDLearner, batch::NamedTuple)
         # Critic loss
         q_t = AC.critic(s)
         critic_loss = Flux.Losses.huber_loss(q_t[a], target)
-        
+
         # Actor loss
         logit = AC.actor(s)
-        log_prob = -log.(softmax(logit, dims=1))
+        log_prob = -log.(softmax(logit, dims = 1))
         actor_loss = mean(log_prob[a])
 
         ignore() do
             learner.actor_loss = actor_loss
             learner.critic_loss = critic_loss
         end
-        
+
         actor_loss + critic_loss + θ * mean(logit .^ 2)
     end
 
     update!(AC, gs)
 
     # polyak averaging
-    for (dest, src) in zip(
-        Flux.params([learner.target_approximator]),
-        Flux.params([learner.approximator]),
-    )
+    for (dest, src) in
+        zip(Flux.params([learner.target_approximator]), Flux.params([learner.approximator]))
         dest .= (1 - τ) .* dest .+ τ .* src
     end
 end

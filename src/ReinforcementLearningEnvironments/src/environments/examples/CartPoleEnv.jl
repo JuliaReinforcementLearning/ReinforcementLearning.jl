@@ -1,5 +1,7 @@
 export CartPoleEnv
 
+using FillArrays: Trues
+
 struct CartPoleEnvParams{T}
     gravity::T
     masscart::T
@@ -29,7 +31,7 @@ function CartPoleEnvParams(;
     max_steps = 200,
     dt = 0.02,
     thetathreshold = 12.0,
-    xthreshold = 2.4
+    xthreshold = 2.4,
 )
     CartPoleEnvParams{T}(
         gravity,
@@ -74,12 +76,7 @@ end
 - `thetathreshold = 12.0 # degrees`
 - `xthreshold` = 2.4`
 """
-function CartPoleEnv(;
-    T = Float64,
-    continuous = false,
-    rng = Random.GLOBAL_RNG,
-    kwargs...
-)
+function CartPoleEnv(; T = Float64, continuous = false, rng = Random.GLOBAL_RNG, kwargs...)
     params = CartPoleEnvParams(; T = T, kwargs...)
     action_space = continuous ? ClosedInterval{T}(-1.0, 1.0) : Base.OneTo(2)
     state_space = Space(
@@ -112,6 +109,9 @@ RLBase.state_space(env::CartPoleEnv) = env.observation_space
 RLBase.reward(env::CartPoleEnv{A,T}) where {A,T} = env.done ? zero(T) : one(T)
 RLBase.is_terminated(env::CartPoleEnv) = env.done
 RLBase.state(env::CartPoleEnv) = env.state
+
+# TODO: continuous version
+RLBase.legal_action_space_mask(env::CartPoleEnv) = Trues(2)
 
 function RLBase.reset!(env::CartPoleEnv{A,T}) where {A,T}
     env.state[:] = T(0.1) * rand(env.rng, T, 4) .- T(0.05)

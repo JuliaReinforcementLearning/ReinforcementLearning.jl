@@ -24,12 +24,7 @@ And also https://danieltakeshi.github.io/2019/07/14/per/
 !!! note
     Our implementation is slightly different from the original paper. But it should be aligned with the version in [dopamine](https://github.com/google/dopamine/blob/90527f4eaad4c574b92df556c02dea45853ffd2e/dopamine/jax/agents/rainbow/rainbow_agent.py#L26-L30).
 """
-mutable struct PrioritizedDQNLearner{
-    Tq<:AbstractApproximator,
-    Tt<:AbstractApproximator,
-    Tf,
-    R<:AbstractRNG,
-} <: AbstractLearner
+mutable struct PrioritizedDQNLearner{Tq,Tt,Tf,R<:AbstractRNG} <: Any
     approximator::Tq
     target_approximator::Tt
     loss_func::Tf
@@ -86,12 +81,13 @@ function PrioritizedDQNLearner(;
 end
 
 
-Flux.functor(x::PrioritizedDQNLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
-y -> begin
-    x = @set x.approximator = y.Q
-    x = @set x.target_approximator = y.Qₜ
-    x
-end
+Functors.functor(x::PrioritizedDQNLearner) =
+    (Q = x.approximator, Qₜ = x.target_approximator),
+    y -> begin
+        x = @set x.approximator = y.Q
+        x = @set x.target_approximator = y.Qₜ
+        x
+    end
 
 """
 
@@ -125,7 +121,7 @@ function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
     a = CartesianIndex.(a, 1:batch_size)
 
     updated_priorities = Vector{Float32}(undef, batch_size)
-    w = 1.0f0 ./ ((batch.priority .+ 1f-10) .^ β)
+    w = 1.0f0 ./ ((batch.priority .+ 1.0f-10) .^ β)
     w ./= maximum(w)
     w = send_to_device(D, w)
 
@@ -143,7 +139,7 @@ function RLBase.update!(learner::PrioritizedDQNLearner, batch::NamedTuple)
         batch_losses = loss_func(G, q)
         loss = dot(vec(w), vec(batch_losses)) * 1 // batch_size
         ignore() do
-            updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10) .^ β))
+            updated_priorities .= send_to_host(vec((batch_losses .+ 1.0f-10) .^ β))
             learner.loss = loss
         end
         loss

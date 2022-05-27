@@ -2,7 +2,7 @@ export GradientBanditLearner
 
 using Flux: softmax, onehot
 
-Base.@kwdef struct GradientBanditLearner{A,B} <: AbstractLearner
+Base.@kwdef struct GradientBanditLearner{A,B} <: Any
     approximator::A
     baseline::B
 end
@@ -10,19 +10,9 @@ end
 (learner::GradientBanditLearner)(s::Int) = s |> learner.approximator |> softmax
 (learner::GradientBanditLearner)(env::AbstractEnv) = learner(state(env))
 
-function RLBase.update!(
-    L::GradientBanditLearner,
-    t::AbstractTrajectory,
-    ::AbstractEnv,
-    ::PreActStage,
-) end
+function RLBase.update!(L::GradientBanditLearner, t::Any, ::AbstractEnv, ::PreActStage) end
 
-function RLBase.update!(
-    L::GradientBanditLearner,
-    t::AbstractTrajectory,
-    ::AbstractEnv,
-    ::PostActStage,
-)
+function RLBase.update!(L::GradientBanditLearner, t::Any, ::AbstractEnv, ::PostActStage)
     A = L.approximator
     s, a, r = t[:state][end], t[:action][end], t[:reward][end]
     probs = s |> A |> softmax
@@ -32,7 +22,7 @@ function RLBase.update!(
 end
 
 function RLBase.update!(
-    t::AbstractTrajectory,
+    t::Any,
     ::QBasedPolicy{<:GradientBanditLearner},
     ::AbstractEnv,
     ::PreEpisodeStage,

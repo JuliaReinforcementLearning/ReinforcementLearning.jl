@@ -24,19 +24,20 @@ function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook)
         hook(PreEpisodeStage(), policy, env)
 
         while !is_terminated(env) # one episode
-            action = policy(env)
+            policy(PreActStage(), env)
+            hook(PreActStage(), policy, env)
 
-            policy(PreActStage(), env, action)
-            hook(PreActStage(), policy, env, action)
-
+            env |> policy |> env
             optimise!(policy)
-            env(action)
 
             policy(PostActStage(), env)
             hook(PostActStage(), policy, env)
 
             if stop_condition(policy, env)
                 is_stop = true
+                policy(PreActStage(), env)
+                hook(PreActStage(), policy, env)
+                policy(env)  # let the policy see the last observation
                 break
             end
         end # end of an episode
@@ -46,6 +47,7 @@ function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook)
             hook(PostEpisodeStage(), policy, env)
         end
     end
+    policy(PostExperimentStage(), env)
     hook(PostExperimentStage(), policy, env)
     hook
 end

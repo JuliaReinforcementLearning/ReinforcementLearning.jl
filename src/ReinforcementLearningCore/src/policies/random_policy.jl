@@ -18,9 +18,9 @@ struct RandomPolicy{S,R<:AbstractRNG} <: AbstractPolicy
     rng::R
 end
 
-Random.seed!(p::RandomPolicy, seed) = Random.seed!(p.rng, seed)
-
 RandomPolicy(s = nothing; rng = Random.GLOBAL_RNG) = RandomPolicy(s, rng)
+
+optimise!(::RandomPolicy, x::NamedTuple) = nothing
 
 (p::RandomPolicy{Nothing})(env) = rand(p.rng, legal_action_space(env))
 (p::RandomPolicy)(env) = rand(p.rng, p.action_space)

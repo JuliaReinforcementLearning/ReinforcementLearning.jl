@@ -8,20 +8,17 @@ export AbstractHook,
     TimePerStep,
     DoEveryNEpisode,
     DoEveryNStep,
-    DoOnExit,
-    UploadTrajectoryEveryNStep,
-    MultiAgentHook,
-    period_rollout_hook,
-    RolloutHook
+    DoOnExit
 
 using UnicodePlots: lineplot, lineplot!
 using Statistics
+using CircularArrayBuffers
 
 """
 A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
 By default, a `AbstractHook` will do nothing. One can override the behavior by implementing the following methods:
 
-- `(hook::YourHook)(::PreActStage, agent, env, action)`, note that there's an extra argument of `action`.
+- `(hook::YourHook)(::PreActStage, agent, env)`
 - `(hook::YourHook)(::PostActStage, agent, env)`
 - `(hook::YourHook)(::PreEpisodeStage, agent, env)`
 - `(hook::YourHook)(::PostEpisodeStage, agent, env)`

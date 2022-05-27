@@ -3,6 +3,7 @@ export normlogpdf, mvnormlogpdf
 using Flux, LinearAlgebra
 # watch https://github.com/JuliaStats/Distributions.jl/issues/1183
 const log2π = log(2.0f0π)
+
 """
      normlogpdf(μ, σ, x; ϵ = 1.0f-8)
 GPU automatic differentiable version for the logpdf function of normal distributions.

@@ -1,11 +1,6 @@
 export DQNLearner
 
-mutable struct DQNLearner{
-    Tq<:AbstractApproximator,
-    Tt<:AbstractApproximator,
-    Tf,
-    R<:AbstractRNG,
-} <: AbstractLearner
+mutable struct DQNLearner{Tq,Tt,Tf,R<:AbstractRNG} <: Any
     approximator::Tq
     target_approximator::Tt
     loss_func::Tf
@@ -55,7 +50,7 @@ function DQNLearner(;
     traces = SARTS,
     update_step = 0,
     rng = Random.GLOBAL_RNG,
-    is_enable_double_DQN::Bool = true
+    is_enable_double_DQN::Bool = true,
 ) where {Tq,Tt,Tf}
     copyto!(approximator, target_approximator)
     sampler = NStepBatchSampler{traces}(;
@@ -75,12 +70,12 @@ function DQNLearner(;
         sampler,
         rng,
         0.0f0,
-        is_enable_double_DQN
+        is_enable_double_DQN,
     )
 end
 
 
-Flux.functor(x::DQNLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
+Functors.functor(x::DQNLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
 y -> begin
     x = @set x.approximator = y.Q
     x = @set x.target_approximator = y.Qₜ
@@ -117,14 +112,14 @@ function RLBase.update!(learner::DQNLearner, batch::NamedTuple)
     else
         q_values = Qₜ(s′)
     end
-    
+
     if haskey(batch, :next_legal_actions_mask)
         l′ = send_to_device(D, batch[:next_legal_actions_mask])
         q_values .+= ifelse.(l′, 0.0f0, typemin(Float32))
     end
 
     if is_enable_double_DQN
-        selected_actions = dropdims(argmax(q_values, dims=1), dims=1)
+        selected_actions = dropdims(argmax(q_values, dims = 1), dims = 1)
         q′ = Qₜ(s′)[selected_actions]
     else
         q′ = dropdims(maximum(q_values; dims = 1), dims = 1)

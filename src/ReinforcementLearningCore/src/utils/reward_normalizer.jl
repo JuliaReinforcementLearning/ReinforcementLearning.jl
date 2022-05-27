@@ -1,4 +1,3 @@
-export RewardNormalizer, ExpRewardNormalizer, AbstractRewardNormalizer
 abstract type AbstractRewardNormalizer end
 
 """
@@ -21,16 +20,17 @@ mutable struct RewardNormalizer{T} <: AbstractRewardNormalizer
     step_count::Int
 end
 
-RewardNormalizer() = RewardNormalizer(0f0, 1f0, 1f0, 0)
+RewardNormalizer() = RewardNormalizer(0.0f0, 1.0f0, 1.0f0, 0)
 
 function (rn::RewardNormalizer)(rewards; update = true)
     if update
         N = length(rewards)
         rn.step_count += N
         tmp_mean = rn.mean
-        rn.mean = (rn.step_count-N)/rn.step_count * rn.mean + sum(rewards)/rn.step_count
+        rn.mean =
+            (rn.step_count - N) / rn.step_count * rn.mean + sum(rewards) / rn.step_count
         rn.moment2 += sum((rewards .- tmp_mean) .* (rewards .- rn.mean))
-        rn.std = max(sqrt(rn.moment2/(max(1,rn.step_count-1))), eps(rn.std))
+        rn.std = max(sqrt(rn.moment2 / (max(1, rn.step_count - 1))), eps(rn.std))
     end
     return (rewards .- rn.std) ./ rn.std
 end
@@ -56,7 +56,7 @@ mutable struct ExpRewardNormalizer{T} <: AbstractRewardNormalizer
     first::Bool
 end
 
-ExpRewardNormalizer(factor = 0.2f0) = ExpRewardNormalizer(0f0, 0f0, 0f0, factor, true)
+ExpRewardNormalizer(factor = 0.2f0) = ExpRewardNormalizer(0.0f0, 0.0f0, 0.0f0, factor, true)
 
 function (rn::ExpRewardNormalizer)(rewards; update = true)
     if update
@@ -69,5 +69,5 @@ function (rn::ExpRewardNormalizer)(rewards; update = true)
         rn.var = (1 - rn.factor) * (rn.var + rn.factor * sum(rewards .^ 2))
         rn.std = sqrt(rn.var)
     end
-    return (rewards .- rn.std)./rn.std
+    return (rewards .- rn.std) ./ rn.std
 end

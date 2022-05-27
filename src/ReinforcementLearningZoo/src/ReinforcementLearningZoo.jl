@@ -11,6 +11,7 @@ using ReinforcementLearningCore
 using Setfield: @set
 using Logging
 using Flux.Losses
+using Functors
 using Dates
 using IntervalSets
 using Random
@@ -29,7 +30,6 @@ using StructArrays
 
 
 include("patch.jl")
-include("utils/utils.jl")
 include("algorithms/algorithms.jl")
 
 end # module
