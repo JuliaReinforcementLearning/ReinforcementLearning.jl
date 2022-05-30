@@ -17,7 +17,7 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
-IntervalSets = "0.5"
+IntervalSets = "0.5, 0.7"
 MacroTools = "0.5"
 ReinforcementLearningBase = "0.9.2"
 Requires = "1.0"
