@@ -6,12 +6,12 @@ function run(
     stop_condition = StopAfterEpisode(1),
     hook = EmptyHook(),
 )
-    check(policy, env)
+    policy, env = check(policy, env)
     _run(policy, env, stop_condition, hook)
 end
 
 "Inject some customized checkings here by overwriting this function"
-function check(policy, env) end
+check(policy, env) = policy, env
 
 function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook)
 

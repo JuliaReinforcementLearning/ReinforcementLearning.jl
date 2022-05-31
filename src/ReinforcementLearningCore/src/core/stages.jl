@@ -17,4 +17,4 @@ struct PostActStage <: AbstractStage end
 
 (p::AbstractPolicy)(::AbstractStage, ::AbstractEnv) = nothing
 
-optimise!(::AbstractPolicy) = nothing
+RLBase.optimise!(::AbstractPolicy) = nothing

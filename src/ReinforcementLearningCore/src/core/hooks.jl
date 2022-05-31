@@ -11,12 +11,12 @@ export AbstractHook,
     DoOnExit
 
 using UnicodePlots: lineplot, lineplot!
-using Statistics
-using CircularArrayBuffers
+using Statistics: mean, std
+using CircularArrayBuffers: CircularArrayBuffer
 
 """
 A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
-By default, a `AbstractHook` will do nothing. One can override the behavior by implementing the following methods:
+By default, an `AbstractHook` will do nothing. One can custimize the behavior by implementing the following methods:
 
 - `(hook::YourHook)(::PreActStage, agent, env)`
 - `(hook::YourHook)(::PostActStage, agent, env)`
@@ -25,10 +25,22 @@ By default, a `AbstractHook` will do nothing. One can override the behavior by i
 - `(hook::YourHook)(::PostExperimentStage, agent, env)`
 
 By convention, the `Base.getindex(h::YourHook)` is implemented to extract the metrics we are interested in.
+Users can compose different `AbstractHook`s with `+`.
 """
 abstract type AbstractHook end
 
 (hook::AbstractHook)(args...) = nothing
+
+struct ComposedHook{H} <: AbstractHook
+    hooks::H
+end
+
+Base.:(+)(h1::AbstractHook, h2::AbstractHook) = ComposedHook((h1, h2))
+Base.:(+)(h1::ComposedHook, h2::AbstractHook) = ComposedHook((h1.hooks..., h2))
+Base.:(+)(h1::AbstractHook, h2::ComposedHook) = ComposedHook((h1, h2.hooks...))
+Base.:(+)(h1::ComposedHook, h2::ComposedHook) = ComposedHook((h1.hooks..., h2.hooks...))
+
+(h::ComposedHook)(args...) = map(h -> h(args...), h.hooks)
 
 #####
 # EmptyHook
