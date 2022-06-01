@@ -1,21 +1,24 @@
 export BasicDQNLearner
 
-import Zygote: ignore
+using Zygote: ignore
+using Setfield: @set
 
 """
     BasicDQNLearner(;kwargs...)
 
 See paper: [Playing Atari with Deep Reinforcement Learning](https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf)
 
-This is the very basic implementation of DQN. Compared to the traditional Q learning, the only difference is that,
-in the updating step it uses a batch of transitions sampled from an experience buffer instead of current transition.
-And the `approximator` is usually a [`NeuralNetworkApproximator`](@ref).
-You can start from this implementation to understand how everything is organized and how to write your own customized algorithm.
+This is the very basic implementation of DQN. Compared to the traditional Q
+learning, the only difference is that, in the optimising step it uses a batch of
+transitions sampled from an experience buffer instead of current transition. And
+a neural network is used to extimate the Q-value.  You can start from this
+implementation to understand how everything is organized and how to write your
+own customized algorithm.
 
-# Keywords
+# Keyword Arguments
 
-- `approximator`::[`AbstractApproximator`](@ref): used to get Q-values of a state.
-- `loss_func`: the loss function to use.
+- `approximator`::[`Approximator`](@ref): used to get Q-values of a state.
+- `loss_func=huber_loss`: the loss function to use.
 - `γ::Float32=0.99f0`: discount rate.
 """
 Base.@kwdef mutable struct BasicDQNLearner{Q} <: AbstractLearner

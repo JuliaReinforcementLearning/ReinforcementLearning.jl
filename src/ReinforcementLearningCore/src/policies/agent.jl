@@ -1,8 +1,6 @@
 export Agent
 
 using Base.Threads: @spawn
-using ReinforcementLearningTrajectories:
-    Trajectory, SyncTrajectoryStyle, AsyncTrajectoryStyle, TrajectoryStyle
 
 import Functors
 

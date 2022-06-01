@@ -1,7 +1,6 @@
 export StackFrames
 
 using CircularArrayBuffers: CircularArrayBuffer
-using MacroTools: @forward
 
 """
     StackFrames(::Type{T}=Float32, d::Int...)
@@ -13,7 +12,8 @@ struct StackFrames{T,N} <: AbstractArray{T,N}
     buffer::CircularArrayBuffer{T,N}
 end
 
-@forward StackFrames.buffer Base.size, Base.getindex
+Base.size(x::StackFrames) = size(x.buffer)
+Base.getindex(x::StackFrames, I...) = getindex(x.buffer, I...)
 Base.IndexStyle(x::StackFrames) = IndexStyle(x.buffer)
 
 StackFrames(d::Int...) = StackFrames(Float32, d...)
