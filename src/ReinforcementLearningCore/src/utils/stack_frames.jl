@@ -1,6 +1,5 @@
 export StackFrames
 
-import CircularArrayBuffers
 using CircularArrayBuffers: CircularArrayBuffer
 using MacroTools: @forward
 

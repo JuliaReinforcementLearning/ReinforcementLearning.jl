@@ -1,6 +1,6 @@
 export WeightedExplorer
 
-using Random
+using Random: AbstractRNG
 using StatsBase: sample, Weights
 
 """

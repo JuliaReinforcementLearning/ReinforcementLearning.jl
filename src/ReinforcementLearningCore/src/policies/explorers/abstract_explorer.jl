@@ -1,6 +1,6 @@
 export AbstractExplorer
 
-using Flux
+using FillArrays: Trues
 
 """
     (p::AbstractExplorer)(x)
@@ -12,6 +12,8 @@ abstract type AbstractExplorer end
 
 function (p::AbstractExplorer)(x) end
 function (p::AbstractExplorer)(x, mask) end
+
+(p::AbstractExplorer)(x, mask::Trues) = p(x)
 
 """
     prob(p::AbstractExplorer, x) -> AbstractDistribution
@@ -26,3 +28,5 @@ function RLBase.prob(p::AbstractExplorer, x) end
 Similar to `prob(p::AbstractExplorer, x)`, but here only the `mask`ed elements are considered.
 """
 function RLBase.prob(p::AbstractExplorer, x, mask) end
+
+RLBase.prob(p::AbstractExplorer, x, mask::Trues) = prob(p, x)

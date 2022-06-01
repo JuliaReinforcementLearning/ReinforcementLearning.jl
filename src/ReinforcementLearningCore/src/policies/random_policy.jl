@@ -1,6 +1,8 @@
 export RandomPolicy
 
-using Random
+using Random: AbstractRNG
+using Distributions: Categorical
+using FillArrays: Fill
 
 """
     RandomPolicy(action_space=nothing; rng=Random.GLOBAL_RNG)
@@ -13,30 +15,33 @@ runtime to randomly select an action. Otherwise, a random element within
     You should always set `action_space=nothing` when dealing with environments
     of `FULL_ACTION_SET`.
 """
-struct RandomPolicy{S,R<:AbstractRNG} <: AbstractPolicy
+struct RandomPolicy{S} <: AbstractPolicy
     action_space::S
-    rng::R
+    rng::AbstractRNG
 end
 
 RandomPolicy(s = nothing; rng = Random.GLOBAL_RNG) = RandomPolicy(s, rng)
 
-optimise!(::RandomPolicy, x::NamedTuple) = nothing
+RLBase.optimise!(::RandomPolicy, x::NamedTuple) = nothing
 
 (p::RandomPolicy{Nothing})(env) = rand(p.rng, legal_action_space(env))
 (p::RandomPolicy)(env) = rand(p.rng, p.action_space)
 
-function RLBase.prob(p::RandomPolicy{<:Union{AbstractVector,Tuple}}, env::AbstractEnv)
-    prob(p, state(env))
-end
+#####
 
-function RLBase.prob(p::RandomPolicy{<:Union{AbstractVector,Tuple}}, s)
+RLBase.prob(p::RandomPolicy, env::AbstractEnv) = prob(p, state(env))
+
+function RLBase.prob(p::RandomPolicy, s)
     n = length(p.action_space)
-    Categorical(fill(1 / n, n); check_args = false)
+    Categorical(Fill(1 / n, n); check_args = false)
 end
 
-RLBase.prob(p::RandomPolicy{Nothing}, env::AbstractEnv) = prob(p, env, ChanceStyle(env))
 RLBase.prob(p::RandomPolicy{Nothing}, x) =
     @error "no I really don't know how to calculate the prob from nothing"
+
+#####
+
+RLBase.prob(p::RandomPolicy{Nothing}, env::AbstractEnv) = prob(p, env, ChanceStyle(env))
 
 function RLBase.prob(
     p::RandomPolicy{Nothing},
@@ -62,7 +67,7 @@ function RLBase.prob(
     end
 end
 
-RLBase.update!(p::RandomPolicy, x) = nothing
+#####
 
 RLBase.prob(p::RandomPolicy, env_or_state, a) = 1 / length(p.action_space)
 

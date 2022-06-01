@@ -1,8 +1,7 @@
 export AbstractLearner, Approximator
 
-using Flux
-
-using Functors
+import Flux
+import Functors
 
 abstract type AbstractLearner end
 
@@ -17,4 +16,5 @@ Functors.functor(x::Approximator) = (model = x.model,), y -> Approximator(y.mode
 
 (A::Approximator)(x) = A.model(x)
 
-optimise!(A::Approximator, gs) = Flux.Optimise.update!(A.optimiser, params(A), gs)
+RLBase.optimise!(A::Approximator, gs) =
+    Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)

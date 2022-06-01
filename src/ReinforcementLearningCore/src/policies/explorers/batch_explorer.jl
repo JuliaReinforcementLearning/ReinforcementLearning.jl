@@ -1,7 +1,5 @@
 export BatchExplorer
 
-using Flux
-
 """
     BatchExplorer(explorer::AbstractExplorer)
 """

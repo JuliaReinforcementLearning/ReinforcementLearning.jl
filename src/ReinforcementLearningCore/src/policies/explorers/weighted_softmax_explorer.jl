@@ -1,6 +1,6 @@
 export WeightedSoftmaxExplorer
 
-using Random
+using Random: AbstractRNG
 using StatsBase: sample, Weights
 using Flux: softmax
 
@@ -9,8 +9,8 @@ using Flux: softmax
 
 See also: [`WeightedExplorer`](@ref)
 """
-struct WeightedSoftmaxExplorer{R<:AbstractRNG} <: AbstractExplorer
-    rng::R
+struct WeightedSoftmaxExplorer <: AbstractExplorer
+    rng::AbstractRNG
 end
 
 function WeightedSoftmaxExplorer(; rng = Random.GLOBAL_RNG)
@@ -29,5 +29,6 @@ RLBase.prob(s::WeightedSoftmaxExplorer, values) = softmax(values)
 
 function RLBase.prob(s::WeightedSoftmaxExplorer, values::AbstractVector{T}, mask) where {T}
     p = prob(s, values) .* mask
-    p / sum(p)
+    p ./= sum(p)
+    p
 end

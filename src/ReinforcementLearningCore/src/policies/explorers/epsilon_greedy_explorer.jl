@@ -2,7 +2,7 @@ export EpsilonGreedyExplorer, GreedyExplorer
 
 using Random
 using Distributions: Categorical
-using Flux
+using Flux: onehot
 
 """
     EpsilonGreedyExplorer{T}(;kwargs...)
@@ -24,7 +24,6 @@ Two kinds of epsilon-decreasing strategy are implemented here (`linear` and `exp
 - `ϵ_stable::Float64`: the epsilon after `warmup_steps + decay_steps`.
 - `is_break_tie=false`: randomly select an action of the same maximum values if set to `true`.
 - `rng=Random.GLOBAL_RNG`: set the internal RNG.
-- `is_training=true`, in training mode, `step` will not be updated. And the `ϵ` will be set to 0.
 
 # Example
 
@@ -43,7 +42,6 @@ mutable struct EpsilonGreedyExplorer{Kind,IsBreakTie,R} <: AbstractExplorer
     decay_steps::Int
     step::Int
     rng::R
-    is_training::Bool
 end
 
 function EpsilonGreedyExplorer(;
@@ -54,7 +52,6 @@ function EpsilonGreedyExplorer(;
     decay_steps = 0,
     step = 1,
     is_break_tie = false,
-    is_training = true,
     rng = Random.GLOBAL_RNG,
 )
     EpsilonGreedyExplorer{kind,is_break_tie,typeof(rng)}(
@@ -64,7 +61,6 @@ function EpsilonGreedyExplorer(;
         decay_steps,
         step,
         rng,
-        is_training,
     )
 end
 
@@ -91,44 +87,44 @@ function get_ϵ(s::EpsilonGreedyExplorer{:exp}, step)
     end
 end
 
-get_ϵ(s::EpsilonGreedyExplorer) = s.is_training ? get_ϵ(s, s.step) : 0.0
+get_ϵ(s::EpsilonGreedyExplorer) = get_ϵ(s, s.step)
 
 """
     (s::EpsilonGreedyExplorer)(values; step) where T
 
 !!! note
     If multiple values with the same maximum value are found.
-    Then a random one will be returned!
+    Then a random one will be returned when `is_break_tie==true`.
 
     `NaN` will be filtered unless all the values are `NaN`.
     In that case, a random one will be returned.
 """
 function (s::EpsilonGreedyExplorer{<:Any,true})(values)
     ϵ = get_ϵ(s)
-    s.is_training && (s.step += 1)
+    s.step += 1
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values)[2]) : rand(s.rng, 1:length(values))
 end
 
 function (s::EpsilonGreedyExplorer{<:Any,false})(values)
     ϵ = get_ϵ(s)
-    s.is_training && (s.step += 1)
+    s.step += 1
     rand(s.rng) >= ϵ ? findmax(values)[2] : rand(s.rng, 1:length(values))
 end
 
 function (s::EpsilonGreedyExplorer{<:Any,true})(values, mask)
     ϵ = get_ϵ(s)
-    s.is_training && (s.step += 1)
+    s.step += 1
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values, mask)[2]) :
     rand(s.rng, findall(mask))
 end
 
 function (s::EpsilonGreedyExplorer{<:Any,false})(values, mask)
     ϵ = get_ϵ(s)
-    s.is_training && (s.step += 1)
+    s.step += 1
     rand(s.rng) >= ϵ ? findmax(values, mask)[2] : rand(s.rng, findall(mask))
 end
 
-Random.seed!(s::EpsilonGreedyExplorer, seed) = Random.seed!(s.rng, seed)
+#####
 
 """
     prob(s::EpsilonGreedyExplorer, values) ->Categorical
@@ -143,7 +139,7 @@ function RLBase.prob(s::EpsilonGreedyExplorer{<:Any,true}, values)
     for ind in max_val_inds
         probs[ind] += (1 - ϵ) / length(max_val_inds)
     end
-    Categorical(probs)
+    Categorical(probs; check_args = false)
 end
 
 function RLBase.prob(s::EpsilonGreedyExplorer{<:Any,true}, values, action::Integer)
@@ -160,7 +156,7 @@ function RLBase.prob(s::EpsilonGreedyExplorer{<:Any,false}, values)
     ϵ, n = get_ϵ(s), length(values)
     probs = fill(ϵ / n, n)
     probs[findmax(values)[2]] += 1 - ϵ
-    Categorical(probs)
+    Categorical(probs; check_args = false)
 end
 
 function RLBase.prob(s::EpsilonGreedyExplorer{<:Any,false}, values, action::Integer)
@@ -180,7 +176,7 @@ function RLBase.prob(s::EpsilonGreedyExplorer{<:Any,true}, values, mask)
     for ind in max_val_inds
         probs[ind] += (1 - ϵ) / length(max_val_inds)
     end
-    Categorical(probs)
+    Categorical(probs; check_args = false)
 end
 
 function RLBase.prob(s::EpsilonGreedyExplorer{<:Any,false}, values, mask)
@@ -188,8 +184,10 @@ function RLBase.prob(s::EpsilonGreedyExplorer{<:Any,false}, values, mask)
     probs = zeros(n)
     probs[mask] .= ϵ / sum(mask)
     probs[findmax(values, mask)[2]] += 1 - ϵ
-    Categorical(probs)
+    Categorical(probs; check_args = false)
 end
+
+#####
 
 # Though we can achieve the same goal by setting the ϵ of [`EpsilonGreedyExplorer`](@ref) to 0,
 # the GreedyExplorer is much faster.
@@ -198,17 +196,11 @@ struct GreedyExplorer <: AbstractExplorer end
 (s::GreedyExplorer)(values) = findmax(values)[2]
 (s::GreedyExplorer)(values, mask) = findmax(values, mask)[2]
 
-function RLBase.prob(s::GreedyExplorer, values)
-    prob = zeros(length(values))
-    prob[findmax(values)[2]] = 1.0
-    Categorical(prob)
-end
+RLBase.prob(s::GreedyExplorer, values) =
+    Categorical(onehot(findmax(values)[2], 1:length(values)); check_args = false)
 
 RLBase.prob(s::GreedyExplorer, values, action::Integer) =
     findmax(values)[2] == action ? 1.0 : 0.0
 
-function RLBase.prob(s::GreedyExplorer, values, mask)
-    prob = zeros(length(values))
-    prob[findmax(values, mask)[2]] = 1.0
-    Categorical(prob)
-end
+RLBase.prob(s::GreedyExplorer, values, mask) =
+    Categorical(onehot(findmax(values, mask)[2], length(values)); check_args = false)

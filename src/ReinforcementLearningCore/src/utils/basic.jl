@@ -9,7 +9,7 @@ export global_norm,
     flatten_batch,
     orthogonal
 
-using StatsBase
+using FillArrays: Trues
 
 #####
 # Zygote
@@ -92,6 +92,8 @@ function find_all_max(x)
     v, findall(==(v), x)
 end
 
+find_all_max(x, mask::Trues) = find_all_max(x)
+
 function find_all_max(x, mask::AbstractVector{Bool})
     v = maximum(view(x, mask))
     v, [k for (m, k) in zip(mask, keys(x)) if m && x[k] == v]
@@ -104,6 +106,8 @@ end
 # !!! type piracy
 Base.findmax(A::AbstractVector{T}, mask::AbstractVector{Bool}) where {T} =
     findmax(ifelse.(mask, A, typemin(T)))
+
+Base.findmax(A::AbstractVector, mask::Trues) = findmax(A)
 
 
 const VectorOrMatrix = Union{AbstractMatrix,AbstractVector}
