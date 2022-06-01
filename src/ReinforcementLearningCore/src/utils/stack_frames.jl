@@ -40,5 +40,5 @@ only the latest frame is pushed. If the `StackFrames` is one dimension lower,
 then it is treated as a general `AbstractArray` and is pushed in as a frame.
 """
 function Base.push!(cb::CircularArrayBuffer{T,N}, p::StackFrames{T,N}) where {T,N}
-    push!(cb, select_last_frame(p.buffer))
+    push!(cb, selectdim(p.buffer, N, size(p.buffer, N)))
 end

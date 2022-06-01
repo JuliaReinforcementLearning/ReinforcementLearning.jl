@@ -1,7 +1,7 @@
 export StopAfterStep,
     StopAfterEpisode, StopWhenDone, StopSignal, StopAfterNoImprovement, StopAfterNSeconds
 
-using ProgressMeter: Progress, update!
+import ProgressMeter
 
 #####
 # StopAfterStep
@@ -19,8 +19,8 @@ end
 
 function StopAfterStep(step; cur = 1, is_show_progress = true)
     if is_show_progress
-        progress = Progress(step, 1)
-        update!(progress, cur)
+        progress = ProgressMeter.Progress(step, 1)
+        ProgressMeter.update!(progress, cur)
     else
         progress = nothing
     end
@@ -31,7 +31,7 @@ function (s::StopAfterStep)(args...)
     if !isnothing(s.progress)
         # https://github.com/timholy/ProgressMeter.jl/pull/131
         # next!(s.progress; showvalues = [(Symbol(s.tag, "/", :STEP), s.cur)])
-        next!(s.progress)
+        ProgressMeter.next!(s.progress)
     end
 
     @debug s.tag STEP = s.cur
@@ -58,8 +58,8 @@ end
 
 function StopAfterEpisode(episode; cur = 0, is_show_progress = true)
     if is_show_progress
-        progress = Progress(episode, 1)
-        update!(progress, cur)
+        progress = ProgressMeter.Progress(episode, 1)
+        ProgressMeter.update!(progress, cur)
     else
         progress = nothing
     end
@@ -70,7 +70,7 @@ function (s::StopAfterEpisode)(agent, env)
     if is_terminated(env)
         s.cur += 1
         if !isnothing(s.progress)
-            next!(s.progress;)
+            ProgressMeter.next!(s.progress;)
         end
     end
 
