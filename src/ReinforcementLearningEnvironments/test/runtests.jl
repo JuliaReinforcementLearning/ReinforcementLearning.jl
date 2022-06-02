@@ -3,7 +3,7 @@ using ReinforcementLearningBase
 using ReinforcementLearningEnvironments
 using ArcadeLearningEnvironment
 using PyCall
-using OpenSpiel
+# using OpenSpiel
 # using SnakeGames
 using Random
 using StableRNGs

@@ -22,10 +22,10 @@ RLBase.current_player(::RockPaperScissorsEnv) = SIMULTANEOUS_PLAYER
 # Defining the `action_space` of each independent player can help to transform
 # this SIMULTANEOUS environment into a SEQUENTIAL environment with
 # [`simultaneous2sequential`](@ref).
-RLBase.action_space(::RockPaperScissorsEnv, ::Int) = ('💎', '📃', '✂')
+RLBase.action_space(::RockPaperScissorsEnv, ::Int) = Space(('💎', '📃', '✂'))
 
 RLBase.action_space(::RockPaperScissorsEnv, ::SimultaneousPlayer) =
-    Tuple((i, j) for i in ('💎', '📃', '✂') for j in ('💎', '📃', '✂'))
+    Space(Tuple((i, j) for i in ('💎', '📃', '✂') for j in ('💎', '📃', '✂')))
 
 RLBase.action_space(env::RockPaperScissorsEnv) = action_space(env, SIMULTANEOUS_PLAYER)
 
@@ -33,7 +33,7 @@ RLBase.legal_action_space(env::RockPaperScissorsEnv, p) =
     is_terminated(env) ? () : action_space(env, p)
 
 "Since it's a one-shot game, the state space doesn't have much meaning."
-RLBase.state_space(::RockPaperScissorsEnv, ::Observation, p) = Base.OneTo(1)
+RLBase.state_space(::RockPaperScissorsEnv, ::Observation, p) = Space(OneTo(1))
 
 """
 For multi-agent environments, we usually implement the most detailed one.
