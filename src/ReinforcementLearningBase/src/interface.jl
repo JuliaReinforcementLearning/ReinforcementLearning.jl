@@ -450,9 +450,14 @@ legal_action_space(::MinimalActionSet, env, player) = action_space(env)
 """
     legal_action_space_mask(env, player=current_player(env)) -> AbstractArray{Bool}
 
-Required for environments of [`FULL_ACTION_SET`](@ref).
+Required for environments of [`FULL_ACTION_SET`](@ref). As a default implementation,
+     [`legal_action_space_mask`](@ref) creates a mask of [`action_space`](@ref) with
+     the subset [`legal_action_space`](@ref).
 """
-@multi_agent_env_api legal_action_space_mask(env::AbstractEnv, player = current_player(env))
+@multi_agent_env_api legal_action_space_mask(env::AbstractEnv, player = current_player(env)) = 
+    map(action_space(env, player)) do action
+        action in legal_action_space(env, player)
+    end
 
 """
     state(env, style=[DefaultStateStyle(env)], player=[current_player(env)])
