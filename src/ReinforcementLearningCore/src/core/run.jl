@@ -1,7 +1,7 @@
 export @E_cmd
 
 
-using Parsers
+import Parsers
 
 macro E_cmd(s)
     Experiment(s)
@@ -33,6 +33,13 @@ function try_parse_kw(s)
     NamedTuple(kw)
 end
 
+struct Experiment
+    policy_factory::Any
+    env_factory::Any
+    stop_condition_factory::Any
+    hook_factory::Any
+end
+
 function Experiment(s::String)
     m = match(r"(?<source>\w+)_(?<method>\w+)_(?<env>\w+)(\((?<game>.*)\))?", s)
     isnothing(m) && throw(
@@ -48,19 +55,12 @@ function Experiment(s::String)
 end
 
 
-struct Experiment
-    policy_factory::Any
-    env_factory::Any
-    stop_condition_factory::Any
-    hook_factory::Any
-end
-
 (ex::Experiment)() =
     (ex.policy_factory(), ex.env_factory(), ex.stop_condition_factory(), ex.hook_factory())
 
-run(ex::Experiment) = run(ex()...)
+Base.run(ex::Experiment) = run(ex()...)
 
-function run(
+function Base.run(
     policy::AbstractPolicy,
     env::AbstractEnv,
     stop_condition = StopAfterEpisode(1),

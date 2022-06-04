@@ -4,6 +4,8 @@ using Flux: gradient, params
 using Zygote: ignore
 using Setfield: @set
 
+import Functors
+
 """
     BasicDQNLearner(;kwargs...)
 

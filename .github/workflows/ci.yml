@@ -77,6 +77,7 @@ jobs:
         run: |
           julia --color=yes -e '
             using Pkg;
+            Pkg.develop(path="src/ReinforcementLearningBase")
             Pkg.develop(path="src/ReinforcementLearningCore")
             Pkg.test("ReinforcementLearningCore")'
 
@@ -90,6 +91,9 @@ jobs:
         run: |
           julia --color=yes -e '
             using Pkg;
+            Pkg.develop(path="src/ReinforcementLearningBase")
+            Pkg.develop(path="src/ReinforcementLearningCore")
+            Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.develop(path="src/ReinforcementLearningZoo")
             Pkg.test("ReinforcementLearningZoo")'
 
@@ -103,6 +107,7 @@ jobs:
         run: |
           julia --color=yes -e '
             using Pkg;
+            Pkg.develop(path="src/ReinforcementLearningBase")
             Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.test("ReinforcementLearningEnvironments")'
 
@@ -111,13 +116,13 @@ jobs:
         with:
           paths: src/ReinforcementLearningDatasets
 
-      - name: Test RLDatasets
-        if: (steps.RLDatasets-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
-        run: |
-          julia --color=yes -e '
-            using Pkg;
-            Pkg.develop(path="src/ReinforcementLearningDatasets")
-            Pkg.test("ReinforcementLearningDatasets")'
+      # - name: Test RLDatasets
+      #   if: (steps.RLDatasets-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+      #   run: |
+      #     julia --color=yes -e '
+      #       using Pkg;
+      #       Pkg.develop(path="src/ReinforcementLearningDatasets")
+      #       Pkg.test("ReinforcementLearningDatasets")'
 
       - uses: marceloprado/has-changed-path@v1
         id: RLExperiments-changed
@@ -129,56 +134,60 @@ jobs:
         run: |
           julia --color=yes -e '
             using Pkg;
+            Pkg.develop(path="src/ReinforcementLearningBase")
+            Pkg.develop(path="src/ReinforcementLearningCore")
+            Pkg.develop(path="src/ReinforcementLearningEnvironments")
+            Pkg.develop(path="src/ReinforcementLearningZoo")
             Pkg.develop(path="src/ReinforcementLearningExperiments")
             Pkg.build("ReinforcementLearningExperiments")
             Pkg.test("ReinforcementLearningExperiments")'
 
-  docs:
-    name: Documentation
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup python
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.arch }}
-      - run: python -m pip install --user matplotlib
-      - uses: julia-actions/setup-julia@v1
-        with:
-          version: '1.6'
-      - name: Build homepage
-        run: |
-          cd docs/homepage
-          julia --project --color=yes -e '
-            using Pkg; Pkg.instantiate();
-            using NodeJS; run(`$(npm_cmd()) install highlight.js`);
-            using Franklin;
-            optimize()' > build.log
+  # docs:
+  #   name: Documentation
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Setup python
+  #       uses: actions/setup-python@v1
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #         architecture: ${{ matrix.arch }}
+  #     - run: python -m pip install --user matplotlib
+  #     - uses: julia-actions/setup-julia@v1
+  #       with:
+  #         version: '1.6'
+  #     - name: Build homepage
+  #       run: |
+  #         cd docs/homepage
+  #         julia --project --color=yes -e '
+  #           using Pkg; Pkg.instantiate();
+  #           using NodeJS; run(`$(npm_cmd()) install highlight.js`);
+  #           using Franklin;
+  #           optimize()' > build.log
 
-      - name: Make sure homepage is generated without error
-        run: |
-          if grep -1 "Franklin Warning" build.log; then
-            echo "Franklin reported a warning"
-            exit 1
-          else
-            echo "Franklin did not report a warning"
-          fi
+  #     - name: Make sure homepage is generated without error
+  #       run: |
+  #         if grep -1 "Franklin Warning" build.log; then
+  #           echo "Franklin reported a warning"
+  #           exit 1
+  #         else
+  #           echo "Franklin did not report a warning"
+  #         fi
 
-      - name: Build docs
-        run: |
-          cd docs
-          julia --project --color=yes -e '
-            using Pkg; Pkg.instantiate();
-            include("make.jl")'
-          mv build homepage/__site/docs
+  #     - name: Build docs
+  #       run: |
+  #         cd docs
+  #         julia --project --color=yes -e '
+  #           using Pkg; Pkg.instantiate();
+  #           include("make.jl")'
+  #         mv build homepage/__site/docs
 
-      - name: Deploy to the main repo
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.event_name == 'push' }}
-        with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          external_repository: JuliaReinforcementLearning/JuliaReinforcementLearning.github.io
-          force_orphan: true
-          publish_branch: master
-          publish_dir: ./docs/homepage/__site
+  #     - name: Deploy to the main repo
+  #       uses: peaceiris/actions-gh-pages@v3
+  #       if: ${{ github.event_name == 'push' }}
+  #       with:
+  #         deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+  #         external_repository: JuliaReinforcementLearning/JuliaReinforcementLearning.github.io
+  #         force_orphan: true
+  #         publish_branch: master
+  #         publish_dir: ./docs/homepage/__site
