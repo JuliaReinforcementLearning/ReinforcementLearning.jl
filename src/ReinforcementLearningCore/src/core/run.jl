@@ -1,4 +1,4 @@
-export @E_cmd
+export @E_cmd, Experiment
 
 
 import Parsers
@@ -7,7 +7,7 @@ macro E_cmd(s)
     Experiment(s)
 end
 
-function try_parse(s, TS = (Bool, Int, Float32, Float64))
+function try_parse(s, TS=(Bool, Int, Float32, Float64))
     if s == "nothing"
         nothing
     else
@@ -34,10 +34,10 @@ function try_parse_kw(s)
 end
 
 struct Experiment
-    policy_factory::Any
-    env_factory::Any
-    stop_condition_factory::Any
-    hook_factory::Any
+    policy::Any
+    env::Any
+    stop_condition::Any
+    hook::Any
 end
 
 function Experiment(s::String)
@@ -51,20 +51,17 @@ function Experiment(s::String)
     method = m[:method]
     env = m[:env]
     kw_args = isnothing(m[:game]) ? (;) : try_parse_kw(m[:game])
-    Experiment(Val(source), Val(method), Val(env); kw_args...)
+    Experiment(Val(Symbol(source)), Val(Symbol(method)), Val(Symbol(env)); kw_args...)
 end
 
 
-(ex::Experiment)() =
-    (ex.policy_factory(), ex.env_factory(), ex.stop_condition_factory(), ex.hook_factory())
-
-Base.run(ex::Experiment) = run(ex()...)
+Base.run(ex::Experiment) = run(ex.policy, ex.env, ex.stop_condition, ex.hook)
 
 function Base.run(
     policy::AbstractPolicy,
     env::AbstractEnv,
-    stop_condition = StopAfterEpisode(1),
-    hook = EmptyHook(),
+    stop_condition=StopAfterEpisode(1),
+    hook=EmptyHook(),
 )
     policy, env = check(policy, env)
     _run(policy, env, stop_condition, hook)

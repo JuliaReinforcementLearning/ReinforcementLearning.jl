@@ -8,31 +8,32 @@
 
 #+ tangle=true
 using ReinforcementLearning
-using StableRNGs
 using Flux
-using Flux.Losses
+using Flux: glorot_uniform
+
+using StableRNGs: StableRNG
+using Flux.Losses: huber_loss
 
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BasicDQN},
-    ::Val{:CartPole},
-    ::Nothing;
+    ::Val{:CartPole};
     seed=123
 )
     rng = StableRNG(seed)
     env = CartPoleEnv(; T=Float32, rng=rng)
     ns, na = length(state(env)), length(action_space(env))
 
-    policy = Agent(
+    agent = Agent(
         policy=QBasedPolicy(
             learner=BasicDQNLearner(
-                approximator=NeuralNetworkApproximator(
+                approximator=Approximator(
                     model=Chain(
                         Dense(ns, 128, relu; init=glorot_uniform(rng)),
                         Dense(128, 128, relu; init=glorot_uniform(rng)),
                         Dense(128, na; init=glorot_uniform(rng)),
                     ) |> gpu,
-                    optimizer=ADAM(),
+                    optimiser=ADAM(),
                 ),
                 loss_func=huber_loss,
             ),
@@ -44,21 +45,21 @@ function RL.Experiment(
             ),
         ),
         trajectory=Trajectory(
-            container=CircularArraySARTTrajectory(
+            container=CircularArraySARTTraces(
                 capacity=1000,
                 state=Vector{Float32} => (ns,),
             ),
             sampler=BatchSampler{(:state, :action, :reward, :terminal, :next_state)}(
                 batch_size=32
             ),
-            controller=AsyncInsertSampleRatioController(
+            controller=InsertSampleRatioController(
                 threshold=100
             )
         )
     )
     stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
-    Experiment(policy, env, stop_condition, hook, "# BasicDQN <-> CartPole")
+    Experiment(agent, env, stop_condition, hook)
 end
 
 #+ tangle=false
