@@ -170,7 +170,8 @@
         "mvnormals",
         "Optimise",
         "xlabel",
-        "ylabel"
+        "ylabel",
+        "optimising"
     ],
     "ignoreWords": [],
     "minWordLength": 5,

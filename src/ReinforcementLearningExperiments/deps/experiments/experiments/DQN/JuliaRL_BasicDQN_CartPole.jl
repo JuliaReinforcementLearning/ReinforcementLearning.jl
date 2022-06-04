@@ -53,7 +53,8 @@ function RL.Experiment(
                 batch_size=32
             ),
             controller=InsertSampleRatioController(
-                threshold=100
+                threshold=100,
+                n_inserted=-1
             )
         )
     )
