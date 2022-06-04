@@ -79,6 +79,7 @@ jobs:
             using Pkg;
             Pkg.develop(path="src/ReinforcementLearningBase")
             Pkg.develop(path="src/ReinforcementLearningCore")
+            Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.test("ReinforcementLearningCore")'
 
       - uses: marceloprado/has-changed-path@v1
