@@ -47,7 +47,7 @@ function RL.Experiment(
         trajectory=Trajectory(
             container=CircularArraySARTTraces(
                 capacity=1000,
-                state=Vector{Float32} => (ns,),
+                state=Float32 => (ns,),
             ),
             sampler=BatchSampler{(:state, :action, :reward, :terminal, :next_state)}(
                 batch_size=32
