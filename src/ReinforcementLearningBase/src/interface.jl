@@ -375,7 +375,7 @@ Specify the default state style when calling `state(env)`.
 """
 @env_api DefaultStateStyle(env::AbstractEnv) = DefaultStateStyle(StateStyle(env))
 DefaultStateStyle(ss::AbstractStateStyle) = ss
-DefaultStateStyle(ss::Tuple{Vararg{<:AbstractStateStyle}}) = first(ss)
+DefaultStateStyle(ss::Tuple{Vararg{AbstractStateStyle}}) = first(ss)
 
 #####
 # EpisodeStyle

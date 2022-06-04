@@ -2,7 +2,7 @@
 # title: JuliaRL\_BasicDQN\_CartPole
 # cover: assets/JuliaRL_BasicDQN_CartPole.png
 # description: The simplest example to demonstrate how to use BasicDQN
-# date: 2021-05-22
+# date: 2022-06-04
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
