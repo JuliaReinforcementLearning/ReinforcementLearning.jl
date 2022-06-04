@@ -168,7 +168,9 @@
         "trilcol",
         "mvnormlogpdf",
         "mvnormals",
-        "Optimise"
+        "Optimise",
+        "xlabel",
+        "ylabel"
     ],
     "ignoreWords": [],
     "minWordLength": 5,

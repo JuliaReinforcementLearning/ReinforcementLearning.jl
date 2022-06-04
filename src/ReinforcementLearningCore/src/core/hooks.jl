@@ -16,7 +16,7 @@ using CircularArrayBuffers: CircularArrayBuffer
 
 """
 A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
-By default, an `AbstractHook` will do nothing. One can custimize the behavior by implementing the following methods:
+By default, an `AbstractHook` will do nothing. One can customize the behavior by implementing the following methods:
 
 - `(hook::YourHook)(::PreActStage, agent, env)`
 - `(hook::YourHook)(::PostActStage, agent, env)`
@@ -124,9 +124,9 @@ function (hook::TotalRewardPerEpisode)(::PostExperimentStage, agent, env)
         println(
             lineplot(
                 hook.rewards,
-                title = "Total reward per episode",
-                xlabel = "Episode",
-                ylabel = "Score",
+                title="Total reward per episode",
+                xlabel="Episode",
+                ylabel="Score",
             ),
         )
     end
@@ -151,7 +151,7 @@ which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 If `is_display_on_exit` is set to `true`, a ribbon plot will be shown to reflect
 the mean and std of rewards.
 """
-function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit = true)
+function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit=true)
     TotalBatchRewardPerEpisode(
         [Float64[] for _ in 1:batch_size],
         zeros(batch_size),
@@ -177,9 +177,9 @@ function (hook::TotalBatchRewardPerEpisode)(::PostExperimentStage, agent, env)
         s = std([@view(x[1:n]) for x in hook.rewards])
         p = lineplot(
             m,
-            title = "Avg total reward per episode",
-            xlabel = "Episode",
-            ylabel = "Score",
+            title="Avg total reward per episode",
+            xlabel="Episode",
+            ylabel="Score",
         )
         lineplot!(p, m .- s)
         lineplot!(p, m .+ s)
@@ -235,7 +235,7 @@ end
 
 Base.getindex(h::TimePerStep) = h.times
 
-TimePerStep(; max_steps = 100) =
+TimePerStep(; max_steps=100) =
     TimePerStep(CircularArrayBuffer{Float64}(max_steps), time_ns())
 
 function (hook::TimePerStep)(::PostActStage, agent, env)
@@ -255,7 +255,7 @@ mutable struct DoEveryNStep{F} <: AbstractHook
     t::Int
 end
 
-DoEveryNStep(f; n = 1, t = 0) = DoEveryNStep(f, n, t)
+DoEveryNStep(f; n=1, t=0) = DoEveryNStep(f, n, t)
 
 function (hook::DoEveryNStep)(::PostActStage, agent, env)
     hook.t += 1
@@ -276,7 +276,7 @@ mutable struct DoEveryNEpisode{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <: 
     t::Int
 end
 
-DoEveryNEpisode(f::F; n = 1, t = 0, stage::S = POST_EPISODE_STAGE) where {S,F} =
+DoEveryNEpisode(f::F; n=1, t=0, stage::S=POST_EPISODE_STAGE) where {S,F} =
     DoEveryNEpisode{S,F}(f, n, t)
 
 function (hook::DoEveryNEpisode{S})(::S, agent, env) where {S}
