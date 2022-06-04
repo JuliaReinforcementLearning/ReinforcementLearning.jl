@@ -24,7 +24,7 @@ Two kinds of epsilon-decreasing strategy are implemented here (`linear` and `exp
 - `ϵ_stable::Float64`: the epsilon after `warmup_steps + decay_steps`.
 - `is_break_tie=false`: randomly select an action of the same maximum values if set to `true`.
 - `rng=Random.GLOBAL_RNG`: set the internal RNG.
-- `is_training=true`, in training mode, `step` will not be updated. And the `ϵ` will be set to 0.
+- `is_training=true`: when not in training mode, `step` will not be updated. And the `ϵ` will be set to 0.
 
 # Example
 
