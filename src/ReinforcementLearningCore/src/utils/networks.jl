@@ -377,3 +377,20 @@ function vae_loss(model::VAE, state, action)
     kl_loss = -0.5f0 * mean(1.0f0 .+ log.(σ .^ 2) .- μ .^ 2 .- σ .^ 2)
     return recon_loss, kl_loss
 end
+
+#####
+# TwinNetwork
+#####
+
+export TwinNetwork
+
+struct TwinNetwork{S,T}
+    source::S
+    target::T
+end
+
+TwinNetwork(x) = TwinNetwork(x, deepcopy(x))
+
+Functors.@functor TwinNetwork
+
+(model::TwinNetwork)(x) = model.source(x)
