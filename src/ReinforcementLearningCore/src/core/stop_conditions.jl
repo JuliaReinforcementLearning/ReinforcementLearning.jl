@@ -1,36 +1,7 @@
 export StopAfterStep,
-    StopAfterEpisode,
-    StopWhenDone,
-    ComposedStopCondition,
-    StopSignal,
-    StopAfterNoImprovement,
-    StopAfterNSeconds
+    StopAfterEpisode, StopWhenDone, StopSignal, StopAfterNoImprovement, StopAfterNSeconds
 
-using ProgressMeter
-using CircularArrayBuffers: CircularArrayBuffer, isfull
-
-const update! = ReinforcementLearningBase.update!
-
-#####
-# ComposedStopCondition
-#####
-
-"""
-    ComposedStopCondition(stop_conditions...; reducer = any)
-
-The result of `stop_conditions` is reduced by `reducer`.
-"""
-struct ComposedStopCondition{S,T}
-    stop_conditions::S
-    reducer::T
-    function ComposedStopCondition(stop_conditions...; reducer = any)
-        new{typeof(stop_conditions),typeof(reducer)}(stop_conditions, reducer)
-    end
-end
-
-function (s::ComposedStopCondition)(args...)
-    s.reducer(sc(args...) for sc in s.stop_conditions)
-end
+import ProgressMeter
 
 #####
 # StopAfterStep
@@ -48,7 +19,7 @@ end
 
 function StopAfterStep(step; cur = 1, is_show_progress = true)
     if is_show_progress
-        progress = Progress(step, 1)
+        progress = ProgressMeter.Progress(step, 1)
         ProgressMeter.update!(progress, cur)
     else
         progress = nothing
@@ -60,7 +31,7 @@ function (s::StopAfterStep)(args...)
     if !isnothing(s.progress)
         # https://github.com/timholy/ProgressMeter.jl/pull/131
         # next!(s.progress; showvalues = [(Symbol(s.tag, "/", :STEP), s.cur)])
-        next!(s.progress)
+        ProgressMeter.next!(s.progress)
     end
 
     @debug s.tag STEP = s.cur
@@ -87,7 +58,7 @@ end
 
 function StopAfterEpisode(episode; cur = 0, is_show_progress = true)
     if is_show_progress
-        progress = Progress(episode, 1)
+        progress = ProgressMeter.Progress(episode, 1)
         ProgressMeter.update!(progress, cur)
     else
         progress = nothing
@@ -99,7 +70,7 @@ function (s::StopAfterEpisode)(agent, env)
     if is_terminated(env)
         s.cur += 1
         if !isnothing(s.progress)
-            next!(s.progress;)
+            ProgressMeter.next!(s.progress;)
         end
     end
 

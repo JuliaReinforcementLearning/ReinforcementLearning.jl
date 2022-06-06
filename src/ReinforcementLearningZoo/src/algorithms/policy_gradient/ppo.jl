@@ -149,7 +149,9 @@ function RLBase.prob(
     if p.update_step < p.n_random_start
         @error "todo"
     else
-        μ, logσ = p.approximator.actor(send_to_device(device(p.approximator), state)) |> send_to_host 
+        μ, logσ =
+            p.approximator.actor(send_to_device(device(p.approximator), state)) |>
+            send_to_host
         StructArray{Normal}((μ, exp.(logσ)))
     end
 end
@@ -157,7 +159,7 @@ end
 function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArray, mask)
     logits = p.approximator.actor(send_to_device(device(p.approximator), state))
     if !isnothing(mask)
-        logits .+= ifelse.(mask, 0f0, typemin(Float32))
+        logits .+= ifelse.(mask, 0.0f0, typemin(Float32))
     end
     logits = logits |> softmax |> send_to_host
     if p.update_step < p.n_random_start
@@ -171,14 +173,14 @@ function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArr
 end
 
 function RLBase.prob(p::PPOPolicy, env::MultiThreadEnv)
-    mask =  ActionStyle(env) === FULL_ACTION_SET ? legal_action_space_mask(env) : nothing
+    mask = ActionStyle(env) === FULL_ACTION_SET ? legal_action_space_mask(env) : nothing
     prob(p, state(env), mask)
 end
 
 function RLBase.prob(p::PPOPolicy, env::AbstractEnv)
     s = state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
-    mask =  ActionStyle(env) === FULL_ACTION_SET ? legal_action_space_mask(env) : nothing
+    mask = ActionStyle(env) === FULL_ACTION_SET ? legal_action_space_mask(env) : nothing
     prob(p, s, mask)
 end
 
@@ -211,7 +213,7 @@ function RLBase.update!(
     end
 end
 
-function _update!(p::PPOPolicy, t::AbstractTrajectory)
+function _update!(p::PPOPolicy, t::Any)
     rng = p.rng
     AC = p.approximator
     γ = p.γ
@@ -261,11 +263,8 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
         for i in 1:n_microbatches
             inds = rand_inds[(i-1)*microbatch_size+1:i*microbatch_size]
             if t isa MaskedPPOTrajectory
-                lam = select_last_dim(
-                    flatten_batch(select_last_dim(LAM, 2:n+1)),
-                    inds,
-                )
-                
+                lam = select_last_dim(flatten_batch(select_last_dim(LAM, 2:n+1)), inds)
+
             else
                 lam = nothing
             end
@@ -274,11 +273,11 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
             # !!! we need to convert it into a continuous CuArray otherwise CUDA.jl will complain scalar indexing
             s = to_device(collect(select_last_dim(states_flatten_on_host, inds)))
             a = to_device(collect(select_last_dim(actions_flatten, inds)))
-            
+
             if eltype(a) === Int
                 a = CartesianIndex.(a, 1:length(a))
             end
-            
+
             r = vec(returns)[inds]
             log_p = vec(action_log_probs)[inds]
             adv = vec(advantages)[inds]
@@ -293,7 +292,8 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
                     else
                         log_p′ₐ = normlogpdf(μ, exp.(logσ), a)
                     end
-                    entropy_loss = mean(size(logσ, 1) * (log(2.0f0π) + 1) .+ sum(logσ; dims = 1)) / 2
+                    entropy_loss =
+                        mean(size(logσ, 1) * (log(2.0f0π) + 1) .+ sum(logσ; dims = 1)) / 2
                 else
                     # actor is assumed to return discrete logits
                     raw_logit′ = AC.actor(s)

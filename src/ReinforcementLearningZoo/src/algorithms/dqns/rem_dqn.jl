@@ -1,11 +1,6 @@
 export REMDQNLearner
 
-mutable struct REMDQNLearner{
-    Tq<:AbstractApproximator,
-    Tt<:AbstractApproximator,
-    Tf,
-    R<:AbstractRNG,
-} <: AbstractLearner
+mutable struct REMDQNLearner{Tq,Tt,Tf,R<:AbstractRNG} <: Any
     approximator::Tq
     target_approximator::Tt
     loss_func::Tf
@@ -83,7 +78,7 @@ function REMDQNLearner(;
     )
 end
 
-Flux.functor(x::REMDQNLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
+Functors.functor(x::REMDQNLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
 y -> begin
     x = @set x.approximator = y.Q
     x = @set x.target_approximator = y.Qₜ
@@ -120,7 +115,7 @@ function RLBase.update!(learner::REMDQNLearner, batch::NamedTuple)
 
     target_q = Qₜ(s′)
     target_q = convex_polygon .* reshape(target_q, :, ensemble_num, batch_size)
-    target_q = dropdims(sum(target_q, dims=2), dims=2)
+    target_q = dropdims(sum(target_q, dims = 2), dims = 2)
 
     if haskey(batch, :next_legal_actions_mask)
         l′ = send_to_device(D, batch[:next_legal_actions_mask])
@@ -133,7 +128,7 @@ function RLBase.update!(learner::REMDQNLearner, batch::NamedTuple)
     gs = gradient(params(Q)) do
         q = Q(s)
         q = convex_polygon .* reshape(q, :, ensemble_num, batch_size)
-        q = dropdims(sum(q, dims=2), dims=2)[a]
+        q = dropdims(sum(q, dims = 2), dims = 2)[a]
 
         loss = loss_func(G, q)
         ignore() do
@@ -143,5 +138,5 @@ function RLBase.update!(learner::REMDQNLearner, batch::NamedTuple)
     end
 
     update!(Q, gs)
-end 
+end
 
