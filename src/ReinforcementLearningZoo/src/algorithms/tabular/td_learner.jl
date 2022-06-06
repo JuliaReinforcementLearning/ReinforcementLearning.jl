@@ -3,6 +3,18 @@ export TDLearner
 using LinearAlgebra: dot
 using Distributions: pdf
 
+"""
+    TDLearner(;approximator, γ=1.0, method, n=0)
+
+Use temporal-difference method to estimate state value or state-action value.
+
+# Fields
+- `approximator` can be either
+  `TabularQApproximator`, `LinearQApproximator`, `TabularVApproximator` or `LinearVApproximator`.
+- `γ=1.0`, discount rate.
+- `method` can be `:SRS` (for state value function); for state-action value function, it can be `:SARS` (Q-learning) , `:SARSA` (Sarsa) or `:ExpectedSARSA`.
+- `n=0`: the number of time steps used minus 1.
+"""
 Base.@kwdef struct TDLearner{A} <: Any
     approximator::A
     γ::Float64 = 1.0
