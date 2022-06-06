@@ -1,4 +1,5 @@
 import Functors
+import Flux
 
 #####
 # ActorCritic
@@ -384,9 +385,12 @@ end
 
 export TwinNetwork
 
-struct TwinNetwork{S,T}
+Base.@kwdef mutable struct TwinNetwork{S,T}
     source::S
     target::T
+    sync_freq::Int = 1
+    ρ::Float32 = 0.0f0
+    n_optimise::Int = 0
 end
 
 TwinNetwork(x) = TwinNetwork(x, deepcopy(x))
@@ -394,3 +398,16 @@ TwinNetwork(x) = TwinNetwork(x, deepcopy(x))
 Functors.@functor TwinNetwork
 
 (model::TwinNetwork)(x) = model.source(x)
+
+function RLBase.optimise!(A::Approximator{<:TwinNetwork}, gs)
+    Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
+    M = A.model
+    M.n_optimise += 1
+
+    if M.n_optimise % M.sync_freq == 0
+        # polyak averaging
+        for (dest, src) in zip(Flux.params(M.target), Flux.params(M.source))
+            dest .= M.ρ .* dest .+ (1 - M.ρ) .* src
+        end
+    end
+end
