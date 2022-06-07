@@ -15,7 +15,7 @@ Reexport = "0.2, 1"
 ReinforcementLearningBase = "0.10"
 ReinforcementLearningCore = "0.9"
 ReinforcementLearningEnvironments = "0.7"
-ReinforcementLearningZoo = "0.6"
+ReinforcementLearningZoo = "0.6, 0.5"
 julia = "1.6"
 
 [extras]
