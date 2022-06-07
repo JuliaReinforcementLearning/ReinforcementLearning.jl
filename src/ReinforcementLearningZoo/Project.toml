@@ -14,6 +14,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 [compat]
 ReinforcementLearningBase = "0.10"
 ReinforcementLearningCore = "0.9"
+Zygote = "0.6"
 julia = "1.6"
 
 [extras]
