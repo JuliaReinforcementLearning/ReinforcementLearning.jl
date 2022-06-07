@@ -12,6 +12,7 @@ Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
+Flux = "0.13"
 ReinforcementLearningBase = "0.10"
 ReinforcementLearningCore = "0.9"
 julia = "1.6"
