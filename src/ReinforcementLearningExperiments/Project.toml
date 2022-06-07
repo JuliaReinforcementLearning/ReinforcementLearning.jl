@@ -12,6 +12,7 @@ Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 
 [compat]
 ReinforcementLearning = "0.11"
+StableRNGs = "1"
 julia = "1.6"
 
 [extras]
