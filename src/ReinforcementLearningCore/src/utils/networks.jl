@@ -1,6 +1,8 @@
 import Functors
 import Flux
 
+using Setfield: @set
+
 #####
 # ActorCritic
 #####
@@ -11,7 +13,7 @@ export ActorCritic
     ActorCritic(;actor, critic, optimizer=ADAM())
 The `actor` part must return logits (*Do not use softmax in the last layer!*), and the `critic` part must return a state value.
 """
-Base.@kwdef struct ActorCritic{A,C,O} <: AbstractApproximator
+Base.@kwdef struct ActorCritic{A,C,O}
     actor::A
     critic::C
 end
@@ -136,7 +138,7 @@ end
 
 CovGaussianNetwork(pre, m, s) = CovGaussianNetwork(pre, m, s, tanh)
 
-Flux.@functor CovGaussianNetwork
+Functors.@functor CovGaussianNetwork
 
 """
     (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
@@ -393,9 +395,9 @@ Base.@kwdef mutable struct TwinNetwork{S,T}
     n_optimise::Int = 0
 end
 
-TwinNetwork(x) = TwinNetwork(x, deepcopy(x))
+TwinNetwork(x; kw...) = TwinNetwork(; source=x, target=deepcopy(x), kw...)
 
-Functors.@functor TwinNetwork
+Functors.functor(x::TwinNetwork) = (; source=x.source), y -> @set x.source = y.source
 
 (model::TwinNetwork)(x) = model.source(x)
 

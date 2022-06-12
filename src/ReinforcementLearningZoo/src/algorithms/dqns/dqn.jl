@@ -1,49 +1,53 @@
 export DQNLearner
 
-mutable struct DQNLearner{A<:Approximator{<:TwinNetwork}} <: Any
+using Setfield: @set
+using Random: AbstractRNG, GLOBAL_RNG
+import Functors
+
+Base.@kwdef mutable struct DQNLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
     approximator::A
     loss_func::Any
+    n::Int = 1
     γ::Float32 = 0.99f0
-    rng::AbstractRNG = Random.GLOBAL_RNG
+    is_enable_double_DQN::Bool = true
+    rng::AbstractRNG = GLOBAL_RNG
     # for logging
     loss::Float32 = 0.0f0
 end
 
+(L::DQNLearner)(s::AbstractArray) = L.approximator(s)
+
 Functors.functor(x::DQNLearner) = (; approximator=x.approximator), y -> @set x.approximator = y.approximator
 
-function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
-    Q = learner.approximator
-    Qₜ = learner.target_approximator
-    γ = learner.sampler.γ
+function RLBase.optimise!(learner::DQNLearner, batch::Union{NamedTuple{SS′ART},NamedTuple{SS′L′ART}})
+    A = learner.approximator
+    Q = A.model.source
+    Qₜ = A.model.target
+    γ = learner.γ
     loss_func = learner.loss_func
-    n = learner.sampler.n
-    batch_size = learner.sampler.batch_size
-    is_enable_double_DQN = learner.is_enable_double_DQN
-    D = device(Q)
+    n = learner.n
 
-    s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
-    a = CartesianIndex.(a, 1:batch_size)
+    s, s′, a, r, t = map(x -> batch[x], SS′ART)
+    a = CartesianIndex.(a, 1:length(a))
 
-    q_values = Q(s′)
+    q′ = learner.is_enable_double_DQN ? Q(s′) : Qₜ(s′)
 
     if haskey(batch, :next_legal_actions_mask)
-        l′ = send_to_device(D, batch[:next_legal_actions_mask])
-        q_values .+= ifelse.(l′, 0.0f0, typemin(Float32))
+        q′ .+= ifelse.(batch[:next_legal_actions_mask], 0.0f0, typemin(Float32))
     end
 
-    selected_actions = dropdims(argmax(q_values, dims=1), dims=1)
-    q′ = Qₜ(s′)[selected_actions]
+    q′ₐ = learner.is_enable_double_DQN ? Qₜ(s′)[dropdims(argmax(q′, dims=1), dims=1)] : dropdims(maximum(q′; dims=1), dims=1)
 
-    G = r .+ γ^n .* (1 .- t) .* q′
+    G = r .+ γ^n .* (1 .- t) .* q′ₐ
 
-    gs = gradient(params(Q)) do
-        q = Q(s)[a]
-        loss = loss_func(G, q)
+    gs = gradient(params(A)) do
+        qₐ = Q(s)[a]
+        loss = loss_func(G, qₐ)
         ignore() do
             learner.loss = loss
         end
         loss
     end
 
-    update!(Q, gs)
+    optimise!(A, gs)
 end

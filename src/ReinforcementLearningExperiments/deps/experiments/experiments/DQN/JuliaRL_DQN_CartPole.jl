@@ -1,9 +1,8 @@
-
 # ---
 # title: JuliaRL\_DQN\_CartPole
 # cover: assets/JuliaRL_DQN_CartPole.png
 # description: DQN applied to CartPole
-# date: 2022-06-06
+# date: 2022-06-12
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
@@ -19,7 +18,10 @@ function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:DQN},
     ::Val{:CartPole};
-    seed=123
+    seed=123,
+    n=1,
+    γ=0.99f0,
+    is_enable_double_DQN=true
 )
     rng = StableRNG(seed)
     env = CartPoleEnv(; T=Float32, rng=rng)
@@ -28,34 +30,21 @@ function RL.Experiment(
     agent = Agent(
         policy=QBasedPolicy(
             learner=DQNLearner(
-                approximator=NeuralNetworkApproximator(
-                    model=DuelingNetwork(
-                        base=Chain(
+                approximator=Approximator(
+                    model=TwinNetwork(
+                        Chain(
                             Dense(ns, 128, relu; init=glorot_uniform(rng)),
                             Dense(128, 128, relu; init=glorot_uniform(rng)),
-                        ),
-                        val=Dense(128, 1; init=glorot_uniform(rng)),
-                        adv=Dense(128, na; init=glorot_uniform(rng)),
+                            Dense(128, na; init=glorot_uniform(rng)),
+                        );
+                        sync_freq=100
                     ),
-                    optimizer=ADAM(),
+                    optimiser=ADAM(),
                 ) |> gpu,
-                target_approximator=NeuralNetworkApproximator(
-                    model=DuelingNetwork(
-                        base=Chain(
-                            Dense(ns, 128, relu; init=glorot_uniform(rng)),
-                            Dense(128, 128, relu; init=glorot_uniform(rng)),
-                        ),
-                        val=Dense(128, 1; init=glorot_uniform(rng)),
-                        adv=Dense(128, na; init=glorot_uniform(rng)),
-                    ),
-                ) |> gpu,
+                n=n,
+                γ=γ,
+                is_enable_double_DQN=is_enable_double_DQN,
                 loss_func=huber_loss,
-                stack_size=nothing,
-                batch_size=32,
-                update_horizon=1,
-                min_replay_history=100,
-                update_freq=1,
-                target_update_freq=100,
                 rng=rng,
             ),
             explorer=EpsilonGreedyExplorer(
@@ -65,15 +54,27 @@ function RL.Experiment(
                 rng=rng,
             ),
         ),
-        trajectory=CircularArraySARTTrajectory(
-            capacity=1000,
-            state=Vector{Float32} => (ns,),
-        ),
+        trajectory=Trajectory(
+            container=CircularArraySARTTraces(
+                capacity=1000,
+                state=Float32 => (ns,),
+            ),
+            sampler=NStepBatchSampler{SS′ART}(
+                n=n,
+                γ=γ,
+                batch_size=32,
+                rng=rng
+            ),
+            controller=InsertSampleRatioController(
+                threshold=100,
+                n_inserted=-1
+            )
+        )
     )
 
     stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
-    Experiment(agent, env, stop_condition, hook, "")
+    Experiment(agent, env, stop_condition, hook)
 end
 
 #+ tangle=false

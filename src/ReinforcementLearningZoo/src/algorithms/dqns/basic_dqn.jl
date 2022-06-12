@@ -38,14 +38,14 @@ Functors.functor(x::BasicDQNLearner) = (Q=x.approximator,), y -> @set x.approxim
 
 function RLCore.optimise!(
     learner::BasicDQNLearner,
-    batch::NamedTuple{(:state, :action, :reward, :terminal, :next_state)},
+    batch::NamedTuple{SS′ART},
 )
 
     Q = learner.approximator
     γ = learner.γ
     loss_func = learner.loss_func
 
-    s, a, r, t, s′ = send_to_device(device(Q), batch)
+    s, s′, a, r, t = send_to_device(device(Q), batch)
     a = CartesianIndex.(a, 1:length(a))
 
     gs = gradient(params(Q)) do
