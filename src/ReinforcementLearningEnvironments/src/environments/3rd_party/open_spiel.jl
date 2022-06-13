@@ -126,7 +126,7 @@ function RLBase.state(env::OpenSpielEnv, ss::RLBase.AbstractStateStyle, player)
     if player < 0  # TODO: revisit this in OpenSpiel@v0.2
         @warn "unexpected player $player, falling back to default state value." maxlog = 1
         s = state_space(env)
-        if s isa WorldSpace
+        if s === Space(AbstractString)
             ""
         elseif s isa Array{<:Interval}
             rand(s)
