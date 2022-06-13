@@ -12,6 +12,7 @@ ReinforcementLearningZoo = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 
 [compat]
 Reexport = "0.2, 1"
+ReinforcementLearningBase = "0.9"
 julia = "1.6"
 
 [extras]
