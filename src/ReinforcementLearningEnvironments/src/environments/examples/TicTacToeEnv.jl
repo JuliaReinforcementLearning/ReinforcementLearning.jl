@@ -58,9 +58,9 @@ RLBase.legal_action_space(env::TicTacToeEnv, p) =
 
 function RLBase.legal_action_space_mask(env::TicTacToeEnv, p)
     if is_win(env, CROSS) || is_win(env, NOUGHT)
-        zeros(false, 9)
+        falses(9)
     else
-        vec(view(env.board, :, :, 1))
+        vec(env.board[:, :, 1])
     end
 end
 
