@@ -135,7 +135,7 @@ end
 
 function get_tic_tac_toe_state_info()
     if isempty(TIC_TAC_TOE_STATE_INFO)
-        @info "initializing state info..."
+        @info "initializing tictactoe state info cache..."
         t = @elapsed begin
             n = 1
             root = TicTacToeEnv()
@@ -160,7 +160,7 @@ function get_tic_tac_toe_state_info()
                 end
             end
         end
-        @info "finished initializing state info in $t seconds"
+        @info "finished initializing tictactoe state info cache in $t seconds"
     end
     TIC_TAC_TOE_STATE_INFO
 end
