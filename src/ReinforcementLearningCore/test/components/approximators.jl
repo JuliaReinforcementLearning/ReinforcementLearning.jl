@@ -1,3 +1,4 @@
+import Flux.params
 @testset "Approximators" begin
 
     @testset "TabularApproximator" begin
@@ -54,7 +55,7 @@
             μ = Dense(15,10)
             logσ = Dense(15,10)
             gn = GaussianNetwork(pre, μ, logσ, identity)
-            @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, logσ.W, logσ.b])
+            @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, logσ.weight, logσ.bias])
             state = rand(20,3) #batch of 3 states
             m, L = gn(state)
             @test size(m) == size(L) == (10,3)
@@ -106,7 +107,7 @@
             μ = Dense(15,10)
             logσ = Dense(15,10)
             gn = GaussianNetwork(pre, μ, logσ)
-            @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, logσ.W, logσ.b])
+            @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, logσ.weight, logσ.bias])
             state = rand(20,3) #batch of 3 states
             m, L = gn(state)
             @test size(m) == size(L) == (10,3)
@@ -159,7 +160,7 @@
                 μ = Dense(15,10) |> gpu
                 logσ = Dense(15,10) |> gpu
                 gn = GaussianNetwork(pre, μ, logσ)
-                @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, logσ.W, logσ.b])
+                @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, logσ.weight, logσ.bias])
                 state = rand(20,3)  |> gpu #batch of 3 states
                 m, L = gn(state)
                 @test size(m) == size(L) == (10,3)
@@ -214,7 +215,7 @@
             μ = Dense(15,10)
             Σ = Dense(15,10*11÷2)
             gn = CovGaussianNetwork(pre, μ, Σ, identity)
-            @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, Σ.W, Σ.b])
+            @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, Σ.weight, Σ.bias])
             state = rand(20,3) #batch of 3 states
             #Check that it works in 2D
             m, L = gn(state)
@@ -280,7 +281,7 @@
             μ = Dense(15,10)
             Σ = Dense(15,10*11÷2)
             gn = CovGaussianNetwork(pre, μ, Σ)
-            @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, Σ.W, Σ.b])
+            @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, Σ.weight, Σ.bias])
             state = rand(20,3) #batch of 3 states
             m, L = gn(Flux.unsqueeze(state,2))
             @test size(m) == (10,1,3)
@@ -339,7 +340,7 @@
                 μ = Dense(15,10) |> gpu
                 Σ = Dense(15,10*11÷2) |> gpu
                 gn = CovGaussianNetwork(pre, μ, Σ, identity)
-                @test Flux.params(gn) == Flux.Params([pre.W, pre.b, μ.W, μ.b, Σ.W, Σ.b])
+                @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, Σ.weight, Σ.bias])
                 state = rand(20,3)|> gpu #batch of 3 states
                 m, L = gn(Flux.unsqueeze(state,2))
                 @test size(m) == (10,1,3)
