@@ -58,7 +58,7 @@ See [paper](https://arxiv.org/abs/1806.06923)
 - `rng = Random.GLOBAL_RNG`,
 - `device_seed = nothing`,
 """
-mutable struct IQNLearner{A,T,R,D} <: AbstractLearner
+mutable struct IQNLearner{A,T,R,D} <: Any
     approximator::A
     target_approximator::T
     sampler::NStepBatchSampler
@@ -78,7 +78,7 @@ mutable struct IQNLearner{A,T,R,D} <: AbstractLearner
     loss::Float32
 end
 
-Flux.functor(x::IQNLearner) =
+Functors.functor(x::IQNLearner) =
     (Z = x.approximator, Zₜ = x.target_approximator, device_rng = x.device_rng),
     y -> begin
         x = @set x.approximator = y.Z
@@ -195,7 +195,7 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
     is_use_PER = haskey(batch, :priority)  # is use Prioritized Experience Replay
     if is_use_PER
         updated_priorities = Vector{Float32}(undef, batch_size)
-        weights = 1.0f0 ./ ((batch.priority .+ 1f-10) .^ β)
+        weights = 1.0f0 ./ ((batch.priority .+ 1.0f-10) .^ β)
         weights ./= maximum(weights)
         weights = send_to_device(D, weights)
     end
@@ -224,7 +224,7 @@ function RLBase.update!(learner::IQNLearner, batch::NamedTuple)
             # @assert all(loss_per_element .>= 0)
             is_use_PER && (
                 updated_priorities .=
-                    send_to_host(vec((loss_per_element .+ 1f-10) .^ β))
+                    send_to_host(vec((loss_per_element .+ 1.0f-10) .^ β))
             )
             learner.loss = loss
         end

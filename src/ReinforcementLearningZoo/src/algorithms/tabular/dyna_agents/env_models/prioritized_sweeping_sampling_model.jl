@@ -25,7 +25,7 @@ end
 
 function RLBase.update!(
     m::PrioritizedSweepingSamplingModel,
-    t::AbstractTrajectory,
+    t::Any,
     p::AbstractPolicy,
     ::AbstractEnv,
     ::Union{PreActStage,PostEpisodeStage},
