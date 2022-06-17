@@ -2,7 +2,7 @@ export LinearApproximator, LinearVApproximator, LinearQApproximator
 
 using LinearAlgebra: dot
 
-struct LinearApproximator{N,O} <: AbstractApproximator
+struct LinearApproximator{N,O}
     weights::Array{Float64,N}
     optimizer::O
 end

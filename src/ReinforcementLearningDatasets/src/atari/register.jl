@@ -1,7 +1,12 @@
-export ATARI_GAMES
 export atari_init
+export atari_params
 
-const atari_checksum = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+function atari_params()
+    game = ATARI_GAMES
+    index = 1:5
+    epochs = 0:50
+    @info game index epochs
+end
 
 const ATARI_GAMES = [
     "air-raid", "alien", "amidar", "assault", "asterix",
@@ -18,13 +23,6 @@ const ATARI_GAMES = [
     "up-n-down", "venture", "video-pinball", "wizard-of-wor",
     "yars-revenge", "zaxxon"
 ]
-
-function fetch_atari_ds(src, dest)
-    try run(`which gsutil`) catch x throw("gsutil not found, install gsutil to proceed further") end
-    
-    run(`gsutil -m cp -r $src $dest`)
-    return dest
-end
 
 game_name(game) = join(titlecase.(split(game, "-")))
 # use function to initialise atari
@@ -50,7 +48,7 @@ function atari_init()
                     encountered during training into 5 replay datasets per game, resulting in a total of 300 datasets.
                     """,
                     "gs://atari-replay-datasets/dqn/$(game_name(game))/$index/replay_logs/";
-                    fetch_method = fetch_atari_ds
+                    fetch_method = fetch_gc_bucket
                 )
             )
         end

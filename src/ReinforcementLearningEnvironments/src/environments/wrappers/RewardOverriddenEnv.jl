@@ -3,7 +3,7 @@ export RewardOverriddenEnv
 """
     RewardOverriddenEnv(env, f)
 
-Apply `f` on `reward(env)`.
+Apply `f` on `env` to generate a custom reward.
 """
 struct RewardOverriddenEnv{F,E<:AbstractEnv} <: AbstractEnvWrapper
     env::E
@@ -11,4 +11,4 @@ struct RewardOverriddenEnv{F,E<:AbstractEnv} <: AbstractEnvWrapper
 end
 
 RLBase.reward(env::RewardOverriddenEnv, args...; kwargs...) =
-    env.f(reward(env.env, args...; kwargs...))
+    env.f(env.env, args...; kwargs...)

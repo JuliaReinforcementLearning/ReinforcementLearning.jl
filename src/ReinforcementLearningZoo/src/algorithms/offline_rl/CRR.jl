@@ -13,7 +13,7 @@ See paper: [Critic Regularized Regression](https://arxiv.org/abs/2006.15134).
 - `batch_size::Int=32`
 - `policy_improvement_mode::Symbol=:exp`, type of the weight function f. Possible values: :binary/:exp.
 - `ratio_upper_bound::Float32`, when `policy_improvement_mode` is ":exp", the value of the exp function is upper-bounded by this parameter.
-- `beta::Float32`,  when `policy_improvement_mode` is ":exp", this is the denominator of the exp function.
+- `β::Float32`,  when `policy_improvement_mode` is ":exp", this is the denominator of the exp function.
 - `advantage_estimator::Symbol=:mean`, type of the advantage estimate \\hat{A}. Possible values: :mean/:max.
 - `m::Int=4`, when `continuous=true`, sample `m` action to estimate \\hat{A}.
 - `update_freq::Int`: the frequency of updating the `approximator`.
@@ -22,18 +22,14 @@ See paper: [Critic Regularized Regression](https://arxiv.org/abs/2006.15134).
 - `continuous::Bool`: type of action space.
 - `rng = Random.GLOBAL_RNG`
 """
-mutable struct CRRLearner{
-    Aq<:ActorCritic,
-    At<:ActorCritic,
-    R<:AbstractRNG,
-} <: AbstractLearner
+mutable struct CRRLearner{Aq<:ActorCritic,At<:ActorCritic,R<:AbstractRNG} <: Any
     approximator::Aq
     target_approximator::At
     γ::Float32
     batch_size::Int
     policy_improvement_mode::Symbol
     ratio_upper_bound::Float32
-    beta::Float32
+    β::Float32
     advantage_estimator::Symbol
     m::Int
     update_freq::Int
@@ -51,9 +47,9 @@ function CRRLearner(;
     target_approximator::At,
     γ::Float32 = 0.99f0,
     batch_size::Int = 32,
-    policy_improvement_mode::Symbol = :binary,
+    policy_improvement_mode::Symbol = :exp,
     ratio_upper_bound::Float32 = 20.0f0,
-    beta::Float32 = 1.0f0,
+    β::Float32 = 1.0f0,
     advantage_estimator::Symbol = :mean,
     m::Int = 4,
     update_freq::Int = 10,
@@ -61,7 +57,7 @@ function CRRLearner(;
     target_update_freq::Int = 100,
     continuous::Bool,
     rng = Random.GLOBAL_RNG,
-) where {Aq<:ActorCritic, At<:ActorCritic}
+) where {Aq<:ActorCritic,At<:ActorCritic}
     copyto!(approximator, target_approximator)
     CRRLearner(
         approximator,
@@ -70,8 +66,9 @@ function CRRLearner(;
         batch_size,
         policy_improvement_mode,
         ratio_upper_bound,
-        beta,
+        β,
         advantage_estimator,
+        m,
         update_freq,
         update_step,
         target_update_freq,
@@ -82,7 +79,7 @@ function CRRLearner(;
     )
 end
 
-Flux.functor(x::CRRLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
+Functors.functor(x::CRRLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
 y -> begin
     x = @set x.approximator = y.Q
     x = @set x.target_approximator = y.Qₜ
@@ -94,7 +91,7 @@ function (learner::CRRLearner)(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
     s = send_to_device(device(learner), s)
     if learner.continuous
-        learner.approximator.actor(s; is_sampling=true) |> vec |> send_to_host
+        learner.approximator.actor(s; is_sampling = true) |> vec |> send_to_host
     else
         learner.approximator.actor(s) |> vec |> send_to_host
     end
@@ -112,7 +109,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
     AC = learner.approximator
     target_AC = learner.target_approximator
     γ = learner.γ
-    beta = learner.beta
+    β = learner.β
     batch_size = learner.batch_size
     policy_improvement_mode = learner.policy_improvement_mode
     ratio_upper_bound = learner.ratio_upper_bound
@@ -124,15 +121,15 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
     r = reshape(r, :, batch_size)
     t = reshape(t, :, batch_size)
 
-    target_a_t = target_AC.actor(s′; is_sampling=true)
+    target_a_t = target_AC.actor(s′; is_sampling = true)
     target_q_input = vcat(s′, target_a_t)
     expected_target_q = target_AC.critic(target_q_input)
 
     target = r .+ γ .* (1 .- t) .* expected_target_q
 
-    q_t = Array{Float32}(undef, learner.m, batch_size)
+    q_t = send_to_device(D, Matrix{Float32}(undef, learner.m, batch_size))
     for i in 1:learner.m
-        a_sample = AC.actor(s; is_sampling=true)
+        a_sample = AC.actor(s; is_sampling = true)
         q_t[i, :] = AC.critic(vcat(s, a_sample))
     end
 
@@ -141,14 +138,14 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
         # Critic loss
         qa_t = AC.critic(vcat(s, a))
         critic_loss = Flux.Losses.mse(qa_t, target)
-        
+
         # Actor loss
-        log_π = AC.actor.model(s, a)
+        log_π = AC.actor(s, a)
 
         if advantage_estimator == :max
-            advantage = qa_t .- maximum(q_t, dims=1)
+            advantage = qa_t .- maximum(q_t, dims = 1)
         elseif advantage_estimator == :mean
-            advantage = qa_t .- mean(q_t, dims=1)
+            advantage = qa_t .- mean(q_t, dims = 1)
         else
             error("Wrong parameter.")
         end
@@ -156,7 +153,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
         if policy_improvement_mode == :binary
             actor_loss_coef = (advantage .> 0.0f0)
         elseif policy_improvement_mode == :exp
-            actor_loss_coef = clamp.(exp.(advantage ./ beta), 0, ratio_upper_bound)
+            actor_loss_coef = clamp.(exp.(advantage ./ β), 0, ratio_upper_bound)
         else
             error("Wrong parameter.")
         end
@@ -167,7 +164,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
             learner.actor_loss = actor_loss
             learner.critic_loss = critic_loss
         end
-        
+
         actor_loss + critic_loss
     end
 
@@ -178,7 +175,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
     AC = learner.approximator
     target_AC = learner.target_approximator
     γ = learner.γ
-    beta = learner.beta
+    β = learner.β
     batch_size = learner.batch_size
     policy_improvement_mode = learner.policy_improvement_mode
     ratio_upper_bound = learner.ratio_upper_bound
@@ -187,12 +184,12 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
 
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     a = CartesianIndex.(a, 1:batch_size)
-    r = reshape(r, :, batch_size)
-    t = reshape(t, :, batch_size)
+    r = send_to_device(D, reshape(r, :, batch_size))
+    t = send_to_device(D, reshape(t, :, batch_size))
 
     target_a_t = softmax(target_AC.actor(s′))
     target_q_t = target_AC.critic(s′)
-    expected_target_q = sum(target_a_t .* target_q_t, dims=1)
+    expected_target_q = sum(target_a_t .* target_q_t, dims = 1)
 
     target = r .+ γ .* (1 .- t) .* expected_target_q
 
@@ -200,16 +197,16 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
     gs = gradient(ps) do
         # Critic loss
         q_t = AC.critic(s)
-        qa_t = q_t[a]
+        qa_t = reshape(q_t[a], :, batch_size)
         critic_loss = Flux.Losses.mse(qa_t, target)
-        
+
         # Actor loss
         a_t = softmax(AC.actor(s))
 
         if advantage_estimator == :max
-            advantage = qa_t .- maximum(q_t, dims=1)
+            advantage = qa_t .- maximum(q_t, dims = 1)
         elseif advantage_estimator == :mean
-            advantage = qa_t .- mean(q_t, dims=1)
+            advantage = qa_t .- mean(q_t, dims = 1)
         else
             error("Wrong parameter.")
         end
@@ -217,7 +214,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
         if policy_improvement_mode == :binary
             actor_loss_coef = (advantage .> 0.0f0)
         elseif policy_improvement_mode == :exp
-            actor_loss_coef = clamp.(exp.(advantage ./ beta), 0, ratio_upper_bound)
+            actor_loss_coef = clamp.(exp.(advantage ./ β), 0, ratio_upper_bound)
         else
             error("Wrong parameter.")
         end
@@ -228,7 +225,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
             learner.actor_loss = actor_loss
             learner.critic_loss = critic_loss
         end
-        
+
         actor_loss + critic_loss
     end
 

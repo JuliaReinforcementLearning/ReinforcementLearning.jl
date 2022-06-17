@@ -1,5 +1,7 @@
 import Printf.@sprintf
 
+export rl_unplugged_atari_params
+
 # 9 tuning games.
 const TUNING_SUITE = [
     "BeamRider",
@@ -57,11 +59,12 @@ const TESTING_SUITE = [
 # Total of 45 games.
 const ALL = cat(TUNING_SUITE, TESTING_SUITE, dims=1)
 
-function fetch_rl_unplugged_atari(src, dest)
-    try run(`which gsutil`) catch x throw("gsutil not found, install gsutil to proceed further") end
+function rl_unplugged_atari_params()
+    game = ALL
+    run = 1:5
+    shards = 0:99
     
-    run(`gsutil -m cp $src $dest`)
-    return dest
+    @info game run shards
 end
 
 num_shards = 100
@@ -89,14 +92,14 @@ function rl_unplugged_atari_init()
                         from its replay during training with sticky actions Machado et al., 2018. As stated
                         in Agarwal et al., 2020, for each game we use data from five runs with 50 million 
                         transitions each. States in each transition include stacks of four frames to be able
-                        to do frame-stacking with our baselines. We release datasets for 46 Atari games. 
+                        to do frame-stacking with our baselines. Datasets for 46 Atari games has been released. 
                         For details on how the dataset was generated, please refer to the paper.
-                        Atari is a standard RL benchmark. We recommend you to try offline RL methods 
+                        Atari is a standard RL benchmark. It is recommended that you to try offline RL methods 
                         on Atari if you are interested in comparing your approach to other state of the 
                         art offline RL methods with discrete actions.
                         """,
                         "gs://rl_unplugged/atari/$game/"*@sprintf("run_%i-%05i-of-%05i", run, index, num_shards);
-                        fetch_method = fetch_rl_unplugged_atari
+                        fetch_method = fetch_gc_file
                     )
                 )
             end

@@ -11,16 +11,21 @@ struct MountainCarEnvParams{T}
     max_steps::Int
 end
 
+Base.show(io::IO, params::MountainCarEnvParams) = print(
+    io,
+    join(["$p=$(getfield(params, p))" for p in fieldnames(MountainCarEnvParams)], ","),
+)
+
 function MountainCarEnvParams(;
     T = Float64,
     min_pos = -1.2,
     max_pos = 0.6,
     max_speed = 0.07,
     goal_pos = 0.5,
-    max_steps = 200,
     goal_velocity = 0.0,
     power = 0.001,
     gravity = 0.0025,
+    max_steps = 200,
 )
     MountainCarEnvParams{T}(
         min_pos,
@@ -34,22 +39,19 @@ function MountainCarEnvParams(;
     )
 end
 
-mutable struct MountainCarEnv{A,T,ACT,R<:AbstractRNG} <: AbstractEnv
+mutable struct MountainCarEnv{T,ACT} <: AbstractEnv
     params::MountainCarEnvParams{T}
-    action_space::A
-    observation_space::Space{Vector{ClosedInterval{T}}}
     state::Vector{T}
     action::ACT
     done::Bool
     t::Int
-    rng::R
+    rng::AbstractRNG
 end
 
 """
     MountainCarEnv(;kwargs...)
 
 # Keyword arguments
-
 - `T = Float64`
 - `continuous = false`
 - `rng = Random.GLOBAL_RNG`
@@ -73,17 +75,7 @@ function MountainCarEnv(;
     else
         params = MountainCarEnvParams(; T = T, kwargs...)
     end
-    action_space = continuous ? ClosedInterval{T}(-1.0, 1.0) : Base.OneTo(3)
-    env = MountainCarEnv(
-        params,
-        action_space,
-        Space([params.min_pos..params.max_pos, -params.max_speed..params.max_speed]),
-        zeros(T, 2),
-        rand(action_space),
-        false,
-        0,
-        rng,
-    )
+    env = MountainCarEnv(params, zeros(T, 2), continuous ? 0.0 : 0, false, 0, rng)
     reset!(env)
     env
 end
@@ -92,13 +84,21 @@ ContinuousMountainCarEnv(; kwargs...) = MountainCarEnv(; continuous = true, kwar
 
 Random.seed!(env::MountainCarEnv, seed) = Random.seed!(env.rng, seed)
 
-RLBase.action_space(env::MountainCarEnv) = env.action_space
-RLBase.state_space(env::MountainCarEnv) = env.observation_space
-RLBase.reward(env::MountainCarEnv{A,T}) where {A,T} = env.done ? zero(T) : -one(T)
+RLBase.state_space(env::MountainCarEnv) = Space(
+    SVector(
+        env.params.min_pos .. env.params.max_pos,
+        -env.params.max_speed .. env.params.max_speed,
+    ),
+)
+
+RLBase.action_space(::MountainCarEnv{<:AbstractFloat,Int}) = Space(OneTo(3))
+RLBase.action_space(::MountainCarEnv{<:AbstractFloat,<:AbstractFloat}) = Space(-1.0 .. 1.0)
+
+RLBase.reward(env::MountainCarEnv{T}) where {T} = env.done ? zero(T) : -one(T)
 RLBase.is_terminated(env::MountainCarEnv) = env.done
 RLBase.state(env::MountainCarEnv) = env.state
 
-function RLBase.reset!(env::MountainCarEnv{A,T}) where {A,T}
+function RLBase.reset!(env::MountainCarEnv{T}) where {T}
     env.state[1] = 0.2 * rand(env.rng, T) - 0.6
     env.state[2] = 0.0
     env.done = false
@@ -106,14 +106,14 @@ function RLBase.reset!(env::MountainCarEnv{A,T}) where {A,T}
     nothing
 end
 
-function (env::MountainCarEnv{<:ClosedInterval})(a::AbstractFloat)
-    @assert a in env.action_space
+function (env::MountainCarEnv)(a::AbstractFloat)
+    @assert a in action_space(env)
     env.action = a
     _step!(env, a)
 end
 
-function (env::MountainCarEnv{<:Base.OneTo{Int}})(a::Int)
-    @assert a in env.action_space
+function (env::MountainCarEnv)(a::Int)
+    @assert a in action_space(env)
     env.action = a
     _step!(env, a - 2)
 end
@@ -135,3 +135,4 @@ function _step!(env::MountainCarEnv, force)
     env.state[2] = v
     nothing
 end
+

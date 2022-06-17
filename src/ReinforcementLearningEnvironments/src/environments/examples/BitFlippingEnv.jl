@@ -24,7 +24,7 @@ end
 
 Random.seed!(env::BitFlippingEnv, s) = Random.seed!(env.rng, s)
 
-RLBase.action_space(env::BitFlippingEnv) = Base.OneTo(env.N)
+RLBase.action_space(env::BitFlippingEnv) = Space(OneTo(env.N))
 
 RLBase.legal_action_space(env::BitFlippingEnv) = Base.OneTo(env.N)
 
@@ -41,8 +41,8 @@ end
 RLBase.state(env::BitFlippingEnv) = state(env::BitFlippingEnv, Observation{BitArray{1}}())
 RLBase.state(env::BitFlippingEnv, ::Observation) = env.state
 RLBase.state(env::BitFlippingEnv, ::GoalState) = env.goal_state
-RLBase.state_space(env::BitFlippingEnv, ::Observation) = Space(fill(false..true, env.N))
-RLBase.state_space(env::BitFlippingEnv, ::GoalState) = Space(fill(false..true, env.N))
+RLBase.state_space(env::BitFlippingEnv, ::Observation) = Space(Bool, env.N)
+RLBase.state_space(env::BitFlippingEnv, ::GoalState) = Space(Bool, env.N)
 RLBase.is_terminated(env::BitFlippingEnv) =
     (env.state == env.goal_state) || (env.t >= env.max_steps)
 

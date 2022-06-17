@@ -6,13 +6,13 @@ struct GymEnv{T,Ta,To,P} <: AbstractEnv
 end
 export GymEnv
 
-mutable struct AtariEnv{IsGrayScale,TerminalOnLifeLoss,N,S <: AbstractRNG} <: AbstractEnv
+mutable struct AtariEnv{IsGrayScale,TerminalOnLifeLoss,N,S<:AbstractRNG} <: AbstractEnv
     ale::Ptr{Nothing}
     name::String
     screens::Tuple{Array{UInt8,N},Array{UInt8,N}}  # for max-pooling
     actions::Vector{Int}
-    action_space::Base.OneTo{Int}
-    observation_space::Space{Array{ClosedInterval{UInt8},N}}
+    action_space::Space
+    observation_space::Space
     noopmax::Int
     frame_skip::Int
     reward::Float32
@@ -65,7 +65,7 @@ end
 
 export AcrobotEnvParams
 
-mutable struct AcrobotEnv{T,R <: AbstractRNG} <: AbstractEnv
+mutable struct AcrobotEnv{T,R<:AbstractRNG} <: AbstractEnv
     params::AcrobotEnvParams{T}
     state::Vector{T}
     action::Int

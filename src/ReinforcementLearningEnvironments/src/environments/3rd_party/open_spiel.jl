@@ -60,7 +60,7 @@ RLBase.current_player(env::OpenSpielEnv) = OpenSpiel.current_player(env.state)
 RLBase.chance_player(env::OpenSpielEnv) = convert(Int, OpenSpiel.CHANCE_PLAYER)
 
 function RLBase.players(env::OpenSpielEnv)
-    p = 0:(num_players(env.game) - 1)
+    p = 0:(num_players(env.game)-1)
     if ChanceStyle(env) === EXPLICIT_STOCHASTIC
         (p..., RLBase.chance_player(env))
     else
@@ -73,9 +73,9 @@ function RLBase.action_space(env::OpenSpielEnv, player)
         # !!! this bug is already fixed in OpenSpiel
         # replace it with the following one later
         # ZeroTo(max_chance_outcomes(env.game)-1)
-        ZeroTo(max_chance_outcomes(env.game))
+        Space(0:max_chance_outcomes(env.game))
     else
-        ZeroTo(num_distinct_actions(env.game) - 1)
+        Space(0:num_distinct_actions(env.game)-1)
     end
 end
 
@@ -91,7 +91,7 @@ function RLBase.prob(env::OpenSpielEnv, player)
     # @assert player == chance_player(env)
     p = zeros(length(action_space(env)))
     for (k, v) in chance_outcomes(env.state)
-        p[k + 1] = v
+        p[k+1] = v
     end
     p
 end
@@ -102,7 +102,7 @@ function RLBase.legal_action_space_mask(env::OpenSpielEnv, player)
         num_distinct_actions(env.game)
     mask = BitArray(undef, n)
     for a in legal_actions(env.state, player)
-        mask[a + 1] = true
+        mask[a+1] = true
     end
     mask
 end
@@ -115,6 +115,8 @@ function RLBase.reward(env::OpenSpielEnv, player)
         rewards(env.state)
     elseif player < 0
         0
+    elseif RewardStyle(env) == RLBase.TERMINAL_REWARD && !RLBase.is_terminated(env)
+        0
     else
         player_reward(env.state, player)
     end
@@ -124,7 +126,7 @@ function RLBase.state(env::OpenSpielEnv, ss::RLBase.AbstractStateStyle, player)
     if player < 0  # TODO: revisit this in OpenSpiel@v0.2
         @warn "unexpected player $player, falling back to default state value." maxlog = 1
         s = state_space(env)
-        if s isa WorldSpace
+        if s === Space(AbstractString)
             ""
         elseif s isa Array{<:Interval}
             rand(s)
@@ -147,19 +149,15 @@ RLBase.state_space(
     env::OpenSpielEnv,
     ::Union{InformationSet{String},Observation{String}},
     p,
-) = WorldSpace{AbstractString}()
+) = Space(AbstractString)
 
 RLBase.state_space(env::OpenSpielEnv, ::InformationSet{Array},
     p,
-) = Space(
-    fill(typemin(Float64)..typemax(Float64), reverse(information_state_tensor_shape(env.game))...),
-)
+) = Space(Float64, reverse(information_state_tensor_shape(env.game))...)
 
 RLBase.state_space(env::OpenSpielEnv, ::Observation{Array},
     p,
-) = Space(
-    fill(typemin(Float64)..typemax(Float64), reverse(observation_tensor_shape(env.game))...),
-)
+) = Space(Float64, reverse(observation_tensor_shape(env.game))...)
 
 Random.seed!(env::OpenSpielEnv, s) = @warn "seed!(OpenSpielEnv) is not supported currently."
 

@@ -2,11 +2,111 @@
 
 ## ReinforcementLearning.jl@v0.10.0
 
+### ReinforcementLearningExperiments.jl
+
+#### v0.1.4
+
+- Support `device_rng` in SAC [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
+
+#### v0.1.3
+
+- Test experiments on GPU by default [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
+
+#### v0.1.2
+
+- Added an experiment for DQN training on discrete `PendulumEnv` (#537)
+
 ### ReinforcementLearningEnvironments.jl
+
+#### v0.6.12
+
+- Bugfix bug with `is_discrete_space` [#566](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/566)
+
+#### v0.6.11
+
+- Bugfix of CartPoleEnv with keyword arguments
+
+#### v0.6.10
+
+- Bugfix of CartPoleEnv with Float32
+
+#### v0.6.9
+
+- Added a continuous option for CartPoleEnv [#543](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/543).
+
+#### v0.6.8
+
+- Support `action_space(::TicTacToeEnv, player)`.
+
+#### v0.6.7
+
+- Fixed bugs in plotting `MountainCarEnv` (#537)
+- Implemented plotting for `PendulumEnv` (#537)
+
+#### v0.6.6
+
+- Bugfix with `ZeroTo` [#534](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/534)
 
 ### ReinforcementLearningCore.jl
 
+#### v0.8.11
+
+- When sending a `CircularArrayBuffer` to GPU devices, convert `CircularArrayBuffer` into `CuArray` instead of the adapted `CircularArrayBuffer` of `CuArray`. [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
+
+#### v0.8.10
+
+- Update dependency of `CircularArrayBuffers` to `v0.1.9`. [#602](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/602)
+- Add `CovGaussianNetwork`. [#597](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/597)
+#### v0.8.8
+
+- Fix warning about `vararg.data` in Julia@v1.7 [#560](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/560)
+
+#### v0.8.7
+
+- Make `GaussianNetwork` differentiable. [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
+
+#### v0.8.6
+
+- Fixed a bug [1] with the `DoOnExit` hook (#537)
+- Added some convenience hooks for rendering rollout episodes (#537)
+
+#### v0.8.5
+
+- Fixed the method overwritten warning of `device` from `CUDA.jl`.
+
 ### ReinforcementLearningZoo.jl
+
+#### v0.5.11
+
+- Fix multi-dimension action space in TD3. [#624](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/624)
+
+#### v0.5.10
+
+- Support `device_rng` in SAC [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
+
+#### v0.5.7
+
+- Fix warning about `vararg.data` in Julia@v1.7 [#560](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/560)
+
+#### v0.5.6
+
+- Make BC GPU compatible [#553](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/553)
+
+#### v0.5.5
+
+- Make most algorithms GPU compatible [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
+
+#### v0.5.4
+
+- Support `length` method for `VectorWSARTTrajectory`.
+
+#### v0.5.3
+
+- Revert part of the unexpected change of PPO in the last PR.
+
+#### v0.5.2
+
+- Fixed the bug with MaskedPPOTrajectory reported [here](https://discourse.julialang.org/t/using-ppopolicy-with-custom-environment-with-action-masking-in-reinforcementlearning-jl/69625/6)
 
 #### v0.5.0
 
@@ -22,7 +122,8 @@
 - Add functionality for fetching d4rl datasets as an iterable DataSet. Credits: https://arxiv.org/abs/2004.07219
 - This supports d4rl and d4rl-pybullet and Google Research DQN atari datasets.
 - Uses DataDeps for data dependency management.
-- This package also supports RL Unplugged Atari Datasets.
+- This package also supports RL Unplugged Datasets.
+- Support for [google-research/deep_ope](https://github.com/google-research/deep_ope) added.
 
 ## ReinforcementLearning.jl@v0.9.0
 

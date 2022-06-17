@@ -60,17 +60,10 @@ function AtariEnv(;
     observation_size =
         grayscale_obs ? (getScreenWidth(ale), getScreenHeight(ale)) :
         (3, getScreenWidth(ale), getScreenHeight(ale))  # !!! note the order
-    observation_space = Space(
-        ClosedInterval{
-            Cuchar,
-        }.(
-            fill(typemin(Cuchar), observation_size),
-            fill(typemax(Cuchar), observation_size),
-        ),
-    )
+    observation_space = Space(Cuchar, observation_size...)
 
     actions = full_action_space ? getLegalActionSet(ale) : getMinimalActionSet(ale)
-    action_space = Base.OneTo(length(actions))
+    action_space = Space(OneTo(length(actions)))
     screens =
         (fill(typemin(Cuchar), observation_size), fill(typemin(Cuchar), observation_size))
 

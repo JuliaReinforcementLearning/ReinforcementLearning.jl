@@ -144,20 +144,24 @@ end
 function RLBase.prob(
     p::PPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal},
     state::AbstractArray,
+    mask,
 )
     if p.update_step < p.n_random_start
         @error "todo"
     else
-        μ, logσ = p.approximator.actor(send_to_device(device(p.approximator), state)) |> send_to_host 
+        μ, logσ =
+            p.approximator.actor(send_to_device(device(p.approximator), state)) |>
+            send_to_host
         StructArray{Normal}((μ, exp.(logσ)))
     end
 end
 
-function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArray)
-    logits =
-        p.approximator.actor(send_to_device(device(p.approximator), state)) |>
-        softmax |>
-        send_to_host
+function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArray, mask)
+    logits = p.approximator.actor(send_to_device(device(p.approximator), state))
+    if !isnothing(mask)
+        logits .+= ifelse.(mask, 0.0f0, typemin(Float32))
+    end
+    logits = logits |> softmax |> send_to_host
     if p.update_step < p.n_random_start
         [
             Categorical(fill(1 / length(x), length(x)); check_args = false) for
@@ -168,15 +172,21 @@ function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArr
     end
 end
 
-RLBase.prob(p::PPOPolicy, env::MultiThreadEnv) = prob(p, state(env))
+function RLBase.prob(p::PPOPolicy, env::MultiThreadEnv)
+    mask = ActionStyle(env) === FULL_ACTION_SET ? legal_action_space_mask(env) : nothing
+    prob(p, state(env), mask)
+end
 
 function RLBase.prob(p::PPOPolicy, env::AbstractEnv)
     s = state(env)
     s = Flux.unsqueeze(s, ndims(s) + 1)
-    prob(p, s)
+    mask = ActionStyle(env) === FULL_ACTION_SET ? legal_action_space_mask(env) : nothing
+    prob(p, s, mask)
 end
 
 (p::PPOPolicy)(env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
+
+# !!! https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/533/files#r728920324
 (p::PPOPolicy)(env::AbstractEnv) = rand.(p.rng, prob(p, env))
 
 function (agent::Agent{<:PPOPolicy})(env::MultiThreadEnv)
@@ -203,7 +213,7 @@ function RLBase.update!(
     end
 end
 
-function _update!(p::PPOPolicy, t::AbstractTrajectory)
+function _update!(p::PPOPolicy, t::Any)
     rng = p.rng
     AC = p.approximator
     γ = p.γ
@@ -215,17 +225,24 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
     w₂ = p.critic_loss_weight
     w₃ = p.entropy_loss_weight
     D = device(AC)
+    to_device(x) = send_to_device(D, x)
 
     n_envs, n_rollout = size(t[:terminal])
     @assert n_envs * n_rollout % n_microbatches == 0 "size mismatch"
     microbatch_size = n_envs * n_rollout ÷ n_microbatches
 
     n = length(t)
-    states_plus = send_to_device(D, t[:state])
+    states_plus = to_device(t[:state])
 
-    states_flatten = flatten_batch(select_last_dim(states_plus, 1:n))
+    if t isa MaskedPPOTrajectory
+        LAM = to_device(t[:legal_actions_mask])
+    end
+
+    states_flatten_on_host = flatten_batch(select_last_dim(t[:state], 1:n))
     states_plus_values =
         reshape(send_to_host(AC.critic(flatten_batch(states_plus))), n_envs, :)
+
+    # TODO: make generalized_advantage_estimation GPU friendly
     advantages = generalized_advantage_estimation(
         t[:reward],
         states_plus_values,
@@ -234,10 +251,11 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
         dims = 2,
         terminal = t[:terminal],
     )
-    returns = advantages .+ select_last_dim(states_plus_values, 1:n_rollout)
+    returns = to_device(advantages .+ select_last_dim(states_plus_values, 1:n_rollout))
+    advantages = to_device(advantages)
 
     actions_flatten = flatten_batch(select_last_dim(t[:action], 1:n))
-    action_log_probs = select_last_dim(t[:action_log_prob], 1:n)
+    action_log_probs = select_last_dim(to_device(t[:action_log_prob]), 1:n)
 
     # TODO: normalize advantage
     for epoch in 1:n_epochs
@@ -245,25 +263,24 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
         for i in 1:n_microbatches
             inds = rand_inds[(i-1)*microbatch_size+1:i*microbatch_size]
             if t isa MaskedPPOTrajectory
-                lam = send_to_device(
-                    D,
-                    select_last_dim(
-                        flatten_batch(select_last_dim(t[:legal_actions_mask], 1:n)),
-                        inds,
-                    ),
-                )
-                @error "TODO:"
+                lam = select_last_dim(flatten_batch(select_last_dim(LAM, 2:n+1)), inds)
+
+            else
+                lam = nothing
             end
-            s = send_to_device(D, select_last_dim(states_flatten, inds))  # !!! performance critical
-            a = send_to_device(D, select_last_dim(actions_flatten, inds))
-            
+
+            # s = to_device(select_last_dim(states_flatten_on_host, inds))
+            # !!! we need to convert it into a continuous CuArray otherwise CUDA.jl will complain scalar indexing
+            s = to_device(collect(select_last_dim(states_flatten_on_host, inds)))
+            a = to_device(collect(select_last_dim(actions_flatten, inds)))
+
             if eltype(a) === Int
                 a = CartesianIndex.(a, 1:length(a))
             end
-            
-            r = send_to_device(D, vec(returns)[inds])
-            log_p = send_to_device(D, vec(action_log_probs)[inds])
-            adv = send_to_device(D, vec(advantages)[inds])
+
+            r = vec(returns)[inds]
+            log_p = vec(action_log_probs)[inds]
+            adv = vec(advantages)[inds]
 
             ps = Flux.params(AC)
             gs = gradient(ps) do
@@ -275,10 +292,16 @@ function _update!(p::PPOPolicy, t::AbstractTrajectory)
                     else
                         log_p′ₐ = normlogpdf(μ, exp.(logσ), a)
                     end
-                    entropy_loss = mean(size(logσ, 1) * (log(2.0f0π) + 1) .+ sum(logσ; dims = 1)) / 2
+                    entropy_loss =
+                        mean(size(logσ, 1) * (log(2.0f0π) + 1) .+ sum(logσ; dims = 1)) / 2
                 else
                     # actor is assumed to return discrete logits
-                    logit′ = AC.actor(s)
+                    raw_logit′ = AC.actor(s)
+                    if isnothing(lam)
+                        logit′ = raw_logit′
+                    else
+                        logit′ = raw_logit′ .+ ifelse.(lam, 0.0f0, typemin(Float32))
+                    end
                     p′ = softmax(logit′)
                     log_p′ = logsoftmax(logit′)
                     log_p′ₐ = log_p′[a]

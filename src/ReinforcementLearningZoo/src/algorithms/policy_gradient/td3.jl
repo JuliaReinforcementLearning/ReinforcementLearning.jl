@@ -139,7 +139,8 @@ function RLBase.update!(
 end
 
 function RLBase.update!(p::TD3Policy, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(p.behavior_actor), batch)
+    to_device(x) = send_to_device(device(p.behavior_actor), x)
+    s, a, r, t, s′ = to_device(batch)
 
     actor = p.behavior_actor
     critic = p.behavior_critic
@@ -152,13 +153,17 @@ function RLBase.update!(p::TD3Policy, batch::NamedTuple{SARTS})
             randn(p.rng, Float32, 1, p.batch_size) .* p.target_act_noise,
             -p.target_act_limit,
             p.target_act_limit,
-        )
-    # add noise and clip to tanh bounds
-    a′ = clamp.(p.target_actor(s′) + target_noise, -1.0f0, 1.0f0)
+        ) |> to_device
+    # add noise and clip to act_limit bounds
+    a′ = clamp.(p.target_actor(s′) + target_noise, -p.act_limit, p.act_limit)
 
     q_1′, q_2′ = p.target_critic(s′, a′)
     y = r .+ p.γ .* (1 .- t) .* (min.(q_1′, q_2′) |> vec)
-    a = Flux.unsqueeze(a, 1)
+
+    # ad-hoc fix to https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/624
+    if ndims(a) == 1
+        a = Flux.unsqueeze(a, 1)
+    end
 
     gs1 = gradient(Flux.params(critic)) do
         q1, q2 = critic(s, a)

@@ -25,13 +25,7 @@ See paper: [Rainbow: Combining Improvements in Deep Reinforcement Learning](http
 - `stack_size::Union{Int, Nothing}=4`: use the recent `stack_size` frames to form a stacked state.
 - `rng = Random.GLOBAL_RNG`
 """
-mutable struct RainbowLearner{
-    Tq<:AbstractApproximator,
-    Tt<:AbstractApproximator,
-    Tf,
-    Ts,
-    R<:AbstractRNG,
-} <: AbstractLearner
+mutable struct RainbowLearner{Tq,Tt,Tf,Ts,R<:AbstractRNG} <: Any
     approximator::Tq
     target_approximator::Tt
     loss_func::Tf
@@ -52,7 +46,7 @@ mutable struct RainbowLearner{
     loss::Float32
 end
 
-Flux.functor(x::RainbowLearner) =
+Functors.functor(x::RainbowLearner) =
     (Q = x.approximator, Qₜ = x.target_approximator, S = x.support),
     y -> begin
         x = @set x.approximator = y.Q
@@ -168,7 +162,7 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
     is_use_PER = haskey(batch, :priority)  # is use Prioritized Experience Replay
     if is_use_PER
         updated_priorities = Vector{Float32}(undef, batch_size)
-        weights = 1.0f0 ./ ((batch.priority .+ 1f-10) .^ β)
+        weights = 1.0f0 ./ ((batch.priority .+ 1.0f-10) .^ β)
         weights ./= maximum(weights)
         weights = send_to_device(D, weights)
     end
@@ -183,7 +177,7 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
             mean(batch_losses)
         ignore() do
             if is_use_PER
-                updated_priorities .= send_to_host(vec((batch_losses .+ 1f-10) .^ β))
+                updated_priorities .= send_to_host(vec((batch_losses .+ 1.0f-10) .^ β))
             end
             learner.loss = loss
         end

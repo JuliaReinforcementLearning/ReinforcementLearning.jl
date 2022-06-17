@@ -1,6 +1,0 @@
-{
-  "description": "Offline RL related experiments.",
-  "order": [
-    "JuliaRL_BC_CartPole.jl"
-  ]
-}

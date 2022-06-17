@@ -1,0 +1,19 @@
+{
+  "description": "DQN related experiments.",
+  "order": [
+    "JuliaRL_BasicDQN_CartPole.jl",
+    "JuliaRL_BasicDQN_MountainCar.jl",
+    "JuliaRL_BasicDQN_PendulumDiscrete.jl",
+    "JuliaRL_BasicDQN_SingleRoomUndirected.jl",
+    "JuliaRL_DQN_CartPole.jl",
+    "JuliaRL_PrioritizedDQN_CartPole.jl",
+    "JuliaRL_DQN_MountainCar.jl",
+    "JuliaRL_IQN_CartPole.jl",
+    "JuliaRL_QRDQN_Cartpole.jl",
+    "JuliaRL_REMDQN_CartPole.jl",
+    "JuliaRL_Rainbow_CartPole.jl",
+    "Dopamine_DQN_Atari.jl",
+    "Dopamine_Rainbow_Atari.jl",
+    "Dopamine_IQN_Atari.jl"
+  ]
+}

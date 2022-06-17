@@ -1,0 +1,16 @@
+{
+  "description": "Offline RL related experiments.",
+  "order": [
+    "GenDataset_BasicDQN_CartPole.jl",
+    "GenDataset_SAC_Pendulum.jl",
+    "JuliaRL_BC_CartPole.jl",
+    "JuliaRL_BCQ_Pendulum.jl",
+    "JuliaRL_BCQD_CartPole.jl",
+    "JuliaRL_BEAR_Pendulum.jl",
+    "JuliaRL_CRR_CartPole.jl",
+    "JuliaRL_CRR_Pendulum.jl",
+    "JuliaRL_FisherBRC_Pendulum.jl",
+    "JuliaRL_PLAS_Pendulum.jl",
+    "JuliaRL_FQE_Pendulum.jl"
+  ]
+}

@@ -34,7 +34,7 @@ Use monte carlo method to estimate state value or state-action value.
 - `sampling=NO_SAMPLING`. Optional values are `NO_SAMPLING`,
   `WEIGHTED_IMPORTANCE_SAMPLING` or `ORDINARY_IMPORTANCE_SAMPLING`.
 """
-Base.@kwdef struct MonteCarloLearner{A,K,S} <: AbstractLearner
+Base.@kwdef struct MonteCarloLearner{A,K,S} <: Any
     approximator::A
     γ::Float64 = 1.0
     kind::K = FIRST_VISIT
@@ -45,37 +45,25 @@ end
 (learner::MonteCarloLearner)(s) = learner.approximator(s)
 (learner::MonteCarloLearner)(s, a) = learner.approximator(s, a)
 
-function RLBase.update!(::VBasedPolicy{<:MonteCarloLearner}, ::AbstractTrajectory) end
+function RLBase.update!(::VBasedPolicy{<:MonteCarloLearner}, ::Any) end
 
 "Only update at the end of an episode"
 function RLBase.update!(
     p::VBasedPolicy{<:MonteCarloLearner},
-    t::AbstractTrajectory,
+    t::Any,
     ::AbstractEnv,
     ::PostEpisodeStage,
 )
     update!(p.learner, t)
 end
 
-function RLBase.update!(
-    L::MonteCarloLearner,
-    t::AbstractTrajectory,
-    e::AbstractEnv,
-    s::PreActStage,
-) end
-
-function RLBase.update!(
-    L::MonteCarloLearner,
-    t::AbstractTrajectory,
-    e::AbstractEnv,
-    s::PostEpisodeStage,
-)
+function RLBase.update!(L::MonteCarloLearner, t::Any, e::AbstractEnv, s::PostEpisodeStage)
     update!(L, t)
 end
 
 "Empty the trajectory at the end of an episode"
 function RLBase.update!(
-    t::AbstractTrajectory,
+    t::Any,
     ::Union{
         VBasedPolicy{<:MonteCarloLearner},
         QBasedPolicy{<:MonteCarloLearner},
@@ -87,7 +75,7 @@ function RLBase.update!(
     empty!(t)
 end
 
-function RLBase.update!(L::MonteCarloLearner, t::AbstractTrajectory)
+function RLBase.update!(L::MonteCarloLearner, t::Any)
     _update!(L.kind, L.approximator, L.sampling, L, t)
 end
 
@@ -96,7 +84,7 @@ function _update!(
     ::Union{TabularVApproximator,LinearVApproximator},
     ::NoSampling,
     L::MonteCarloLearner,
-    t::AbstractTrajectory,
+    t::Any,
 )
     S, R = t[:state], t[:reward]
     V, G, γ = L.approximator, 0.0, L.γ
@@ -117,7 +105,7 @@ function _update!(
     ::Union{TabularVApproximator,LinearVApproximator},
     ::NoSampling,
     L::MonteCarloLearner,
-    t::AbstractTrajectory,
+    t::Any,
 )
     S, R = t[:state], t[:reward]
     V, G, γ = L.approximator, 0.0, L.γ
@@ -133,7 +121,7 @@ function _update!(
     ::TabularQApproximator,
     ::NoSampling,
     L::MonteCarloLearner,
-    t::AbstractTrajectory,
+    t::Any,
 )
     S, A, R = t[:state], t[:action], t[:reward]
     γ, Q, G = L.γ, L.approximator, 0.0
@@ -149,7 +137,7 @@ function _update!(
     ::TabularQApproximator,
     ::NoSampling,
     L::MonteCarloLearner,
-    t::AbstractTrajectory,
+    t::Any,
 )
     S, A, R = t[:state], t[:action], t[:reward]
     γ, Q, G = L.γ, L.approximator, 0.0
@@ -175,7 +163,7 @@ function _update!(
     },
     ::OrdinaryImportanceSampling,
     L::MonteCarloLearner,
-    t::AbstractTrajectory,
+    t::Any,
 )
     S, R, W = t[:state], t[:reward], t[:weight]
     (V, G), g, γ, ρ = L.approximator, 0.0, L.γ, 1.0
@@ -200,7 +188,7 @@ function _update!(
     ::Tuple,
     ::WeightedImportanceSampling,
     L::MonteCarloLearner,
-    t::AbstractTrajectory,
+    t::Any,
 )
     S, R, W = t[:state], t[:reward], t[:weight]
     (V, G, Ρ), g, γ, ρ = L.approximator, 0.0, L.γ, 1.0

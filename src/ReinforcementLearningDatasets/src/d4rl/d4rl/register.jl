@@ -1,11 +1,10 @@
-export D4RL_DATASET_URLS
-export D4RL_REF_MAX_SCORE
-export D4RL_REF_MIN_SCORE
+export  d4rl_dataset_params
 
-"""
-This file holds the registration information for d4rl datasets.
-It also registers the information in DataDeps for further use in this package.
-"""
+function d4rl_dataset_params()
+    dataset = keys(D4RL_DATASET_URLS)
+    repo = "d4rl"
+    @info dataset repo
+end
 
 const D4RL_DATASET_URLS = Dict{String, String}(
     "maze2d-open-v0" => "http://rail.eecs.berkeley.edu/datasets/offline_rl/maze2d/maze2d-open-sparse.hdf5",

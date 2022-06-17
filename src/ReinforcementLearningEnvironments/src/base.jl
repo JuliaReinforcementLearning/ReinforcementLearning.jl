@@ -6,10 +6,18 @@ using MacroTools: @forward
 
 using IntervalSets
 
-Random.rand(s::Union{Interval,Array{<:Interval}}) = rand(Random.GLOBAL_RNG, s)
+Random.rand(s::Interval) = rand(Random.GLOBAL_RNG, s)
 
 function Random.rand(rng::AbstractRNG, s::Interval)
-    rand(rng) * (s.right - s.left) + s.left
+    r = rand(rng)
+    
+    # Check to prevent choosing an excluded endpoint
+    # of (half-)open intervals
+    while (r == 0.0) || (r == 1.0)
+        r = rand(rng)
+    end
+
+    return r * (s.right - s.left) + s.left
 end
 
 #####
@@ -36,10 +44,10 @@ Base.show(io::IO, r::ZeroTo) = print(io, "ZeroTo(", r.stop, ")")
 Base.length(r::ZeroTo{T}) where {T} = T(r.stop + one(r.stop))
 Base.first(r::ZeroTo{T}) where {T} = zero(r.stop)
 
-function getindex(v::ZeroTo{T}, i::Integer) where {T}
+function Base.getindex(v::ZeroTo{T}, i::Integer) where {T}
     Base.@_inline_meta
-    @boundscheck ((i >= 0) & (i <= v.stop)) || throw_boundserror(v, i)
-    convert(T, i)
+    @boundscheck ((i > 0) & (i <= v.stop+1)) || Base.throw_boundserror(v, i)
+    convert(T, i-1)
 end
 
 #####

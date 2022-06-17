@@ -1,10 +1,16 @@
 export buffered_shuffle
+export RLTransition
+export batch!
+export RingBuffer
+export gen_JuliaRL_dataset
 
 import Base.take!
 import Base.iterate
 
 using Random
 using ProgressMeter
+
+abstract type RLTransition end
 
 #####
 #  BufferedShuffle
@@ -87,7 +93,17 @@ mutable struct RingBuffer{T} <: AbstractChannel{T}
 end
 
 Base.close(b::RingBuffer) = close(b.buffers) # will propergate to b.results
+"""
+    RingBuffer(f!, buffer, taskref=nothing)
 
+Return a RingBuffer that gives batches with the specs in `buffer`.
+
+# Arguments
+
+- `f!`: the inplace operation to do in the `buffer`.
+- `buffer::T`: the type containing the batch.
+- `sz::Int`:size of the internal buffers.
+"""
 function RingBuffer(f!, buffer::T;sz=Threads.nthreads(), taskref=nothing) where T
     buffers = Channel{T}(sz)
     for _ in 1:sz
@@ -107,4 +123,12 @@ function Base.take!(b::RingBuffer)
     put!(b.buffers, b.current)
     b.current = take!(b.results)
     b.current
+end
+
+function batch!(dest::RLTransition, src::RLTransition, i::Int)
+    for fn in fieldnames(typeof(dest))
+        xs = getfield(dest, fn)
+        x = getfield(src, fn)
+        selectdim(xs, ndims(xs), i) .= x
+    end
 end

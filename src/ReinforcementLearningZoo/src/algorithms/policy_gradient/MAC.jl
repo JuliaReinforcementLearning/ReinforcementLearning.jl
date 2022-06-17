@@ -12,7 +12,7 @@ export MACLearner
 -  `bootstrap::bool`, if false then Q function is approximated using monte carlo returns.
 """
 
-Base.@kwdef mutable struct MACLearner{A<:ActorCritic} <: AbstractLearner
+Base.@kwdef mutable struct MACLearner{A<:ActorCritic} <: Any
     approximator::A
     γ::Float32
     max_grad_norm::Union{Nothing,Float32} = nothing
@@ -25,7 +25,7 @@ Base.@kwdef mutable struct MACLearner{A<:ActorCritic} <: AbstractLearner
     update_step::Int = 0
 end
 
-Flux.functor(x::MACLearner) = (app = x.approximator,), y -> @set x.approximator = y.app
+Functors.functor(x::MACLearner) = (app = x.approximator,), y -> @set x.approximator = y.app
 
 function (learner::MACLearner)(env::MultiThreadEnv)
     learner.approximator.actor(send_to_device(device(learner.approximator), state(env))) |>
