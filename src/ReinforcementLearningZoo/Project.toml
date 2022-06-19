@@ -5,6 +5,7 @@ version = "0.6.0-dev"
 [deps]
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 Functors = "d9f16b24-f501-4c13-a1f2-28368ffc5196"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 ReinforcementLearningBase = "e575027e-6cd6-5018-9292-cdc6200d2b44"
 ReinforcementLearningCore = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
@@ -13,7 +14,6 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 ReinforcementLearningBase = "0.10"
-ReinforcementLearningCore = "0.9"
 julia = "1.6"
 
 [extras]
