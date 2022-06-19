@@ -300,7 +300,7 @@ For some simple environments, we can simply use a `Tuple` or a `Vector` to
 describe the action space. A special space type [`Space`](@ref) is also provided
 as a meta space to hold the composition of different kinds of sub-spaces. For
 example, we can use `Space(((1:3),(true,false)))` to describe the environment
-with two kinds of actions, an integer between `1` and `3`, and a boolearn.
+with two kinds of actions, an integer between `1` and `3`, and a boolean.
 Sometimes, the action space is not easy to be described by some built in data
 structures. In that case, you can defined a customized one with the following
 interfaces implemented:
