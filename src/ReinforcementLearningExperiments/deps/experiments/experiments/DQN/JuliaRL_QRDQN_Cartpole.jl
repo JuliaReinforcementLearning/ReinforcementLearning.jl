@@ -2,22 +2,21 @@
 # title: JuliaRL\_QRDQN\_CartPole
 # cover: assets/JuliaRL_QRDQN_CartPole.png
 # description: QRDQN applied to CartPole
-# date: 2021-05-22
+# date: 2021-06-19
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
 #+ tangle=true
 using ReinforcementLearning
-using StableRNGs
+using StableRNGs: StableRNG
 using Flux
-using Flux.Losses
+using Flux: glorot_uniform
 
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:QRDQN},
     ::Val{:CartPole},
-    ::Nothing;
-    seed=123,
+    ; seed=123
 )
 
     N = 10
@@ -26,33 +25,23 @@ function RL.Experiment(
     env = CartPoleEnv(; T=Float32, rng=rng)
     ns, na = length(state(env)), length(action_space(env))
 
-    init = glorot_uniform(rng)
-
     agent = Agent(
         policy=QBasedPolicy(
             learner=QRDQNLearner(
-                approximator=NeuralNetworkApproximator(
-                    model=Chain(
-                        Dense(ns, 128, relu; init = init),
-                        Dense(128, 128, relu; init = init),
-                        Dense(128, N * na; init = init),
-                    ) |> gpu,
-                    optimizer=ADAM(),
+                approximator=Approximator(
+                    model=TwinNetwork(
+                        Chain(
+                            Dense(ns, 128, relu; init=glorot_uniform(rng)),
+                            Dense(128, 128, relu; init=glorot_uniform(rng)),
+                            Dense(128, N * na; init=glorot_uniform(rng)),
+                        );
+                        sync_freq=100
+                    ),
+                    optimiser=ADAM(),
                 ),
-                target_approximator=NeuralNetworkApproximator(
-                    model=Chain(
-                        Dense(ns, 128, relu; init = init),
-                        Dense(128, 128, relu; init = init),
-                        Dense(128, N * na; init = init),
-                    ) |> gpu,
-                ),
-                stack_size=nothing,
-                batch_size=32,
-                update_horizon=1,
-                min_replay_history=100,
-                update_freq=1,
-                target_update_freq=100,
                 n_quantile=N,
+                loss_func=quantile_huber_loss,
+                γ=0.99f0,
                 rng=rng,
             ),
             explorer=EpsilonGreedyExplorer(
@@ -62,15 +51,25 @@ function RL.Experiment(
                 rng=rng,
             ),
         ),
-        trajectory=CircularArraySARTTrajectory(
-            capacity=1000,
-            state=Vector{Float32} => (ns,),
-        ),
+        trajectory=Trajectory(
+            container=CircularArraySARTTraces(
+                capacity=1000,
+                state=Float32 => (ns,),
+            ),
+            sampler=BatchSampler{SS′ART}(
+                batch_size=32,
+                rng=rng
+            ),
+            controller=InsertSampleRatioController(
+                threshold=100,
+                n_inserted=-1
+            )
+        )
     )
 
     stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
-    Experiment(agent, env, stop_condition, hook, "")
+    Experiment(agent, env, stop_condition, hook)
 end
 
 #+ tangle=false
