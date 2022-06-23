@@ -60,82 +60,84 @@ function (p::MPOPolicy)(env; testmode = false)
     send_to_host(action)
 end
 
-#Update of the NNs happens here. This function is called at every environment step but will only update every `update_freq` calls. A low update_freq makes for a strongly offpolicy algorithm that will reuse data from far in the past.
+#=Update of the NNs happens here. This function is called at every environment step but will only update every `update_freq` calls. A low update_freq makes for a strongly offpolicy algorithm that will reuse data from far in the past.
 #A high `update_freq` will use more recent transitions, but less times. To work only with transitions sampled from the current policy, use a trajectory with a length equal to `update_freq`. If you work with N multiple parallel environment, 
 #use `update_freq = length(traj) ÷ N` (remainder should be zero) otherwise some transitions will never be used at all. 
+NamedTuple{
+        (:policy, :critic), 
+        <: Tuple{
+            <: Vector{<: NamedTuple{(:state)}},
+            <: Vector{<: NamedTuple{SS′ART}}
+        }
+    }
+is the signature of batches returned by a MetaSampler with two MutliBatchSampler: a `:policy` and a `:critic` one.
+The :policy sampler must sample :state traces only and the :critic needs SS′ART traces. 
 
-function RLBase.update!(
+=#
+function RLBase.optimise!(
     p::MPOPolicy,
-    traj::CircularArraySARTTrajectory,
-    ::AbstractEnv,
-    ::PreActStage
+    batches::NamedTuple{
+        (:policy, :critic), 
+        <: Tuple{
+            <: Vector{<: NamedTuple{(:state)}},
+            <: Vector{<: NamedTuple{SS′ART}}
+        }
+    }
 )
     length(traj) >= p.update_after || return
     p.update_step % p.update_freq == 0 || return
-    update_critic!(p, traj)
-    update_policy!(p, traj)
-end
-
-#Need to update the normalizer, unnormalized rewards are kept in memory to use the latest estimate when sampling.
-function RLBase.update!(
-    trajectory::AbstractTrajectory,
-    policy::MPOPolicy,
-    env::AbstractEnv,
-    ::PostActStage,
-)
-    r = policy isa NamedPolicy ? reward(env, nameof(policy)) : reward(env)
-    policy.reward_normalizer(r)
-    push!(trajectory[:reward], r)
-    push!(trajectory[:terminal], is_terminated(env))
+    for batch in batches[:critic]
+        update_critic!(p, batch)
+    end
+    for batch in batches[:policy]
+        update_policy!(p, batch)
+    end
 end
 
 #Here we apply the TD3 Q network approach. This could be customizable by the user in a new p.critic <: AbstractCritic field. 
-function update_critic!(p::MPOPolicy, traj)
-    for _ in 1:p.critic_batches
-        inds, batch = p.batch_sampler(traj)
-        s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
-        γ, τ = p.γ, p.τ
+function update_critic!(p::MPOPolicy, batch)
+    s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
+    γ, τ = p.γ, p.τ
 
-        a′ = p.policy(p.rng, s′; is_sampling=true, is_return_log_prob=false)
-        q′_input = vcat(s′, a′)
-        q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
+    a′ = p.policy(p.rng, s′; is_sampling=true, is_return_log_prob=false)
+    q′_input = vcat(s′, a′)
+    q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
-        y =  p.reward_normalizer(r, update = false) .+ γ .* (1 .- t) .* vec(q′) 
+    y =  p.reward_normalizer(r, update = false) .+ γ .* (1 .- t) .* vec(q′) 
 
-        # Train Q Networks
-        q_input = vcat(s, a)
+    # Train Q Networks
+    q_input = vcat(s, a)
 
-        q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
-            q1 = p.qnetwork1(q_input) |> vec
-            l = mse(q1, y)
-            Zygote.ignore() do 
-                push!(p.logs[:qnetwork1_loss], l)
-            end
-            return l
+    q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
+        q1 = p.qnetwork1(q_input) |> vec
+        l = mse(q1, y)
+        Zygote.ignore() do 
+            push!(p.logs[:qnetwork1_loss], l)
         end
-        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
-            error("Gradient of Q_1 contains NaN of Inf")
+        return l
+    end
+    if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
+        error("Gradient of Q_1 contains NaN of Inf")
+    end
+    update!(p.qnetwork1, q_grad_1)
+    q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
+        q2 = p.qnetwork2(q_input) |> vec
+        l = mse(q2, y)
+        Zygote.ignore() do 
+            push!(p.logs[:qnetwork2_loss], l)
         end
-        update!(p.qnetwork1, q_grad_1)
-        q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
-            q2 = p.qnetwork2(q_input) |> vec
-            l = mse(q2, y)
-            Zygote.ignore() do 
-                push!(p.logs[:qnetwork2_loss], l)
-            end
-            return l
-        end
-        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_2)
-            error("Gradient of Q_2 contains NaN of Inf")
-        end
-        update!(p.qnetwork2, q_grad_2)
+        return l
+    end
+    if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_2)
+        error("Gradient of Q_2 contains NaN of Inf")
+    end
+    update!(p.qnetwork2, q_grad_2)
 
-        for (dest, src) in zip(
-            Flux.params([p.target_qnetwork1, p.target_qnetwork2]),
-            Flux.params([p.qnetwork1, p.qnetwork2]),
-        )
-            dest .= (1 - τ) .* dest .+ τ .* src
-        end
+    for (dest, src) in zip(
+        Flux.params([p.target_qnetwork1, p.target_qnetwork2]),
+        Flux.params([p.qnetwork1, p.qnetwork2]),
+    )
+        dest .= (1 - τ) .* dest .+ τ .* src
     end
 end
 
