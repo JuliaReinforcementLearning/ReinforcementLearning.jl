@@ -141,46 +141,42 @@ function update_critic!(p::MPOPolicy, batch)
     end
 end
 
-function update_policy!(p::MPOPolicy, traj)
-    sd(x) = send_to_device(device(p.policy), x)
-    tmp = [first(last(p.batch_sampler(traj))) for _ in 1:p.policy_batches]
-    states_batches = map(s -> reshape(sd(s), first(size(s)), 1, :), tmp) #3D tensors with dimensions (state_size x 1 x batch_size), sent to device
-    batches = [(states, p.policy(p.rng, states, is_sampling = false)...) for states in states_batches]
+function update_policy!(p::MPOPolicy, batch::NamedTuple{(:state)})
+    states = send_to_device(device(p.policy), reshape(batch[:state], size(batch[:state],1), 1, :)) #3D tensors with dimensions (state_size x 1 x batch_size), sent to device
+    μ_old, L_old = p.policy(p.rng, states, is_sampling = false)
 
-    for (states, μ_old, L_old) in batches 
-        #Fit non-parametric variational distribution
-        action_samples = p.policy(p.rng, states, p.action_sample_size, is_return_log_prob = false) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
-        repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
-        input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
-        Q = p.qnetwork1(input) 
-        η = solve_mpodual(send_to_host(Q), p.ϵ, p.policy)
-        push!(p.logs[:η], η)
-        qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batch_size)
+    #Fit non-parametric variational distribution
+    action_samples = p.policy(p.rng, states, p.action_sample_size, is_return_log_prob = false) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
+    repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
+    input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
+    Q = p.qnetwork1(input) 
+    η = solve_mpodual(send_to_host(Q), p.ϵ, p.policy)
+    push!(p.logs[:η], η)
+    qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batch_size)
 
-        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), qij)
-            error("qij contains NaN of Inf")
-        end
+    if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), qij)
+        error("qij contains NaN of Inf")
+    end
 
-        #Improve policy towards qij
-        ps = Flux.params(p.policy, p.αμ, p.αΣ)
-        gs = gradient(ps) do 
-            loss_decoupled(p, qij, states, action_samples, μ_old, L_old)
-        end
-        
-        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), gs)
-            error("Gradient contains NaN of Inf")
-        end
+    #Improve policy towards qij
+    ps = Flux.params(p.policy, p.αμ, p.αΣ)
+    gs = gradient(ps) do 
+        loss_decoupled(p, qij, states, action_samples, μ_old, L_old)
+    end
+    
+    if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), gs)
+        error("Gradient contains NaN of Inf")
+    end
 
-        gs[p.αμ] *= -1 #negative of gradient since we maximize w.r.t. α
-        gs[p.αΣ] *= -1 
+    gs[p.αμ] *= -1 #negative of gradient since we maximize w.r.t. α
+    gs[p.αΣ] *= -1 
 
-        Flux.Optimise.update!(p.policy.optimizer, ps, gs)
-        p.αμ = clamp.(p.αμ, 0f0, Inf32) #maybe add an upperbound ?
-        p.αΣ = clamp.(p.αΣ, 0f0, Inf32)
-        Zygote.ignore() do 
-            push!(p.logs[:αμ],sum(p.αμ))
-            push!(p.logs[:αΣ],sum(p.αΣ))
-        end
+    Flux.Optimise.update!(p.policy.optimizer, ps, gs)
+    p.αμ = clamp.(p.αμ, 0f0, Inf32) #maybe add an upperbound ?
+    p.αΣ = clamp.(p.αΣ, 0f0, Inf32)
+    Zygote.ignore() do 
+        push!(p.logs[:αμ],sum(p.αμ))
+        push!(p.logs[:αΣ],sum(p.αΣ))
     end
 end
 
