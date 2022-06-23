@@ -4,6 +4,9 @@ const RLBase = ReinforcementLearningBase
 export RLBase
 
 using Random
+using Reexport
+
+@reexport using CommonRLSpaces
 
 include("inline_export.jl")
 include("interface.jl")

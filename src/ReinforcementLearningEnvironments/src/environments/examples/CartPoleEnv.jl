@@ -1,5 +1,7 @@
 export CartPoleEnv
 
+using FillArrays: Trues
+
 struct CartPoleEnvParams{T}
     gravity::T
     masscart::T
@@ -19,8 +21,7 @@ Base.show(io::IO, params::CartPoleEnvParams) = print(
     join(["$p=$(getfield(params, p))" for p in fieldnames(CartPoleEnvParams)], ","),
 )
 
-function CartPoleEnvParams(;
-    T = Float64,
+function CartPoleEnvParams{T}(;
     gravity = 9.8,
     masscart = 1.0,
     masspole = 0.1,
@@ -29,8 +30,8 @@ function CartPoleEnvParams(;
     max_steps = 200,
     dt = 0.02,
     thetathreshold = 12.0,
-    xthreshold = 2.4
-)
+    xthreshold = 2.4,
+) where {T}
     CartPoleEnvParams{T}(
         gravity,
         masscart,
@@ -46,15 +47,13 @@ function CartPoleEnvParams(;
     )
 end
 
-mutable struct CartPoleEnv{A,T,ACT,R<:AbstractRNG} <: AbstractEnv
+mutable struct CartPoleEnv{T,ACT} <: AbstractEnv
     params::CartPoleEnvParams{T}
-    action_space::A
-    observation_space::Space{Vector{ClosedInterval{T}}}
     state::Vector{T}
     action::ACT
     done::Bool
     t::Int
-    rng::R
+    rng::AbstractRNG
 end
 
 """
@@ -74,32 +73,9 @@ end
 - `thetathreshold = 12.0 # degrees`
 - `xthreshold` = 2.4`
 """
-function CartPoleEnv(;
-    T = Float64,
-    continuous = false,
-    rng = Random.GLOBAL_RNG,
-    kwargs...
-)
-    params = CartPoleEnvParams(; T = T, kwargs...)
-    action_space = continuous ? ClosedInterval{T}(-1.0, 1.0) : Base.OneTo(2)
-    state_space = Space(
-        ClosedInterval{T}[
-            (-2*params.xthreshold)..(2*params.xthreshold),
-            typemin(T)..typemax(T),
-            (-2*params.thetathreshold)..(2*params.thetathreshold),
-            typemin(T)..typemax(T),
-        ],
-    )
-    env = CartPoleEnv(
-        params,
-        action_space,
-        state_space,
-        zeros(T, 4),
-        rand(action_space),
-        false,
-        0,
-        rng,
-    )
+function CartPoleEnv(; T = Float64, continuous = false, rng = Random.GLOBAL_RNG, kwargs...)
+    params = CartPoleEnvParams{T}(; kwargs...)
+    env = CartPoleEnv(params, zeros(T, 4), continuous ? zero(T) : zero(Int), false, 0, rng)
     reset!(env)
     env
 end
@@ -107,28 +83,39 @@ end
 CartPoleEnv{T}(; kwargs...) where {T} = CartPoleEnv(T = T, kwargs...)
 
 Random.seed!(env::CartPoleEnv, seed) = Random.seed!(env.rng, seed)
-RLBase.action_space(env::CartPoleEnv) = env.action_space
-RLBase.state_space(env::CartPoleEnv) = env.observation_space
-RLBase.reward(env::CartPoleEnv{A,T}) where {A,T} = env.done ? zero(T) : one(T)
+RLBase.reward(env::CartPoleEnv{T}) where {T} = env.done ? zero(T) : one(T)
 RLBase.is_terminated(env::CartPoleEnv) = env.done
 RLBase.state(env::CartPoleEnv) = env.state
 
-function RLBase.reset!(env::CartPoleEnv{A,T}) where {A,T}
+RLBase.state_space(env::CartPoleEnv{T}) where {T} = Space(
+    SVector(
+        (-2 * env.params.xthreshold) .. (2 * env.params.xthreshold),
+        typemin(T) .. typemax(T),
+        (-2 * env.params.thetathreshold) .. (2 * env.params.thetathreshold),
+        typemin(T) .. typemax(T),
+    ),
+)
+
+RLBase.action_space(env::CartPoleEnv{<:AbstractFloat,Int}) = Space(OneTo(2))
+RLBase.action_space(env::CartPoleEnv{<:AbstractFloat,<:AbstractFloat}) = Space(-1.0 .. 1.0)
+RLBase.legal_action_space_mask(env::CartPoleEnv) = Trues(2)
+
+function RLBase.reset!(env::CartPoleEnv{T}) where {T}
     env.state[:] = T(0.1) * rand(env.rng, T, 4) .- T(0.05)
     env.t = 0
-    env.action = rand(env.rng, env.action_space)
+    env.action = rand(env.rng, action_space(env))
     env.done = false
     nothing
 end
 
-function (env::CartPoleEnv{<:ClosedInterval})(a::AbstractFloat)
-    @assert a in env.action_space
+function (env::CartPoleEnv)(a::AbstractFloat)
+    @assert a in action_space(env)
     env.action = a
     _step!(env, a)
 end
 
-function (env::CartPoleEnv{<:Base.OneTo{Int}})(a::Int)
-    @assert a in env.action_space
+function (env::CartPoleEnv)(a::Int)
+    @assert a in action_space(env)
     env.action = a
     _step!(env, a == 2 ? 1 : -1)
 end

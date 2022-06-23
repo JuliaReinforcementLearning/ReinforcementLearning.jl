@@ -1,5 +1,4 @@
 @testset "OpenSpielEnv" begin
-
     for name in [
         "tic_tac_toe",
         "kuhn_poker",

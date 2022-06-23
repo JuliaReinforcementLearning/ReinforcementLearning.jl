@@ -8,8 +8,7 @@ using Random
 This is a meta-learner, it will randomly select one learner and update another learner.
 The estimation of an observation is the sum of result from two learners.
 """
-Base.@kwdef struct DoubleLearner{T1<:AbstractLearner,T2<:AbstractLearner,R<:AbstractRNG} <:
-                   AbstractLearner
+Base.@kwdef struct DoubleLearner{T1<:Any,T2<:Any,R<:AbstractRNG} <: Any
     L1::T1
     L2::T2
     rng::R = Random.GLOBAL_RNG
@@ -19,7 +18,7 @@ end
 
 function RLBase.update!(
     L::DoubleLearner{<:TDLearner},
-    t::AbstractTrajectory,
+    t::Any,
     ::AbstractEnv,
     ::PostEpisodeStage,
 )
@@ -41,12 +40,7 @@ function RLBase.update!(
     end
 end
 
-function RLBase.update!(
-    L::DoubleLearner{<:TDLearner},
-    t::AbstractTrajectory,
-    ::AbstractEnv,
-    ::PreActStage,
-)
+function RLBase.update!(L::DoubleLearner{<:TDLearner}, t::Any, ::AbstractEnv, ::PreActStage)
     if rand(L.rng, Bool)
         L, Lₜ = L.L1, L.L2
     else
@@ -68,7 +62,7 @@ function RLBase.update!(
 end
 
 function RLBase.update!(
-    t::AbstractTrajectory,
+    t::Any,
     # not very elegant
     ::Union{
         QBasedPolicy{<:DoubleLearner{<:TDLearner}},

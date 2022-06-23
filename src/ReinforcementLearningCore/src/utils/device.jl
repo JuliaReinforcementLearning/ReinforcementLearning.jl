@@ -1,14 +1,17 @@
-export device, send_to_host, send_to_device
+# TODO: watch https://github.com/JuliaGPU/Adapt.jl/pull/52
+
+export device, send_to_device, send_to_host
 
 using Flux
 using CUDA
 using Adapt
 using Random
-using ElasticArrays
 
 import CUDA: device
 
 send_to_host(x) = send_to_device(Val(:cpu), x)
+
+send_to_device(d) = x -> send_to_device(device(d), x)
 
 send_to_device(::Val{:cpu}, m) = fmap(x -> adapt(Array, x), m)
 
@@ -26,9 +29,9 @@ device(x::Function) = nothing
 device(::Array) = Val(:cpu)
 device(x::Tuple{}) = nothing
 device(x::NamedTuple{(),Tuple{}}) = nothing
-device(x::ElasticArray) = device(x.data)
-device(x::SubArray) = device(parent(x))
-device(x::Base.ReshapedArray) = device(parent(x))
+device(x::AbstractArray) = device(parent(x))
+
+device(x::AbstractEnv) = Val(:cpu)  # TODO: we may support gpu later
 
 function device(x::Random.AbstractRNG)
     if x isa CUDA.CURAND.RNG

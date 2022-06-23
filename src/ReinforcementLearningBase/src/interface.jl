@@ -40,11 +40,11 @@ object which takes in an environment and returns an action.
 @api (π::AbstractPolicy)(env)
 
 """
-    update!(π::AbstractPolicy, experience)
+    optimise!(π::AbstractPolicy, experience)
 
-Update the policy `π` with online/offline experience or parameters.
+Optimise the policy `π` with online/offline experience or parameters.
 """
-@api update!(π::AbstractPolicy, experience)
+@api optimise!(π::AbstractPolicy, experience)
 
 """
     prob(π::AbstractPolicy, env) -> Distribution
@@ -63,7 +63,7 @@ Only valid for environments with discrete actions.
 """
     priority(π::AbstractPolicy, experience)
 
-Usually used in offline policies.
+Usually used in offline policies to evaluate the priorities of the experience.
 """
 @api priority(π::AbstractPolicy, experience)
 
@@ -304,7 +304,11 @@ abstract type AbstractActionStyle <: AbstractEnvStyle end
 abstract type AbstractDiscreteActionStyle <: AbstractActionStyle end
 @api struct FullActionSet <: AbstractDiscreteActionStyle end
 
-"The action space of the environment may contains illegal actions"
+"""
+The action space of the environment may contains illegal actions. For
+environments of `FULL_ACTION_SET`, [`legal_action_space`](@ref) and
+[`legal_action_space_mask`](@ref) must also be defined.
+"""
 @api const FULL_ACTION_SET = FullActionSet()
 
 @api struct MinimalActionSet <: AbstractDiscreteActionStyle end
@@ -371,11 +375,21 @@ Specify the default state style when calling `state(env)`.
 """
 @env_api DefaultStateStyle(env::AbstractEnv) = DefaultStateStyle(StateStyle(env))
 DefaultStateStyle(ss::AbstractStateStyle) = ss
-DefaultStateStyle(ss::Tuple{Vararg{<:AbstractStateStyle}}) = first(ss)
+DefaultStateStyle(ss::Tuple{Vararg{AbstractStateStyle}}) = first(ss)
 
+#####
 # EpisodeStyle
-# Episodic
-# NeverEnding
+#####
+
+abstract type AbstractEpisodeStyle end
+
+"The environment will terminate in finite steps."
+@api struct Episodic <: AbstractEpisodeStyle end
+
+"The environment can run infinitely."
+@api struct NeverEnding <: AbstractEpisodeStyle end
+
+@env_api EpisodeStyle(env::AbstractEnv) = Episodic()
 
 #####
 # General
@@ -410,12 +424,14 @@ Make an independent copy of `env`,
 !!! warning
     Only check the state of all players in the env.
 """
-function Base.:(==)(env1::T, env2::T) where T<:AbstractEnv
+function Base.:(==)(env1::T, env2::T) where {T<:AbstractEnv}
     len = length(players(env1))
-    len == length(players(env2)) && 
-    all(state(env1, player) == state(env2, player) for player in players(env1))
+    len == length(players(env2)) &&
+        all(state(env1, player) == state(env2, player) for player in players(env1))
 end
-Base.hash(env::AbstractEnv, h::UInt) = hash([state(env, player) for player in players(env)], h)
+
+Base.hash(env::AbstractEnv, h::UInt) =
+    hash([state(env, player) for player in players(env)], h)
 
 @api nameof(env::AbstractEnv) = nameof(typeof(env))
 
@@ -450,9 +466,14 @@ legal_action_space(::MinimalActionSet, env, player) = action_space(env)
 """
     legal_action_space_mask(env, player=current_player(env)) -> AbstractArray{Bool}
 
-Required for environments of [`FULL_ACTION_SET`](@ref).
+Required for environments of [`FULL_ACTION_SET`](@ref). As a default implementation,
+     [`legal_action_space_mask`](@ref) creates a mask of [`action_space`](@ref) with
+     the subset [`legal_action_space`](@ref).
 """
-@multi_agent_env_api legal_action_space_mask(env::AbstractEnv, player = current_player(env))
+@multi_agent_env_api legal_action_space_mask(env::AbstractEnv, player = current_player(env)) = 
+    map(action_space(env, player)) do action
+        action in legal_action_space(env, player)
+    end
 
 """
     state(env, style=[DefaultStateStyle(env)], player=[current_player(env)])

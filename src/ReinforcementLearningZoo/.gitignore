@@ -1,8 +1,0 @@
-.DS_Store
-/Manifest.toml
-/dev/
-**/checkpoints/
-
-# add vim generated temp files
-*~
-*.swp

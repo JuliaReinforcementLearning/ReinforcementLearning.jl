@@ -17,7 +17,7 @@ end
 
 function RLBase.update!(
     m::ExperienceBasedSamplingModel,
-    t::AbstractTrajectory,
+    t::Any,
     ::AbstractPolicy,
     ::AbstractEnv,
     ::Union{PreActStage,PostEpisodeStage},

@@ -3,7 +3,7 @@ export TDLearner
 using LinearAlgebra: dot
 using Distributions: pdf
 
-Base.@kwdef struct TDLearner{A} <: AbstractLearner
+Base.@kwdef struct TDLearner{A} <: Any
     approximator::A
     γ::Float64 = 1.0
     method::Symbol
@@ -18,7 +18,7 @@ end
 
 function RLBase.update!(
     p::QBasedPolicy{<:TDLearner},
-    t::AbstractTrajectory,
+    t::Any,
     e::AbstractEnv,
     s::AbstractStage,
 )
@@ -31,16 +31,11 @@ function RLBase.update!(
 end
 
 
-function RLBase.update!(L::TDLearner, t::AbstractTrajectory, ::AbstractEnv, s::PreActStage)
+function RLBase.update!(L::TDLearner, t::Any, ::AbstractEnv, s::PreActStage)
     _update!(L, L.approximator, Val(L.method), t, s)
 end
 
-function RLBase.update!(
-    L::TDLearner,
-    t::AbstractTrajectory,
-    ::AbstractEnv,
-    s::PostEpisodeStage,
-)
+function RLBase.update!(L::TDLearner, t::Any, ::AbstractEnv, s::PostEpisodeStage)
     _update!(L, L.approximator, Val(L.method), t, s)
 end
 
@@ -57,7 +52,7 @@ end
 ## update trajectories
 
 function RLBase.update!(
-    t::AbstractTrajectory,
+    t::Any,
     ::Union{
         QBasedPolicy{<:TDLearner},
         NamedPolicy{<:QBasedPolicy{<:TDLearner}},
@@ -131,7 +126,7 @@ function _update!(
     L::TDLearner,
     ::Union{TabularQApproximator,LinearQApproximator},
     ::Val{:SARS},
-    t::AbstractTrajectory,
+    t::Any,
     ::PreActStage,
 )
     S = t[:state]
@@ -172,7 +167,7 @@ function _update!(
     L::TDLearner,
     ::Union{TabularVApproximator,LinearVApproximator},
     ::Val{:SRS},
-    t::AbstractTrajectory,
+    t::Any,
     ::PreActStage,
 )
     S = t[:state]
@@ -199,7 +194,7 @@ end
 function RLBase.update!(
     p::QBasedPolicy{<:TDLearner},
     m::Union{ExperienceBasedSamplingModel,TimeBasedSamplingModel},
-    ::AbstractTrajectory,
+    ::Any,
     env::AbstractEnv,
     ::Union{PreActStage,PostEpisodeStage},
 )
@@ -220,7 +215,7 @@ end
 function RLBase.update!(
     p::QBasedPolicy{<:TDLearner},
     m::PrioritizedSweepingSamplingModel,
-    ::AbstractTrajectory,
+    ::Any,
     env::AbstractEnv,
     ::Union{PreActStage,PostEpisodeStage},
 )
@@ -265,7 +260,7 @@ end
 
 export TDλReturnLearner
 
-Base.@kwdef struct TDλReturnLearner{Tapp<:AbstractApproximator} <: AbstractLearner
+Base.@kwdef struct TDλReturnLearner{Tapp} <: Any
     approximator::Tapp
     γ::Float64 = 1.0
     λ::Float64
@@ -275,19 +270,9 @@ end
 (L::TDλReturnLearner)(s) = L.approximator(s)
 (L::TDλReturnLearner)(s, a) = L.approximator(s, a)
 
-function RLBase.update!(
-    L::TDλReturnLearner,
-    t::AbstractTrajectory,
-    ::AbstractEnv,
-    ::PreActStage,
-) end
+function RLBase.update!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PreActStage) end
 
-function RLBase.update!(
-    L::TDλReturnLearner,
-    t::AbstractTrajectory,
-    ::AbstractEnv,
-    ::PostEpisodeStage,
-)
+function RLBase.update!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PostEpisodeStage)
     λ, γ, V = L.λ, L.γ, L.approximator
     R = t[:reward]
     S = @view t[:state][1:end-1]
@@ -310,7 +295,7 @@ function RLBase.update!(
 end
 
 function RLBase.update!(
-    t::AbstractTrajectory,
+    t::Any,
     ::VBasedPolicy{<:TDλReturnLearner},
     ::AbstractEnv,
     ::PreEpisodeStage,

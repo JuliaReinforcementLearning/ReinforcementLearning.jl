@@ -167,7 +167,11 @@
         "logps",
         "trilcol",
         "mvnormlogpdf",
-        "mvnormals"
+        "mvnormals",
+        "Optimise",
+        "xlabel",
+        "ylabel",
+        "optimising"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
