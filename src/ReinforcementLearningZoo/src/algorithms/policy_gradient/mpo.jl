@@ -18,11 +18,6 @@ mutable struct MPOPolicy{P<:NeuralNetworkApproximator,Q<:NeuralNetworkApproximat
     ϵΣ::Float32 #KL bound for the parametric policy training of (co)variance estimations
     αμ::AV
     αΣ::AV
-    update_freq::Int
-    update_after::Int
-    update_step::Int
-    critic_batches::Int
-    policy_batches::Int
     τ::Float32 #Polyak avering parameter of target networks
     rng::R
     logs::Dict{Symbol, Vector{Float32}}
@@ -85,8 +80,6 @@ function RLBase.optimise!(
         }
     }
 )
-    length(traj) >= p.update_after || return
-    p.update_step % p.update_freq == 0 || return
     for batch in batches[:critic]
         update_critic!(p, batch)
     end
