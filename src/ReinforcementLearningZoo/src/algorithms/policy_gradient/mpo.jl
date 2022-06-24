@@ -12,7 +12,6 @@ mutable struct MPOPolicy{P<:NeuralNetworkApproximator,Q<:NeuralNetworkApproximat
     target_qnetwork1::Q
     target_qnetwork2::Q 
     γ::Float32
-    batch_sampler::BatchSampler{SARTS} #can't directly specify a batch_size because trajectory sampling may need its own rng (e.g. if working on gpu). Eventually, we could split this into critic/policy samplers to use multi-steps like vtrace/retrace.
     action_sample_size::Int #K 
     ϵ::Float32  #KL bound on the non-parametric variational approximation to the policy
     ϵμ::Float32 #KL bound for the parametric policy training of mean estimations
@@ -63,6 +62,7 @@ end
 #=Update of the NNs happens here. This function is called at every environment step but will only update every `update_freq` calls. A low update_freq makes for a strongly offpolicy algorithm that will reuse data from far in the past.
 #A high `update_freq` will use more recent transitions, but less times. To work only with transitions sampled from the current policy, use a trajectory with a length equal to `update_freq`. If you work with N multiple parallel environment, 
 #use `update_freq = length(traj) ÷ N` (remainder should be zero) otherwise some transitions will never be used at all. 
+```
 NamedTuple{
         (:policy, :critic), 
         <: Tuple{
@@ -70,6 +70,7 @@ NamedTuple{
             <: Vector{<: NamedTuple{SS′ART}}
         }
     }
+```
 is the signature of batches returned by a MetaSampler with two MutliBatchSampler: a `:policy` and a `:critic` one.
 The :policy sampler must sample :state traces only and the :critic needs SS′ART traces. 
 
