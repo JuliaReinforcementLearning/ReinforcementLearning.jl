@@ -20,7 +20,7 @@ end
 
 Random.seed!(env::TigerProblemEnv, s) = seed!(env.rng, s)
 
-RLBase.action_space(::TigerProblemEnv) = (:listen, :open_left, :open_right)
+RLBase.action_space(::TigerProblemEnv) = Space((:listen, :open_left, :open_right))
 
 (env::TigerProblemEnv)(action) = env.action = action
 
@@ -67,8 +67,8 @@ end
 RLBase.state(env::TigerProblemEnv, ::InternalState) = env.tiger_pos
 
 RLBase.state_space(env::TigerProblemEnv) = state_space(env, Observation{Int}())
-RLBase.state_space(env::TigerProblemEnv, ::Observation) = 1:4
-RLBase.state_space(env::TigerProblemEnv, ::InternalState) = 1:2
+RLBase.state_space(env::TigerProblemEnv, ::Observation) = Space(1:4)
+RLBase.state_space(env::TigerProblemEnv, ::InternalState) = Space(1:2)
 
 RLBase.NumAgentStyle(::TigerProblemEnv) = SINGLE_AGENT
 RLBase.DynamicStyle(::TigerProblemEnv) = SEQUENTIAL

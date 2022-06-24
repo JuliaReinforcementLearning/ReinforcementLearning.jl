@@ -32,7 +32,7 @@ end
 
 Random.seed!(env::MontyHallEnv, s) = Random.seed!(env.rng, s)
 
-RLBase.action_space(::MontyHallEnv) = Base.OneTo(3)
+RLBase.action_space(::MontyHallEnv) = Space(OneTo(3))
 
 """
 In the first round, the guest has 3 options, in the second round only two
@@ -66,7 +66,7 @@ function RLBase.state(env::MontyHallEnv)
     end
 end
 
-RLBase.state_space(env::MontyHallEnv) = 1:4
+RLBase.state_space(env::MontyHallEnv) = Space(1:4)
 
 function (env::MontyHallEnv)(action)
     if isnothing(env.host_action)

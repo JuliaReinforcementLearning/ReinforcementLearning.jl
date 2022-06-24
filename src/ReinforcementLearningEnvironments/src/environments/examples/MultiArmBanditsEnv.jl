@@ -38,7 +38,7 @@ environment, the possible actions are `1` to `k` (which equals to
     require that the action space must be of `Base.OneTo`. However, it's the
     algorithm designer's job to do the checking and conversion.
 """
-RLBase.action_space(env::MultiArmBanditsEnv) = Base.OneTo(length(env.true_values))
+RLBase.action_space(env::MultiArmBanditsEnv) = Space(OneTo(length(env.true_values)))
 
 """
 In our design, the return of taking an action in `env` is **undefined**. This is
@@ -70,7 +70,7 @@ state is after each action. So here we can simply set it to a constant `1`.
 """
 RLBase.state(env::MultiArmBanditsEnv) = 1
 
-RLBase.state_space(env::MultiArmBanditsEnv) = Base.OneTo(1)
+RLBase.state_space(env::MultiArmBanditsEnv) = Space(OneTo(1))
 
 function RLBase.reset!(env::MultiArmBanditsEnv)
     env.is_terminated = false

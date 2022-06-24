@@ -498,6 +498,24 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "tyleringebrand",
+      "name": "tyleringebrand",
+      "avatar_url": "https://avatars.githubusercontent.com/u/59975096?v=4",
+      "profile": "https://github.com/tyleringebrand",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "baedan",
+      "name": "baedan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/106585642?v=4",
+      "profile": "https://github.com/baedan",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

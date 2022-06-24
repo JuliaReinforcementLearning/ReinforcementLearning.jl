@@ -34,7 +34,7 @@ end
 # By default we do nothing
 function RLBase.update!(
     ::AbstractEnvironmentModel,
-    ::AbstractTrajectory,
+    ::Any,
     ::AbstractPolicy,
     ::AbstractEnv,
     ::AbstractStage,
@@ -45,7 +45,7 @@ function RLBase.update!(
 function RLBase.update!(
     ::AbstractPolicy,
     ::AbstractEnvironmentModel,
-    ::AbstractTrajectory,
+    ::Any,
     ::AbstractEnv,
     ::AbstractStage,
 ) end

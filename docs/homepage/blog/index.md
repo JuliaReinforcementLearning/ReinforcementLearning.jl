@@ -2,6 +2,8 @@
 @def description = ""
 @def is_enable_toc = false
 
+- [A Practical Introduction to ReinforcementLearning.jl](/blog/a_practical_introduction_to_RL.jl)
+
 - [An Introduction to ReinforcementLearning.jl: Design, Implementations and Thoughts](/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts)
 
 - [Phase 1 Technical Report of Enriching Offline Reinforcement Learning Algorithms in ReinforcementLearning.jl](/blog/phase1_technical_report_of_enriching_offline_reinforcement_learning_algorithms_in_reinforcement_learning_jl)
