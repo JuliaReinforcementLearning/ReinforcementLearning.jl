@@ -21,23 +21,15 @@ mutable struct MPOPolicy{P<:NeuralNetworkApproximator,Q<:NeuralNetworkApproximat
     τ::Float32 #Polyak avering parameter of target networks
     rng::R
     logs::Dict{Symbol, Vector{Float32}}
-    reward_normalizer::N
 end
 
-function MPOPolicy(;policy::NeuralNetworkApproximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, batch_size::Int, action_sample_size, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, update_freq = 1, update_after = 0, critic_batches = 1, policy_batches = 1, τ = 1f-3, rng = Random.GLOBAL_RNG, reward_normalizer:: Union{Bool, AbstractRewardNormalizer} = false) where Q <: NeuralNetworkApproximator
+function MPOPolicy(;policy::NeuralNetworkApproximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q <: NeuralNetworkApproximator
     @assert device(policy) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(policy) == device(rng) "The specified rng does not generate on the same device as the policy. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     αμ = send_to_device(device(policy), [0f0])
     αΣ = send_to_device(device(policy), [0f0])
     logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :policy_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :αμ, :αΣ, :klμ, :klΣ))
-    if reward_normalizer == false
-        normalizer_ = n(x; kwargs...) = identity(x)
-    elseif reward_normalizer == true
-        normalizer_ = ExpRewardNormalizer(0.1f0)
-    else
-        normalizer_ = reward_normalizer
-    end
-    MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, BatchSampler{SARTS}(batch_size), action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, update_freq, update_after, 0, critic_batches, policy_batches, τ, rng, logs, normalizer_)
+    MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, τ, rng, logs)
 end
 
 Flux.@functor MPOPolicy
@@ -97,7 +89,7 @@ function update_critic!(p::MPOPolicy, batch)
     q′_input = vcat(s′, a′)
     q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
-    y =  p.reward_normalizer(r, update = false) .+ γ .* (1 .- t) .* vec(q′) 
+    y =  r .+ γ .* (1 .- t) .* vec(q′) 
 
     # Train Q Networks
     q_input = vcat(s, a)
@@ -178,9 +170,7 @@ function solve_mpodual(Q, ϵ, nna::NeuralNetworkApproximator)
     solve_mpodual(Q, ϵ, nna.model)
 end
 
-function solve_mpodual(Q::AbstractArray, ϵ, ::Union{GaussianNetwork, CovGaussianNetwork})
-    max_Q = maximum(Q) #needed for numerical stability
-    
+function solve_mpodual(Q::AbstractArray, ϵ, ::Union{GaussianNetwork, CovGaussianNetwork})    
     g(η) = η * ϵ + η * mean(logsumexp( Q ./η .- log(size(Q, 2)*1f0), dims = 2))
     Optim.minimizer(optimize(g, eps(ϵ), 10f0))
 end
@@ -202,7 +192,7 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:CovGaussianNe
     klΣ = mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_d_s, L_s))
     lagrangeμ = - mean(p.αμ) * (p.ϵμ - klμ) 
     lagrangeΣ = - mean(p.αΣ) * (p.ϵΣ - klΣ)
-    Zygote.ignore() do 
+    Zygote.ignore() do #logging
         push!(p.logs[:policy_loss],policy_loss)
         push!(p.logs[:lagrangeμ_loss], lagrangeμ)
         push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
@@ -227,7 +217,7 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:GaussianNetwo
     μ_old_s, σ_old_s, μ_s, σ_d_s, μ_d_s, σ_s = map(x->eachslice(x, dims =3), (μ_old, σ_old, μ, σ_d, μ_d, σ)) #slice all tensors along 3rd dim
     lagrangeμ = - mean(p.αμ) * (p.ϵμ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))) 
     lagrangeΣ = - mean(p.αΣ) * (p.ϵΣ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_d_s, σ_s)))
-    Zygote.ignore() do 
+    Zygote.ignore() do #logging
         push!(p.logs[:policy_loss],policy_loss)
         push!(p.logs[:lagrangeμ_loss], lagrangeμ)
         push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
@@ -251,18 +241,12 @@ function Flux.gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
         p.target_qnetwork1 |> gpu, 
         p.target_qnetwork2 |> gpu, 
         p.γ, 
-        p.batch_sampler, 
         p.action_sample_size, 
         p.ϵ, 
         p.ϵμ, 
         p.ϵΣ, 
         p.αμ |> gpu, 
-        p.αΣ |> gpu, 
-        p.update_freq, 
-        p.update_after, 
-        p.update_step,
-        p.critic_batches, 
-        p.policy_batches, 
+        p.αΣ |> gpu,
         p.τ, 
         rng,
         p.logs)
@@ -282,19 +266,13 @@ function RLCore.send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ?
         p.qnetwork2 |> sd, 
         p.target_qnetwork1 |> sd, 
         p.target_qnetwork2 |> sd, 
-        p.γ, 
-        p.batch_sampler.batch_size, 
+        p.γ,
         p.action_sample_size, 
         p.ϵ, 
         p.ϵμ, 
         p.ϵΣ, 
         p.αμ |> sd, 
         p.αΣ |> sd, 
-        p.update_freq, 
-        p.update_after, 
-        p.update_step,
-        p.critic_batches, 
-        p.policy_batches, 
         p.τ, 
         rng,
         p.logs)
