@@ -1,7 +1,5 @@
-import Functors
+using Functors: @functor
 import Flux
-
-using Setfield: @set
 
 #####
 # ActorCritic
@@ -18,7 +16,7 @@ Base.@kwdef struct ActorCritic{A,C,O}
     critic::C
 end
 
-Functors.@functor ActorCritic
+@functor ActorCritic
 
 #####
 # GaussianNetwork
@@ -44,7 +42,7 @@ end
 
 GaussianNetwork(pre, μ, logσ, normalizer=tanh) = GaussianNetwork(pre, μ, logσ, 0.0f0, Inf32, normalizer)
 
-Functors.@functor GaussianNetwork
+@functor GaussianNetwork
 
 """
 This function is compatible with a multidimensional action space. When outputting an action, it uses the `normalizer` function to normalize it elementwise.
@@ -138,7 +136,7 @@ end
 
 CovGaussianNetwork(pre, m, s) = CovGaussianNetwork(pre, m, s, tanh)
 
-Functors.@functor CovGaussianNetwork
+@functor CovGaussianNetwork
 
 """
     (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
@@ -397,7 +395,7 @@ end
 
 TwinNetwork(x; kw...) = TwinNetwork(; source=x, target=deepcopy(x), kw...)
 
-Functors.functor(x::TwinNetwork) = (; source=x.source), y -> @set x.source = y.source
+@functor TwinNetwork (source,)
 
 (model::TwinNetwork)(x) = model.source(x)
 

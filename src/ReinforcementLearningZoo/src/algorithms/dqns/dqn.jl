@@ -1,8 +1,7 @@
 export DQNLearner
 
-using Setfield: @set
 using Random: AbstractRNG, GLOBAL_RNG
-import Functors
+using Functors: @functor
 
 Base.@kwdef mutable struct DQNLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
     approximator::A
@@ -17,7 +16,7 @@ end
 
 (L::DQNLearner)(s::AbstractArray) = L.approximator(s)
 
-Functors.functor(x::DQNLearner) = (; approximator=x.approximator), y -> @set x.approximator = y.approximator
+@functor DQNLearner (approximator,)
 
 function RLBase.optimise!(learner::DQNLearner, batch::Union{NamedTuple{SS′ART},NamedTuple{SS′L′ART}})
     A = learner.approximator

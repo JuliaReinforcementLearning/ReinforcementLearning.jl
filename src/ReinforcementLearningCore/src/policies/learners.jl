@@ -1,7 +1,7 @@
 export AbstractLearner, Approximator
 
 import Flux
-import Functors
+using Functors: @functor
 
 abstract type AbstractLearner end
 
@@ -12,7 +12,7 @@ Base.@kwdef mutable struct Approximator{M,O}
     optimiser::O
 end
 
-Functors.functor(x::Approximator) = (model=x.model,), y -> Approximator(y.model, x.state)
+@functor Approximator (model,)
 
 (A::Approximator)(x) = A.model(x)
 
