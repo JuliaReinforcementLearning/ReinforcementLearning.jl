@@ -397,7 +397,7 @@ TwinNetwork(x; kw...) = TwinNetwork(; source=x, target=deepcopy(x), kw...)
 
 @functor TwinNetwork (source,)
 
-(model::TwinNetwork)(x) = model.source(x)
+(model::TwinNetwork)(args...) = model.source(args...)
 
 function RLBase.optimise!(A::Approximator{<:TwinNetwork}, gs)
     Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
