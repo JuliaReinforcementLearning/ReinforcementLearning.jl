@@ -5,7 +5,7 @@ using ReinforcementLearningCore: logdetLorU
 import LogExpFunctions.logsumexp
 
 #Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
-mutable struct MPOPolicy{P<:NeuralNetworkApproximator,Q<:NeuralNetworkApproximator,R,AV<:AbstractVector, N} <: AbstractPolicy
+mutable struct MPOPolicy{P<:Approximator,Q<:Approximator,R,AV<:AbstractVector, N} <: AbstractPolicy
     policy::P
     qnetwork1::Q
     qnetwork2::Q
@@ -23,7 +23,7 @@ mutable struct MPOPolicy{P<:NeuralNetworkApproximator,Q<:NeuralNetworkApproximat
     logs::Dict{Symbol, Vector{Float32}}
 end
 
-function MPOPolicy(;policy::NeuralNetworkApproximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q <: NeuralNetworkApproximator
+function MPOPolicy(;policy::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q <: Approximator
     @assert device(policy) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(policy) == device(rng) "The specified rng does not generate on the same device as the policy. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     αμ = send_to_device(device(policy), [0f0])
@@ -166,7 +166,7 @@ function update_policy!(p::MPOPolicy, batch::NamedTuple{(:state)})
     end
 end
 
-function solve_mpodual(Q, ϵ, nna::NeuralNetworkApproximator)
+function solve_mpodual(Q, ϵ, nna::Approximator)
     solve_mpodual(Q, ϵ, nna.model)
 end
 
@@ -176,7 +176,7 @@ function solve_mpodual(Q::AbstractArray, ϵ, ::Union{GaussianNetwork, CovGaussia
 end
 
 #For CovGaussianNetwork
-function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:CovGaussianNetwork}}, qij, states, actions, μ_old, L_old)
+function loss_decoupled(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, states, actions, μ_old, L_old)
     μ, L = p.policy(p.rng, states, is_sampling = false)
     #decoupling
     μ_d, L_d = Zygote.ignore() do 
@@ -203,7 +203,7 @@ function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:CovGaussianNe
 end
 
 #In the case of diagonal covariance (with GaussianNetwork), 
-function loss_decoupled(p::MPOPolicy{<:NeuralNetworkApproximator{<:GaussianNetwork}}, qij, states, actions, μ_old, logσ_old)
+function loss_decoupled(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, actions, μ_old, logσ_old)
     σ_old = exp.(logσ_old)
     μ, logσ = p.policy(p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
     σ = exp.(logσ)
