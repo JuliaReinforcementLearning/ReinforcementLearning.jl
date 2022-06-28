@@ -47,3 +47,16 @@ function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ = 1.0f-8) where {A<:AbstractArray
     logp = [mvnormlogpdf(μ[:, :, k], LorU[:, :, k], x[:, :, k]) for k in 1:size(x, 3)]
     return unsqueeze(stack(logp, 2), 1) #returns a 3D vector 
 end
+
+#Used for mvnormlogpdf
+"""
+`logdetLorU(LorU::AbstractMatrix)`
+Log-determinant of the Positive-Semi-Definite matrix A = L*U (cholesky lower and upper triangulars), given L or U. 
+Has a sign uncertainty for non PSD matrices.
+"""
+function logdetLorU(LorU::CuArray)
+    return 2*sum(log.(diag(LorU)))
+end
+
+#Cpu fallback
+logdetLorU(LorU::AbstractMatrix) = logdet(LorU)*2
