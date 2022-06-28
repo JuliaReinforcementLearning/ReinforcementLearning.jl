@@ -76,8 +76,8 @@ end
 
 """
     (model::GaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
-Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions (action_size x action_samples x batch_size).
-`state` must be 3D tensor with dimensions (state_size x 1 x batch_size). Always returns the logpdf of each action along.
+Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batch_size)`.
+`state` must be 3D tensor with dimensions `(state_size x 1 x batch_size)`. Always returns the logpdf of each action along.
 """
 function (model::GaussianNetwork)(rng::AbstractRNG, s, action_samples::Int)
     x = model.pre(s)
@@ -121,8 +121,8 @@ export CovGaussianNetwork
 
 Returns `μ` and `Σ` when called where μ is the mean and Σ is a covariance
 matrix. Unlike GaussianNetwork, the output is 3-dimensional.  μ has dimensions
-(action_size x 1 x batch_size) and Σ has dimensions (action_size x action_size x
-batch_size).  The Σ head of the `CovGaussianNetwork` should not directly return
+`(action_size x 1 x batch_size)` and Σ has dimensions `(action_size x action_size x
+batch_size)`.  The Σ head of the `CovGaussianNetwork` should not directly return
 a square matrix but a vector of length `action_size x (action_size + 1) ÷ 2`.
 This vector will contain elements of the uppertriangular cholesky decomposition
 of the covariance matrix, which is then reconstructed from it.  Sample from
@@ -146,11 +146,12 @@ Functors.@functor CovGaussianNetwork
 This function is compatible with a multidimensional action space. When
 outputting a sampled action, it uses the `normalizer` function to normalize it
 elementwise.  To work with covariance matrices, the outputs are 3D tensors.  If
-sampling, return an actions tensor with dimensions (action_size x action_samples
-x batch_size) and logp_π (1 x action_samples x batch_size) If not, returns μ
-with dimensions (action_size x 1 x batch_size) and L, the lower triangular of
+sampling, return an actions tensor with dimensions `(action_size x action_samples
+x batch_size)` and a `logp_π` tensor with dimensions `(1 x action_samples x batch_size)`. 
+If not sampling, returns `μ`
+with dimensions `(action_size x 1 x batch_size)` and `L`, the lower triangular of
 the cholesky decomposition of the covariance matrix, with dimensions
-(action_size x action_size x batch_size) The covariance matrices can be
+`(action_size x action_size x batch_size)` The covariance matrices can be
 retrieved with `Σ = Flux.stack(map(l -> l*l', eachslice(L, dims=3)),3)`
 
 - `rng::AbstractRNG=Random.GLOBAL_RNG`
@@ -205,8 +206,8 @@ Sample `action_samples` actions given `state` and return the `actions,
 logpdf(actions)`.  This function is compatible with a multidimensional action
 space. When outputting a sampled action, it uses the `normalizer` function to
 normalize it elementwise.  The outputs are 3D tensors with dimensions
-(action_size x action_samples x batch_size) and (1 x action_samples x
-batch_size) for `actions` and `logdpf` respectively.
+`(action_size x action_samples x batch_size)` and `(1 x action_samples x
+batch_size)` for `actions` and `logdpf` respectively.
 """
 function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
     batch_size = size(state, 3) #3
@@ -230,10 +231,10 @@ end
     (model::CovGaussianNetwork)(state, action)
     
 Return the logpdf of the model sampling `action` when in `state`.  State must be
-a 3D tensor with dimensions (state_size x 1 x batch_size).  Multiple actions may
-be taken per state, `action` must have dimensions (action_size x
-action_samples_per_state x batch_size) Returns a 3D tensor with dimensions (1 x
-action_samples_per_state x batch_size)
+a 3D tensor with dimensions `(state_size x 1 x batch_size)`.  Multiple actions may
+be taken per state, `action` must have dimensions `(action_size x
+action_samples_per_state x batch_size)`. Returns a 3D tensor with dimensions `(1 x
+action_samples_per_state x batch_size)`.
 """
 function (model::CovGaussianNetwork)(state::AbstractArray, action::AbstractArray)
     da = size(action, 1)
