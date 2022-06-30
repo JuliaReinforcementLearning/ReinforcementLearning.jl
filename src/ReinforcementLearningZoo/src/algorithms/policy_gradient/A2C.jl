@@ -12,7 +12,7 @@ export A2CLearner
 - `entropy_loss_weight::Float32`
 - `update_freq::Int`, usually set to the same with the length of trajectory.
 """
-Base.@kwdef mutable struct A2CLearner{A<:ActorCritic} <: AbstractLearner
+Base.@kwdef mutable struct A2CLearner{A<:ActorCritic} <: Any
     approximator::A
     γ::Float32
     max_grad_norm::Union{Nothing,Float32} = nothing
@@ -29,7 +29,7 @@ Base.@kwdef mutable struct A2CLearner{A<:ActorCritic} <: AbstractLearner
     norm::Float32 = 0.0f0
 end
 
-Flux.functor(x::A2CLearner) = (app = x.approximator,), y -> @set x.approximator = y.app
+Functors.functor(x::A2CLearner) = (app = x.approximator,), y -> @set x.approximator = y.app
 
 function (learner::A2CLearner)(env::MultiThreadEnv)
     learner.approximator.actor(send_to_device(device(learner), state(env))) |> send_to_host

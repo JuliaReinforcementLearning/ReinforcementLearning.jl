@@ -5,7 +5,7 @@ mutable struct FQE{
     C<:NeuralNetworkApproximator,
     C_T<:NeuralNetworkApproximator,
     R<:AbstractRNG,
- } <: AbstractLearner
+} <: Any
     policy::P
     q_network::C
     target_q_network::C_T
@@ -44,13 +44,13 @@ function FQE(;
     policy,
     q_network,
     target_q_network,
-    n_evals=20,
-    γ=0.99f0,
-    batch_size=32,
-    update_freq=1,
-    update_step=0,
+    n_evals = 20,
+    γ = 0.99f0,
+    batch_size = 32,
+    update_freq = 1,
+    update_step = 0,
     tar_update_freq = 50,
-    rng=Random.GLOBAL_RNG,
+    rng = Random.GLOBAL_RNG,
 )
     copyto!(q_network, target_q_network) #force sync
     FQE(
@@ -68,8 +68,7 @@ function FQE(;
     )
 end
 
-Flux.functor(x::FQE) = (Q = x.q_network, Qₜ = x.target_q_network),
-y -> begin
+Functors.functor(x::FQE) = (Q = x.q_network, Qₜ = x.target_q_network), y -> begin
     x = @set x.q_network = y.Q
     x = @set x.target_q_network = y.Qₜ
     x
@@ -78,7 +77,7 @@ end
 function (l::FQE)(env)
     s = send_to_device(device(l.policy), state(env))
     s = Flux.unsqueeze(s, ndims(s) + 1)
-    action = dropdims(l.policy(l.rng, s; is_sampling=true), dims=2)
+    action = dropdims(l.policy(l.rng, s; is_sampling = true), dims = 2)
 end
 
 function (l::FQE)(env, ::Val{:Eval})
@@ -87,8 +86,8 @@ function (l::FQE)(env, ::Val{:Eval})
     for _ in 1:l.n_evals
         reset!(env)
         s = send_to_device(D, state(env))
-        s = Flux.unsqueeze(s, ndims(s)+1)
-        a = dropdims(l.policy(l.rng, s; is_sampling=true), dims=2)
+        s = Flux.unsqueeze(s, ndims(s) + 1)
+        a = dropdims(l.policy(l.rng, s; is_sampling = true), dims = 2)
         input = vcat(s, a)
         result = l.q_network(input)
         push!(results, result[])
@@ -107,7 +106,7 @@ end
 function RLBase.update!(l::FQE, batch::NamedTuple{SARTS})
     policy = l.policy
     Q, Qₜ = l.q_network, l.target_q_network
-    
+
     D = device(Q)
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     γ = l.γ
@@ -116,7 +115,7 @@ function RLBase.update!(l::FQE, batch::NamedTuple{SARTS})
     loss_func = Flux.Losses.mse
 
     q′ = Qₜ(vcat(s′, policy(s′)[1])) |> vec
-    
+
     target = r .+ γ .* (1 .- t) .* q′
 
     gs = gradient(params(Q)) do

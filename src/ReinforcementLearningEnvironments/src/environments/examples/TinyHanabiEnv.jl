@@ -57,10 +57,11 @@ RLBase.current_player(env::TinyHanabiEnv) =
 (env::TinyHanabiEnv)(action, ::ChancePlayer) = push!(env.cards, action)
 (env::TinyHanabiEnv)(action, ::Int) = push!(env.actions, action)
 
-RLBase.action_space(env::TinyHanabiEnv, ::Int) = Base.OneTo(3)
-RLBase.action_space(env::TinyHanabiEnv, ::ChancePlayer) = Base.OneTo(2)
+RLBase.action_space(env::TinyHanabiEnv, ::Int) = Space(OneTo(3))
+RLBase.action_space(env::TinyHanabiEnv, ::ChancePlayer) = Space(OneTo(2))
 
-RLBase.legal_action_space(env::TinyHanabiEnv, ::ChancePlayer) = findall(!in(env.cards), 1:2)
+RLBase.legal_action_space(env::TinyHanabiEnv, ::ChancePlayer) =
+    Space(findall(!in(env.cards), 1:2))
 RLBase.legal_action_space_mask(env::TinyHanabiEnv, ::ChancePlayer) =
     [x ∉ env.cards for x in 1:2]
 
@@ -77,13 +78,15 @@ function RLBase.prob(env::TinyHanabiEnv, ::ChancePlayer)
 end
 
 RLBase.state_space(env::TinyHanabiEnv, ::InformationSet, ::ChancePlayer) =
-    ((0,), (0, 1), (0, 2), (0, 1, 2), (0, 2, 1)) # (chance_player_id(0), chance_player's actions...)
+    Space(((0,), (0, 1), (0, 2), (0, 1, 2), (0, 2, 1))) # (chance_player_id(0), chance_player's actions...)
 RLBase.state(env::TinyHanabiEnv, ::InformationSet, ::ChancePlayer) = (0, env.cards...)
 
 function RLBase.state_space(env::TinyHanabiEnv, ::InformationSet, p::Int)
-    Tuple(
-        (p, c..., a...) for p in 1:2 for c in ((), 1, 2) for
-        a in ((), 1:3..., ((i, j) for i in 1:3 for j in 1:3)...)
+    Space(
+        Tuple(
+            (p, c..., a...) for p in 1:2 for c in ((), 1, 2) for
+            a in ((), 1:3..., ((i, j) for i in 1:3 for j in 1:3)...)
+        ),
     )
 end
 
