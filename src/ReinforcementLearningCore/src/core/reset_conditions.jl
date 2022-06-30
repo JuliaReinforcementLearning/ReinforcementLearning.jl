@@ -3,7 +3,7 @@ export ResetAtTerminal, ResetAfterNSteps
 """
     ResetAtTerminal()
 
-A reset condition that resets the environemnt if is_terminated(env) is true.
+A reset condition that resets the environment if is_terminated(env) is true.
 """
 struct ResetAtTerminal end
 
