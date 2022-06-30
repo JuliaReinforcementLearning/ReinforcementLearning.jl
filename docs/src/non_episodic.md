@@ -39,7 +39,7 @@ end
 run(agent, env, stop_condition, hook, MyCondition(ResetAfterNSteps(10000)))
 ```
 
-A last possibility is to use an anonymous function. For example here is alternative way to implement ResetAtTerminal:
+A last possibility is to use an anonymous function. This approach cannot be used to implement stateful conditions (such as `ResetAfterNSteps`). For example here is alternative way to implement `ResetAtTerminal`:
 
 ```julia
 run(agent, env, stop_condition, hook, (p,e) -> is_terminated(e))
