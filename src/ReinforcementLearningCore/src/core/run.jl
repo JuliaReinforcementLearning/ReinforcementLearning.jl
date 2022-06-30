@@ -84,6 +84,7 @@ function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook, re
         while !reset_condition(policy, env) # one episode
             policy(PreActStage(), env)
             hook(PreActStage(), policy, env)
+            
             env |> policy |> env
             optimise!(policy)
 
