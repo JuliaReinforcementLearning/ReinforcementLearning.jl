@@ -3,15 +3,14 @@ export QBasedPolicy
 include("learners.jl")
 include("explorers/explorers.jl")
 
-import Functors
+using Functors: @functor
 
 Base.@kwdef mutable struct QBasedPolicy{L,E} <: AbstractPolicy
     learner::L
     explorer::E
 end
 
-Functors.functor(x::QBasedPolicy) =
-    (learner = x.learner,), y -> QBasedPolicy(y.learner, x.explorer)
+@functor QBasedPolicy (learner,)
 
 (p::QBasedPolicy)(env) = p.explorer(p.learner(env), legal_action_space_mask(env))
 
