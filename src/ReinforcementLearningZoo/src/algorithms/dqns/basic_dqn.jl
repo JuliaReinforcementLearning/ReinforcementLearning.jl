@@ -3,8 +3,7 @@ export BasicDQNLearner
 using Flux: gradient, params
 using Zygote: ignore
 using Setfield: @set
-
-import Functors
+using Functors: @functor
 
 """
     BasicDQNLearner(;kwargs...)
@@ -32,7 +31,7 @@ Base.@kwdef mutable struct BasicDQNLearner{Q} <: AbstractLearner
     loss::Float32 = 0.0f0
 end
 
-Functors.functor(x::BasicDQNLearner) = (Q=x.approximator,), y -> @set x.approximator = y.Q
+@functor BasicDQNLearner (approximator,)
 
 (L::BasicDQNLearner)(s::AbstractArray) = L.approximator(s)
 
