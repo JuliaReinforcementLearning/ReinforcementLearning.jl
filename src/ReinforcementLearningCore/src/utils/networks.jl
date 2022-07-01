@@ -305,7 +305,7 @@ function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray; is_
             log_probs = reshape(logsoftmax(logits, dims = 1), size(logits,1), :) # work in 2D
             gumbels = -log.(-log.(rand(rng, size(log_probs)...))) .+ log_probs # Gumbel-Max trick
             z = getindex.(argmax(gumbels, dims = 1), 1)
-            reshape(onehotbatch(z, 1:size(logits,1)), size(logits)...) # reshape back to orignal shape
+            reshape(onehotbatch(z, 1:size(logits,1)), size(logits)...) # reshape back to original shape
         end
         if is_return_logits
             return z, logits
