@@ -336,8 +336,8 @@ function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray{<:An
         gumbels = -log.(-log.(rand(rng, da, action_samples, batch_size))) .+ log_probs # Gumbel-Max trick
         z = getindex.(argmax(gumbels, dims = 1), 1)
         reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
-    end
-    return z, reduce(hcat, repeat(logits, outer = (1, action_samples)))
+    end   
+    return z, reduce(hcat, Iterators.repeated(logits, action_samples))
 end
 
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractMatrix, action_samples::Int)
