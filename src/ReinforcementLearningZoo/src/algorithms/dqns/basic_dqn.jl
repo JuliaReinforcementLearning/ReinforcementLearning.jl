@@ -2,7 +2,6 @@ export BasicDQNLearner
 
 using Flux: gradient, params
 using Zygote: ignore
-using Setfield: @set
 using Functors: @functor
 
 """

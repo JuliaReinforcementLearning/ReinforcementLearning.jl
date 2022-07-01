@@ -3,6 +3,7 @@ export QRDQNLearner, quantile_huber_loss
 using Zygote: ignore, dropgrad
 using Random: GLOBAL_RNG, AbstractRNG
 using StatsBase: mean
+using Functors: @functor
 
 function quantile_huber_loss(ŷ, y; κ=1.0f0)
     N, B = size(y)
@@ -29,7 +30,7 @@ Base.@kwdef mutable struct QRDQNLearner{A<:Approximator{<:TwinNetwork}} <: Abstr
     loss::Float32 = 0.0f0
 end
 
-Functors.functor(x::QRDQNLearner) = (; approximator=x.approximator), y -> @set x.approximator = y.approximator
+@functor QRDQNLearner (approximator,)
 
 (L::QRDQNLearner)(s::AbstractArray) = vec(mean(reshape(L.approximator(s), L.n_quantile, :), dims=1))
 

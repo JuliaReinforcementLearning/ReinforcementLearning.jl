@@ -1,8 +1,7 @@
 export PrioritizedDQNLearner
 
-using Setfield: @set
 using Random: AbstractRNG, GLOBAL_RNG
-import Functors
+using Functors: @functor
 using LinearAlgebra: dot
 
 Base.@kwdef mutable struct PrioritizedDQNLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
@@ -19,7 +18,7 @@ end
 
 (L::PrioritizedDQNLearner)(s::AbstractArray) = L.approximator(s)
 
-Functors.functor(x::PrioritizedDQNLearner) = (; approximator=x.approximator), y -> @set x.approximator = y.approximator
+@functor PrioritizedDQNLearner (approximator,)
 
 function RLBase.optimise!(
     learner::PrioritizedDQNLearner,
