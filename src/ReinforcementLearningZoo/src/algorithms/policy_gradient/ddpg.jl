@@ -31,10 +31,10 @@ mutable struct DDPGPolicy{
 end
 
 Functors.functor(x::DDPGPolicy) = (
-    ba = x.behavior_actor,
-    bc = x.behavior_critic,
-    ta = x.target_actor,
-    tc = x.target_critic,
+    ba=x.behavior_actor,
+    bc=x.behavior_critic,
+    ta=x.target_actor,
+    tc=x.target_critic,
 ),
 y -> begin
     x = @set x.behavior_actor = y.ba
@@ -71,17 +71,17 @@ function DDPGPolicy(;
     target_actor,
     target_critic,
     start_policy,
-    γ = 0.99f0,
-    ρ = 0.995f0,
-    na = 1,
-    batch_size = 32,
-    start_steps = 10000,
-    update_after = 1000,
-    update_freq = 50,
-    act_limit = 1.0,
-    act_noise = 0.1,
-    update_step = 0,
-    rng = Random.GLOBAL_RNG,
+    γ=0.99f0,
+    ρ=0.995f0,
+    na=1,
+    batch_size=32,
+    start_steps=10000,
+    update_after=1000,
+    update_freq=50,
+    act_limit=1.0,
+    act_noise=0.1,
+    update_step=0,
+    rng=Random.GLOBAL_RNG
 )
     copyto!(behavior_actor, target_actor)  # force sync
     copyto!(behavior_critic, target_critic)  # force sync
@@ -108,7 +108,7 @@ function DDPGPolicy(;
 end
 
 # TODO: handle Training/Testing mode
-function (p::DDPGPolicy)(env, player::Any = nothing)
+function (p::DDPGPolicy)(env, player::Any=nothing)
     p.update_step += 1
 
     if p.update_step <= p.start_steps
@@ -116,7 +116,7 @@ function (p::DDPGPolicy)(env, player::Any = nothing)
     else
         D = device(p.behavior_actor)
         s = DynamicStyle(env) == SEQUENTIAL ? state(env) : state(env, player)
-        s = Flux.unsqueeze(s, ndims(s) + 1)
+        s = Flux.unsqueeze(s, dims=ndims(s) + 1)
         actions = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
         c =
             clamp.(
@@ -159,12 +159,12 @@ function RLBase.update!(p::DDPGPolicy, batch::NamedTuple{SARTS})
     a′ = Aₜ(s′)
     qₜ = Cₜ(vcat(s′, a′)) |> vec
     y = r .+ γ .* (1 .- t) .* qₜ
-    a = Flux.unsqueeze(a, ndims(a) + 1)
+    a = Flux.unsqueeze(a, dims=ndims(a) + 1)
 
     gs1 = gradient(Flux.params(C)) do
         q = C(vcat(s, a)) |> vec
         loss = mean((y .- q) .^ 2)
-        ignore() do
+        ignore_derivatives() do
             p.critic_loss = loss
         end
         loss
@@ -174,7 +174,7 @@ function RLBase.update!(p::DDPGPolicy, batch::NamedTuple{SARTS})
 
     gs2 = gradient(Flux.params(A)) do
         loss = -mean(C(vcat(s, A(s))))
-        ignore() do
+        ignore_derivatives() do
             p.actor_loss = loss
         end
         loss

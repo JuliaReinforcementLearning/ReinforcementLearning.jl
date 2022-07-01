@@ -76,20 +76,20 @@ function BEARLearner(;
     target_qnetwork2,
     vae,
     log_α,
-    γ = 0.99f0,
-    τ = 0.005f0,
-    λ = 0.75f0,
-    ε = 0.05f0,
-    p = 10,
-    max_log_α = 10.0f0,
-    min_log_α = -5.0f0,
-    sample_num = 10,
-    kernel_type = :laplacian,
-    mmd_σ = 10.0f0,
-    batch_size = 32,
-    update_freq = 50,
-    update_step = 0,
-    rng = Random.GLOBAL_RNG,
+    γ=0.99f0,
+    τ=0.005f0,
+    λ=0.75f0,
+    ε=0.05f0,
+    p=10,
+    max_log_α=10.0f0,
+    min_log_α=-5.0f0,
+    sample_num=10,
+    kernel_type=:laplacian,
+    mmd_σ=10.0f0,
+    batch_size=32,
+    update_freq=50,
+    update_step=0,
+    rng=Random.GLOBAL_RNG
 )
     copyto!(policy, target_policy)  # force sync
     copyto!(qnetwork1, target_qnetwork1)  # force sync
@@ -125,9 +125,9 @@ end
 
 function (l::BEARLearner)(env)
     s = send_to_device(device(l.policy), state(env))
-    s = Flux.unsqueeze(s, ndims(s) + 1)
-    s = repeat(s, outer = (1, 1, l.p))
-    action = l.policy(l.rng, s; is_sampling = true)
+    s = Flux.unsqueeze(s, dims=ndims(s) + 1)
+    s = repeat(s, outer=(1, 1, l.p))
+    action = l.policy(l.rng, s; is_sampling=true)
     q_value = l.qnetwork1(vcat(s, action))
     idx = argmax(q_value)
     action[idx]
@@ -140,15 +140,15 @@ function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
 
     update_vae!(l, s, a)
 
-    repeat_s′ = repeat(s′, outer = (1, 1, l.p))
-    repeat_action′ = l.target_policy(l.rng, repeat_s′, is_sampling = true)
+    repeat_s′ = repeat(s′, outer=(1, 1, l.p))
+    repeat_action′ = l.target_policy(l.rng, repeat_s′, is_sampling=true)
 
     q′_input = vcat(repeat_s′, repeat_action′)
 
     q′ = maximum(
         λ .* min.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)) +
         (1 - λ) .* max.(l.target_qnetwork1(q′_input), l.target_qnetwork2(q′_input)),
-        dims = 3,
+        dims=3,
     )
 
     y = r .+ γ .* (1 .- t) .* vec(q′)
@@ -160,7 +160,7 @@ function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
     q_grad_1 = gradient(Flux.params(l.qnetwork1)) do
         q1 = l.qnetwork1(q_input) |> vec
         loss = mse(q1, y)
-        ignore() do
+        ignore_derivatives() do
             l.critic_loss = loss
         end
         loss
@@ -170,17 +170,17 @@ function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
     q_grad_2 = gradient(Flux.params(l.qnetwork2)) do
         q2 = l.qnetwork2(q_input) |> vec
         loss = mse(q2, y)
-        ignore() do
+        ignore_derivatives() do
             l.critic_loss += loss
         end
         loss
     end
     update!(l.qnetwork2, q_grad_2)
 
-    repeat_s = repeat(s, outer = (1, 1, l.p))
-    repeat_a = repeat(a, outer = (1, 1, l.p))
-    repeat_q1 = mean(l.target_qnetwork1(vcat(repeat_s, repeat_a)), dims = (1, 3))
-    repeat_q2 = mean(l.target_qnetwork2(vcat(repeat_s, repeat_a)), dims = (1, 3))
+    repeat_s = repeat(s, outer=(1, 1, l.p))
+    repeat_a = repeat(a, outer=(1, 1, l.p))
+    repeat_q1 = mean(l.target_qnetwork1(vcat(repeat_s, repeat_a)), dims=(1, 3))
+    repeat_q2 = mean(l.target_qnetwork2(vcat(repeat_s, repeat_a)), dims=(1, 3))
     q = vec(min.(repeat_q1, repeat_q2))
 
     alpha = exp(l.log_α.model[1])
@@ -189,11 +189,11 @@ function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
     p_grad = gradient(Flux.params(l.policy)) do
         raw_sample_action = decode(
             l.vae.model,
-            repeat(s, outer = (1, 1, l.sample_num));
-            is_normalize = false,
+            repeat(s, outer=(1, 1, l.sample_num));
+            is_normalize=false
         )  # action_dim * batch_size * sample_num
         raw_actor_action =
-            l.policy(repeat(s, outer = (1, 1, l.sample_num)); is_sampling = true) # action_dim * batch_size * sample_num
+            l.policy(repeat(s, outer=(1, 1, l.sample_num)); is_sampling=true) # action_dim * batch_size * sample_num
 
         mmd_loss = maximum_mean_discrepancy_loss(
             raw_sample_action,
@@ -203,7 +203,7 @@ function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
         )
 
         actor_loss = mean(-q .+ alpha .* mmd_loss)
-        ignore() do
+        ignore_derivatives() do
             l.actor_loss = actor_loss
             l.mmd_loss = mmd_loss
         end

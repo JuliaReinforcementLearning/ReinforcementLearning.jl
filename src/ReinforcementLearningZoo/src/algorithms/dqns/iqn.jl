@@ -4,7 +4,8 @@ using Functors: @functor
 using Flux: params, unsqueeze
 using Random: AbstractRNG, GLOBAL_RNG
 using StatsBase: mean
-using Zygote: gradient, dropgrad, ignore
+using Zygote: gradient
+using ChainRulesCore: ignore_derivatives
 
 """
     ImplicitQuantileNet(;ψ, ϕ, header)
@@ -31,7 +32,7 @@ end
 function (net::ImplicitQuantileNet)(s, emb)
     features = net.ψ(s)  # (n_feature, batch_size)
     emb_aligned = net.ϕ(emb)  # (n_feature, N * batch_size)
-    merged = unsqueeze(features, 2) .* reshape(emb_aligned, size(features, 1), :, size(features, 2))  # (n_feature, N, batch_size)
+    merged = unsqueeze(features, dims=2) .* reshape(emb_aligned, size(features, 1), :, size(features, 2))  # (n_feature, N, batch_size)
     quantiles = net.header(reshape(merged, size(merged)[1:end-2]..., :)) # flattern last two dimension first
     reshape(quantiles, :, size(merged, 2), size(merged, 3))  # (n_action, N, batch_size)
 end
@@ -65,7 +66,7 @@ end
 
 function (L::IQNLearner)(env::AbstractEnv)
     s = env |> state |> send_to_device(L)
-    q = s |> unsqueeze(ndims(s) + 1) |> L |> vec
+    q = s |> unsqueeze(dims=ndims(s) + 1) |> L |> vec
     q
 end
 
@@ -115,12 +116,12 @@ function RLBase.optimise!(learner::IQNLearner, batch::NamedTuple)
 
         # dropgrad
         raw_loss =
-            abs.(reshape(τ, 1, N, batch_size) .- dropgrad(TD_error .< 0)) .*
+            abs.(reshape(τ, 1, N, batch_size) .- ignore_derivatives(TD_error .< 0)) .*
             huber_loss ./ κ
         loss_per_quantile = reshape(sum(raw_loss; dims=1), N, batch_size)
         loss_per_element = mean(loss_per_quantile; dims=1)  # use as priorities
         loss = mean(loss_per_element)
-        ignore() do
+        ignore_derivatives() do
             learner.loss = loss
         end
         loss
