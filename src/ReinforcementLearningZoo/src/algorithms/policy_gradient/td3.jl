@@ -70,19 +70,19 @@ function TD3Policy(;
     target_actor,
     target_critic,
     start_policy,
-    γ = 0.99f0,
-    ρ = 0.995f0,
-    batch_size = 64,
-    start_steps = 10000,
-    update_after = 1000,
-    update_freq = 50,
-    policy_freq = 2,
-    target_act_limit = 1.0,
-    target_act_noise = 0.1,
-    act_limit = 1.0,
-    act_noise = 0.1,
-    update_step = 0,
-    rng = Random.GLOBAL_RNG,
+    γ=0.99f0,
+    ρ=0.995f0,
+    batch_size=64,
+    start_steps=10000,
+    update_after=1000,
+    update_freq=50,
+    policy_freq=2,
+    target_act_limit=1.0,
+    target_act_noise=0.1,
+    act_limit=1.0,
+    act_noise=0.1,
+    update_step=0,
+    rng=Random.GLOBAL_RNG
 )
     copyto!(behavior_actor, target_actor)  # force sync
     copyto!(behavior_critic, target_critic)  # force sync
@@ -120,7 +120,7 @@ function (p::TD3Policy)(env)
     else
         D = device(p.behavior_actor)
         s = state(env)
-        s = Flux.unsqueeze(s, ndims(s) + 1)
+        s = Flux.unsqueeze(s, dims=ndims(s) + 1)
         action = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
         clamp(action[] + randn(p.rng) * p.act_noise, -p.act_limit, p.act_limit)
     end
@@ -162,13 +162,13 @@ function RLBase.update!(p::TD3Policy, batch::NamedTuple{SARTS})
 
     # ad-hoc fix to https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/624
     if ndims(a) == 1
-        a = Flux.unsqueeze(a, 1)
+        a = Flux.unsqueeze(a, dims=1)
     end
 
     gs1 = gradient(Flux.params(critic)) do
         q1, q2 = critic(s, a)
         loss = mse(q1 |> vec, y) + mse(q2 |> vec, y)
-        ignore() do
+        ignore_derivatives() do
             p.critic_loss = loss
         end
         loss
@@ -179,7 +179,7 @@ function RLBase.update!(p::TD3Policy, batch::NamedTuple{SARTS})
         gs2 = gradient(Flux.params(actor)) do
             actions = actor(s)
             loss = -mean(critic.model.critic_1(vcat(s, actions)))
-            ignore() do
+            ignore_derivatives() do
                 p.actor_loss = loss
             end
             loss

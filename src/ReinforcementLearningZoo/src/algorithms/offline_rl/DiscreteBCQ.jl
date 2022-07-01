@@ -37,14 +37,14 @@ end
 function BCQDLearner(;
     approximator::Aq,
     target_approximator::At,
-    γ::Float32 = 0.99f0,
-    τ::Float32 = 0.005f0,
-    θ::Float32 = 1.0f-2,
-    threshold::Float32 = 0.3f0,
-    batch_size::Int = 32,
-    update_freq::Int = 10,
-    update_step::Int = 0,
-    rng = Random.GLOBAL_RNG,
+    γ::Float32=0.99f0,
+    τ::Float32=0.005f0,
+    θ::Float32=1.0f-2,
+    threshold::Float32=0.3f0,
+    batch_size::Int=32,
+    update_freq::Int=10,
+    update_step::Int=0,
+    rng=Random.GLOBAL_RNG
 ) where {Aq<:ActorCritic,At<:ActorCritic}
     copyto!(approximator, target_approximator)
     BCQDLearner(
@@ -63,7 +63,7 @@ function BCQDLearner(;
     )
 end
 
-Functors.functor(x::BCQDLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
+Functors.functor(x::BCQDLearner) = (Q=x.approximator, Qₜ=x.target_approximator),
 y -> begin
     x = @set x.approximator = y.Q
     x = @set x.target_approximator = y.Qₜ
@@ -72,11 +72,11 @@ end
 
 function (learner::BCQDLearner)(env)
     s = state(env)
-    s = Flux.unsqueeze(s, ndims(s) + 1)
+    s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s = send_to_device(device(learner), s)
     q = learner.approximator.critic(s)
-    prob = softmax(learner.approximator.actor(s), dims = 1)
-    mask = Float32.((prob ./ maximum(prob, dims = 1)) .> learner.threshold)
+    prob = softmax(learner.approximator.actor(s), dims=1)
+    mask = Float32.((prob ./ maximum(prob, dims=1)) .> learner.threshold)
     new_q = q .* mask .+ (1.0f0 .- mask) .* -1.0f8
     new_q |> vec |> send_to_host
 end
@@ -92,9 +92,9 @@ function RLBase.update!(learner::BCQDLearner, batch::NamedTuple)
     a = CartesianIndex.(a, 1:batch_size)
 
     prob = softmax(AC.actor(s′))
-    mask = Float32.((prob ./ maximum(prob, dims = 1)) .> learner.threshold)
+    mask = Float32.((prob ./ maximum(prob, dims=1)) .> learner.threshold)
     q′ = AC.critic(s′)
-    a′ = argmax(q′ .* mask .+ (1.0f0 .- mask) .* -1.0f8, dims = 1)
+    a′ = argmax(q′ .* mask .+ (1.0f0 .- mask) .* -1.0f8, dims=1)
     target_q = target_AC.critic(s′)
 
     target = r .+ γ .* (1 .- t) .* vec(target_q[a′])
@@ -107,10 +107,10 @@ function RLBase.update!(learner::BCQDLearner, batch::NamedTuple)
 
         # Actor loss
         logit = AC.actor(s)
-        log_prob = -log.(softmax(logit, dims = 1))
+        log_prob = -log.(softmax(logit, dims=1))
         actor_loss = mean(log_prob[a])
 
-        ignore() do
+        ignore_derivatives() do
             learner.actor_loss = actor_loss
             learner.critic_loss = critic_loss
         end

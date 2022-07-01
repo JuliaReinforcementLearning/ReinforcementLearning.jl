@@ -58,7 +58,7 @@ function RLBase.optimise!(
         qₐ = Q(s)[a]
         batch_losses = loss_func(G, qₐ)
         loss = dot(vec(w), vec(batch_losses)) * 1 // batch_size
-        ignore() do
+        ignore_derivatives() do
             p′ .= vec((batch_losses .+ 1.0f-10) .^ β)
             learner.loss = loss
         end

@@ -1,6 +1,6 @@
 export QRDQNLearner, quantile_huber_loss
 
-using Zygote: ignore, dropgrad
+using ChainRulesCore: ignore_derivatives
 using Random: GLOBAL_RNG, AbstractRNG
 using StatsBase: mean
 using Functors: @functor
@@ -13,10 +13,10 @@ function quantile_huber_loss(ŷ, y; κ=1.0f0)
     linear = abs_error .- quadratic
     huber_loss = 0.5f0 .* quadratic .* quadratic .+ κ .* linear
 
-    cum_prob = ignore() do
+    cum_prob = ignore_derivatives() do
         send_to_device(device(y), range(0.5f0 / N; length=N, step=1.0f0 / N))
     end
-    loss = dropgrad(abs.(cum_prob .- (Δ .< 0))) .* huber_loss
+    loss = ignore_derivatives(abs.(cum_prob .- (Δ .< 0))) .* huber_loss
     mean(sum(loss; dims=1))
 end
 
@@ -58,7 +58,7 @@ function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
 
         loss = loss_func(ŷ, y)
 
-        ignore() do
+        ignore_derivatives() do
             learner.loss = loss
         end
         loss

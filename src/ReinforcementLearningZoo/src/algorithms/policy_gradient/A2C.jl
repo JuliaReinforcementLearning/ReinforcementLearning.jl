@@ -1,4 +1,5 @@
 export A2CLearner
+using ChainRulesCore: ignore_derivatives
 
 """
     A2CLearner(;kwargs...)
@@ -29,7 +30,7 @@ Base.@kwdef mutable struct A2CLearner{A<:ActorCritic} <: Any
     norm::Float32 = 0.0f0
 end
 
-Functors.functor(x::A2CLearner) = (app = x.approximator,), y -> @set x.approximator = y.app
+Functors.functor(x::A2CLearner) = (app=x.approximator,), y -> @set x.approximator = y.app
 
 function (learner::A2CLearner)(env::MultiThreadEnv)
     learner.approximator.actor(send_to_device(device(learner), state(env))) |> send_to_host
@@ -37,7 +38,7 @@ end
 
 function (learner::A2CLearner)(env)
     s = state(env)
-    s = Flux.unsqueeze(s, ndims(s) + 1)
+    s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s = send_to_device(device(learner), s)
     learner.approximator.actor(s) |> vec |> send_to_host
 end
@@ -74,9 +75,9 @@ function _update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
         discount_rewards(
             t[:reward],
             γ;
-            dims = 2,
-            init = send_to_host(next_state_values),
-            terminal = t[:terminal],
+            dims=2,
+            init=send_to_host(next_state_values),
+            terminal=t[:terminal]
         ) |> to_device
 
     ps = Flux.params(AC)
@@ -87,11 +88,11 @@ function _update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
         log_probs_select = log_probs[actions]
         values = AC.critic(states_flattened)
         advantage = vec(gains) .- vec(values)
-        actor_loss = -mean(log_probs_select .* Zygote.dropgrad(advantage))
+        actor_loss = -mean(log_probs_select .* ignore_derivatives(advantage))
         critic_loss = mean(advantage .^ 2)
         entropy_loss = -sum(probs .* log_probs) * 1 // size(probs, 2)
         loss = w₁ * actor_loss + w₂ * critic_loss - w₃ * entropy_loss
-        ignore() do
+        ignore_derivatives() do
             learner.actor_loss = actor_loss
             learner.critic_loss = critic_loss
             learner.entropy_loss = entropy_loss

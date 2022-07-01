@@ -44,13 +44,13 @@ function FQE(;
     policy,
     q_network,
     target_q_network,
-    n_evals = 20,
-    γ = 0.99f0,
-    batch_size = 32,
-    update_freq = 1,
-    update_step = 0,
-    tar_update_freq = 50,
-    rng = Random.GLOBAL_RNG,
+    n_evals=20,
+    γ=0.99f0,
+    batch_size=32,
+    update_freq=1,
+    update_step=0,
+    tar_update_freq=50,
+    rng=Random.GLOBAL_RNG
 )
     copyto!(q_network, target_q_network) #force sync
     FQE(
@@ -68,7 +68,7 @@ function FQE(;
     )
 end
 
-Functors.functor(x::FQE) = (Q = x.q_network, Qₜ = x.target_q_network), y -> begin
+Functors.functor(x::FQE) = (Q=x.q_network, Qₜ=x.target_q_network), y -> begin
     x = @set x.q_network = y.Q
     x = @set x.target_q_network = y.Qₜ
     x
@@ -76,8 +76,8 @@ end
 
 function (l::FQE)(env)
     s = send_to_device(device(l.policy), state(env))
-    s = Flux.unsqueeze(s, ndims(s) + 1)
-    action = dropdims(l.policy(l.rng, s; is_sampling = true), dims = 2)
+    s = Flux.unsqueeze(s, dims=ndims(s) + 1)
+    action = dropdims(l.policy(l.rng, s; is_sampling=true), dims=2)
 end
 
 function (l::FQE)(env, ::Val{:Eval})
@@ -86,8 +86,8 @@ function (l::FQE)(env, ::Val{:Eval})
     for _ in 1:l.n_evals
         reset!(env)
         s = send_to_device(D, state(env))
-        s = Flux.unsqueeze(s, ndims(s) + 1)
-        a = dropdims(l.policy(l.rng, s; is_sampling = true), dims = 2)
+        s = Flux.unsqueeze(s, dims=ndims(s) + 1)
+        a = dropdims(l.policy(l.rng, s; is_sampling=true), dims=2)
         input = vcat(s, a)
         result = l.q_network(input)
         push!(results, result[])
@@ -121,7 +121,7 @@ function RLBase.update!(l::FQE, batch::NamedTuple{SARTS})
     gs = gradient(params(Q)) do
         q = Q(vcat(s, reshape(a, :, batch_size))) |> vec
         loss = loss_func(q, target)
-        Zygote.ignore() do
+        Zygote.ignore_derivatives() do
             l.loss = loss
         end
         loss
