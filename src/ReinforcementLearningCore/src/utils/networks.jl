@@ -1,6 +1,7 @@
 using Functors: @functor
 import Flux
 import Flux.onehotbatch
+using ChainRulesCore: ignore_derivatives
 
 #####
 # ActorCritic
@@ -58,7 +59,7 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, 
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     if is_sampling
         σ = exp.(logσ)
-        z = Zygote.ignore() do
+        z = ignore_derivatives() do
             noise = randn(rng, Float32, size(μ))
             model.normalizer.(μ .+ σ .* noise)
         end
@@ -85,7 +86,7 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s, action_samples::Int)
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
 
     σ = exp.(logσ)
-    z = Zygote.ignore() do
+    z = ignore_derivatives() do
         noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
         model.normalizer.(μ .+ σ .* noise)
     end
@@ -167,7 +168,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
     L = vec_to_tril(cholesky_vec, da)
 
     if is_sampling
-        z = Zygote.ignore() do
+        z = ignore_derivatives() do
             noise = randn(rng, eltype(μ), da, 1, batch_size)
             model.normalizer.(Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3))
         end
@@ -188,7 +189,7 @@ end
 Given a Matrix of states, will return actions, μ and logpdf in matrix format. The batch of Σ remains a 3D tensor.
 """
 function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractMatrix; is_sampling::Bool=false, is_return_log_prob::Bool=false)
-    output = model(rng, Flux.unsqueeze(state, 2); is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
+    output = model(rng, Flux.unsqueeze(state, dims=2); is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
     if output isa Tuple && is_sampling
         dropdims(output[1], dims=2), dropdims(output[2], dims=2)
     elseif output isa Tuple
@@ -214,7 +215,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::In
     μ, cholesky_vec = model.μ(x), model.Σ(x)
     da = size(μ, 1)
     L = vec_to_tril(cholesky_vec, da)
-    z = Zygote.ignore() do
+    z = ignore_derivatives() do
         noise = randn(rng, eltype(μ), da, action_samples, batch_size)
         model.normalizer.(Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3))
     end
@@ -249,7 +250,7 @@ If given 2D matrices as input, will return a 2D matrix of logpdf. States and
 actions are paired column-wise, one action per state.
 """
 function (model::CovGaussianNetwork)(state::AbstractMatrix, action::AbstractMatrix)
-    output = model(Flux.unsqueeze(state, 2), Flux.unsqueeze(action, 2))
+    output = model(Flux.unsqueeze(state, 2), Flux.unsqueeze(action, dims=2))
     return dropdims(output, dims=2)
 end
 
@@ -262,7 +263,7 @@ function vec_to_tril(cholesky_vec, da)
     function f(j) #return a slice (da x 1 x batchsize) containing the jth columns of the lower triangular cholesky decomposition of the covariance
         tc_diag = softplus.(cholesky_vec[c2idx(j, j):c2idx(j, j), :, :])
         tc_other = cholesky_vec[c2idx(j, j)+1:c2idx(j + 1, j + 1)-1, :, :]
-        zs = Flux.Zygote.ignore() do
+        zs = ignore_derivatives() do
             zs = similar(cholesky_vec, da - size(tc_other, 1) - 1, 1, batch_size)
             zs .= zero(eltype(cholesky_vec))
             return zs
