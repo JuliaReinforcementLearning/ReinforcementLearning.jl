@@ -123,7 +123,7 @@ function (p::SACPolicy)(env)
     else
         D = device(p.policy)
         s = send_to_device(D, state(env))
-        s = Flux.unsqueeze(s, ndims(s) + 1)
+        s = Flux.unsqueeze(s, dims=ndims(s) + 1)
         # trainmode:
         action = dropdims(p.policy(p.device_rng, s; is_sampling=true), dims=2) # Single action vec, drop second dim
         send_to_host(action)
@@ -179,7 +179,7 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
         q = min.(p.qnetwork1(q_input), p.qnetwork2(q_input))
         reward = mean(q)
         entropy = mean(log_π)
-        ignore() do
+        ignore_derivatives() do
             p.reward_term = reward
             p.entropy_term = entropy
         end

@@ -1,9 +1,8 @@
 export BasicDQNLearner
 
 using Flux: gradient, params
-using Zygote: ignore
-using Setfield: @set
 using Functors: @functor
+using ChainRulesCore: ignore_derivatives
 
 """
     BasicDQNLearner(;kwargs...)
@@ -52,7 +51,7 @@ function RLCore.optimise!(
         q′ = vec(maximum(Q(s′); dims=1))
         G = @. r + γ * (1 - t) * q′
         loss = loss_func(G, q)
-        ignore() do
+        ignore_derivatives() do
             learner.loss = loss
         end
         loss

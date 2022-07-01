@@ -16,7 +16,7 @@ See the paper https://arxiv.org/abs/1706.02275 for more details.
 - `rng::AbstractRNG`.
 """
 mutable struct MADDPGManager <: AbstractPolicy
-    agents::Dict{<:Any, <:Agent}
+    agents::Dict{<:Any,<:Agent}
     traces
     batch_size::Int
     update_freq::Int
@@ -31,10 +31,10 @@ function (π::MADDPGManager)(env::AbstractEnv)
     end
     Dict(
         player => agent.policy(env)
-    for (player, agent) in π.agents)
+        for (player, agent) in π.agents)
 end
 
-function (π::MADDPGManager)(stage::Union{PreEpisodeStage, PostActStage}, env::AbstractEnv)
+function (π::MADDPGManager)(stage::Union{PreEpisodeStage,PostActStage}, env::AbstractEnv)
     # only need to update trajectory.
     for (_, agent) in π.agents
         update!(agent.trajectory, agent.policy, env, stage)
@@ -46,7 +46,7 @@ function (π::MADDPGManager)(stage::PreActStage, env::AbstractEnv, actions)
     for (player, agent) in π.agents
         update!(agent.trajectory, agent.policy, env, stage, actions[player])
     end
-    
+
     # update policy
     update!(π, env)
 end
@@ -70,14 +70,14 @@ function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
         length(agent.trajectory) > agent.policy.policy.update_after || return
         length(agent.trajectory) > π.batch_size || return
     end
-    
+
     # get training data
     temp_player = collect(keys(π.agents))[1]
     t = π.agents[temp_player].trajectory
     inds = rand(π.rng, 1:length(t), π.batch_size)
-    batches = Dict((player, RLCore.fetch!(BatchSampler{π.traces}(π.batch_size), agent.trajectory, inds)) 
-                for (player, agent) in π.agents)
-    
+    batches = Dict((player, RLCore.fetch!(BatchSampler{π.traces}(π.batch_size), agent.trajectory, inds))
+                   for (player, agent) in π.agents)
+
     # get s, a, s′ for critic
     s = vcat((batches[player][:state] for (player, _) in π.agents)...)
     a = vcat((batches[player][:action] for (player, _) in π.agents)...)
@@ -108,7 +108,7 @@ function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
         # for training behavior_critic.
         new_actions = vcat(
             ((
-                batches[p][:next_state] |> 
+                batches[p][:next_state] |>
                 a.policy.policy.target_actor
             ) for (p, a) in π.agents)...
         )
@@ -121,16 +121,20 @@ function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
 
             mask = batches[player][:next_legal_actions_mask]
             mu_l′ = Flux.batch(
-                (begin
+                (
+                begin
                     actions = env.action_mapping(mu_actions[:, i])
                     mask[actions[player]]
-                end for i = 1:π.batch_size)
+                end for i = 1:π.batch_size
+            )
             )
             new_l′ = Flux.batch(
-                (begin
+                (
+                begin
                     actions = env.action_mapping(new_actions[:, i])
                     mask[actions[player]]
-                end for i = 1:π.batch_size)
+                end for i = 1:π.batch_size
+            )
             )
         end
 
@@ -143,7 +147,7 @@ function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
         gs1 = gradient(Flux.params(C)) do
             q = C(vcat(s, a)) |> vec
             loss = mean((y .- q) .^ 2)
-            ignore() do
+            ignore_derivatives() do
                 p.critic_loss = loss
             end
             loss
@@ -157,8 +161,8 @@ function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
                 v .+= ifelse.(mu_l′, 0.0f0, typemin(Float32))
             end
             reg = mean(A(batches[player][:state]) .^ 2)
-            loss = -mean(v) +  reg * 1e-3
-            ignore() do
+            loss = -mean(v) + reg * 1e-3
+            ignore_derivatives() do
                 p.actor_loss = loss
             end
             loss

@@ -62,7 +62,7 @@ function RLBase.optimise!(learner::REMDQNLearner, batch::NamedTuple)
         q = dropdims(sum(q, dims=2), dims=2)[a]
 
         loss = loss_func(G, q)
-        ignore() do
+        ignore_derivatives() do
             learner.loss = loss
         end
         loss
