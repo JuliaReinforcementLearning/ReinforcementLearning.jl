@@ -107,14 +107,14 @@ function RLBase.update!(
     for idx in Iterators.partition(shuffle(1:length(traj[:terminal])), π.batch_size)
         S = select_last_dim(states, idx) |> Array |> to_dev
         A = actions[idx]
-        G = gains[idx] |> x -> Flux.unsqueeze(x, 1) |> to_dev
+        G = gains[idx] |> x -> Flux.unsqueeze(x, dims=1) |> to_dev
         # gains is a 1 column array, but the output of flux model is 1 row, n_batch columns array. so unsqueeze it.
 
         if π.baseline isa NeuralNetworkApproximator
             gs = gradient(Flux.params(π.baseline)) do
                 δ = G - π.baseline(S)
                 loss = mean(δ .^ 2) * π.α_w # mse
-                ignore() do
+                ignore_derivatives() do
                     π.baseline_loss = loss
                 end
                 loss
@@ -125,7 +125,7 @@ function RLBase.update!(
             # (http://rail.eecs.berkeley.edu/deeprlcourse-fa17/f17docs/hw2_final.pdf)
             # (https://web.stanford.edu/class/cs234/assignment3/solution.pdf)
             # normalise should not be used with baseline. or the loss of the policy will be too small.
-            δ = G |> x -> normalise(x; dims = 2)
+            δ = G |> x -> normalise(x; dims=2)
         end
 
         gs = gradient(Flux.params(model)) do
@@ -137,7 +137,7 @@ function RLBase.update!(
                 log_probₐ = logpdf.(dist, A)
             end
             loss = -mean(log_probₐ .* δ) * π.α_θ
-            ignore() do
+            ignore_derivatives() do
                 π.loss = loss
             end
             loss

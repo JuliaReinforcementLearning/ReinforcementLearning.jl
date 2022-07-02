@@ -16,10 +16,10 @@ const PPOTrajectory = Trajectory{
 function PPOTrajectory(; capacity, action_log_prob, kwargs...)
     merge(
         CircularArrayTrajectory(;
-            capacity = capacity + 1,
-            action_log_prob = action_log_prob,
+            capacity=capacity + 1,
+            action_log_prob=action_log_prob
         ),
-        CircularArraySARTTrajectory(; capacity = capacity, kwargs...),
+        CircularArraySARTTrajectory(; capacity=capacity, kwargs...),
     )
 end
 
@@ -40,10 +40,10 @@ const MaskedPPOTrajectory = Trajectory{
 function MaskedPPOTrajectory(; capacity, action_log_prob, kwargs...)
     merge(
         CircularArrayTrajectory(;
-            capacity = capacity + 1,
-            action_log_prob = action_log_prob,
+            capacity=capacity + 1,
+            action_log_prob=action_log_prob
         ),
-        CircularArraySLARTTrajectory(; capacity = capacity, kwargs...),
+        CircularArraySLARTTrajectory(; capacity=capacity, kwargs...),
     )
 end
 
@@ -104,19 +104,19 @@ end
 function PPOPolicy(;
     approximator,
     update_freq,
-    n_random_start = 0,
-    update_step = 0,
-    γ = 0.99f0,
-    λ = 0.95f0,
-    clip_range = 0.2f0,
-    max_grad_norm = 0.5f0,
-    n_microbatches = 4,
-    n_epochs = 4,
-    actor_loss_weight = 1.0f0,
-    critic_loss_weight = 0.5f0,
-    entropy_loss_weight = 0.01f0,
-    dist = Categorical,
-    rng = Random.GLOBAL_RNG,
+    n_random_start=0,
+    update_step=0,
+    γ=0.99f0,
+    λ=0.95f0,
+    clip_range=0.2f0,
+    max_grad_norm=0.5f0,
+    n_microbatches=4,
+    n_epochs=4,
+    actor_loss_weight=1.0f0,
+    critic_loss_weight=0.5f0,
+    entropy_loss_weight=0.01f0,
+    dist=Categorical,
+    rng=Random.GLOBAL_RNG
 )
     PPOPolicy{typeof(approximator),dist,typeof(rng)}(
         approximator,
@@ -164,11 +164,11 @@ function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArr
     logits = logits |> softmax |> send_to_host
     if p.update_step < p.n_random_start
         [
-            Categorical(fill(1 / length(x), length(x)); check_args = false) for
+            Categorical(fill(1 / length(x), length(x)); check_args=false) for
             x in eachcol(logits)
         ]
     else
-        [Categorical(x; check_args = false) for x in eachcol(logits)]
+        [Categorical(x; check_args=false) for x in eachcol(logits)]
     end
 end
 
@@ -179,7 +179,7 @@ end
 
 function RLBase.prob(p::PPOPolicy, env::AbstractEnv)
     s = state(env)
-    s = Flux.unsqueeze(s, ndims(s) + 1)
+    s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     mask = ActionStyle(env) === FULL_ACTION_SET ? legal_action_space_mask(env) : nothing
     prob(p, s, mask)
 end
@@ -193,11 +193,11 @@ function (agent::Agent{<:PPOPolicy})(env::MultiThreadEnv)
     dist = prob(agent.policy, env)
     action = rand.(agent.policy.rng, dist)
     if ndims(action) == 2
-        action_log_prob = sum(logpdf.(dist, action), dims = 1)
+        action_log_prob = sum(logpdf.(dist, action), dims=1)
     else
         action_log_prob = logpdf.(dist, action)
     end
-    EnrichedAction(action; action_log_prob = vec(action_log_prob))
+    EnrichedAction(action; action_log_prob=vec(action_log_prob))
 end
 
 function RLBase.update!(
@@ -248,8 +248,8 @@ function _update!(p::PPOPolicy, t::Any)
         states_plus_values,
         γ,
         λ;
-        dims = 2,
-        terminal = t[:terminal],
+        dims=2,
+        terminal=t[:terminal]
     )
     returns = to_device(advantages .+ select_last_dim(states_plus_values, 1:n_rollout))
     advantages = to_device(advantages)
@@ -288,12 +288,12 @@ function _update!(p::PPOPolicy, t::Any)
                 if AC.actor isa GaussianNetwork
                     μ, logσ = AC.actor(s)
                     if ndims(a) == 2
-                        log_p′ₐ = vec(sum(normlogpdf(μ, exp.(logσ), a), dims = 1))
+                        log_p′ₐ = vec(sum(normlogpdf(μ, exp.(logσ), a), dims=1))
                     else
                         log_p′ₐ = normlogpdf(μ, exp.(logσ), a)
                     end
                     entropy_loss =
-                        mean(size(logσ, 1) * (log(2.0f0π) + 1) .+ sum(logσ; dims = 1)) / 2
+                        mean(size(logσ, 1) * (log(2.0f0π) + 1) .+ sum(logσ; dims=1)) / 2
                 else
                     # actor is assumed to return discrete logits
                     raw_logit′ = AC.actor(s)
@@ -315,7 +315,7 @@ function _update!(p::PPOPolicy, t::Any)
                 critic_loss = mean((r .- v′) .^ 2)
                 loss = w₁ * actor_loss + w₂ * critic_loss - w₃ * entropy_loss
 
-                ignore() do
+                ignore_derivatives() do
                     p.actor_loss[i, epoch] = actor_loss
                     p.critic_loss[i, epoch] = critic_loss
                     p.entropy_loss[i, epoch] = entropy_loss
@@ -340,12 +340,12 @@ function RLBase.update!(
 )
     push!(
         trajectory;
-        state = state(env),
-        action = action.action,
-        action_log_prob = action.meta.action_log_prob,
+        state=state(env),
+        action=action.action,
+        action_log_prob=action.meta.action_log_prob
     )
 
     if trajectory isa MaskedPPOTrajectory
-        push!(trajectory; legal_actions_mask = legal_action_space_mask(env))
+        push!(trajectory; legal_actions_mask=legal_action_space_mask(env))
     end
 end

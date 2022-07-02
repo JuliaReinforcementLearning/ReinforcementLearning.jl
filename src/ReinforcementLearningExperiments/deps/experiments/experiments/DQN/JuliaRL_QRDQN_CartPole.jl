@@ -1,62 +1,48 @@
-
 # ---
-# title: JuliaRL\_IQN\_CartPole
-# cover: assets/JuliaRL_IQN_CartPole.png
-# description: IQN applied to CartPole
-# date: 2022-06-27
+# title: JuliaRL\_QRDQN\_CartPole
+# cover: assets/JuliaRL_QRDQN_CartPole.png
+# description: QRDQN applied to CartPole
+# date: 2021-06-19
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
-
+#+ tangle=true
 using ReinforcementLearning
-using StableRNGs
+using StableRNGs: StableRNG
 using Flux
-using Flux.Losses
+using Flux: glorot_uniform
 
 function RL.Experiment(
     ::Val{:JuliaRL},
-    ::Val{:IQN},
+    ::Val{:QRDQN},
     ::Val{:CartPole},
     ; seed=123
 )
+
+    N = 10
+
     rng = StableRNG(seed)
-    device_rng = rng
     env = CartPoleEnv(; T=Float32, rng=rng)
     ns, na = length(state(env)), length(action_space(env))
-    init = glorot_uniform(rng)
-    Nₑₘ = 16
-    n_hidden = 64
-    κ = 1.0f0
-
-    nn_creator() =
-        ImplicitQuantileNet(
-            ψ=Dense(ns, n_hidden, relu; init=init),
-            ϕ=Dense(Nₑₘ, n_hidden, relu; init=init),
-            header=Dense(n_hidden, na; init=init),
-        ) |> gpu
 
     agent = Agent(
         policy=QBasedPolicy(
-            learner=IQNLearner(
+            learner=QRDQNLearner(
                 approximator=Approximator(
                     model=TwinNetwork(
-                        ImplicitQuantileNet(
-                            ψ=Dense(ns, n_hidden, relu; init=init),
-                            ϕ=Dense(Nₑₘ, n_hidden, relu; init=init),
-                            header=Dense(n_hidden, na; init=init),
-                        ),
+                        Chain(
+                            Dense(ns, 128, relu; init=glorot_uniform(rng)),
+                            Dense(128, 128, relu; init=glorot_uniform(rng)),
+                            Dense(128, N * na; init=glorot_uniform(rng)),
+                        );
                         sync_freq=100
                     ),
-                    optimiser=ADAM(0.001),
+                    optimiser=ADAM(),
                 ),
-                κ=κ,
-                N=8,
-                N′=8,
-                Nₑₘ=Nₑₘ,
-                K=32,
+                n_quantile=N,
+                loss_func=quantile_huber_loss,
                 γ=0.99f0,
                 rng=rng,
-                device_rng=device_rng,
             ),
             explorer=EpsilonGreedyExplorer(
                 kind=:exp,
@@ -86,13 +72,12 @@ function RL.Experiment(
     Experiment(agent, env, stop_condition, hook)
 end
 
-
 #+ tangle=false
 using Plots
 pyplot() #hide
-ex = E`JuliaRL_IQN_CartPole`
+ex = E`JuliaRL_QRDQN_CartPole`
 run(ex)
 plot(ex.hook.rewards)
-savefig("assets/JuliaRL_IQN_CartPole.png") #hide
+savefig("assets/JuliaRL_QRDQN_CartPole.png") #hide
 
-# ![](assets/JuliaRL_IQN_CartPole.png)
+# ![](assets/JuliaRL_QRDQN_CartPole.png)

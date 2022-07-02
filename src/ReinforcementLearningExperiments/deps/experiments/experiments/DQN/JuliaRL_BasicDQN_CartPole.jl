@@ -49,8 +49,9 @@ function RL.Experiment(
                 capacity=1000,
                 state=Float32 => (ns,),
             ),
-            sampler=BatchSampler{(:state, :action, :reward, :terminal, :next_state)}(
-                batch_size=32
+            sampler=BatchSampler{SS′ART}(
+                batch_size=32,
+                rng=rng
             ),
             controller=InsertSampleRatioController(
                 threshold=100,

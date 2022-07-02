@@ -1,7 +1,7 @@
 export VMPOPolicy, VMPOTrajectory
 
 using LinearAlgebra: ⋅  # dot product
-using Zygote: ignore, dropgrad
+using ChainRulesCore: ignore_derivatives
 
 ## trajectory
 
@@ -101,7 +101,7 @@ function (policy::VMPOPolicy{<:ActorCritic,Categorical})(
     action::AbstractArray,
 )
     p = policy.approximator.actor(state) |> softmax
-    idx = ignore() do
+    idx = ignore_derivatives() do
         CartesianIndex.(action, 1:length(action))
     end
     action_log_prob = log.(p)[idx]
@@ -198,7 +198,7 @@ function _update!(p::VMPOPolicy, t::VMPOTrajectory)
             Lᵥ = Flux.Losses.mse(v, rewards) / 2
 
             # actor loss
-            ψ = softmax(top_k_advs / dropgrad(η))
+            ψ = softmax(top_k_advs / ignore_derivatives(η))
             Lπ = -ψ ⋅ logπ[top_k_idx]
 
             # loss for temperature η
@@ -207,12 +207,12 @@ function _update!(p::VMPOPolicy, t::VMPOTrajectory)
             # loss for Lagrange multiplier α
             Lα = if is_discrete
                 KL = Flux.kldivergence(π_old, π, agg=identity)
-                mean(α * (p.ϵ_α .- dropgrad(KL)) + dropgrad(α) * KL)
+                mean(α * (p.ϵ_α .- ignore_derivatives(KL)) + ignore_derivatives(α) * KL)
             else
                 KLμ = 0.5f0 * (μ .- μ_old) .^ 2 ./ (σ .^ 2)
-                Lαμ = mean(αμ * (p.ϵ_αμ .- dropgrad(KLμ)) + dropgrad(αμ) * KLμ)
+                Lαμ = mean(αμ * (p.ϵ_αμ .- ignore_derivatives(KLμ)) + ignore_derivatives(αμ) * KLμ)
                 KLσ = 0.5f0 * ((σ_old ./ σ) .^ 2 .- 1 .+ 2 * log.(σ ./ σ_old))
-                Lασ = mean(ασ * (p.ϵ_ασ .- dropgrad(KLσ)) + dropgrad(ασ) * KLσ)
+                Lασ = mean(ασ * (p.ϵ_ασ .- ignore_derivatives(KLσ)) + ignore_derivatives(ασ) * KLσ)
                 Lαμ + Lασ
             end
 

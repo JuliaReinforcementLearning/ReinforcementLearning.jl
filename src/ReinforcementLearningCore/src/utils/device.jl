@@ -1,6 +1,6 @@
 # TODO: watch https://github.com/JuliaGPU/Adapt.jl/pull/52
 
-export device, send_to_device
+export device, send_to_device, send_to_host
 
 using Flux
 using CUDA
@@ -8,6 +8,8 @@ using Adapt
 using Random
 
 import CUDA: device
+
+send_to_host(x) = send_to_device(Val(:cpu), x)
 
 send_to_device(d) = x -> send_to_device(device(d), x)
 

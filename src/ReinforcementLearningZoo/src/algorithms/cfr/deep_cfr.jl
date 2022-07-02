@@ -1,5 +1,7 @@
 export DeepCFR
 
+using ChainRulesCore: ignore_derivatives
+
 
 """
     DeepCFR(;kwargs...)
@@ -43,7 +45,7 @@ end
 function RLBase.prob(π::DeepCFR, env::AbstractEnv)
     I = send_to_device(device(π.Π), state(env))
     m = send_to_device(device(π.Π), ifelse.(legal_action_space_mask(env), 0.0f0, -Inf32))
-    logits = π.Π(Flux.unsqueeze(I, ndims(I) + 1)) |> vec
+    logits = π.Π(Flux.unsqueeze(I, dims=ndims(I) + 1)) |> vec
     σ = softmax(logits .+ m)
     send_to_host(σ)
 end
@@ -89,7 +91,7 @@ function RLBase.update!(π::DeepCFR)
         gs = gradient(ps) do
             logits = Π(I) .+ m
             loss = mean(reshape(t, 1, :) .* ((σ .- softmax(logits)) .^ 2))
-            ignore() do
+            ignore_derivatives() do
                 # println(σ, "!!!",m, "===", Π(I))
                 Π_losses[i] = loss
             end
@@ -122,7 +124,7 @@ function update_advantage_networks(π, p)
             ps = Flux.params(V)
             gs = gradient(ps) do
                 loss = mean(reshape(t, 1, :) .* ((r̃ .- V(I) .* m) .^ 2))
-                ignore() do
+                ignore_derivatives() do
                     V_losses[i] = loss
                 end
                 loss
@@ -143,7 +145,7 @@ function external_sampling!(π::DeepCFR, env::AbstractEnv, p)
     elseif current_player(env) == p
         V = π.V[p]
         s = state(env)
-        I = send_to_device(device(V), Flux.unsqueeze(s, ndims(s) + 1))
+        I = send_to_device(device(V), Flux.unsqueeze(s, dims=ndims(s) + 1))
         A = action_space(env)
         m = legal_action_space_mask(env)
         σ = masked_regret_matching(V(I) |> send_to_host |> vec, m)
@@ -155,16 +157,16 @@ function external_sampling!(π::DeepCFR, env::AbstractEnv, p)
                 v̄ += σ[i] * v[i]
             end
         end
-        push!(π.MV[p], I = s, t = π.t, r̃ = (v .- v̄) .* m, m = m)
+        push!(π.MV[p], I=s, t=π.t, r̃=(v .- v̄) .* m, m=m)
         v̄
     else
         V = π.V[current_player(env)]
         s = state(env)
-        I = send_to_device(device(V), Flux.unsqueeze(s, ndims(s) + 1))
+        I = send_to_device(device(V), Flux.unsqueeze(s, dims=ndims(s) + 1))
         A = action_space(env)
         m = legal_action_space_mask(env)
         σ = masked_regret_matching(V(I) |> send_to_host |> vec, m)
-        push!(π.MΠ, I = s, t = π.t, σ = σ, m = m)
+        push!(π.MΠ, I=s, t=π.t, σ=σ, m=m)
         a = sample(π.rng, A, Weights(σ, 1.0))
         env(a)
         external_sampling!(π, env, p)
