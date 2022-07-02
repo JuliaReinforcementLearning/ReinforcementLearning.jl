@@ -9,7 +9,7 @@ using Distributions: pdf
 Use temporal-difference method to estimate state value or state-action value.
 
 # Fields
-- `approximator` can be either
+- `approximator` can be either a
   `TabularQApproximator`, `LinearQApproximator`, `TabularVApproximator` or `LinearVApproximator`.
 - `γ=1.0`, discount rate.
 - `method` can be `:SRS` (for state value function); for state-action value function, it can be `:SARS` (Q-learning) , `:SARSA` (Sarsa) or `:ExpectedSARSA`.
