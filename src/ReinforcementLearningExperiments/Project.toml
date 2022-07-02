@@ -13,7 +13,7 @@ Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 [compat]
 Flux = "0.13"
 Reexport = "1"
-ReinforcementLearning = "0.11"
+ReinforcementLearning = "0.11, 0.10"
 Weave = "0.10"
 julia = "1.6"
 
