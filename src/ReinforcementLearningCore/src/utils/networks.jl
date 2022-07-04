@@ -280,10 +280,13 @@ end
 export CategoricalNetwork
 
 """
-    CategoricalNetwork(model)([rng,], state::AbstractArray; is_sampling::Bool=false, is_return_log_prob::Bool = false)
+    CategoricalNetwork(model)([rng,] state::AbstractArray [, mask::AbstractArray{Bool}]; is_sampling::Bool=false, is_return_log_prob::Bool = false)
 
 CategoricalNetwork wraps a model (typically a neural network) that takes a `state` input 
-and outputs logits for a categorical distribution. 
+and outputs logits for a categorical distribution. The optional argument `mask` must be
+an Array of `Bool` with the same size as `state` expect for the first dimension that must
+have the length of the action vector. Actions mapped to `false` by mask have a logit equal to 
+`-Inf` and/or a zero-probability of being sampled.
 
 - `rng::AbstractRNG=Random.GLOBAL_RNG`
 - `is_sampling::Bool=false`, whether to sample from the obtained normal categorical distribution (returns a Flux.OneHotArray `z`). 
@@ -301,12 +304,7 @@ Flux.@functor CategoricalNetwork
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray; is_sampling::Bool=false, is_return_logits::Bool = false)
     logits = model.model(state) #may be 1-3 dimensional
     if is_sampling
-        z = Flux.Zygote.ignore() do 
-            log_probs = reshape(logsoftmax(logits, dims = 1), size(logits,1), :) # work in 2D
-            gumbels = -log.(-log.(rand(rng, size(log_probs)...))) .+ log_probs # Gumbel-Max trick
-            z = getindex.(argmax(gumbels, dims = 1), 1)
-            reshape(onehotbatch(z, 1:size(logits,1)), size(logits)...) # reshape back to original shape
-        end
+        z = sample_categorical(rng,logits)
         if is_return_logits
             return z, logits
         else
@@ -317,15 +315,27 @@ function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray; is_
     end
 end
 
+function sample_categorical(rng, logits::AbstractArray)
+    Flux.Zygote.ignore() do 
+        log_probs = reshape(logsoftmax(logits, dims = 1), size(logits,1), :) # work in 2D
+        gumbels = -log.(-log.(rand(rng, size(log_probs)...))) .+ log_probs # Gumbel-Max trick
+        z = getindex.(argmax(gumbels, dims = 1), 1)
+        reshape(onehotbatch(z, 1:size(logits,1)), size(logits)...) # reshape back to original shape
+    end
+end
+
 function (model::CategoricalNetwork)(state::AbstractArray, args...; kwargs...)
     model(Random.GLOBAL_RNG, state, args...; kwargs...)
 end
 
 """
-    (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray, action_samples::Int)
+    (model::CategoricalNetwork)([rng::AbstractRNG,] state::AbstractArray, [mask::AbstractArray{Bool},] action_samples::Int)
 
-Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions (action_size x action_samples x batch_size). 
-Always returns the *logits* of each action along in a tensor with the same dimensions.
+Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batch_size)`. 
+Always returns the *logits* of each action along in a tensor with the same dimensions. The optional argument `mask` must be
+an Array of `Bool` with the same size as `state` expect for the first dimension that must
+have the length of the action vector. Actions mapped to `false` by mask have a logit equal to 
+`-Inf` and/or a zero-probability of being sampled.
 """
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
     logits = model.model(state) #da x 1 x batch_size 
@@ -340,8 +350,43 @@ function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray{<:An
     return z, reduce(hcat, Iterators.repeated(logits, action_samples))
 end
 
-function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractMatrix, action_samples::Int)
+function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractVecOrMat, action_samples::Int)
     model(rng, reshape(state, size(state, 1), 1, :), action_samples)
+end
+
+#Masked Methods
+
+function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray, mask::AbstractArray{Bool}; is_sampling::Bool=false, is_return_logits::Bool = false)
+    logits = model.model(state) #may be 1-3 dimensional
+    logits .+= ifelse.(mask, 0f0, typemin(eltype(logits)))
+    if is_sampling
+        z = sample_categorical(rng,logits)
+        if is_return_logits
+            return z, logits
+        else
+            return z
+        end
+    else
+        return logits
+    end
+end
+
+function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, mask::AbstractArray{Bool, 3}, action_samples::Int)
+    logits = model.model(state) #da x 1 x batch_size 
+    logits .+= ifelse.(mask, 0f0, typemin(eltype(logits)))
+    z = Flux.Zygote.ignore() do 
+        batch_size = size(state, 3) #3
+        da = size(logits, 1)
+        log_probs = logsoftmax(logits, dims = 1)
+        gumbels = -log.(-log.(rand(rng, da, action_samples, batch_size))) .+ log_probs # Gumbel-Max trick
+        z = getindex.(argmax(gumbels, dims = 1), 1)
+        reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
+    end   
+    return z, reduce(hcat, Iterators.repeated(logits, action_samples))
+end
+
+function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray, mask::AbstractArray, action_samples::Int)
+    model(rng, reshape(state, size(state, 1), 1, :), reshape(mask, size(mask, 1), 1, :), action_samples)
 end
 
 #####

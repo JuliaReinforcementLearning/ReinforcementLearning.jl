@@ -411,6 +411,29 @@ using Test, Flux, CUDA
         @test logits isa Array{Float64, 3}
         a, logits = d(s, 4)
         @test size(a) == (3,4,10) == size(logits)
+
+        #Masking
+        ##2D
+        s = rand(5, 10)
+        mask = trues(3, 10)
+        mask[1,:] .= false
+        a_masked, logits = d(s, mask, is_sampling = true, is_return_logits = true)
+        @test size(a_masked) == (3, 10)
+        @test all(a -> a == 0, a_masked[1,:])
+        @test all(l -> l == -Inf32, logits[1, :]) && all(l -> l !== -Inf32, logits[2:3, :])
+        a_masked, logits = d(s, mask, 4)
+        @test size(a_masked) == (3,4,10) == size(logits)
+        ##3D
+        s = rand(5,1,10)
+        mask = trues(3, 1, 10)
+        mask[1,:, :] .= false
+        a_masked, logits = d(s, mask, is_sampling = true, is_return_logits = true)
+        @test size(a_masked) == (3, 1, 10)
+        @test all(a -> a == 0, a_masked[1,:, :])
+        @test all(l -> l == -Inf32, logits[1, :, :]) && all(l -> l !== -Inf32, logits[2:3, :, :])
+        a_masked, logits = d(s, mask, 4)
+        @test size(a_masked) == (3,4,10) == size(logits)
+
         @testset "CUDA" begin
             if CUDA.functional()
                 CUDA.allowscalar(false) 
@@ -428,6 +451,8 @@ using Test, Flux, CUDA
                 @test size(a) == (3,1,10) == size(logits)
                 a, logits = d(rng, s, 4);
                 @test size(a) == (3,4,10) == size(logits)
+                a_masked, logits = d(rng, s, 4)
+                @test size(a_masked) == (3,4,10) == size(logits)
             end
         end
     end
