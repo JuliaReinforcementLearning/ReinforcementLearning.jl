@@ -1,4 +1,4 @@
-using Test, ReinforcementLearning, Flux, CUDA
+using Test, Flux, CUDA
 @testset "Approximators" begin
     #= These may need to be updated due to recent changes
     @testset "TabularApproximator" begin
