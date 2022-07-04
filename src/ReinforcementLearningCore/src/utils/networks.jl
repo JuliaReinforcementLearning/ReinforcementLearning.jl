@@ -299,7 +299,7 @@ mutable struct CategoricalNetwork{P}
     model::P
 end
 
-Flux.@functor CategoricalNetwork
+@functor CategoricalNetwork
 
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray; is_sampling::Bool=false, is_return_logits::Bool = false)
     logits = model.model(state) #may be 1-3 dimensional
