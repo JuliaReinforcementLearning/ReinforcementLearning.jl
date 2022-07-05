@@ -49,6 +49,7 @@ makedocs(
             "How to implement a new algorithm?" => "How_to_implement_a_new_algorithm.md",
             "How to use hooks?" => "How_to_use_hooks.md",
             "Which algorithm should I use?" => "Which_algorithm_should_I_use.md",
+            "Episodic vs. Non-episodic environments" => "non_episodic.md",
         ],
         "FAQ" => "FAQ.md",
         experiments,

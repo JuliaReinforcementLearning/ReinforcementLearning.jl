@@ -1,7 +1,6 @@
 name = "ReinforcementLearningEnvironments"
 uuid = "25e41dd2-4622-11e9-1641-f1adca772921"
-authors = ["Jun Tian <juti@microsoft.com>"]
-version = "0.7.0-dev"
+version = "0.7.0"
 
 [deps]
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
@@ -18,6 +17,7 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
+FillArrays = "0.13"
 IntervalSets = "0.7"
 MacroTools = "0.5"
 ReinforcementLearningBase = "0.10"

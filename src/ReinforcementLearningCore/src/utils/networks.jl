@@ -1,7 +1,7 @@
-import Functors
+using Functors: @functor
 import Flux
-
-using Setfield: @set
+import Flux.onehotbatch
+using ChainRulesCore: ignore_derivatives
 
 #####
 # ActorCritic
@@ -18,7 +18,7 @@ Base.@kwdef struct ActorCritic{A,C,O}
     critic::C
 end
 
-Functors.@functor ActorCritic
+@functor ActorCritic
 
 #####
 # GaussianNetwork
@@ -44,7 +44,7 @@ end
 
 GaussianNetwork(pre, μ, logσ, normalizer=tanh) = GaussianNetwork(pre, μ, logσ, 0.0f0, Inf32, normalizer)
 
-Functors.@functor GaussianNetwork
+@functor GaussianNetwork
 
 """
 This function is compatible with a multidimensional action space. When outputting an action, it uses the `normalizer` function to normalize it elementwise.
@@ -59,7 +59,7 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, 
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
     if is_sampling
         σ = exp.(logσ)
-        z = Zygote.ignore() do
+        z = ignore_derivatives() do
             noise = randn(rng, Float32, size(μ))
             model.normalizer.(μ .+ σ .* noise)
         end
@@ -76,6 +76,7 @@ end
 
 """
     (model::GaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
+
 Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions (action_size x action_samples x batch_size).
 `state` must be 3D tensor with dimensions (state_size x 1 x batch_size). Always returns the logpdf of each action along.
 """
@@ -85,7 +86,7 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s, action_samples::Int)
     logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
 
     σ = exp.(logσ)
-    z = Zygote.ignore() do
+    z = ignore_derivatives() do
         noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
         model.normalizer.(μ .+ σ .* noise)
     end
@@ -138,7 +139,7 @@ end
 
 CovGaussianNetwork(pre, m, s) = CovGaussianNetwork(pre, m, s, tanh)
 
-Functors.@functor CovGaussianNetwork
+@functor CovGaussianNetwork
 
 """
     (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
@@ -167,7 +168,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
     L = vec_to_tril(cholesky_vec, da)
 
     if is_sampling
-        z = Zygote.ignore() do
+        z = ignore_derivatives() do
             noise = randn(rng, eltype(μ), da, 1, batch_size)
             model.normalizer.(Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3))
         end
@@ -188,7 +189,7 @@ end
 Given a Matrix of states, will return actions, μ and logpdf in matrix format. The batch of Σ remains a 3D tensor.
 """
 function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractMatrix; is_sampling::Bool=false, is_return_log_prob::Bool=false)
-    output = model(rng, Flux.unsqueeze(state, 2); is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
+    output = model(rng, Flux.unsqueeze(state, dims=2); is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
     if output isa Tuple && is_sampling
         dropdims(output[1], dims=2), dropdims(output[2], dims=2)
     elseif output isa Tuple
@@ -214,7 +215,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::In
     μ, cholesky_vec = model.μ(x), model.Σ(x)
     da = size(μ, 1)
     L = vec_to_tril(cholesky_vec, da)
-    z = Zygote.ignore() do
+    z = ignore_derivatives() do
         noise = randn(rng, eltype(μ), da, action_samples, batch_size)
         model.normalizer.(Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3))
     end
@@ -249,7 +250,7 @@ If given 2D matrices as input, will return a 2D matrix of logpdf. States and
 actions are paired column-wise, one action per state.
 """
 function (model::CovGaussianNetwork)(state::AbstractMatrix, action::AbstractMatrix)
-    output = model(Flux.unsqueeze(state, 2), Flux.unsqueeze(action, 2))
+    output = model(Flux.unsqueeze(state, 2), Flux.unsqueeze(action, dims=2))
     return dropdims(output, dims=2)
 end
 
@@ -262,7 +263,7 @@ function vec_to_tril(cholesky_vec, da)
     function f(j) #return a slice (da x 1 x batchsize) containing the jth columns of the lower triangular cholesky decomposition of the covariance
         tc_diag = softplus.(cholesky_vec[c2idx(j, j):c2idx(j, j), :, :])
         tc_other = cholesky_vec[c2idx(j, j)+1:c2idx(j + 1, j + 1)-1, :, :]
-        zs = Flux.Zygote.ignore() do
+        zs = ignore_derivatives() do
             zs = similar(cholesky_vec, da - size(tc_other, 1) - 1, 1, batch_size)
             zs .= zero(eltype(cholesky_vec))
             return zs
@@ -270,6 +271,122 @@ function vec_to_tril(cholesky_vec, da)
         [zs; tc_diag; tc_other]
     end
     return mapreduce(f, hcat, 1:da)
+end
+
+#####
+# DiscreteNetwork
+#####
+
+export CategoricalNetwork
+
+"""
+    CategoricalNetwork(model)([rng,] state::AbstractArray [, mask::AbstractArray{Bool}]; is_sampling::Bool=false, is_return_log_prob::Bool = false)
+
+CategoricalNetwork wraps a model (typically a neural network) that takes a `state` input 
+and outputs logits for a categorical distribution. The optional argument `mask` must be
+an Array of `Bool` with the same size as `state` expect for the first dimension that must
+have the length of the action vector. Actions mapped to `false` by mask have a logit equal to 
+`-Inf` and/or a zero-probability of being sampled.
+
+- `rng::AbstractRNG=Random.GLOBAL_RNG`
+- `is_sampling::Bool=false`, whether to sample from the obtained normal categorical distribution (returns a Flux.OneHotArray `z`). 
+- `is_return_logits::Bool=false`, whether to return the *logits* of getting the sampled actions in the given state.
+Only applies if `is_sampling` is true and will return `z, logits`.
+
+If `is_sampling = false`, returns only the logits obtained by a simple forward pass into `model`.
+"""
+mutable struct CategoricalNetwork{P}
+    model::P
+end
+
+@functor CategoricalNetwork
+
+function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray; is_sampling::Bool=false, is_return_logits::Bool = false)
+    logits = model.model(state) #may be 1-3 dimensional
+    if is_sampling
+        z = sample_categorical(rng,logits)
+        if is_return_logits
+            return z, logits
+        else
+            return z
+        end
+    else
+        return logits
+    end
+end
+
+function sample_categorical(rng, logits::AbstractArray)
+    Flux.Zygote.ignore() do 
+        log_probs = reshape(logsoftmax(logits, dims = 1), size(logits,1), :) # work in 2D
+        gumbels = -log.(-log.(rand(rng, size(log_probs)...))) .+ log_probs # Gumbel-Max trick
+        z = getindex.(argmax(gumbels, dims = 1), 1)
+        reshape(onehotbatch(z, 1:size(logits,1)), size(logits)...) # reshape back to original shape
+    end
+end
+
+function (model::CategoricalNetwork)(state::AbstractArray, args...; kwargs...)
+    model(Random.GLOBAL_RNG, state, args...; kwargs...)
+end
+
+"""
+    (model::CategoricalNetwork)([rng::AbstractRNG,] state::AbstractArray, [mask::AbstractArray{Bool},] action_samples::Int)
+
+Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batch_size)`. 
+Always returns the *logits* of each action along in a tensor with the same dimensions. The optional argument `mask` must be
+an Array of `Bool` with the same size as `state` expect for the first dimension that must
+have the length of the action vector. Actions mapped to `false` by mask have a logit equal to 
+`-Inf` and/or a zero-probability of being sampled.
+"""
+function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
+    logits = model.model(state) #da x 1 x batch_size 
+    z = Flux.Zygote.ignore() do 
+        batch_size = size(state, 3) #3
+        da = size(logits, 1)
+        log_probs = logsoftmax(logits, dims = 1)
+        gumbels = -log.(-log.(rand(rng, da, action_samples, batch_size))) .+ log_probs # Gumbel-Max trick
+        z = getindex.(argmax(gumbels, dims = 1), 1)
+        reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
+    end   
+    return z, reduce(hcat, Iterators.repeated(logits, action_samples))
+end
+
+function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractVecOrMat, action_samples::Int)
+    model(rng, reshape(state, size(state, 1), 1, :), action_samples)
+end
+
+#Masked Methods
+
+function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray, mask::AbstractArray{Bool}; is_sampling::Bool=false, is_return_logits::Bool = false)
+    logits = model.model(state) #may be 1-3 dimensional
+    logits .+= ifelse.(mask, 0f0, typemin(eltype(logits)))
+    if is_sampling
+        z = sample_categorical(rng,logits)
+        if is_return_logits
+            return z, logits
+        else
+            return z
+        end
+    else
+        return logits
+    end
+end
+
+function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, mask::AbstractArray{Bool, 3}, action_samples::Int)
+    logits = model.model(state) #da x 1 x batch_size 
+    logits .+= ifelse.(mask, 0f0, typemin(eltype(logits)))
+    z = Flux.Zygote.ignore() do 
+        batch_size = size(state, 3) #3
+        da = size(logits, 1)
+        log_probs = logsoftmax(logits, dims = 1)
+        gumbels = -log.(-log.(rand(rng, da, action_samples, batch_size))) .+ log_probs # Gumbel-Max trick
+        z = getindex.(argmax(gumbels, dims = 1), 1)
+        reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
+    end   
+    return z, reduce(hcat, Iterators.repeated(logits, action_samples))
+end
+
+function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray, mask::AbstractArray, action_samples::Int)
+    model(rng, reshape(state, size(state, 1), 1, :), reshape(mask, size(mask, 1), 1, :), action_samples)
 end
 
 #####
@@ -397,9 +514,9 @@ end
 
 TwinNetwork(x; kw...) = TwinNetwork(; source=x, target=deepcopy(x), kw...)
 
-Functors.functor(x::TwinNetwork) = (; source=x.source), y -> @set x.source = y.source
+@functor TwinNetwork (source,)
 
-(model::TwinNetwork)(x) = model.source(x)
+(model::TwinNetwork)(args...) = model.source(args...)
 
 function RLBase.optimise!(A::Approximator{<:TwinNetwork}, gs)
     Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)

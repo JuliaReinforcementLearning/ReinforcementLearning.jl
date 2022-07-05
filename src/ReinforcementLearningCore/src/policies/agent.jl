@@ -2,7 +2,7 @@ export Agent
 
 using Base.Threads: @spawn
 
-import Functors
+using Functors: @functor
 
 """
     Agent(;policy, trajectory)
@@ -20,7 +20,7 @@ mutable struct Agent{P,T} <: AbstractPolicy
     trajectory::T
     cache::NamedTuple # trajectory do not support partial inserting
 
-    function Agent(policy::P, trajectory::T, cache = NamedTuple()) where {P,T}
+    function Agent(policy::P, trajectory::T, cache=NamedTuple()) where {P,T}
         agent = new{P,T}(policy, trajectory, cache)
         if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
             bind(trajectory, @spawn(optimise!(p, t)))
@@ -29,7 +29,7 @@ mutable struct Agent{P,T} <: AbstractPolicy
     end
 end
 
-Agent(; policy, trajectory, cache = NamedTuple()) = Agent(policy, trajectory, cache)
+Agent(; policy, trajectory, cache=NamedTuple()) = Agent(policy, trajectory, cache)
 
 RLBase.optimise!(agent::Agent) = optimise!(TrajectoryStyle(agent.trajectory), agent)
 RLBase.optimise!(::SyncTrajectoryStyle, agent::Agent) =
@@ -44,21 +44,20 @@ function RLBase.optimise!(policy::AbstractPolicy, trajectory::Trajectory)
     end
 end
 
-Functors.functor(x::Agent) =
-    (policy = x.policy,), y -> Agent(y.policy, x.trajectory, x.cache)
+@functor Agent (policy,)
 
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
 function (agent::Agent)(env::AbstractEnv)
     action = agent.policy(env)
-    push!(agent.trajectory, (agent.cache..., action = action))
+    push!(agent.trajectory, (agent.cache..., action=action))
     agent.cache = (;)
     action
 end
 
 (agent::Agent)(::PreActStage, env::AbstractEnv) =
-    agent.cache = (agent.cache..., state = state(env))
+    agent.cache = (agent.cache..., state=state(env))
 
 (agent::Agent)(::PostActStage, env::AbstractEnv) =
-    agent.cache = (agent.cache..., reward = reward(env), terminal = is_terminated(env))
+    agent.cache = (agent.cache..., reward=reward(env), terminal=is_terminated(env))

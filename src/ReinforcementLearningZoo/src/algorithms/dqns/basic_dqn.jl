@@ -1,10 +1,8 @@
 export BasicDQNLearner
 
 using Flux: gradient, params
-using Zygote: ignore
-using Setfield: @set
-
-import Functors
+using Functors: @functor
+using ChainRulesCore: ignore_derivatives
 
 """
     BasicDQNLearner(;kwargs...)
@@ -32,7 +30,7 @@ Base.@kwdef mutable struct BasicDQNLearner{Q} <: AbstractLearner
     loss::Float32 = 0.0f0
 end
 
-Functors.functor(x::BasicDQNLearner) = (Q=x.approximator,), y -> @set x.approximator = y.Q
+@functor BasicDQNLearner (approximator,)
 
 (L::BasicDQNLearner)(s::AbstractArray) = L.approximator(s)
 
@@ -53,7 +51,7 @@ function RLCore.optimise!(
         q′ = vec(maximum(Q(s′); dims=1))
         G = @. r + γ * (1 - t) * q′
         loss = loss_func(G, q)
-        ignore() do
+        ignore_derivatives() do
             learner.loss = loss
         end
         loss

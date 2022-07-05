@@ -29,7 +29,7 @@ Base.@kwdef mutable struct A2CGAELearner{A<:ActorCritic} <: Any
 end
 
 Functors.functor(x::A2CGAELearner) =
-    (app = x.approximator,), y -> @set x.approximator = y.app
+    (app=x.approximator,), y -> @set x.approximator = y.app
 
 (learner::A2CGAELearner)(env::MultiThreadEnv) =
     learner.approximator.actor(send_to_device(device(learner), state(env))) |> send_to_host
@@ -70,8 +70,8 @@ function _update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
         rollout_values,
         γ,
         λ;
-        dims = 2,
-        terminal = t[:terminal],
+        dims=2,
+        terminal=t[:terminal]
     )
 
     gains = to_device(advantages + select_last_dim(rollout_values, 1:n))
@@ -90,7 +90,7 @@ function _update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
         critic_loss = mean(advantage .^ 2)
         entropy_loss = -sum(probs .* log_probs) * 1 // size(probs, 2)
         loss = w₁ * actor_loss + w₂ * critic_loss - w₃ * entropy_loss
-        ignore() do
+        ignore_derivatives() do
             learner.actor_loss = actor_loss
             learner.critic_loss = critic_loss
             learner.entropy_loss = entropy_loss
