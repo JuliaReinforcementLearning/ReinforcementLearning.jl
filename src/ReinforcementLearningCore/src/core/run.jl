@@ -60,17 +60,18 @@ Base.run(ex::Experiment) = run(ex.policy, ex.env, ex.stop_condition, ex.hook)
 function Base.run(
     policy::AbstractPolicy,
     env::AbstractEnv,
-    stop_condition=StopAfterEpisode(1),
-    hook=EmptyHook(),
+    stop_condition = StopAfterEpisode(1),
+    hook = EmptyHook(),
+    reset_condition = ResetAtTerminal()
 )
     policy, env = check(policy, env)
-    _run(policy, env, stop_condition, hook)
+    _run(policy, env, stop_condition, hook, reset_condition)
 end
 
 "Inject some customized checkings here by overwriting this function"
 check(policy, env) = policy, env
 
-function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook)
+function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook, reset_condition)
 
     hook(PreExperimentStage(), policy, env)
     policy(PreExperimentStage(), env)
@@ -80,7 +81,7 @@ function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook)
         policy(PreEpisodeStage(), env)
         hook(PreEpisodeStage(), policy, env)
 
-        while !is_terminated(env) # one episode
+        while !reset_condition(policy, env) # one episode
             policy(PreActStage(), env)
             hook(PreActStage(), policy, env)
 

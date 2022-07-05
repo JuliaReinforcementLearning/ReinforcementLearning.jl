@@ -12,7 +12,7 @@ GPU automatic differentiable version for the logpdf function of normal distribut
 Adding an epsilon value to guarantee numeric stability if sigma is exactly zero
 (e.g. if relu is used in output layer).
 """
-function normlogpdf(μ, σ, x; ϵ = 1.0f-8)
+function normlogpdf(μ, σ, x; ϵ=1.0f-8)
     z = (x .- μ) ./ (σ .+ ϵ)
     -(z .^ 2 .+ log2π) / 2.0f0 .- log.(σ .+ ϵ)
 end
@@ -29,7 +29,7 @@ and `Σ = L*L'`.
 """
 function mvnormlogpdf(μ::AbstractVecOrMat, L::AbstractMatrix, x::AbstractVecOrMat)
     return -(
-        (size(x, 1) * log2π + logdetLorU(L)) .+ vec(sum(abs2.(L \ (x .- μ)), dims = 1))
+        (size(x, 1) * log2π + logdetLorU(L)) .+ vec(sum(abs2.(L \ (x .- μ)), dims=1))
     ) ./ 2
 end
 
@@ -43,9 +43,9 @@ dimension is a batch sample.  `μ` is a (action_size x 1 x batch_size) matrix,
 action_samples x batch_size).  Return a 3D matrix of size (1 x action_samples x
 batch_size). 
 """
-function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ = 1.0f-8) where {A<:AbstractArray}
+function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ=1.0f-8) where {A<:AbstractArray}
     logp = [mvnormlogpdf(μ[:, :, k], LorU[:, :, k], x[:, :, k]) for k in 1:size(x, 3)]
-    return unsqueeze(stack(logp, 2), 1) #returns a 3D vector 
+    return unsqueeze(stack(logp, 2), dims=1) #returns a 3D vector 
 end
 
 #Used for mvnormlogpdf

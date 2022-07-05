@@ -45,18 +45,18 @@ end
 function CRRLearner(;
     approximator::Aq,
     target_approximator::At,
-    γ::Float32 = 0.99f0,
-    batch_size::Int = 32,
-    policy_improvement_mode::Symbol = :exp,
-    ratio_upper_bound::Float32 = 20.0f0,
-    β::Float32 = 1.0f0,
-    advantage_estimator::Symbol = :mean,
-    m::Int = 4,
-    update_freq::Int = 10,
-    update_step::Int = 0,
-    target_update_freq::Int = 100,
+    γ::Float32=0.99f0,
+    batch_size::Int=32,
+    policy_improvement_mode::Symbol=:exp,
+    ratio_upper_bound::Float32=20.0f0,
+    β::Float32=1.0f0,
+    advantage_estimator::Symbol=:mean,
+    m::Int=4,
+    update_freq::Int=10,
+    update_step::Int=0,
+    target_update_freq::Int=100,
     continuous::Bool,
-    rng = Random.GLOBAL_RNG,
+    rng=Random.GLOBAL_RNG
 ) where {Aq<:ActorCritic,At<:ActorCritic}
     copyto!(approximator, target_approximator)
     CRRLearner(
@@ -79,7 +79,7 @@ function CRRLearner(;
     )
 end
 
-Functors.functor(x::CRRLearner) = (Q = x.approximator, Qₜ = x.target_approximator),
+Functors.functor(x::CRRLearner) = (Q=x.approximator, Qₜ=x.target_approximator),
 y -> begin
     x = @set x.approximator = y.Q
     x = @set x.target_approximator = y.Qₜ
@@ -88,10 +88,10 @@ end
 
 function (learner::CRRLearner)(env)
     s = state(env)
-    s = Flux.unsqueeze(s, ndims(s) + 1)
+    s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s = send_to_device(device(learner), s)
     if learner.continuous
-        learner.approximator.actor(s; is_sampling = true) |> vec |> send_to_host
+        learner.approximator.actor(s; is_sampling=true) |> vec |> send_to_host
     else
         learner.approximator.actor(s) |> vec |> send_to_host
     end
@@ -121,7 +121,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
     r = reshape(r, :, batch_size)
     t = reshape(t, :, batch_size)
 
-    target_a_t = target_AC.actor(s′; is_sampling = true)
+    target_a_t = target_AC.actor(s′; is_sampling=true)
     target_q_input = vcat(s′, target_a_t)
     expected_target_q = target_AC.critic(target_q_input)
 
@@ -129,7 +129,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
 
     q_t = send_to_device(D, Matrix{Float32}(undef, learner.m, batch_size))
     for i in 1:learner.m
-        a_sample = AC.actor(s; is_sampling = true)
+        a_sample = AC.actor(s; is_sampling=true)
         q_t[i, :] = AC.critic(vcat(s, a_sample))
     end
 
@@ -143,9 +143,9 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
         log_π = AC.actor(s, a)
 
         if advantage_estimator == :max
-            advantage = qa_t .- maximum(q_t, dims = 1)
+            advantage = qa_t .- maximum(q_t, dims=1)
         elseif advantage_estimator == :mean
-            advantage = qa_t .- mean(q_t, dims = 1)
+            advantage = qa_t .- mean(q_t, dims=1)
         else
             error("Wrong parameter.")
         end
@@ -160,7 +160,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
 
         actor_loss = mean(-log_π .* actor_loss_coef)
 
-        ignore() do
+        ignore_derivatives() do
             learner.actor_loss = actor_loss
             learner.critic_loss = critic_loss
         end
@@ -189,7 +189,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
 
     target_a_t = softmax(target_AC.actor(s′))
     target_q_t = target_AC.critic(s′)
-    expected_target_q = sum(target_a_t .* target_q_t, dims = 1)
+    expected_target_q = sum(target_a_t .* target_q_t, dims=1)
 
     target = r .+ γ .* (1 .- t) .* expected_target_q
 
@@ -204,9 +204,9 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
         a_t = softmax(AC.actor(s))
 
         if advantage_estimator == :max
-            advantage = qa_t .- maximum(q_t, dims = 1)
+            advantage = qa_t .- maximum(q_t, dims=1)
         elseif advantage_estimator == :mean
-            advantage = qa_t .- mean(q_t, dims = 1)
+            advantage = qa_t .- mean(q_t, dims=1)
         else
             error("Wrong parameter.")
         end
@@ -221,7 +221,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
 
         actor_loss = mean(-log.(a_t[a]) .* actor_loss_coef)
 
-        ignore() do
+        ignore_derivatives() do
             learner.actor_loss = actor_loss
             learner.critic_loss = critic_loss
         end
