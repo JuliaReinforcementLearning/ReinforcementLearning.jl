@@ -1,6 +1,7 @@
 export normlogpdf, mvnormlogpdf
 
 using Flux: unsqueeze, stack
+using LinearAlgebra
 
 # watch https://github.com/JuliaStats/Distributions.jl/issues/1183
 const log2π = log(2.0f0π)

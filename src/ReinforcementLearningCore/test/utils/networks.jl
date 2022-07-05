@@ -1,4 +1,4 @@
-using Test, Flux, CUDA
+using Test, Flux, CUDA, LinearAlgebra, Distributions
 @testset "Approximators" begin
     #= These may need to be updated due to recent changes
     @testset "TabularApproximator" begin
@@ -209,7 +209,6 @@ using Test, Flux, CUDA
             end
         end
     end
-    #= Tests for CovGaussianNetwork are broken due to the disappearance of logdetLorU. This will be dealt with in another PR.
     @testset "CovGaussianNetwork" begin
         @testset "identity normalizer" begin
             pre = Dense(20,15)
@@ -395,7 +394,7 @@ using Test, Flux, CUDA
                 CUDA.allowscalar(true) #to avoid breaking other tests 
             end
         end
-    end=#
+    end
     @testset "CategoricalNetwork" begin
         d = CategoricalNetwork(Dense(5,3))
         s = rand(5, 10)
