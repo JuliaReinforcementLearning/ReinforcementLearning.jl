@@ -1,53 +1,62 @@
 export RainbowLearner
 
 using Random: AbstractRNG, GLOBAL_RNG
+using Flux: params, unsqueeze, softmax
 using Flux.Losses: logitcrossentropy
 using Functors: @functor
 
-mutable struct RainbowLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
+Base.@kwdef mutable struct RainbowLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
     approximator::A
     Vₘₐₓ::Float32
     Vₘᵢₙ::Float32
     n_actions::Int
+    γ::Float32
+    update_horizon::Int = 1
     n_atoms::Int = 51
-    support::Ts = range(Float32(-Vₘₐₓ), Float32(Vₘₐₓ), length=n_atoms)
-    delta_z::Float32 = support.step
+    support::AbstractVector = range(Float32(-Vₘₐₓ), Float32(Vₘₐₓ), length=n_atoms)
+    delta_z::Float32 = convert(Float32, support.step)
     default_priority::Float32 = 1.0f2
     β_priority::Float32 = 0.5f0
     loss_func::Any = (ŷ, y) -> logitcrossentropy(ŷ, y; agg=identity)
     rng::AbstractRNG = GLOBAL_RNG
     # for logging
-    loss::Float32
+    loss::Float32 = 0.0f0
 end
 
 @functor RainbowLearner (support, approximator)
 
-function (learner::RainbowLearner)(env)
-    s = send_to_device(device(learner.approximator), state(env))
-    s = Flux.unsqueeze(s, dims=ndims(s) + 1)
-    logits = learner.approximator(s)
-    q = learner.support .* softmax(reshape(logits, :, learner.n_actions))
-    vec(sum(q, dims=1)) |> send_to_host
+function (L::RainbowLearner)(s::AbstractArray)
+    logits = L.approximator(s)
+    q = L.support .* softmax(reshape(logits, :, L.n_actions))
+    sum(q, dims=1)
 end
 
-function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
-    Q = learner.approximator
-    Qₜ = learner.target_approximator
-    γ = learner.sampler.γ
+function (learner::RainbowLearner)(env::AbstractEnv)
+    s = send_to_device(device(learner.approximator), state(env))
+    s = unsqueeze(s, dims=ndims(s) + 1)
+    s |> learner |> vec |> send_to_host
+end
+
+function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
+    A = learner.approximator
+    Q = A.model.source
+    Qₜ = A.model.target
+    γ = learner.γ
     β = learner.β_priority
     loss_func = learner.loss_func
     n_atoms = learner.n_atoms
     n_actions = learner.n_actions
     support = learner.support
     delta_z = learner.delta_z
-    update_horizon = learner.sampler.n
-    batch_size = learner.sampler.batch_size
+    update_horizon = learner.update_horizon
+
     D = device(Q)
     states = send_to_device(D, batch.state)
     rewards = send_to_device(D, batch.reward)
     terminals = send_to_device(D, batch.terminal)
     next_states = send_to_device(D, batch.next_state)
 
+    batch_size = length(terminals)
     actions = CartesianIndex.(batch.action, 1:batch_size)
 
     target_support =
@@ -56,11 +65,14 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
 
     next_logits = Qₜ(next_states)
     next_probs = reshape(softmax(reshape(next_logits, n_atoms, :)), n_atoms, n_actions, :)
+
     next_q = reshape(sum(support .* next_probs, dims=1), n_actions, :)
+
     if haskey(batch, :next_legal_actions_mask)
         l′ = send_to_device(D, batch[:next_legal_actions_mask])
         next_q .+= ifelse.(l′, 0.0f0, typemin(Float32))
     end
+
     next_prob_select = select_best_probs(next_probs, next_q)
 
     target_distribution = project_distribution(
@@ -73,21 +85,21 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
     )
 
     is_use_PER = haskey(batch, :priority)  # is use Prioritized Experience Replay
+
     if is_use_PER
         updated_priorities = Vector{Float32}(undef, batch_size)
         weights = 1.0f0 ./ ((batch.priority .+ 1.0f-10) .^ β)
         weights ./= maximum(weights)
         weights = send_to_device(D, weights)
+        # TODO: init on device directly
     end
 
-    gs = gradient(Flux.params(Q)) do
+    gs = gradient(params(A)) do
         logits = reshape(Q(states), n_atoms, n_actions, :)
         select_logits = logits[:, actions]
         # The original paper normalized logits, but using normalization and Flux.Losses.crossentropy is not as stable as using Flux.Losses.logitcrossentropy.
         batch_losses = loss_func(select_logits, target_distribution)
-        loss =
-            is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1 // batch_size :
-            mean(batch_losses)
+        loss = is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1 // batch_size : mean(batch_losses)
         ignore_derivatives() do
             if is_use_PER
                 updated_priorities .= send_to_host(vec((batch_losses .+ 1.0f-10) .^ β))
@@ -97,9 +109,9 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
         loss
     end
 
-    update!(Q, gs)
+    optimise!(A, gs)
 
-    is_use_PER ? updated_priorities : nothing
+    is_use_PER ? batch.key => updated_priorities : nothing
 end
 
 @inline function select_best_probs(probs, q)
@@ -125,4 +137,14 @@ function project_distribution(supports, weights, target_support, delta_z, vmin, 
             1,
         ) .* reshape(weights, n_atoms, 1, batch_size)
     reshape(sum(projection, dims=1), n_atoms, batch_size)
+end
+
+function RLBase.optimise!(policy::QBasedPolicy{<:RainbowLearner}, trajectory::Trajectory)
+    for batch in trajectory
+        res = optimise!(policy, batch) |> send_to_host
+        if !isnothing(res)
+            k, p = res
+            trajectory[:priority, k] = p
+        end
+    end
 end
