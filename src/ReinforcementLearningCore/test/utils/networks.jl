@@ -398,14 +398,14 @@ using Test, Flux, CUDA, LinearAlgebra, Distributions
     @testset "CategoricalNetwork" begin
         d = CategoricalNetwork(Dense(5,3))
         s = rand(5, 10)
-        a, logits = d(s, is_sampling = true, is_return_logits = true)
+        a, logits = d(s, is_sampling = true, is_return_log_prob = true)
         @test size(a) == (3,10) == size(logits)
         a, logits = d(s, 4)
         @test size(a) == (3,4,10) == size(logits)
         
         #3D input
         s = rand(5,1,10)
-        a, logits = d(s, is_sampling = true, is_return_logits = true)
+        a, logits = d(s, is_sampling = true, is_return_log_prob = true)
         @test size(a) == (3,1,10) == size(logits)
         @test logits isa Array{Float64, 3}
         a, logits = d(s, 4)
@@ -416,7 +416,7 @@ using Test, Flux, CUDA, LinearAlgebra, Distributions
         s = rand(5, 10)
         mask = trues(3, 10)
         mask[1,:] .= false
-        a_masked, logits = d(s, mask, is_sampling = true, is_return_logits = true)
+        a_masked, logits = d(s, mask, is_sampling = true, is_return_log_prob = true)
         @test size(a_masked) == (3, 10)
         @test all(a -> a == 0, a_masked[1,:])
         @test all(l -> l == -Inf32, logits[1, :]) && all(l -> l !== -Inf32, logits[2:3, :])
@@ -426,7 +426,7 @@ using Test, Flux, CUDA, LinearAlgebra, Distributions
         s = rand(5,1,10)
         mask = trues(3, 1, 10)
         mask[1,:, :] .= false
-        a_masked, logits = d(s, mask, is_sampling = true, is_return_logits = true)
+        a_masked, logits = d(s, mask, is_sampling = true, is_return_log_prob = true)
         @test size(a_masked) == (3, 1, 10)
         @test all(a -> a == 0, a_masked[1,:, :])
         @test all(l -> l == -Inf32, logits[1, :, :]) && all(l -> l !== -Inf32, logits[2:3, :, :])
@@ -439,14 +439,14 @@ using Test, Flux, CUDA, LinearAlgebra, Distributions
                 rng = CUDA.CURAND.RNG()
                 d = CategoricalNetwork(Dense(5,3) |> gpu)
                 s = cu(rand(5, 10))
-                a, logits = d(rng, s, is_sampling = true, is_return_logits = true);
+                a, logits = d(rng, s, is_sampling = true, is_return_log_prob = true);
                 @test size(a) == (3,10) == size(logits)
                 a, logits = d(rng, s, 4);
                 @test size(a) == (3,4,10) == size(logits)
                 
                 #3D input
                 s = cu(rand(5,1,10))
-                a, logits = d(rng, s, is_sampling = true, is_return_logits = true);
+                a, logits = d(rng, s, is_sampling = true, is_return_log_prob = true);
                 @test size(a) == (3,1,10) == size(logits)
                 a, logits = d(rng, s, 4);
                 @test size(a) == (3,4,10) == size(logits)

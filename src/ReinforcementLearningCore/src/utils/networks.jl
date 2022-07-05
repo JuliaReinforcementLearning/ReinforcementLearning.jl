@@ -291,7 +291,7 @@ have the length of the action vector. Actions mapped to `false` by mask have a l
 
 - `rng::AbstractRNG=Random.GLOBAL_RNG`
 - `is_sampling::Bool=false`, whether to sample from the obtained normal categorical distribution (returns a Flux.OneHotArray `z`). 
-- `is_return_logits::Bool=false`, whether to return the *logits* of getting the sampled actions in the given state.
+- `is_return_log_prob::Bool=false`, whether to return the *logits* (i.e. the unnormalized logprobabilities) of getting the sampled actions in the given state.
 Only applies if `is_sampling` is true and will return `z, logits`.
 
 If `is_sampling = false`, returns only the logits obtained by a simple forward pass into `model`.
@@ -302,11 +302,11 @@ end
 
 @functor CategoricalNetwork
 
-function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray; is_sampling::Bool=false, is_return_logits::Bool = false)
+function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray; is_sampling::Bool=false, is_return_log_prob::Bool = false)
     logits = model.model(state) #may be 1-3 dimensional
     if is_sampling
         z = sample_categorical(rng,logits)
-        if is_return_logits
+        if is_return_log_prob
             return z, logits
         else
             return z
@@ -357,12 +357,12 @@ end
 
 #Masked Methods
 
-function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray, mask::AbstractArray{Bool}; is_sampling::Bool=false, is_return_logits::Bool = false)
+function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray, mask::AbstractArray{Bool}; is_sampling::Bool=false, is_return_log_prob::Bool = false)
     logits = model.model(state) #may be 1-3 dimensional
     logits .+= ifelse.(mask, 0f0, typemin(eltype(logits)))
     if is_sampling
         z = sample_categorical(rng,logits)
-        if is_return_logits
+        if is_return_log_prob
             return z, logits
         else
             return z
