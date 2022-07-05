@@ -24,7 +24,7 @@ end
 
 function (learner::RainbowLearner)(env)
     s = send_to_device(device(learner.approximator), state(env))
-    s = Flux.unsqueeze(s, ndims(s) + 1)
+    s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     logits = learner.approximator(s)
     q = learner.support .* softmax(reshape(logits, :, learner.n_actions))
     vec(sum(q, dims=1)) |> send_to_host
@@ -88,7 +88,7 @@ function RLBase.update!(learner::RainbowLearner, batch::NamedTuple)
         loss =
             is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1 // batch_size :
             mean(batch_losses)
-        ignore() do
+        ignore_derivatives() do
             if is_use_PER
                 updated_priorities .= send_to_host(vec((batch_losses .+ 1.0f-10) .^ β))
             end

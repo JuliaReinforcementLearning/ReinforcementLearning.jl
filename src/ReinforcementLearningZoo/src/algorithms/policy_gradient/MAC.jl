@@ -1,5 +1,7 @@
 export MACLearner
 
+using Zygote: ignore_derivatives
+
 """
     MACLearner(;kwargs...)
 
@@ -25,7 +27,7 @@ Base.@kwdef mutable struct MACLearner{A<:ActorCritic} <: Any
     update_step::Int = 0
 end
 
-Functors.functor(x::MACLearner) = (app = x.approximator,), y -> @set x.approximator = y.app
+Functors.functor(x::MACLearner) = (app=x.approximator,), y -> @set x.approximator = y.app
 
 function (learner::MACLearner)(env::MultiThreadEnv)
     learner.approximator.actor(send_to_device(device(learner.approximator), state(env))) |>
@@ -34,7 +36,7 @@ end
 
 function (learner::MACLearner)(env)
     s = state(env)
-    s = Flux.unsqueeze(s, ndims(s) + 1)
+    s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s = send_to_device(device(learner.approximator), s)
     learner.approximator.actor(s) |> vec |> send_to_host
 end
@@ -79,9 +81,9 @@ function _update!(learner::MACLearner, t::CircularArraySARTTrajectory)
         gains = discount_rewards(
             rewards,
             γ;
-            dims = 2,
-            init = send_to_host(next_state_values),
-            terminal = terminals,
+            dims=2,
+            init=send_to_host(next_state_values),
+            terminal=terminals
         )
         gains = send_to_device(D, gains)
     else
@@ -97,9 +99,9 @@ function _update!(learner::MACLearner, t::CircularArraySARTTrajectory)
     gs1 = gradient(ps1) do
         logits = AC.actor(states_flattened)
         probs = softmax(logits)
-        actor_loss = -mean(sum((probs .* Zygote.dropgrad(action_values)), dims = 1))
+        actor_loss = -mean(sum((probs .* ignore_derivatives(action_values)), dims=1))
         loss = actor_loss
-        ignore() do
+        ignore_derivatives() do
             learner.actor_loss = actor_loss
         end
         loss
@@ -118,10 +120,10 @@ function _update!(learner::MACLearner, t::CircularArraySARTTrajectory)
             target_action_values =
                 vec(rewards_flattened) .+
                 γ * vec(
-                    Zygote.dropgrad(
+                    ignore_derivatives(
                         sum(
                             next_state_values .* softmax(AC.actor(next_state_flattened)),
-                            dims = 1,
+                            dims=1,
                         ),
                     ),
                 )
@@ -130,7 +132,7 @@ function _update!(learner::MACLearner, t::CircularArraySARTTrajectory)
         end
 
         loss = critic_loss
-        ignore() do
+        ignore_derivatives() do
             learner.critic_loss = critic_loss
         end
         loss

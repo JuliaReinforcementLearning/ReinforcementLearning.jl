@@ -59,14 +59,14 @@ function PLASLearner(;
     target_qnetwork1,
     target_qnetwork2,
     vae,
-    γ = 0.99f0,
-    τ = 0.005f0,
-    λ = 0.75f0,
-    batch_size = 32,
-    pretrain_step = 10000,
-    update_freq = 50,
-    update_step = 0,
-    rng = Random.GLOBAL_RNG,
+    γ=0.99f0,
+    τ=0.005f0,
+    λ=0.75f0,
+    batch_size=32,
+    pretrain_step=10000,
+    update_freq=50,
+    update_step=0,
+    rng=Random.GLOBAL_RNG
 )
     copyto!(policy, target_policy)  # force sync
     copyto!(qnetwork1, target_qnetwork1)  # force sync
@@ -94,9 +94,9 @@ end
 
 function (l::PLASLearner)(env)
     s = send_to_device(device(l.policy), state(env))
-    s = Flux.unsqueeze(s, ndims(s) + 1)
+    s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     latent_action = tanh.(l.policy(s))
-    action = dropdims(decode(l.vae.model, s, latent_action), dims = 2)
+    action = dropdims(decode(l.vae.model, s, latent_action), dims=2)
 end
 
 function RLBase.update!(l::PLASLearner, batch::NamedTuple{SARTS})
@@ -138,7 +138,7 @@ function update_learner!(l::PLASLearner, batch::NamedTuple{SARTS})
     q_grad_1 = gradient(Flux.params(l.qnetwork1)) do
         q1 = l.qnetwork1(q_input) |> vec
         loss = mse(q1, y)
-        ignore() do
+        ignore_derivatives() do
             l.critic_loss = loss
         end
         loss
@@ -148,7 +148,7 @@ function update_learner!(l::PLASLearner, batch::NamedTuple{SARTS})
     q_grad_2 = gradient(Flux.params(l.qnetwork2)) do
         q2 = l.qnetwork2(q_input) |> vec
         loss = mse(q2, y)
-        ignore() do
+        ignore_derivatives() do
             l.critic_loss += loss
         end
         loss
@@ -160,7 +160,7 @@ function update_learner!(l::PLASLearner, batch::NamedTuple{SARTS})
         latent_action = tanh.(l.policy(s))
         action = decode(l.vae.model, s, latent_action)
         actor_loss = -mean(l.qnetwork1(vcat(s, action)))
-        ignore() do
+        ignore_derivatives() do
             l.actor_loss = actor_loss
         end
         actor_loss

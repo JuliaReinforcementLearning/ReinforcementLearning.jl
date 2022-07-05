@@ -42,7 +42,7 @@ function RLBase.optimise!(learner::DQNLearner, batch::Union{NamedTuple{SS′ART}
     gs = gradient(params(A)) do
         qₐ = Q(s)[a]
         loss = loss_func(G, qₐ)
-        ignore() do
+        ignore_derivatives() do
             learner.loss = loss
         end
         loss
