@@ -119,13 +119,18 @@ function (p::SACPolicy)(env)
     p.update_step += 1
 
     if p.update_step <= p.start_steps
-        p.start_policy(env)
+        action = p.start_policy(env)
+        if(size(action[1]) != ())
+            action = permutedims(hcat(action...))
+        end
+        action
     else
         D = device(p.policy)
         s = send_to_device(D, state(env))
         s = Flux.unsqueeze(s, dims=ndims(s) + 1)
         # trainmode:
-        action = dropdims(p.policy(p.device_rng, s; is_sampling=true), dims=2) # Single action vec, drop second dim
+        action = p.policy(p.device_rng, s; is_sampling=true)
+        action = dropdims(action, dims=ndims(action)) # Single action vec, drop second dim
         send_to_host(action)
 
         # testmode:
@@ -156,18 +161,18 @@ function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
     q′_input = vcat(s′, a′)
     q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
 
-    y = r .+ γ .* (1 .- t) .* vec(q′ .- α .* log_π)
+    y = r .+ γ .* (1 .- t) .* dropdims(q′ .- α .* log_π, dims=1)
 
     # Train Q Networks
     q_input = vcat(s, a)
 
     q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
-        q1 = p.qnetwork1(q_input) |> vec
+        q1 = dropdims(p.qnetwork1(q_input), dims=1)
         mse(q1, y)
     end
     update!(p.qnetwork1, q_grad_1)
     q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
-        q2 = p.qnetwork2(q_input) |> vec
+        q2 = dropdims(p.qnetwork2(q_input), dims=1)
         mse(q2, y)
     end
     update!(p.qnetwork2, q_grad_2)
