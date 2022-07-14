@@ -121,7 +121,7 @@ function (p::SACPolicy)(env)
     if p.update_step <= p.start_steps
         action = p.start_policy(env)
         if(size(action[1]) != ())
-            action = permutedims(hcat(action...))
+            action = reduce(hcat, action)
         end
         action
     else
