@@ -516,6 +516,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "ll7",
+      "name": "ll7",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32880741?v=4",
+      "profile": "https://github.com/ll7",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
