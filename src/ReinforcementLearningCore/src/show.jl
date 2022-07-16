@@ -105,3 +105,7 @@ function Base.convert(
 end
 
 annotated_fields(x::AbstractTrace) = ()
+
+#####
+
+Base.show(io::IO, m::MIME"text/plain", p::AbstractPolicy) = show(io, m, convert(AnnotatedStructTree, p))

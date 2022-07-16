@@ -57,7 +57,7 @@ function Experiment(s::String)
     Experiment{Symbol(s)}(ex.policy, ex.env, ex.stop_condition, ex.hook)
 end
 
-Base.show(io::IO, m::MIME"text/plain", t::Experiment{S}) where {S} = show(io, m, convert(AnnotatedStructTree, t; name=S))
+Base.show(io::IO, m::MIME"text/plain", t::Experiment{S}) where {S} = show(io, m, convert(AnnotatedStructTree, t; description=S))
 
 Base.run(ex::Experiment) = run(ex.policy, ex.env, ex.stop_condition, ex.hook)
 
