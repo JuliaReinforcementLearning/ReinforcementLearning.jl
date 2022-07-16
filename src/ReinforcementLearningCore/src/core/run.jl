@@ -33,12 +33,14 @@ function try_parse_kw(s)
     NamedTuple(kw)
 end
 
-struct Experiment
+struct Experiment{S}
     policy::Any
     env::Any
     stop_condition::Any
     hook::Any
 end
+
+Experiment(args...) = Experiment{Symbol()}(args...)
 
 function Experiment(s::String)
     m = match(r"(?<source>\w+)_(?<method>\w+)_(?<env>\w+)(\((?<game>.*)\))?", s)
@@ -51,18 +53,20 @@ function Experiment(s::String)
     method = m[:method]
     env = m[:env]
     kw_args = isnothing(m[:game]) ? (;) : try_parse_kw(m[:game])
-    Experiment(Val(Symbol(source)), Val(Symbol(method)), Val(Symbol(env)); kw_args...)
+    ex = Experiment(Val(Symbol(source)), Val(Symbol(method)), Val(Symbol(env)); kw_args...)
+    Experiment{Symbol(s)}(ex.policy, ex.env, ex.stop_condition, ex.hook)
 end
 
+Base.show(io::IO, m::MIME"text/plain", t::Experiment{S}) where {S} = show(io, m, convert(AnnotatedStructTree, t; name=S))
 
 Base.run(ex::Experiment) = run(ex.policy, ex.env, ex.stop_condition, ex.hook)
 
 function Base.run(
     policy::AbstractPolicy,
     env::AbstractEnv,
-    stop_condition = StopAfterEpisode(1),
-    hook = EmptyHook(),
-    reset_condition = ResetAtTerminal()
+    stop_condition=StopAfterEpisode(1),
+    hook=EmptyHook(),
+    reset_condition=ResetAtTerminal()
 )
     policy, env = check(policy, env)
     _run(policy, env, stop_condition, hook, reset_condition)
