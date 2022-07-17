@@ -205,9 +205,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "0597dffe1268516192ff4ddebdb4d8937254512d"
+git-tree-sha1 = "429077fd74119f5ac495857fd51f4120baf36355"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.63"
+version = "0.25.65"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -635,19 +635,19 @@ version = "0.11.0"
 deps = ["AbstractTrees", "CommonRLInterface", "CommonRLSpaces", "Markdown", "Random", "Reexport", "Test"]
 path = "../ReinforcementLearningBase"
 uuid = "e575027e-6cd6-5018-9292-cdc6200d2b44"
-version = "0.10.0"
+version = "0.10.1"
 
 [[deps.ReinforcementLearningCore]]
-deps = ["Adapt", "CUDA", "CircularArrayBuffers", "Distributions", "FillArrays", "Flux", "Functors", "Parsers", "ProgressMeter", "Random", "Reexport", "ReinforcementLearningBase", "ReinforcementLearningTrajectories", "Statistics", "StatsBase", "UnicodePlots"]
+deps = ["AbstractTrees", "Adapt", "CUDA", "ChainRulesCore", "CircularArrayBuffers", "Crayons", "Distributions", "FillArrays", "Flux", "Functors", "Parsers", "ProgressMeter", "Random", "Reexport", "ReinforcementLearningBase", "ReinforcementLearningTrajectories", "Statistics", "StatsBase", "UnicodePlots"]
 path = "../ReinforcementLearningCore"
 uuid = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
-version = "0.9.0"
+version = "0.9.1"
 
 [[deps.ReinforcementLearningEnvironments]]
 deps = ["DelimitedFiles", "FillArrays", "IntervalSets", "LinearAlgebra", "MacroTools", "Markdown", "Pkg", "Random", "ReinforcementLearningBase", "Requires", "SparseArrays", "StatsBase"]
 path = "../ReinforcementLearningEnvironments"
 uuid = "25e41dd2-4622-11e9-1641-f1adca772921"
-version = "0.7.0-dev"
+version = "0.7.0"
 
 [[deps.ReinforcementLearningTrajectories]]
 deps = ["CircularArrayBuffers", "MacroTools", "OnlineStats", "Random", "StackViews"]
@@ -656,7 +656,7 @@ uuid = "6486599b-a3cd-4e92-a99a-2cea90cc8c3c"
 version = "0.1.3"
 
 [[deps.ReinforcementLearningZoo]]
-deps = ["Flux", "Functors", "LinearAlgebra", "Random", "ReinforcementLearningBase", "ReinforcementLearningCore", "StatsBase", "Zygote"]
+deps = ["ChainRulesCore", "Distributions", "Flux", "Functors", "LinearAlgebra", "Random", "ReinforcementLearningBase", "ReinforcementLearningCore", "StatsBase", "Zygote"]
 path = "../ReinforcementLearningZoo"
 uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 version = "0.6.0"

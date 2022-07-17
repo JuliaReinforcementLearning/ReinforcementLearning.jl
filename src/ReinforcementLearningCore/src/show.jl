@@ -14,6 +14,8 @@ end
 annotated_fields(x) = annotated_fields(typeof(x))
 annotated_fields(::Type{T}) where {T} = fieldnames(T)
 
+annotations(x::UnionAll) = []
+
 function annotations(x)
     binding = aliasof(typeof(x), typeof(typeof(x)))
     res = []
