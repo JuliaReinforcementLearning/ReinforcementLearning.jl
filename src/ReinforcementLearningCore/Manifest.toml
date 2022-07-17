@@ -60,9 +60,9 @@ version = "0.4.2"
 
 [[deps.CUDA]]
 deps = ["AbstractFFTs", "Adapt", "BFloat16s", "CEnum", "CompilerSupportLibraries_jll", "ExprTools", "GPUArrays", "GPUCompiler", "LLVM", "LazyArtifacts", "Libdl", "LinearAlgebra", "Logging", "Printf", "Random", "Random123", "RandomNumbers", "Reexport", "Requires", "SparseArrays", "SpecialFunctions", "TimerOutputs"]
-git-tree-sha1 = "e4e5ece72fa2f108fb20c3c5538a5fa9ef3d668a"
+git-tree-sha1 = "49549e2c28ffb9cc77b3689dc10e46e6271e9452"
 uuid = "052768ef-5323-5732-b1bb-66c8b64840ba"
-version = "3.11.0"
+version = "3.12.0"
 
 [[deps.Calculus]]
 deps = ["LinearAlgebra"]
@@ -230,6 +230,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "3f3a2501fa7236e9b911e0f7a588c657e822bb6d"
 uuid = "5ae413db-bbd1-5e63-b57d-d24a61df00f5"
 version = "2.2.3+0"
+
+[[deps.ElasticArrays]]
+deps = ["Adapt"]
+git-tree-sha1 = "a0fcc1bb3c9ceaf07e1d0529c9806ce94be6adf9"
+uuid = "fdbdab4c-e67f-52f5-8c3f-e7b388dad3d4"
+version = "1.2.9"
 
 [[deps.ExprTools]]
 git-tree-sha1 = "56559bbef6ca5ea0c0818fa5c90320398a6fbf8d"
@@ -606,13 +612,13 @@ version = "1.2.2"
 deps = ["AbstractTrees", "CommonRLInterface", "CommonRLSpaces", "Markdown", "Random", "Reexport", "Test"]
 path = "../ReinforcementLearningBase"
 uuid = "e575027e-6cd6-5018-9292-cdc6200d2b44"
-version = "0.10.0"
+version = "0.10.1"
 
 [[deps.ReinforcementLearningTrajectories]]
-deps = ["CircularArrayBuffers", "MacroTools", "OnlineStats", "Random", "StackViews"]
-git-tree-sha1 = "7c355d4dc3a77e3d6b16197126f07d65896ab4af"
+deps = ["CircularArrayBuffers", "ElasticArrays", "MacroTools", "OnlineStats", "Random", "StackViews"]
+git-tree-sha1 = "87c22ac70368f1aa9d1c583c0c1f96b196183444"
 uuid = "6486599b-a3cd-4e92-a99a-2cea90cc8c3c"
-version = "0.1.4"
+version = "0.1.5"
 
 [[deps.Requires]]
 deps = ["UUIDs"]
@@ -697,9 +703,9 @@ version = "1.4.0"
 
 [[deps.StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
-git-tree-sha1 = "48598584bacbebf7d30e20880438ed1d24b7c7d6"
+git-tree-sha1 = "472d044a1c8df2b062b23f222573ad6837a615ba"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-version = "0.33.18"
+version = "0.33.19"
 
 [[deps.StatsFuns]]
 deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
