@@ -16,6 +16,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 ChainRulesCore = "1"
+Distributions = "0.25"
 Flux = "0.13"
 Functors = "0.2"
 ReinforcementLearningBase = "0.10"
