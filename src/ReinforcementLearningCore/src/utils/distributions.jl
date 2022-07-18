@@ -1,4 +1,4 @@
-export normlogpdf, mvnormlogpdf
+export normlogpdf, mvnormlogpdf, diagnormlogpdf
 
 using Flux: unsqueeze, stack
 using LinearAlgebra
@@ -16,6 +16,18 @@ Adding an epsilon value to guarantee numeric stability if sigma is exactly zero
 function normlogpdf(μ, σ, x; ϵ=1.0f-8)
     z = (x .- μ) ./ (σ .+ ϵ)
     -(z .^ 2 .+ log2π) / 2.0f0 .- log.(σ .+ ϵ)
+end
+
+"""
+    diagnormlogpdf(μ, σ, x; ϵ = 1.0f-8)
+
+GPU automatic differentiable version for the logpdf function of normal distributions with 
+diagonal covariance. Adding an epsilon value to guarantee numeric stability if sigma is 
+exactly zero (e.g. if relu is used in output layer).
+"""
+function diagnormlogpdf(μ, σ, x; ϵ = 1.0f-8)
+    v = (σ .+ ϵ) .^2
+    -0.5f0*(log(prod(v)) + ((x .- μ).^2)'*inv.(v) + length(μ)*log2π)
 end
 
 """
@@ -51,7 +63,7 @@ end
 
 #Used for mvnormlogpdf
 """
-`logdetLorU(LorU::AbstractMatrix)`
+    logdetLorU(LorU::AbstractMatrix)
 Log-determinant of the Positive-Semi-Definite matrix A = L*U (cholesky lower and upper triangulars), given L or U. 
 Has a sign uncertainty for non PSD matrices.
 """
