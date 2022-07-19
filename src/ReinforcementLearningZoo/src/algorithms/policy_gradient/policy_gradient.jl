@@ -1,4 +1,5 @@
 # include("run.jl")
+include("util.jl")
 include("vpg.jl")
 # include("A2C.jl")
 # include("ppo.jl")
