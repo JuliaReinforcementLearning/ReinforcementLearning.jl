@@ -1,9 +1,8 @@
 export MPOPolicy
 using LinearAlgebra, Flux, Optim
 using Zygote: ignore, dropgrad
-using ReinforcementLearningCore: logdetLorU
 import LogExpFunctions.logsumexp
-using Flux.Losses
+import Flux.Losses: logitcrossentropy, mse
 
 #Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
 mutable struct MPOPolicy{P<:Approximator,Q<:Approximator,R,AV<:AbstractVector, N} <: AbstractPolicy
@@ -184,8 +183,8 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
     policy_loss = - mean(qij .* (logp_π_new_μ .+ logp_π_new_L))
     μ_old_s, L_old_s, μ_s, L_d_s, μ_d_s, L_s = map(x->eachslice(x, dims =3), (μ_old, L_old, μ, L_d, μ_d, L)) #slice all tensors along 3rd dim
 
-    klμ = mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_s, L_d_s))
-    klΣ = mean(mvnorm_kl_divergence.(μ_old_s, L_old_s, μ_d_s, L_s))
+    klμ = mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_s, L_d_s))
+    klΣ = mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_d_s, L_s))
     lagrangeμ = - mean(p.αμ) * (p.ϵμ - klμ) 
     lagrangeΣ = - mean(p.αΣ) * (p.ϵΣ - klΣ)
     ignore_derivatives() do #logging
@@ -208,12 +207,14 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
         μ, σ #decoupling
     end
     #decoupled logp for mu and sigma
-    logp_π_new_μ = sum(normlogpdf(μ, σ_d, actions) .- (2.0f0 .* (log(2.0f0) .- actions .- softplus.(-2.0f0 .* actions))), dims = 1)
-    logp_π_new_σ = sum(normlogpdf(μ_d, σ, actions) .- (2.0f0 .* (log(2.0f0) .- actions .- softplus.(-2.0f0 .* actions))), dims = 1)
-    policy_loss = -mean(qij .* (logp_π_new_μ .+ logp_π_new_σ))
     μ_old_s, σ_old_s, μ_s, σ_d_s, μ_d_s, σ_s = map(x->eachslice(x, dims =3), (μ_old, σ_old, μ, σ_d, μ_d, σ)) #slice all tensors along 3rd dim
-    lagrangeμ = - mean(p.αμ) * (p.ϵμ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))) 
-    lagrangeΣ = - mean(p.αΣ) * (p.ϵΣ - mean(norm_kl_divergence.(μ_old_s, σ_old_s, μ_d_s, σ_s)))
+
+    logp_π_new_μ = diagnormlogpdf(μ, σ_d, actions)
+    logp_π_new_σ = diagnormlogpdf(μ_d, σ, actions)
+    policy_loss = -mean(qij .* (logp_π_new_μ .+ logp_π_new_σ))
+
+    lagrangeμ = - mean(p.αμ) * (p.ϵμ - mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))) 
+    lagrangeΣ = - mean(p.αΣ) * (p.ϵΣ - mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_d_s, σ_s)))
     ignore_derivatives() do #logging
         push!(p.logs[:policy_loss],policy_loss)
         push!(p.logs[:lagrangeμ_loss], lagrangeμ)
@@ -224,7 +225,7 @@ end
 
 function mpo_loss(p::MPOPolicy{<:Approximator{<:CategoricalNetwork}}, qij, states, actions, logits_old)
     logits = p.policy(p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
-    policy_loss = logitcrossentropy(logits, qij)
+    policy_loss = -  mean(qij .* logsoftmax(logits, dims = 2))
     lagrange_loss = - mean(p.αμ) * (p.ϵμ - kldivergence(softmax(logits_old, dims = 1), softmax(logits, dims = 1)))
     ignore_derivatives() do #logging
         push!(p.logs[:policy_loss],policy_loss)
@@ -233,12 +234,12 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CategoricalNetwork}}, qij, state
     return policy_loss + lagrange_loss
 end
 
-```
+"""
     Flux.gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
 
 Apply Flux.gpu to all neural nets of the policy. 
 `rng` can be used to specificy a particular rng if desired, make sure this rng generates numbers on the correct device.
-```
+"""
 function Flux.gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
     MPOPolicy(
         p.policy |> gpu, 
