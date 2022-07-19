@@ -14,7 +14,7 @@ action_distribution(dist, model_output) =
 """
     action_distribution(dist::Type{T}, model_output) where {T<:DiscreteDistribution}
 
-When `dist` is a subtype of `DiscreteDistribution`, assume `model_output` is a batch of unnomalized log probabilities.
+When `dist` is a subtype of `DiscreteDistribution`, assume `model_output` is a batch of unnormalized log probabilities.
 # Examples
 ```jldoctest
 julia> model_output = reshape(1:10, 5, 2)
