@@ -26,7 +26,7 @@ end
 
 function (π::VPG)(env::AbstractEnv)
     res = env |> state |> send_to_device(π) |> π.approximator |> send_to_host
-    rand(π.rng, action_distribution(π.dist, res), 1)
+    rand(π.rng, action_distribution(π.dist, res)[1])
 end
 
 function (p::Agent{<:VPG})(::PostEpisodeStage, env::AbstractEnv)

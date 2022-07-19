@@ -38,7 +38,7 @@ p: [0.011656230956039605, 0.03168492079612427, 0.0861285444362687, 0.23412165725
 ```
 """
 action_distribution(dist::Type{T}, model_output) where {T<:DiscreteDistribution} = 
-    map(col -> dist(col, check_args=false), eachcol(softmax(model_output)))
+    map(col -> dist(col; check_args=false), eachcol(softmax(model_output)))
 
 """
     action_distribution(dist::Type{T}, model_output) where {T<:ContinuousDistribution}
@@ -60,4 +60,4 @@ julia> action_distribution(Normal, model_output)
 ```
 """
 action_distribution(dist::Type{T}, model_output) where {T<:ContinuousDistribution} = 
-    map(col -> dist(Vector(col)), eachcol(model_output))
+    map(col -> dist(col...), eachcol(model_output))
