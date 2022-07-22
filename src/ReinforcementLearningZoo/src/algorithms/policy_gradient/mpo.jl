@@ -5,7 +5,7 @@ import LogExpFunctions.logsumexp
 import Flux.Losses: logitcrossentropy, mse
 
 #Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
-mutable struct MPOPolicy{P<:Approximator,Q<:Approximator,R,AV<:AbstractVector, N} <: AbstractPolicy
+mutable struct MPOPolicy{P<:Approximator,Q<:Approximator,R,AV<:AbstractVector} <: AbstractPolicy
     policy::P
     qnetwork1::Q
     qnetwork2::Q
@@ -23,7 +23,7 @@ mutable struct MPOPolicy{P<:Approximator,Q<:Approximator,R,AV<:AbstractVector, N
     logs::Dict{Symbol, Vector{Float32}}
 end
 
-function MPOPolicy(;policy::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q <: Approximator
+function MPOPolicy(;policy::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, τ = 1f-3, rng = Random.GLOBAL_RNG) where Q <: Approximator
     @assert device(policy) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(policy) == device(rng) "The specified rng does not generate on the same device as the policy. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     αμ = send_to_device(device(policy), [0f0])
@@ -35,13 +35,12 @@ end
 Flux.@functor MPOPolicy
 
 function (p::MPOPolicy)(env; testmode = false)
-    p.update_step += 1
     D = device(p.policy)
     s = send_to_device(D, state(env))
     if !testmode
-        action = p.policy(p.rng, s; is_sampling=!testmode)
+        action = p.policy.model(p.rng, s; is_sampling=!testmode)
     else
-        action, _ = p.policy(p.rng, s; is_sampling=!testmode)
+        action, _ = p.policy.model(p.rng, s; is_sampling=!testmode)
     end
     send_to_host(action)
 end
@@ -51,7 +50,7 @@ end
 NamedTuple{
         (:policy, :critic), 
         <: Tuple{
-            <: Vector{<: NamedTuple{(:state)}},
+            <: Vector{<: NamedTuple{(:state,)}},
             <: Vector{<: NamedTuple{SS′ART}}
         }
     }
@@ -65,7 +64,7 @@ function RLBase.optimise!(
     batches::NamedTuple{
         (:policy, :critic), 
         <: Tuple{
-            <: Vector{<: NamedTuple{(:state)}},
+            <: Vector{<: NamedTuple{(:state,)}},
             <: Vector{<: NamedTuple{SS′ART}}
         }
     }
@@ -80,7 +79,7 @@ end
 
 #Here we apply the TD3 Q network approach. This could be customizable by the user in a new p.critic <: AbstractCritic field. 
 function update_critic!(p::MPOPolicy, batch)
-    s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
+    s, s′, a, r, t, = send_to_device(device(p.qnetwork1), batch)
     γ, τ = p.γ, p.τ
 
     a′ = p.policy(p.rng, s′; is_sampling=true, is_return_log_prob=false)
@@ -103,7 +102,7 @@ function update_critic!(p::MPOPolicy, batch)
     if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
         error("Gradient of Q_1 contains NaN of Inf")
     end
-    update!(p.qnetwork1, q_grad_1)
+    Flux.Optimise.update!(p.qnetwork1.optimiser, Flux.params(p.qnetwork1), q_grad_1)
     q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
         q2 = p.qnetwork2(q_input) |> vec
         l = mse(q2, y)
@@ -115,7 +114,7 @@ function update_critic!(p::MPOPolicy, batch)
     if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_2)
         error("Gradient of Q_2 contains NaN of Inf")
     end
-    update!(p.qnetwork2, q_grad_2)
+    Flux.Optimise.update!(p.qnetwork2.optimiser, Flux.params(p.qnetwork2), q_grad_2)
 
     for (dest, src) in zip(
         Flux.params([p.target_qnetwork1, p.target_qnetwork2]),
@@ -125,12 +124,12 @@ function update_critic!(p::MPOPolicy, batch)
     end
 end
 
-function update_policy!(p::MPOPolicy, batch::NamedTuple{(:state)})
+function update_policy!(p::MPOPolicy, batch::NamedTuple{(:state,)})
     states = send_to_device(device(p.policy), reshape(batch[:state], size(batch[:state],1), 1, :)) #3D tensors with dimensions (state_size x 1 x batch_size), sent to device
     current_action_dist = p.policy(p.rng, states, is_sampling = false)
 
     #Fit non-parametric variational distribution
-    action_samples = p.policy(p.rng, states, p.action_sample_size, is_return_log_prob = false) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
+    action_samples, _ = p.policy(p.rng, states, p.action_sample_size) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
     repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
     input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
     Q = p.qnetwork1(input) 
@@ -155,7 +154,7 @@ function update_policy!(p::MPOPolicy, batch::NamedTuple{(:state)})
     gs[p.αμ] *= -1 #negative of gradient since we maximize w.r.t. α
     gs[p.αΣ] *= -1 
 
-    Flux.Optimise.update!(p.policy.optimizer, ps, gs)
+    Flux.Optimise.update!(p.policy.optimiser, ps, gs)
     p.αμ = clamp.(p.αμ, 0f0, Inf32) #maybe add an upperbound ?
     p.αΣ = clamp.(p.αΣ, 0f0, Inf32)
     ignore_derivatives() do 
