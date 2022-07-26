@@ -525,6 +525,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "mplemay",
+      "name": "Matthew LeMay",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4324379?v=4",
+      "profile": "http://mplemay.github.io",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
