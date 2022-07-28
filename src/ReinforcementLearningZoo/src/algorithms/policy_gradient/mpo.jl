@@ -19,6 +19,7 @@ mutable struct MPOPolicy{P<:Approximator,Q<:Approximator,R,AV<:AbstractVector} <
     αμ::AV
     αΣ::AV
     τ::Float32 #Polyak avering parameter of target networks
+    η::Float32 #Temperature parameter cache
     rng::R
     logs::Dict{Symbol, Vector{Float32}}
 end
@@ -28,7 +29,7 @@ function MPOPolicy(;policy::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f
     @assert device(policy) == device(rng) "The specified rng does not generate on the same device as the policy. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     αμ = send_to_device(device(policy), [0f0])
     αΣ = send_to_device(device(policy), [0f0])
-    logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :policy_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :αμ, :αΣ, :klμ, :klΣ))
+    logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :policy_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :αμ, :αΣ, :kl))
     MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, τ, rng, logs)
 end
 
@@ -131,7 +132,7 @@ function update_policy!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
         repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
         input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
         Q = p.qnetwork1(input) 
-        η = solve_mpodual(send_to_host(Q), p.ϵ)
+        p.η = η = solve_mpodual(send_to_host(Q), p.ϵ, p.η)
         push!(p.logs[:η], η)
         qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batch_size)
 
@@ -183,9 +184,9 @@ function sample_actions(p::MPOPolicy{<:Approximator{<:CategoricalNetwork}}, logi
     reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
 end
 
-function solve_mpodual(Q::AbstractArray, ϵ)    
+function solve_mpodual(Q::AbstractArray, ϵ, start)    
     g(η) = η * ϵ + η * mean(logsumexp( Q ./η .- log(size(Q, 2)*1f0), dims = 2))
-    Optim.minimizer(optimize(g, eps(ϵ), 10f0))
+    Optim.minimizer(optimize(g, start, 10f0))
 end
 
 #For CovGaussianNetwork
@@ -210,8 +211,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
         push!(p.logs[:policy_loss],policy_loss)
         push!(p.logs[:lagrangeμ_loss], lagrangeμ)
         push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
-        push!(p.logs[:klμ], klμ)
-        push!(p.logs[:klΣ], klΣ)
+        push!(p.logs[:kl], klμ)
     end
     return policy_loss + lagrangeμ + lagrangeΣ
 end
@@ -239,8 +239,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
         push!(p.logs[:policy_loss],policy_loss)
         push!(p.logs[:lagrangeμ_loss], lagrangeμ)
         push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
-        push!(p.logs[:klμ], klμ)
-        push!(p.logs[:klΣ], klΣ)
+        push!(p.logs[:kl], klμ)
     end
     return policy_loss + lagrangeμ + lagrangeΣ
 end
