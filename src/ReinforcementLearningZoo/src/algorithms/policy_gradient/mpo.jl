@@ -28,7 +28,7 @@ function MPOPolicy(;policy::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f
     @assert device(policy) == device(rng) "The specified rng does not generate on the same device as the policy. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     αμ = send_to_device(device(policy), [0f0])
     αΣ = send_to_device(device(policy), [0f0])
-    logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :policy_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :αμ, :αΣ, :klμ, :klΣ))
+    logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :policy_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :αμ, :αΣ, :kl))
     MPOPolicy(policy, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, action_sample_size, ϵ, ϵμ, ϵΣ, αμ, αΣ, τ, rng, logs)
 end
 
@@ -69,98 +69,118 @@ function RLBase.optimise!(
         }
     }
 )
-    for batch in batches[:critic]
-        update_critic!(p, batch)
-    end
-    for batch in batches[:policy]
-        update_policy!(p, batch)
+    update_critic!(p, batches[:critic])
+    update_policy!(p, batches[:policy])
+end
+
+#Here we apply the TD3 Q network approach. The original MPO paper uses retrace.
+function update_critic!(p::MPOPolicy, batches)
+    for batch in batches
+        s, s′, a, r, t, = send_to_device(device(p.qnetwork1), batch)
+        γ, τ = p.γ, p.τ
+
+        a′ = p.policy(p.rng, s′; is_sampling=true, is_return_log_prob=false)
+        q′_input = vcat(s′, a′)
+        q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
+
+        y =  r .+ γ .* (1 .- t) .* vec(q′) 
+
+        # Train Q Networks
+        q_input = vcat(s, a)
+
+        q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
+            q1 = p.qnetwork1(q_input) |> vec
+            l = mse(q1, y)
+            ignore_derivatives() do 
+                push!(p.logs[:qnetwork1_loss], l)
+            end
+            return l
+        end
+        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
+            error("Gradient of Q_1 contains NaN of Inf")
+        end
+        Flux.Optimise.update!(p.qnetwork1.optimiser, Flux.params(p.qnetwork1), q_grad_1)
+        q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
+            q2 = p.qnetwork2(q_input) |> vec
+            l = mse(q2, y)
+            ignore_derivatives() do 
+                push!(p.logs[:qnetwork2_loss], l)
+            end
+            return l
+        end
+        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_2)
+            error("Gradient of Q_2 contains NaN of Inf")
+        end
+        Flux.Optimise.update!(p.qnetwork2.optimiser, Flux.params(p.qnetwork2), q_grad_2)
+
+        for (dest, src) in zip(
+            Flux.params([p.target_qnetwork1, p.target_qnetwork2]),
+            Flux.params([p.qnetwork1, p.qnetwork2]),
+        )
+            dest .= (1 - τ) .* dest .+ τ .* src
+        end
     end
 end
 
-#Here we apply the TD3 Q network approach. This could be customizable by the user in a new p.critic <: AbstractCritic field. 
-function update_critic!(p::MPOPolicy, batch)
-    s, s′, a, r, t, = send_to_device(device(p.qnetwork1), batch)
-    γ, τ = p.γ, p.τ
+function update_policy!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
+    states_batches = [send_to_device(device(p.policy), reshape(batch[:state], size(batch[:state],1), 1, :)) for batch in batches] #3D tensors with dimensions (state_size x 1 x batch_size), sent to device
+    current_action_dist_batches = [p.policy(p.rng, states, is_sampling = false) for states in states_batches] #π(.|s,Θᵢ) 
+    action_samples_batches = [sample_actions(p, dist, p.action_sample_size) for dist in current_action_dist_batches] #3D tensor with dimensions (action_size x action_sample_size x batchsize)
+    for (states, current_action_dist, action_samples) in zip(states_batches, current_action_dist_batches, action_samples_batches)
+        #Fit non-parametric variational distributions
+        repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
+        input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
+        Q = p.qnetwork1(input) 
+        η = solve_mpodual(send_to_host(Q), p.ϵ)
+        push!(p.logs[:η], η)
+        qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batch_size)
 
-    a′ = p.policy(p.rng, s′; is_sampling=true, is_return_log_prob=false)
-    q′_input = vcat(s′, a′)
-    q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
-
-    y =  r .+ γ .* (1 .- t) .* vec(q′) 
-
-    # Train Q Networks
-    q_input = vcat(s, a)
-
-    q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
-        q1 = p.qnetwork1(q_input) |> vec
-        l = mse(q1, y)
-        ignore_derivatives() do 
-            push!(p.logs[:qnetwork1_loss], l)
+        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), qij)
+            error("qij contains NaN of Inf")
         end
-        return l
-    end
-    if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
-        error("Gradient of Q_1 contains NaN of Inf")
-    end
-    Flux.Optimise.update!(p.qnetwork1.optimiser, Flux.params(p.qnetwork1), q_grad_1)
-    q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
-        q2 = p.qnetwork2(q_input) |> vec
-        l = mse(q2, y)
-        ignore_derivatives() do 
-            push!(p.logs[:qnetwork2_loss], l)
-        end
-        return l
-    end
-    if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_2)
-        error("Gradient of Q_2 contains NaN of Inf")
-    end
-    Flux.Optimise.update!(p.qnetwork2.optimiser, Flux.params(p.qnetwork2), q_grad_2)
 
-    for (dest, src) in zip(
-        Flux.params([p.target_qnetwork1, p.target_qnetwork2]),
-        Flux.params([p.qnetwork1, p.qnetwork2]),
-    )
-        dest .= (1 - τ) .* dest .+ τ .* src
+        #Improve policy towards qij
+        ps = Flux.params(p.policy, p.αμ, p.αΣ)
+        gs = gradient(ps) do 
+            mpo_loss(p, qij, states, action_samples, current_action_dist)
+        end
+        
+        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), gs)
+            error("Gradient contains NaN of Inf")
+        end
+
+        gs[p.αμ] *= -1 #negative of gradient since we maximize w.r.t. α
+        gs[p.αΣ] *= -1 
+
+        Flux.Optimise.update!(p.policy.optimiser, ps, gs)
+        p.αμ = clamp.(p.αμ, 0f0, Inf32) #maybe add an upperbound ?
+        p.αΣ = clamp.(p.αΣ, 0f0, Inf32)
+        ignore_derivatives() do 
+            push!(p.logs[:αμ],sum(p.αμ))
+            push!(p.logs[:αΣ],sum(p.αΣ))
+        end
     end
 end
 
-function update_policy!(p::MPOPolicy, batch::NamedTuple{(:state,)})
-    states = send_to_device(device(p.policy), reshape(batch[:state], size(batch[:state],1), 1, :)) #3D tensors with dimensions (state_size x 1 x batch_size), sent to device
-    current_action_dist = p.policy(p.rng, states, is_sampling = false)
+function sample_actions(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, dist, N::Int)
+    μ, L = dist
+    noise = randn(p.rng, size(μ)[1], N, size(μ)[3])
+    p.policy.model.normalizer.(Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3))
+end
 
-    #Fit non-parametric variational distribution
-    action_samples, _ = p.policy(p.rng, states, p.action_sample_size) #3D tensor with dimensions (action_size x action_sample_size x batchsize)
-    repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
-    input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
-    Q = p.qnetwork1(input) 
-    η = solve_mpodual(send_to_host(Q), p.ϵ)
-    push!(p.logs[:η], η)
-    qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batch_size)
+function sample_actions(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, dist, N::Int)
+    μ, σ = dist
+    noise = randn(p.rng, size(μ)[1], N, size(μ)[3])
+    p.policy.model.normalizer.(μ .+ σ .* noise)
+end
 
-    if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), qij)
-        error("qij contains NaN of Inf")
-    end
-
-    #Improve policy towards qij
-    ps = Flux.params(p.policy, p.αμ, p.αΣ)
-    gs = gradient(ps) do 
-        mpo_loss(p, qij, states, action_samples, current_action_dist)
-    end
-    
-    if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), gs)
-        error("Gradient contains NaN of Inf")
-    end
-
-    gs[p.αμ] *= -1 #negative of gradient since we maximize w.r.t. α
-    gs[p.αΣ] *= -1 
-
-    Flux.Optimise.update!(p.policy.optimiser, ps, gs)
-    p.αμ = clamp.(p.αμ, 0f0, Inf32) #maybe add an upperbound ?
-    p.αΣ = clamp.(p.αΣ, 0f0, Inf32)
-    ignore_derivatives() do 
-        push!(p.logs[:αμ],sum(p.αμ))
-        push!(p.logs[:αΣ],sum(p.αΣ))
-    end
+function sample_actions(p::MPOPolicy{<:Approximator{<:CategoricalNetwork}}, logits, N)
+    batch_size = size(logits, 3) #3
+    da = size(logits, 1)
+    log_probs = logsoftmax(logits, dims = 1)
+    gumbels = -log.(-log.(rand(p.rng, da, N, batch_size))) .+ log_probs # Gumbel-Max trick
+    z = getindex.(argmax(gumbels, dims = 1), 1)
+    reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
 end
 
 function solve_mpodual(Q::AbstractArray, ϵ)    
@@ -190,8 +210,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
         push!(p.logs[:policy_loss],policy_loss)
         push!(p.logs[:lagrangeμ_loss], lagrangeμ)
         push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
-        push!(p.logs[:klμ], klμ)
-        push!(p.logs[:klΣ], klΣ)
+        push!(p.logs[:kl], klμ)
     end
     return policy_loss + lagrangeμ + lagrangeΣ
 end
@@ -211,13 +230,15 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
     logp_π_new_μ = diagnormlogpdf(μ, σ_d, actions)
     logp_π_new_σ = diagnormlogpdf(μ_d, σ, actions)
     policy_loss = -mean(qij .* (logp_π_new_μ .+ logp_π_new_σ))
-
-    lagrangeμ = - mean(p.αμ) * (p.ϵμ - mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))) 
-    lagrangeΣ = - mean(p.αΣ) * (p.ϵΣ - mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_d_s, σ_s)))
+    klμ = mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))
+    klΣ = mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_d_s, σ_s))
+    lagrangeμ = - mean(p.αμ) * (p.ϵμ - klμ) 
+    lagrangeΣ = - mean(p.αΣ) * (p.ϵΣ - klΣ)
     ignore_derivatives() do #logging
         push!(p.logs[:policy_loss],policy_loss)
         push!(p.logs[:lagrangeμ_loss], lagrangeμ)
         push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
+        push!(p.logs[:kl], klμ)
     end
     return policy_loss + lagrangeμ + lagrangeΣ
 end
