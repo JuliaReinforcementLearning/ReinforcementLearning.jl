@@ -1,5 +1,5 @@
-using ReinforcementLearning
 using Pkg; Pkg.activate("./src/ReinforcementLearningExperiments")
+using ReinforcementLearning
 using Flux, Random, StableRNGs
 
 seed = 123
