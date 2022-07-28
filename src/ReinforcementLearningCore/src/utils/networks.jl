@@ -61,13 +61,13 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, 
         σ = exp.(logσ)
         z = ignore_derivatives() do
             noise = randn(rng, Float32, size(μ))
-            model.normalizer.(μ .+ σ .* noise)
+            μ .+ σ .* noise
         end
         if is_return_log_prob
             logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
-            return z, logp_π
+            return model.normalizer.(z), logp_π
         else
-            return z
+            return model.normalizer.(z)
         end
     else
         return μ, logσ
@@ -88,10 +88,10 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s, action_samples::Int)
     σ = exp.(logσ)
     z = ignore_derivatives() do
         noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
-        model.normalizer.(μ .+ σ .* noise)
+        μ .+ σ .* noise
     end
     logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
-    return z, logp_π
+    return model.normalizer.(z), logp_π
 end
 
 function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
@@ -171,13 +171,13 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
     if is_sampling
         z = ignore_derivatives() do
             noise = randn(rng, eltype(μ), da, 1, batch_size)
-            model.normalizer.(Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3))
+            Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3)
         end
         if is_return_log_prob
             logp_π = mvnormlogpdf(μ, L, z)
-            return z, logp_π
+            return model.normalizer.(z), logp_π
         else
-            return z
+            return model.normalizer.(z)
         end
     else
         return μ, L
@@ -218,10 +218,10 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::In
     L = vec_to_tril(cholesky_vec, da)
     z = ignore_derivatives() do
         noise = randn(rng, eltype(μ), da, action_samples, batch_size)
-        model.normalizer.(Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3))
+        Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3)
     end
     logp_π = mvnormlogpdf(μ, L, z)
-    return z, logp_π
+    return model.normalizer.(z), logp_π
 end
 
 function (model::CovGaussianNetwork)(state::AbstractArray, args...; kwargs...)
