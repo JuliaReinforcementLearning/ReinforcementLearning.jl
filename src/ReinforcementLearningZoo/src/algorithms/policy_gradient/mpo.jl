@@ -19,7 +19,6 @@ mutable struct MPOPolicy{P<:Approximator,Q<:Approximator,R,AV<:AbstractVector} <
     αμ::AV
     αΣ::AV
     τ::Float32 #Polyak avering parameter of target networks
-    η::Float32 #Temperature parameter cache
     rng::R
     logs::Dict{Symbol, Vector{Float32}}
 end
@@ -132,7 +131,7 @@ function update_policy!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
         repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
         input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
         Q = p.qnetwork1(input) 
-        p.η = η = solve_mpodual(send_to_host(Q), p.ϵ, p.η)
+        η = solve_mpodual(send_to_host(Q), p.ϵ)
         push!(p.logs[:η], η)
         qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batch_size)
 
@@ -184,9 +183,9 @@ function sample_actions(p::MPOPolicy{<:Approximator{<:CategoricalNetwork}}, logi
     reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
 end
 
-function solve_mpodual(Q::AbstractArray, ϵ, start)    
+function solve_mpodual(Q::AbstractArray, ϵ)    
     g(η) = η * ϵ + η * mean(logsumexp( Q ./η .- log(size(Q, 2)*1f0), dims = 2))
-    Optim.minimizer(optimize(g, start, 10f0))
+    Optim.minimizer(optimize(g, eps(ϵ), 10f0))
 end
 
 #For CovGaussianNetwork
