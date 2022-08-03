@@ -22,6 +22,7 @@ Base.@kwdef struct VPG{A,B,D} <: AbstractPolicy
     rng::AbstractRNG = GLOBAL_RNG
 end
 
+IsPolicyGradient(::Type{<:VPG}) = IsPolicyGradient()
 @functor VPG (approximator, baseline)
 
 function (π::VPG)(env::AbstractEnv)
@@ -48,9 +49,12 @@ function RLBase.optimise!(p::VPG, batch::NamedTuple{(:state, :action, :gain)})
     A = p.approximator
     B = p.baseline
     s, a, g = map(Array, batch) # !!! FIXME
+    local δ
 
     if isnothing(B)
         δ = normalise(g)
+        loss = 0
+        println("branch")
     else
         gs = gradient(params(B)) do
             δ = g - vec(B(s))
@@ -62,14 +66,7 @@ function RLBase.optimise!(p::VPG, batch::NamedTuple{(:state, :action, :gain)})
         end
         optimise!(B, gs)
     end
-
-    gs = gradient(params(A)) do
-        log_probₐ = logpdf.(action_distribution(p.dist, A(s)), a)
-        loss = -mean(log_probₐ .* δ)
-        ignore_derivatives() do
-            # @info "VPG" loss = loss
-        end
-        loss
-    end
+    
+    gs, _ = policy_gradient_estimate(p, s, a, δ)
     optimise!(A, gs)
 end
