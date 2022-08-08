@@ -78,7 +78,7 @@ policy_gradient_estimate(policy::AbstractPolicy, states, actions, advantage) =
 function policy_gradient_estimate(::IsPolicyGradient, policy, states, actions, advantage)
     gs = gradient(params(policy.approximator)) do
         action_logits = action_distribution(policy.dist, policy.approximator(states))
-        total_loss = logpdf.(action_distribut, actions) .* advantage
+        total_loss = logpdf.(action_logits, actions) .* advantage
         loss = -mean(total_loss)
         loss
     end
