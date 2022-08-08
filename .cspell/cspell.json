@@ -177,6 +177,7 @@
         "rsold",
         "rsnew",
         "unnormalized",
+        "baedan",
     ],
     "ignoreWords": [],
     "minWordLength": 5,
