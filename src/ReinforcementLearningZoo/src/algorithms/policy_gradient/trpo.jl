@@ -43,7 +43,6 @@ RLBase.optimise!(::Agent{<:TRPO}) = nothing
 
 function RLBase.optimise!(π::TRPO, episode::Episode)
     gain = discount_rewards(episode[:reward][:], π.γ)
-    println("episode reward is $(gain[1])")
     for inds in Iterators.partition(shuffle(π.rng, 1:length(episode)), π.batch_size)
         optimise!(π, (state=episode[:state][inds], action=episode[:action][inds], gain=gain[inds]))
     end
@@ -96,7 +95,7 @@ function RLBase.optimise!(p::TRPO, batch::NamedTuple{(:state, :action, :gain)})
     search_condition(θ) = begin
         model_θ = re(θ)
         sur_adv = surrogate_advantage(model_θ, s, a, δ, old_logits[]) - mean(δ)
-        kld_excess = kld_direct(model_θ, s, old_logits[]) - p.kldivergence_limit
+        kld_excess = kld(model_θ, s, old_logits[]) - p.kldivergence_limit
         sur_adv > 0 && kld_excess <= 0
     end
     Δ = copy(search_direction)
