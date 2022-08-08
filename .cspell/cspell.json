@@ -171,7 +171,12 @@
         "Optimise",
         "xlabel",
         "ylabel",
-        "optimising"
+        "optimising",
+        "Kullback",
+        "Leibler",
+        "rsold",
+        "rsnew",
+        "unnormalized",
     ],
     "ignoreWords": [],
     "minWordLength": 5,
