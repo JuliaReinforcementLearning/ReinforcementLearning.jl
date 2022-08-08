@@ -2,13 +2,9 @@ export TRPO
 
 using Random: GLOBAL_RNG, shuffle, AbstractRNG
 using Functors: @functor
-using Zygote: forward_jacobian
 using Flux: Flux, destructure
 using StatsBase: mean
-using Distributions: kldivergence, pdf
 using ChainRulesCore: ignore_derivatives
-using ForwardDiff
-
 
 """
 Trust Region Policy Optimization
@@ -24,6 +20,9 @@ Base.@kwdef struct TRPO{A,B,D} <: AbstractPolicy
     max_backtrack_step::Int = 10
     kldivergence_limit::Float32 = 1f-2
     backtrack_coeff::Float32 = 0.8f0
+    cg_max_iter::Int = 10
+    cg_ϵ::Float32 = 1f-10
+    damping_coeff = 1f-2
 end
 
 IsPolicyGradient(::Type{<:TRPO}) = IsPolicyGradient()
@@ -70,7 +69,8 @@ function RLBase.optimise!(p::TRPO, batch::NamedTuple{(:state, :action, :gain)})
         end
         optimise!(B, gs)
     end
-
+    
+    # store logits as intermediate value
     old_logits = Ref{Matrix{Float32}}()
 
     gps = gradient(params(A.model)) do
@@ -83,31 +83,32 @@ function RLBase.optimise!(p::TRPO, batch::NamedTuple{(:state, :action, :gain)})
     end
 
     ĝₖ = mapreduce(vec, vcat, gps)
-
-    #println("action parameters are $(old_logits[]), ĝₖ = $ĝₖ")
-
     θₖ, re = Flux.destructure(A.model)
 
-    hes1(x) = hvp_direct(A.model, s, old_logits[], x)
-
-    x̂ₖ = conjugate_gradient(hes1, ĝₖ)
+    # solve Hx̂ₖ = ĝₖ approx. with conjugate gradient
+    hes(x) = hvp(A.model, s, old_logits[], x; damping_coeff = p.damping_coeff)
+    x̂ₖ = conjugate_gradient(hes, ĝₖ; max_iter = p.cg_max_iter, ϵ = p.cg_ϵ)
 
     # backtracking line search
-    search_length = sqrt(2*p.kldivergence_limit / (x̂ₖ' * ĝₖ)) .* x̂ₖ
-    println("search_length is $search_length")
-    any(isnan, search_length) && error("search length is nan, x̂ₖ = $x̂ₖ, ĝₖ = $ĝₖ")
+
+    # set-up
+    search_direction = sqrt(2*p.kldivergence_limit / (x̂ₖ' * ĝₖ)) .* x̂ₖ
     search_condition(θ) = begin
         model_θ = re(θ)
         sur_adv = surrogate_advantage(model_θ, s, a, δ, old_logits[]) - mean(δ)
-        println("surrogate advantage is $sur_adv")
         kld_excess = kld_direct(model_θ, s, old_logits[]) - p.kldivergence_limit
-        println("kldivergence excess is $kld_excess")
         sur_adv > 0 && kld_excess <= 0
     end
+    Δ = copy(search_direction)
+    local θ
 
-    θₖ₊₁ = backtrack_line_search(θₖ, p.backtrack_coeff, search_length, p.max_backtrack_step, search_condition)
+    # search
+    for _ in 1:p.max_backtrack_step
+        θ = θₖ + Δ
+        search_condition(θ) && break
+        Δ = Δ * p.backtrack_coeff
+    end
 
     # update policy approximator
-    ps = params(A.model)
-    copy!(ps, θₖ₊₁)
+    copy!(params(A.model), θ)
 end

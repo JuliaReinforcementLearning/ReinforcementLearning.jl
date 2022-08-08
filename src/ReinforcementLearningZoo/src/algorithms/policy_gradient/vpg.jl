@@ -67,6 +67,6 @@ function RLBase.optimise!(p::VPG, batch::NamedTuple{(:state, :action, :gain)})
         optimise!(B, gs)
     end
     
-    gs, _ = policy_gradient_estimate(p, s, a, δ)
+    gs = policy_gradient_estimate(p, s, a, δ)
     optimise!(A, gs)
 end
