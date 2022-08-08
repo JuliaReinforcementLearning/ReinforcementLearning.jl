@@ -1,9 +1,9 @@
 # ---
-# title: JuliaRL\_VPG\_CartPole
-# cover: assets/JuliaRL_VPG_CartPole.png
-# description: VPG applied to CartPole
-# date: 2022-07-17
-# author: "[norci](https://github.com/norci)"
+# title: JuliaRL\_TRPO\_CartPole
+# cover: assets/JuliaRL_TRPO_CartPole.png
+# description: TRPO applied to CartPole
+# date: 2022-08-08
+# author: "[baedan](https://github.com/baedan)"
 # ---
 
 #+ tangle=true
