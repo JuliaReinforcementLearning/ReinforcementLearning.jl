@@ -54,7 +54,6 @@ function RLBase.optimise!(p::VPG, batch::NamedTuple{(:state, :action, :gain)})
     if isnothing(B)
         δ = normalise(g)
         loss = 0
-        println("branch")
     else
         gs = gradient(params(B)) do
             δ = g - vec(B(s))
