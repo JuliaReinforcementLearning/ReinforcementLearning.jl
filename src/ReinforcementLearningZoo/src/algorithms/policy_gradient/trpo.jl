@@ -92,19 +92,16 @@ function RLBase.optimise!(p::TRPO, batch::NamedTuple{(:state, :action, :gain)})
 
     # set-up
     search_direction = sqrt(2*p.kldivergence_limit / (x̂ₖ' * ĝₖ)) .* x̂ₖ
-    search_condition(θ) = begin
-        model_θ = re(θ)
-        sur_adv = surrogate_advantage(model_θ, s, a, δ, old_logits[]) - mean(δ)
-        kld_excess = kld(model_θ, s, old_logits[]) - p.kldivergence_limit
-        sur_adv > 0 && kld_excess <= 0
-    end
     Δ = copy(search_direction)
     local θ
 
     # search
     for _ in 1:p.max_backtrack_step
         θ = θₖ + Δ
-        search_condition(θ) && break
+        model_θ = re(θ)
+        sur_adv = surrogate_advantage(model_θ, s, a, δ, old_logits[]) - mean(δ)
+        kld_excess = kld(model_θ, s, old_logits[]) - p.kldivergence_limit
+        sur_adv > 0 && kld_excess <= 0 && break
         Δ = Δ * p.backtrack_coeff
     end
 
