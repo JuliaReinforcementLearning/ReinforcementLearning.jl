@@ -16,7 +16,7 @@ while true
 end
 ```
 
-The benifit of this approach is the great clarity. You are responsible for what
+The benefit of this approach is the great clarity. You are responsible for what
 you write. And this is the encouraged approach for new users to try different
 components in this package.
 
