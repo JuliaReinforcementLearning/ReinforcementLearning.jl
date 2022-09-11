@@ -6,11 +6,10 @@ export RLBase
 using Random
 using Reexport
 
-@reexport using CommonRLSpaces
-
 include("inline_export.jl")
 include("interface.jl")
 include("CommonRLInterface.jl")
 include("base.jl")
+include("space.jl")
 
 end # module
