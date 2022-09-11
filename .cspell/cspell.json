@@ -174,7 +174,13 @@
         "optimising",
         "Tdomains",
         "tointernalpoint",
-        "toexternalpoint"
+        "toexternalpoint",
+        "Kullback",
+        "Leibler",
+        "rsold",
+        "rsnew",
+        "unnormalized",
+        "baedan"
     ],
     "ignoreWords": [],
     "minWordLength": 5,

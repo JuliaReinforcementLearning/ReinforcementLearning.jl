@@ -1,7 +1,7 @@
 export VPG
 
 using Random: GLOBAL_RNG, shuffle
-using Distributions: ContinuousDistribution, DiscreteDistribution
+using Distributions: ContinuousDistribution, DiscreteDistribution, logpdf
 using Functors: @functor
 using Flux: params, softmax, gradient, logsoftmax
 using StatsBase: mean
@@ -22,17 +22,12 @@ Base.@kwdef struct VPG{A,B,D} <: AbstractPolicy
     rng::AbstractRNG = GLOBAL_RNG
 end
 
+IsPolicyGradient(::Type{<:VPG}) = IsPolicyGradient()
 @functor VPG (approximator, baseline)
 
 function (π::VPG)(env::AbstractEnv)
     res = env |> state |> send_to_device(π) |> π.approximator |> send_to_host
-    if π.dist <: ContinuousDistribution
-        rand.(π.rng, π.dist.(res...))
-    elseif π.dist <: DiscreteDistribution
-        rand(π.rng, res |> softmax |> π.dist)
-    else
-        @error "unknown distribution"
-    end
+    rand(π.rng, action_distribution(π.dist, res)[1])
 end
 
 function (p::Agent{<:VPG})(::PostEpisodeStage, env::AbstractEnv)
@@ -54,9 +49,11 @@ function RLBase.optimise!(p::VPG, batch::NamedTuple{(:state, :action, :gain)})
     A = p.approximator
     B = p.baseline
     s, a, g = map(Array, batch) # !!! FIXME
+    local δ
 
     if isnothing(B)
         δ = normalise(g)
+        loss = 0
     else
         gs = gradient(params(B)) do
             δ = g - vec(B(s))
@@ -68,20 +65,7 @@ function RLBase.optimise!(p::VPG, batch::NamedTuple{(:state, :action, :gain)})
         end
         optimise!(B, gs)
     end
-
-    gs = gradient(params(A)) do
-        if p.dist <: DiscreteDistribution
-            log_prob = s |> A |> logsoftmax
-            log_probₐ = log_prob[CartesianIndex.(a, 1:length(a))]
-        elseif p.dist <: ContinuousDistribution
-            dist = p.dist.(A(s)...) # TODO: this part does not work on GPU. See: https://github.com/JuliaStats/Distributions.jl/issues/1183 .
-            log_probₐ = logpdf.(dist, A)
-        end
-        loss = -mean(log_probₐ .* δ)
-        ignore_derivatives() do
-            # @info "VPG" loss = loss
-        end
-        loss
-    end
+    
+    gs = policy_gradient_estimate(p, s, a, δ)
     optimise!(A, gs)
 end
