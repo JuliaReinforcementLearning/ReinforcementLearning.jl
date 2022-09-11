@@ -1,7 +1,5 @@
 export CartPoleEnv
 
-using FillArrays: Trues
-
 struct CartPoleEnvParams{T}
     gravity::T
     masscart::T
@@ -22,15 +20,15 @@ Base.show(io::IO, params::CartPoleEnvParams) = print(
 )
 
 function CartPoleEnvParams{T}(;
-    gravity = 9.8,
-    masscart = 1.0,
-    masspole = 0.1,
-    halflength = 0.5,
-    forcemag = 10.0,
-    max_steps = 200,
-    dt = 0.02,
-    thetathreshold = 12.0,
-    xthreshold = 2.4,
+    gravity=9.8,
+    masscart=1.0,
+    masspole=0.1,
+    halflength=0.5,
+    forcemag=10.0,
+    max_steps=200,
+    dt=0.02,
+    thetathreshold=12.0,
+    xthreshold=2.4
 ) where {T}
     CartPoleEnvParams{T}(
         gravity,
@@ -73,32 +71,29 @@ end
 - `thetathreshold = 12.0 # degrees`
 - `xthreshold` = 2.4`
 """
-function CartPoleEnv(; T = Float64, continuous = false, rng = Random.GLOBAL_RNG, kwargs...)
+function CartPoleEnv(; T=Float64, continuous=false, rng=Random.GLOBAL_RNG, kwargs...)
     params = CartPoleEnvParams{T}(; kwargs...)
     env = CartPoleEnv(params, zeros(T, 4), continuous ? zero(T) : zero(Int), false, 0, rng)
     reset!(env)
     env
 end
 
-CartPoleEnv{T}(; kwargs...) where {T} = CartPoleEnv(T = T, kwargs...)
+CartPoleEnv{T}(; kwargs...) where {T} = CartPoleEnv(T=T, kwargs...)
 
 Random.seed!(env::CartPoleEnv, seed) = Random.seed!(env.rng, seed)
 RLBase.reward(env::CartPoleEnv{T}) where {T} = env.done ? zero(T) : one(T)
 RLBase.is_terminated(env::CartPoleEnv) = env.done
 RLBase.state(env::CartPoleEnv) = env.state
 
-RLBase.state_space(env::CartPoleEnv{T}) where {T} = Space(
-    SVector(
-        (-2 * env.params.xthreshold) .. (2 * env.params.xthreshold),
-        typemin(T) .. typemax(T),
-        (-2 * env.params.thetathreshold) .. (2 * env.params.thetathreshold),
-        typemin(T) .. typemax(T),
-    ),
-)
+function RLBase.state_space(env::CartPoleEnv{T}) where {T}
+    ((-2 * env.params.xthreshold) .. (2 * env.params.xthreshold)) ×
+    (typemin(T) .. typemax(T)) ×
+    ((-2 * env.params.thetathreshold) .. (2 * env.params.thetathreshold)) ×
+    (typemin(T) .. typemax(T))
+end
 
-RLBase.action_space(env::CartPoleEnv{<:AbstractFloat,Int}) = Space(OneTo(2))
-RLBase.action_space(env::CartPoleEnv{<:AbstractFloat,<:AbstractFloat}) = Space(-1.0 .. 1.0)
-RLBase.legal_action_space_mask(env::CartPoleEnv) = Trues(2)
+RLBase.action_space(env::CartPoleEnv{<:AbstractFloat,Int}) = Base.OneTo(2)
+RLBase.action_space(env::CartPoleEnv{<:AbstractFloat,<:AbstractFloat}) = -1.0 .. 1.0
 
 function RLBase.reset!(env::CartPoleEnv{T}) where {T}
     env.state[:] = T(0.1) * rand(env.rng, T, 4) .- T(0.05)
