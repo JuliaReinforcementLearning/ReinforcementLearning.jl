@@ -91,7 +91,9 @@ function _update!(
     for i in 1:min(n + 1, length(R))
         G = R[end-i+1] + γ * G
         s, a = S[end-i], A[end-i]
-        update!(Q, (s, a) => Q(s, a) - G)
+        if !(a isa NoOp)
+            update!(Q, (s, a) => Q(s, a) - G)
+        end
     end
 end
 
@@ -149,8 +151,10 @@ function _update!(
 
     if length(R) >= n + 1
         s, a, s′ = S[end-n-1], A[end-n-1], S[end]
-        G = discount_rewards_reduced(@view(R[end-n:end]), γ) + γ^(n + 1) * maximum(Q(s′))
-        update!(Q, (s, a) => Q(s, a) - G)
+        if !(a isa NoOp)
+            G = discount_rewards_reduced(@view(R[end-n:end]), γ) + γ^(n + 1) * maximum(Q(s′))
+            update!(Q, (s, a) => Q(s, a) - G)
+        end
     end
 end
 
