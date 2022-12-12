@@ -19,23 +19,23 @@
 - `avail_torque = [T(-1.), T(0.), T(1.)]`
 """
 function AcrobotEnv(;
-    T = Float64,
-    link_length_a = T(1.0),
-    link_length_b = T(1.0),
-    link_mass_a = T(1.0),
-    link_mass_b = T(1.0),
-    link_com_pos_a = T(0.5),
-    link_com_pos_b = T(0.5),
-    link_moi = T(1.0),
-    max_torque_noise = T(0.0),
-    max_vel_a = T(4 * π),
-    max_vel_b = T(9 * π),
-    g = T(9.8),
-    dt = T(0.2),
-    max_steps = 200,
-    rng = Random.GLOBAL_RNG,
-    book_or_nips = "book",
-    avail_torque = [T(-1.0), T(0.0), T(1.0)],
+    T=Float64,
+    link_length_a=T(1.0),
+    link_length_b=T(1.0),
+    link_mass_a=T(1.0),
+    link_mass_b=T(1.0),
+    link_com_pos_a=T(0.5),
+    link_com_pos_b=T(0.5),
+    link_moi=T(1.0),
+    max_torque_noise=T(0.0),
+    max_vel_a=T(4 * π),
+    max_vel_b=T(9 * π),
+    g=T(9.8),
+    dt=T(0.2),
+    max_steps=200,
+    rng=Random.GLOBAL_RNG,
+    book_or_nips="book",
+    avail_torque=[T(-1.0), T(0.0), T(1.0)]
 )
 
     params = AcrobotEnvParams{T}(
@@ -71,17 +71,17 @@ end
 
 acrobot_observation(s) = [cos(s[1]), sin(s[1]), cos(s[2]), sin(s[2]), s[3], s[4]]
 
-RLBase.action_space(env::AcrobotEnv) = Space(OneTo(3))
+RLBase.action_space(env::AcrobotEnv) = Base.OneTo(3)
 
-RLBase.state_space(env::AcrobotEnv) = Space(
-    SVector(
-        -1.0 .. 1.0,
-        -1.0 .. 1.0,
-        -1.0 .. 1.0,
-        -1.0 .. 1.0,
-        -env.params.max_vel_a .. env.params.max_vel_a,
-        -env.params.max_vel_b .. env.params.max_vel_b,
-    ),
+RLBase.state_space(env::AcrobotEnv) = ArrayProductDomain(
+    [
+    -1.0 .. 1.0,
+    -1.0 .. 1.0,
+    -1.0 .. 1.0,
+    -1.0 .. 1.0,
+    -env.params.max_vel_a .. env.params.max_vel_a,
+    -env.params.max_vel_b .. env.params.max_vel_b
+]
 )
 
 RLBase.is_terminated(env::AcrobotEnv) = env.done

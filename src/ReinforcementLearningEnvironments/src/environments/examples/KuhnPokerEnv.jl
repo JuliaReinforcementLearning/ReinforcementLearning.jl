@@ -99,15 +99,12 @@ end
 
 RLBase.state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, ::ChancePlayer) =
     Tuple(env.cards)
-RLBase.state_space(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, p) =
-    Space(KUHN_POKER_STATES)
+RLBase.state_space(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, p) = KUHN_POKER_STATES
 
-RLBase.action_space(env::KuhnPokerEnv, ::Int) = Space(OneTo(length(KUHN_POKER_ACTIONS)))
-RLBase.action_space(env::KuhnPokerEnv, ::ChancePlayer) =
-    Space(OneTo(length(KUHN_POKER_CARDS)))
+RLBase.action_space(env::KuhnPokerEnv, ::Int) = Base.OneTo(length(KUHN_POKER_ACTIONS))
+RLBase.action_space(env::KuhnPokerEnv, ::ChancePlayer) = Base.OneTo(length(KUHN_POKER_CARDS))
 
-RLBase.legal_action_space(env::KuhnPokerEnv, p::ChancePlayer) =
-    Space(Tuple(x for x in action_space(env, p).s if KUHN_POKER_CARDS[x] ∉ env.cards))
+RLBase.legal_action_space(env::KuhnPokerEnv, p::ChancePlayer) = Tuple(x for x in action_space(env, p) if KUHN_POKER_CARDS[x] ∉ env.cards)
 
 function RLBase.legal_action_space_mask(env::KuhnPokerEnv, p::ChancePlayer)
     m = fill(true, 3)
