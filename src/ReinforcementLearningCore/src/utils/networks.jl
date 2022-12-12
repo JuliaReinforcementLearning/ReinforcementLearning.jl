@@ -27,27 +27,26 @@ end
 export GaussianNetwork
 
 """
-    GaussianNetwork(;pre=identity, μ, logσ, min_σ=0f0, max_σ=Inf32, normalizer = tanh)
+    GaussianNetwork(;pre=identity, μ, logσ, min_σ=0f0, max_σ=Inf32)
 
 Returns `μ` and `logσ` when called.  Create a distribution to sample from using
 `Normal.(μ, exp.(logσ))`. `min_σ` and `max_σ` are used to clip the output from
-`logσ`. Actions are normalized according to the specified normalizer function.
+`logσ`. `pre` is a shared body before the two heads of the NN.
 """
-Base.@kwdef struct GaussianNetwork{P,U,S,F}
+Base.@kwdef struct GaussianNetwork{P,U,S}
     pre::P = identity
     μ::U
     logσ::S
     min_σ::Float32 = 0.0f0
     max_σ::Float32 = Inf32
-    normalizer::F = tanh
 end
 
-GaussianNetwork(pre, μ, logσ, normalizer=tanh) = GaussianNetwork(pre, μ, logσ, 0.0f0, Inf32, normalizer)
+GaussianNetwork(pre, μ, logσ) = GaussianNetwork(pre, μ, logσ, 0.0f0, Inf32)
 
 @functor GaussianNetwork
 
 """
-This function is compatible with a multidimensional action space. When outputting an action, it uses the `normalizer` function to normalize it elementwise.
+This function is compatible with a multidimensional action space.
 
 - `rng::AbstractRNG=Random.GLOBAL_RNG`
 - `is_sampling::Bool=false`, whether to sample from the obtained normal distribution. 
@@ -61,7 +60,7 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, 
         σ = exp.(logσ)
         z = ignore_derivatives() do
             noise = randn(rng, Float32, size(μ))
-            model.normalizer.(μ .+ σ .* noise)
+            μ .+ σ .* noise
         end
         if is_return_log_prob
             logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
@@ -88,7 +87,7 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s, action_samples::Int)
     σ = exp.(logσ)
     z = ignore_derivatives() do
         noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
-        model.normalizer.(μ .+ σ .* noise)
+        μ .+ σ .* noise
     end
     logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
     return z, logp_π
@@ -118,7 +117,7 @@ end
 export CovGaussianNetwork
 
 """
-    CovGaussianNetwork(;pre=identity, μ, Σ, normalizer = tanh)
+    CovGaussianNetwork(;pre=identity, μ, Σ)
 
 Returns `μ` and `Σ` when called where μ is the mean and Σ is a covariance
 matrix. Unlike GaussianNetwork, the output is 3-dimensional.  μ has dimensions
@@ -127,26 +126,20 @@ batch_size)`.  The Σ head of the `CovGaussianNetwork` should not directly retur
 a square matrix but a vector of length `action_size x (action_size + 1) ÷ 2`.
 This vector will contain elements of the uppertriangular cholesky decomposition
 of the covariance matrix, which is then reconstructed from it.  Sample from
-`MvNormal.(μ, Σ)`. Actions are normalized elementwise according to the specified
-normalizer function.
+`MvNormal.(μ, Σ)`.
 """
-mutable struct CovGaussianNetwork{P,U,S,F}
+Base.@kwdef mutable struct CovGaussianNetwork{P,U,S}
     pre::P
     μ::U
     Σ::S
-    normalizer::F
 end
-
-CovGaussianNetwork(pre, m, s) = CovGaussianNetwork(pre, m, s, tanh)
 
 @functor CovGaussianNetwork
 
 """
     (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
 
-This function is compatible with a multidimensional action space. When
-outputting a sampled action, it uses the `normalizer` function to normalize it
-elementwise.  To work with covariance matrices, the outputs are 3D tensors.  If
+This function is compatible with a multidimensional action space. To work with covariance matrices, the outputs are 3D tensors.  If
 sampling, return an actions tensor with dimensions `(action_size x action_samples
 x batch_size)` and a `logp_π` tensor with dimensions `(1 x action_samples x batch_size)`. 
 If not sampling, returns `μ`
@@ -171,7 +164,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
     if is_sampling
         z = ignore_derivatives() do
             noise = randn(rng, eltype(μ), da, 1, batch_size)
-            model.normalizer.(Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3))
+            Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3)
         end
         if is_return_log_prob
             logp_π = mvnormlogpdf(μ, L, z)
@@ -189,8 +182,9 @@ end
     
 Given a Matrix of states, will return actions, μ and logpdf in matrix format. The batch of Σ remains a 3D tensor.
 """
-function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractMatrix; is_sampling::Bool=false, is_return_log_prob::Bool=false)
-    output = model(rng, Flux.unsqueeze(state, dims=2); is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
+function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractVecOrMat; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    state_3d = reshape(state, size(state,1), 1, size(state, 2))
+    output = model(rng, state_3d; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
     if output isa Tuple && is_sampling
         dropdims(output[1], dims=2), dropdims(output[2], dims=2)
     elseif output isa Tuple
@@ -205,8 +199,7 @@ end
 
 Sample `action_samples` actions given `state` and return the `actions,
 logpdf(actions)`.  This function is compatible with a multidimensional action
-space. When outputting a sampled action, it uses the `normalizer` function to
-normalize it elementwise.  The outputs are 3D tensors with dimensions
+space.  The outputs are 3D tensors with dimensions
 `(action_size x action_samples x batch_size)` and `(1 x action_samples x
 batch_size)` for `actions` and `logdpf` respectively.
 """
@@ -218,7 +211,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::In
     L = vec_to_tril(cholesky_vec, da)
     z = ignore_derivatives() do
         noise = randn(rng, eltype(μ), da, action_samples, batch_size)
-        model.normalizer.(Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3))
+        Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3)
     end
     logp_π = mvnormlogpdf(μ, L, z)
     return z, logp_π
