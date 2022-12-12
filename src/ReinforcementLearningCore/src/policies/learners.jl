@@ -14,7 +14,7 @@ end
 
 @functor Approximator (model,)
 
-(A::Approximator)(args...) = A.model(args...)
+(A::Approximator)(args...; kwargs...) = A.model(args...; kwargs...)
 
 RLBase.optimise!(A::Approximator, gs) =
     Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
