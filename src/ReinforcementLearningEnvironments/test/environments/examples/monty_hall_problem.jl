@@ -1,7 +1,7 @@
 @testset "MontyHallEnv" begin
 
     rng = StableRNG(123)
-    env = MontyHallEnv(; rng = rng)
+    env = MontyHallEnv(; rng=rng)
 
     RLBase.test_interfaces!(env)
     RLBase.test_runnable!(env)
@@ -19,6 +19,6 @@
         reset!(env)
     end
 
-    @test isapprox(n_win_car / N, 1 / 3; atol = 0.01)
+    @test isapprox(n_win_car / N, 1 / 3; atol=0.01)
 
 end

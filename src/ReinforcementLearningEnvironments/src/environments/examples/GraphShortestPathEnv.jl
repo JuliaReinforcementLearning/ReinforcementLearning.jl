@@ -1,6 +1,5 @@
 export GraphShortestPathEnv
 
-using Random
 using SparseArrays
 using LinearAlgebra
 
@@ -32,10 +31,10 @@ Quoted **A.3** in the the paper [Decision Transformer: Reinforcement Learning vi
 
 """
 function GraphShortestPathEnv(
-    rng = Random.GLOBAL_RNG;
-    n = 20,
-    sparsity = 0.1,
-    max_steps = 10,
+    rng=Random.GLOBAL_RNG;
+    n=20,
+    sparsity=0.1,
+    max_steps=10
 )
     graph = sprand(rng, Bool, n, n, sparsity) .| I(n)
 
@@ -56,8 +55,8 @@ function (env::GraphShortestPathEnv)(action)
 end
 
 RLBase.state(env::GraphShortestPathEnv) = env.pos
-RLBase.state_space(env::GraphShortestPathEnv) = Space(axes(env.graph, 2))
-RLBase.action_space(env::GraphShortestPathEnv) = Space(axes(env.graph, 2))
+RLBase.state_space(env::GraphShortestPathEnv) = axes(env.graph, 2)
+RLBase.action_space(env::GraphShortestPathEnv) = axes(env.graph, 2)
 RLBase.legal_action_space(env::GraphShortestPathEnv) = (env.graph[:, env.pos]).nzind
 RLBase.reward(env::GraphShortestPathEnv) = env.reward
 RLBase.is_terminated(env::GraphShortestPathEnv) =
