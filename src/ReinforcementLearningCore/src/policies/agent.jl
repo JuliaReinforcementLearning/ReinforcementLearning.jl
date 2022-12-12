@@ -10,10 +10,6 @@ using Functors: @functor
 A wrapper of an `AbstractPolicy`. Generally speaking, it does nothing but to
 update the trajectory and policy appropriately in different stages.
 
-# Keywords & Fields
-
-- `policy`::[`AbstractPolicy`](@ref): the policy to use
-- `trajectory`::[`Trajectory`](@ref): used to store intractions between an agent and an environment
 """
 mutable struct Agent{P,T} <: AbstractPolicy
     policy::P
@@ -23,7 +19,7 @@ mutable struct Agent{P,T} <: AbstractPolicy
     function Agent(policy::P, trajectory::T, cache=NamedTuple()) where {P,T}
         agent = new{P,T}(policy, trajectory, cache)
         if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
-            bind(trajectory, @spawn(optimise!(p, t)))
+            bind(trajectory, @spawn(optimise!(policy, trajectory)))
         end
         agent
     end

@@ -22,19 +22,19 @@ This implementation follows the guidelines in [Revisiting the Arcade Learning En
 
 See also the [python implementation](https://github.com/openai/gym/blob/c072172d64bdcd74313d97395436c592dc836d5c/gym/wrappers/atari_preprocessing.py#L8-L36)
 """
-AtariEnv(name; kwargs...) = AtariEnv(; name = name, kwargs...)
+AtariEnv(name; kwargs...) = AtariEnv(; name=name, kwargs...)
 function AtariEnv(;
-    name = "pong",
-    grayscale_obs = true,
-    noop_max = 30,
-    frame_skip = 4,
-    terminal_on_life_loss = false,
-    repeat_action_probability = 0.0,
-    color_averaging = false,
-    max_num_frames_per_episode = 0,
-    full_action_space = false,
-    seed = nothing,
-    log_level = :error,
+    name="pong",
+    grayscale_obs=true,
+    noop_max=30,
+    frame_skip=4,
+    terminal_on_life_loss=false,
+    repeat_action_probability=0.0,
+    color_averaging=false,
+    max_num_frames_per_episode=0,
+    full_action_space=false,
+    seed=nothing,
+    log_level=:error
 )
     frame_skip > 0 || throw(ArgumentError("frame_skip must be greater than 0!"))
     name in getROMList() || throw(
@@ -60,10 +60,10 @@ function AtariEnv(;
     observation_size =
         grayscale_obs ? (getScreenWidth(ale), getScreenHeight(ale)) :
         (3, getScreenWidth(ale), getScreenHeight(ale))  # !!! note the order
-    observation_space = Space(Cuchar, observation_size...)
+    observation_space = ArrayProductDomain(fill(typemin(Cuchar):typemax(Cuchar), observation_size...))
 
     actions = full_action_space ? getLegalActionSet(ale) : getMinimalActionSet(ale)
-    action_space = Space(OneTo(length(actions)))
+    action_space = Base.OneTo(length(actions))
     screens =
         (fill(typemin(Cuchar), observation_size), fill(typemin(Cuchar), observation_size))
 
@@ -146,7 +146,7 @@ end
 
 
 imshowgrey(x::AbstractArray{UInt8,2}) = imshowgrey(reshape(x, :), size(x))
-imshowgrey(x::AbstractArray{UInt8,1}, dims) = imshow(reshape(x, dims), colormap = 2)
+imshowgrey(x::AbstractArray{UInt8,1}, dims) = imshow(reshape(x, dims), colormap=2)
 imshowcolor(x::AbstractArray{UInt8,3}) = imshowcolor(reshape(x, :), size(x))
 function imshowcolor(x::AbstractArray{UInt8,1}, dims)
     clearws()

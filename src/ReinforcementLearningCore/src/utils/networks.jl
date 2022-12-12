@@ -508,7 +508,9 @@ end
 
 TwinNetwork(x; kw...) = TwinNetwork(; source=x, target=deepcopy(x), kw...)
 
-@functor TwinNetwork (source,)
+@functor TwinNetwork (source, target)
+
+Flux.trainable(model::TwinNetwork) = (model.source,)
 
 (model::TwinNetwork)(args...) = model.source(args...)
 
