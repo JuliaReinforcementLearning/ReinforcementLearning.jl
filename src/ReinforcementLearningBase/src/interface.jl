@@ -11,7 +11,7 @@ Basically, we defined the following two main concepts in reinforcement learning:
 
 import Base: copy, copyto!, nameof
 import Random: seed!, rand, AbstractRNG
-import AbstractTrees: children, has_children
+import AbstractTrees: children
 import Markdown
 
 #####
@@ -407,7 +407,7 @@ abstract type AbstractEpisodeStyle end
 @api struct Spector end
 @api const SPECTOR = Spector()
 
-@api (env::AbstractEnv)(action, player = current_player(env))
+@api (env::AbstractEnv)(action, player=current_player(env))
 
 """
 Make an independent copy of `env`, 
@@ -442,7 +442,7 @@ Get the action distribution of chance player.
     Only valid for environments of [`EXPLICIT_STOCHASTIC`](@ref) style. The
     current player of `env` must be the chance player.
 """
-@env_api prob(env::AbstractEnv, player = chance_player(env))
+@env_api prob(env::AbstractEnv, player=chance_player(env))
 
 """
     action_space(env, player=current_player(env))
@@ -450,7 +450,7 @@ Get the action distribution of chance player.
 Get all available actions from environment. See also:
 [`legal_action_space`](@ref)
 """
-@multi_agent_env_api action_space(env::AbstractEnv, player = current_player(env))
+@multi_agent_env_api action_space(env::AbstractEnv, player=current_player(env))
 
 """
     legal_action_space(env, player=current_player(env))
@@ -458,7 +458,7 @@ Get all available actions from environment. See also:
 For environments of [`MINIMAL_ACTION_SET`](@ref), the result is the same with
 [`action_space`](@ref).
 """
-@multi_agent_env_api legal_action_space(env::AbstractEnv, player = current_player(env)) =
+@multi_agent_env_api legal_action_space(env::AbstractEnv, player=current_player(env)) =
     legal_action_space(ActionStyle(env), env, player)
 
 legal_action_space(::MinimalActionSet, env, player) = action_space(env)
@@ -470,7 +470,7 @@ Required for environments of [`FULL_ACTION_SET`](@ref). As a default implementat
      [`legal_action_space_mask`](@ref) creates a mask of [`action_space`](@ref) with
      the subset [`legal_action_space`](@ref).
 """
-@multi_agent_env_api legal_action_space_mask(env::AbstractEnv, player = current_player(env)) = 
+@multi_agent_env_api legal_action_space_mask(env::AbstractEnv, player=current_player(env)) =
     map(action_space(env, player)) do action
         action in legal_action_space(env, player)
     end
@@ -550,7 +550,7 @@ Used in imperfect multi-agent environments.
 """
     reward(env, player=current_player(env))
 """
-@multi_agent_env_api reward(env::AbstractEnv, player = current_player(env))
+@multi_agent_env_api reward(env::AbstractEnv, player=current_player(env))
 
 """
     child(env::AbstractEnv, action)
@@ -564,8 +564,6 @@ Treat the `env` as a game tree. Create an independent child after applying
     new_env
 end
 
-@api has_children(env::AbstractEnv) = !is_terminated(env)
-
 @api children(env::AbstractEnv) = (child(env, action) for action in legal_action_space(env))
 
 """
@@ -575,7 +573,7 @@ Call `f` with `env` and its descendants. Only use it with small games.
 """
 @api function walk(f, env::AbstractEnv)
     f(env)
-    if has_children(env)
+    if !is_terminated(env)
         for x in children(env)
             walk(f, x)
         end

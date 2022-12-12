@@ -5,8 +5,13 @@ include("explorers/explorers.jl")
 
 using Functors: @functor
 
+"""
+    QBasedPolicy(;learner, explorer)
+"""
 Base.@kwdef mutable struct QBasedPolicy{L,E} <: AbstractPolicy
+    "estimate the Q value"
     learner::L
+    "select the action based on Q values calculated by the learner"
     explorer::E
 end
 

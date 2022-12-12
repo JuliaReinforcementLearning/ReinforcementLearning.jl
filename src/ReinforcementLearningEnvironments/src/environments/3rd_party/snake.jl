@@ -1,6 +1,6 @@
 using .SnakeGames
 
-function SnakeGameEnv(; action_style = MINIMAL_ACTION_SET, kw...)
+function SnakeGameEnv(; action_style=MINIMAL_ACTION_SET, kw...)
     game = SnakeGame(; kw...)
     n_snakes = length(game.snakes)
     num_agent_style = n_snakes == 1 ? SINGLE_AGENT : MultiAgent{n_snakes}()
@@ -41,9 +41,9 @@ end
 (env::SnakeGameEnv)(action::Int) = env([SNAKE_GAME_ACTIONS[action]])
 (env::SnakeGameEnv)(actions::Vector{Int}) = env(map(a -> SNAKE_GAME_ACTIONS[a], actions))
 
-RLBase.action_space(env::SnakeGameEnv) = 1:4
+RLBase.action_space(env::SnakeGameEnv) = Base.OneTo(4)
 RLBase.state(env::SnakeGameEnv) = env.game.board
-RLBase.state_space(env::SnakeGameEnv) = Space(fill(false..true, size(env.game.board)))
+RLBase.state_space(env::SnakeGameEnv) = ArrayProductDomain(fill(false:true, size(env.game.board)))
 RLBase.reward(env::SnakeGameEnv{<:Any,SINGLE_AGENT}) =
     length(env.game.snakes[]) - env.latest_snakes_length[]
 RLBase.reward(env::SnakeGameEnv) = length.(env.game.snakes) .- env.latest_snakes_length
