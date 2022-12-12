@@ -17,15 +17,15 @@ Base.show(io::IO, params::MountainCarEnvParams) = print(
 )
 
 function MountainCarEnvParams(;
-    T = Float64,
-    min_pos = -1.2,
-    max_pos = 0.6,
-    max_speed = 0.07,
-    goal_pos = 0.5,
-    goal_velocity = 0.0,
-    power = 0.001,
-    gravity = 0.0025,
-    max_steps = 200,
+    T=Float64,
+    min_pos=-1.2,
+    max_pos=0.6,
+    max_speed=0.07,
+    goal_pos=0.5,
+    goal_velocity=0.0,
+    power=0.001,
+    gravity=0.0025,
+    max_steps=200
 )
     MountainCarEnvParams{T}(
         min_pos,
@@ -65,34 +65,32 @@ end
 - `gravity = 0.0025`
 """
 function MountainCarEnv(;
-    T = Float64,
-    continuous = false,
-    rng = Random.GLOBAL_RNG,
-    kwargs...,
+    T=Float64,
+    continuous=false,
+    rng=Random.GLOBAL_RNG,
+    kwargs...
 )
     if continuous
-        params = MountainCarEnvParams(; goal_pos = 0.45, power = 0.0015, T = T, kwargs...)
+        params = MountainCarEnvParams(; goal_pos=0.45, power=0.0015, T=T, kwargs...)
     else
-        params = MountainCarEnvParams(; T = T, kwargs...)
+        params = MountainCarEnvParams(; T=T, kwargs...)
     end
     env = MountainCarEnv(params, zeros(T, 2), continuous ? 0.0 : 0, false, 0, rng)
     reset!(env)
     env
 end
 
-ContinuousMountainCarEnv(; kwargs...) = MountainCarEnv(; continuous = true, kwargs...)
+ContinuousMountainCarEnv(; kwargs...) = MountainCarEnv(; continuous=true, kwargs...)
 
 Random.seed!(env::MountainCarEnv, seed) = Random.seed!(env.rng, seed)
 
-RLBase.state_space(env::MountainCarEnv) = Space(
-    SVector(
-        env.params.min_pos .. env.params.max_pos,
-        -env.params.max_speed .. env.params.max_speed,
-    ),
-)
+function RLBase.state_space(env::MountainCarEnv)
+    (env.params.min_pos .. env.params.max_pos) ×
+    (-env.params.max_speed .. env.params.max_speed)
+end
 
-RLBase.action_space(::MountainCarEnv{<:AbstractFloat,Int}) = Space(OneTo(3))
-RLBase.action_space(::MountainCarEnv{<:AbstractFloat,<:AbstractFloat}) = Space(-1.0 .. 1.0)
+RLBase.action_space(::MountainCarEnv{<:AbstractFloat,Int}) = Base.OneTo(3)
+RLBase.action_space(::MountainCarEnv{<:AbstractFloat,<:AbstractFloat}) = -1.0 .. 1.0
 
 RLBase.reward(env::MountainCarEnv{T}) where {T} = env.done ? zero(T) : -one(T)
 RLBase.is_terminated(env::MountainCarEnv) = env.done

@@ -14,10 +14,11 @@ Return `true` after being called `step` times.
 mutable struct StopAfterStep{Tl}
     step::Int
     cur::Int
+    "IGNORE"
     progress::Tl
 end
 
-function StopAfterStep(step; cur = 1, is_show_progress = true)
+function StopAfterStep(step; cur=1, is_show_progress=true)
     if is_show_progress
         progress = ProgressMeter.Progress(step, 1)
         ProgressMeter.update!(progress, cur)
@@ -53,10 +54,11 @@ Return `true` after being called `episode`. If `is_show_progress` is `true`, the
 mutable struct StopAfterEpisode{Tl}
     episode::Int
     cur::Int
+    "IGNORE"
     progress::Tl
 end
 
-function StopAfterEpisode(episode; cur = 0, is_show_progress = true)
+function StopAfterEpisode(episode; cur=0, is_show_progress=true)
     if is_show_progress
         progress = ProgressMeter.Progress(episode, 1)
         ProgressMeter.update!(progress, cur)
@@ -103,7 +105,7 @@ mutable struct StopAfterNoImprovement{T<:Number,F}
     counter::Int
 end
 
-function StopAfterNoImprovement(fn, patience::Int, δ::T = 0.0f0) where {T<:Number}
+function StopAfterNoImprovement(fn, patience::Int, δ::T=0.0f0) where {T<:Number}
     StopAfterNoImprovement(fn, patience, δ, typemin(T), 1)
 end
 
