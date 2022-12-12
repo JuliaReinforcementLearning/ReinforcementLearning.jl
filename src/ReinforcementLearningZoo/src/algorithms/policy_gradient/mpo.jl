@@ -28,6 +28,49 @@ mutable struct MPOPolicy{P<:Approximator,Q<:Approximator,R} <: AbstractPolicy
     logs::Dict{Symbol, Vector{Float32}}
 end
 
+
+"""
+    MPOPolicy(;
+    actor::Approximator, #The policy approximating function. Can be a GaussianNetwork, a CovGaussianNetwork or a CategoricalNetwork.
+    qnetwork1::Q <: Approximator, #The Q-Value approximating function.  
+    qnetwork2::Q, #A second Q-Value approximator for double Q-learning.
+    γ = 0.99f0, #Discount factor of rewards.
+    action_sample_size::Int, #The number of actions to sample at the E-step (K in the MPO paper).
+    ϵ = 0.1f0, #maximum kl divergence between the current policy and the E-step empirical policy.
+    ϵμ = 5f-4, #maximum kl divergence between the current policy and the updated policy at the M-step w.r.t the mean or the logits.
+    ϵΣ = 1f-5, #maximum kl divergence between the current policy and the updated policy at the M-step w.r.t the covariance (not used with categorical policy).
+    α_scale = 1f0, #gradient descent learning rate for the lagrange penalty.
+    αΣ_scale = 100f0, #gradient descent learning rate for the lagrange penalty for the covariance decoupling (not used with categorical policy).
+    τ = 1f-3, #polyak-averaging update parameter for the target Q-networks.
+    max_grad_norm = 5f-1, #maximum gradient norm.
+    rng = Random.GLOBAL_RNG
+    )
+
+Instantiate an MPO learner. The actor can be of type `GaussianNetwork`, `CovGaussianNetwork`,
+or `CategoricalNetwork`. The original paper uses `CovGaussianNetwork` which approximates a 
+MvNormal policy. It has a better policy representation but requires more computation.
+
+This implementation uses double Q-learning and target Q-networks, 
+unlike the original MPO paper that uses retrace (WIP). The `Approximator` fields should 
+each come with their own `Optimiser` (e.g. `ADAM`). 
+
+MPOPolicy requires batches of type 
+```
+NamedTuple{
+        (:actor, :critic), 
+        <: Tuple{
+            <: Vector{<: NamedTuple{(:state,)}},
+            <: Vector{<: NamedTuple{SS′ART}}
+        }
+    }
+``` 
+to be trained. This type is obtained with a MetaSampler with two MutliBatchSampler: 
+a `:actor` and a `:critic` one. The :actor sampler must sample :state traces only 
+and the :critic needs SS′ART traces. See `ReinforcementLearningExperiments` for examples
+with each policy network type.
+
+`p::MPOPolicy` logs several values during training. You can access them using `p.logs[::Symbol]`.
+"""
 function MPOPolicy(;actor::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, α_scale = 1f0, αΣ_scale = 100f0, τ = 1f-3, max_grad_norm = 5f-1, rng = Random.GLOBAL_RNG) where Q <: Approximator
     @assert device(actor) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(actor) == device(rng) "The specified rng does not generate on the same device as the actor. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
@@ -48,20 +91,6 @@ function (p::MPOPolicy)(env; testmode = false)
     send_to_host(action)
 end
 
-#=
-```
-NamedTuple{
-        (:actor, :critic), 
-        <: Tuple{
-            <: Vector{<: NamedTuple{(:state,)}},
-            <: Vector{<: NamedTuple{SS′ART}}
-        }
-    }
-```
-is the type of batches returned by a MetaSampler with two MutliBatchSampler: a `:actor` and a `:critic` one.
-The :actor sampler must sample :state traces only and the :critic needs SS′ART traces. 
-
-=#
 function RLBase.optimise!(
     p::MPOPolicy,
     batches::NamedTuple{
@@ -130,7 +159,7 @@ function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
     current_action_dist_batches = [p.actor(p.rng, states, is_sampling = false) for states in states_batches] #π(.|s,Θᵢ) 
     action_samples_batches = [sample_actions(p, dist, p.action_sample_size) for dist in current_action_dist_batches] #3D tensor with dimensions (action_size x action_sample_size x batchsize)
     for (states, current_action_dist, action_samples) in zip(states_batches, current_action_dist_batches, action_samples_batches)
-        #Fit non-parametric variational distributions
+        #Fit non-parametric variational distributions (E-step)
         repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
         input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
         Q = p.qnetwork1(input) 
@@ -142,7 +171,7 @@ function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
             error("qij contains NaN of Inf")
         end
 
-        #Improve actor towards qij
+        #Improve actor towards qij (M-step)
         ps = Flux.params(p.actor)#, p.α, p.αΣ)
         gs = gradient(ps) do 
             mpo_loss(p, qij, states, action_samples, current_action_dist)
