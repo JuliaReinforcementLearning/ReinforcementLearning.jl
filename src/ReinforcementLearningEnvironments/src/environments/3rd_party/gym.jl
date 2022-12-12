@@ -1,6 +1,6 @@
 using .PyCall
 
-function GymEnv(name::String; seed::Union{Int,Nothing} = nothing)
+function GymEnv(name::String; seed::Union{Int,Nothing}=nothing)
     if !PyCall.pyexists("gym")
         error(
             "Cannot import module 'gym'.\n\nIf you did not yet install it, try running\n`ReinforcementLearningEnvironments.install_gym()`\n",
@@ -105,24 +105,24 @@ Random.seed!(env::GymEnv, s) = env.pyenv.seed(s)
 function space_transform(s::PyObject)
     spacetype = s.__class__.__name__
     if spacetype == "Box"
-        Space(ClosedInterval.(s.low, s.high))
+        ArrayProductDomain(map((l, h) -> l .. h, s.low, s.high))
     elseif spacetype == "Discrete"  # for GymEnv("CliffWalking-v0"), `s.n` is of type PyObject (numpy.int64)
-        Space(0:(py"int($s.n)"-1))
+        0:(py"int($s.n)"-1)
     elseif spacetype == "MultiBinary"
-        Space(Bool, s.n)
+        ArrayProductDomain(fill(false:true, s.n))
     elseif spacetype == "MultiDiscrete"
-        Space(map(x -> 0:x-one(typeof(x)), s.nvec))
+        ArrayProductDomain(map(x -> 0:x-one(typeof(x)), s.nvec))
     elseif spacetype == "Tuple"
-        Tuple(space_transform(x) for x in s.spaces)
+        TupleProductDomain(space_transform(x) for x in s.spaces)
     elseif spacetype == "Dict"
-        Dict((k => space_transform(v) for (k, v) in s.spaces)...)
+        NamedTupleProductDomain((k => space_transform(v) for (k, v) in s.spaces)...)
     else
         error("Don't know how to convert Gym Space of class [$(spacetype)]")
     end
 end
 
 function list_gym_env_names(;
-    modules = [
+    modules=[
         "gym.envs.algorithmic",
         "gym.envs.box2d",
         "gym.envs.classic_control",
@@ -142,7 +142,7 @@ function list_gym_env_names(;
         "d4rl.locomotion.ant",
         "d4rl.gym_bullet.gym_envs",
         "d4rl.pointmaze_bullet.bullet_maze", # yet to include flow and carla
-    ],
+    ]
 )
     if PyCall.pyexists("d4rl")
         pyimport("d4rl")
@@ -154,7 +154,7 @@ end
 """
     install_gym(; packages = ["gym", "pybullet"])
 """
-function install_gym(; packages = ["gym", "pybullet"])
+function install_gym(; packages=["gym", "pybullet"])
     # Use eventual proxy info
     proxy_arg = String[]
     if haskey(ENV, "http_proxy")

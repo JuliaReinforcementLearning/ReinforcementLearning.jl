@@ -1,11 +1,10 @@
-export BitFlippingEnv
+export BitFlippingEnv, GoalState
 
 """
 In Bit Flipping Environment we have n bits. The actions are 1 to n where executing i-th action flips the i-th bit of the state. For every episode we sample uniformly and initial state as well as the target state.
 
 Refer [Hindsight Experience Replay paper](https://arxiv.org/pdf/1707.01495.pdf) for the motivation behind the environment.
 """
-
 mutable struct BitFlippingEnv <: AbstractEnv
     N::Int
     rng::AbstractRNG
@@ -15,7 +14,7 @@ mutable struct BitFlippingEnv <: AbstractEnv
     t::Int
 end
 
-function BitFlippingEnv(; N = 8, T = N, rng = Random.GLOBAL_RNG)
+function BitFlippingEnv(; N=8, T=N, rng=Random.default_rng())
     state = bitrand(rng, N)
     goal_state = bitrand(rng, N)
     max_steps = T
@@ -24,7 +23,7 @@ end
 
 Random.seed!(env::BitFlippingEnv, s) = Random.seed!(env.rng, s)
 
-RLBase.action_space(env::BitFlippingEnv) = Space(OneTo(env.N))
+RLBase.action_space(env::BitFlippingEnv) = Base.OneTo(env.N)
 
 RLBase.legal_action_space(env::BitFlippingEnv) = Base.OneTo(env.N)
 
@@ -41,8 +40,8 @@ end
 RLBase.state(env::BitFlippingEnv) = state(env::BitFlippingEnv, Observation{BitArray{1}}())
 RLBase.state(env::BitFlippingEnv, ::Observation) = env.state
 RLBase.state(env::BitFlippingEnv, ::GoalState) = env.goal_state
-RLBase.state_space(env::BitFlippingEnv, ::Observation) = Space(Bool, env.N)
-RLBase.state_space(env::BitFlippingEnv, ::GoalState) = Space(Bool, env.N)
+RLBase.state_space(env::BitFlippingEnv, ::Observation) = ArrayProductDomain(fill(false:true, env.N))
+RLBase.state_space(env::BitFlippingEnv, ::GoalState) = ArrayProductDomain(fill(false:true, env.N))
 RLBase.is_terminated(env::BitFlippingEnv) =
     (env.state == env.goal_state) || (env.t >= env.max_steps)
 

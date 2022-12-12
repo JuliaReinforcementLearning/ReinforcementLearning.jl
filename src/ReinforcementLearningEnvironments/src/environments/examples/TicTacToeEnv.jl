@@ -51,10 +51,9 @@ Base.isequal(a::TicTacToeEnv, b::TicTacToeEnv) = isequal(a.board, b.board)
 Base.to_index(::TicTacToeEnv, ::Cross) = 2
 Base.to_index(::TicTacToeEnv, ::Nought) = 3
 
-RLBase.action_space(::TicTacToeEnv, player) = Space(OneTo(9))
+RLBase.action_space(::TicTacToeEnv, player) = Base.OneTo(9)
 
-RLBase.legal_action_space(env::TicTacToeEnv, p) =
-    Space(findall(legal_action_space_mask(env)))
+RLBase.legal_action_space(env::TicTacToeEnv, p) = findall(legal_action_space_mask(env))
 
 function RLBase.legal_action_space_mask(env::TicTacToeEnv, p)
     if is_win(env, CROSS) || is_win(env, NOUGHT)
@@ -76,12 +75,12 @@ RLBase.current_player(env::TicTacToeEnv) = env.player
 RLBase.players(env::TicTacToeEnv) = (CROSS, NOUGHT)
 
 RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = env.board
-RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = Space(Bool, 3, 3, 3)
+RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = ArrayProductDomain(fill(false:true, 3, 3, 3))
 RLBase.state(env::TicTacToeEnv, ::Observation{Int}, p) =
     get_tic_tac_toe_state_info()[env].index
 RLBase.state_space(env::TicTacToeEnv, ::Observation{Int}, p) =
-    Space(OneTo(length(get_tic_tac_toe_state_info())))
-RLBase.state_space(env::TicTacToeEnv, ::Observation{String}, p) = Space(String)
+    Base.OneTo(length(get_tic_tac_toe_state_info()))
+RLBase.state_space(env::TicTacToeEnv, ::Observation{String}, p) = fullspace(String)
 
 function RLBase.state(env::TicTacToeEnv, ::Observation{String}, p)
     buff = IOBuffer()
@@ -140,7 +139,7 @@ function get_tic_tac_toe_state_info()
             n = 1
             root = TicTacToeEnv()
             TIC_TAC_TOE_STATE_INFO[root] =
-                (index = n, is_terminated = false, winner = nothing)
+                (index=n, is_terminated=false, winner=nothing)
             walk(root) do env
                 if !haskey(TIC_TAC_TOE_STATE_INFO, env)
                     n += 1
@@ -153,9 +152,9 @@ function get_tic_tac_toe_state_info()
                         nothing
                     end
                     TIC_TAC_TOE_STATE_INFO[env] = (
-                        index = n,
-                        is_terminated = !(has_empty_pos && isnothing(w)),
-                        winner = w,
+                        index=n,
+                        is_terminated=!(has_empty_pos && isnothing(w)),
+                        winner=w,
                     )
                 end
             end

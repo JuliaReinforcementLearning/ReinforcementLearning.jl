@@ -82,7 +82,7 @@ Usually a closure or a functional object will be used to store some intermediate
 
 ## How to write a customized hook?
 
-In most cases, you don't need to write a customized hook. Some ver general hooks are provided so that you can inject any runtime logic at appropriate time:
+In most cases, you don't need to write a customized hook. Some generic hooks are provided so that you can inject logic at the appropriate time:
 
 - [`DoEveryNStep`](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/rl_core/#ReinforcementLearningCore.DoEveryNStep)
 - [`DoEveryNEpisode`](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/rl_core/#ReinforcementLearningCore.DoEveryNEpisode)

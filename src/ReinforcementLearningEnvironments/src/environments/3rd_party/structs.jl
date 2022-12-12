@@ -11,8 +11,8 @@ mutable struct AtariEnv{IsGrayScale,TerminalOnLifeLoss,N,S<:AbstractRNG} <: Abst
     name::String
     screens::Tuple{Array{UInt8,N},Array{UInt8,N}}  # for max-pooling
     actions::Vector{Int}
-    action_space::Space
-    observation_space::Space
+    action_space::Base.OneTo
+    observation_space::ArrayProductDomain
     noopmax::Int
     frame_skip::Int
     reward::Float32
