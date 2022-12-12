@@ -516,6 +516,33 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "ll7",
+      "name": "ll7",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32880741?v=4",
+      "profile": "https://github.com/ll7",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "mplemay",
+      "name": "Matthew LeMay",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4324379?v=4",
+      "profile": "http://mplemay.github.io",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "ludvigk",
+      "name": "Ludvig Killingberg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12255780?v=4",
+      "profile": "https://github.com/ludvigk",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

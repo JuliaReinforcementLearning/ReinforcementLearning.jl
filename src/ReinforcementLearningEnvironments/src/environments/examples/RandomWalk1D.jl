@@ -21,14 +21,14 @@ Base.@kwdef mutable struct RandomWalk1D <: AbstractEnv
     pos::Int = start_pos
 end
 
-RLBase.action_space(env::RandomWalk1D) = Space(OneTo(length(env.actions)))
+RLBase.action_space(env::RandomWalk1D) = Base.OneTo(length(env.actions))
 
 function (env::RandomWalk1D)(action)
     env.pos = max(min(env.pos + env.actions[action], env.N), 1)
 end
 
 RLBase.state(env::RandomWalk1D) = env.pos
-RLBase.state_space(env::RandomWalk1D) = Space(OneTo(env.N))
+RLBase.state_space(env::RandomWalk1D) = Base.OneTo(env.N)
 RLBase.is_terminated(env::RandomWalk1D) = env.pos == 1 || env.pos == env.N
 RLBase.reset!(env::RandomWalk1D) = env.pos = env.start_pos
 
