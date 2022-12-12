@@ -3,6 +3,18 @@ export TDLearner
 using LinearAlgebra: dot
 using Distributions: pdf
 
+"""
+    TDLearner(;approximator, γ=1.0, method, n=0)
+
+Use temporal-difference method to estimate state value or state-action value.
+
+# Fields
+- `approximator` can be either a
+  `TabularQApproximator`, `LinearQApproximator`, `TabularVApproximator` or `LinearVApproximator`.
+- `γ=1.0`, discount rate.
+- `method` can be `:SRS` (for state value function); for state-action value function, it can be `:SARS` (Q-learning) , `:SARSA` (Sarsa) or `:ExpectedSARSA`.
+- `n=0`: the number of time steps used minus 1.
+"""
 Base.@kwdef struct TDLearner{A} <: Any
     approximator::A
     γ::Float64 = 1.0
@@ -79,7 +91,9 @@ function _update!(
     for i in 1:min(n + 1, length(R))
         G = R[end-i+1] + γ * G
         s, a = S[end-i], A[end-i]
-        update!(Q, (s, a) => Q(s, a) - G)
+        if !(a isa NoOp)
+            update!(Q, (s, a) => Q(s, a) - G)
+        end
     end
 end
 
@@ -137,8 +151,10 @@ function _update!(
 
     if length(R) >= n + 1
         s, a, s′ = S[end-n-1], A[end-n-1], S[end]
-        G = discount_rewards_reduced(@view(R[end-n:end]), γ) + γ^(n + 1) * maximum(Q(s′))
-        update!(Q, (s, a) => Q(s, a) - G)
+        if !(a isa NoOp)
+            G = discount_rewards_reduced(@view(R[end-n:end]), γ) + γ^(n + 1) * maximum(Q(s′))
+            update!(Q, (s, a) => Q(s, a) - G)
+        end
     end
 end
 

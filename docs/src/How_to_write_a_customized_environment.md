@@ -103,6 +103,7 @@ RLBase.test_runnable!(env)
 It is a simple smell test which works like this:
 
 ```
+n_episode = 10
 for _ in 1:n_episode
     reset!(env)
     while !is_terminated(env)

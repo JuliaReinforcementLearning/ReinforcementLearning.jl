@@ -20,7 +20,7 @@ This is a **one-shot** game. The environment terminates immediately after taking
 in an action. Here we use it to demonstrate how to write a customized
 environment with only minimal interfaces defined.
 """
-function MultiArmBanditsEnv(; true_reward = 0.0, k = 10, rng = Random.GLOBAL_RNG)
+function MultiArmBanditsEnv(; true_reward=0.0, k=10, rng=Random.GLOBAL_RNG)
     true_values = true_reward .+ randn(rng, k)
     MultiArmBanditsEnv(true_reward, true_values, rng, 0.0, false)
 end
@@ -38,7 +38,7 @@ environment, the possible actions are `1` to `k` (which equals to
     require that the action space must be of `Base.OneTo`. However, it's the
     algorithm designer's job to do the checking and conversion.
 """
-RLBase.action_space(env::MultiArmBanditsEnv) = Space(OneTo(length(env.true_values)))
+RLBase.action_space(env::MultiArmBanditsEnv) = Base.OneTo(length(env.true_values))
 
 """
 In our design, the return of taking an action in `env` is **undefined**. This is
@@ -70,7 +70,7 @@ state is after each action. So here we can simply set it to a constant `1`.
 """
 RLBase.state(env::MultiArmBanditsEnv) = 1
 
-RLBase.state_space(env::MultiArmBanditsEnv) = Space(OneTo(1))
+RLBase.state_space(env::MultiArmBanditsEnv) = Base.OneTo(1)
 
 function RLBase.reset!(env::MultiArmBanditsEnv)
     env.is_terminated = false
