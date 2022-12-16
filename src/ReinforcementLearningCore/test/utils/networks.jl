@@ -1,4 +1,4 @@
-using Test, Flux, CUDA
+using Test, Flux, CUDA, ChainRulesCore
 @testset "Approximators" begin
     #= These may need to be updated due to recent changes
     @testset "TabularApproximator" begin
