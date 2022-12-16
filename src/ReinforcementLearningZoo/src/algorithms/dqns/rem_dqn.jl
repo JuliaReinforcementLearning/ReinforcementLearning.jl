@@ -1,7 +1,9 @@
 export REMDQNLearner
 
 using Random: AbstractRNG, GLOBAL_RNG
+using Flux
 using Flux.Losses: huber_loss
+using Flux: gradient, params
 using Functors: @functor
 
 Base.@kwdef mutable struct REMDQNLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner

@@ -1,4 +1,5 @@
 using Test, Flux, CUDA
+using Flux: params, gradient
 @testset "Approximators" begin
     #= These may need to be updated due to recent changes
     @testset "TabularApproximator" begin

@@ -3,6 +3,8 @@ export PrioritizedDQNLearner
 using Random: AbstractRNG, GLOBAL_RNG
 using Functors: @functor
 using LinearAlgebra: dot
+using Flux
+using Flux: gradient, params
 
 Base.@kwdef mutable struct PrioritizedDQNLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
     approximator::A
