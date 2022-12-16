@@ -1,7 +1,7 @@
 export RainbowLearner
 
 using Random: AbstractRNG, GLOBAL_RNG
-using Flux: params, unsqueeze, softmax
+using Flux: params, unsqueeze, softmax, gradient
 using Flux.Losses: logitcrossentropy
 using Functors: @functor
 

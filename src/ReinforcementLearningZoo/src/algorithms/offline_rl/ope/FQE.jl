@@ -1,5 +1,8 @@
 export FQE
 
+using Flux
+using Flux: gradient, params
+
 mutable struct FQE{
     P<:GaussianNetwork,
     C<:NeuralNetworkApproximator,

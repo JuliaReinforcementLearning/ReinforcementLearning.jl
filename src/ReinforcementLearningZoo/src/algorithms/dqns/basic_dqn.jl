@@ -1,5 +1,6 @@
 export BasicDQNLearner
 
+using Flux
 using Flux: gradient, params
 using Functors: @functor
 using ChainRulesCore: ignore_derivatives

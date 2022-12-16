@@ -2,7 +2,7 @@ export TRPO
 
 using Random: GLOBAL_RNG, shuffle, AbstractRNG
 using Functors: @functor
-using Flux: Flux, destructure
+using Flux: Flux, destructure, params, gradient
 using StatsBase: mean
 using ChainRulesCore: ignore_derivatives
 
