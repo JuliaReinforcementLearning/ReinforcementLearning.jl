@@ -1,5 +1,8 @@
 export BehaviorCloningPolicy
 
+using Flux
+using Flux: gradient, params
+
 mutable struct BehaviorCloningPolicy{A} <: AbstractPolicy
     approximator::A
     explorer::AbstractExplorer
