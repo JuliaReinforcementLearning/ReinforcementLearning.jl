@@ -250,6 +250,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/ll7"><img src="https://avatars.githubusercontent.com/u/32880741?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ll7</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=ll7" title="Documentation">📖</a></td>
     <td align="center"><a href="http://mplemay.github.io"><img src="https://avatars.githubusercontent.com/u/4324379?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Matthew LeMay</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=mplemay" title="Documentation">📖</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/ludvigk"><img src="https://avatars.githubusercontent.com/u/12255780?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ludvig Killingberg</b></sub></a><br /><a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/commits?author=ludvigk" title="Code">💻</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-restore -->

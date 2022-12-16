@@ -73,9 +73,9 @@ function RLBase.action_space(env::OpenSpielEnv, player)
         # !!! this bug is already fixed in OpenSpiel
         # replace it with the following one later
         # ZeroTo(max_chance_outcomes(env.game)-1)
-        Space(0:max_chance_outcomes(env.game))
+        0:max_chance_outcomes(env.game)
     else
-        Space(0:num_distinct_actions(env.game)-1)
+        0:num_distinct_actions(env.game)-1
     end
 end
 
@@ -126,9 +126,9 @@ function RLBase.state(env::OpenSpielEnv, ss::RLBase.AbstractStateStyle, player)
     if player < 0  # TODO: revisit this in OpenSpiel@v0.2
         @warn "unexpected player $player, falling back to default state value." maxlog = 1
         s = state_space(env)
-        if s === Space(AbstractString)
+        if s === fullspace(AbstractString)
             ""
-        elseif s isa Array{<:Interval}
+        else
             rand(s)
         end
     else
@@ -149,15 +149,15 @@ RLBase.state_space(
     env::OpenSpielEnv,
     ::Union{InformationSet{String},Observation{String}},
     p,
-) = Space(AbstractString)
+) = fullspace(AbstractString)
 
 RLBase.state_space(env::OpenSpielEnv, ::InformationSet{Array},
     p,
-) = Space(Float64, reverse(information_state_tensor_shape(env.game))...)
+) = ArrayProductDomain(fill(-Inf .. Inf, reverse(information_state_tensor_shape(env.game))...))
 
 RLBase.state_space(env::OpenSpielEnv, ::Observation{Array},
     p,
-) = Space(Float64, reverse(observation_tensor_shape(env.game))...)
+) = ArrayProductDomain(fill(-Inf .. Inf, reverse(observation_tensor_shape(env.game))...))
 
 Random.seed!(env::OpenSpielEnv, s) = @warn "seed!(OpenSpielEnv) is not supported currently."
 
