@@ -16,7 +16,7 @@ while true
 end
 ```
 
-The benifit of this approach is the great clarity. You are responsible for what
+The benefit of this approach is the great clarity. You are responsible for what
 you write. And this is the encouraged approach for new users to try different
 components in this package.
 
@@ -101,7 +101,7 @@ run(
     DoEveryNEpisode(;n=10) do t, policy, env
         # In real world cases, the policy is usually wrapped in an Agent,
         # we need to extract the inner policy to run it in the *actor* mode.
-        # Here for illustration only, we simply use the origina policy.
+        # Here for illustration only, we simply use the original policy.
 
         # Note that we create a new instance of CartPoleEnv here to avoid
         # polluting the original env.

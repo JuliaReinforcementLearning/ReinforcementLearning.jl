@@ -1,16 +1,12 @@
 module ReinforcementLearningEnvironments
 
 using ReinforcementLearningBase
-using Random
 using Requires
-using IntervalSets
-using Base.Threads: @spawn
-using Markdown
+using Random
 
 const RLEnvs = ReinforcementLearningEnvironments
 export RLEnvs
 
-include("base.jl")
 include("environments/environments.jl")
 include("converters.jl")
 
@@ -32,8 +28,6 @@ function __init__()
         "environments/3rd_party/AcrobotEnv.jl",
     )
     @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" include("plots.jl")
-
-
 end
 
 end # module

@@ -24,7 +24,7 @@ Quoted from [wiki](https://en.wikipedia.org/wiki/Monty_Hall_problem):
 
 Here we'll introduce the first environment which is of [`FULL_ACTION_SET`](@ref).
 """
-function MontyHallEnv(; rng = Random.GLOBAL_RNG)
+function MontyHallEnv(; rng=Random.GLOBAL_RNG)
     doors = fill(:goat, 3)
     doors[rand(rng, 1:3)] = :car
     MontyHallEnv(doors, rng, nothing, nothing, nothing)
@@ -32,7 +32,7 @@ end
 
 Random.seed!(env::MontyHallEnv, s) = Random.seed!(env.rng, s)
 
-RLBase.action_space(::MontyHallEnv) = Space(OneTo(3))
+RLBase.action_space(::MontyHallEnv) = Base.OneTo(3)
 
 """
 In the first round, the guest has 3 options, in the second round only two
@@ -66,7 +66,7 @@ function RLBase.state(env::MontyHallEnv)
     end
 end
 
-RLBase.state_space(env::MontyHallEnv) = Space(1:4)
+RLBase.state_space(env::MontyHallEnv) = Base.OneTo(4)
 
 function (env::MontyHallEnv)(action)
     if isnothing(env.host_action)

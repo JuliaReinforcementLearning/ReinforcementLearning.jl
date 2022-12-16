@@ -276,7 +276,7 @@ mutable struct DoEveryNEpisode{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <: 
     t::Int
 end
 
-DoEveryNEpisode(f::F; n=1, t=0, stage::S=POST_EPISODE_STAGE) where {S,F} =
+DoEveryNEpisode(f::F; n=1, t=0, stage::S=PostEpisodeStage()) where {S,F} =
     DoEveryNEpisode{S,F}(f, n, t)
 
 function (hook::DoEveryNEpisode{S})(::S, agent, env) where {S}

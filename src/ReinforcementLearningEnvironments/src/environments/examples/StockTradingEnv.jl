@@ -7,7 +7,7 @@ using IntervalSets
 
 function load_default_stock_data(s)
     if s == "prices.csv" || s == "features.csv"
-        data, _ = readdlm(joinpath(artifact"stock_trading_data", s), ',', header = true)
+        data, _ = readdlm(joinpath(artifact"stock_trading_data", s), ',', header=true)
         collect(data')
     elseif s == "turbulence.csv"
         readdlm(joinpath(artifact"stock_trading_data", "turbulence.csv")) |> vec
@@ -49,14 +49,14 @@ This environment is originally provided in [Deep Reinforcement Learning for Auto
 - `initial_account_balance=1_000_000`.
 """
 function StockTradingEnv(;
-    initial_account_balance = 1_000_000.0f0,
-    features = nothing,
-    prices = nothing,
-    first_day = nothing,
-    last_day = nothing,
-    HMAX_NORMALIZE = 100.0f0,
-    TRANSACTION_FEE_PERCENT = 0.001f0,
-    REWARD_SCALING = 1.0f-4,
+    initial_account_balance=1_000_000.0f0,
+    features=nothing,
+    prices=nothing,
+    first_day=nothing,
+    last_day=nothing,
+    HMAX_NORMALIZE=100.0f0,
+    TRANSACTION_FEE_PERCENT=0.001f0,
+    REWARD_SCALING=1.0f-4
 )
     prices = isnothing(prices) ? load_default_stock_data("prices.csv") : prices
     features = isnothing(features) ? load_default_stock_data("features.csv") : features
@@ -141,8 +141,8 @@ function RLBase.reset!(env::StockTradingEnv)
     env.daily_reward = 0.0
 end
 
-RLBase.state_space(env::StockTradingEnv) = Space(Float32, length(state(env)))
-RLBase.action_space(env::StockTradingEnv) = Space(-1.0f0 .. 1.0f0, length(_holds(env)))
+RLBase.state_space(env::StockTradingEnv) = ArrayProductDomain(fill(-Inf .. Inf, length(state(env))))
+RLBase.action_space(env::StockTradingEnv) = ArrayProductDomain(fill(-1.0f0 .. 1.0f0, length(_holds(env))))
 
 RLBase.ChanceStyle(::StockTradingEnv) = DETERMINISTIC
 
@@ -155,9 +155,9 @@ struct StockTradingEnvWithTurbulence{E<:StockTradingEnv} <: AbstractEnvWrapper
 end
 
 function StockTradingEnvWithTurbulence(;
-    turbulence_threshold = 140.0,
-    turbulences = nothing,
-    kw...,
+    turbulence_threshold=140.0,
+    turbulences=nothing,
+    kw...
 )
     turbulences = isnothing(turbulences) && load_default_stock_data("turbulence.csv")
 

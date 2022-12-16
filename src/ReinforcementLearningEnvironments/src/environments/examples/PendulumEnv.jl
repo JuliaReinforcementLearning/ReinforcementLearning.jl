@@ -39,17 +39,17 @@ end
 - `rng = Random.GLOBAL_RNG`
 """
 function PendulumEnv(;
-    T = Float64,
-    max_speed = T(8),
-    max_torque = T(2),
-    g = T(10),
-    m = T(1),
-    l = T(1),
-    dt = T(0.05),
-    max_steps = 200,
-    continuous::Bool = true,
-    n_actions::Int = 3,
-    rng = Random.GLOBAL_RNG,
+    T=Float64,
+    max_speed=T(8),
+    max_torque=T(2),
+    g=T(10),
+    m=T(1),
+    l=T(1),
+    dt=T(0.05),
+    max_steps=200,
+    continuous::Bool=true,
+    n_actions::Int=3,
+    rng=Random.GLOBAL_RNG
 )
     env = PendulumEnv{continuous,T}(
         PendulumEnvParams(max_speed, max_torque, g, m, l, dt, max_steps),
@@ -70,10 +70,13 @@ Random.seed!(env::PendulumEnv, seed) = Random.seed!(env.rng, seed)
 pendulum_observation(s) = [cos(s[1]), sin(s[1]), s[2]]
 angle_normalize(x) = Base.mod((x + Base.π), (2 * Base.π)) - Base.π
 
-RLBase.action_space(env::PendulumEnv{true}) = Space(-2.0 .. 2.0)
-RLBase.action_space(env::PendulumEnv{false}) = Space(OneTo(env.n_actions))
-RLBase.state_space(env::PendulumEnv) =
-    Space(SVector(-1.0 .. 1.0, -1.0 .. 1.0, -env.params.max_speed .. env.params.max_speed))
+RLBase.action_space(env::PendulumEnv{true}) = -2.0 .. 2.0
+RLBase.action_space(env::PendulumEnv{false}) = Base.OneTo(env.n_actions)
+function RLBase.state_space(env::PendulumEnv)
+    (-1.0 .. 1.0) ×
+    (-1.0 .. 1.0) ×
+    (-env.params.max_speed .. env.params.max_speed)
+end
 RLBase.reward(env::PendulumEnv) = env.reward
 RLBase.is_terminated(env::PendulumEnv) = env.done
 RLBase.state(env::PendulumEnv) = pendulum_observation(env.state)

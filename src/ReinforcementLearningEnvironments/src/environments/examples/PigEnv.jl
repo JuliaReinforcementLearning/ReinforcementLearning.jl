@@ -17,7 +17,7 @@ See [wiki](https://en.wikipedia.org/wiki/Pig_(dice_game)) for explanation of thi
 
 Here we use it to demonstrate how to write a game with more than 2 players.
 """
-PigEnv(; n_players = 2) = PigEnv{n_players}(zeros(Int, n_players), 1, false, 0)
+PigEnv(; n_players=2) = PigEnv{n_players}(zeros(Int, n_players), 1, false, 0)
 
 function RLBase.reset!(env::PigEnv)
     fill!(env.scores, 0)
@@ -29,15 +29,14 @@ end
 RLBase.current_player(env::PigEnv) =
     env.is_chance_player_active ? CHANCE_PLAYER : env.current_player
 RLBase.players(env::PigEnv) = 1:length(env.scores)
-RLBase.action_space(env::PigEnv, ::Int) = Space((:roll, :hold))
-RLBase.action_space(env::PigEnv, ::ChancePlayer) = Space(OneTo(PIG_N_SIDES))
+RLBase.action_space(env::PigEnv, ::Int) = (:roll, :hold)
+RLBase.action_space(env::PigEnv, ::ChancePlayer) = Base.OneTo(PIG_N_SIDES)
 
 RLBase.prob(env::PigEnv, ::ChancePlayer) = fill(1 / 6, 6)  # TODO: uniform distribution, more memory efficient
 
 RLBase.state(env::PigEnv, ::Observation{Vector{Int}}, p) = env.scores
-RLBase.state_space(env::PigEnv, ::Observation, p) = Space(
-    SVector(ntuple(_ -> 0 .. (PIG_TARGET_SCORE + PIG_N_SIDES - 1), length(env.scores))),
-)
+RLBase.state_space(env::PigEnv, ::Observation, p) = ArrayProductDomain([0 .. (PIG_TARGET_SCORE + PIG_N_SIDES - 1) for _ in env.scores])
+
 
 RLBase.is_terminated(env::PigEnv) = any(s >= PIG_TARGET_SCORE for s in env.scores)
 
