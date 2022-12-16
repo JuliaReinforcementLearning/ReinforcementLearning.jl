@@ -16,6 +16,7 @@ Distributions = "0.25"
 Flux = "0.13"
 Reexport = "1"
 ReinforcementLearning = "0.11"
+StableRNGs = "1"
 Weave = "0.10"
 julia = "1.6"
 
