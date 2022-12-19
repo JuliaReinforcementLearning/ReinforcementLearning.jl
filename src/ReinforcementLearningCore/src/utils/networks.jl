@@ -64,9 +64,9 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, 
         end
         if is_return_log_prob
             logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
-            return model.normalizer.(z), logp_π
+            return z, logp_π
         else
-            return model.normalizer.(z)
+            return z
         end
     else
         return μ, logσ
@@ -90,7 +90,7 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s, action_samples::Int)
         μ .+ σ .* noise
     end
     logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
-    return model.normalizer.(z), logp_π
+    return z, logp_π
 end
 
 function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
@@ -168,9 +168,9 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
         end
         if is_return_log_prob
             logp_π = mvnormlogpdf(μ, L, z)
-            return model.normalizer.(z), logp_π
+            return z, logp_π
         else
-            return model.normalizer.(z)
+            return z
         end
     else
         return μ, L
@@ -214,7 +214,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::In
         Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3)
     end
     logp_π = mvnormlogpdf(μ, L, z)
-    return model.normalizer.(z), logp_π
+    return z, logp_π
 end
 
 function (model::CovGaussianNetwork)(state::AbstractArray, args...; kwargs...)
