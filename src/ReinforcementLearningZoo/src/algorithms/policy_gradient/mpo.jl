@@ -1,5 +1,5 @@
 export MPOPolicy
-using LinearAlgebra, Flux, Optim, StatsBase
+using LinearAlgebra, Flux, Optim, StatsBase, Random
 using Zygote: ignore, dropgrad
 import LogExpFunctions.logsumexp
 import Flux.Losses: logitcrossentropy, mse
