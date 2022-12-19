@@ -1,5 +1,5 @@
 export MPOPolicy
-using LinearAlgebra, Flux, Optim, StatsBase, Random
+using LinearAlgebra, Flux, Optim, StatsBase, Random, CUDA
 using Zygote: ignore, dropgrad
 import LogExpFunctions.logsumexp
 import Flux.Losses: logitcrossentropy, mse
@@ -121,31 +121,31 @@ function update_critic!(p::MPOPolicy, batches)
         # Train Q Networks
         q_input = vcat(s, a)
         if id % 2 == modulo
-        q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
-            q1 = p.qnetwork1(q_input) |> vec
-            l = mse(q1, y)
-            ignore() do 
-                push!(p.logs[:qnetwork1_loss], l)
+            q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
+                q1 = p.qnetwork1(q_input) |> vec
+                l = mse(q1, y)
+                ignore() do 
+                    push!(p.logs[:qnetwork1_loss], l)
+                end
+                return l
             end
-            return l
-        end
-        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
-            error("Gradient of Q_1 contains NaN of Inf")
-        end
-        Flux.Optimise.update!(p.qnetwork1.optimiser, Flux.params(p.qnetwork1), q_grad_1)
+            if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
+                error("Gradient of Q_1 contains NaN of Inf")
+            end
+            Flux.Optimise.update!(p.qnetwork1.optimiser, Flux.params(p.qnetwork1), q_grad_1)
         else
-        q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
-            q2 = p.qnetwork2(q_input) |> vec
-            l = mse(q2, y)
-            ignore() do 
-                push!(p.logs[:qnetwork2_loss], l)
+            q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
+                q2 = p.qnetwork2(q_input) |> vec
+                l = mse(q2, y)
+                ignore() do 
+                    push!(p.logs[:qnetwork2_loss], l)
+                end
+                return l
             end
-            return l
-        end
-        if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_2)
-            error("Gradient of Q_2 contains NaN of Inf")
-        end
-        Flux.Optimise.update!(p.qnetwork2.optimiser, Flux.params(p.qnetwork2), q_grad_2)
+            if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_2)
+                error("Gradient of Q_2 contains NaN of Inf")
+            end
+            Flux.Optimise.update!(p.qnetwork2.optimiser, Flux.params(p.qnetwork2), q_grad_2)
         end
 
         for (dest, src) in zip(
@@ -335,9 +335,9 @@ function Flux.gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
         p.ϵΣ, 
         p.α, 
         p.αΣ,
-        α_scale,
-        αΣ_scale,
-        max_grad_norm,
+        p.α_scale,
+        p.αΣ_scale,
+        p.max_grad_norm,
         p.τ, 
         rng,
         p.logs)
@@ -364,9 +364,9 @@ function RLCore.send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ?
         p.ϵΣ, 
         p.α, 
         p.αΣ, 
-        α_scale,
-        αΣ_scale,
-        max_grad_norm,
+        p.α_scale,
+        p.αΣ_scale,
+        p.max_grad_norm,
         p.τ, 
         rng,
         p.logs)
