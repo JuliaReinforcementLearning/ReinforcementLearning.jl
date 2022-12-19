@@ -107,7 +107,8 @@ end
 
 #Here we apply the TD3 Q network approach. The original MPO paper uses retrace.
 function update_critic!(p::MPOPolicy, batches)
-    for batch in batches
+    modulo = rand((0,1)) #we randomize this so that if the number of batches is odd, we do not train one critic more than the other.
+    for (id, batch) in enumerate(batches)
         s, s′, a, r, t, = send_to_device(device(p.qnetwork1), batch)
         γ, τ = p.γ, p.τ
 
@@ -119,7 +120,7 @@ function update_critic!(p::MPOPolicy, batches)
 
         # Train Q Networks
         q_input = vcat(s, a)
-
+        if id % 2 == modulo
         q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
             q1 = p.qnetwork1(q_input) |> vec
             l = mse(q1, y)
@@ -132,6 +133,7 @@ function update_critic!(p::MPOPolicy, batches)
             error("Gradient of Q_1 contains NaN of Inf")
         end
         Flux.Optimise.update!(p.qnetwork1.optimiser, Flux.params(p.qnetwork1), q_grad_1)
+        else
         q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
             q2 = p.qnetwork2(q_input) |> vec
             l = mse(q2, y)
@@ -144,6 +146,7 @@ function update_critic!(p::MPOPolicy, batches)
             error("Gradient of Q_2 contains NaN of Inf")
         end
         Flux.Optimise.update!(p.qnetwork2.optimiser, Flux.params(p.qnetwork2), q_grad_2)
+        end
 
         for (dest, src) in zip(
             Flux.params([p.target_qnetwork1, p.target_qnetwork2]),
