@@ -1,10 +1,9 @@
 export IQNLearner, ImplicitQuantileNet
 
 using Functors: @functor
-using Flux: params, unsqueeze
+using Flux: params, unsqueeze, gradient
 using Random: AbstractRNG, GLOBAL_RNG
 using StatsBase: mean
-using Zygote: gradient
 using ChainRulesCore: ignore_derivatives
 
 """

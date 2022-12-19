@@ -4,6 +4,8 @@ using ChainRulesCore: ignore_derivatives
 using Random: GLOBAL_RNG, AbstractRNG
 using StatsBase: mean
 using Functors: @functor
+using Flux
+using Flux: gradient, params
 
 function quantile_huber_loss(ŷ, y; κ=1.0f0)
     N, B = size(y)

@@ -244,7 +244,7 @@ If given 2D matrices as input, will return a 2D matrix of logpdf. States and
 actions are paired column-wise, one action per state.
 """
 function (model::CovGaussianNetwork)(state::AbstractMatrix, action::AbstractMatrix)
-    output = model(Flux.unsqueeze(state, 2), Flux.unsqueeze(action, dims=2))
+    output = model(Flux.unsqueeze(state, dims = 2), Flux.unsqueeze(action, dims=2))
     return dropdims(output, dims=2)
 end
 
@@ -310,7 +310,7 @@ function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray; is_
 end
 
 function sample_categorical(rng, logits::AbstractArray)
-    Flux.Zygote.ignore() do 
+    ignore_derivatives() do 
         log_probs = reshape(logsoftmax(logits, dims = 1), size(logits,1), :) # work in 2D
         gumbels = -log.(-log.(rand(rng, size(log_probs)...))) .+ log_probs # Gumbel-Max trick
         z = getindex.(argmax(gumbels, dims = 1), 1)
@@ -333,7 +333,7 @@ have the length of the action vector. Actions mapped to `false` by mask have a l
 """
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
     logits = model.model(state) #da x 1 x batch_size 
-    z = Flux.Zygote.ignore() do 
+    z = ignore_derivatives() do 
         batch_size = size(state, 3) #3
         da = size(logits, 1)
         log_probs = logsoftmax(logits, dims = 1)
@@ -368,7 +368,7 @@ end
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, mask::AbstractArray{Bool, 3}, action_samples::Int)
     logits = model.model(state) #da x 1 x batch_size 
     logits .+= ifelse.(mask, 0f0, typemin(eltype(logits)))
-    z = Flux.Zygote.ignore() do 
+    z = ignore_derivatives() do 
         batch_size = size(state, 3) #3
         da = size(logits, 1)
         log_probs = logsoftmax(logits, dims = 1)

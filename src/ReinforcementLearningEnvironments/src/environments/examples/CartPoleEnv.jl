@@ -92,8 +92,8 @@ function RLBase.state_space(env::CartPoleEnv{T}) where {T}
     (typemin(T) .. typemax(T))
 end
 
-RLBase.action_space(env::CartPoleEnv{<:AbstractFloat,Int}) = Base.OneTo(2)
-RLBase.action_space(env::CartPoleEnv{<:AbstractFloat,<:AbstractFloat}) = -1.0 .. 1.0
+RLBase.action_space(env::CartPoleEnv{<:AbstractFloat,Int}, player) = Base.OneTo(2)
+RLBase.action_space(env::CartPoleEnv{<:AbstractFloat,<:AbstractFloat}, player) = -1.0 .. 1.0
 
 function RLBase.reset!(env::CartPoleEnv{T}) where {T}
     env.state[:] = T(0.1) * rand(env.rng, T, 4) .- T(0.05)
