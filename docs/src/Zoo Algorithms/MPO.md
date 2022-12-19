@@ -48,7 +48,7 @@ Then we have `qnetwork1` and 2. This implementation of MPO uses twin QNetworks w
 - `action_sample_size` is the number of actions sampled for each state during the E-step of the algorithm ($K$ in the second paper). 
 - `ϵ` is the maximum KL divergence between the E-step variational distribution and the current policy.
 - `ϵμ` is the maximum KL divergence between the updated policy at the M-step and the current policy, with respect to the mean of the Gaussian.
--  `ϵΣ` is the maximum KL divergence between the updated policy at the M-step and the current policy, with respect to the standard deviation of the Gaussian. It should tipically be lower than `ϵμ` to ensure it does not shrink to 0 before the mean settles around its optimum. 
+-  `ϵΣ` is the maximum KL divergence between the updated policy at the M-step and the current policy, with respect to the standard deviation of the Gaussian. It should typically be lower than `ϵμ` to ensure it does not shrink to 0 before the mean settles around its optimum. 
 - `α_scale = 1f0` and `αΣ_scale = 100f0`, are the gradient descent learning rate for the lagrange penalty for the mean and covariance. We leave it to the default values here. 
 
 The next step is to wrap this policy into an `Agent`. An agent is a combination of a policy and a `Trajectory`. We will use the following trajectory.
