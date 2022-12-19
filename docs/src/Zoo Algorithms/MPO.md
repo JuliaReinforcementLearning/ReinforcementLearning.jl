@@ -11,7 +11,7 @@ The implementation of MPO is declined in three forms (one for each cartpole expe
 The latter is the approach used in the paper for continuous actions. It is implemented but is very slow on a GPU at the moment. Although more expressive, it may not be worth the extra computation time. 
 
 ## Learning a continuous Cartpole policy
-First, we instantiate the environment from the package `ReinforcementLearningEnvironments`. We wrapp it into an `ActionTransformedEnv` with a `tanh` to constrain the action in [-1, 1].
+First, we instantiate the environment from the package `ReinforcementLearningEnvironments`. We wrap it into an `ActionTransformedEnv` with a `tanh` to constrain the action in [-1, 1].
 
 ```julia
 using ReinforcementLearning, Flux
@@ -65,7 +65,7 @@ trajectory = Trajectory(
 ```
 
 MPO needs to store `SART` Traces, i.e. State-Action-Reward-Terminal-NextState. Here we use a fixed sized buffer with a capacity of 1000 steps. Then we specify the `Sampler`. MPO needs a specific type of sampler called a `MetaSampler`. A MetaSampler contains several named samplers, here one named `:actor` and the other `critic`. As you may have guessed, one samples to update the actor and the other for the critic (the QNetworks). You must use these exact names. Each Sampler must be a `MultiBatchSampler`, that will sample multiple batch to update the networks for several iterations. Here we update the critic 1000 times but only 10 times the policy. The actor sampler must sample only `(:state,)` traces, it does not need any other trace, the critic needs the `SS′ART` traces to perform the 1-step TD update on the `qnetwork`s. Here we sample batches of 32 transitions, of course this is a hyperparameter that you can tune to your liking.
-Finaly, we decide on the `InsertSampleRatioController`. We decide to start sampling to update the networks once we have inserted `threshold = 1000` transitions in the buffer (that is, when the buffer is full). You can chose another value but it does not make sense to pick one that is larger than the capacity of the buffer. Ratio defines how many steps are to be done between each sample call. In this case, we do 1000 steps to collect data before sampling and updating the networks. 
+Finally, we decide on the `InsertSampleRatioController`. We decide to start sampling to update the networks once we have inserted `threshold = 1000` transitions in the buffer (that is, when the buffer is full). You can chose another value but it does not make sense to pick one that is larger than the capacity of the buffer. Ratio defines how many steps are to be done between each sample call. In this case, we do 1000 steps to collect data before sampling and updating the networks. 
 
 To summarize, with this setup, the algorithm will perform the following:
 1. Interact 1000 times with the environment to fill the buffer.
