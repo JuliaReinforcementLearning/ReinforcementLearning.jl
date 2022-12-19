@@ -9,6 +9,7 @@ Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 ReinforcementLearning = "158674fc-8238-5cab-b5ba-03dfc80d1318"
 StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
+UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 
 [compat]

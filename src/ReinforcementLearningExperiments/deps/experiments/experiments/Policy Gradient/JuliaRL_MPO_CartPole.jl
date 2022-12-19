@@ -1,11 +1,20 @@
+# ---
+# title: JuliaRL\_MPO\_Cartpole
+# cover: assets/JuliaRL_DQN_MountainCar.png
+# description: DQN can also be applied to MountainCar
+# date: 2021-05-22
+# author: "[Felix Chalumeau](https://github.com/felixchalumeau)"
+# ---
+
+
 using ReinforcementLearning
 using Flux, Random, StableRNGs
 
 function RL.Experiment(
     ::Val{:JuliaRL},
-    ::Val{:MPO_continuous},
+    ::Val{:MPO},
     ::Val{:CartPole},
-    ::Nothing;
+    ::Val{:Continuous};
     save_dir=nothing,
     seed=123
 )
@@ -41,13 +50,14 @@ function RL.Experiment(
     stop_condition = StopAfterStep(50_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     run(agent, env, stop_condition, hook)
+    lineplot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Continuous Action Space")
 end
 
 function RL.Experiment(
     ::Val{:JuliaRL},
-    ::Val{:MPO_discrete},
+    ::Val{:MPO},
     ::Val{:CartPole},
-    ::Nothing;
+    ::Val{:Discrete};
     save_dir=nothing,
     seed=123
 )
@@ -81,13 +91,14 @@ function RL.Experiment(
     stop_condition = StopAfterStep(50000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     run(agent, env, stop_condition, hook)
+    plot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Continuous Action Space")
 end
 
 function RL.Experiment(
     ::Val{:JuliaRL},
-    ::Val{:MPO_covariance},
+    ::Val{:MPO},
     ::Val{:CartPole},
-    ::Nothing;
+    ::Val{:Covariance};
     save_dir=nothing,
     seed=123
 )
@@ -123,23 +134,14 @@ function RL.Experiment(
     stop_condition = StopAfterStep(50_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     run(agent, env, stop_condition, hook)
+    plot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Discrete Action Space with MvGaussian")
 end
 
-using Plots
 ex = E`JuliaRL_MPO_discrete_Cartpole`
 run(ex)
-plot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Discrete Action Space")
-
-savefig("assets/JuliaRL_MPO_discrete_Cartpole.png")
 
 ex = E`JuliaRL_MPO_continuous_Cartpole`
 run(ex)
-plot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Continuous Action Space")
-
-savefig("assets/JuliaRL_MPO_continuous_Cartpole.png")
 
 ex = E`JuliaRL_MPO_covariance_Cartpole`
 run(ex)
-plot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Discrete Action Space with MvGaussian")
-
-savefig("assets/JuliaRL_MPO_covariance_Cartpole.png")
