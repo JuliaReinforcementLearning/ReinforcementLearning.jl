@@ -64,7 +64,7 @@ NamedTuple{
         }
     }
 ``` 
-to be trained. This type is obtained with a MetaSampler with two MutliBatchSampler: 
+to be trained. This type is obtained with a MetaSampler with two MultiBatchSampler: 
 a `:actor` and a `:critic` one. The :actor sampler must sample :state traces only 
 and the :critic needs SS′ART traces. See `ReinforcementLearningExperiments` for examples
 with each policy network type.
