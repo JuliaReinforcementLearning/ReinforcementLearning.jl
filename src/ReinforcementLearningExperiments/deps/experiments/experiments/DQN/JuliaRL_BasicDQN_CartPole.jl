@@ -17,7 +17,8 @@ using Flux.Losses: huber_loss
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BasicDQN},
-    ::Val{:CartPole};
+    ::Val{:CartPole},
+    ::Nothing;
     seed=123
 )
     rng = StableRNG(seed)
