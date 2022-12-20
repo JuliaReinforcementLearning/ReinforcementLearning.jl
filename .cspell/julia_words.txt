@@ -5284,3 +5284,4 @@ inworld
 Posteriori
 normalised
 kldivergence
+devmode
