@@ -11,8 +11,9 @@ using Flux, Random, StableRNGs
 
 function RL.Experiment(
     ::Val{:JuliaRL},
-    ::Val{:MPO},
-    ::Val{:CartPoleContinuous};
+    ::Val{:MPOContinuous},
+    ::Val{:CartPole},
+    ::Nothing;
     save_dir=nothing,
     seed=123
 )
@@ -53,8 +54,9 @@ end
 
 function RL.Experiment(
     ::Val{:JuliaRL},
-    ::Val{:MPO},
-    ::Val{:CartPoleDiscrete};
+    ::Val{:MPODiscrete},
+    ::Val{:CartPole},
+    ::Nothing;
     save_dir=nothing,
     seed=123
 )
@@ -93,8 +95,9 @@ end
 
 function RL.Experiment(
     ::Val{:JuliaRL},
-    ::Val{:MPO},
-    ::Val{:CartPoleCovariance};
+    ::Val{:MPOCovariance},
+    ::Val{:CartPole},
+    ::Nothing;
     save_dir=nothing,
     seed=123
 )
