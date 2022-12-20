@@ -7,7 +7,7 @@
 # ---
 
 using ReinforcementLearning
-using Flux, Random, StableRNGs
+using Flux, Random, StableRNGs, UnicodePlots
 
 function RL.Experiment(
     ::Val{:JuliaRL},
@@ -49,7 +49,7 @@ function RL.Experiment(
     stop_condition = StopAfterStep(50_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     run(agent, env, stop_condition, hook)
-    lineplot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Continuous Action Space")
+    plot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Continuous Action Space")
 end
 
 function RL.Experiment(
@@ -136,11 +136,11 @@ function RL.Experiment(
     plot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Discrete Action Space with MvGaussian")
 end
 
-ex = E`JuliaRL_MPO_CartpoleDiscrete`
+ex = E`JuliaRL_MPODiscrete_CartPole`
 run(ex)
 
-ex = E`JuliaRL_MPO_CartpoleContinuous`
+ex = E`JuliaRL_MPOContinuous_CartPole`
 run(ex)
 
-ex = E`JuliaRL_MPO_CartpoleCovariance`
+ex = E`JuliaRL_MPOCovariance_CartPole`
 run(ex)
