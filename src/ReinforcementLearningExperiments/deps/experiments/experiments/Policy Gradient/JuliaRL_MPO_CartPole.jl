@@ -1,11 +1,10 @@
 # ---
 # title: JuliaRL\_MPO\_Cartpole
-# cover: assets/JuliaRL_DQN_MountainCar.png
-# description: DQN can also be applied to MountainCar
-# date: 2021-05-22
-# author: "[Felix Chalumeau](https://github.com/felixchalumeau)"
+# cover:
+# description: Solving Cartpole with MPO with a Discrete or a Continuous action space.
+# date: 2022-12-20
+# author: "[Henri Dehaybe](https://github.com/HenriDeh)"
 # ---
-
 
 using ReinforcementLearning
 using Flux, Random, StableRNGs
@@ -13,8 +12,7 @@ using Flux, Random, StableRNGs
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPO},
-    ::Val{:CartPole},
-    ::Val{:Continuous};
+    ::Val{:CartPoleContinuous};
     save_dir=nothing,
     seed=123
 )
@@ -56,8 +54,7 @@ end
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPO},
-    ::Val{:CartPole},
-    ::Val{:Discrete};
+    ::Val{:CartPoleDiscrete};
     save_dir=nothing,
     seed=123
 )
@@ -97,8 +94,7 @@ end
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPO},
-    ::Val{:CartPole},
-    ::Val{:Covariance};
+    ::Val{:CartPoleCovariance};
     save_dir=nothing,
     seed=123
 )
@@ -137,11 +133,11 @@ function RL.Experiment(
     plot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Discrete Action Space with MvGaussian")
 end
 
-ex = E`JuliaRL_MPO_discrete_Cartpole`
+ex = E`JuliaRL_MPO_CartpoleDiscrete`
 run(ex)
 
-ex = E`JuliaRL_MPO_continuous_Cartpole`
+ex = E`JuliaRL_MPO_CartpoleContinuous`
 run(ex)
 
-ex = E`JuliaRL_MPO_covariance_Cartpole`
+ex = E`JuliaRL_MPO_CartpoleCovariance`
 run(ex)
