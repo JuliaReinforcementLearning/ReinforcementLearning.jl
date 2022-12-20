@@ -180,7 +180,8 @@
         "rsold",
         "rsnew",
         "unnormalized",
-        "baedan"
+        "baedan",
+        "Dehaybe"
     ],
     "ignoreWords": [],
     "minWordLength": 5,
