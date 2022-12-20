@@ -22,6 +22,7 @@ env = ActionTransformedEnv(CartPoleEnv(continuous = true), action_mapping = x->t
 Because we want our experiment to be reproducible, we also use a seed.
 
 ```julia
+using Random
 Random.set_global_seed!(123)
 ```
 
@@ -87,21 +88,21 @@ run(agent, env, stop_condition, hook)
 This should take a couple of minutes on a recent CPU. You can plot the result, for example with UnicodePlots:
 ```julia
 using UnicodePlots
-lineplot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Continuous Action Space")
+lineplot(hook.episodes, hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Continuous Action Space")
 ```
 
 ### Learning on a GPU
 
 If you have a CUDA compatible GPU, you can accelerate your experiments by transfering the neural networks on the card. `MPOPolicy` comes with a method for the `gpu` function from the `Flux` package.
 
-```
+```julia
 using CUDA
 
 policy = gpu(policy) #Recreate a new policy if you already trained it.
 agent = Agent(policy = policy, trajectory = trajectory)
 stop_condition = StopAfterStep(50_000, is_show_progress=true)
 hook = TotalRewardPerEpisode()
-run(agent, env, stop_condition, hook)
+run(agent, env, stop_condition, hook) #Using the GPU is not super intersting in this case because the NN is small.
 ```
 
 ## Learning a discrete Cartpole policy
