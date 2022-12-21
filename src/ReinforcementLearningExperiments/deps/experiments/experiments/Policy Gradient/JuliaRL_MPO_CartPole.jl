@@ -52,11 +52,6 @@ function RL.Experiment(
     Experiment(agent, env, stop_condition, hook)
 end
 
-ex = E`JuliaRL_MPOContinuous_CartPole`
-run(ex)
-plot(ex.hook.rewards, ylabel = "Episode length", xlabel = "Episode", title = "Cartpole with MPO (GaussianNetwork)")
-savefig("assets/JuliaRL_MPOContinuous_CartPole.png")
-
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPODiscrete},
@@ -97,10 +92,7 @@ function RL.Experiment(
     Experiment(agent, env, stop_condition, hook)
 end
 
-ex = E`JuliaRL_MPODiscrete_CartPole`
-run(ex)
-plot(ex.hook.rewards, ylabel = "Episode length", xlabel = "Episode", title = "Cartpole with MPO (CategoricalNetwork)")
-savefig("assets/JuliaRL_MPODiscrete_CartPole.png")
+
 
 function RL.Experiment(
     ::Val{:JuliaRL},
@@ -143,6 +135,17 @@ function RL.Experiment(
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook)
 end
+#+ tangle=false
+
+ex = E`JuliaRL_MPOContinuous_CartPole`
+run(ex)
+plot(ex.hook.rewards, ylabel = "Episode length", xlabel = "Episode", title = "Cartpole with MPO (GaussianNetwork)")
+savefig("assets/JuliaRL_MPOContinuous_CartPole.png")
+
+ex = E`JuliaRL_MPODiscrete_CartPole`
+run(ex)
+plot(ex.hook.rewards, ylabel = "Episode length", xlabel = "Episode", title = "Cartpole with MPO (CategoricalNetwork)")
+savefig("assets/JuliaRL_MPODiscrete_CartPole.png")
 
 ex = E`JuliaRL_MPOCovariance_CartPole`
 run(ex)
