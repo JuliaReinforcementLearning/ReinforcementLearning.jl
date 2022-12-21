@@ -1,6 +1,6 @@
 export MPOPolicy
 using LinearAlgebra, Flux, Optim, StatsBase, Random, CUDA
-using Zygote: ignore, dropgrad
+import ChainRulesCore: ignore_derivatives
 import LogExpFunctions.logsumexp
 import Flux.Losses: logitcrossentropy, mse
 import Flux.onehotbatch
@@ -124,7 +124,7 @@ function update_critic!(p::MPOPolicy, batches)
             q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
                 q1 = p.qnetwork1(q_input) |> vec
                 l = mse(q1, y)
-                ignore() do 
+                ignore_derivatives() do 
                     push!(p.logs[:qnetwork1_loss], l)
                 end
                 return l
@@ -137,7 +137,7 @@ function update_critic!(p::MPOPolicy, batches)
             q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
                 q2 = p.qnetwork2(q_input) |> vec
                 l = mse(q2, y)
-                ignore() do 
+                ignore_derivatives() do 
                     push!(p.logs[:qnetwork2_loss], l)
                 end
                 return l
@@ -188,7 +188,7 @@ function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
 
         Flux.Optimise.update!(p.actor.optimiser, ps, gs)
 
-        ignore() do 
+        ignore_derivatives() do 
             push!(p.logs[:α], p.α)
             push!(p.logs[:αΣ],p.αΣ)
         end
@@ -230,7 +230,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
     μ_old, L_old = μ_L_old
     μ, L = p.actor(p.rng, states, is_sampling = false)
     #decoupling
-    μ_d, L_d = ignore() do 
+    μ_d, L_d = ignore_derivatives() do 
         μ, L 
     end 
     #decoupled logp for mu and L
@@ -242,7 +242,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
     klμ = mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_s, L_d_s))
     klΣ = mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_d_s, L_s))
     
-    ignore() do
+    ignore_derivatives() do
         p.α -= p.α_scale*(p.ϵμ - klμ) 
         p.αΣ -= p.αΣ_scale*(p.ϵμ - klΣ) 
         p.α = clamp(p.α, 0f0, Inf32)
@@ -251,7 +251,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
 
     lagrangeμ = - p.α * (p.ϵμ - klμ) 
     lagrangeΣ = - p.αΣ * (p.ϵΣ - klΣ)
-    ignore() do #logging
+    ignore_derivatives() do #logging
         push!(p.logs[:actor_loss],actor_loss)
         push!(p.logs[:lagrangeμ_loss], lagrangeμ)
         push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
@@ -266,7 +266,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
     σ_old = exp.(logσ_old)
     μ, logσ = p.actor(p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
     σ = exp.(logσ)
-    μ_d, σ_d = ignore() do
+    μ_d, σ_d = ignore_derivatives() do
         μ, σ #decoupling
     end
     #decoupled logp for mu and sigma
@@ -278,7 +278,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
     klμ = mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))
     klΣ = mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_d_s, σ_s))
     
-    ignore() do
+    ignore_derivatives() do
         p.α -= p.α_scale*(p.ϵμ - klμ) 
         p.αΣ -= p.αΣ_scale*(p.ϵμ - klΣ) 
         p.α = clamp(p.α, 0f0, Inf32)
@@ -287,7 +287,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
 
     lagrangeμ = - p.α * (p.ϵμ - klμ) 
     lagrangeΣ = - p.αΣ * (p.ϵΣ - klΣ)
-    ignore() do #logging
+    ignore_derivatives() do #logging
         push!(p.logs[:actor_loss],actor_loss)
         push!(p.logs[:lagrangeμ_loss], lagrangeμ)
         push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
@@ -301,13 +301,13 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CategoricalNetwork}}, qij, state
     actor_loss = -  mean(qij .* log.(sum(softmax(logits, dims = 1) .* actions, dims = 1)))
     kl = kldivergence(softmax(logits_old, dims = 1), softmax(logits, dims = 1))/prod(size(qij)[2:3]) #divide to get average
     
-    ignore() do 
+    ignore_derivatives() do 
         p.α -= 1*(p.ϵμ - kl)
         p.α = clamp(p.α, 0f0, Inf32)
     end
 
     lagrange_loss = - p.α * (p.ϵμ - kl)
-    ignore() do #logging
+    ignore_derivatives() do #logging
         push!(p.logs[:actor_loss],actor_loss)
         push!(p.logs[:lagrangeμ_loss], lagrange_loss)
         push!(p.logs[:kl], kl)
