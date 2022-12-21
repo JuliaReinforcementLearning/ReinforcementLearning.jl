@@ -37,8 +37,8 @@ end
     γ = 0.99f0, #Discount factor of rewards.
     action_sample_size::Int, #The number of actions to sample at the E-step (K in the MPO paper).
     ϵ = 0.1f0, #maximum kl divergence between the current policy and the E-step empirical policy.
-    ϵμ = 5f-4, #maximum kl divergence between the current policy and the updated policy at the M-step w.r.t the mean or the logits.
-    ϵΣ = 1f-5, #maximum kl divergence between the current policy and the updated policy at the M-step w.r.t the covariance (not used with categorical policy).
+    ϵμ = 1f-2, #maximum kl divergence between the current policy and the updated policy at the M-step w.r.t the mean or the logits.
+    ϵΣ = 1f-4, #maximum kl divergence between the current policy and the updated policy at the M-step w.r.t the covariance (not used with categorical policy).
     α_scale = 1f0, #gradient descent learning rate for the lagrange penalty.
     αΣ_scale = 100f0, #gradient descent learning rate for the lagrange penalty for the covariance decoupling (not used with categorical policy).
     τ = 1f-3, #polyak-averaging update parameter for the target Q-networks.
@@ -71,7 +71,7 @@ with each policy network type.
 
 `p::MPOPolicy` logs several values during training. You can access them using `p.logs[::Symbol]`.
 """
-function MPOPolicy(;actor::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 5f-4, ϵΣ = 1f-5, α_scale = 1f0, αΣ_scale = 100f0, τ = 1f-3, max_grad_norm = 5f-1, rng = Random.GLOBAL_RNG) where Q <: Approximator
+function MPOPolicy(;actor::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 1f-2, ϵΣ = 1f-4, α_scale = 1f0, αΣ_scale = 100f0, τ = 1f-3, max_grad_norm = 5f-1, rng = Random.GLOBAL_RNG) where Q <: Approximator
     @assert device(actor) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(actor) == device(rng) "The specified rng does not generate on the same device as the actor. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :actor_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :α, :αΣ, :kl))
