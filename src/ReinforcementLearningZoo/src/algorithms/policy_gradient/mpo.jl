@@ -107,7 +107,7 @@ end
 
 #Here we apply the TD3 Q network approach. The original MPO paper uses retrace.
 function update_critic!(p::MPOPolicy, batches)
-    modulo = rand((0,1)) #we randomize this so that if the number of batches is odd, we do not train one critic more than the other.
+    modulo = rand(p.rng, (0,1)) #we randomize this so that if the number of batches is odd, we do not train one critic more than the other.
     for (id, batch) in enumerate(batches)
         s, s′, a, r, t, = send_to_device(device(p.qnetwork1), batch)
         γ, τ = p.γ, p.τ
