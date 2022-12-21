@@ -8,7 +8,6 @@
 
 using ReinforcementLearning
 using Flux, Random, StableRNGs
-using Plots
 
 function RL.Experiment(
     ::Val{:JuliaRL},
@@ -139,15 +138,9 @@ end
 
 ex = E`JuliaRL_MPOContinuous_CartPole`
 run(ex)
-plot(ex.hook.rewards, ylabel = "Episode length", xlabel = "Episode", title = "Cartpole with MPO (GaussianNetwork)")
-savefig("assets/JuliaRL_MPOContinuous_CartPole.png")
 
 ex = E`JuliaRL_MPODiscrete_CartPole`
 run(ex)
-plot(ex.hook.rewards, ylabel = "Episode length", xlabel = "Episode", title = "Cartpole with MPO (CategoricalNetwork)")
-savefig("assets/JuliaRL_MPODiscrete_CartPole.png")
 
 ex = E`JuliaRL_MPOCovariance_CartPole`
 run(ex)
-plot(ex.hook.rewards, ylabel = "Episode length", xlabel = "Episode", title = "Cartpole with MPO (CovGaussianNetwork)")
-savefig("assets/JuliaRL_MPOCovariance_CartPole.png")
