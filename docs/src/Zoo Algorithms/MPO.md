@@ -116,6 +116,6 @@ To use MPO with a discrete action space only requires simple changes.
 
 `CovGaussianNetowrk` allows the approximation of a policy with a correlation between action dimensions, unlike the `GaussianNetwork` that only models a standard deviation for each dimension independently. In practice, this only requires two changes to the above example with `GaussianNetwork`:
 1. Use a `CovGaussianNetowrk` instead of a `GaussianNetwork`.
-2. The output size of the second head ($\Sigma$) should not be the action size ($|A|$), but $\frac{|A|^2}{2} + |A|$. For the Cartpole environment, the remains 1 since the action is of length 1.
+2. The output size of the second head ($\Sigma$) should not be the action size ($|A|$), but $\frac{|A|*(|A|+1)}{2}$. For the Cartpole environment, the remains 1 since the action is of length 1.
 
 
