@@ -7,13 +7,14 @@
 # ---
 
 using ReinforcementLearning
-using Flux, Random, StableRNGs, UnicodePlots
+using Flux, Random, StableRNGs
+using Plots
 
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPOContinuous},
     ::Val{:CartPole},
-    ::Nothing;
+    dummy = nothing;
     save_dir=nothing,
     seed=123
 )
@@ -30,8 +31,8 @@ function RL.Experiment(
         qnetwork2 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), ADAM(3f-4)),
         action_sample_size = 32,
         rng = rng,
-        ϵμ = 0.1f0, 
-        ϵΣ = 1f-2,
+        ϵμ = 0.01f0, 
+        ϵΣ = 1f-4,
         ϵ = 0.1f0)
     
     agent = Agent(
@@ -40,7 +41,7 @@ function RL.Experiment(
             CircularArraySARTTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (1,)), 
             MetaSampler(
                 actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
-                critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 1000)
+                critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 2000)
             ),
             InsertSampleRatioController(ratio = 1/1000, threshold = 1000)
         )      
@@ -48,15 +49,19 @@ function RL.Experiment(
 
     stop_condition = StopAfterStep(50_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
-    run(agent, env, stop_condition, hook)
-    plot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Continuous Action Space")
+    Experiment(agent, env, stop_condition, hook)
 end
+
+ex = E`JuliaRL_MPOContinuous_CartPole`
+run(ex)
+plot(ex.hook.rewards, ylabel = "Episode length", xlabel = "Episode", title = "Cartpole with MPO (GaussianNetwork)")
+savefig("assets/JuliaRL_MPOContinuous_CartPole.png")
 
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPODiscrete},
     ::Val{:CartPole},
-    ::Nothing;
+    dummy = nothing;
     save_dir=nothing,
     seed=123
 )
@@ -72,8 +77,8 @@ function RL.Experiment(
         qnetwork2 = Approximator(Chain(Dense(6, 64, gelu), Dense(64,64,gelu), Dense(64,1)), ADAM(3f-4)),
         action_sample_size = 32,
         rng = rng,
-        ϵμ = 1f-1, 
-        ϵ = 1f-1)
+        ϵμ = 1f-2, 
+        ϵ = 1f-2)
     
     agent = Agent(
         policy = policy, 
@@ -81,7 +86,7 @@ function RL.Experiment(
             CircularArraySARTTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (2,)), 
             MetaSampler(
                 actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
-                critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 1000)
+                critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 2000)
             ),
             InsertSampleRatioController(ratio = 1/1000, threshold = 1000)
         )      
@@ -89,15 +94,19 @@ function RL.Experiment(
 
     stop_condition = StopAfterStep(50000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
-    run(agent, env, stop_condition, hook)
-    plot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Continuous Action Space")
+    Experiment(agent, env, stop_condition, hook)
 end
+
+ex = E`JuliaRL_MPODiscrete_CartPole`
+run(ex)
+plot(ex.hook.rewards, ylabel = "Episode length", xlabel = "Episode", title = "Cartpole with MPO (CategoricalNetwork)")
+savefig("assets/JuliaRL_MPODiscrete_CartPole.png")
 
 function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPOCovariance},
     ::Val{:CartPole},
-    ::Nothing;
+    dummy = nothing;
     save_dir=nothing,
     seed=123
 )
@@ -114,9 +123,9 @@ function RL.Experiment(
         qnetwork2 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), ADAM(3f-4)),
         action_sample_size = 32,
         rng = rng,
-        ϵμ = 0.1f0, 
-        ϵΣ = 1f-2,
-        ϵ = 0.1f0)
+        ϵμ = 0.01f0, 
+        ϵΣ = 1f-4,
+        ϵ = 0.01f0)
     
     agent = Agent(
         policy = policy, 
@@ -124,7 +133,7 @@ function RL.Experiment(
             CircularArraySARTTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (1,)), 
             MetaSampler(
                 actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
-                critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 1000)
+                critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 2000)
             ),
             InsertSampleRatioController(ratio = 1/1000, threshold = 1000)
         )      
@@ -132,15 +141,10 @@ function RL.Experiment(
 
     stop_condition = StopAfterStep(50_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
-    run(agent, env, stop_condition, hook)
-    plot(ex.hook.episodes, ex.hook.mean_rewards, xlabel="episode", ylabel="mean episode reward", title = "Cartpole Discrete Action Space with MvGaussian")
+    Experiment(agent, env, stop_condition, hook)
 end
-
-ex = E`JuliaRL_MPODiscrete_CartPole`
-run(ex)
-
-ex = E`JuliaRL_MPOContinuous_CartPole`
-run(ex)
 
 ex = E`JuliaRL_MPOCovariance_CartPole`
 run(ex)
+plot(ex.hook.rewards, ylabel = "Episode length", xlabel = "Episode", title = "Cartpole with MPO (CovGaussianNetwork)")
+savefig("assets/JuliaRL_MPOCovariance_CartPole.png")
