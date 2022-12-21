@@ -102,7 +102,7 @@ policy = gpu(policy) #Recreate a new policy if you already trained it.
 agent = Agent(policy = policy, trajectory = trajectory)
 stop_condition = StopAfterStep(50_000, is_show_progress=true)
 hook = TotalRewardPerEpisode()
-run(agent, env, stop_condition, hook) #Using the GPU is not super intersting in this case because the NN is small.
+run(agent, env, stop_condition, hook) #Using the GPU is slower in this case because the NN and the batch size are small.
 ```
 
 ## Learning a discrete Cartpole policy
