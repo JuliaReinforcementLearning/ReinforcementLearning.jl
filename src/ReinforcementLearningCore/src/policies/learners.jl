@@ -18,7 +18,7 @@ Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(An
 
 @functor Approximator (model,)
 
-(A::Approximator)(args...) = A.model(args...)
+(A::Approximator)(args...; kwargs...) = A.model(args...; kwargs...)
 
 RLBase.optimise!(A::Approximator, gs) =
     Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)

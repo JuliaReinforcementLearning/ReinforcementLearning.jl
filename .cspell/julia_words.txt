@@ -5284,4 +5284,12 @@ inworld
 Posteriori
 normalised
 kldivergence
+qnetworks
+mpodual
+lagrangeμ
+mvnormkldivergence
+diagnormkldivergence
+normkldivergence
+sqmahal
+logdpf
 devmode

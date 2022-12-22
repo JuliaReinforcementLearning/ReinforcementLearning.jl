@@ -51,6 +51,9 @@ makedocs(
             "Which algorithm should I use?" => "Which_algorithm_should_I_use.md",
             "Episodic vs. Non-episodic environments" => "non_episodic.md",
         ],
+        "Zoo Algorithms" => [
+            "MPO" => "src/Zoo Algorithms/MPO.md"
+        ],
         "FAQ" => "FAQ.md",
         experiments,
         "Tips for Developers" => "tips.md",
