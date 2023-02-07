@@ -18,6 +18,9 @@ function __init__()
     @require PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0" include(
         "environments/3rd_party/gym.jl",
     )
+    @require PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0" include(
+        "environments/3rd_party/pettingzoo.jl",
+    )
     @require OpenSpiel = "ceb70bd2-fe3f-44f0-b81f-41608acaf2f2" include(
         "environments/3rd_party/open_spiel.jl",
     )
