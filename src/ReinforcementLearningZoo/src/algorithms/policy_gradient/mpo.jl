@@ -244,7 +244,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
     
     ignore_derivatives() do
         p.α -= p.α_scale*(p.ϵμ - klμ) 
-        p.αΣ -= p.αΣ_scale*(p.ϵμ - klΣ) 
+        p.αΣ -= p.αΣ_scale*(p.ϵΣ - klΣ) 
         p.α = clamp(p.α, 0f0, Inf32)
         p.αΣ = clamp(p.αΣ, 0f0, Inf32)
     end
@@ -280,7 +280,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
     
     ignore_derivatives() do
         p.α -= p.α_scale*(p.ϵμ - klμ) 
-        p.αΣ -= p.αΣ_scale*(p.ϵμ - klΣ) 
+        p.αΣ -= p.αΣ_scale*(p.ϵΣ - klΣ) 
         p.α = clamp(p.α, 0f0, Inf32)
         p.αΣ = clamp(p.αΣ, 0f0, Inf32)
     end
