@@ -129,6 +129,10 @@
 
 ### ReinforcementLearningBase.jl
 
+#### dev
+
+- Update POMDPModelTools -> POMDPTools
+
 #### v0.9.6
 
 - Implement `Base.:(==)` for `Space`. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
