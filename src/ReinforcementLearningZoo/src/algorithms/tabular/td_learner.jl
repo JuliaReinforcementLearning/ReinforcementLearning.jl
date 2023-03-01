@@ -85,7 +85,7 @@ function _update!(
     t::Trajectory,
     ::PostEpisodeStage,
 )
-    S, A, R, T = [t[x] for x in SART]
+    S, A, R, T = (t[x] for x in SART)
     n, γ, Q = L.n, L.γ, L.approximator
     G = 0.0
     for i in 1:min(n + 1, length(R))
@@ -104,7 +104,7 @@ function _update!(
     t::Trajectory,
     ::PreActStage,
 )
-    S, A, R, T = [t[x] for x in SART]
+    S, A, R, T = (t[x] for x in SART)
     n, γ, Q = L.n, L.γ, L.approximator
 
     if length(R) >= n + 1

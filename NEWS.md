@@ -161,6 +161,10 @@
 
 ### ReinforcementLearningZoo.jl
 
+#### Unreleased
+
+- Reduce excess `TDLearner` allocations by using Tuple instead of Array
+
 #### v0.4.1
 
 - Make keyword argument `n_actions` in `TabularPolicy` optional. [#300](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/300)
