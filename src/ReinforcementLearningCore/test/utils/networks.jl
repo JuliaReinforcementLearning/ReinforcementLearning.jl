@@ -190,10 +190,10 @@ using Flux: params, gradient
             @test size(logps) == (1,5,3)
             logps2 = gn(Flux.unsqueeze(state,dims = 2), as)
             @test logps2 ≈ logps
-            s = Flux.stack(map(l -> l*l', eachslice(L, dims=3)),3)
+            s = Flux.stack(map(l -> l*l', eachslice(L, dims=3)); dims=3)
             mvnormals = map(z -> MvNormal(Array(vec(z[1])), Array(z[2])), zip(eachslice(m, dims = 3), eachslice(s, dims = 3)))
             logp_truth = [logpdf(mvn, a) for (mvn, a) in zip(mvnormals, eachslice(as, dims = 3))]
-            @test Flux.stack(logp_truth,2) ≈ dropdims(logps,dims = 1) #test against ground truth
+            @test Flux.stack(logp_truth; dims=2) ≈ dropdims(logps,dims = 1) #test against ground truth
             action_saver = []
             g = Flux.gradient(Flux.params(gn)) do 
                 a, logp = gn(Flux.unsqueeze(state,dims = 2), is_sampling = true, is_return_log_prob = true)
@@ -249,10 +249,10 @@ using Flux: params, gradient
                 @test size(logps) == (1,5,3)
                 logps2 = gn(Flux.unsqueeze(state,dims = 2), as)
                 @test logps2 ≈ logps
-                s = Flux.stack(map(l -> l*l', eachslice(L, dims=3)),3)
+                s = Flux.stack(map(l -> l*l', eachslice(L, dims=3)); dims=3)
                 mvnormals = map(z -> MvNormal(Array(vec(z[1])), Array(z[2])), zip(eachslice(m, dims = 3), eachslice(s, dims = 3)))
                 logp_truth = [logpdf(mvn, cpu(a)) for (mvn, a) in zip(mvnormals, eachslice(as, dims = 3))]
-                @test Flux.stack(logp_truth,2) ≈ dropdims(cpu(logps),dims = 1) #test against ground truth
+                @test Flux.stack(logp_truth,2) ≈ dropdims(cpu(logps); dims=1) #test against ground truth
                 action_saver = []
                 g = Flux.gradient(Flux.params(gn)) do 
                     a, logp = gn(rng, Flux.unsqueeze(state,dims = 2), is_sampling = true, is_return_log_prob = true)
