@@ -44,3 +44,6 @@ function (env::SequentialEnv)(action)
     end
 end
 
+# Ensure NoOps are not acted upon
+function (agent::Agent)(stage::PreActStage, env::SequentialEnv, action::ReinforcementLearning.NoOp)
+end

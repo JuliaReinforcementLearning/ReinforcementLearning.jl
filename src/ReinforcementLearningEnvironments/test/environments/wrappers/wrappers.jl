@@ -157,5 +157,26 @@
         @test reward(env′, 2) == 0
         @test is_terminated(env′) == false
         @test RLBase.current_player(env′) == 1
+
+        reset!(env′)
+        policy = MultiAgentManager(
+            (
+                Agent(
+                    policy = NamedPolicy(
+                        p => QBasedPolicy(;
+                            learner = TDLearner(;
+                                approximator = TabularQApproximator(;n_state=10, n_action=3),
+                                method = :SARS,
+                            ),
+                            explorer = GreedyExplorer(),
+                        ),
+                    ),
+                    trajectory = VectorSARTTrajectory(),
+                ) for p in 1:2
+            )...,
+        )
+        ReinforcementLearning.run(policy, env′, StopAfterStep(1))
+        @test RLBase.current_player(env′) == 2
+
     end
 end

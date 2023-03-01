@@ -18,6 +18,10 @@
 
 ### ReinforcementLearningEnvironments.jl
 
+#### dev
+
+- Bugfix `SequentialEnv` issue with `NoOps`, add test
+
 #### v0.6.12
 
 - Bugfix bug with `is_discrete_space` [#566](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/566)
