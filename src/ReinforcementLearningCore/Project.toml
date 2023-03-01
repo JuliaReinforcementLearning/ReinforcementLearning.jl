@@ -27,7 +27,7 @@ UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 [compat]
 AbstractTrees = "0.3, 0.4"
 Adapt = "3"
-CUDA = "3.5"
+CUDA = "4.0"
 ChainRulesCore = "1"
 CircularArrayBuffers = "0.1"
 Crayons = "4"
