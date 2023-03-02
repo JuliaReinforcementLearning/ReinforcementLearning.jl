@@ -64,7 +64,7 @@ batch_size).
 """
 function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ=1.0f-8) where {A<:AbstractArray}
     logp = [mvnormlogpdf(μ[:, :, k], LorU[:, :, k], x[:, :, k]) for k in 1:size(x, 3)]
-    return unsqueeze(stack(logp, 2), dims=1) #returns a 3D vector 
+    return unsqueeze(stack(logp; dims=2), dims=1) #returns a 3D vector 
 end
 
 #Used for mvnormlogpdf
