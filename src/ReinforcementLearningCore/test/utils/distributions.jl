@@ -18,12 +18,12 @@ using Test, LinearAlgebra, Distributions, ReinforcementLearningCore
     μ1 = [10f0, 10f0]
     σ1 = [5f0, 6f0]
     x = [4f0,4f0]
-    d1 = MvNormal(μ1,σ1)
+    d1 = MvNormal(μ1, LinearAlgebra.Diagonal(map(abs2, σ1)))
     @test logpdf(d1, x) ≈ diagnormlogpdf(μ1, σ1, x)
     μ2 = [11f0, 11f0]
     σ2 = [6f0, 6f0]
     x = [4f0, 4f0]
-    d2 = MvNormal(μ2,σ2)
+    d2 = MvNormal(μ2, LinearAlgebra.Diagonal(map(abs2, σ2)))
     @test kldivergence(d1, d2) ≈ diagnormkldivergence(μ1, σ1, μ2, σ2)
     @test kldivergence(d2, d1) ≈ diagnormkldivergence(μ2, σ2, μ1, σ1)
 

@@ -5,7 +5,7 @@ using CommonRLInterface
 const CRL = CommonRLInterface
 
 using POMDPs
-using POMDPModelTools: Deterministic
+using POMDPTools: Deterministic
 
 @testset "ReinforcementLearningBase" begin
 include("CommonRLInterface.jl")

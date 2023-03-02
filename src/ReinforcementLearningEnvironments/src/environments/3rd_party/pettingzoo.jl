@@ -51,7 +51,7 @@ end
 RLBase.state(env::PettingzooEnv, ::Observation{Any}, players::Tuple) = Dict(p => state(env, p) for p in players)
 
 
-# partial obsverability is default for pettingzoo
+# partial observability is default for pettingzoo
 function RLBase.state(env::PettingzooEnv, ::Observation{Any}, player)
     env.pyenv.observe(player)
 end
@@ -64,7 +64,7 @@ RLBase.state_space(env::PettingzooEnv, ::Observation{Any}, players) = Space(Dict
     # partial observability
 RLBase.state_space(env::PettingzooEnv, ::Observation{Any}, player::String) = space_transform(env.pyenv.observation_space(player))
 
-# for full observability. Be carefule: action_space has also to be adjusted
+# for full observability. Be careful: action_space has also to be adjusted
 # RLBase.state_space(env::PettingzooEnv, ::Observation{Any}, player::String) = space_transform(env.pyenv.state_space)
 
 
