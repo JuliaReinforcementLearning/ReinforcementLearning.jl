@@ -49,6 +49,10 @@
 
 ### ReinforcementLearningCore.jl
 
+#### dev
+
+- Use correct Flux.stack function signature
+
 #### v0.8.11
 
 - When sending a `CircularArrayBuffer` to GPU devices, convert `CircularArrayBuffer` into `CuArray` instead of the adapted `CircularArrayBuffer` of `CuArray`. [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
@@ -128,6 +132,10 @@
 ## ReinforcementLearning.jl@v0.9.0
 
 ### ReinforcementLearningBase.jl
+
+#### dev
+
+- Update POMDPModelTools -> POMDPTools
 
 #### v0.9.6
 
