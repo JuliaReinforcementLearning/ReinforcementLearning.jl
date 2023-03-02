@@ -18,6 +18,7 @@ include(joinpath(EXPERIMENTS_DIR, "JuliaRL_Rainbow_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_VPG_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_TRPO_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_MPO_CartPole.jl"))
+include(joinpath(EXPERIMENTS_DIR, "JuliaRL_BC_CartPole.jl"))
 
 # dynamic loading environments
 function __init__() end

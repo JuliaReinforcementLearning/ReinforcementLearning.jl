@@ -11,6 +11,7 @@ using ReinforcementLearning
 using StableRNGs
 using Flux
 using Flux.Losses
+using Flux: glorot_uniform
 
 Base.@kwdef struct RecordStateAction <: AbstractHook
     records::Any = VectorSATrajectory(; state = Vector{Float32})
@@ -24,7 +25,7 @@ function RL.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BC},
     ::Val{:CartPole},
-    ::Nothing;
+    dummy = nothing;
     seed = 123,
     save_dir = nothing,
 )
