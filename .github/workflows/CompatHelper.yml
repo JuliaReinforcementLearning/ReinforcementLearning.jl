@@ -37,7 +37,7 @@ jobs:
       - name: "Run CompatHelper"
         run: |
           import CompatHelper
-          CompatHelper.main()
+          CompatHelper.main(; subdirs = ["", "src/ReinforcementLearningBase", "src/ReinforcementLearningCore", "src/ReinforcementLearningEnvironments", "src/ReinforcementLearningZoo", "src/ReinforcementLearningExperiments"])
         shell: julia --color=yes {0}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
