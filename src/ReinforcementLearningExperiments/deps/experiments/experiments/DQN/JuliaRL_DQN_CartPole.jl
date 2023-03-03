@@ -7,14 +7,15 @@
 # ---
 
 
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearningEnvironments
 using Flux
 using Flux: glorot_uniform
 
 using StableRNGs: StableRNG
 using Flux.Losses: huber_loss
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:DQN},
     ::Val{:CartPole};
@@ -39,7 +40,7 @@ function RL.Experiment(
                         );
                         sync_freq=100
                     ),
-                    optimiser=ADAM(),
+                    optimiser=Adam(),
                 ) |> gpu,
                 n=n,
                 γ=γ,

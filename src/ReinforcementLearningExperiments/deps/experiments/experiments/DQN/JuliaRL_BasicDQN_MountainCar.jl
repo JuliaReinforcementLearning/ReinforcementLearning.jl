@@ -7,12 +7,12 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using StableRNGs
 using Flux
 using Flux.Losses
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BasicDQN},
     ::Val{:MountainCar},
@@ -31,7 +31,7 @@ function RL.Experiment(
                         Dense(64, 64, relu; init = glorot_uniform(rng)),
                         Dense(64, na; init = glorot_uniform(rng)),
                     ) |> gpu,
-                    optimizer = ADAM(),
+                    optimizer = Adam(),
                 ),
                 batch_size = 32,
                 min_replay_history = 100,

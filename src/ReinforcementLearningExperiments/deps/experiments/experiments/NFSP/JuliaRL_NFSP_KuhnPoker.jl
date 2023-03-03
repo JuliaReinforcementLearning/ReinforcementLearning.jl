@@ -7,7 +7,7 @@
 # --- 
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using StableRNGs
 using Flux
 using Flux.Losses
@@ -27,7 +27,7 @@ function (hook::KuhnNFSPHook)(::PostEpisodeStage, policy, env)
     end
 end
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:NFSP},
     ::Val{:KuhnPoker},

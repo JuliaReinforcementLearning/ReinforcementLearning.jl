@@ -744,7 +744,7 @@ The [implementation](https://github.com/JuliaReinforcementLearning/Reinforcement
 -  Policy => CRR Policy
 -  Env => PendulumEnv
 -  q_networks => Two 64 neuron layers with `n_s+n_a` input neurons and `1` output neuron.
--  optimizer => ADAM(0.005)
+-  optimizer => Adam(0.005)
 -  loss => Flux.Losses.mse
 -  γ => 0.99
 -  batch\_size => 256

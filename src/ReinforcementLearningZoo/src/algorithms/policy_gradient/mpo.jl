@@ -52,7 +52,7 @@ MvNormal policy. It has a better policy representation but requires more computa
 
 This implementation uses double Q-learning and target Q-networks, 
 unlike the original MPO paper that uses retrace (WIP). The `Approximator` fields should 
-each come with their own `Optimiser` (e.g. `ADAM`). 
+each come with their own `Optimiser` (e.g. `Adam`). 
 
 MPOPolicy requires batches of type 
 ```

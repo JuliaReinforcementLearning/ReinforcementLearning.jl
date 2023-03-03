@@ -9,7 +9,7 @@
                     Dense(128, 128, relu; initW = glorot_uniform),
                     Dense(128, 2; initW = glorot_uniform),
                 ) |> cpu,
-                optimizer = ADAM(),
+                optimizer = Adam(),
             ),
             loss_func = huber_loss,
         )
@@ -103,7 +103,7 @@ end
                                     Dense(128, 128, relu; initW = glorot_uniform),
                                     Dense(128, 2; initW = glorot_uniform),
                                 ) |> cpu,
-                                optimizer = ADAM(),
+                                optimizer = Adam(),
                             ),
                             loss_func = huber_loss,
                         ),

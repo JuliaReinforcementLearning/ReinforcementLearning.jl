@@ -7,13 +7,13 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using StableRNGs
 using Flux
 using Flux.Losses
 using Distributions
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:PPO},
     ::Val{:Pendulum},
@@ -53,7 +53,7 @@ function RL.Experiment(
                     Dense(64, 64, relu; init = glorot_uniform(rng)),
                     Dense(64, 1; init = glorot_uniform(rng)),
                 ),
-                optimizer = ADAM(3e-4),
+                optimizer = Adam(3e-4),
             ) |> gpu,
             γ = 0.99f0,
             λ = 0.95f0,

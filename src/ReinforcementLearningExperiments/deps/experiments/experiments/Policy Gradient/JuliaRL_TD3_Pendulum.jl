@@ -7,13 +7,13 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using StableRNGs
 using Flux
 using Flux.Losses
 using IntervalSets
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:TD3},
     ::Val{:Pendulum},
@@ -51,19 +51,19 @@ function RL.Experiment(
         policy = TD3Policy(
             behavior_actor = NeuralNetworkApproximator(
                 model = create_actor(),
-                optimizer = ADAM(),
+                optimizer = Adam(),
             ),
             behavior_critic = NeuralNetworkApproximator(
                 model = create_critic(),
-                optimizer = ADAM(),
+                optimizer = Adam(),
             ),
             target_actor = NeuralNetworkApproximator(
                 model = create_actor(),
-                optimizer = ADAM(),
+                optimizer = Adam(),
             ),
             target_critic = NeuralNetworkApproximator(
                 model = create_critic(),
-                optimizer = ADAM(),
+                optimizer = Adam(),
             ),
             γ = 0.99f0,
             ρ = 0.99f0,

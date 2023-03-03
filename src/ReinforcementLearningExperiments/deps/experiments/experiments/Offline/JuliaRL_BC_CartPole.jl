@@ -7,7 +7,8 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearningEnvironments
 using StableRNGs
 using Flux
 using Flux.Losses
@@ -21,7 +22,7 @@ function (h::RecordStateAction)(::PreActStage, policy, env, action)
     push!(h.records; state = copy(state(env)), action = action)
 end
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BC},
     ::Val{:CartPole},
@@ -42,7 +43,7 @@ function RL.Experiment(
                         Dense(128, 128, relu; init = glorot_uniform(rng)),
                         Dense(128, na; init = glorot_uniform(rng)),
                     ) |> gpu,
-                    optimizer = ADAM(),
+                    optimizer = Adam(),
                 ),
                 batch_size = 32,
                 min_replay_history = 100,
@@ -73,7 +74,7 @@ function RL.Experiment(
                 Dense(128, 128, relu; init = glorot_uniform(rng)),
                 Dense(128, na; init = glorot_uniform(rng)),
             ) |> gpu,
-            optimizer = ADAM(),
+            optimizer = Adam(),
         ),
     )
 
