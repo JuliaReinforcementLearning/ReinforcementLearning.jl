@@ -45,7 +45,7 @@ function RLCore.Experiment(
             Dense(64, 64, relu; init = glorot_uniform(rng)),
             Dense(64, latent_dims; init = glorot_uniform(rng))
         ),
-        optimizer = ADAM(0.003),
+        optimizer = Adam(0.003),
     )
 
     create_q_net() = NeuralNetworkApproximator(
@@ -54,7 +54,7 @@ function RLCore.Experiment(
             Dense(64, 64, relu; init = init),
             Dense(64, 1; init = init),
         ),
-        optimizer = ADAM(0.003),
+        optimizer = Adam(0.003),
     )
 
     create_vae_net() = NeuralNetworkApproximator(
@@ -74,7 +74,7 @@ function RLCore.Experiment(
             ),
             latent_dims = latent_dims,
         ),
-        optimizer = ADAM(0.003),
+        optimizer = Adam(0.003),
     )
 
     agent = Agent(

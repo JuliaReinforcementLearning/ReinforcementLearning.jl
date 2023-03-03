@@ -136,7 +136,7 @@ policy = Agent(
                     Dense(128, 128, relu; init = glorot_uniform),
                     Dense(128, na; init = glorot_uniform),
                 ) |> cpu,
-                optimizer = ADAM(),
+                optimizer = Adam(),
             ),
             batch_size = 32,
             min_replay_history = 100,

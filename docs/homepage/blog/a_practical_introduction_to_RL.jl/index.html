@@ -15127,7 +15127,7 @@ M1048.31 1426.48 L1048.31 1366.51 L1499.66 1366.51 L1499.66 1426.48 L1048.31 142
                     <span class="n">Dense</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="n">relu</span><span class="p">;</span> <span class="n">init</span> <span class="o">=</span> <span class="n">glorot_uniform</span><span class="p">(</span><span class="n">rng</span><span class="p">)),</span>
                     <span class="n">Dense</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="n">na</span><span class="p">;</span> <span class="n">init</span> <span class="o">=</span> <span class="n">glorot_uniform</span><span class="p">(</span><span class="n">rng</span><span class="p">)),</span>
                 <span class="p">)</span> <span class="o">|&gt;</span> <span class="n">cpu</span><span class="p">,</span>
-                <span class="n">optimizer</span> <span class="o">=</span> <span class="n">ADAM</span><span class="p">(),</span>
+                <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(),</span>
             <span class="p">),</span>
             <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
             <span class="n">min_replay_history</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
@@ -15264,7 +15264,7 @@ M1048.31 1426.48 L1048.31 1366.51 L1499.66 1366.51 L1499.66 1426.48 L1048.31 142
                 <span class="n">Dense</span><span class="p">(</span><span class="n">ns</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="n">relu</span><span class="p">;</span> <span class="n">init</span> <span class="o">=</span> <span class="n">glorot_uniform</span><span class="p">(</span><span class="n">rng</span><span class="p">)),</span>
                 <span class="n">Dense</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">1</span><span class="p">;</span> <span class="n">init</span> <span class="o">=</span> <span class="n">glorot_uniform</span><span class="p">(</span><span class="n">rng</span><span class="p">)),</span>
             <span class="p">),</span>
-            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">ADAM</span><span class="p">(</span><span class="mf">1e-3</span><span class="p">),</span>
+            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(</span><span class="mf">1e-3</span><span class="p">),</span>
         <span class="p">)</span> <span class="o">|&gt;</span> <span class="n">cpu</span><span class="p">,</span>
         <span class="nb">γ</span> <span class="o">=</span> <span class="mf">0.99f0</span><span class="p">,</span>
         <span class="n">λ</span> <span class="o">=</span> <span class="mf">0.95f0</span><span class="p">,</span>

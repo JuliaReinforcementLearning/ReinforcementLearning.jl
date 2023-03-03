@@ -42,7 +42,7 @@ function RLCore.Experiment(
             Dense(128, 128, relu; init),
             Dense(128, na; init),
         ),
-        optimizer = ADAM(1e-3),
+        optimizer = Adam(1e-3),
     )
 
     agent = Agent(

@@ -38,7 +38,7 @@ function RLCore.Experiment(
                             Dense(30, 30, relu; init = glorot_uniform(rng)),
                             Dense(30, na; init = glorot_uniform(rng)),
                         ),
-                        optimizer = ADAM(1e-2),
+                        optimizer = Adam(1e-2),
                     ),
                     critic = NeuralNetworkApproximator(
                         model = Chain(
@@ -46,7 +46,7 @@ function RLCore.Experiment(
                             Dense(30, 30, relu; init = glorot_uniform(rng)),
                             Dense(30, na; init = glorot_uniform(rng)),
                         ),
-                        optimizer = ADAM(3e-3),
+                        optimizer = Adam(3e-3),
                     ),
                 ) |> cpu,
                 γ = 0.99f0,

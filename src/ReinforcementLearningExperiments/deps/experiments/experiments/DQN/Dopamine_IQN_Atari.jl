@@ -9,7 +9,7 @@
 # This experiment tries to use the same config in [google/dopamine](https://github.com/google/dopamine/blob/master/dopamine/agents/implicit_quantile/configs/implicit_quantile.gin) to run the atari games with IQN, except the following two major differences:
 
 # - We use the `BSpline(Linear())` instead of `cv2.INTER_AREA` method to resize the image.
-# - `ADAM` in Flux.jl do not support setting `epsilon`. (This should be a minor issue.)
+# - `Adam` in Flux.jl do not support setting `epsilon`. (This should be a minor issue.)
 
 # On a machine with a Nvidia 2080Ti GPU card, the training speed of this
 # experiment is about **138 steps/sec**. The testing speed about **695
@@ -222,7 +222,7 @@ function RLCore.Experiment(
             learner = IQNLearner(
                 approximator = NeuralNetworkApproximator(
                     model = create_model(),
-                    optimizer = ADAM(0.00005),  # epsilon is not set here
+                    optimizer = Adam(0.00005),  # epsilon is not set here
                 ),
                 target_approximator = NeuralNetworkApproximator(model = create_model()),
                 κ = 1.0f0,

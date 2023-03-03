@@ -36,14 +36,14 @@ function RLCore.Experiment(
                             Dense(ns, 256, relu; init = glorot_uniform(rng)),
                             Dense(256, na; init = glorot_uniform(rng)),
                         ),
-                        optimizer = ADAM(1e-3),
+                        optimizer = Adam(1e-3),
                     ),
                     critic = NeuralNetworkApproximator(
                         model = Chain(
                             Dense(ns, 256, relu; init = glorot_uniform(rng)),
                             Dense(256, 1; init = glorot_uniform(rng)),
                         ),
-                        optimizer = ADAM(1e-3),
+                        optimizer = Adam(1e-3),
                     ),
                 ) |> gpu,
                 γ = 0.99f0,

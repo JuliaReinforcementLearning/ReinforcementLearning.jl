@@ -37,7 +37,7 @@ function RLCore.Experiment(
                         );
                         sync_freq=100
                     ),
-                    optimiser=ADAM(),
+                    optimiser=Adam(),
                 ),
                 n_quantile=N,
                 loss_func=quantile_huber_loss,

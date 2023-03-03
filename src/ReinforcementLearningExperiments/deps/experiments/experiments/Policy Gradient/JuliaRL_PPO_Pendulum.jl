@@ -53,7 +53,7 @@ function RLCore.Experiment(
                     Dense(64, 64, relu; init = glorot_uniform(rng)),
                     Dense(64, 1; init = glorot_uniform(rng)),
                 ),
-                optimizer = ADAM(3e-4),
+                optimizer = Adam(3e-4),
             ) |> gpu,
             γ = 0.99f0,
             λ = 0.95f0,

@@ -30,7 +30,7 @@ function RLCore.Experiment(
     p = DeepCFR(
         Π = NeuralNetworkApproximator(
             model = Chain(Dense(30, 64, relu), Dense(64, 64, relu), Dense(64, 3)) |> gpu,
-            optimizer = ADAM(0.001),
+            optimizer = Adam(0.001),
         ),
         MΠ = ReservoirTrajectory(
             3_000_000,
@@ -42,7 +42,7 @@ function RLCore.Experiment(
         V = Dict(
             p => NeuralNetworkApproximator(
                 model = Chain(Dense(30, 64, relu), Dense(64, 64, relu), Dense(64, 3)) |> gpu,
-                optimizer = ADAM(0.001),
+                optimizer = Adam(0.001),
             ) for p in players(env) if p != chance_player(env)
         ),
         MV = Dict(

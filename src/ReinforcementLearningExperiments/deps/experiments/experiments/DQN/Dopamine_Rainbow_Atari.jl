@@ -9,7 +9,7 @@
 # This experiment tries to use the same config in [google/dopamine](https://github.com/google/dopamine/blob/master/dopamine/agents/rainbow/configs/rainbow.gin) to run the atari games with rainbow, except the following two major differences:
 
 # - We use the `BSpline(Linear())` instead of `cv2.INTER_AREA` method to resize the image.
-# - `ADAM` in Flux.jl do not support setting `epsilon`. (This should be a minor issue.)
+# - `Adam` in Flux.jl do not support setting `epsilon`. (This should be a minor issue.)
 
 # On a machine with a Nvidia 2080Ti GPU card, the training speed of this
 # experiment is about **198 steps/sec**. The testing speed about **932
@@ -212,7 +212,7 @@ function RLCore.Experiment(
             learner = RainbowLearner(
                 approximator = NeuralNetworkApproximator(
                     model = create_model(),
-                    optimizer = ADAM(0.0000625),
+                    optimizer = Adam(0.0000625),
                 ),  # epsilon is not set here
                 target_approximator = NeuralNetworkApproximator(model = create_model()),
                 n_actions = N_ACTIONS,

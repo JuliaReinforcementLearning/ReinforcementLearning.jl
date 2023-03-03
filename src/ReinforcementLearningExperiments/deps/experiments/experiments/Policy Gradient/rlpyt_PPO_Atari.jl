@@ -47,7 +47,7 @@ function RLCore.Experiment(
             approximator = ActorCritic(
                 actor = Chain(model, Dense(512, N_ACTIONS; init = init)),
                 critic = Chain(model, Dense(512, 1; init = init)),
-                optimizer = ADAM(INIT_LEARNING_RATE),  # decrease learning rate with a hook
+                optimizer = Adam(INIT_LEARNING_RATE),  # decrease learning rate with a hook
             ) |> gpu,
             γ = 0.99f0,
             λ = 0.98f0,

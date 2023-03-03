@@ -9,7 +9,7 @@
 # This experiment tries to use the same config in [google/dopamine](https://github.com/google/dopamine/blob/2a7d91d283/dopamine/agents/dqn/configs/dqn.gin) to run the atari games with DQN, except the following two major differences:
 
 # - We use the `BSpline(Linear())` instead of `cv2.INTER_AREA` method to resize the image.
-# - `RMSProp` in Flux.jl do not support centering. So we used `ADAM` instead here. (The result with `RMSProp` is poor.)
+# - `RMSProp` in Flux.jl do not support centering. So we used `Adam` instead here. (The result with `RMSProp` is poor.)
 
 # On a machine with a Nvidia 2080Ti GPU card, the training speed of this experiment is about **208 steps/sec**. The testing speed about **1096 steps/sec**. For comparison, the training speed of dopamine is about **96 steps/sec**.
 
@@ -211,7 +211,7 @@ function RLCore.Experiment(
             learner = DQNLearner(
                 approximator = NeuralNetworkApproximator(
                     model = create_model(),
-                    optimizer = ADAM(0.0001),
+                    optimizer = Adam(0.0001),
                 ),  # unlike TF/PyTorch RMSProp doesn't support center
                 target_approximator = NeuralNetworkApproximator(model = create_model()),
                 update_freq = 4,

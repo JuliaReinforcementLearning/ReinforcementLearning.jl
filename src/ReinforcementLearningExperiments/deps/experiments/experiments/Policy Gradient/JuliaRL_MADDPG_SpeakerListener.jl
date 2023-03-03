@@ -64,11 +64,11 @@ function RLCore.Experiment(
     create_policy(player) = DDPGPolicy(
             behavior_actor = NeuralNetworkApproximator(
                 model = create_actor(player),
-                optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), ADAM(1e-2)),
+                optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), Adam(1e-2)),
             ),
             behavior_critic = NeuralNetworkApproximator(
                 model = create_critic(critic_dim),
-                optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), ADAM(1e-2)),
+                optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), Adam(1e-2)),
             ),
             target_actor = NeuralNetworkApproximator(
                 model = create_actor(player),

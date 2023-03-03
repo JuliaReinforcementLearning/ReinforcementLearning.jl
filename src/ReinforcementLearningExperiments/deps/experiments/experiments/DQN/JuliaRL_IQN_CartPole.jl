@@ -47,7 +47,7 @@ function RLCore.Experiment(
                         ),
                         sync_freq=100
                     ),
-                    optimiser=ADAM(0.001),
+                    optimiser=Adam(0.001),
                 ),
                 κ=κ,
                 N=8,

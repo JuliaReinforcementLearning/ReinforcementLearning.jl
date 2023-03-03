@@ -31,7 +31,7 @@ function RLCore.Experiment(
                     Dense(128, 128, relu; init=glorot_uniform(rng)),
                     Dense(128, na; init=glorot_uniform(rng)),
                 ),
-                optimiser=ADAM(),
+                optimiser=Adam(),
             ),
             baseline=Approximator(
                 model=Chain(
@@ -39,7 +39,7 @@ function RLCore.Experiment(
                     Dense(128, 128, relu; init=glorot_uniform(rng)),
                     Dense(128, 1; init=glorot_uniform(rng)),
                 ),
-                optimiser=ADAM(),
+                optimiser=Adam(),
             ),
             dist=Categorical,
             γ=0.99f0,

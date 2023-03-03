@@ -414,19 +414,19 @@ So that can design the inner `DDPGPolicy` and trajectory like the following:
 policy = DDPGPolicy(
     behavior_actor = NeuralNetworkApproximator(
         model = create_actor(),
-        optimizer = ADAM(),
+        optimizer = Adam(),
     ),
     behavior_critic = NeuralNetworkApproximator(
         model = create_critic(),
-        optimizer = ADAM(),
+        optimizer = Adam(),
     ),
     target_actor = NeuralNetworkApproximator(
         model = create_actor(),
-        optimizer = ADAM(),
+        optimizer = Adam(),
     ),
     target_critic = NeuralNetworkApproximator(
         model = create_critic(),
-        optimizer = ADAM(),
+        optimizer = Adam(),
     ),
     γ = 0.95f0,
     ρ = 0.99f0,
@@ -491,11 +491,11 @@ create_critic(critic_dim) = Chain(
 create_policy(player) = DDPGPolicy(
     behavior_actor = NeuralNetworkApproximator(
         model = create_actor(player),
-        optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), ADAM(1e-2)),
+        optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), Adam(1e-2)),
     ),
     behavior_critic = NeuralNetworkApproximator(
         model = create_critic(critic_dim),
-        optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), ADAM(1e-2)),
+        optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), Adam(1e-2)),
     ),
     target_actor = NeuralNetworkApproximator(
         model = create_actor(player),

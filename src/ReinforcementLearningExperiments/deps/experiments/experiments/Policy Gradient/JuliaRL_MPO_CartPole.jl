@@ -25,9 +25,9 @@ function RLCore.Experiment(
         actor = Approximator(GaussianNetwork(
             Chain(Dense(4, 64, tanh), Dense(64,64,tanh)),
             Dense(64, 1),
-            Dense(64, 1)), ADAM(3f-4)),
-        qnetwork1 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), ADAM(3f-4)),
-        qnetwork2 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), ADAM(3f-4)),
+            Dense(64, 1)), Adam(3f-4)),
+        qnetwork1 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
+        qnetwork2 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
         action_sample_size = 32,
         rng = rng,
         ϵμ = 0.01f0, 
@@ -66,9 +66,9 @@ function RLCore.Experiment(
     policy = MPOPolicy(
         actor = Approximator(
             CategoricalNetwork(Chain(Dense(4, 64, tanh), Dense(64,64,tanh), Dense(64,2))),
-            ADAM(3f-4)),
-        qnetwork1 = Approximator(Chain(Dense(6, 64, gelu), Dense(64,64,gelu), Dense(64,1)), ADAM(3f-4)),
-        qnetwork2 = Approximator(Chain(Dense(6, 64, gelu), Dense(64,64,gelu), Dense(64,1)), ADAM(3f-4)),
+            Adam(3f-4)),
+        qnetwork1 = Approximator(Chain(Dense(6, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
+        qnetwork2 = Approximator(Chain(Dense(6, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
         action_sample_size = 32,
         rng = rng,
         ϵμ = 1f-2, 
@@ -109,9 +109,9 @@ function RLCore.Experiment(
         actor = Approximator(CovGaussianNetwork( #using a CovGaussianNetwork makes non sense here because there's one action space dimension. This is only to unit test.
             pre = Chain(Dense(4, 64, tanh), Dense(64,64,tanh)),
             μ = Dense(64, 1),
-            Σ = Dense(64, 1)), ADAM(3f-4)),
-        qnetwork1 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), ADAM(3f-4)),
-        qnetwork2 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), ADAM(3f-4)),
+            Σ = Dense(64, 1)), Adam(3f-4)),
+        qnetwork1 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
+        qnetwork2 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
         action_sample_size = 32,
         rng = rng,
         ϵμ = 0.01f0, 
