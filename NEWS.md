@@ -1,6 +1,8 @@
 # ReinforcementLearning.jl Release Notes
 
-## ReinforcementLearning.jl@v0.10.0
+## ReinforcementLearning.jl@v0.10.2
+
+- Pin sub-packages to pre-refactor versions
 
 ### ReinforcementLearningExperiments.jl
 
