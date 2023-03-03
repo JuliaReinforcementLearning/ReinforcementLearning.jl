@@ -8,6 +8,7 @@
 
 #+ tangle=true
 using ReinforcementLearningCore
+using ReinforcementLearningEnvironments
 using Flux: Flux, glorot_uniform
 using StableRNGs: StableRNG
 using Distributions: Categorical

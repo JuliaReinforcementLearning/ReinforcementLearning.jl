@@ -9,6 +9,7 @@
 
 
 using ReinforcementLearningCore
+using ReinforcementLearningEnvironments
 using StableRNGs
 using Flux
 using Flux.Losses

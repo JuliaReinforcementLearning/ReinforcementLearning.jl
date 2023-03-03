@@ -8,6 +8,7 @@
 
 #+ tangle=true
 using ReinforcementLearningCore
+using ReinforcementLearningEnvironments
 using Flux
 using Flux: glorot_uniform
 

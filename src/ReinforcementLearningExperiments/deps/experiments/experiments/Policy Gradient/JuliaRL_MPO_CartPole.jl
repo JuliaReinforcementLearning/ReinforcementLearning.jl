@@ -7,6 +7,7 @@
 # ---
 
 using ReinforcementLearningCore
+using ReinforcementLearningEnvironments
 using Flux, Random, StableRNGs
 
 function RLCore.Experiment(
