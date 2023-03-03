@@ -7,7 +7,7 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore
 using GridWorlds
 using StableRNGs
 using Flux

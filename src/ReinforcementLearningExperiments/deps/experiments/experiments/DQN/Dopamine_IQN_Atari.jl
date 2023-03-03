@@ -36,7 +36,7 @@
 # ![](assets/Dopamine_IQN_Atari_breakout_training_reward.svg)
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore
 using ArcadeLearningEnvironment
 using CUDA
 using Flux

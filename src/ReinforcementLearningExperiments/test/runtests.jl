@@ -1,4 +1,4 @@
-using ReinforcementLearningExperiments
+using ReinforcementLearningCoreExperiments
 using CUDA
 
 CUDA.allowscalar(false)

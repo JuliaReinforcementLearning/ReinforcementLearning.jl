@@ -36,7 +36,7 @@
 # ![](assets/Dopamine_Rainbow_Atari_mspacman_training_reward.svg)
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore
 using ArcadeLearningEnvironment
 using Flux
 using Flux.Losses

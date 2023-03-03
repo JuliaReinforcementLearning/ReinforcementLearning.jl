@@ -33,7 +33,7 @@
 # ![](assets/Dopamine_DQN_Atari_pong_training_reward.svg)
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore
 using ArcadeLearningEnvironment
 using Flux
 using Flux.Losses: huber_loss

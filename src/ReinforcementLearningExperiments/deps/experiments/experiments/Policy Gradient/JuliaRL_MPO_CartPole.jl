@@ -6,7 +6,7 @@
 # author: "[Henri Dehaybe](https://github.com/HenriDeh)"
 # ---
 
-using ReinforcementLearning
+using ReinforcementLearningCore
 using Flux, Random, StableRNGs
 
 function RL.Experiment(

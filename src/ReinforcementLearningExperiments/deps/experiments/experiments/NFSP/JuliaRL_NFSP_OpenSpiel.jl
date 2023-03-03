@@ -7,7 +7,7 @@
 # --- 
 
 #+ tangle=false
-using ReinforcementLearning
+using ReinforcementLearningCore
 using StableRNGs
 using OpenSpiel
 using Flux

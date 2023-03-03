@@ -7,7 +7,7 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore
 using StableRNGs
 using Statistics
 using Flux
