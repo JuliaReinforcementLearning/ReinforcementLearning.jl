@@ -7,7 +7,7 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using StableRNGs
 using Flux
 using IntervalSets
@@ -27,7 +27,7 @@ function (hook::KuhnMADDPGHook)(::PostEpisodeStage, policy, env)
     end
 end
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MADDPG},
     ::Val{:KuhnPoker},
@@ -66,19 +66,19 @@ function RL.Experiment(
     policy = DDPGPolicy(
         behavior_actor = NeuralNetworkApproximator(
             model = create_actor(),
-            optimizer = ADAM(),
+            optimizer = Adam(),
         ),
         behavior_critic = NeuralNetworkApproximator(
             model = create_critic(),
-            optimizer = ADAM(),
+            optimizer = Adam(),
         ),
         target_actor = NeuralNetworkApproximator(
             model = create_actor(),
-            optimizer = ADAM(),
+            optimizer = Adam(),
         ),
         target_critic = NeuralNetworkApproximator(
             model = create_critic(),
-            optimizer = ADAM(),
+            optimizer = Adam(),
         ),
         γ = 0.95f0,
         ρ = 0.99f0,

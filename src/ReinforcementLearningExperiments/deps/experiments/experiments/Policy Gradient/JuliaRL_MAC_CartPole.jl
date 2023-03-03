@@ -7,12 +7,13 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearningEnvironments
 using StableRNGs
 using Flux
 using Flux.Losses
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MAC},
     ::Val{:CartPole},
@@ -38,7 +39,7 @@ function RL.Experiment(
                             Dense(30, 30, relu; init = glorot_uniform(rng)),
                             Dense(30, na; init = glorot_uniform(rng)),
                         ),
-                        optimizer = ADAM(1e-2),
+                        optimizer = Adam(1e-2),
                     ),
                     critic = NeuralNetworkApproximator(
                         model = Chain(
@@ -46,7 +47,7 @@ function RL.Experiment(
                             Dense(30, 30, relu; init = glorot_uniform(rng)),
                             Dense(30, na; init = glorot_uniform(rng)),
                         ),
-                        optimizer = ADAM(3e-3),
+                        optimizer = Adam(3e-3),
                     ),
                 ) |> cpu,
                 γ = 0.99f0,

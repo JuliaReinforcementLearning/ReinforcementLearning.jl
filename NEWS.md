@@ -212,4 +212,8 @@
 
 ### ReinforcementLearningExperiments.jl
 
+#### dev
+
+- Drop `ReinforcementLearning.jl` from dependencies, use `ReinforcementLearningCore.jl` instead
+
 #### v0.1.0

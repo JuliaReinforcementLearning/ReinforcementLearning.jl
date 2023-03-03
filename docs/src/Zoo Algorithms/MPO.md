@@ -32,9 +32,9 @@ Then we instantiate a `MPOPolicy`
         actor = Approximator(GaussianNetwork(
             Chain(Dense(4, 64, tanh), Dense(64,64,tanh)),
             Dense(64, 1),
-            Dense(64, 1)), ADAM(3f-4)),
-        qnetwork1 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), ADAM(3f-4)),
-        qnetwork2 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), ADAM(3f-4)),
+            Dense(64, 1)), Adam(3f-4)),
+        qnetwork1 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
+        qnetwork2 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
         action_sample_size = 32,
         ϵμ = 0.1f0, 
         ϵΣ = 1f-2,

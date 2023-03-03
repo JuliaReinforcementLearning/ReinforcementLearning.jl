@@ -2,7 +2,7 @@ module ReinforcementLearningExperiments
 
 using Reexport
 
-@reexport using ReinforcementLearning
+@reexport using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 
 const EXPERIMENTS_DIR = joinpath(@__DIR__, "experiments")
 # for f in readdir(EXPERIMENTS_DIR)

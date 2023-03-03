@@ -7,12 +7,13 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearningEnvironments
 using Flux: Flux, glorot_uniform
 using StableRNGs: StableRNG
 using Distributions: Categorical
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:TRPO},
     ::Val{:CartPole};

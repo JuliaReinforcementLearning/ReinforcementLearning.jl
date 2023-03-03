@@ -7,14 +7,15 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo, ReinforcementLearningZoo
+using ReinforcementLearningEnvironments
 using Flux
 using Flux: glorot_uniform
 
 using StableRNGs: StableRNG
 using Flux.Losses: huber_loss
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BasicDQN},
     ::Val{:CartPole};
@@ -33,7 +34,7 @@ function RL.Experiment(
                         Dense(128, 128, relu; init=glorot_uniform(rng)),
                         Dense(128, na; init=glorot_uniform(rng)),
                     ) |> gpu,
-                    optimiser=ADAM(),
+                    optimiser=Adam(),
                 ),
                 loss_func=huber_loss,
             ),
