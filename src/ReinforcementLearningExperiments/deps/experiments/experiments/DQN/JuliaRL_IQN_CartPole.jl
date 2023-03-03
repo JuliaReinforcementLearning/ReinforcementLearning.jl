@@ -8,7 +8,7 @@
 # ---
 
 
-using ReinforcementLearningCore
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using ReinforcementLearningEnvironments
 using StableRNGs
 using Flux

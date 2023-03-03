@@ -7,7 +7,7 @@
 # --- 
 
 #+ tangle=true
-using ReinforcementLearningCore
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using StableRNGs
 using Flux
 using Flux.Losses

@@ -6,7 +6,7 @@
 # author: "[Henri Dehaybe](https://github.com/HenriDeh)"
 # ---
 
-using ReinforcementLearningCore
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using ReinforcementLearningEnvironments
 using Flux, Random, StableRNGs
 

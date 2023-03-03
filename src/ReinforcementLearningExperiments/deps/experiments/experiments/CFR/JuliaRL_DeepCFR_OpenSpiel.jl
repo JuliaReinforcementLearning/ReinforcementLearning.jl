@@ -7,7 +7,7 @@
 # ---
 
 #+ tangle=false
-using ReinforcementLearningCore
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using OpenSpiel
 
 function RLCore.Experiment(

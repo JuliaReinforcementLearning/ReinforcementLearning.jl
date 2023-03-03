@@ -7,7 +7,7 @@
 # ---
 
 using PyCall
-using ReinforcementLearningCore
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using Flux
 using Flux: glorot_uniform
 

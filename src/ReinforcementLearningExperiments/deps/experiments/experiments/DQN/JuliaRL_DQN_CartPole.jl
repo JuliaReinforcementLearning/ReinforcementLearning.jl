@@ -7,7 +7,7 @@
 # ---
 
 
-using ReinforcementLearningCore
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using ReinforcementLearningEnvironments
 using Flux
 using Flux: glorot_uniform
