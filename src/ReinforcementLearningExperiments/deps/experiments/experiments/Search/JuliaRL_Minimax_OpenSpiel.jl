@@ -10,7 +10,7 @@
 using ReinforcementLearningCore
 using OpenSpiel
 
-function RL.Experiment(::Val{:JuliaRL}, ::Val{:Minimax}, ::Val{:OpenSpiel}, game;)
+function RLCore.Experiment(::Val{:JuliaRL}, ::Val{:Minimax}, ::Val{:OpenSpiel}, game;)
     env = OpenSpielEnv(string(game))
     agents = MultiAgentManager(
         NamedPolicy(0 => MinimaxPolicy()),

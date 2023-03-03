@@ -14,7 +14,7 @@ using Flux: glorot_uniform
 using StableRNGs: StableRNG
 using Flux.Losses: huber_loss
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:DQN},
     ::Val{:MPESimple};

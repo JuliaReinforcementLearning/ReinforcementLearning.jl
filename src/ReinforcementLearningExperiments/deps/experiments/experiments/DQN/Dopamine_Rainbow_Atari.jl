@@ -171,7 +171,7 @@ end
 ## END TODO: move into a common file
 
 #+ tangle=true
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:Dopamine},
     ::Val{:Rainbow},
     ::Val{:Atari},

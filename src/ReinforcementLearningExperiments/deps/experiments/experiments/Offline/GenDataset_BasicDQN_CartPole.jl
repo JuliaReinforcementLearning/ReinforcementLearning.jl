@@ -11,7 +11,7 @@ using StableRNGs
 using Flux
 using Flux.Losses
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:GenDataset},
     ::Val{:BasicDQN},
     ::Val{:CartPole},

@@ -20,7 +20,7 @@ function (h::RecordStateAction)(::PreActStage, policy, env, action)
     push!(h.records; state = copy(state(env)), action = action)
 end
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BC},
     ::Val{:CartPole},

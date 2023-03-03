@@ -14,7 +14,7 @@ using Flux.Losses
 using IntervalSets
 using CUDA
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:SAC},
     ::Val{:Pendulum},

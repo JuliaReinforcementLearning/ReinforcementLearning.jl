@@ -38,7 +38,7 @@ function (hook::MeanRewardHook)(::PostEpisodeStage, policy, env)
     hook.episode += 1
 end
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MADDPG},
     ::Val{:SpeakerListener},

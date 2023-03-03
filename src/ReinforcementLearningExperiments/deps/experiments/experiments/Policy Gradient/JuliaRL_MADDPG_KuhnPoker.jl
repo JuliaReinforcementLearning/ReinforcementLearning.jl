@@ -27,7 +27,7 @@ function (hook::KuhnMADDPGHook)(::PostEpisodeStage, policy, env)
     end
 end
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MADDPG},
     ::Val{:KuhnPoker},

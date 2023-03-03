@@ -10,7 +10,7 @@
 using ReinforcementLearningCore
 using OpenSpiel
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:DeepCFR},
     ::Val{:OpenSpiel},

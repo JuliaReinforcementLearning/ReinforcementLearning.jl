@@ -9,7 +9,7 @@
 using ReinforcementLearningCore
 using Flux, Random, StableRNGs
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPOContinuous},
     ::Val{:CartPole},
@@ -51,7 +51,7 @@ function RL.Experiment(
     Experiment(agent, env, stop_condition, hook)
 end
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPODiscrete},
     ::Val{:CartPole},
@@ -93,7 +93,7 @@ end
 
 
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPOCovariance},
     ::Val{:CartPole},

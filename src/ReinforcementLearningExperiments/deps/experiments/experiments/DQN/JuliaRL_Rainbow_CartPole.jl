@@ -11,7 +11,7 @@ using ReinforcementLearningCore
 using StableRNGs
 using Flux
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:Rainbow},
     ::Val{:CartPole},

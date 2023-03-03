@@ -13,7 +13,7 @@ using Flux
 using Flux.Losses
 using Distributions
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:PPO},
     ::Val{:Pendulum},

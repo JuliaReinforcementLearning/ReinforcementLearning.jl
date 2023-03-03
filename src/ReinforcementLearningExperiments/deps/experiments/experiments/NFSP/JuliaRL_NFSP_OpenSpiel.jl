@@ -29,7 +29,7 @@ function (hook::KuhnOpenNFSPHook)(::PostEpisodeStage, policy, env)
     end
 end
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:NFSP},
     ::Val{:OpenSpiel},

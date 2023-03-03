@@ -1,4 +1,4 @@
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:rlpyt},
     ::Val{:PPO},
     ::Val{:Atari},

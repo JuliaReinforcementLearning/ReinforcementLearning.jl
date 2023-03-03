@@ -166,7 +166,7 @@ end
 
 ## END TODO: move into a common file
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:Dopamine},
     ::Val{:DQN},
     ::Val{:Atari},

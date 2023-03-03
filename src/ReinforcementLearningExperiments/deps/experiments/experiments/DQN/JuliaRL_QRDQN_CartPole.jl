@@ -12,7 +12,7 @@ using StableRNGs: StableRNG
 using Flux
 using Flux: glorot_uniform
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:QRDQN},
     ::Val{:CartPole},

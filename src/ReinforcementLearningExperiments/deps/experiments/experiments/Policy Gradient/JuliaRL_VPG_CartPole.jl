@@ -13,7 +13,7 @@ using Flux
 using Flux: glorot_uniform
 using Distributions: Categorical
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:VPG},
     ::Val{:CartPole};

@@ -13,7 +13,7 @@ using Flux
 using Flux.Losses
 using IntervalSets
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:TD3},
     ::Val{:Pendulum},

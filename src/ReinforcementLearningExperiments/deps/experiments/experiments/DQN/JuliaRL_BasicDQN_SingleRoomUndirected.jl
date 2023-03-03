@@ -13,7 +13,7 @@ using StableRNGs
 using Flux
 using Flux.Losses
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BasicDQN},
     ::Val{:SingleRoomUndirected},
