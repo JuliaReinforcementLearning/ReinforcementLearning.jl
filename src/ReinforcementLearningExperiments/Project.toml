@@ -18,6 +18,7 @@ Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 [compat]
 Distributions = "0.25"
 Flux = "0.13"
+ReinforcementLearningEnvironments = "0.7"
 StableRNGs = "1"
 Weave = "0.10"
 julia = "1.6"
