@@ -19,6 +19,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
+CUDA = "4"
 ChainRulesCore = "1"
 Distributions = "0.25"
 Flux = "0.13"
