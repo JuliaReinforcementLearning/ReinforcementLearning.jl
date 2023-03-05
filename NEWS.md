@@ -82,6 +82,10 @@
 
 ### ReinforcementLearningZoo.jl
 
+#### v0.6.0
+
+- Extensive refactor based on RLBase.jl `v0.11`, most components not **yet** ported
+
 #### v0.5.11
 
 - Fix multi-dimension action space in TD3. [#624](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/624)
