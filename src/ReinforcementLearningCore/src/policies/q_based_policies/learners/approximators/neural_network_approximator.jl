@@ -7,6 +7,7 @@ using Random
 using Distributions: Normal, logpdf
 import Functors: functor
 using MacroTools: @forward
+using Flux: params
 
 """
     NeuralNetworkApproximator(;kwargs)
