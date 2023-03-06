@@ -3,6 +3,7 @@ export VAE, decode, vae_loss
 
 using LinearAlgebra
 using Flux
+using Flux: params
 using Random
 using Distributions: Normal, logpdf
 import Functors: functor
