@@ -20,6 +20,10 @@
 
 ### ReinforcementLearningEnvironments.jl
 
+#### dev
+
+- Reduce allocations, improve performance of `RandomWalk1D`
+
 #### v0.6.12
 
 - Bugfix bug with `is_discrete_space` [#566](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/566)
@@ -54,6 +58,7 @@
 #### dev
 
 - Use correct Flux.stack function signature
+- Reduce allocations, improve performance of `RandomPolicy`
 
 #### v0.8.11
 
