@@ -1,6 +1,8 @@
 # ReinforcementLearning.jl Release Notes
 
-## ReinforcementLearning.jl@v0.10.0
+## ReinforcementLearning.jl@v0.10.2
+
+- Pin sub-packages to pre-refactor versions
 
 ### ReinforcementLearningExperiments.jl
 
@@ -79,6 +81,10 @@
 - Fixed the method overwritten warning of `device` from `CUDA.jl`.
 
 ### ReinforcementLearningZoo.jl
+
+#### v0.6.0
+
+- Extensive refactor based on RLBase.jl `v0.11`, most components not **yet** ported
 
 #### v0.5.11
 
@@ -209,5 +215,9 @@
 - Set `AcrobotEnv` into lazy loading to reduce the dependency of `OrdinaryDiffEq`.
 
 ### ReinforcementLearningExperiments.jl
+
+#### dev
+
+- Drop `ReinforcementLearning.jl` from dependencies, use `ReinforcementLearningCore.jl` instead
 
 #### v0.1.0

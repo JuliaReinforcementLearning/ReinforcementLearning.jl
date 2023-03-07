@@ -7,12 +7,13 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearningEnvironments
 using StableRNGs: StableRNG
 using Flux
 using Flux: glorot_uniform
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:QRDQN},
     ::Val{:CartPole},
@@ -37,7 +38,7 @@ function RL.Experiment(
                         );
                         sync_freq=100
                     ),
-                    optimiser=ADAM(),
+                    optimiser=Adam(),
                 ),
                 n_quantile=N,
                 loss_func=quantile_huber_loss,

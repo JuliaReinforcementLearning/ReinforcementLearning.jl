@@ -7,12 +7,13 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearningEnvironments
 using StableRNGs
 using Flux
 using Flux.Losses
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:CRR},
     ::Val{:CartPole},
@@ -42,7 +43,7 @@ function RL.Experiment(
             Dense(128, 128, relu; init),
             Dense(128, na; init),
         ),
-        optimizer = ADAM(1e-3),
+        optimizer = Adam(1e-3),
     )
 
     agent = Agent(

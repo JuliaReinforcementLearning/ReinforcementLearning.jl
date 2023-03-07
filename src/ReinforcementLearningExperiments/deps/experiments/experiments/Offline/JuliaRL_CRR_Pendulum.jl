@@ -7,12 +7,12 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using StableRNGs
 using Flux
 using Flux.Losses
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:CRR},
     ::Val{:Pendulum},
@@ -59,12 +59,12 @@ function RL.Experiment(
                 approximator = ActorCritic(
                     actor = create_policy_net() |> cpu,
                     critic = create_q_net() |> cpu,
-                    optimizer = ADAM(3e-3),
+                    optimizer = Adam(3e-3),
                 ),
                 target_approximator = ActorCritic(
                     actor = create_policy_net() |> cpu,
                     critic = create_q_net() |> cpu,
-                    optimizer = ADAM(3e-3),
+                    optimizer = Adam(3e-3),
                 ),
                 γ = 0.99f0,
                 batch_size = batch_size,

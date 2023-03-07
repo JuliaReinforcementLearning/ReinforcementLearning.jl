@@ -8,12 +8,13 @@
 # ---
 
 
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearningEnvironments
 using StableRNGs
 using Flux
 using Flux.Losses
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:IQN},
     ::Val{:CartPole},
@@ -47,7 +48,7 @@ function RL.Experiment(
                         ),
                         sync_freq=100
                     ),
-                    optimiser=ADAM(0.001),
+                    optimiser=Adam(0.001),
                 ),
                 κ=κ,
                 N=8,

@@ -1,6 +1,6 @@
 name = "ReinforcementLearningCore"
 uuid = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
-version = "0.9.2"
+version = "0.9.1"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -37,6 +37,7 @@ Flux = "0.13"
 Functors = "0.1, 0.2, 0.3, 0.4"
 Parsers = "2"
 ProgressMeter = "1.2"
+Reexport = "1"
 ReinforcementLearningBase = "0.10, 0.11"
 ReinforcementLearningTrajectories = "0.1.9"
 StatsBase = "0.32, 0.33"

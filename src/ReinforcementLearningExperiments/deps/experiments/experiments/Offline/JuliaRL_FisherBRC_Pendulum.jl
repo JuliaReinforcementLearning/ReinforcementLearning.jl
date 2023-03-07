@@ -7,12 +7,12 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using StableRNGs
 using Flux
 using Flux.Losses
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:FisherBRC},
     ::Val{:Pendulum},
@@ -47,7 +47,7 @@ function RL.Experiment(
             μ = Chain(Dense(64, na, init = init)),
             logσ = Chain(Dense(64, na, init = init)),
         ),
-        optimizer = ADAM(0.003),
+        optimizer = Adam(0.003),
     )
 
     create_q_net() = NeuralNetworkApproximator(
@@ -56,7 +56,7 @@ function RL.Experiment(
             Dense(64, 64, relu; init = init),
             Dense(64, 1; init = init),
         ),
-        optimizer = ADAM(0.003),
+        optimizer = Adam(0.003),
     )
 
     agent = Agent(

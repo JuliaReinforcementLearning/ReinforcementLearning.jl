@@ -134,12 +134,11 @@ jobs:
         if: (steps.RLZoo-changed.outputs.changed == 'true') || (steps.RLExperiments-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
           julia --color=yes -e '
-            using Pkg;
+            using Pkg
             Pkg.develop(path="src/ReinforcementLearningBase")
-            Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.develop(path="src/ReinforcementLearningCore")
+            Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.develop(path="src/ReinforcementLearningZoo")
-            Pkg.develop(path=".")
             Pkg.develop(path="src/ReinforcementLearningExperiments")
             Pkg.build("ReinforcementLearningExperiments")
             Pkg.test("ReinforcementLearningExperiments")'
