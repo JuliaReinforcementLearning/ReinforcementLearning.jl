@@ -26,8 +26,14 @@ end
 
 RLBase.action_space(env::RandomWalk1D) = env.action_space
 
-function (env::RandomWalk1D)(action)
-    env.pos = max(min(env.pos + env.actions[action], env.N), 1)
+function (env::RandomWalk1D)(action::Int)
+    env.pos += env.actions[action]
+    if env.pos > env.N
+        env.pos = env.N
+    elseif env.pos < 1
+        env.pos = 1
+    end
+    return
 end
 
 RLBase.state(env::RandomWalk1D) = env.pos

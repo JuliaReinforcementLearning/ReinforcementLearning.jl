@@ -30,3 +30,30 @@ end
     p_ = RandomPolicy()
     @test (@allocated p_(env)) == 0
 end
+
+@testset "RandomWalk1D Env Updating" begin
+    # Reach positive outcome
+    env = RandomWalk1D()
+    for i in 1:(env.N+1)
+        env(1)
+    end
+    @test env.pos == 1
+    @test RLCore.reward(env) == -1
+
+    # Reach negative outcome
+    env = RandomWalk1D()
+    for i in 1:(env.N+1)
+        env(2)
+    end
+    @test env.pos == env.N
+    @test RLCore.reward(env) == 1
+
+    # Reach starting position
+    env = RandomWalk1D()
+    @test env.pos == 4
+    env(1)
+    @test env.pos == 3
+    env(2)
+    @test env.pos == 4
+    @test RLCore.reward(env) == 0
+end
