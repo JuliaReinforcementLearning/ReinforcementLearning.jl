@@ -31,7 +31,7 @@ RLBase.optimise!(::RandomPolicy, x::NamedTuple) = nothing
 
 RLBase.prob(p::RandomPolicy, env::AbstractEnv) = prob(p, state(env))
 
-function RLBase.prob(p::RandomPolicy, s)
+function RLBase.prob(p::RandomPolicy{S,RNG}, s) where {S, RNG<:AbstractRNG}
     n = length(p.action_space)
     Categorical(Fill(1 / n, n); check_args=false)
 end
