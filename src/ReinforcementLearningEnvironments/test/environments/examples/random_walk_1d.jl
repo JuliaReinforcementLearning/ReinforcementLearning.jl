@@ -29,6 +29,8 @@ end
 
     p_ = RandomPolicy()
     @test (@allocated p_(env)) == 0
+    @test (@allocated reward(env)) == 0
+    @test (@allocated env(1)) == 0
 end
 
 @testset "RandomWalk1D Env Updating" begin
