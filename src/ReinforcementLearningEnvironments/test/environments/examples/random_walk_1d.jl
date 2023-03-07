@@ -19,3 +19,14 @@
 
     @test isapprox(mean(rewards), mean(end_rewards); atol = 0.01)
 end
+
+@testset "RandomPolicy / RandomWalk1D Performance Specs" begin
+    env = RandomWalk1D()
+    
+    # Test zero allocations for RandomPolicy calls
+    p = RandomPolicy(legal_action_space(env))
+    @test (@allocated p(env)) == 0
+
+    p_ = RandomPolicy()
+    @test (@allocated p_(env)) == 0
+end

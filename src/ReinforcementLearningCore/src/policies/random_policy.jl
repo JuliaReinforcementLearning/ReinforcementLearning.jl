@@ -1,6 +1,6 @@
 export RandomPolicy
 
-using Random: AbstractRNG
+using Random: Random, AbstractRNG
 using Distributions: Categorical
 using FillArrays: Fill
 
@@ -15,17 +15,17 @@ runtime to randomly select an action. Otherwise, a random element within
     You should always set `action_space=nothing` when dealing with environments
     of `FULL_ACTION_SET`.
 """
-struct RandomPolicy{S} <: AbstractPolicy
+struct RandomPolicy{S,RNG<:AbstractRNG} <: AbstractPolicy
     action_space::S
-    rng::AbstractRNG
+    rng::RNG
 end
 
-RandomPolicy(s = nothing; rng = Random.GLOBAL_RNG) = RandomPolicy(s, rng)
+RandomPolicy(s=nothing; rng=Random.GLOBAL_RNG) = RandomPolicy(s, rng)
 
 RLBase.optimise!(::RandomPolicy, x::NamedTuple) = nothing
 
-(p::RandomPolicy{Nothing})(env) = rand(p.rng, legal_action_space(env))
-(p::RandomPolicy)(env) = rand(p.rng, p.action_space)
+(p::RandomPolicy{Nothing,RNG})(env) where {RNG<:AbstractRNG} = rand(p.rng, legal_action_space(env))
+(p::RandomPolicy{S,RNG})(env) where {S,RNG<:AbstractRNG} = rand(p.rng, p.action_space)
 
 #####
 
@@ -33,21 +33,21 @@ RLBase.prob(p::RandomPolicy, env::AbstractEnv) = prob(p, state(env))
 
 function RLBase.prob(p::RandomPolicy, s)
     n = length(p.action_space)
-    Categorical(Fill(1 / n, n); check_args = false)
+    Categorical(Fill(1 / n, n); check_args=false)
 end
 
-RLBase.prob(p::RandomPolicy{Nothing}, x) =
+RLBase.prob(p::RandomPolicy{Nothing,RNG}, x) where {RNG<:AbstractRNG} =
     @error "no I really don't know how to calculate the prob from nothing"
 
 #####
 
-RLBase.prob(p::RandomPolicy{Nothing}, env::AbstractEnv) = prob(p, env, ChanceStyle(env))
+RLBase.prob(p::RandomPolicy{Nothing,RNG}, env::AbstractEnv) where {RNG<:AbstractRNG} = prob(p, env, ChanceStyle(env))
 
 function RLBase.prob(
-    p::RandomPolicy{Nothing},
+    p::RandomPolicy{Nothing,RNG},
     env::AbstractEnv,
     ::RLBase.AbstractChanceStyle,
-)
+) where {RNG<:AbstractRNG}
     mask = legal_action_space_mask(env)
     n = sum(mask)
     prob = zeros(length(mask))
@@ -56,10 +56,10 @@ function RLBase.prob(
 end
 
 function RLBase.prob(
-    p::RandomPolicy{Nothing},
+    p::RandomPolicy{Nothing,RNG},
     env::AbstractEnv,
     ::RLBase.ExplicitStochastic,
-)
+) where {RNG<:AbstractRNG}
     if current_player(env) == chance_player(env)
         prob(env, chance_player(env))
     else
@@ -69,9 +69,9 @@ end
 
 #####
 
-RLBase.prob(p::RandomPolicy, env_or_state, a) = 1 / length(p.action_space)
+RLBase.prob(p::RandomPolicy{S,RNG}, env_or_state, a) where {S,RNG<:AbstractRNG} = 1 / length(p.action_space)
 
-function RLBase.prob(p::RandomPolicy{Nothing}, env::AbstractEnv, a)
+function RLBase.prob(p::RandomPolicy{Nothing,RNG}, env::AbstractEnv, a) where {RNG<:AbstractRNG}
     # we can safely assume s is discrete here.
     s = legal_action_space(env)
     if a in s

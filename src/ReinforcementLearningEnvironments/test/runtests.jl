@@ -9,6 +9,7 @@ using Random
 using StableRNGs
 using Statistics
 using OrdinaryDiffEq
+using TimerOutputs
 
 @testset "ReinforcementLearningEnvironments" begin
     include("environments/environments.jl")
