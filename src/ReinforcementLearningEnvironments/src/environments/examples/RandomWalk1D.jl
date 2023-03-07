@@ -41,7 +41,7 @@ RLBase.state_space(env::RandomWalk1D) = env.state_space
 RLBase.is_terminated(env::RandomWalk1D) = env.pos == 1 || env.pos == env.N
 RLBase.reset!(env::RandomWalk1D) = env.pos = env.start_pos
 
-function reward(env::RandomWalk1D)
+function RLBase.reward(env::RandomWalk1D)
     return _reward(env.pos, env.rewards, env.N)
 end
 
