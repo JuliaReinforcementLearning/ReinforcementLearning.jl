@@ -20,7 +20,7 @@
     @test isapprox(mean(rewards), mean(end_rewards); atol = 0.01)
 end
 
-@allocated random_walk_reward(1, Pair(-1.0, 1.0), 10)
+@allocated RLEnvs.random_walk_reward(1, Pair(-1.0, 1.0), 10)
 
 @testset "RandomPolicy / RandomWalk1D Performance Specs" begin
     env = RandomWalk1D()
@@ -40,9 +40,9 @@ end
 end
 
 @testset "Reward Dispatch" begin
-    @test random_walk_reward(1, Pair(-1.0, 1.0), 10) == -1.0
-    @test random_walk_reward(10, Pair(-1.0, 1.0), 10) == 1.0
-    @test random_walk_reward(5, Pair(-1.0, 1.0), 10) == 0.0
+    @test RLEnvs.random_walk_reward(1, Pair(-1.0, 1.0), 10) == -1.0
+    @test RLEnvs.random_walk_reward(10, Pair(-1.0, 1.0), 10) == 1.0
+    @test RLEnvs.random_walk_reward(5, Pair(-1.0, 1.0), 10) == 0.0
 end
 
 @testset "RandomWalk1D Env Updating" begin
