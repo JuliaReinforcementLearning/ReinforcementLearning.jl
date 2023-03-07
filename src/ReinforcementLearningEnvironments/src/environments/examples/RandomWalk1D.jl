@@ -43,10 +43,18 @@ RLBase.reset!(env::RandomWalk1D) = env.pos = env.start_pos
 
 RLBase.reward(env::RandomWalk1D) = random_walk_reward(env.pos, env.rewards, env.N)
 
-# random_walk_reward(pos, rewards, N) = 0.0
-random_walk_reward(pos::Int, rewards::Pair{Float64,Float64}, ::Int) = 0.0
-random_walk_reward(pos::Val{1}, rewards::Pair{Float64,Float64}, ::Int) = first(rewards)
-random_walk_reward(pos::Val{N}, rewards::Pair{Float64,Float64}, ::Val{N}) where {N} = last(rewards)
+function random_walk_reward(pos::Int, rewards::Pair{Float64,Float64}, N::Int)
+    if pos == 1
+        return random_walk_reward_first(rewards)
+    elseif pos == N
+        return random_walk_reward_last(rewards)
+    else
+        return 0.0
+    end
+end
+
+random_walk_reward_first(rewards::Pair{Float64,Float64}) = first(rewards)
+random_walk_reward_last(rewards::Pair{Float64,Float64}) = last(rewards)
 
 RLBase.NumAgentStyle(::RandomWalk1D) = SINGLE_AGENT
 RLBase.DynamicStyle(::RandomWalk1D) = SEQUENTIAL

@@ -53,6 +53,7 @@ end
     end
     @test env.pos == 1
     @test reward(env) == -1
+    @test (@allocated reward(env)) == 0
 
     # Reach negative outcome
     env = RandomWalk1D()
@@ -61,6 +62,7 @@ end
     end
     @test env.pos == env.N
     @test reward(env) == 1
+    @test (@allocated reward(env)) == 0
 
     # Reach starting position
     env = RandomWalk1D()
@@ -70,4 +72,5 @@ end
     env(2)
     @test env.pos == 4
     @test reward(env) == 0
+    @test (@allocated reward(env)) == 0
 end
