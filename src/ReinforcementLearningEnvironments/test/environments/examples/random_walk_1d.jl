@@ -20,7 +20,7 @@
     @test isapprox(mean(rewards), mean(end_rewards); atol = 0.01)
 end
 
-@allocated _reward(1, Pair(-1.0, 1.0), 10)
+@allocated random_walk_reward(1, Pair(-1.0, 1.0), 10)
 
 @testset "RandomPolicy / RandomWalk1D Performance Specs" begin
     env = RandomWalk1D()
