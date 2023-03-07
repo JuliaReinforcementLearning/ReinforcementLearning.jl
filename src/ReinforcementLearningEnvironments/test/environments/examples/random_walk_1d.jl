@@ -40,7 +40,7 @@ end
         env(1)
     end
     @test env.pos == 1
-    @test RLCore.reward(env) == -1
+    @test reward(env) == -1
 
     # Reach negative outcome
     env = RandomWalk1D()
@@ -48,7 +48,7 @@ end
         env(2)
     end
     @test env.pos == env.N
-    @test RLCore.reward(env) == 1
+    @test reward(env) == 1
 
     # Reach starting position
     env = RandomWalk1D()
@@ -57,5 +57,5 @@ end
     @test env.pos == 3
     env(2)
     @test env.pos == 4
-    @test RLCore.reward(env) == 0
+    @test reward(env) == 0
 end
