@@ -20,17 +20,29 @@
     @test isapprox(mean(rewards), mean(end_rewards); atol = 0.01)
 end
 
+@allocated _reward(1, Pair(-1.0, 1.0), 10)
+
 @testset "RandomPolicy / RandomWalk1D Performance Specs" begin
     env = RandomWalk1D()
+    reward(env)
+    env(1)
+    @test (@allocated reward(env)) == 0
+    @test (@allocated env(1)) == 0
     
     # Test zero allocations for RandomPolicy calls
     p = RandomPolicy(legal_action_space(env))
+    p(env)
     @test (@allocated p(env)) == 0
 
     p_ = RandomPolicy()
+    p_(env)
     @test (@allocated p_(env)) == 0
-    @test (@allocated reward(env)) == 0
-    @test (@allocated env(1)) == 0
+end
+
+@testset "Reward Dispatch" begin
+    @test random_walk_reward(1, Pair(-1.0, 1.0), 10) == -1.0
+    @test random_walk_reward(10, Pair(-1.0, 1.0), 10) == 1.0
+    @test random_walk_reward(5, Pair(-1.0, 1.0), 10) == 0.0
 end
 
 @testset "RandomWalk1D Env Updating" begin
