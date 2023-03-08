@@ -114,8 +114,7 @@ function StopAfterNoImprovement(fn, patience::Int, δ::T=0.0f0) where {T<:Number
     StopAfterNoImprovement(fn, patience, δ, typemin(T), 1)
 end
 
-function (s::StopAfterNoImprovement)(agent, env)::Bool
-    is_terminated(env) || return false # post episode stage
+function _stop_after_no_improvement(s::StopAfterNoImprovement{T,F}) where {T<:Number,F}
     val = s.fn()
     if s.δ < val - s.peak
         s.counter = 1
@@ -126,6 +125,11 @@ function (s::StopAfterNoImprovement)(agent, env)::Bool
         return s.counter > s.patience
     end
     return false
+end
+
+function (s::StopAfterNoImprovement)(agent::AbstractPolicy, env::AbstractEnv)
+    is_terminated(env) || return false # post episode stage
+    return _stop_after_no_improvement(s)
 end
 
 #####

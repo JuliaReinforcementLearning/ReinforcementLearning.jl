@@ -19,3 +19,18 @@ end
         @test stop_(policy, env) == true
     end
 end
+
+@testset "StopAfterNoImprovement" begin
+    using ReinforcementLearningBase
+    using ReinforcementLearningCore
+    using ReinforcementLearningEnvironments
+    using BenchmarkTools
+    using JET
+
+
+    env = RandomWalk1D()
+    policy = RandomPolicy(legal_action_space(env))
+    
+    s_ = StopAfterNoImprovement(() -> 1.0, 10)
+    [s_(policy, env) for i in 1:11]
+end
