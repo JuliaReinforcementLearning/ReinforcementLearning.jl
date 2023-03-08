@@ -177,35 +177,31 @@ function (hook::TotalBatchRewardPerEpisode)(
     agent,
     env,
 )
-    R = reward(env)
-    for (i, (t, r)) in enumerate(zip(is_terminated(env), R))
-        hook.reward[i] += r
-        if t
-            push!(hook.rewards[i], hook.reward[i])
-            hook.reward[i] = 0.0
-        end
-    end
+    hook.reward .+= reward(env)
 end
 
-function (hook::TotalBatchRewardPerEpisode)(
+function (h::RewardsPerEpisode)(::PreEpisodeStage, agent, env)
+    push!.(hook.rewards, hook.reward)
+    hook.reward .= 0
+end
+
+function (hook::TotalBatchRewardPerEpisode{Bool})(
     ::PostExperimentStage,
     agent,
     env,
 )
-    if hook.is_display_on_exit
-        n = minimum(map(length, hook.rewards))
-        m = mean([@view(x[1:n]) for x in hook.rewards])
-        s = std([@view(x[1:n]) for x in hook.rewards])
-        p = lineplot(
-            m,
-            title = "Avg total reward per episode",
-            xlabel = "Episode",
-            ylabel = "Score",
-        )
-        lineplot!(p, m .- s)
-        lineplot!(p, m .+ s)
-        println(p)
-    end
+    n = minimum(map(length, hook.rewards))
+    m = mean([@view(x[1:n]) for x in hook.rewards])
+    s = std([@view(x[1:n]) for x in hook.rewards])
+    p = lineplot(
+        m,
+        title = "Avg total reward per episode",
+        xlabel = "Episode",
+        ylabel = "Score",
+    )
+    lineplot!(p, m .- s)
+    lineplot!(p, m .+ s)
+    println(p)
 end
 
 #####
