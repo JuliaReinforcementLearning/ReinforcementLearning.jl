@@ -122,8 +122,8 @@ Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
 function (hook::TotalRewardPerEpisode)(
     ::PostEpisodeStage,
-    agent::AbstractPolicy,
-    env::AbstractEnv,
+    agent,
+    env,
 )
     push!(hook.rewards, hook.reward)
     hook.reward = 0
@@ -131,8 +131,8 @@ end
 
 function (hook::TotalRewardPerEpisode{Bool})(
     ::PostExperimentStage,
-    agent::AbstractPolicy,
-    env::AbstractEnv,
+    agent,
+    env,
 )
     println(
         lineplot(
@@ -173,8 +173,8 @@ end
 
 function (hook::TotalBatchRewardPerEpisode)(
     ::PostActStage,
-    agent::AbstractPolicy,
-    env::AbstractEnv,
+    agent,
+    env,
 )
     R = reward(env)
     for (i, (t, r)) in enumerate(zip(is_terminated(env), R))
@@ -188,8 +188,8 @@ end
 
 function (hook::TotalBatchRewardPerEpisode)(
     ::PostExperimentStage,
-    agent::AbstractPolicy,
-    env::AbstractEnv,
+    agent,
+    env,
 )
     if hook.is_display_on_exit
         n = minimum(map(length, hook.rewards))
@@ -230,8 +230,8 @@ end
 
 function (hook::BatchStepsPerEpisode)(
     ::PostActStage,
-    agent::AbstractPolicy,
-    env::AbstractEnv,
+    agent,
+    env,
 )
     for (i, t) in enumerate(is_terminated(env))
         hook.step[i] += 1
@@ -262,7 +262,7 @@ Base.getindex(h::TimePerStep) = h.times
 TimePerStep(; max_steps = 100) =
     TimePerStep(CircularArrayBuffer{Float64}(max_steps), time_ns())
 
-function (hook::TimePerStep)(::PostActStage, agent::AbstractPolicy, env::AbstractEnv)
+function (hook::TimePerStep)(::PostActStage, agent, env)
     push!(hook.times, (time_ns() - hook.t) / 1e9)
     hook.t = time_ns()
 end
@@ -281,7 +281,7 @@ end
 
 DoEveryNStep(f; n = 1, t = 0) = DoEveryNStep(f, n, t)
 
-function (hook::DoEveryNStep)(::PostActStage, agent::AbstractPolicy, env::AbstractEnv)
+function (hook::DoEveryNStep)(::PostActStage, agent, env)
     hook.t += 1
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
@@ -303,7 +303,7 @@ end
 DoEveryNEpisode(f::F; n = 1, t = 0, stage::S = PostEpisodeStage()) where {S,F} =
     DoEveryNEpisode{S,F}(f, n, t)
 
-function (hook::DoEveryNEpisode{S})(::S, agent::AbstractPolicy, env::AbstractEnv) where {S}
+function (hook::DoEveryNEpisode{S})(::S, agent, env) where {S}
     hook.t += 1
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
@@ -319,6 +319,6 @@ struct DoOnExit{F} <: AbstractHook
     f::F
 end
 
-function (h::DoOnExit)(::PostExperimentStage, agent::AbstractPolicy, env::AbstractEnv)
+function (h::DoOnExit)(::PostExperimentStage, agent, env)
     h.f(agent, env)
 end
