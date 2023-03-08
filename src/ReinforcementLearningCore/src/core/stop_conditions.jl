@@ -127,7 +127,7 @@ function _stop_after_no_improvement(s::StopAfterNoImprovement{T,F}) where {T<:Nu
     return false
 end
 
-function (s::StopAfterNoImprovement)(agent::AbstractPolicy, env::AbstractEnv)
+function (s::StopAfterNoImprovement{T,F})(agent::AbstractPolicy, env::AbstractEnv)  where {T<:Number,F}
     is_terminated(env) || return false # post episode stage
     return _stop_after_no_improvement(s)
 end
