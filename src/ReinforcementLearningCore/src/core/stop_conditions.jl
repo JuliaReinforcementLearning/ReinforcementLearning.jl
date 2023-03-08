@@ -67,7 +67,7 @@ function StopAfterEpisode(episode; cur = 0, is_show_progress = true)
     StopAfterEpisode(episode, cur, progress)
 end
 
-function (s::StopAfterEpisode{Nothing})(agent::AbstractPolicy, env::AbstractEnv)
+function (s::StopAfterEpisode{Nothing})(agent, agent)
     if is_terminated(env)
         s.cur += 1
     end
@@ -75,7 +75,7 @@ function (s::StopAfterEpisode{Nothing})(agent::AbstractPolicy, env::AbstractEnv)
     s.cur >= s.episode
 end
 
-function (s::StopAfterEpisode)(agent::AbstractPolicy, env::AbstractEnv)
+function (s::StopAfterEpisode)(agent, agent)
     if is_terminated(env)
         s.cur += 1
         ProgressMeter.next!(s.progress)
@@ -127,7 +127,7 @@ function _stop_after_no_improvement(s::StopAfterNoImprovement{T,F}) where {T<:Nu
     return false
 end
 
-function (s::StopAfterNoImprovement)(agent::AbstractPolicy, env::AbstractEnv)
+function (s::StopAfterNoImprovement)(agent, agent)
     is_terminated(env) || return false # post episode stage
     return _stop_after_no_improvement(s)
 end
