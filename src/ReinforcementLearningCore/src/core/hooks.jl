@@ -104,28 +104,28 @@ Base.getindex(h::RewardsPerEpisode) = h.rewards
 Store the total reward of each episode in the field of `rewards`. If
 `is_display_on_exit` is set to `true`, a unicode plot will be shown at the [`PostExperimentStage`](@ref).
 """
-mutable struct TotalRewardPerEpisode{T} <: AbstractHook where {T<:Union{Bool,Nothing}}
+struct TotalRewardPerEpisode{T} <: AbstractHook where {T<:Union{Bool,Nothing}}
     rewards::Vector{Float64}
-    reward::Float64
+    reward::Vector{Float64}
     is_display_on_exit::Bool
 
     function TotalRewardPerEpisode(; is_display_on_exit::Bool = true)
         struct_type = is_display_on_exit ? Bool : Nothing
-        new{struct_type}(Float64[], 0.0, is_display_on_exit)
+        new{struct_type}(Float64[], Float64[0.0], is_display_on_exit)
     end
 end
 
 Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
 (h::TotalRewardPerEpisode)(::PostActStage, agent, env) =
-    h.reward += reward(env)
+    h.reward[1] += reward(env)
 
 function (hook::TotalRewardPerEpisode)(
     ::PostEpisodeStage,
     agent,
     env,
 )
-    push!(hook.rewards, hook.reward)
+    push!(hook.rewards, hook.reward[1])
     hook.reward = 0
 end
 
