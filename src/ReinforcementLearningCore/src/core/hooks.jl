@@ -104,10 +104,15 @@ Base.getindex(h::RewardsPerEpisode) = h.rewards
 Store the total reward of each episode in the field of `rewards`. If
 `is_display_on_exit` is set to `true`, a unicode plot will be shown at the [`PostExperimentStage`](@ref).
 """
-Base.@kwdef mutable struct TotalRewardPerEpisode <: AbstractHook
-    rewards::Vector{Float64} = Float64[]
-    reward::Float64 = 0.0
-    is_display_on_exit::Bool = true
+mutable struct TotalRewardPerEpisode{T} <: AbstractHook where T <: Union{Bool,Nothing}
+    rewards::Vector{Float64}
+    reward::Float64
+    is_display_on_exit::Bool
+
+    function TotalRewardPerEpisode(; is_display_on_exit::Bool = true)
+        struct_type = is_display_on_exit ? Bool : Nothing
+        new{struct_type}(Float64[], 0.0, is_display_on_exit)
+    end
 end
 
 Base.getindex(h::TotalRewardPerEpisode) = h.rewards
@@ -119,17 +124,15 @@ function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env)
     hook.reward = 0
 end
 
-function (hook::TotalRewardPerEpisode)(::PostExperimentStage, agent, env)
-    if hook.is_display_on_exit
-        println(
-            lineplot(
-                hook.rewards,
-                title="Total reward per episode",
-                xlabel="Episode",
-                ylabel="Score",
-            ),
-        )
-    end
+function (hook::TotalRewardPerEpisode{Bool})(::PostExperimentStage, agent, env)
+    println(
+        lineplot(
+            hook.rewards,
+            title="Total reward per episode",
+            xlabel="Episode",
+            ylabel="Score",
+        ),
+    )
 end
 
 #####
