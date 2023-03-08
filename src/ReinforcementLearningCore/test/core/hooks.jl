@@ -16,3 +16,16 @@
         h(PostExperimentStage(), policy, env)
     end
 end
+
+@testset "StepsPerEpisode" begin
+    env = RandomWalk1D()
+    agent = RandomPolicy()
+    h = StepsPerEpisode()
+    [h(PostActStage()) for i in 1:100]
+    @test h.count == 100
+    h(PostEpisodeStage(), agent, env)
+    @test h.count == 0
+    @test h.steps == [100]
+    h(PostExperimentStage(), agent, env)
+    @test h.steps == [100, 0]
+end
