@@ -79,39 +79,6 @@
 #### v0.6.0
 
 - Set `AcrobotEnv` into lazy loading to reduce the dependency of `OrdinaryDiffEq`.
-### ReinforcementLearningCore.jl
-
-#### v0.9.2-dev
-
-- Use correct Flux.stack function signature
-- Reduce allocations, improve performance of `RandomPolicy`
-- Chase down JET.jl errors, fix
-- Add tests for `StopAfterStep`,  `StopAfterEpisode`
-
-#### v0.8.11
-
-- When sending a `CircularArrayBuffer` to GPU devices, convert `CircularArrayBuffer` into `CuArray` instead of the adapted `CircularArrayBuffer` of `CuArray`. [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
-
-#### v0.8.10
-
-- Update dependency of `CircularArrayBuffers` to `v0.1.9`. [#602](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/602)
-- Add `CovGaussianNetwork`. [#597](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/597)
-#### v0.8.8
-
-- Fix warning about `vararg.data` in Julia@v1.7 [#560](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/560)
-
-#### v0.8.7
-
-- Make `GaussianNetwork` differentiable. [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
-
-#### v0.8.6
-
-- Fixed a bug [1] with the `DoOnExit` hook (#537)
-- Added some convenience hooks for rendering rollout episodes (#537)
-
-#### v0.8.5
-
-- Fixed the method overwritten warning of `device` from `CUDA.jl`.
 
 ### ReinforcementLearningZoo.jl
 
@@ -185,6 +152,39 @@
 - Add default `Base.:(==)` and `Base.hash` method for `AbstractEnv`. [#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 
 ### ReinforcementLearningCore.jl
+
+#### v0.9.2-dev
+
+- Use correct Flux.stack function signature
+- Reduce allocations, improve performance of `RandomPolicy`
+- Chase down JET.jl errors, fix
+- Add tests for `StopAfterStep`,  `StopAfterEpisode`
+- Add tests, improve performance of `RewardsPerEpisode`
+
+#### v0.8.11
+
+- When sending a `CircularArrayBuffer` to GPU devices, convert `CircularArrayBuffer` into `CuArray` instead of the adapted `CircularArrayBuffer` of `CuArray`. [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
+
+#### v0.8.10
+
+- Update dependency of `CircularArrayBuffers` to `v0.1.9`. [#602](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/602)
+- Add `CovGaussianNetwork`. [#597](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/597)
+#### v0.8.8
+
+- Fix warning about `vararg.data` in Julia@v1.7 [#560](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/560)
+
+#### v0.8.7
+
+- Make `GaussianNetwork` differentiable. [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
+
+#### v0.8.6
+
+- Fixed a bug [1] with the `DoOnExit` hook (#537)
+- Added some convenience hooks for rendering rollout episodes (#537)
+
+#### v0.8.5
+
+- Fixed the method overwritten warning of `device` from `CUDA.jl`.
 
 #### v0.8.3
 
