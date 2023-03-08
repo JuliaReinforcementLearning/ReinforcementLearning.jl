@@ -16,3 +16,15 @@
         h(PostExperimentStage(), policy, env)
     end
 end
+
+@testset "TotalBatchRewardPerEpisode" begin
+    env = RandomWalk1D()
+    env.pos = 7
+    policy = RandomPolicy(legal_action_space(env))
+
+    h_1 = TotalBatchRewardPerEpisode(10; is_display_on_exit = true)
+    
+    for h in (h_1)
+        h()
+    end
+end
