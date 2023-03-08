@@ -9,6 +9,8 @@ using CircularArrayBuffers
 using Flux
 
 @testset "ReinforcementLearningCore.jl" begin
-    include("core.jl")
+    include("core/core.jl")
+    include("core/hooks.jl")
+    include("core/stop_conditions.jl")
     include("utils/utils.jl")
 end
