@@ -20,20 +20,21 @@ struct RandomPolicy{S,RNG<:AbstractRNG} <: AbstractPolicy
     rng::RNG
 end
 
-RandomPolicy(s=nothing; rng=Random.GLOBAL_RNG) = RandomPolicy(s, rng)
+RandomPolicy(s = nothing; rng = Random.GLOBAL_RNG) = RandomPolicy(s, rng)
 
 RLBase.optimise!(::RandomPolicy, x::NamedTuple) = nothing
 
-(p::RandomPolicy{Nothing,RNG})(env) where {RNG<:AbstractRNG} = rand(p.rng, legal_action_space(env))
+(p::RandomPolicy{Nothing,RNG})(env) where {RNG<:AbstractRNG} =
+    rand(p.rng, legal_action_space(env))
 (p::RandomPolicy{S,RNG})(env) where {S,RNG<:AbstractRNG} = rand(p.rng, p.action_space)
 
 #####
 
 RLBase.prob(p::RandomPolicy, env::AbstractEnv) = prob(p, state(env))
 
-function RLBase.prob(p::RandomPolicy{S,RNG}, s) where {S, RNG<:AbstractRNG}
+function RLBase.prob(p::RandomPolicy{S,RNG}, s) where {S,RNG<:AbstractRNG}
     n = length(p.action_space)
-    Categorical(Fill(1 / n, n); check_args=false)
+    Categorical(Fill(1 / n, n); check_args = false)
 end
 
 RLBase.prob(p::RandomPolicy{Nothing,RNG}, x) where {RNG<:AbstractRNG} =
@@ -41,7 +42,8 @@ RLBase.prob(p::RandomPolicy{Nothing,RNG}, x) where {RNG<:AbstractRNG} =
 
 #####
 
-RLBase.prob(p::RandomPolicy{Nothing,RNG}, env::AbstractEnv) where {RNG<:AbstractRNG} = prob(p, env, ChanceStyle(env))
+RLBase.prob(p::RandomPolicy{Nothing,RNG}, env::AbstractEnv) where {RNG<:AbstractRNG} =
+    prob(p, env, ChanceStyle(env))
 
 function RLBase.prob(
     p::RandomPolicy{Nothing,RNG},
@@ -69,9 +71,14 @@ end
 
 #####
 
-RLBase.prob(p::RandomPolicy{S,RNG}, env_or_state, a) where {S,RNG<:AbstractRNG} = 1 / length(p.action_space)
+RLBase.prob(p::RandomPolicy{S,RNG}, env_or_state, a) where {S,RNG<:AbstractRNG} =
+    1 / length(p.action_space)
 
-function RLBase.prob(p::RandomPolicy{Nothing,RNG}, env::AbstractEnv, a) where {RNG<:AbstractRNG}
+function RLBase.prob(
+    p::RandomPolicy{Nothing,RNG},
+    env::AbstractEnv,
+    a,
+) where {RNG<:AbstractRNG}
     # we can safely assume s is discrete here.
     s = legal_action_space(env)
     if a in s

@@ -9,7 +9,7 @@
     rng = StableRNG(123)
     N = 50_000
     rewards = []
-    for _ in 1:N
+    for _ = 1:N
         while !is_terminated(env)
             env(rand(rng, legal_action_space(env)))
         end
@@ -28,7 +28,7 @@ end
     env(1)
     @test (@allocated reward(env)) == 0
     @test (@allocated env(1)) == 0
-    
+
     # Test zero allocations for RandomPolicy calls
     p = RandomPolicy(legal_action_space(env))
     p(env)
@@ -48,7 +48,7 @@ end
 @testset "RandomWalk1D Env Updating" begin
     # Reach positive outcome
     env = RandomWalk1D()
-    for i in 1:(env.N+1)
+    for i = 1:(env.N+1)
         env(1)
     end
     @test env.pos == 1
@@ -57,7 +57,7 @@ end
 
     # Reach negative outcome
     env = RandomWalk1D()
-    for i in 1:(env.N+1)
+    for i = 1:(env.N+1)
         env(2)
     end
     @test env.pos == env.N

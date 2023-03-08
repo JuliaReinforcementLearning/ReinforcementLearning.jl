@@ -4,11 +4,10 @@
             agent = Agent(
                 RandomPolicy(),
                 Trajectory(
-                    CircularArraySARTTraces(; capacity=1_000),
+                    CircularArraySARTTraces(; capacity = 1_000),
                     BatchSampler(1),
-                    InsertSampleRatioController(
-                        n_inserted=-1,
-                    )),
+                    InsertSampleRatioController(n_inserted = -1),
+                ),
             )
             env = RandomWalk1D()
             stop_condition = StopAfterStep(123)
@@ -22,11 +21,9 @@
             agent = Agent(
                 RandomPolicy(),
                 Trajectory(
-                    CircularArraySARTTraces(; capacity=1_000),
+                    CircularArraySARTTraces(; capacity = 1_000),
                     BatchSampler(1),
-                    InsertSampleRatioController(
-                        n_inserted=-1,
-                    )
+                    InsertSampleRatioController(n_inserted = -1),
                 ),
             )
             env = RandomWalk1D()
@@ -38,4 +35,3 @@
         end
     end
 end
-
