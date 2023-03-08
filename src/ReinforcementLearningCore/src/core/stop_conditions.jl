@@ -67,12 +67,18 @@ function StopAfterEpisode(episode; cur=0, is_show_progress=true)
     StopAfterEpisode(episode, cur, progress)
 end
 
-function (s::StopAfterEpisode)(agent, env)
+function (s::StopAfterEpisode{Nothing})(agent::AbstractPolicy, env::AbstractEnv)
     if is_terminated(env)
         s.cur += 1
-        if !isnothing(s.progress)
-            ProgressMeter.next!(s.progress;)
-        end
+    end
+
+    s.cur >= s.episode
+end
+
+function (s::StopAfterEpisode)(agent::AbstractPolicy, env::AbstractEnv)
+    if is_terminated(env)
+        s.cur += 1
+        ProgressMeter.next!(s.progress)
     end
 
     s.cur >= s.episode
