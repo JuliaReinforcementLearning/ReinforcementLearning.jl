@@ -18,7 +18,7 @@ mutable struct StopAfterStep{Tl}
     progress::Tl
 end
 
-function StopAfterStep(step; cur=1, is_show_progress=true)
+function StopAfterStep(step; cur = 1, is_show_progress = true)
     if is_show_progress
         progress = ProgressMeter.Progress(step, 1)
         ProgressMeter.update!(progress, cur)
@@ -28,19 +28,18 @@ function StopAfterStep(step; cur=1, is_show_progress=true)
     StopAfterStep(step, cur, progress)
 end
 
-function (s::StopAfterStep)(args...)
-    if !isnothing(s.progress)
-        # https://github.com/timholy/ProgressMeter.jl/pull/131
-        # next!(s.progress; showvalues = [(Symbol(s.tag, "/", :STEP), s.cur)])
-        ProgressMeter.next!(s.progress)
-    end
-
-    @debug s.tag STEP = s.cur
-
+function _stop_after_step(s::StopAfterStep)
     res = s.cur >= s.step
     s.cur += 1
     res
 end
+
+function (s::StopAfterStep)(args...)
+    ProgressMeter.next!(s.progress)
+    _stop_after_step(s)
+end
+
+(s::StopAfterStep{Nothing})(args...) = _stop_after_step(s)
 
 #####
 # StopAfterEpisode
@@ -58,7 +57,7 @@ mutable struct StopAfterEpisode{Tl}
     progress::Tl
 end
 
-function StopAfterEpisode(episode; cur=0, is_show_progress=true)
+function StopAfterEpisode(episode; cur = 0, is_show_progress = true)
     if is_show_progress
         progress = ProgressMeter.Progress(episode, 1)
         ProgressMeter.update!(progress, cur)
@@ -68,12 +67,18 @@ function StopAfterEpisode(episode; cur=0, is_show_progress=true)
     StopAfterEpisode(episode, cur, progress)
 end
 
+function (s::StopAfterEpisode{Nothing})(agent, env)
+    if is_terminated(env)
+        s.cur += 1
+    end
+
+    s.cur >= s.episode
+end
+
 function (s::StopAfterEpisode)(agent, env)
     if is_terminated(env)
         s.cur += 1
-        if !isnothing(s.progress)
-            ProgressMeter.next!(s.progress;)
-        end
+        ProgressMeter.next!(s.progress)
     end
 
     s.cur >= s.episode
@@ -105,12 +110,11 @@ mutable struct StopAfterNoImprovement{T<:Number,F}
     counter::Int
 end
 
-function StopAfterNoImprovement(fn, patience::Int, δ::T=0.0f0) where {T<:Number}
+function StopAfterNoImprovement(fn, patience::Int, δ::T = 0.0f0) where {T<:Number}
     StopAfterNoImprovement(fn, patience, δ, typemin(T), 1)
 end
 
-function (s::StopAfterNoImprovement)(agent, env)::Bool
-    is_terminated(env) || return false # post episode stage
+function _stop_after_no_improvement(s::StopAfterNoImprovement{T,F}) where {T<:Number,F}
     val = s.fn()
     if s.δ < val - s.peak
         s.counter = 1
@@ -121,6 +125,11 @@ function (s::StopAfterNoImprovement)(agent, env)::Bool
         return s.counter > s.patience
     end
     return false
+end
+
+function (s::StopAfterNoImprovement)(agent, env)
+    is_terminated(env) || return false # post episode stage
+    return _stop_after_no_improvement(s)
 end
 
 #####

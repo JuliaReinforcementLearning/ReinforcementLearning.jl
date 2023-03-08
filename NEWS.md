@@ -20,6 +20,12 @@
 
 ### ReinforcementLearningEnvironments.jl
 
+#### dev
+
+- Reduce allocations, improve performance of `RandomWalk1D`
+- Add tests to `RandomWalk1D`
+- Chase down JET.jl errors, fix
+
 #### v0.6.12
 
 - Bugfix bug with `is_discrete_space` [#566](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/566)
@@ -49,11 +55,38 @@
 
 - Bugfix with `ZeroTo` [#534](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/534)
 
+#### v0.6.4
+
+- Add `GraphShortestPathEnv`. [#445](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/445)
+
+#### v0.6.3
+
+- Add `StockTradingEnv` from the paper [Deep Reinforcement Learning for
+  Automated Stock Trading: An Ensemble
+  Strategy](https://github.com/AI4Finance-LLC/Deep-Reinforcement-Learning-for-Automated-Stock-Trading-Ensemble-Strategy-ICAIF-2020).
+  This environment is a good testbed for multi-continuous action space
+  algorithms. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
+
+#### v0.6.2
+
+- Add `SequentialEnv` environment wrapper to turn a simultaneous environment
+  into a sequential one.
+
+#### v0.6.1
+
+- Drop GR in RLEnvs and lazily load ploting functions.[#309](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/309), [#310](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/310)
+
+#### v0.6.0
+
+- Set `AcrobotEnv` into lazy loading to reduce the dependency of `OrdinaryDiffEq`.
 ### ReinforcementLearningCore.jl
 
-#### dev
+#### v0.9.2-dev
 
 - Use correct Flux.stack function signature
+- Reduce allocations, improve performance of `RandomPolicy`
+- Chase down JET.jl errors, fix
+- Add tests for `StopAfterStep`,  `StopAfterEpisode`
 
 #### v0.8.11
 
@@ -186,33 +219,6 @@
 #### v0.4.0
 
 - Moved all the experiments into a new package `ReinforcementLearningExperiments.jl`. The related dependencies are also removed (`BSON.jl`, `StableRNGs.jl`, `TensorBoardLogger.jl`).
-
-### ReinforcementLearningEnvironments.jl
-
-#### v0.6.4-dev
-
-- Add `GraphShortestPathEnv`. [#445](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/445)
-
-#### v0.6.3
-
-- Add `StockTradingEnv` from the paper [Deep Reinforcement Learning for
-  Automated Stock Trading: An Ensemble
-  Strategy](https://github.com/AI4Finance-LLC/Deep-Reinforcement-Learning-for-Automated-Stock-Trading-Ensemble-Strategy-ICAIF-2020).
-  This environment is a good testbed for multi-continuous action space
-  algorithms. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
-
-#### v0.6.2
-
-- Add `SequentialEnv` environment wrapper to turn a simultaneous environment
-  into a sequential one.
-
-#### v0.6.1
-
-- Drop GR in RLEnvs and lazily load ploting functions.[#309](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/309), [#310](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/310)
-
-#### v0.6.0
-
-- Set `AcrobotEnv` into lazy loading to reduce the dependency of `OrdinaryDiffEq`.
 
 ### ReinforcementLearningExperiments.jl
 

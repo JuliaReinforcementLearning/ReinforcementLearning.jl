@@ -104,32 +104,44 @@ Base.getindex(h::RewardsPerEpisode) = h.rewards
 Store the total reward of each episode in the field of `rewards`. If
 `is_display_on_exit` is set to `true`, a unicode plot will be shown at the [`PostExperimentStage`](@ref).
 """
-Base.@kwdef mutable struct TotalRewardPerEpisode <: AbstractHook
-    rewards::Vector{Float64} = Float64[]
-    reward::Float64 = 0.0
-    is_display_on_exit::Bool = true
+mutable struct TotalRewardPerEpisode{T} <: AbstractHook where {T<:Union{Bool,Nothing}}
+    rewards::Vector{Float64}
+    reward::Float64
+    is_display_on_exit::Bool
+
+    function TotalRewardPerEpisode(; is_display_on_exit::Bool = true)
+        struct_type = is_display_on_exit ? Bool : Nothing
+        new{struct_type}(Float64[], 0.0, is_display_on_exit)
+    end
 end
 
 Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
-(h::TotalRewardPerEpisode)(::PostActStage, agent, env) = h.reward += reward(env)
+(h::TotalRewardPerEpisode)(::PostActStage, agent, env) =
+    h.reward += reward(env)
 
-function (hook::TotalRewardPerEpisode)(::PostEpisodeStage, agent, env)
+function (hook::TotalRewardPerEpisode)(
+    ::PostEpisodeStage,
+    agent,
+    env,
+)
     push!(hook.rewards, hook.reward)
     hook.reward = 0
 end
 
-function (hook::TotalRewardPerEpisode)(::PostExperimentStage, agent, env)
-    if hook.is_display_on_exit
-        println(
-            lineplot(
-                hook.rewards,
-                title="Total reward per episode",
-                xlabel="Episode",
-                ylabel="Score",
-            ),
-        )
-    end
+function (hook::TotalRewardPerEpisode{Bool})(
+    ::PostExperimentStage,
+    agent,
+    env,
+)
+    println(
+        lineplot(
+            hook.rewards,
+            title = "Total reward per episode",
+            xlabel = "Episode",
+            ylabel = "Score",
+        ),
+    )
 end
 
 #####
@@ -151,15 +163,19 @@ which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 If `is_display_on_exit` is set to `true`, a ribbon plot will be shown to reflect
 the mean and std of rewards.
 """
-function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit=true)
+function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit = true)
     TotalBatchRewardPerEpisode(
-        [Float64[] for _ in 1:batch_size],
+        [Float64[] for _ = 1:batch_size],
         zeros(batch_size),
         is_display_on_exit,
     )
 end
 
-function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env)
+function (hook::TotalBatchRewardPerEpisode)(
+    ::PostActStage,
+    agent,
+    env,
+)
     R = reward(env)
     for (i, (t, r)) in enumerate(zip(is_terminated(env), R))
         hook.reward[i] += r
@@ -170,16 +186,20 @@ function (hook::TotalBatchRewardPerEpisode)(::PostActStage, agent, env)
     end
 end
 
-function (hook::TotalBatchRewardPerEpisode)(::PostExperimentStage, agent, env)
+function (hook::TotalBatchRewardPerEpisode)(
+    ::PostExperimentStage,
+    agent,
+    env,
+)
     if hook.is_display_on_exit
         n = minimum(map(length, hook.rewards))
         m = mean([@view(x[1:n]) for x in hook.rewards])
         s = std([@view(x[1:n]) for x in hook.rewards])
         p = lineplot(
             m,
-            title="Avg total reward per episode",
-            xlabel="Episode",
-            ylabel="Score",
+            title = "Avg total reward per episode",
+            xlabel = "Episode",
+            ylabel = "Score",
         )
         lineplot!(p, m .- s)
         lineplot!(p, m .+ s)
@@ -205,10 +225,14 @@ Similar to [`StepsPerEpisode`](@ref), but is specific to environments
 which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 """
 function BatchStepsPerEpisode(batch_size::Int)
-    BatchStepsPerEpisode([Int[] for _ in 1:batch_size], zeros(Int, batch_size))
+    BatchStepsPerEpisode([Int[] for _ = 1:batch_size], zeros(Int, batch_size))
 end
 
-function (hook::BatchStepsPerEpisode)(::PostActStage, agent, env)
+function (hook::BatchStepsPerEpisode)(
+    ::PostActStage,
+    agent,
+    env,
+)
     for (i, t) in enumerate(is_terminated(env))
         hook.step[i] += 1
         if t
@@ -235,7 +259,7 @@ end
 
 Base.getindex(h::TimePerStep) = h.times
 
-TimePerStep(; max_steps=100) =
+TimePerStep(; max_steps = 100) =
     TimePerStep(CircularArrayBuffer{Float64}(max_steps), time_ns())
 
 function (hook::TimePerStep)(::PostActStage, agent, env)
@@ -255,7 +279,7 @@ mutable struct DoEveryNStep{F} <: AbstractHook
     t::Int
 end
 
-DoEveryNStep(f; n=1, t=0) = DoEveryNStep(f, n, t)
+DoEveryNStep(f; n = 1, t = 0) = DoEveryNStep(f, n, t)
 
 function (hook::DoEveryNStep)(::PostActStage, agent, env)
     hook.t += 1
@@ -276,7 +300,7 @@ mutable struct DoEveryNEpisode{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <: 
     t::Int
 end
 
-DoEveryNEpisode(f::F; n=1, t=0, stage::S=PostEpisodeStage()) where {S,F} =
+DoEveryNEpisode(f::F; n = 1, t = 0, stage::S = PostEpisodeStage()) where {S,F} =
     DoEveryNEpisode{S,F}(f, n, t)
 
 function (hook::DoEveryNEpisode{S})(::S, agent, env) where {S}
