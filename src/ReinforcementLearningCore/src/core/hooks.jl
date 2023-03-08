@@ -147,7 +147,7 @@ end
 #####
 # TotalBatchRewardPerEpisode
 #####
-struct TotalBatchRewardPerEpisode <: AbstractHook
+struct TotalBatchRewardPerEpisode{T} <: AbstractHook where {T<:Union{Bool,Nothing}}
     rewards::Vector{Vector{Float64}}
     reward::Vector{Float64}
     is_display_on_exit::Bool
@@ -163,8 +163,9 @@ which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 If `is_display_on_exit` is set to `true`, a ribbon plot will be shown to reflect
 the mean and std of rewards.
 """
-function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit = true)
-    TotalBatchRewardPerEpisode(
+function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit::Bool = true)
+    struct_type = is_display_on_exit ? Bool : Nothing
+    TotalBatchRewardPerEpisode{struct_type}(
         [Float64[] for _ = 1:batch_size],
         zeros(batch_size),
         is_display_on_exit,
