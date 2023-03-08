@@ -85,13 +85,22 @@ end
 
 Store each reward of each step in every episode in the field of `rewards`.
 """
-Base.@kwdef mutable struct RewardsPerEpisode <: AbstractHook
-    rewards::Vector{Vector{Float64}} = Vector{Vector{Float64}}()
+struct RewardsPerEpisode{T} <: AbstractHook where {T<:Number}
+    rewards::Vector{Vector{T}}
+    empty_vect::Vector{T}
+
+    function RewardsPerEpisode{T}() where {T<:Number}
+        new(Vector{Vector{T}}(), Vector{T}())
+    end
+
+    function RewardsPerEpisode()
+        new(Vector{Vector{Float64}}(), Vector{Float64}())
+    end
 end
 
 Base.getindex(h::RewardsPerEpisode) = h.rewards
 
-(h::RewardsPerEpisode)(::PreEpisodeStage, agent, env) = push!(h.rewards, [])
+(h::RewardsPerEpisode)(::PreEpisodeStage, agent, env) = push!(h.rewards, h.empty_vect)
 (h::RewardsPerEpisode)(::PostActStage, agent, env) = push!(h.rewards[end], reward(env))
 
 #####
