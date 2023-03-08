@@ -117,7 +117,7 @@ end
 
 Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
-(h::TotalRewardPerEpisode)(::PostActStage, agent::AbstractPolicy, env::AbstractEnv) =
+(h::TotalRewardPerEpisode)(::PostActStage, agent, env) =
     h.reward += reward(env)
 
 function (hook::TotalRewardPerEpisode)(
