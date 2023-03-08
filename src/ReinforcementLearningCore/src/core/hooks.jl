@@ -90,11 +90,11 @@ struct RewardsPerEpisode{T} <: AbstractHook where {T<:Number}
     empty_vect::Vector{T}
 
     function RewardsPerEpisode{T}() where {T<:Number}
-        new(Vector{Vector{T}}(), Vector{T}())
+        new{T}(Vector{Vector{T}}(), Vector{T}())
     end
 
     function RewardsPerEpisode()
-        new(Vector{Vector{Float64}}(), Vector{Float64}())
+        new{Float64}(Vector{Vector{Float64}}(), Vector{Float64}())
     end
 end
 
