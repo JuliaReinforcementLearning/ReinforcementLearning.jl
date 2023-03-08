@@ -34,7 +34,7 @@ end
     @test h.steps == [100, 0]
 end
 
-@testset "RewardsPerEpisode"
+@testset "RewardsPerEpisode" begin
     env = RandomWalk1D()
     env.pos = 1
     agent = RandomPolicy()
