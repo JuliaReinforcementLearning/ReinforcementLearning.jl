@@ -28,19 +28,18 @@ function StopAfterStep(step; cur=1, is_show_progress=true)
     StopAfterStep(step, cur, progress)
 end
 
-function (s::StopAfterStep)(args...)
-    if !isnothing(s.progress)
-        # https://github.com/timholy/ProgressMeter.jl/pull/131
-        # next!(s.progress; showvalues = [(Symbol(s.tag, "/", :STEP), s.cur)])
-        ProgressMeter.next!(s.progress)
-    end
-
-    @debug s.tag STEP = s.cur
-
+function _stop_after_step(s::StopAfterStep)
     res = s.cur >= s.step
     s.cur += 1
     res
 end
+
+function (s::StopAfterStep)(args...)
+    ProgressMeter.next!(s.progress)    
+    _stop_after_step(s)
+end
+
+(s::StopAfterStep{Nothing})(args...) = _stop_after_step(s)
 
 #####
 # StopAfterEpisode
