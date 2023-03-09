@@ -16,3 +16,44 @@
         h(PostExperimentStage(), policy, env)
     end
 end
+
+@testset "StepsPerEpisode" begin
+    env = RandomWalk1D()
+    agent = RandomPolicy()
+    h = StepsPerEpisode()
+
+    [h(PostActStage()) for i in 1:100]
+
+    @test h.count == 100
+
+    h(PostEpisodeStage(), agent, env)
+    @test h.count == 0
+    @test h.steps == [100]
+
+    h(PostExperimentStage(), agent, env)
+    @test h.steps == [100, 0]
+end
+
+@testset "RewardsPerEpisode" begin
+    env = RandomWalk1D()
+    env.pos = 1
+    agent = RandomPolicy()
+    h_0 = RewardsPerEpisode()
+    h_1 = RewardsPerEpisode{Float64}()
+    h_2 = RewardsPerEpisode{Float16}()
+
+    for h in [h_0, h_1, h_2]
+        h(PreEpisodeStage(), agent, env)
+        @test h.rewards == [[]]
+
+        env.pos = 1
+        h(PostActStage(), agent, env)
+        @test h.rewards == [[-1.0]]
+        env.pos = 7
+        h(PostActStage(), agent, env)
+        @test h.rewards == [[-1.0, 1.0]]
+        env.pos = 3
+        h(PostActStage(), agent, env)
+        @test h.rewards == [[-1.0, 1.0, 0.0]]
+    end
+end
