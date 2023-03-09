@@ -32,9 +32,9 @@ end
 
     for h in (h_1, h_2, h_3, h_4, h_5)
         h(PostActStage(), policy, env)
-        @test h.reward[] == 1
+        @test h.reward == 1
         h(PostEpisodeStage(), policy, env)
-        @test h.reward[] == 0
+        @test h.reward == 0
         @test h.rewards == [1]
         h(PostExperimentStage(), policy, env)
 
