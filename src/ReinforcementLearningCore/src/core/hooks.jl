@@ -288,19 +288,26 @@ end
 Execute `f(t, agent, env)` every `n` step.
 `t` is a counter of steps.
 """
-mutable struct DoEveryNStep{F} <: AbstractHook
+mutable struct DoEveryNStep{F,T} <: AbstractHook where {F, T <: Integer}
     f::F
-    n::Int
-    t::Int
-end
+    n::T
+    t::T
 
-DoEveryNStep(f; n = 1, t = 0) = DoEveryNStep(f, n, t)
+    function DoEveryNStep(f; n = 1, t = 0)
+        new{typeof(f),Int64}(f, n, t)
+    end
+
+    function DoEveryNStep{T}(f; n = 1, t = 0) where {T <: Integer}
+        new{typeof(f),T}(f, n, t)
+    end
+end
 
 function (hook::DoEveryNStep)(::PostActStage, agent, env)
     hook.t += 1
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
     end
+    return
 end
 
 """
