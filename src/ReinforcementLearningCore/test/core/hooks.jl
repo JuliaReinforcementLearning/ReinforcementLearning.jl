@@ -24,13 +24,13 @@ end
     h_2 = TotalRewardPerEpisode(; is_display_on_exit = false)
     h_3 = TotalRewardPerEpisode()
     h_4 = TotalRewardPerEpisode{Float32}()
-    h_4 = TotalRewardPerEpisode{Float32}(; is_display_on_exit = false)
+    h_5 = TotalRewardPerEpisode{Float32}(; is_display_on_exit = false)
 
     env = RandomWalk1D()
     env.pos = 7
     policy = RandomPolicy(legal_action_space(env))
 
-    for h in (h_1, h_2, h_3)
+    for h in (h_1, h_2, h_3, h_4, h_5)
         h(PostActStage(), policy, env)
         @test h.reward[] == 1
         h(PostEpisodeStage(), policy, env)
