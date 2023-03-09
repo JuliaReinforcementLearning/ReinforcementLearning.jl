@@ -9,7 +9,11 @@ function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), P
             hook_copy = deepcopy(hook)
             hook_copy(stage, policy, env)
             for field_ in hook_fieldnames
-                @test getfield(hook, field_) == getfield(hook_copy, field_)
+                if getfield(hook, field_) isa Ref
+                    @test getfield(hook, field_)[] == getfield(hook_copy, field_)[]
+                else
+                    @test getfield(hook, field_) == getfield(hook_copy, field_)
+                end
             end
         end
     end
