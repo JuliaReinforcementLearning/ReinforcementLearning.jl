@@ -92,3 +92,19 @@ end
     h(PostExperimentStage(), agent, env)
     @test env.pos == 2
 end
+
+@testset "DoEveryNEpisode" begin
+    h_1 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2, stage=PreEpisodeStage())
+    h_2 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2, stage=PostEpisodeStage())
+    h_3 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2)
+    h_list = (h_1, h_2, h_3)
+    stage_list = (PreEpisodeStage(), PostEpisodeStage(), PostEpisodeStage())
+
+    for i in 1:3
+        env = RandomWalk1D()
+        env.pos = 1
+        policy = RandomPolicy(legal_action_space(env))
+        [h_list[i](stage_list[i], policy, env) for j in 1:4]
+        @test env.pos == 3
+    end
+end

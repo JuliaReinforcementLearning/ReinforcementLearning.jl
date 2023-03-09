@@ -330,6 +330,7 @@ function (hook::DoEveryNEpisode{S})(::S, agent, env) where {S}
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
     end
+    return
 end
 
 """
