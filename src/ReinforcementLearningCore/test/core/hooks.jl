@@ -31,7 +31,7 @@ end
         @test h.reward[] == 1
         h(PostEpisodeStage(), policy, env)
         @test h.reward[] == 0
-        @test h.rewards == 1
+        @test h.rewards == [1]
         h(PostExperimentStage(), policy, env)
 
         test_noop!(h; stages=[PreActStage(), PreEpisodeStage(), PreExperimentStage()])
