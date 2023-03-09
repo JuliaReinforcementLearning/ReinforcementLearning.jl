@@ -126,7 +126,7 @@ function (hook::TotalRewardPerEpisode)(
     env,
 )
     push!(hook.rewards, hook.reward[1])
-    hook.reward = 0
+    hook.reward[1] = 0
 end
 
 function (hook::TotalRewardPerEpisode{Bool})(
