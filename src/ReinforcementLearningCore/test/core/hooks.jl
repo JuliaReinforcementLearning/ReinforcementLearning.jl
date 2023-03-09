@@ -1,3 +1,20 @@
+function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), PreEpisodeStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
+    @testset "hook: $(typeof(hook))" begin
+        env = RandomWalk1D()
+        env.pos = 7
+        policy = RandomPolicy(legal_action_space(env))
+
+        hook_fieldnames = fieldnames(typeof(hook))
+        for stage in stages
+            hook_copy = deepcopy(hook)
+            hook_copy(stage, policy, env)
+            for field_ in hook_fieldnames
+                @test getfield(hook, field_) == getfield(hook_copy, field_)
+            end
+        end
+    end
+end
+
 @testset "TotalRewardPerEpisode" begin
     h_1 = TotalRewardPerEpisode(; is_display_on_exit = true)
     h_2 = TotalRewardPerEpisode(; is_display_on_exit = false)
@@ -14,6 +31,8 @@
         @test h.reward == 0
         @test h.rewards == [1]
         h(PostExperimentStage(), policy, env)
+
+        test_noop!(h; stages=[PreActStage(), PreEpisodeStage(), PreExperimentStage()])
     end
 end
 
@@ -35,8 +54,13 @@ end
         @test h.reward == fill(0.0, 10)
         @test h.rewards == fill([1.0], 10)
         h(PostExperimentStage(), policy, env)
+
+        test_noop!(h; stages=[PreActStage(), PreEpisodeStage(), PreExperimentStage()])
     end
 end
+
+
+
 
 
 # NOOP Check for hooks!
