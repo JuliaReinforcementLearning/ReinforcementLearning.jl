@@ -147,9 +147,9 @@ end
 #####
 # TotalBatchRewardPerEpisode
 #####
-struct TotalBatchRewardPerEpisode{T} <: AbstractHook where {T<:Union{Bool,Nothing}}
-    rewards::Vector{Vector{Float64}}
-    reward::Vector{Float64}
+struct TotalBatchRewardPerEpisode{T,F} <: AbstractHook where {T<:Union{Bool,Nothing}, F<:Number}
+    rewards::Vector{Vector{F}}
+    reward::Vector{F}
     is_display_on_exit::Bool
 end
 
@@ -163,14 +163,19 @@ which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 If `is_display_on_exit` is set to `true`, a ribbon plot will be shown to reflect
 the mean and std of rewards.
 """
-function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit::Bool = true)
+function TotalBatchRewardPerEpisode{F}(batch_size::Int; is_display_on_exit::Bool = true) where {F<:Number}
     struct_type = is_display_on_exit ? Bool : Nothing
-    TotalBatchRewardPerEpisode{struct_type}(
-        [Float64[] for _ = 1:batch_size],
-        zeros(batch_size),
+    TotalBatchRewardPerEpisode{struct_type, F}(
+        [[] for _ = 1:batch_size],
+        zeros(F, batch_size),
         is_display_on_exit,
     )
 end
+
+function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit::Bool = true)
+    TotalBatchRewardPerEpisode{Float64}(batch_size; is_display_on_exit = is_display_on_exit)
+end
+
 
 function (hook::TotalBatchRewardPerEpisode)(
     ::PostActStage,
@@ -178,18 +183,20 @@ function (hook::TotalBatchRewardPerEpisode)(
     env,
 )
     hook.reward .+= reward(env)
+    return
 end
 
-function (h::RewardsPerEpisode)(::PreEpisodeStage, agent, env)
+function (hook::TotalBatchRewardPerEpisode)(::PostEpisodeStage, agent, env)
     push!.(hook.rewards, hook.reward)
     hook.reward .= 0
+    return
 end
 
-function (hook::TotalBatchRewardPerEpisode{Bool})(
+function (hook::TotalBatchRewardPerEpisode{Bool, F})(
     ::PostExperimentStage,
     agent,
     env,
-)
+) where {F<:Number}
     n = minimum(map(length, hook.rewards))
     m = mean([@view(x[1:n]) for x in hook.rewards])
     s = std([@view(x[1:n]) for x in hook.rewards])
