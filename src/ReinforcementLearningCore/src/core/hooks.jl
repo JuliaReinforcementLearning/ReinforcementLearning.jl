@@ -12,7 +12,7 @@ export AbstractHook,
 
 using UnicodePlots: lineplot, lineplot!
 using Statistics: mean, std
-using CircularArrayBuffers: CircularArrayBuffer
+using CircularArrayBuffers: CircularVectorBuffer
 
 """
 A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
@@ -85,13 +85,22 @@ end
 
 Store each reward of each step in every episode in the field of `rewards`.
 """
-Base.@kwdef mutable struct RewardsPerEpisode <: AbstractHook
-    rewards::Vector{Vector{Float64}} = Vector{Vector{Float64}}()
+struct RewardsPerEpisode{T} <: AbstractHook where {T<:Number}
+    rewards::Vector{Vector{T}}
+    empty_vect::Vector{T}
+
+    function RewardsPerEpisode{T}() where {T<:Number}
+        new{T}(Vector{Vector{T}}(), Vector{T}())
+    end
+
+    function RewardsPerEpisode()
+        new{Float64}(Vector{Vector{Float64}}(), Vector{Float64}())
+    end
 end
 
 Base.getindex(h::RewardsPerEpisode) = h.rewards
 
-(h::RewardsPerEpisode)(::PreEpisodeStage, agent, env) = push!(h.rewards, [])
+(h::RewardsPerEpisode)(::PreEpisodeStage, agent, env) = push!(h.rewards, h.empty_vect)
 (h::RewardsPerEpisode)(::PostActStage, agent, env) = push!(h.rewards[end], reward(env))
 
 #####
@@ -248,23 +257,29 @@ end
 
 """
     TimePerStep(;max_steps=100)
-    TimePerStep(times::CircularArrayBuffer{Float64}, t::UInt64)
+    TimePerStep(times::CircularVectorBuffer{Float64}, t::Float64)
 
-Store time cost of the latest `max_steps` in the `times` field.
+Store time cost in seconds of the latest `max_steps` in the `times` field.
 """
-mutable struct TimePerStep <: AbstractHook
-    times::CircularArrayBuffer{Float64,1}
-    t::UInt64
+struct TimePerStep{T} <: AbstractHook where {T<:AbstractFloat}
+    times::CircularVectorBuffer{T}
+    t::Vector{Float64}
+
+    function TimePerStep(; max_steps = 100)
+        new{Float64}(CircularVectorBuffer{Float64}(max_steps), Float64[time()])
+    end
+
+    function TimePerStep{T}(; max_steps = 100) where {T<: AbstractFloat}
+        new{T}(CircularVectorBuffer{T}(max_steps), Float64[time()])
+    end
 end
 
 Base.getindex(h::TimePerStep) = h.times
 
-TimePerStep(; max_steps = 100) =
-    TimePerStep(CircularArrayBuffer{Float64}(max_steps), time_ns())
-
 function (hook::TimePerStep)(::PostActStage, agent, env)
-    push!(hook.times, (time_ns() - hook.t) / 1e9)
-    hook.t = time_ns()
+    push!(hook.times, (time() - hook.t[1]))
+    hook.t[1] = time()
+    return
 end
 
 """
