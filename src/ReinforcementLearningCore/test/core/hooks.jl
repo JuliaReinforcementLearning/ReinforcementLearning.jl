@@ -23,9 +23,10 @@ end
 
     for h in (h_1, h_2)
         env = RandomWalk1D()
+        env.pos = 1
         policy = RandomPolicy(legal_action_space(env))
         [h(PostActStage(), policy, env) for i in 1:4]
-        @test env.pos == 6
+        @test env.pos == 3
     end
 end
 
@@ -80,4 +81,14 @@ end
         h(PostActStage(), agent, env)
         @test h.rewards == [[-1.0, 1.0, 0.0]]
     end
+end
+
+@testset "DoOnExit" begin
+    env = RandomWalk1D()
+    env.pos = 1
+    agent = RandomPolicy()
+
+    h = DoOnExit((agent, env) -> (env.pos += 1))
+    h(PostExperimentStage(), agent, env)
+    @test env.pos == 2
 end
