@@ -19,6 +19,8 @@ end
     h_1 = TotalRewardPerEpisode(; is_display_on_exit = true)
     h_2 = TotalRewardPerEpisode(; is_display_on_exit = false)
     h_3 = TotalRewardPerEpisode()
+    h_4 = TotalRewardPerEpisode{Float32}()
+    h_4 = TotalRewardPerEpisode{Float32}(; is_display_on_exit = false)
 
     env = RandomWalk1D()
     env.pos = 7
