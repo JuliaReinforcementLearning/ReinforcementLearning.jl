@@ -27,6 +27,8 @@ end
     for h in (h_1, h_2)
         [h(PostActStage(), policy, env) for i in 1:4]
         @test env.pos == 6
+    end
+end
 
 @testset "TimePerStep" begin
     h_1 = TimePerStep()
