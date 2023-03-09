@@ -65,10 +65,68 @@ end
     end
 end
 
+@testset "DoEveryNStep" begin
+    env = RandomWalk1D()
+    policy = RandomPolicy(legal_action_space(env))
 
+    h_1 = DoEveryNStep((hook, agent, env) -> (env.pos += 1); n=2)
+    h_2 = DoEveryNStep((hook, agent, env) -> () -> print("hi"))
 
+    for h in (h_1, h_2)
+        [h(PostActStage(), policy, env) for i in 1:4]
+        @test env.pos == 6
+    end
+end
 
+@testset "TimePerStep" begin
+    h_1 = TimePerStep()
+    h_2 = TimePerStep{Float32}()
 
-# NOOP Check for hooks!
-# E.g. nothing should change for certain states
-# PostEpisodeStage()
+    sleep_vect = [0.1, 0.2, 0.3]
+    for h in (h_1, h_2)
+        h(PostActStage(), 1, 1)
+        [(sleep(i); h(PostActStage(), 1, 1)) for i in sleep_vect]
+        @test all(round.(h.times[end-2:end]; digits=1) .≈ sleep_vect)
+    end
+end
+
+@testset "StepsPerEpisode" begin
+    env = RandomWalk1D()
+    agent = RandomPolicy()
+    h = StepsPerEpisode()
+
+    [h(PostActStage()) for i in 1:100]
+
+    @test h.count == 100
+
+    h(PostEpisodeStage(), agent, env)
+    @test h.count == 0
+    @test h.steps == [100]
+
+    h(PostExperimentStage(), agent, env)
+    @test h.steps == [100, 0]
+end
+
+@testset "RewardsPerEpisode" begin
+    env = RandomWalk1D()
+    env.pos = 1
+    agent = RandomPolicy()
+    h_0 = RewardsPerEpisode()
+    h_1 = RewardsPerEpisode{Float64}()
+    h_2 = RewardsPerEpisode{Float16}()
+
+    for h in [h_0, h_1, h_2]
+        h(PreEpisodeStage(), agent, env)
+        @test h.rewards == [[]]
+
+        env.pos = 1
+        h(PostActStage(), agent, env)
+        @test h.rewards == [[-1.0]]
+        env.pos = 7
+        h(PostActStage(), agent, env)
+        @test h.rewards == [[-1.0, 1.0]]
+        env.pos = 3
+        h(PostActStage(), agent, env)
+        @test h.rewards == [[-1.0, 1.0, 0.0]]
+    end
+end
