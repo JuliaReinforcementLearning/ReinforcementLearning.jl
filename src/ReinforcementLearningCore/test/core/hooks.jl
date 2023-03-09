@@ -18,13 +18,12 @@
 end
 
 @testset "DoEveryNStep" begin
-    env = RandomWalk1D()
-    policy = RandomPolicy(legal_action_space(env))
-
     h_1 = DoEveryNStep((hook, agent, env) -> (env.pos += 1); n=2)
-    h_2 = DoEveryNStep((hook, agent, env) -> () -> print("hi"))
+    h_2 = DoEveryNStep((hook, agent, env) -> (env.pos += 1); n=2)
 
     for h in (h_1, h_2)
+        env = RandomWalk1D()
+        policy = RandomPolicy(legal_action_space(env))
         [h(PostActStage(), policy, env) for i in 1:4]
         @test env.pos == 6
     end
