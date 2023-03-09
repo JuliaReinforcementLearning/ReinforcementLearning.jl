@@ -16,3 +16,17 @@
         h(PostExperimentStage(), policy, env)
     end
 end
+
+
+@testset "TimePerStep" begin
+    h_1 = TimePerStep()
+    h_2 = TimePerStep{Float32}()
+
+    sleep_vect = [0.1, 0.2, 0.3]
+    for h in (h_1, h_2)
+        h(PostActStage(), 1, 1)
+        [(sleep(i); h(PostActStage(), 1, 1)) for i in sleep_vect]
+        @test all(round.(h.times[end-2:end]; digits=1) .≈ sleep_vect)
+    end
+end
+
