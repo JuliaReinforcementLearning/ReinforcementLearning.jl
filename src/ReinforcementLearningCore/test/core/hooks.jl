@@ -1,6 +1,6 @@
 @testset "TotalRewardPerEpisode" begin
-    h_1 = TotalRewardPerEpisode(; is_display_on_exit = true)
-    h_2 = TotalRewardPerEpisode(; is_display_on_exit = false)
+    h_1 = TotalRewardPerEpisode(; is_display_on_exit=true)
+    h_2 = TotalRewardPerEpisode(; is_display_on_exit=false)
     h_3 = TotalRewardPerEpisode()
 
     env = RandomWalk1D()
