@@ -118,7 +118,7 @@ mutable struct TotalRewardPerEpisode{T} <: AbstractHook where {T<:Union{Bool,Not
     reward::Float64
     is_display_on_exit::Bool
 
-    function TotalRewardPerEpisode(; is_display_on_exit::Bool = true)
+    function TotalRewardPerEpisode(; is_display_on_exit::Bool=true)
         struct_type = is_display_on_exit ? Bool : Nothing
         new{struct_type}(Float64[], 0.0, is_display_on_exit)
     end
@@ -146,9 +146,9 @@ function (hook::TotalRewardPerEpisode{Bool})(
     println(
         lineplot(
             hook.rewards,
-            title = "Total reward per episode",
-            xlabel = "Episode",
-            ylabel = "Score",
+            title="Total reward per episode",
+            xlabel="Episode",
+            ylabel="Score",
         ),
     )
 end
@@ -172,7 +172,7 @@ which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 If `is_display_on_exit` is set to `true`, a ribbon plot will be shown to reflect
 the mean and std of rewards.
 """
-function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit = true)
+function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit=true)
     TotalBatchRewardPerEpisode(
         [Float64[] for _ = 1:batch_size],
         zeros(batch_size),
@@ -206,9 +206,9 @@ function (hook::TotalBatchRewardPerEpisode)(
         s = std([@view(x[1:n]) for x in hook.rewards])
         p = lineplot(
             m,
-            title = "Avg total reward per episode",
-            xlabel = "Episode",
-            ylabel = "Score",
+            title="Avg total reward per episode",
+            xlabel="Episode",
+            ylabel="Score",
         )
         lineplot!(p, m .- s)
         lineplot!(p, m .+ s)
@@ -265,11 +265,11 @@ struct TimePerStep{T} <: AbstractHook where {T<:AbstractFloat}
     times::CircularVectorBuffer{T}
     t::Vector{Float64}
 
-    function TimePerStep(; max_steps = 100)
+    function TimePerStep(; max_steps=100)
         new{Float64}(CircularVectorBuffer{Float64}(max_steps), Float64[time()])
     end
 
-    function TimePerStep{T}(; max_steps = 100) where {T<: AbstractFloat}
+    function TimePerStep{T}(; max_steps=100) where {T<:AbstractFloat}
         new{T}(CircularVectorBuffer{T}(max_steps), Float64[time()])
     end
 end
@@ -288,16 +288,16 @@ end
 Execute `f(t, agent, env)` every `n` step.
 `t` is a counter of steps.
 """
-mutable struct DoEveryNStep{F,T} <: AbstractHook where {F, T <: Integer}
+mutable struct DoEveryNStep{F,T} <: AbstractHook where {F,T<:Integer}
     f::F
     n::T
     t::T
 
-    function DoEveryNStep(f; n = 1, t = 0)
+    function DoEveryNStep(f; n=1, t=0)
         new{typeof(f),Int64}(f, n, t)
     end
 
-    function DoEveryNStep{T}(f; n = 1, t = 0) where {T <: Integer}
+    function DoEveryNStep{T}(f; n=1, t=0) where {T<:Integer}
         new{typeof(f),T}(f, n, t)
     end
 end
@@ -322,7 +322,7 @@ mutable struct DoEveryNEpisode{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <: 
     t::Int
 end
 
-DoEveryNEpisode(f::F; n = 1, t = 0, stage::S = PostEpisodeStage()) where {S,F} =
+DoEveryNEpisode(f::F; n=1, t=0, stage::S=PostEpisodeStage()) where {S,F} =
     DoEveryNEpisode{S,F}(f, n, t)
 
 function (hook::DoEveryNEpisode{S})(::S, agent, env) where {S}
