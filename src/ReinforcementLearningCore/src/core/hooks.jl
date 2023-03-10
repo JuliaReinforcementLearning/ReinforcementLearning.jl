@@ -119,7 +119,7 @@ mutable struct TotalRewardPerEpisode{T,F} <: AbstractHook where {T<:Union{Val{tr
     is_display_on_exit::Bool
 
     function TotalRewardPerEpisode{F}(; is_display_on_exit::Bool=true) where {F<:Number}
-        new{Val{is_display_on_exit}},F}([], 0.0, is_display_on_exit)
+        new{Val{is_display_on_exit},F}([], 0.0, is_display_on_exit)
     end
 
     function TotalRewardPerEpisode(; is_display_on_exit::Bool=true)
