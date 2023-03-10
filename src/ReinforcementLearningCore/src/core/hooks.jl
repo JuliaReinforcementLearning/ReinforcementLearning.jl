@@ -175,8 +175,7 @@ If `is_display_on_exit` is set to `true`, a ribbon plot will be shown to reflect
 the mean and std of rewards.
 """
 function TotalBatchRewardPerEpisode{F}(batch_size::Int; is_display_on_exit::Bool = true) where {F<:Number}
-    struct_type = is_display_on_exit ? Bool : Nothing
-    TotalBatchRewardPerEpisode{struct_type, F}(
+    TotalBatchRewardPerEpisode{is_display_on_exit, F}(
         [[] for _ = 1:batch_size],
         zeros(F, batch_size),
         is_display_on_exit,
