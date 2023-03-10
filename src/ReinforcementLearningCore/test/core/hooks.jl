@@ -20,8 +20,8 @@ function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), P
 end
 
 @testset "TotalRewardPerEpisode" begin
-    h_1 = TotalRewardPerEpisode(; is_display_on_exit = true)
-    h_2 = TotalRewardPerEpisode(; is_display_on_exit = false)
+    h_1 = TotalRewardPerEpisode(; is_display_on_exit=true)
+    h_2 = TotalRewardPerEpisode(; is_display_on_exit=false)
     h_3 = TotalRewardPerEpisode()
     h_4 = TotalRewardPerEpisode{Float32}()
     h_5 = TotalRewardPerEpisode{Float32}(; is_display_on_exit = false)
@@ -66,15 +66,15 @@ end
 end
 
 @testset "DoEveryNStep" begin
-    env = RandomWalk1D()
-    policy = RandomPolicy(legal_action_space(env))
-
     h_1 = DoEveryNStep((hook, agent, env) -> (env.pos += 1); n=2)
-    h_2 = DoEveryNStep((hook, agent, env) -> () -> print("hi"))
+    h_2 = DoEveryNStep((hook, agent, env) -> (env.pos += 1); n=2)
 
     for h in (h_1, h_2)
+        env = RandomWalk1D()
+        env.pos = 1
+        policy = RandomPolicy(legal_action_space(env))
         [h(PostActStage(), policy, env) for i in 1:4]
-        @test env.pos == 6
+        @test env.pos == 3
     end
 end
 
@@ -128,5 +128,31 @@ end
         env.pos = 3
         h(PostActStage(), agent, env)
         @test h.rewards == [[-1.0, 1.0, 0.0]]
+    end
+end
+
+@testset "DoOnExit" begin
+    env = RandomWalk1D()
+    env.pos = 1
+    agent = RandomPolicy()
+
+    h = DoOnExit((agent, env) -> (env.pos += 1))
+    h(PostExperimentStage(), agent, env)
+    @test env.pos == 2
+end
+
+@testset "DoEveryNEpisode" begin
+    h_1 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2, stage=PreEpisodeStage())
+    h_2 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2, stage=PostEpisodeStage())
+    h_3 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2)
+    h_list = (h_1, h_2, h_3)
+    stage_list = (PreEpisodeStage(), PostEpisodeStage(), PostEpisodeStage())
+
+    for i in 1:3
+        env = RandomWalk1D()
+        env.pos = 1
+        policy = RandomPolicy(legal_action_space(env))
+        [h_list[i](stage_list[i], policy, env) for j in 1:4]
+        @test env.pos == 3
     end
 end
