@@ -11,5 +11,6 @@ include("devmode.jl")
 @reexport using ReinforcementLearningCore
 @reexport using ReinforcementLearningEnvironments
 @reexport using ReinforcementLearningZoo
+@reexport using MultiAgentReinforcementLearning
 
 end

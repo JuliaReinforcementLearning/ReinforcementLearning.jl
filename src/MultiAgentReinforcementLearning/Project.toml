@@ -1,0 +1,13 @@
+name = "MultiAgentReinforcementLearning"
+uuid = "c65af49a-feda-45df-9d14-b4e40efca6f2"
+authors = ["Panajiotis Keßler <panajiotis@christoforidis.net>"]
+version = "0.1.0"
+
+[deps]
+BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+ReinforcementLearningBase = "e575027e-6cd6-5018-9292-cdc6200d2b44"
+ReinforcementLearningCore = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
+ReinforcementLearningTrajectories = "6486599b-a3cd-4e92-a99a-2cea90cc8c3c"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
