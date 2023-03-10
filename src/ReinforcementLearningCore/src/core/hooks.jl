@@ -140,19 +140,25 @@ function (hook::TotalRewardPerEpisode)(
     hook.reward = 0
 end
 
+function Base.show(io::IO, hook::TotalRewardPerEpisode{Val{true}, F}) where {F<:Number}
+    if hook.rewards != []
+        println(io, lineplot(
+            hook.rewards,
+            title="Total reward per episode",
+            xlabel="Episode",
+            ylabel="Score",
+        ))
+    else
+        println(io, typeof(hook))
+    end
+end
+
 function (hook::TotalRewardPerEpisode{Val{true}, F})(
     ::PostExperimentStage,
     agent,
     env,
 ) where {F<:Number}
-    println(
-        lineplot(
-            hook.rewards,
-            title="Total reward per episode",
-            xlabel="Episode",
-            ylabel="Score",
-        ),
-    )
+    display(hook)
 end
 
 #####
@@ -202,23 +208,31 @@ function (hook::TotalBatchRewardPerEpisode)(::PostEpisodeStage, agent, env)
     return
 end
 
+function Base.show(io::IO, hook::TotalBatchRewardPerEpisode{Val{true}, F}) where {F<:Number}
+    if hook.rewards != [[]]
+        n = minimum(map(length, hook.rewards))
+        m = mean([@view(x[1:n]) for x in hook.rewards])
+        s = std([@view(x[1:n]) for x in hook.rewards])
+        p = lineplot(
+            m,
+            title = "Avg total reward per episode",
+            xlabel = "Episode",
+            ylabel = "Score",
+        )
+        lineplot!(p, m .- s)
+        lineplot!(p, m .+ s)
+        println(io, p)
+    else
+        println(io, typeof(hook))
+    end
+end
+
 function (hook::TotalBatchRewardPerEpisode{Val{true}, F})(
     ::PostExperimentStage,
     agent,
     env,
 ) where {F<:Number}
-    n = minimum(map(length, hook.rewards))
-    m = mean([@view(x[1:n]) for x in hook.rewards])
-    s = std([@view(x[1:n]) for x in hook.rewards])
-    p = lineplot(
-        m,
-        title = "Avg total reward per episode",
-        xlabel = "Episode",
-        ylabel = "Score",
-    )
-    lineplot!(p, m .- s)
-    lineplot!(p, m .+ s)
-    println(p)
+    display(hook)
 end
 
 #####
