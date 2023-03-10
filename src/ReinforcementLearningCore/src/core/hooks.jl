@@ -140,8 +140,8 @@ function (hook::TotalRewardPerEpisode)(
     hook.reward = 0
 end
 
-function Base.show(io::IO, hook::TotalRewardPerEpisode{Val{true}, F}) where {F<:Number}
-    if hook.rewards != []
+function Base.show(io::IO, hook::TotalRewardPerEpisode{true, F}) where {F<:Number}
+    if length(hook.rewards) > 0
         println(io, lineplot(
             hook.rewards,
             title="Total reward per episode",
@@ -153,7 +153,7 @@ function Base.show(io::IO, hook::TotalRewardPerEpisode{Val{true}, F}) where {F<:
     end
 end
 
-function (hook::TotalRewardPerEpisode{Val{true}, F})(
+function (hook::TotalRewardPerEpisode{true, F})(
     ::PostExperimentStage,
     agent,
     env,
@@ -208,8 +208,8 @@ function (hook::TotalBatchRewardPerEpisode)(::PostEpisodeStage, agent, env)
     return
 end
 
-function Base.show(io::IO, hook::TotalBatchRewardPerEpisode{Val{true}, F}) where {F<:Number}
-    if hook.rewards != [[]]
+function Base.show(io::IO, hook::TotalBatchRewardPerEpisode{true, F}) where {F<:Number}
+    if sum(length(i) for i in hook.rewards) > 0
         n = minimum(map(length, hook.rewards))
         m = mean([@view(x[1:n]) for x in hook.rewards])
         s = std([@view(x[1:n]) for x in hook.rewards])
@@ -227,7 +227,7 @@ function Base.show(io::IO, hook::TotalBatchRewardPerEpisode{Val{true}, F}) where
     end
 end
 
-function (hook::TotalBatchRewardPerEpisode{Val{true}, F})(
+function (hook::TotalBatchRewardPerEpisode{true, F})(
     ::PostExperimentStage,
     agent,
     env,
