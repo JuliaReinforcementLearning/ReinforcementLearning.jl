@@ -113,14 +113,13 @@ Base.getindex(h::RewardsPerEpisode) = h.rewards
 Store the total reward of each episode in the field of `rewards`. If
 `is_display_on_exit` is set to `true`, a unicode plot will be shown at the [`PostExperimentStage`](@ref).
 """
-mutable struct TotalRewardPerEpisode{T,F} <: AbstractHook where {T<:Union{Bool,Nothing},F<:Number}
+mutable struct TotalRewardPerEpisode{T,F} <: AbstractHook where {T<:Union{Val{true},Val{false}},F<:Number}
     rewards::Vector{F}
     reward::F
     is_display_on_exit::Bool
 
     function TotalRewardPerEpisode{F}(; is_display_on_exit::Bool=true) where {F<:Number}
-        struct_type = is_display_on_exit ? Bool : Nothing
-        new{struct_type,F}([], 0.0, is_display_on_exit)
+        new{Val{is_display_on_exit}},F}([], 0.0, is_display_on_exit)
     end
 
     function TotalRewardPerEpisode(; is_display_on_exit::Bool=true)
@@ -141,7 +140,7 @@ function (hook::TotalRewardPerEpisode)(
     hook.reward = 0
 end
 
-function (hook::TotalRewardPerEpisode{Bool, F})(
+function (hook::TotalRewardPerEpisode{Val{true}, F})(
     ::PostExperimentStage,
     agent,
     env,
@@ -159,7 +158,7 @@ end
 #####
 # TotalBatchRewardPerEpisode
 #####
-struct TotalBatchRewardPerEpisode{T,F} <: AbstractHook where {T<:Union{Bool,Nothing}, F<:Number}
+struct TotalBatchRewardPerEpisode{T,F} <: AbstractHook where {T<:Union{Val{true},Val{false}}, F<:Number}
     rewards::Vector{Vector{F}}
     reward::Vector{F}
     is_display_on_exit::Bool
@@ -204,7 +203,7 @@ function (hook::TotalBatchRewardPerEpisode)(::PostEpisodeStage, agent, env)
     return
 end
 
-function (hook::TotalBatchRewardPerEpisode{Bool, F})(
+function (hook::TotalBatchRewardPerEpisode{Val{true}, F})(
     ::PostExperimentStage,
     agent,
     env,
