@@ -1,6 +1,6 @@
 # MultiAgentReinforcementLearning.jl
 
-This package provides mutli agent reinforcement learning baselines as well as some further techniques.
+This package provides multi agent reinforcement learning baselines as well as some further techniques.
 
 Basically, the following parts are included in this module
 

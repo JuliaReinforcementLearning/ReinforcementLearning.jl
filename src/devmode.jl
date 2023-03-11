@@ -20,18 +20,13 @@ function activate_devmode!()
     Pkg.activate("src/ReinforcementLearningZoo")
     Pkg.develop(path="src/ReinforcementLearningCore")
     Pkg.develop(path="src/ReinforcementLearningBase")
-    Pkg.develop(path="src/ReinforcementLearningTrajectories")    
     #RLEnvironments
     Pkg.activate("src/ReinforcementLearningEnvironments")
     Pkg.develop(path="src/ReinforcementLearningBase")
-    Pkg.develop(path="src/ReinforcementLearningTrajectories")
-    #RLTrajectories
-    # no deps
     # MultiAgentRL
     Pkg.activate("src/MultiAgentReinforcementLearning")
     Pkg.develop(path="src/ReinforcementLearningCore")
     Pkg.develop(path="src/ReinforcementLearningBase")
-    Pkg.develop(path="src/ReinforcementLearningTrajectories")
     #RLExperiments
     Pkg.activate("src/ReinforcementLearningExperiments")
     Pkg.develop(path=".")
@@ -39,13 +34,11 @@ function activate_devmode!()
     Pkg.develop(path="src/ReinforcementLearningEnvironments")
     Pkg.develop(path="src/ReinforcementLearningCore")
     Pkg.develop(path="src/ReinforcementLearningBase")
-    Pkg.develop(path="src/ReinforcementLearningTrajectories")
     #RL
     Pkg.activate(".")
     Pkg.develop(path="src/ReinforcementLearningZoo")
     Pkg.develop(path="src/ReinforcementLearningEnvironments")
     Pkg.develop(path="src/ReinforcementLearningCore")
     Pkg.develop(path="src/ReinforcementLearningBase")
-    Pkg.develop(path="src/ReinforcementLearningTrajectories")
     Pkg.develop(path="src/MultiAgentReinforcementLearning")
 end
