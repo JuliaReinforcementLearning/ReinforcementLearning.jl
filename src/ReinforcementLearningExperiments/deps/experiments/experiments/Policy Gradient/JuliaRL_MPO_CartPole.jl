@@ -26,7 +26,7 @@ function RLCore.Experiment(
         actor = Approximator(GaussianNetwork(
             Chain(Dense(4, 64, tanh), Dense(64,64,tanh)),
             Dense(64, 1),
-            Dense(64, 1, init = Flux.glorot_uniform(gain = 0.1))), Adam(3f-4)),
+            Dense(64, 1, softplus, init = Flux.glorot_uniform(gain = 0.1))), Adam(3f-4)),
         qnetwork1 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
         qnetwork2 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
         action_sample_size = 32,
