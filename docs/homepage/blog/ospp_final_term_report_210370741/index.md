@@ -36,7 +36,7 @@ Establish a General Pipeline for Offline Reinforcement Learning Evaluation
 
 In recent years, there have been several breakthroughs in the field of Reinforcement Learning with numerous practical applications where RL bots have been able to achieve superhuman performance. This is also reflected in the industry where several cutting edge solutions have been developed based on RL ([Tesla Motors](https://www.tesla.com/), [AutoML](https://cloud.google.com/automl), [DeepMind data center cooling solutions](https://deepmind.com/blog/article/deepmind-ai-reduces-google-data-centre-cooling-bill-40) just to name a few).
 
-One of the most prominent challenges in RL is the lack of reliable environments for training RL agents. **Offline RL** has played a pivotal role in solving this problem by removing the need for the agent to interact with the environment to improve its policy over time. This brings forth the problem of not having reliable tests to verify the performance of RL algorithms. Such tests are facilitated by standard datasets ([RL Unplugged](https://arxiv.org/abs/2006.13888)\dcite{DBLP:journals/corr/abs-2006-13888}, [D4RL](https://arxiv.org/abs/2004.07219)\dcite{DBLP:journals/corr/abs-2004-07219} and [An Optimistic Perspective on Offline Reinforcement Learning](https://arxiv.org/abs/1907.04543)\dcite{agarwal2020optimistic}) that are used to train Offline RL agents and benchmark against other algorithms and implementations. [ReinforcementLearningDatasets.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningDatasets) provides a simple solution to access various standard datasets that are available for Offline RL benchmarking across a variety of tasks.
+One of the most prominent challenges in RL is the lack of reliable environments for training RL agents. **Offline RL** has played a pivotal role in solving this problem by removing the need for the agent to interact with the environment to improve its policy over time. This brings forth the problem of not having reliable tests to verify the performance of RL algorithms. Such tests are facilitated by standard datasets ([RL Unplugged](https://arxiv.org/abs/2006.13888)\dcite{DBLP:journals/corr/abs-2006-13888}, [D4RL](https://arxiv.org/abs/2004.07219)\dcite{DBLP:journals/corr/abs-2004-07219} and [An Optimistic Perspective on Offline Reinforcement Learning](https://arxiv.org/abs/1907.04543)\dcite{agarwal2020optimistic}) that are used to train Offline RL agents and benchmark against other algorithms and implementations. [ReinforcementLearningDatasets.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/main/src/ReinforcementLearningDatasets) provides a simple solution to access various standard datasets that are available for Offline RL benchmarking across a variety of tasks.
 
 Another problem in Offline RL is Offline Model Selection. For this, there are numerous policies that are available in [Benchmarks for Deep Off-Policy Evaluation](https://openreview.net/forum?id=kWSeGEeHvF8)\dcite{DBLP:journals/corr/abs-2103-16596}. ReinforcementLearningDatasets.jl will also help in loading policies that will aid in model selection in ReinforcementLearning.jl package.
 
@@ -561,7 +561,7 @@ RingBuffer{NamedTuple{(:reward, :episodic_reward, :discount, :state, :next_state
 Support is given for D4RL policies provided in [Deep OPE](https://github.com/google-research/deep_ope)\dcite{DBLP:journals/corr/abs-2103-16596}.
 
 #### Implementation
-The policies that are given [here](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningDatasets/src/deep_ope/d4rl/d4rl_policies.jl) are loaded using `d4rl_policy` function.
+The policies that are given [here](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/main/src/ReinforcementLearningDatasets/src/deep_ope/d4rl/d4rl_policies.jl) are loaded using `d4rl_policy` function.
 
 The policies are loaded into a `D4RLGaussianNetwork` which will be integrated into `GaussianNetwork` in RLCore soon.
 ```julia
@@ -590,9 +590,9 @@ function (model::D4RLGaussianNetwork)(
     a, μ
 end 
 ```
-The weights are loaded using the following [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningDatasets/src/deep_ope/d4rl/d4rl_policy.jl).
+The weights are loaded using the following [code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/main/src/ReinforcementLearningDatasets/src/deep_ope/d4rl/d4rl_policy.jl).
 
-To know the real life performance of the networks an auxiliary function `deep_ope_d4rl_evaluate` is also given which gives the unicode plot showing the performance of the policy. The code is given [here](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/src/ReinforcementLearningDatasets/src/deep_ope/d4rl/evaluate.jl).
+To know the real life performance of the networks an auxiliary function `deep_ope_d4rl_evaluate` is also given which gives the unicode plot showing the performance of the policy. The code is given [here](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/main/src/ReinforcementLearningDatasets/src/deep_ope/d4rl/evaluate.jl).
 
 #### Working
 The params needed for loading the policies can be obtained using `d4rl_policy_params`
