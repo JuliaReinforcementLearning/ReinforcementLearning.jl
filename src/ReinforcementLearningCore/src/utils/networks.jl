@@ -32,7 +32,7 @@ export GaussianNetwork
 Returns `μ` and `σ` when called.  Create a distribution to sample from using
 `Normal.(μ, σ)`. `min_σ` and `max_σ` are used to clip the output from
 `σ`. `pre` is a shared body before the two heads of the NN. σ should be > 0. 
-You may enfore this using a `softplus` output activation. 
+You may enforce this using a `softplus` output activation. 
 """
 Base.@kwdef struct GaussianNetwork{P,U,S}
     pre::P = identity
@@ -56,7 +56,7 @@ This function is compatible with a multidimensional action space.
 function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, is_return_log_prob::Bool=false)
     x = model.pre(s)
     μ, raw_σ = model.μ(x), model.σ(x)
-    σ = clamp.(raw_σ, lmodel.min_σ, model.max_σ)
+    σ = clamp.(raw_σ, model.min_σ, model.max_σ)
     if is_sampling
         z = ignore_derivatives() do
             noise = randn(rng, Float32, size(μ))
