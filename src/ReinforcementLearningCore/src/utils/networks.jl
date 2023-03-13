@@ -42,7 +42,7 @@ Base.@kwdef struct GaussianNetwork{P,U,S}
     max_σ::Float32 = Inf32
 end
 
-GaussianNetwork(pre, μ, logσ) = GaussianNetwork(pre, μ, logσ, 0.0f0, Inf32)
+GaussianNetwork(pre, μ, σ) = GaussianNetwork(pre, μ, σ, 0.0f0, Inf32)
 
 @functor GaussianNetwork
 
@@ -460,8 +460,7 @@ end
 Flux.@functor VAE
 
 function (model::VAE)(rng::AbstractRNG, state, action)
-    μ, logσ = model.encoder(vcat(state, action))
-    σ = exp.(logσ)
+    μ, σ = model.encoder(vcat(state, action))
     z = μ .+ σ .* randn(rng, Float32, size(μ))
     u = decode(model, state, z)
     return u, μ, σ
