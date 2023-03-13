@@ -1,3 +1,8 @@
+"""
+test_noop!(hook; stages=[PreActStage()])
+
+Tests that the hook is not modified when called with the specified set of stages.
+"""
 function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), PreEpisodeStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     @testset "hook: $(typeof(hook))" begin
         env = RandomWalk1D()
@@ -75,6 +80,8 @@ end
         policy = RandomPolicy(legal_action_space(env))
         [h(PostActStage(), policy, env) for i in 1:4]
         @test env.pos == 3
+
+        test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end
 end
 
@@ -87,6 +94,7 @@ end
         h(PostActStage(), 1, 1)
         [(sleep(i); h(PostActStage(), 1, 1)) for i in sleep_vect]
         @test all(round.(h.times[end-2:end]; digits=1) .≈ sleep_vect)
+        test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end
 end
 
@@ -105,17 +113,19 @@ end
 
     h(PostExperimentStage(), agent, env)
     @test h.steps == [100, 0]
+
+    test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PreExperimentStage()])
 end
 
 @testset "RewardsPerEpisode" begin
     env = RandomWalk1D()
     env.pos = 1
     agent = RandomPolicy()
-    h_0 = RewardsPerEpisode()
-    h_1 = RewardsPerEpisode{Float64}()
-    h_2 = RewardsPerEpisode{Float16}()
+    h_1 = RewardsPerEpisode()
+    h_2 = RewardsPerEpisode{Float64}()
+    h_3 = RewardsPerEpisode{Float16}()
 
-    for h in [h_0, h_1, h_2]
+    for h in (h_1, h_2, h_3)
         h(PreEpisodeStage(), agent, env)
         @test h.rewards == [[]]
 
@@ -128,6 +138,7 @@ end
         env.pos = 3
         h(PostActStage(), agent, env)
         @test h.rewards == [[-1.0, 1.0, 0.0]]
+        test_noop!(h, stages=[PreActStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end
 end
 
@@ -149,10 +160,13 @@ end
     stage_list = (PreEpisodeStage(), PostEpisodeStage(), PostEpisodeStage())
 
     for i in 1:3
+        h = h_list[i]
+        stage = stage_list[i]
         env = RandomWalk1D()
         env.pos = 1
         policy = RandomPolicy(legal_action_space(env))
-        [h_list[i](stage_list[i], policy, env) for j in 1:4]
+        [h(stage, policy, env) for j in 1:4]
         @test env.pos == 3
+        test_noop!(h, stages=[PreActStage(), PostActStage(), PreExperimentStage(), PostExperimentStage()])
     end
 end
