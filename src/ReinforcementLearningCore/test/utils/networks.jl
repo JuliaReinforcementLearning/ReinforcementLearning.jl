@@ -54,9 +54,9 @@ using Flux: params, gradient
         @testset "identity normalizer" begin
             pre = Dense(20,15)
             μ = Dense(15,10)
-            logσ = Dense(15,10)
-            gn = GaussianNetwork(pre, μ, logσ)
-            @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, logσ.weight, logσ.bias])
+            σ = Dense(15,10, softplus)
+            gn = GaussianNetwork(pre, μ, σ)
+            @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, σ.weight, σ.bias])
             state = rand(20,3) #batch of 3 states
             m, L = gn(state)
             @test size(m) == size(L) == (10,3)
@@ -107,9 +107,9 @@ using Flux: params, gradient
             if CUDA.functional()
                 pre = Dense(20,15) |> gpu
                 μ = Dense(15,10) |> gpu
-                logσ = Dense(15,10) |> gpu
-                gn = GaussianNetwork(pre, μ, logσ)
-                @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, logσ.weight, logσ.bias])
+                σ = Dense(15,10) |> gpu
+                gn = GaussianNetwork(pre, μ, σ)
+                @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, σ.weight, σ.bias])
                 state = rand(20,3)  |> gpu #batch of 3 states
                 m, L = gn(state)
                 @test size(m) == size(L) == (10,3)
