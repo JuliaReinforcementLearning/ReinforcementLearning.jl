@@ -108,26 +108,28 @@ Base.getindex(h::RewardsPerEpisode) = h.rewards
 #####
 
 """
-    TotalRewardPerEpisode(; rewards = Float64[], reward = 0.0, is_display_on_exit = true)
+    TotalRewardPerEpisode(; is_display_on_exit = true)
 
 Store the total reward of each episode in the field of `rewards`. If
 `is_display_on_exit` is set to `true`, a unicode plot will be shown at the [`PostExperimentStage`](@ref).
 """
-mutable struct TotalRewardPerEpisode{T} <: AbstractHook where {T<:Union{Bool,Nothing}}
-    rewards::Vector{Float64}
-    reward::Float64
+mutable struct TotalRewardPerEpisode{T,F} <: AbstractHook where {T<:Union{Val{true},Val{false}},F<:Number}
+    rewards::Vector{F}
+    reward::F
     is_display_on_exit::Bool
 
+    function TotalRewardPerEpisode{F}(; is_display_on_exit::Bool=true) where {F<:Number}
+        new{Val{is_display_on_exit},F}([], 0.0, is_display_on_exit)
+    end
+
     function TotalRewardPerEpisode(; is_display_on_exit::Bool=true)
-        struct_type = is_display_on_exit ? Bool : Nothing
-        new{struct_type}(Float64[], 0.0, is_display_on_exit)
+        TotalRewardPerEpisode{Float64}(; is_display_on_exit=is_display_on_exit)
     end
 end
 
 Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
-(h::TotalRewardPerEpisode)(::PostActStage, agent, env) =
-    h.reward += reward(env)
+(h::TotalRewardPerEpisode)(::PostActStage, agent, env) = h.reward += reward(env)
 
 function (hook::TotalRewardPerEpisode)(
     ::PostEpisodeStage,
@@ -138,27 +140,33 @@ function (hook::TotalRewardPerEpisode)(
     hook.reward = 0
 end
 
-function (hook::TotalRewardPerEpisode{Bool})(
-    ::PostExperimentStage,
-    agent,
-    env,
-)
-    println(
-        lineplot(
+function Base.show(io::IO, hook::TotalRewardPerEpisode{true, F}) where {F<:Number}
+    if length(hook.rewards) > 0
+        println(io, lineplot(
             hook.rewards,
             title="Total reward per episode",
             xlabel="Episode",
             ylabel="Score",
-        ),
-    )
+        ))
+    else
+        println(io, typeof(hook))
+    end
+end
+
+function (hook::TotalRewardPerEpisode{true, F})(
+    ::PostExperimentStage,
+    agent,
+    env,
+) where {F<:Number}
+    display(hook)
 end
 
 #####
 # TotalBatchRewardPerEpisode
 #####
-struct TotalBatchRewardPerEpisode <: AbstractHook
-    rewards::Vector{Vector{Float64}}
-    reward::Vector{Float64}
+struct TotalBatchRewardPerEpisode{T,F} <: AbstractHook where {T<:Union{Val{true},Val{false}}, F<:Number}
+    rewards::Vector{Vector{F}}
+    reward::Vector{F}
     is_display_on_exit::Bool
 end
 
@@ -172,48 +180,59 @@ which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 If `is_display_on_exit` is set to `true`, a ribbon plot will be shown to reflect
 the mean and std of rewards.
 """
-function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit=true)
-    TotalBatchRewardPerEpisode(
-        [Float64[] for _ = 1:batch_size],
-        zeros(batch_size),
+function TotalBatchRewardPerEpisode{F}(batch_size::Int; is_display_on_exit::Bool = true) where {F<:Number}
+    TotalBatchRewardPerEpisode{is_display_on_exit, F}(
+        [[] for _ = 1:batch_size],
+        zeros(F, batch_size),
         is_display_on_exit,
     )
 end
+
+function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit::Bool = true)
+    TotalBatchRewardPerEpisode{Float64}(batch_size; is_display_on_exit = is_display_on_exit)
+end
+
 
 function (hook::TotalBatchRewardPerEpisode)(
     ::PostActStage,
     agent,
     env,
 )
-    R = reward(env)
-    for (i, (t, r)) in enumerate(zip(is_terminated(env), R))
-        hook.reward[i] += r
-        if t
-            push!(hook.rewards[i], hook.reward[i])
-            hook.reward[i] = 0.0
-        end
-    end
+    hook.reward .+= reward(env)
+    return
 end
 
-function (hook::TotalBatchRewardPerEpisode)(
-    ::PostExperimentStage,
-    agent,
-    env,
-)
-    if hook.is_display_on_exit
+function (hook::TotalBatchRewardPerEpisode)(::PostEpisodeStage, agent, env)
+    push!.(hook.rewards, hook.reward)
+    hook.reward .= 0
+    return
+end
+
+function Base.show(io::IO, hook::TotalBatchRewardPerEpisode{true, F}) where {F<:Number}
+    if sum(length(i) for i in hook.rewards) > 0
         n = minimum(map(length, hook.rewards))
         m = mean([@view(x[1:n]) for x in hook.rewards])
         s = std([@view(x[1:n]) for x in hook.rewards])
         p = lineplot(
             m,
-            title="Avg total reward per episode",
-            xlabel="Episode",
-            ylabel="Score",
+            title = "Avg total reward per episode",
+            xlabel = "Episode",
+            ylabel = "Score",
         )
         lineplot!(p, m .- s)
         lineplot!(p, m .+ s)
-        println(p)
+        println(io, p)
+    else
+        println(io, typeof(hook))
     end
+end
+
+function (hook::TotalBatchRewardPerEpisode{true, F})(
+    ::PostExperimentStage,
+    agent,
+    env,
+) where {F<:Number}
+    display(hook)
 end
 
 #####
