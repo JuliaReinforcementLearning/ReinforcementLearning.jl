@@ -13,6 +13,8 @@
     "JuliaRL_TD3_Pendulum.jl",
     "JuliaRL_VMPO_CartPole.jl",
     "JuliaRL_VPG_CartPole.jl",
+    "JuliaRL_MPO_CartPole.jl",
+    "JuliaRL_TRPO_CartPole.jl",    
     "rlpyt_A2C_Atari.jl",
     "rlpyt_PPO_Atari.jl"
   ]

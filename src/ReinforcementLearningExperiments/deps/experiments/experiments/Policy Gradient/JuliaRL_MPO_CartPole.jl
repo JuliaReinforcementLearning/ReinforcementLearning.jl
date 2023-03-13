@@ -1,6 +1,6 @@
 # ---
 # title: JuliaRL\_MPO\_Cartpole
-# cover:
+# cover: assets/logo.svg
 # description: Solving Cartpole with MPO with a Discrete or a Continuous action space.
 # date: 2022-12-20
 # author: "[Henri Dehaybe](https://github.com/HenriDeh)"
