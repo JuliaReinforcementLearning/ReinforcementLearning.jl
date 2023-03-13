@@ -7,10 +7,10 @@
 # ---
 
 #+ tangle=false
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using OpenSpiel
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:TabularCFR},
     ::Val{:OpenSpiel},

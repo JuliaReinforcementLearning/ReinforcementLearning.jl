@@ -19,28 +19,42 @@ Base.@kwdef mutable struct RandomWalk1D <: AbstractEnv
     actions::Vector{Int} = [-1, 1]
     start_pos::Int = (N + 1) ÷ 2
     pos::Int = start_pos
+
+    action_space::Base.OneTo = Base.OneTo(length(actions))
+    state_space::Base.OneTo = Base.OneTo(N)
 end
 
-RLBase.action_space(env::RandomWalk1D) = Base.OneTo(length(env.actions))
+RLBase.action_space(env::RandomWalk1D) = env.action_space
 
-function (env::RandomWalk1D)(action)
-    env.pos = max(min(env.pos + env.actions[action], env.N), 1)
+function (env::RandomWalk1D)(action::Int)
+    env.pos += env.actions[action]
+    if env.pos > env.N
+        env.pos = env.N
+    elseif env.pos < 1
+        env.pos = 1
+    end
+    return
 end
 
 RLBase.state(env::RandomWalk1D) = env.pos
-RLBase.state_space(env::RandomWalk1D) = Base.OneTo(env.N)
+RLBase.state_space(env::RandomWalk1D) = env.state_space
 RLBase.is_terminated(env::RandomWalk1D) = env.pos == 1 || env.pos == env.N
 RLBase.reset!(env::RandomWalk1D) = env.pos = env.start_pos
 
-function RLBase.reward(env::RandomWalk1D)
-    if env.pos == 1
-        first(env.rewards)
-    elseif env.pos == env.N
-        last(env.rewards)
+RLBase.reward(env::RandomWalk1D) = random_walk_reward(env.pos, env.rewards, env.N)
+
+function random_walk_reward(pos::Int, rewards::Pair{Float64,Float64}, N::Int)
+    if pos == 1
+        return random_walk_reward_first(rewards)
+    elseif pos == N
+        return random_walk_reward_last(rewards)
     else
-        0.0
+        return 0.0
     end
 end
+
+random_walk_reward_first(rewards::Pair{Float64,Float64}) = first(rewards)
+random_walk_reward_last(rewards::Pair{Float64,Float64}) = last(rewards)
 
 RLBase.NumAgentStyle(::RandomWalk1D) = SINGLE_AGENT
 RLBase.DynamicStyle(::RandomWalk1D) = SEQUENTIAL

@@ -414,19 +414,19 @@ So that can design the inner `DDPGPolicy` and trajectory like the following:
 policy = DDPGPolicy(
     behavior_actor = NeuralNetworkApproximator(
         model = create_actor(),
-        optimizer = ADAM(),
+        optimizer = Adam(),
     ),
     behavior_critic = NeuralNetworkApproximator(
         model = create_critic(),
-        optimizer = ADAM(),
+        optimizer = Adam(),
     ),
     target_actor = NeuralNetworkApproximator(
         model = create_actor(),
-        optimizer = ADAM(),
+        optimizer = Adam(),
     ),
     target_critic = NeuralNetworkApproximator(
         model = create_critic(),
-        optimizer = ADAM(),
+        optimizer = Adam(),
     ),
     γ = 0.95f0,
     ρ = 0.99f0,
@@ -491,11 +491,11 @@ create_critic(critic_dim) = Chain(
 create_policy(player) = DDPGPolicy(
     behavior_actor = NeuralNetworkApproximator(
         model = create_actor(player),
-        optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), ADAM(1e-2)),
+        optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), Adam(1e-2)),
     ),
     behavior_critic = NeuralNetworkApproximator(
         model = create_critic(critic_dim),
-        optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), ADAM(1e-2)),
+        optimizer = Flux.Optimise.Optimiser(ClipNorm(0.5), Adam(1e-2)),
     ),
     target_actor = NeuralNetworkApproximator(
         model = create_actor(player),
@@ -626,16 +626,16 @@ function RLBase.update!(
         # Vector of shape `(length(info_states), 1)`
         # compute expected reward from the start of `e` with policy_vs_best_reponse
         # baseline = ∑ₐ πᵢ(s, a) * q(s, a)
-        baseline = @ignore Flux.stack(([values_vs_br(policy_vs_br, e)] for e in info_states), 1) |> x -> _device(π, x)
+        baseline = @ignore Flux.stack(([values_vs_br(policy_vs_br, e)] for e in info_states); dims=1) |> x -> _device(π, x)
         
         # Vector of shape `(length(info_states), length(action_space))`
         # compute expected reward from the start of `e` when playing each action.
-        q_values = Flux.stack((q_value(π, policy_vs_br, e) for e in info_states), 1)
+        q_values = Flux.stack((q_value(π, policy_vs_br, e) for e in info_states); dims=1)
 
         advantage = q_values .- baseline
         # Vector of shape `(length(info_states), length(action_space))`
         # get the prob of each action with `e`, i.e., πᵢ(s, a).
-        policy_values = Flux.stack((prob(π, e, to_host = false) for e in info_states), 1)
+        policy_values = Flux.stack((prob(π, e, to_host = false) for e in info_states); dims=1)
 
         # get each info_state's loss
         # ∑ₐ πᵢ(s, a) * (q(s, a) - baseline), where baseline = ∑ₐ πᵢ(s, a) * q(s, a).

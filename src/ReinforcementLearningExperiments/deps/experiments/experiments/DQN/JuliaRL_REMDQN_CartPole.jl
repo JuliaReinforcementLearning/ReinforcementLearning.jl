@@ -7,12 +7,13 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearningEnvironments
 using StableRNGs
 using Flux
 using Flux.Losses
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:REMDQN},
     ::Val{:CartPole},
@@ -40,7 +41,7 @@ function RL.Experiment(
                         ),
                         sync_freq=100
                     ),
-                    optimiser=ADAM(),
+                    optimiser=Adam(),
                 ),
                 n=n,
                 γ=γ,

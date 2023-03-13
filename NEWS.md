@@ -1,6 +1,8 @@
 # ReinforcementLearning.jl Release Notes
 
-## ReinforcementLearning.jl@v0.10.0
+## ReinforcementLearning.jl@v0.10.2
+
+- Pin sub-packages to pre-refactor versions
 
 ### ReinforcementLearningExperiments.jl
 
@@ -17,6 +19,12 @@
 - Added an experiment for DQN training on discrete `PendulumEnv` (#537)
 
 ### ReinforcementLearningEnvironments.jl
+
+#### dev
+
+- Reduce allocations, improve performance of `RandomWalk1D`
+- Add tests to `RandomWalk1D`
+- Chase down JET.jl errors, fix
 
 #### v0.6.12
 
@@ -47,34 +55,36 @@
 
 - Bugfix with `ZeroTo` [#534](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/534)
 
-### ReinforcementLearningCore.jl
+#### v0.6.4
 
-#### v0.8.11
+- Add `GraphShortestPathEnv`. [#445](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/445)
 
-- When sending a `CircularArrayBuffer` to GPU devices, convert `CircularArrayBuffer` into `CuArray` instead of the adapted `CircularArrayBuffer` of `CuArray`. [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
+#### v0.6.3
 
-#### v0.8.10
+- Add `StockTradingEnv` from the paper [Deep Reinforcement Learning for
+  Automated Stock Trading: An Ensemble
+  Strategy](https://github.com/AI4Finance-LLC/Deep-Reinforcement-Learning-for-Automated-Stock-Trading-Ensemble-Strategy-ICAIF-2020).
+  This environment is a good testbed for multi-continuous action space
+  algorithms. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
 
-- Update dependency of `CircularArrayBuffers` to `v0.1.9`. [#602](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/602)
-- Add `CovGaussianNetwork`. [#597](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/597)
-#### v0.8.8
+#### v0.6.2
 
-- Fix warning about `vararg.data` in Julia@v1.7 [#560](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/560)
+- Add `SequentialEnv` environment wrapper to turn a simultaneous environment
+  into a sequential one.
 
-#### v0.8.7
+#### v0.6.1
 
-- Make `GaussianNetwork` differentiable. [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
+- Drop GR in RLEnvs and lazily load ploting functions.[#309](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/309), [#310](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/310)
 
-#### v0.8.6
+#### v0.6.0
 
-- Fixed a bug [1] with the `DoOnExit` hook (#537)
-- Added some convenience hooks for rendering rollout episodes (#537)
-
-#### v0.8.5
-
-- Fixed the method overwritten warning of `device` from `CUDA.jl`.
+- Set `AcrobotEnv` into lazy loading to reduce the dependency of `OrdinaryDiffEq`.
 
 ### ReinforcementLearningZoo.jl
+
+#### v0.6.0
+
+- Extensive refactor based on RLBase.jl `v0.11`, most components not **yet** ported
 
 #### v0.5.11
 
@@ -129,6 +139,10 @@
 
 ### ReinforcementLearningBase.jl
 
+#### dev
+
+- Update POMDPModelTools -> POMDPTools
+
 #### v0.9.6
 
 - Implement `Base.:(==)` for `Space`. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
@@ -138,6 +152,39 @@
 - Add default `Base.:(==)` and `Base.hash` method for `AbstractEnv`. [#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 
 ### ReinforcementLearningCore.jl
+
+#### v0.9.2-dev
+
+- Use correct Flux.stack function signature
+- Reduce allocations, improve performance of `RandomPolicy`
+- Chase down JET.jl errors, fix
+- Add tests for `StopAfterStep`,  `StopAfterEpisode`
+- Add tests, improve performance of `RewardsPerEpisode`
+
+#### v0.8.11
+
+- When sending a `CircularArrayBuffer` to GPU devices, convert `CircularArrayBuffer` into `CuArray` instead of the adapted `CircularArrayBuffer` of `CuArray`. [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
+
+#### v0.8.10
+
+- Update dependency of `CircularArrayBuffers` to `v0.1.9`. [#602](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/602)
+- Add `CovGaussianNetwork`. [#597](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/597)
+#### v0.8.8
+
+- Fix warning about `vararg.data` in Julia@v1.7 [#560](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/560)
+
+#### v0.8.7
+
+- Make `GaussianNetwork` differentiable. [#549](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/549)
+
+#### v0.8.6
+
+- Fixed a bug [1] with the `DoOnExit` hook (#537)
+- Added some convenience hooks for rendering rollout episodes (#537)
+
+#### v0.8.5
+
+- Fixed the method overwritten warning of `device` from `CUDA.jl`.
 
 #### v0.8.3
 
@@ -161,6 +208,10 @@
 
 ### ReinforcementLearningZoo.jl
 
+#### Unreleased
+
+- Reduce excess `TDLearner` allocations by using Tuple instead of Array
+
 #### v0.4.1
 
 - Make keyword argument `n_actions` in `TabularPolicy` optional. [#300](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/300)
@@ -169,33 +220,10 @@
 
 - Moved all the experiments into a new package `ReinforcementLearningExperiments.jl`. The related dependencies are also removed (`BSON.jl`, `StableRNGs.jl`, `TensorBoardLogger.jl`).
 
-### ReinforcementLearningEnvironments.jl
-
-#### v0.6.4-dev
-
-- Add `GraphShortestPathEnv`. [#445](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/445)
-
-#### v0.6.3
-
-- Add `StockTradingEnv` from the paper [Deep Reinforcement Learning for
-  Automated Stock Trading: An Ensemble
-  Strategy](https://github.com/AI4Finance-LLC/Deep-Reinforcement-Learning-for-Automated-Stock-Trading-Ensemble-Strategy-ICAIF-2020).
-  This environment is a good testbed for multi-continuous action space
-  algorithms. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
-
-#### v0.6.2
-
-- Add `SequentialEnv` environment wrapper to turn a simultaneous environment
-  into a sequential one.
-
-#### v0.6.1
-
-- Drop GR in RLEnvs and lazily load ploting functions.[#309](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/309), [#310](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/310)
-
-#### v0.6.0
-
-- Set `AcrobotEnv` into lazy loading to reduce the dependency of `OrdinaryDiffEq`.
-
 ### ReinforcementLearningExperiments.jl
+
+#### dev
+
+- Drop `ReinforcementLearning.jl` from dependencies, use `ReinforcementLearningCore.jl` instead
 
 #### v0.1.0

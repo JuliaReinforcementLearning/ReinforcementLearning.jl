@@ -7,7 +7,7 @@
 # --- 
 
 #+ tangle=false
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using StableRNGs
 using OpenSpiel
 using Flux
@@ -33,7 +33,7 @@ function (hook::KuhnOpenEDHook)(::PostExperimentStage, policy, env)
     push!(hook.results, RLZoo.nash_conv(policy, env))
 end
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:ED},
     ::Val{:OpenSpiel},

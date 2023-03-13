@@ -30,11 +30,11 @@ jobs:
         python-version:
           - '3.8'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 100
       - name: Setup python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.arch }}
@@ -43,7 +43,7 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: actions/cache@v1
+      - uses: actions/cache@v3
         env:
           cache-name: cache-artifacts
         with:
@@ -109,6 +109,7 @@ jobs:
           julia --color=yes -e '
             using Pkg;
             Pkg.develop(path="src/ReinforcementLearningBase")
+            Pkg.develop(path="src/ReinforcementLearningCore")
             Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.test("ReinforcementLearningEnvironments")'
 
@@ -134,12 +135,11 @@ jobs:
         if: (steps.RLZoo-changed.outputs.changed == 'true') || (steps.RLExperiments-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
           julia --color=yes -e '
-            using Pkg;
+            using Pkg
             Pkg.develop(path="src/ReinforcementLearningBase")
-            Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.develop(path="src/ReinforcementLearningCore")
+            Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.develop(path="src/ReinforcementLearningZoo")
-            Pkg.develop(path=".")
             Pkg.develop(path="src/ReinforcementLearningExperiments")
             Pkg.build("ReinforcementLearningExperiments")
             Pkg.test("ReinforcementLearningExperiments")'

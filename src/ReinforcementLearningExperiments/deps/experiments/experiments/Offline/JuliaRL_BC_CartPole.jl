@@ -7,10 +7,12 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearningEnvironments
 using StableRNGs
 using Flux
 using Flux.Losses
+using Flux: glorot_uniform
 
 Base.@kwdef struct RecordStateAction <: AbstractHook
     records::Any = VectorSATrajectory(; state = Vector{Float32})
@@ -20,11 +22,11 @@ function (h::RecordStateAction)(::PreActStage, policy, env, action)
     push!(h.records; state = copy(state(env)), action = action)
 end
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:BC},
     ::Val{:CartPole},
-    ::Nothing;
+    dummy = nothing;
     seed = 123,
     save_dir = nothing,
 )
@@ -41,7 +43,7 @@ function RL.Experiment(
                         Dense(128, 128, relu; init = glorot_uniform(rng)),
                         Dense(128, na; init = glorot_uniform(rng)),
                     ) |> gpu,
-                    optimizer = ADAM(),
+                    optimizer = Adam(),
                 ),
                 batch_size = 32,
                 min_replay_history = 100,
@@ -72,7 +74,7 @@ function RL.Experiment(
                 Dense(128, 128, relu; init = glorot_uniform(rng)),
                 Dense(128, na; init = glorot_uniform(rng)),
             ) |> gpu,
-            optimizer = ADAM(),
+            optimizer = Adam(),
         ),
     )
 

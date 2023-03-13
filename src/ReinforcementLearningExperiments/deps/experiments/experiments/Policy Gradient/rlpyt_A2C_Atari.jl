@@ -1,4 +1,4 @@
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:rlpyt},
     ::Val{:A2C},
     ::Val{:Atari},
@@ -49,7 +49,7 @@ function RL.Experiment(
                     approximator = ActorCritic(
                         actor = Chain(model, Dense(512, N_ACTIONS; init = init)),
                         critic = Chain(model, Dense(512, 1; init = init)),
-                        optimizer = ADAM(3e-4),
+                        optimizer = Adam(3e-4),
                     ) |> gpu,
                     γ = 0.99f0,
                     max_grad_norm = 1.0f0,

@@ -165,7 +165,7 @@ using Flux: params, gradient
             Σ = Dense(15,10*11÷2)
             gn = CovGaussianNetwork(pre, μ, Σ)
             @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, Σ.weight, Σ.bias])
-            state = rand(20,3) #batch of 3 states
+            state = rand(Float32, 20,3) #batch of 3 states
             #Check that it works in 2D
             m, L = gn(state)
             @test size(m) == (10,3)
@@ -190,10 +190,10 @@ using Flux: params, gradient
             @test size(logps) == (1,5,3)
             logps2 = gn(Flux.unsqueeze(state,dims = 2), as)
             @test logps2 ≈ logps
-            s = Flux.stack(map(l -> l*l', eachslice(L, dims=3)),3)
+            s = Flux.stack(map(l -> l*l', eachslice(L, dims=3)); dims=3)
             mvnormals = map(z -> MvNormal(Array(vec(z[1])), Array(z[2])), zip(eachslice(m, dims = 3), eachslice(s, dims = 3)))
             logp_truth = [logpdf(mvn, a) for (mvn, a) in zip(mvnormals, eachslice(as, dims = 3))]
-            @test Flux.stack(logp_truth,2) ≈ dropdims(logps,dims = 1) #test against ground truth
+            @test Flux.stack(logp_truth; dims=2) ≈ dropdims(logps,dims = 1) #test against ground truth
             action_saver = []
             g = Flux.gradient(Flux.params(gn)) do 
                 a, logp = gn(Flux.unsqueeze(state,dims = 2), is_sampling = true, is_return_log_prob = true)
@@ -234,7 +234,7 @@ using Flux: params, gradient
                 Σ = Dense(15,10*11÷2) |> gpu
                 gn = CovGaussianNetwork(pre, μ, Σ)
                 @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, Σ.weight, Σ.bias])
-                state = rand(20,3)|> gpu #batch of 3 states
+                state = rand(Float32, 20,3)|> gpu #batch of 3 states
                 m, L = gn(Flux.unsqueeze(state,dims = 2))
                 @test size(m) == (10,1,3)
                 @test size(L) == (10, 10,3)
@@ -249,10 +249,10 @@ using Flux: params, gradient
                 @test size(logps) == (1,5,3)
                 logps2 = gn(Flux.unsqueeze(state,dims = 2), as)
                 @test logps2 ≈ logps
-                s = Flux.stack(map(l -> l*l', eachslice(L, dims=3)),3)
+                s = Flux.stack(map(l -> l*l', eachslice(L, dims=3)); dims=3)
                 mvnormals = map(z -> MvNormal(Array(vec(z[1])), Array(z[2])), zip(eachslice(m, dims = 3), eachslice(s, dims = 3)))
                 logp_truth = [logpdf(mvn, cpu(a)) for (mvn, a) in zip(mvnormals, eachslice(as, dims = 3))]
-                @test Flux.stack(logp_truth,2) ≈ dropdims(cpu(logps),dims = 1) #test against ground truth
+                @test Flux.stack(logp_truth,2) ≈ dropdims(cpu(logps); dims=1) #test against ground truth
                 action_saver = []
                 g = Flux.gradient(Flux.params(gn)) do 
                     a, logp = gn(rng, Flux.unsqueeze(state,dims = 2), is_sampling = true, is_return_log_prob = true)
@@ -290,23 +290,23 @@ using Flux: params, gradient
     end
     @testset "CategoricalNetwork" begin
         d = CategoricalNetwork(Dense(5,3))
-        s = rand(5, 10)
+        s = rand(Float32, 5, 10)
         a, logits = d(s, is_sampling = true, is_return_log_prob = true)
         @test size(a) == (3,10) == size(logits)
         a, logits = d(s, 4)
         @test size(a) == (3,4,10) == size(logits)
         
         #3D input
-        s = rand(5,1,10)
+        s = rand(Float32, 5,1,10)
         a, logits = d(s, is_sampling = true, is_return_log_prob = true)
         @test size(a) == (3,1,10) == size(logits)
-        @test logits isa Array{Float64, 3}
-        a, logits = d(s, 4)
+        @test logits isa Array{Float32, 3}
+        a, logits = d(s, 4)        
         @test size(a) == (3,4,10) == size(logits)
 
         #Masking
         ##2D
-        s = rand(5, 10)
+        s = rand(Float32, 5, 10)
         mask = trues(3, 10)
         mask[1,:] .= false
         a_masked, logits = d(s, mask, is_sampling = true, is_return_log_prob = true)
@@ -316,7 +316,7 @@ using Flux: params, gradient
         a_masked, logits = d(s, mask, 4)
         @test size(a_masked) == (3,4,10) == size(logits)
         ##3D
-        s = rand(5,1,10)
+        s = rand(Float32, 5,1,10)
         mask = trues(3, 1, 10)
         mask[1,:, :] .= false
         a_masked, logits = d(s, mask, is_sampling = true, is_return_log_prob = true)
@@ -331,14 +331,14 @@ using Flux: params, gradient
                 CUDA.allowscalar(false) 
                 rng = CUDA.CURAND.RNG()
                 d = CategoricalNetwork(Dense(5,3) |> gpu)
-                s = cu(rand(5, 10))
+                s = cu(rand(Float32, 5, 10))
                 a, logits = d(rng, s, is_sampling = true, is_return_log_prob = true);
                 @test size(a) == (3,10) == size(logits)
                 a, logits = d(rng, s, 4);
                 @test size(a) == (3,4,10) == size(logits)
                 
                 #3D input
-                s = cu(rand(5,1,10))
+                s = cu(rand(Float32, 5,1,10))
                 a, logits = d(rng, s, is_sampling = true, is_return_log_prob = true);
                 @test size(a) == (3,1,10) == size(logits)
                 a, logits = d(rng, s, 4);

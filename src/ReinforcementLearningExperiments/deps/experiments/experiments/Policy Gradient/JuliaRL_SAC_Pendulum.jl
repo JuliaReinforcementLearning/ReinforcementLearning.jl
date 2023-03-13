@@ -7,14 +7,14 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using StableRNGs
 using Flux
 using Flux.Losses
 using IntervalSets
 using CUDA
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:SAC},
     ::Val{:Pendulum},
@@ -46,7 +46,7 @@ function RL.Experiment(
             μ=Chain(Dense(30, na, init=init)),
             σ=Chain(Dense(30, na, softplus, x -> clamp(x, typeof(x)(-10), typeof(x)(2)), init=init)),
         ),
-        optimizer=ADAM(0.003),
+        optimizer=Adam(0.003),
     ) |> gpu
 
     create_q_net() = NeuralNetworkApproximator(
@@ -55,7 +55,7 @@ function RL.Experiment(
             Dense(30, 30, relu; init=init),
             Dense(30, 1; init=init),
         ),
-        optimizer=ADAM(0.003),
+        optimizer=Adam(0.003),
     ) |> gpu
 
     agent = Agent(

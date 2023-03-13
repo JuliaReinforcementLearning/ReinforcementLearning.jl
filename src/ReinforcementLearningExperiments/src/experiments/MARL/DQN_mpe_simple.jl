@@ -1,49 +1,50 @@
 # ---
-# title: JuliaRL\_Rainbow\_CartPole
-# cover: assets/JuliaRL_Rainbow_CartPole.png
-# description: Rainbow applied to CartPole
-# date: 2021-05-22
-# author: "[Jun Tian](https://github.com/findmyway)"
+# title: JuliaRL\_DQN\_MPESimple
+# cover:
+# description: DQN applied to MPE simple
+# date: 2023-02-01
+# author: "[Panajiotis Keßler](mailto:panajiotis@christoforidis.net)"
 # ---
 
-#+ tangle=true
+using PyCall
 using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
-using ReinforcementLearningEnvironments
-using StableRNGs
 using Flux
+using Flux: glorot_uniform
+
+using StableRNGs: StableRNG
+using Flux.Losses: huber_loss
 
 function RLCore.Experiment(
     ::Val{:JuliaRL},
-    ::Val{:Rainbow},
-    ::Val{:CartPole},
-    ; seed=123
+    ::Val{:DQN},
+    ::Val{:MPESimple};
+    seed=123,
+    n=1,
+    γ=0.99f0,
+    is_enable_double_DQN=true
 )
     rng = StableRNG(seed)
-
-    env = CartPoleEnv(; T=Float32, rng=rng)
+    env = discrete2standard_discrete(PettingzooEnv("mpe.simple_v2"; seed=seed))
     ns, na = length(state(env)), length(action_space(env))
 
-    n_atoms = 51
     agent = Agent(
         policy=QBasedPolicy(
-            learner=RainbowLearner(
+            learner=DQNLearner(
                 approximator=Approximator(
                     model=TwinNetwork(
                         Chain(
                             Dense(ns, 128, relu; init=glorot_uniform(rng)),
                             Dense(128, 128, relu; init=glorot_uniform(rng)),
-                            Dense(128, na * n_atoms; init=glorot_uniform(rng)),
+                            Dense(128, na; init=glorot_uniform(rng)),
                         );
                         sync_freq=100
                     ),
-                    optimiser=Adam(0.0005),
+                    optimiser=Adam(),
                 ),
-                n_actions=na,
-                n_atoms=n_atoms,
-                Vₘₐₓ=200.0f0,
-                Vₘᵢₙ=0.0f0,
-                γ=0.99f0,
-                update_horizon=1,
+                n=n,
+                γ=γ,
+                is_enable_double_DQN=is_enable_double_DQN,
+                loss_func=huber_loss,
                 rng=rng,
             ),
             explorer=EpsilonGreedyExplorer(
@@ -58,7 +59,9 @@ function RLCore.Experiment(
                 capacity=1000,
                 state=Float32 => (ns,),
             ),
-            sampler=BatchSampler{SS′ART}(
+            sampler=NStepBatchSampler{SS′ART}(
+                n=n,
+                γ=γ,
                 batch_size=32,
                 rng=rng
             ),
@@ -69,17 +72,14 @@ function RLCore.Experiment(
         )
     )
 
-    stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
+    stop_condition = StopAfterEpisode(150, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook)
 end
 
-#+ tangle=false
 using Plots
-pyplot() #hide
-ex = E`JuliaRL_Rainbow_CartPole`
+ex = E`JuliaRL_DQN_MPESimple`
 run(ex)
 plot(ex.hook.rewards)
-savefig("assets/JuliaRL_Rainbow_CartPole.png") #hide
+savefig("JuliaRL_DQN_MPESimple.png")
 
-# ![](assets/JuliaRL_Rainbow_CartPole.png)

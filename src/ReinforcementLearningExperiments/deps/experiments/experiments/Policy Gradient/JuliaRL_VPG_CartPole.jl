@@ -7,13 +7,14 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearning
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearningEnvironments
 using StableRNGs: StableRNG
 using Flux
 using Flux: glorot_uniform
 using Distributions: Categorical
 
-function RL.Experiment(
+function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:VPG},
     ::Val{:CartPole};
@@ -31,7 +32,7 @@ function RL.Experiment(
                     Dense(128, 128, relu; init=glorot_uniform(rng)),
                     Dense(128, na; init=glorot_uniform(rng)),
                 ),
-                optimiser=ADAM(),
+                optimiser=Adam(),
             ),
             baseline=Approximator(
                 model=Chain(
@@ -39,7 +40,7 @@ function RL.Experiment(
                     Dense(128, 128, relu; init=glorot_uniform(rng)),
                     Dense(128, 1; init=glorot_uniform(rng)),
                 ),
-                optimiser=ADAM(),
+                optimiser=Adam(),
             ),
             dist=Categorical,
             γ=0.99f0,
