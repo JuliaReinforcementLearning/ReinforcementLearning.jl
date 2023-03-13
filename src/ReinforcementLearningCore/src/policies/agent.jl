@@ -45,8 +45,8 @@ end
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
-function (agent::Agent)(env::AbstractEnv)
-    action = agent.policy(env)
+function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
+    action = agent.policy(env, args...; kwargs...)
     push!(agent.trajectory, (agent.cache..., action=action))
     agent.cache = (;)
     action
