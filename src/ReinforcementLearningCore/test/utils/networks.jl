@@ -54,16 +54,16 @@ using Flux: params, gradient
         @testset "identity normalizer" begin
             pre = Dense(20,15)
             μ = Dense(15,10)
-            logσ = Dense(15,10)
-            gn = GaussianNetwork(pre, μ, logσ)
-            @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, logσ.weight, logσ.bias])
-            state = rand(Float32, 20,3) #batch of 3 states
+            σ = Dense(15,10, softplus)
+            gn = GaussianNetwork(pre, μ, σ)
+            @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, σ.weight, σ.bias])
+            state = rand(Float32,20,3) #batch of 3 states
             m, L = gn(state)
             @test size(m) == size(L) == (10,3)
             a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
             @test size(a) == (10,3)
             @test size(logp) == (1,3)
-            @test logp ≈ sum(normlogpdf(m, exp.(L), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
+            @test logp ≈ sum(normlogpdf(m, L, a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
             @test logp ≈ gn(state, a)
             as, logps = gn(Flux.unsqueeze(state,dims = 2), 5) #sample 5 actions
             @test size(as) == (10,5,3)
@@ -107,10 +107,10 @@ using Flux: params, gradient
             if CUDA.functional()
                 pre = Dense(20,15) |> gpu
                 μ = Dense(15,10) |> gpu
-                logσ = Dense(15,10) |> gpu
-                gn = GaussianNetwork(pre, μ, logσ)
-                @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, logσ.weight, logσ.bias])
-                state = rand(Float32, 20,3)  |> gpu #batch of 3 states
+                σ = Dense(15,10) |> gpu
+                gn = GaussianNetwork(pre, μ, σ)
+                @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, σ.weight, σ.bias])
+                state = rand(20,3)  |> gpu #batch of 3 states
                 m, L = gn(state)
                 @test size(m) == size(L) == (10,3)
                 a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)

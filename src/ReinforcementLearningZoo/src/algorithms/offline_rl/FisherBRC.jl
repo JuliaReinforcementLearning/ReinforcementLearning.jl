@@ -64,8 +64,8 @@ See paper: [Offline reinforcement learning with fisher divergence critic regular
 - `update_step::Int = 0`
 - `rng = Random.GLOBAL_RNG`
 
-`policy` is expected to output a tuple `(μ, logσ)` of mean and
-log standard deviations for the desired action distributions, this
+`policy` is expected to output a tuple `(μ, σ)` of mean and
+standard deviations for the desired action distributions, this
 can be implemented using a `GaussianNetwork` in a `NeuralNetworkApproximator`.
 """
 function FisherBRCLearner(;

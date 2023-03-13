@@ -115,8 +115,8 @@ function RLBase.prob(
     env::AbstractEnv,
 )
     s = send_to_device(device(policy.approximator), state(env))
-    μ, logσ = policy.approximator.actor(agent.policy.rng, s)
-    Normal(μ, exp(logσ))
+    μ, σ = policy.approximator.actor(agent.policy.rng, s)
+    Normal(μ, σ)
 end
 
 function (agent::Agent{<:VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal}})(
@@ -134,9 +134,9 @@ function (policy::VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal})(
     state::AbstractArray,
     action::AbstractArray,
 )
-    μ, logσ = policy.approximator.actor(policy.rng, state)
+    μ, σ = policy.approximator.actor(policy.rng, state)
     action = atanh.(action)
-    μ, logσ, normlogpdf(μ, exp.(logσ), reshape(action, size(μ)...))
+    μ, σ, normlogpdf(μ, σ, reshape(action, size(μ)...))
 end
 
 ## update policy
@@ -159,8 +159,7 @@ function _update!(p::VMPOPolicy, t::VMPOTrajectory)
     is_discrete = isa(p, VMPOPolicy{<:ActorCritic,Categorical})
     π_old = is_discrete ? AC.actor(s) |> softmax : nothing
     μ_old, σ_old = is_discrete ? (nothing, nothing) : begin
-        μ, logσ = AC.actor(s)
-        μ, exp.(logσ)
+        μ, σ = AC.actor(s)
     end
 
     # normalise rewards based on each trajectory
@@ -189,8 +188,7 @@ function _update!(p::VMPOPolicy, t::VMPOTrajectory)
             π, logπ = is_discrete ? p(s, a) : (nothing, nothing)
             μ, σ, logπ =
                 is_discrete ? (nothing, nothing, logπ) : begin
-                    μ, logσ, logπ = p(s, a)
-                    μ, exp.(logσ), logπ
+                    μ, σ, logπ = p(s, a)
                 end
 
             # critic loss

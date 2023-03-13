@@ -74,7 +74,7 @@ with each policy network type.
 function MPOPolicy(;actor::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 1f-2, ϵΣ = 1f-4, α_scale = 1f0, αΣ_scale = 100f0, τ = 1f-3, max_grad_norm = 5f-1, rng = Random.GLOBAL_RNG) where Q <: Approximator
     @assert device(actor) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(actor) == device(rng) "The specified rng does not generate on the same device as the actor. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
-    logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :actor_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :α, :αΣ, :kl))
+    logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :actor_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :α, :αΣ, :kl, :klΣ))
     MPOPolicy(actor, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, action_sample_size, ϵ, ϵμ, ϵΣ, 0f0, 0f0, α_scale, αΣ_scale, max_grad_norm, τ, rng, logs)
 end
 
@@ -107,7 +107,6 @@ end
 
 #Here we apply the TD3 Q network approach. The original MPO paper uses retrace.
 function update_critic!(p::MPOPolicy, batches)
-    modulo = rand(p.rng, (0,1)) #we randomize this so that if the number of batches is odd, we do not train one critic more than the other.
     for (id, batch) in enumerate(batches)
         s, s′, a, r, t, = send_to_device(device(p.qnetwork1), batch)
         γ, τ = p.γ, p.τ
@@ -120,7 +119,7 @@ function update_critic!(p::MPOPolicy, batches)
 
         # Train Q Networks
         q_input = vcat(s, a)
-        if id % 2 == modulo
+        if id % 2 == 0
             q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
                 q1 = p.qnetwork1(q_input) |> vec
                 l = mse(q1, y)
@@ -130,7 +129,7 @@ function update_critic!(p::MPOPolicy, batches)
                 return l
             end
             if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
-                error("Gradient of Q_1 contains NaN of Inf")
+                error("Gradient of Q_1 contains NaN of Inf. Try initializing your NN with a smaller gain parameter.")
             end
             Flux.Optimise.update!(p.qnetwork1.optimiser, Flux.params(p.qnetwork1), q_grad_1)
         else
@@ -143,7 +142,7 @@ function update_critic!(p::MPOPolicy, batches)
                 return l
             end
             if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_2)
-                error("Gradient of Q_2 contains NaN of Inf")
+                error("Gradient of Q_2 contains NaN of Inf. Try initializing your NN with a smaller gain parameter.")
             end
             Flux.Optimise.update!(p.qnetwork2.optimiser, Flux.params(p.qnetwork2), q_grad_2)
         end
@@ -171,7 +170,7 @@ function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
         qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batch_size)
 
         if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), qij)
-            error("qij contains NaN of Inf")
+            error("qij contains NaN of Inf. Try initializing your NN with a smaller gain parameter.")
         end
 
         #Improve actor towards qij (M-step)
@@ -181,7 +180,7 @@ function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
         end
         
         if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), gs)
-            error("Gradient contains NaN of Inf")
+            error("Gradient contains NaN of Inf. Try initializing your NN with a smaller gain parameter.")
         end
 
         grad_norm!(gs, p.max_grad_norm)
@@ -198,11 +197,10 @@ end
 function sample_actions(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, dist, N::Int)
     μ, L = dist
     noise = randn(p.rng, eltype(μ), size(μ,1), N, size(μ,3))
-    output = similar(noise)
     for k in axes(μ,3)
-        output[:,:,k] .= μ[:,:,k] .+ L[:,:,k] .* noise[:,:,k]
+        noise[:,:,k] .= muladd(L[:,:,k], noise[:,:,k], μ[:,:,k])
     end
-    output
+    noise
 end
 
 function sample_actions(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, dist, N::Int)
@@ -222,7 +220,7 @@ end
 
 function solve_mpodual(Q::AbstractArray, ϵ)    
     g(η) = η * ϵ + η * mean(logsumexp( Q ./η .- Float32(log(size(Q, 2))), dims = 2))
-    Optim.minimizer(optimize(g, eps(ϵ), 10f0))
+    Optim.minimizer(optimize(g, eps(ϵ), 1f9))
 end
 
 #For CovGaussianNetwork
@@ -256,16 +254,16 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
         push!(p.logs[:lagrangeμ_loss], lagrangeμ)
         push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
         push!(p.logs[:kl], klμ)
+        push!(p.logs[:klΣ], klΣ)
     end
     return actor_loss + lagrangeμ + lagrangeΣ
 end
 
 #In the case of diagonal covariance (with GaussianNetwork), 
-function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, actions, μ_logσ_old::Tuple)
-    μ_old, logσ_old = μ_logσ_old
-    σ_old = exp.(logσ_old)
-    μ, logσ = p.actor(p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
-    σ = exp.(logσ)
+function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, actions, μ_σ_old::Tuple)
+    μ_old, σ_old = μ_σ_old
+    σ_old = σ_old
+    μ, σ = p.actor(p.rng, states, is_sampling = false)
     μ_d, σ_d = ignore_derivatives() do
         μ, σ #decoupling
     end
@@ -274,7 +272,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
 
     logp_π_new_μ = diagnormlogpdf(μ, σ_d, actions)
     logp_π_new_σ = diagnormlogpdf(μ_d, σ, actions)
-    actor_loss = -mean(qij .* (logp_π_new_μ .+ logp_π_new_σ))
+    actor_loss = - (mean(qij .* (logp_π_new_μ .+ logp_π_new_σ)))
     klμ = mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))
     klΣ = mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_d_s, σ_s))
     
@@ -292,6 +290,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
         push!(p.logs[:lagrangeμ_loss], lagrangeμ)
         push!(p.logs[:lagrangeΣ_loss], lagrangeΣ)
         push!(p.logs[:kl], klμ)
+        push!(p.logs[:klΣ], klΣ)
     end
     return actor_loss + lagrangeμ + lagrangeΣ
 end
