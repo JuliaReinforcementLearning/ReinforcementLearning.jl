@@ -46,7 +46,7 @@ function RL.Experiment(
                         Dense(64, 64, relu; init = glorot_uniform(rng)),
                     ),
                     μ = Chain(Dense(64, 1, tanh; init = glorot_uniform(rng)), vec),
-                    logσ = Chain(Dense(64, 1; init = glorot_uniform(rng)), vec),
+                    σ = Chain(Dense(64, 1, softplus; init = glorot_uniform(rng)), vec),
                 ),
                 critic = Chain(
                     Dense(ns, 64, relu; init = glorot_uniform(rng)),

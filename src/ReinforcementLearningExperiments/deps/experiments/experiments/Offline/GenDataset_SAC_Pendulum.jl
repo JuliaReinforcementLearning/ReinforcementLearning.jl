@@ -41,7 +41,7 @@ function RL.Experiment(
                 Dense(30, 30, relu),
             ),
             μ = Chain(Dense(30, na, init = init)),
-            logσ = Chain(Dense(30, na, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),
+            σ = Chain(Dense(30, na, softplus, x -> clamp.(x, typeof(x)(-10), typeof(x)(2)), init = init)),
         ),
         optimizer = ADAM(0.003),
     )
