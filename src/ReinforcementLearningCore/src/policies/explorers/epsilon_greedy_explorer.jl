@@ -33,7 +33,7 @@ plot([RLCore.get_ϵ(s_lin, i) for i in 1:500], label="linear epsilon")
 s_exp = EpsilonGreedyExplorer(kind=:exp, ϵ_init=0.9, ϵ_stable=0.1, warmup_steps=100, decay_steps=100)
 plot!([RLCore.get_ϵ(s_exp, i) for i in 1:500], label="exp epsilon")
 ```
-![](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/epsilon_greedy_selector.png)
+![](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/main/docs/src/assets/epsilon_greedy_selector.png)
 """
 mutable struct EpsilonGreedyExplorer{Kind,IsBreakTie,R} <: AbstractExplorer
     ϵ_stable::Float64
