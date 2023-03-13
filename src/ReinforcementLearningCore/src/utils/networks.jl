@@ -27,16 +27,17 @@ end
 export GaussianNetwork
 
 """
-    GaussianNetwork(;pre=identity, μ, logσ, min_σ=0f0, max_σ=Inf32)
+    GaussianNetwork(;pre=identity, μ, σ, min_σ=0f0, max_σ=Inf32)
 
-Returns `μ` and `logσ` when called.  Create a distribution to sample from using
-`Normal.(μ, exp.(logσ))`. `min_σ` and `max_σ` are used to clip the output from
-`logσ`. `pre` is a shared body before the two heads of the NN.
+Returns `μ` and `σ` when called.  Create a distribution to sample from using
+`Normal.(μ, σ)`. `min_σ` and `max_σ` are used to clip the output from
+`σ`. `pre` is a shared body before the two heads of the NN. σ should be > 0. 
+You may enfore this using a `softplus` output activation. 
 """
 Base.@kwdef struct GaussianNetwork{P,U,S}
     pre::P = identity
     μ::U
-    logσ::S
+    σ::S
     min_σ::Float32 = 0.0f0
     max_σ::Float32 = Inf32
 end
@@ -54,10 +55,9 @@ This function is compatible with a multidimensional action space.
 """
 function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, is_return_log_prob::Bool=false)
     x = model.pre(s)
-    μ, raw_logσ = model.μ(x), model.logσ(x)
-    logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
+    μ, raw_σ = model.μ(x), model.σ(x)
+    σ = clamp.(raw_σ, lmodel.min_σ, model.max_σ)
     if is_sampling
-        σ = exp.(logσ)
         z = ignore_derivatives() do
             noise = randn(rng, Float32, size(μ))
             μ .+ σ .* noise
@@ -69,7 +69,7 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, 
             return z
         end
     else
-        return μ, logσ
+        return μ, σ
     end
 end
 
@@ -81,10 +81,8 @@ Sample `action_samples` actions from each state. Returns a 3D tensor with dimens
 """
 function (model::GaussianNetwork)(rng::AbstractRNG, s, action_samples::Int)
     x = model.pre(s)
-    μ, raw_logσ = model.μ(x), model.logσ(x)
-    logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
-
-    σ = exp.(logσ)
+    μ, raw_σ = model.μ(x), model.σ(x)
+    σ = clamp.(raw_σ, model.min_σ, model.max_σ)
     z = ignore_derivatives() do
         noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
         μ .+ σ .* noise
@@ -103,9 +101,8 @@ end
 
 function (model::GaussianNetwork)(state, action)
     x = model.pre(state)
-    μ, raw_logσ = model.μ(x), model.logσ(x)
-    logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
-    σ = exp.(logσ)
+    μ, raw_σ = model.μ(x), model.σ(x)
+    σ = clamp.(raw_σ, model.min_σ, model.max_σ)
     logp_π = sum(normlogpdf(μ, σ, action) .- (2.0f0 .* (log(2.0f0) .- action .- softplus.(-2.0f0 .* action))), dims=1)
     return logp_π
 end
@@ -164,7 +161,11 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
     if is_sampling
         z = ignore_derivatives() do
             noise = randn(rng, eltype(μ), da, 1, batch_size)
-            Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)), 3)
+            z = copy(μ)
+            for (m, l, n) in zip(eachslice(z, dims = 3), eachslice(L, dims=3), eachslice(noise, dims = 3))
+                m .+= l * n
+            end
+            z
         end
         if is_return_log_prob
             logp_π = mvnormlogpdf(μ, L, z)
