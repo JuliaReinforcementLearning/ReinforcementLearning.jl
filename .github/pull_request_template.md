@@ -5,3 +5,4 @@ PR Checklist
 - [ ] Integration and correctness tests using a simple env?
 - [ ] PR Review?
 - [ ] Add or update documentation?
+- [ ] Write docstrings for new methods?
