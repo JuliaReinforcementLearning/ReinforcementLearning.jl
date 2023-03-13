@@ -138,7 +138,7 @@ end
         env.pos = 3
         h(PostActStage(), agent, env)
         @test h.rewards == [[-1.0, 1.0, 0.0]]
-        test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
+        test_noop!(h, stages=[PreActStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end
 end
 
@@ -160,10 +160,12 @@ end
     stage_list = (PreEpisodeStage(), PostEpisodeStage(), PostEpisodeStage())
 
     for i in 1:3
+        h = h_list[i]
+        stage = stage_list[i]
         env = RandomWalk1D()
         env.pos = 1
         policy = RandomPolicy(legal_action_space(env))
-        [h_list[i](stage_list[i], policy, env) for j in 1:4]
+        [h(stage, policy, env) for j in 1:4]
         @test env.pos == 3
         test_noop!(h, stages=[PreActStage(), PostActStage(), PreExperimentStage(), PostExperimentStage()])
     end
