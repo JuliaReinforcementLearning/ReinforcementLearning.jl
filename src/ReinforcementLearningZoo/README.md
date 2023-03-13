@@ -23,4 +23,4 @@ This project aims to provide some implementations of the most typical reinforcem
 - Minimax
 - Behavior Cloning
 
-If you are looking for applications of the algorithms implemented here, please refer [ReinforcementLearningAnIntroduction.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl) and [ReinforcementLearningExperiments.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningExperiments)
+If you are looking for applications of the algorithms implemented here, please refer [ReinforcementLearningAnIntroduction.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearningAnIntroduction.jl) and [ReinforcementLearningExperiments.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/main/src/ReinforcementLearningExperiments)

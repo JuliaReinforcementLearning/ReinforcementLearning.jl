@@ -1,7 +1,7 @@
 <!-- ```@raw html -->
 <div align="center">
   <p>
-  <img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/logo.svg?sanitize=true" width="320px">
+  <img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/main/docs/src/assets/logo.svg?sanitize=true" width="320px">
   </p>
   
   <p>
@@ -12,7 +12,7 @@
   <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/actions?query=workflow%3ACI"><img src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/workflows/CI/badge.svg"></a>
   <a href="https://juliahub.com/ui/Packages/ReinforcementLearning/6l2TO"><img src="https://juliahub.com/docs/ReinforcementLearning/pkgeval.svg"></a>
   <a href="https://juliahub.com/ui/Packages/ReinforcementLearning/6l2TO"><img src="https://juliahub.com/docs/ReinforcementLearning/version.svg"></a>
-  <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/LICENSE.md"><img src="http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/main/LICENSE.md"><img src="http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat"></a>
   <a href="https://julialang.org/slack/"><img src="https://img.shields.io/badge/Chat%20on%20Slack-%23reinforcement--learnin-ff69b4"></a>
   <a href="https://github.com/SciML/ColPrac"><img src="https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet"></a>
   </p>
@@ -89,7 +89,7 @@ parameters, plot results and record videos. For example:
 
 <!-- ```@raw html -->
 <img
-src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/master/docs/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true"
+src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/main/docs/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true"
 width="600px">
 
 <!--
@@ -119,19 +119,19 @@ subpackages. The relationship between them is depicted below:
 |  <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl">ReinforcementLearning.jl</a>                                                         |
 |                                                                                   |
 |      +------------------------------+                                             |
-|      | <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningBase">ReinforcementLearningBase.jl</a> |                                             |
+|      | <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/main/src/ReinforcementLearningBase">ReinforcementLearningBase.jl</a> |                                             |
 |      +----|-------------------------+                                             |
 |           |                                                                       |
 |           |     +--------------------------------------+                          |
-|           +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningEnvironments">ReinforcementLearningEnvironments.jl</a> |                          |
+|           +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/main/src/ReinforcementLearningEnvironments">ReinforcementLearningEnvironments.jl</a> |                          |
 |           |     +--------------------------------------+                          |
 |           |                                                                       |
 |           |     +------------------------------+                                  |
-|           +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningCore">ReinforcementLearningCore.jl</a> |                                  |
+|           +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/main/src/ReinforcementLearningCore">ReinforcementLearningCore.jl</a> |                                  |
 |                 +----|-------------------------+                                  |
 |                      |                                                            |
 |                      |     +-----------------------------+                        |
-|                      +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningZoo">ReinforcementLearningZoo.jl</a> |                        |
+|                      +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/main/src/ReinforcementLearningZoo">ReinforcementLearningZoo.jl</a> |                        |
 |                            +----|------------------------+                        |
 |                                 |                                                 |
 |                                 |     +-------------------------------------+     |
@@ -141,7 +141,7 @@ subpackages. The relationship between them is depicted below:
 +------|----------------------------------------------------------------------------+
        |
        |     +-------------------------------------+
-       +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningExperiments">ReinforcementLearningExperiments.jl</a> |
+       +----&gt;+ <a href="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/main/src/ReinforcementLearningExperiments">ReinforcementLearningExperiments.jl</a> |
        |     +-------------------------------------+
        |
        |     +----------------------------------------+
@@ -166,7 +166,7 @@ if you find this package useful. ❤
 ## ✍️ Citing
 
 If you use `ReinforcementLearning.jl` in a scientific publication, we would
-appreciate references to the [CITATION.bib](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/master/CITATION.bib).
+appreciate references to the [CITATION.bib](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/main/CITATION.bib).
 
 ## ✨ Contributors
 

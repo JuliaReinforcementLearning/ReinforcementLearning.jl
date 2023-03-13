@@ -2,7 +2,7 @@ name: CI
 on:
   pull_request:
     branches:
-      - master
+      - main
     types:
       - labeled
       - opened
@@ -11,7 +11,7 @@ on:
       - synchronize
   push:
     branches:
-      - master
+      - main
     tags: '*'
 jobs:
   test:
