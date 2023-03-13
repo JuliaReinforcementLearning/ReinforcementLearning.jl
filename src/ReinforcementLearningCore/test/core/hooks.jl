@@ -1,3 +1,8 @@
+"""
+test_noop!(hook; stages=[PreActStage()])
+
+Tests that the hook is not modified when called with the specified set of stages.
+"""
 function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), PreEpisodeStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     @testset "hook: $(typeof(hook))" begin
         env = RandomWalk1D()
