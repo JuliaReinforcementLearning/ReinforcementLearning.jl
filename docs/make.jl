@@ -52,7 +52,7 @@ makedocs(
             "Episodic vs. Non-episodic environments" => "non_episodic.md",
         ],
         "Zoo Algorithms" => [
-            "MPO" => "src/Zoo_Algorithms/MPO.md"
+            "MPO" => "Zoo_Algorithms/MPO.md"
         ],
         "FAQ" => "FAQ.md",
         experiments,
