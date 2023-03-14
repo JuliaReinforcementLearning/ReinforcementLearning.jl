@@ -2,12 +2,10 @@
 
 ## How to setup local development environment?
 
-`ReinforcementLearning.jl` is kind of different from most packages you've seen.
-It simply re-export all the names in its dependent packages. The `Manifest.toml`
-files are committed in the source code. So when you execute
-`]dev ReinforcementLearning` in the Julia REPL, all the dependents are also
-turned into the development mode automatically. Then you can modify the code in
-your favorite editor and test it as usual. Sometimes, you may need to add some
+You can activate the local development mode as follows: from the base project directory,
+load `ReinforcementLearning` via `using ReinforcementLearning`.
+Then run `ReinforcementLearning.activate_devmode!()`.
+Sometimes, you may need to add some
 extra dependencies. Remember to switch the environment before adding new
 packages. For example, if you want to add
 `Statistics` in `ReinforcementLearningBase`, first run `]activate
