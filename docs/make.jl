@@ -1,5 +1,5 @@
-using ReinforcementLearning
-using ReinforcementLearningDatasets
+# using ReinforcementLearning
+# using ReinforcementLearningDatasets
 using Documenter
 using Markdown
 using DemoCards
@@ -37,12 +37,12 @@ assets = [
 
 makedocs(
     modules = [
-        ReinforcementLearning,
+        # ReinforcementLearning,
         ReinforcementLearningBase,
         ReinforcementLearningCore,
         ReinforcementLearningEnvironments,
         ReinforcementLearningZoo,
-        ReinforcementLearningDatasets,
+        # ReinforcementLearningDatasets,
     ],
     format = Documenter.HTML(
         prettyurls = true,
