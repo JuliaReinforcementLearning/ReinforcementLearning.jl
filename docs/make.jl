@@ -1,5 +1,6 @@
 # using ReinforcementLearning
 # using ReinforcementLearningDatasets
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using Documenter
 using Markdown
 using DemoCards
