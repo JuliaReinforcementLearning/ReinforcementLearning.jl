@@ -57,8 +57,8 @@ end
 - `rng = Random.GLOBAL_RNG`, used to sample batch from trajectory or action from action distribution.
 - `device_rng = Random.GLOBAL_RNG`, should be set to `CUDA.CURAND.RNG()` if the `policy` is set to work with `CUDA.jl`
 
-`policy` is expected to output a tuple `(μ, logσ)` of mean and
-log standard deviations for the desired action distributions, this
+`policy` is expected to output a tuple `(μ, σ)` of mean and
+standard deviations for the desired action distributions, this
 can be implemented using a `GaussianNetwork` in a `NeuralNetworkApproximator`.
 
 Implemented based on http://arxiv.org/abs/1812.05905
