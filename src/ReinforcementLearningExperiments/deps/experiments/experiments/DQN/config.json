@@ -9,7 +9,7 @@
     "JuliaRL_PrioritizedDQN_CartPole.jl",
     "JuliaRL_DQN_MountainCar.jl",
     "JuliaRL_IQN_CartPole.jl",
-    "JuliaRL_QRDQN_Cartpole.jl",
+    "JuliaRL_QRDQN_CartPole.jl",
     "JuliaRL_REMDQN_CartPole.jl",
     "JuliaRL_Rainbow_CartPole.jl",
     "Dopamine_DQN_Atari.jl",

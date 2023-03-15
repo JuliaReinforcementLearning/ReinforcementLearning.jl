@@ -1,12 +1,6 @@
 {
   "order": [
-    "DQN",
-    "Policy Gradient",
-    "Offline",
-    "Search",
-    "CFR",
-    "NFSP",
-    "ED"
+    "Search"
   ]
 }
 
