@@ -4,7 +4,7 @@ import ChainRulesCore: ignore_derivatives
 import LogExpFunctions.logsumexp
 import Flux.Losses: logitcrossentropy, mse
 import Flux.onehotbatch
-import ReinforcementLearningCore : mvnormlogpdf, diagnormlogpdf, mvnormkldivergence, diagnormkldivergence
+import ReinforcementLearningCore: mvnormlogpdf, diagnormlogpdf, mvnormkldivergence, diagnormkldivergence
 
 #Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
 #If using a CategoricalNetwork actor, α is used for αμ. αΣ is only used for [Cov]GaussianNetwork
