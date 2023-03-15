@@ -1,5 +1,6 @@
 export normlogpdf, mvnormlogpdf, diagnormlogpdf, mvnormkldivergence, diagnormkldivergence, normkldivergence
 
+using Flux: Zygote
 using LinearAlgebra
 
 # watch https://github.com/JuliaStats/Distributions.jl/issues/1183
