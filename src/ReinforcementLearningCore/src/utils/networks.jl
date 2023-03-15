@@ -460,8 +460,7 @@ end
 Flux.@functor VAE
 
 function (model::VAE)(rng::AbstractRNG, state, action)
-    μ, logσ = model.encoder(vcat(state, action))
-    σ = exp.(logσ)
+    μ, σ = model.encoder(vcat(state, action))
     z = μ .+ σ .* randn(rng, Float32, size(μ))
     u = decode(model, state, z)
     return u, μ, σ
