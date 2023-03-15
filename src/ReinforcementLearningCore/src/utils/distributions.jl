@@ -1,6 +1,5 @@
 export normlogpdf, mvnormlogpdf, diagnormlogpdf, mvnormkldivergence, diagnormkldivergence, normkldivergence
 
-using Flux: unsqueeze, stack
 using LinearAlgebra
 
 # watch https://github.com/JuliaStats/Distributions.jl/issues/1183
@@ -63,8 +62,9 @@ action_samples x batch_size).  Return a 3D matrix of size (1 x action_samples x
 batch_size). 
 """
 function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ=1.0f-8) where {A<:AbstractArray}
-    logp = [mvnormlogpdf(μ[:, :, k], LorU[:, :, k], x[:, :, k]) for k in 1:size(x, 3)]
-    return unsqueeze(stack(logp; dims=2), dims=1) #returns a 3D vector 
+    l(k) = mvnormlogpdf(μ[:, :, k], LorU[:, :, k], x[:, :, k])
+    logp = reduce(hcat, [l(k) for k in axes(x, 3)])
+    return reshape(logp, 1, size(logp)...)
 end
 
 #Used for mvnormlogpdf
