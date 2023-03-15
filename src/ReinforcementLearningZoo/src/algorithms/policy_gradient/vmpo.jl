@@ -2,7 +2,7 @@ export VMPOPolicy, VMPOTrajectory
 
 using LinearAlgebra: ⋅  # dot product
 using ChainRulesCore: ignore_derivatives
-import ReinforcementLearningCore.normlogpdf
+import ReinforcementLearningCore: normlogpdf
 
 ## trajectory
 
