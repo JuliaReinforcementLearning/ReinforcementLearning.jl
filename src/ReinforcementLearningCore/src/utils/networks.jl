@@ -161,7 +161,11 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
     if is_sampling
         z = ignore_derivatives() do
             noise = randn(rng, eltype(μ), da, 1, batch_size)
-            Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)); dims=3)
+            z = copy(μ)
+            for (m, l, n) in zip(eachslice(z, dims = 3), eachslice(L, dims=3), eachslice(noise, dims = 3))
+                m .+= l * n
+            end
+            z
         end
         if is_return_log_prob
             logp_π = mvnormlogpdf(μ, L, z)
