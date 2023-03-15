@@ -1,5 +1,6 @@
 using Test, Flux, CUDA, ChainRulesCore, LinearAlgebra, Distributions
 using Flux: params, gradient
+import ReinforcementLearningCore: normlogpdf, mvnormlogpdf
 @testset "Approximators" begin
     #= These may need to be updated due to recent changes
     @testset "TabularApproximator" begin

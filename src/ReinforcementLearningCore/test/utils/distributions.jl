@@ -1,4 +1,5 @@
 using Test, LinearAlgebra, Distributions, ReinforcementLearningCore
+import ReinforcementLearningCore : normlogpdf, mvnormlogpdf, diagnormlogpdf, mvnormkldivergence, diagnormkldivergence, normkldivergence
 
 @testset "utils/distributions" begin
     #Scalar
