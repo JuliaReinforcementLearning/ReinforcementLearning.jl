@@ -45,7 +45,7 @@ function RLCore.Experiment(
                 Dense(64, 64, relu),
             ),
             μ = Chain(Dense(64, na, init = init)),
-            logσ = Chain(Dense(64, na, init = init)),
+            σ = Chain(Dense(64, na, softplus, init = init)),
         ),
         optimizer = Adam(0.003),
     )
