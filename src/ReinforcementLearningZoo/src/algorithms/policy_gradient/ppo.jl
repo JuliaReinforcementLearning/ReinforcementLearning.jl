@@ -1,5 +1,5 @@
 export PPOPolicy, PPOTrajectory, MaskedPPOTrajectory
-import ReinforcementLearningCore.normlogpdf
+import ReinforcementLearningCore: normlogpdf
 
 const PPOTrajectory = Trajectory{
     <:NamedTuple{
