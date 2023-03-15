@@ -9,7 +9,7 @@ const log2π = log(2.0f0π)
 """
      normlogpdf(μ, σ, x; ϵ = 1.0f-8)
 
-GPU automatic differentiable version for the logpdf function of a univariate normal distribution.
+GPU compatible and automaticaly differentiable version for the logpdf function of a univariate normal distribution.
 Adding an epsilon value to guarantee numeric stability if sigma is exactly zero
 (e.g. if relu is used in output layer).
 """
@@ -21,7 +21,7 @@ end
 """
     diagnormlogpdf(μ, σ, x; ϵ = 1.0f-8)
 
-GPU automatic differentiable version for the logpdf function of normal distributions with 
+GPU compatible and automaticaly differentiable version for the logpdf function of normal distributions with 
 diagonal covariance. Adding an epsilon value to guarantee numeric stability if sigma is 
 exactly zero (e.g. if relu is used in output layer).
 """
@@ -39,7 +39,7 @@ end
 """
     mvnormlogpdf(μ::AbstractVecOrMat, L::AbstractMatrix, x::AbstractVecOrMat)
 
-GPU automatic differentiable version for the logpdf function of multivariate
+GPU compatible and automaticaly differentiable version for the logpdf function of multivariate
 normal distributions.  Takes as inputs `mu` the mean vector, `L` the lower
 triangular matrix of the cholesky decomposition of the covariance matrix, and
 `x` a matrix of samples where each column is a sample.  Return a Vector
@@ -71,6 +71,7 @@ end
 #Used for mvnormlogpdf
 """
     logdetLorU(LorU::AbstractMatrix)
+
 Log-determinant of the Positive-Semi-Definite matrix A = L*U (cholesky lower and upper triangulars), given L or U. 
 Has a sign uncertainty for non PSD matrices.
 """
@@ -84,7 +85,7 @@ logdetLorU(LorU::AbstractMatrix) = logdet(LorU)*2
 """	
     mvnormkldivergence(μ1, L1, μ2, L2)
     
-GPU differentiable implementation of the kl_divergence between two MultiVariate Gaussian distributions with mean vectors `μ1, μ2` respectively and 	
+GPU compatible and automaticaly differentiable implementation of the kl_divergence between two MultiVariate Gaussian distributions with mean vectors `μ1, μ2` respectively and 	
 with cholesky decomposition of covariance matrices `L1, L2`.	
 """	
 function mvnormkldivergence(μ1, L1M, μ2, L2M)
@@ -107,7 +108,7 @@ end
 """	
     diagnormkldivergence(μ1, σ1, μ2, σ2)	
 
-GPU differentiable implementation of the kl_divergence between two MultiVariate Gaussian distributions with mean vectors `μ1, μ2` respectively and 	
+GPU compatible and automaticaly differentiable implementation of the kl_divergence between two MultiVariate Gaussian distributions with mean vectors `μ1, μ2` respectively and 	
 diagonal standard deviations `σ1, σ2`. Arguments must be Vectors or single-column Matrices.	
 """	
 function diagnormkldivergence(μ1, σ1, μ2, σ2)	
@@ -122,7 +123,7 @@ end
 """	
     normkldivergence(μ1, σ1, μ2, σ2)	
 
-GPU differentiable implementation of the kl_divergence between two univariate Gaussian 
+GPU compatible and automaticaly differentiable implementation of the kl_divergence between two univariate Gaussian 
 distributions with means `μ1, μ2` and standard deviations `σ1, σ2` respectively.	
 """	
 function normkldivergence(μ1, σ1, μ2, σ2)	
