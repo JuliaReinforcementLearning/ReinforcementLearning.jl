@@ -1,7 +1,8 @@
 export MultiAgentManager
 
-struct MultiAgentManager <: AbstractPolicy
-    agents::Dict{Any,Any}
+Base.@kwdef mutable struct MultiAgentManager{T <: AbstractPolicy} <: AbstractPolicy
+    agents::Dict{S,T} where {S<: Union{String, Symbol, Integer}}
+    cur_player::Union{String, Symbol, Integer} = first(keys(agents))
 end
 
 Base.getindex(A::MultiAgentManager, x) = getindex(A.agents, x)
@@ -10,44 +11,34 @@ Base.getindex(A::MultiAgentManager, x) = getindex(A.agents, x)
     MultiAgentManager(player => policy...)
 
 This is the simplest form of multiagent system. At each step they observe the
-environment from their own perspective and get updated independently. For
-environments of `SEQUENTIAL` style, agents which are not the current player will
-observe a dummy action of [`NO_OP`](@ref) in the `PreActStage`. For environments
-of `SIMULTANEOUS` style, please wrap it with [`SequentialEnv`](@ref) first.
+environment from their own perspective and get updated independently.
 """
 MultiAgentManager(policies...) =
     MultiAgentManager(Dict{Any,Any}(nameof(p) => p for p in policies))
-
-RLBase.prob(A::MultiAgentManager, env::AbstractEnv, args...) = prob(A[current_player(env)].policy, env, args...)
+  
+RLBase.prob(A::MultiAgentManager, env::AbstractEnv, args...) = prob(A[A.cur_player].policy, env, args...)
 
 (A::MultiAgentManager)(env::AbstractEnv) = A(env, DynamicStyle(env))
 
-(A::MultiAgentManager)(env::AbstractEnv, ::Sequential) = A[current_player(env)](env)
+function (A::MultiAgentManager)(env::AbstractEnv, ::Sequential)
+    return A[A.cur_player](env)
+end
 
 function (A::MultiAgentManager)(env::AbstractEnv, ::Simultaneous)
     @error "MultiAgentManager doesn't support simultaneous environments. Please consider applying `SequentialEnv` wrapper to environment first."
 end
 
+function (A::MultiAgentManager)(stage::PreActStage, env::AbstractEnv)
+    A.cur_player = current_player(env)
+    A[A.cur_player](stage, env)
+end
+
 function (A::MultiAgentManager)(stage::AbstractStage, env::AbstractEnv)
-    for agent in values(A.agents)
-        agent(stage, env)
-    end
+    A[A.cur_player](stage, env)
 end
 
 function RLBase.optimise!(A::MultiAgentManager)
-    for agent in values(A.agents)
+    for (_, agent) in A.agents
         RLBase.optimise!(agent)
-    end
-end
-
-
-function (A::MultiAgentManager)(
-    stage::PreActStage,
-    env::AbstractEnv,
-    ::Simultaneous,
-    actions,
-)
-    for (agent, action) in zip(values(A.agents), actions)
-        agent(stage, env, action)
     end
 end

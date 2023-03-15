@@ -28,7 +28,7 @@ s = ArgParseSettings()
     "episodes"
     help = "Number of epochs"
     arg_type = Int
-    default = 200
+    default = 10
 end
 arguments = parse_args(s)
 
@@ -96,7 +96,8 @@ function RL.Experiment(
                     )
                 ),
             ) for player in players(env)
-        )
+        ),
+        current_player(env)
     )
    
    
