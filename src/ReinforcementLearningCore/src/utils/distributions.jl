@@ -1,5 +1,3 @@
-export normlogpdf, mvnormlogpdf, diagnormlogpdf, mvnormkldivergence, diagnormkldivergence, normkldivergence
-
 using Flux: Zygote
 using LinearAlgebra
 
