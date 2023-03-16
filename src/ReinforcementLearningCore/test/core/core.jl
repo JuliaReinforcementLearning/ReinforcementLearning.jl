@@ -33,5 +33,23 @@
 
             @test sum(hook[]) == length(agent.trajectory.container)
         end
+
+        @testset "StopAfterStep, use type stable Agent" begin
+            env = RandomWalk1D()
+            agent = Agent(
+                RandomPolicy(),
+                Trajectory(
+                    CircularArraySARTTraces(; capacity = 1_000),
+                    BatchSampler(1),
+                    InsertSampleRatioController(n_inserted = -1),
+                ),
+                env=env
+            )
+            stop_condition = StopAfterStep(123)
+            hook = StepsPerEpisode()
+            run(agent, env, stop_condition, hook)
+
+            @test sum(hook[]) == length(agent.trajectory.container)
+        end        
     end
 end
