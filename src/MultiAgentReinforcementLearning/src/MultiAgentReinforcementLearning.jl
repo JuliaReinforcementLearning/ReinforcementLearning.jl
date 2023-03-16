@@ -11,6 +11,6 @@ using Flux
 using Statistics
 
 include("policies/multi_agent.jl")
-
+include("policies/maddpg.jl")
 
 end 

@@ -21,6 +21,9 @@ RLBase.prob(A::MultiAgentManager, env::AbstractEnv, args...) = prob(A[A.cur_play
 (A::MultiAgentManager)(env::AbstractEnv) = A(env, DynamicStyle(env))
 
 function (A::MultiAgentManager)(env::AbstractEnv, ::Sequential)
+    while current_player(env) == chance_player(env)
+        env |> legal_action_space |> rand |> env
+    end
     return A[A.cur_player](env)
 end
 
