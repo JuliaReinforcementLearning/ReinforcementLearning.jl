@@ -4,11 +4,11 @@ using Base.Threads: @spawn
 
 using Functors: @functor
 
-const cache_attrs = (:action, :state, :reward, :terminal)
+const cache_attrs = (:state, :action, :reward, :terminal)
 
-mutable struct AgentCache{A,S,R}
-    action::Union{Missing, A}
+mutable struct AgentCache{S,A,R}
     state::Union{Missing, S}
+    action::Union{Missing, A}
     reward::Union{Missing, R}
     terminal::Union{Missing, Bool}
 
@@ -21,27 +21,27 @@ mutable struct AgentCache{A,S,R}
     end
 end
 
-function struct_to_trajectory_tuple(agent_cache::AgentCache{A,S,R}) where {A,S,R}
-    if ismissing(agent_cache.terminal)
-        return @NamedTuple{action::A}((agent_cache.action))
+function struct_to_trajectory_tuple(agent_cache::AgentCache{S,A,R}) where {S,A,R}
+    if !ismissing(agent_cache.terminal)
+        return @NamedTuple{state::S, action::A, reward::R, terminal::Bool}((agent_cache.state, agent_cache.action, agent_cache.reward, agent_cache.terminal))
+    elseif !ismissing(agent_cache.reward)
+        return @NamedTuple{state::S, action::A, reward::R}((agent_cache.state, agent_cache.action, agent_cache.reward))
+    elseif !ismissing(agent_cache.action)
+        return @NamedTuple{state::S, action::A}((agent_cache.state, agent_cache.action))
     else
-        return @NamedTuple{action::A, state::S, reward::R, terminal::Bool}((agent_cache.action, agent_cache.state, agent_cache.reward, agent_cache.terminal))
+        return @NamedTuple{state::S}((agent_cache.state))
     end
 end
 
-
-# , (A, S, R, Bool)
-NamedTuple{(:a,:b,:c), Tuple{Int64, Int64, Int64}}((1, 2, 3))
-
-function reset!(agent_cache::AgentCache{A,S,R}) where {A,S,R}
-    agent_cache.action = missing
+function reset!(agent_cache::AgentCache{S,A,R}) where {S,A,R}
     agent_cache.state = missing
+    agent_cache.action = missing
     agent_cache.reward = missing
     agent_cache.terminal = missing
     return nothing
 end
 
-function Base.isempty(agent_cache::AgentCache{A,S,R}) where {A,S,R}
+function Base.isempty(agent_cache::AgentCache{S,A,R}) where {S,A,R}
     ismissing(agent_cache.action) & ismissing(agent_cache.state) & ismissing(agent_cache.reward) & ismissing(agent_cache.terminal)
 end
 
@@ -49,7 +49,7 @@ function update_state!(agent_cache::AgentCache, env::E) where {E <: AbstractEnv}
     agent_cache.state = state(env)
 end
 
-function update_reward!(agent_cache::AgentCache{A,S,R}, env::E) where {A,S,R, E <: AbstractEnv}
+function update_reward!(agent_cache::AgentCache{S,A,R}, env::E) where {S,A,R, E <: AbstractEnv}
     agent_cache.reward = reward(env)
 end
 
@@ -105,7 +105,7 @@ end
 function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action = agent.policy(env, args...; kwargs...)
     agent.cache.action = action
-    push!(agent.trajectory, struct_to_namedtuple(agent.cache))
+    push!(agent.trajectory, struct_to_trajectory_tuple(agent.cache))
     reset!(agent.cache)
     action
 end

@@ -9,13 +9,13 @@ using JET, ReinforcementLearningCore, Test
         policy = RandomPolicy()
         cache_1 = AgentCache(policy, env)
         @test typeof(cache_1) == AgentCache{Int64, Int64, Float64}
-        @test ismissing(cache_1.action)
         @test ismissing(cache_1.state)
+        @test ismissing(cache_1.action)
         @test ismissing(cache_1.reward)
         @test ismissing(cache_1.terminal)
 
-        cache_1.action = 1
         cache_1.state = 10
+        cache_1.action = 1
         cache_1.reward = 10
         cache_1.terminal = true
         @test cache_1.action == 1
@@ -24,13 +24,13 @@ using JET, ReinforcementLearningCore, Test
         @test cache_1.terminal == true
 
         RLCore.reset!(cache_1)
-        @test ismissing(cache_1.action)
         @test ismissing(cache_1.state)
+        @test ismissing(cache_1.action)
         @test ismissing(cache_1.reward)
         @test ismissing(cache_1.terminal)
 
 
-        cache_1.action = 1
+        cache_1.state = 1
         @test RLCore.struct_to_trajectory_tuple(cache_1) == (action = 1,)
         RLCore.reset!(cache_1)
 
@@ -48,8 +48,7 @@ using JET, ReinforcementLearningCore, Test
         @test RLCore.struct_to_trajectory_tuple(cache_1) == (action = 1, state = 1, reward = -1.0, terminal = true)
 
         cache_1.terminal = missing
-        @test RLCore.struct_to_trajectory_tuple(cache_1) == (action = 1,)
-
+        @test RLCore.struct_to_trajectory_tuple(cache_1) == (state = 1, action = 1, reward = -1.0)
     end
 
     a_1 = Agent(
