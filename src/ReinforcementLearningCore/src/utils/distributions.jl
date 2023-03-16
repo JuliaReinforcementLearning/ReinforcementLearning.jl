@@ -62,7 +62,7 @@ batch_size).
 """
 function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ=1.0f-8) where {A<:AbstractArray}
     l(k) = mvnormlogpdf(μ[:, :, k], LorU[:, :, k], x[:, :, k])
-    logp = reduce(hcat, [l(k) for k in axes(x, 3)])
+    logp = reduce(hcat, (l(k) for k in axes(x, 3)))
     return reshape(logp, 1, size(logp)...)
 end
 
