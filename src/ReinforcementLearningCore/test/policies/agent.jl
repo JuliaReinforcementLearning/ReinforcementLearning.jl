@@ -82,15 +82,19 @@ using JET, ReinforcementLearningCore, Test
 
             env = RandomWalk1D()
             agent(PreActStage(), env)
+            @test agent.cache.status == :s
             @test state(env) == agent.cache.state
             @test agent(env) in (1,2)
+            @test agent.cache.status == :sa
             @test isempty(agent.cache)
             @test length(agent.trajectory.container) == 0 
             agent(PostActStage(), env)
+            @test agent.cache.status == :sart
             @test agent.cache.reward == 0. && agent.cache.terminal == false
             agent(PreActStage(), env)
             @test state(env) == agent.cache.state
             @test agent(env) in (1,2)
+            @test agent.cache.status == :sart
             @test isempty(agent.cache)
             @test length(agent.trajectory.container) == 1
 

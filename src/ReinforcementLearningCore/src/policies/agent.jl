@@ -14,11 +14,11 @@ mutable struct AgentCache{S,A,R}
     status::Symbol
 
     function AgentCache(policy::AbstractPolicy, env::AbstractEnv)
-        new{typeof(policy(env)), typeof(state(env)), typeof(reward(env))}(policy(env), state(env), reward(env), :empty)
+        new{typeof(policy(env)), typeof(state(env)), typeof(reward(env))}(policy(env), state(env), reward(env), false, :empty)
     end
 
     function AgentCache()
-        new{Any, Any, Any}(0, 0, 0, :empty)
+        new{Any, Any, Any}(0, 0, 0, false, :empty)
     end
 end
 
@@ -111,12 +111,17 @@ end
 function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action = agent.policy(env, args...; kwargs...)
     agent.cache.action = action
+    agent.cache.status == :s && agent.cache.status == :sa
+
     update_trajectory!(agent.trajectory, agent.cache)
     reset!(agent.cache)
     action
 end
 
-(agent::Agent)(::PreActStage, env::AbstractEnv) = update_state!(agent.cache, env)
+function (agent::Agent)(::PreActStage, env::AbstractEnv)
+    update_state!(agent.cache, env)
+    agent.cache.status = :s
+end
 
 function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
     update_reward!(agent.cache, env)
