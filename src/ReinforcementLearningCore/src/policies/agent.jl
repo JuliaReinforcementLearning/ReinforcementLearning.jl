@@ -30,7 +30,7 @@ sa_to_tuple(agent_cache::AgentCache{S,A,R}) where {S,A,R} = @NamedTuple{state::S
 
 state_to_tuple(agent_cache::AgentCache{S,A,R}) where {S,A,R} = @NamedTuple{state::S}((agent_cache.state::S))
 
-function reset!(agent_cache::AgentCache)
+function RLBase.reset!(agent_cache::AgentCache)
     agent_cache.status = :empty
     return nothing
 end
