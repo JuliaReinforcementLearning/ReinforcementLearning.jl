@@ -13,11 +13,11 @@ mutable struct SART{S,A,R}
     terminal::Union{Bool, Missing}
 
     function SART(policy::AbstractPolicy, env::AbstractEnv)
-        new{typeof(policy(env)), typeof(state(env)), typeof(reward(env))}(policy(env), state(env), reward(env), false)
+        new{typeof(policy(env)), typeof(state(env)), typeof(reward(env))}(missing, missing, missing, missing)
     end
 
     function SART()
-        new{Any, Any, Any}(0, 0, 0, false)
+        new{Any, Any, Any}(missing, missing, missing, missing)
     end
 end
 
@@ -32,7 +32,7 @@ struct SART_strict{S,A,R}
     end
 end
 
-sart_to_tuple(agent_cache::SART_strict{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A, reward::R, terminal::Bool}((agent_cache.state::S, agent_cache.action::A, agent_cache.reward::R, agent_cache.terminal::Bool))
+sart_to_tuple(sart::SART_strict{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A, reward::R, terminal::Bool}((sart.state::S, sart.action::A, sart.reward::R, sart.terminal::Bool))
 
 function RLBase.reset!(sart::SART)
     sart.state = missing
@@ -97,7 +97,7 @@ function RLBase.optimise!(policy::AbstractPolicy, trajectory::Trajectory)
 end
 
 function update_trajectory!(trajectory::Trajectory, sart::SART_strict)
-    push!(trajectory, sart_to_tuple(agent_cache))
+    push!(trajectory, sart_to_tuple(sart))
 end
 
 @functor Agent (policy,)

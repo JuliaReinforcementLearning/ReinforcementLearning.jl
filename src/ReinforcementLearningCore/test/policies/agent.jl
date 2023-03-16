@@ -1,17 +1,17 @@
 using ReinforcementLearningBase, ReinforcementLearningEnvironments
 using ReinforcementLearningCore: SART, SART_strict
+using ReinforcementLearningCore
 
 
 # SART{Int, Int, Float64}(1, 1, 1.0, false) |> SART_strict
 
 @testset "agent.jl" begin
     @testset "Agent Cache struct" begin
-        @test typeof(AgentCache()) == AgentCache{Any, Any, Any}
+        @test typeof(SART()) == SART{Any, Any, Any}
         env = RandomWalk1D()
         policy = RandomPolicy()
-        cache_1 = AgentCache(policy, env)
-        @test typeof(cache_1) == AgentCache{Int64, Int64, Float64}
-        @test cache_1.status == :empty
+        cache_1 = SART(policy, env)
+        @test typeof(cache_1) == SART{Int64, Int64, Float64}
         cache_1.state = 10
         cache_1.action = 1
         cache_1.reward = 10
@@ -22,11 +22,10 @@ using ReinforcementLearningCore: SART, SART_strict
         @test cache_1.terminal == true
 
         RLCore.reset!(cache_1)
-        @test cache_1.status == :empty
-
-        cache_1.state = 1
-        @test RLCore.state_to_tuple(cache_1) == (state = 1,)
-        RLCore.reset!(cache_1)
+        @test ismissing(cache_1.state)
+        @test ismissing(cache_1.action)
+        @test ismissing(cache_1.reward)
+        @test ismissing(cache_1.terminal)
 
         env.pos = 2
         RLCore.update_state!(cache_1, env)
@@ -39,10 +38,7 @@ using ReinforcementLearningCore: SART, SART_strict
         cache_1.state = 1
         cache_1.action = 1
         cache_1.terminal = true
-        @test RLCore.sart_to_tuple(cache_1) == (state = 1, action = 1, reward = -1.0, terminal = true)
-
-        cache_1.status = :sar
-        @test RLCore.sar_to_tuple(cache_1) == (state = 1, action = 1, reward = -1.0)
+        @test RLCore.sart_to_tuple(SART_strict(cache_1)) == (state = 1, action = 1, reward = -1.0, terminal = true)
     end
 
     a_1 = Agent(
@@ -76,19 +72,17 @@ using ReinforcementLearningCore: SART, SART_strict
 
             env = RandomWalk1D()
             agent(PreActStage(), env)
-            @test agent.cache.status == :s
+            @test ismissing(agent.cache.action)
             @test state(env) == agent.cache.state
             @test agent(env) in (1,2)
-            @test agent.cache.status == :empty
+            @test ismissing(agent.cache.action)
             @test isempty(agent.cache)
             @test length(agent.trajectory.container) == 0 
             agent(PostActStage(), env)
-            @test agent.cache.status == :sart
             @test agent.cache.reward == 0. && agent.cache.terminal == false
             agent(PreActStage(), env)
             @test state(env) == agent.cache.state
             @test agent(env) in (1,2)
-            @test agent.cache.status == :empty
             @test isempty(agent.cache)
             @test length(agent.trajectory.container) == 1
 
