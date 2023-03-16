@@ -1,7 +1,6 @@
 using ReinforcementLearningBase, ReinforcementLearningEnvironments
 using ReinforcementLearningCore: AgentCache
 
-using JET, ReinforcementLearningCore, Test
 @testset "agent.jl" begin
     @testset "Agent Cache struct" begin
         @test typeof(AgentCache()) == AgentCache{Any, Any, Any}
