@@ -34,6 +34,10 @@ using JET, ReinforcementLearningCore, Test
         @test (action = 1,) == RLCore.struct_to_namedtuple(cache_1)
         RLCore.reset!(cache_1)
         @test (;) == RLCore.struct_to_namedtuple(cache_1)
+
+        env.pos = 2
+        RLCore.update_state!(cache_1, env)
+        @test cache_1.state == 2
     end
 
     a_1 = Agent(
@@ -63,8 +67,9 @@ using JET, ReinforcementLearningCore, Test
     agent_list = (a_1, a_2, a_3)
     for i in 1:length(agent_list)
         @testset "Test Agent $i" begin
-            env = RandomWalk1D()
             agent = agent_list[i]
+
+            env = RandomWalk1D()
             agent(PreActStage(), env)
             @test state(env) == agent.cache.state
             @test agent(env) in (1,2)

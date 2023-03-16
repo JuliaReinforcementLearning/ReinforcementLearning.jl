@@ -4,6 +4,8 @@ using Base.Threads: @spawn
 
 using Functors: @functor
 
+const cache_attrs = (:action, :state, :reward, :terminal)
+
 mutable struct AgentCache{A,S,R}
     action::Union{Missing, A}
     state::Union{Missing, S}
@@ -19,7 +21,27 @@ mutable struct AgentCache{A,S,R}
     end
 end
 
-const cache_attrs = (:action, :state, :reward, :terminal)
+function struct_to_namedtuple(agent_cache::AgentCache{S,R}) where {S,R}
+    attr_is_not_missing = Bool[!ismissing(getfield(agent_cache, f)) for f in cache_attrs]
+    present_attrs = cache_attrs[attr_is_not_missing]
+    return NamedTuple{present_attrs}(getfield(agent_cache, f) for f in present_attrs)
+end
+
+function reset!(agent_cache::AgentCache{S,R}) where {S,R}
+    agent_cache.action = missing
+    agent_cache.state = missing
+    agent_cache.reward = missing
+    agent_cache.terminal = missing
+    return nothing
+end
+
+function Base.isempty(agent_cache::AgentCache{S,R}) where {S,R}
+    ismissing(agent_cache.action) & ismissing(agent_cache.state) & ismissing(agent_cache.reward) & ismissing(agent_cache.terminal)
+end
+
+function update_state!(agent_cache::AgentCache{A,S,R}, env::E) where {A,S,R, E <: AbstractEnv}
+    agent_cache.state = state(env)
+end
 
 """
     Agent(;policy, trajectory) <: AbstractPolicy
@@ -77,31 +99,11 @@ function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action
 end
 
-function struct_to_namedtuple(agent_cache::AgentCache{S,R}) where {S,R}
-    attr_is_not_missing = Bool[!ismissing(getfield(agent_cache, f)) for f in cache_attrs]
-    present_attrs = cache_attrs[attr_is_not_missing]
-    return NamedTuple{present_attrs}(getfield(agent_cache, f) for f in present_attrs)
-end
-
-function reset!(agent_cache::AgentCache{S,R}) where {S,R}
-    agent_cache.action = missing
-    agent_cache.state = missing
-    agent_cache.reward = missing
-    agent_cache.terminal = missing
-    return nothing
-end
-
-function Base.isempty(agent_cache::AgentCache{S,R}) where {S,R}
-    ismissing(agent_cache.action) & ismissing(agent_cache.state) & ismissing(agent_cache.reward) & ismissing(agent_cache.terminal)
-end
-
-(agent::Agent)(::PreActStage, env::E) where {E <: AbstractEnv} =
-    agent.cache.state = state(env)
-    return
+(agent::Agent)(::PreActStage, env::E) where {E <: AbstractEnv} = update_state!(agent.cache, env)
 
 function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
-    agent.cache.reward = reward(env)
-    agent.cache.state = state(env)
+    update_reward!(agent.cache, env)
+    update_state!(agent.cache, env)
     agent.cache.terminal = is_terminated(env)
     return
 end
