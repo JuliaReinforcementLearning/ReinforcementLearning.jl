@@ -90,7 +90,6 @@ function RLBase.optimise!(policy::AbstractPolicy, trajectory::Trajectory)
 end
 
 function update_trajectory!(trajectory::Trajectory, agent_cache::AgentCache)
-    print(agent_cache.status)
     if agent_cache.status == :sart
         push!(trajectory, sart_to_tuple(agent_cache))
     elseif agent_cache.status == :sar
