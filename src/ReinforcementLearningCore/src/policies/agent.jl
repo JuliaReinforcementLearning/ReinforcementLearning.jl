@@ -16,7 +16,7 @@ passed to the policy.
 mutable struct Agent{P,T} <: AbstractPolicy
     policy::P
     trajectory::T
-    cache::NamedTuple # trajectory do not support partial inserting
+    cache::NamedTuple # trajectory does not support partial inserting
 
     function Agent(policy::P, trajectory::T, cache=NamedTuple()) where {P,T}
         agent = new{P,T}(policy, trajectory, cache)
