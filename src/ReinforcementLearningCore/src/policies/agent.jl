@@ -43,6 +43,10 @@ function update_state!(agent_cache::AgentCache{A,S,R}, env::E) where {A,S,R, E <
     agent_cache.state = state(env)
 end
 
+function update_reward!(agent_cache::AgentCache{A,S,R}, env::E) where {A,S,R, E <: AbstractEnv}
+    agent_cache.reward = reward(env)
+end
+
 """
     Agent(;policy, trajectory) <: AbstractPolicy
 

@@ -38,6 +38,11 @@ using JET, ReinforcementLearningCore, Test
         env.pos = 2
         RLCore.update_state!(cache_1, env)
         @test cache_1.state == 2
+
+        env.pos = 1
+        RLCore.update_reward!(cache_1, env)
+        @test cache_1.reward == -1
+
     end
 
     a_1 = Agent(
