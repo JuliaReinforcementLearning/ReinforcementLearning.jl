@@ -21,13 +21,19 @@ mutable struct AgentCache{A,S,R}
     end
 end
 
-function struct_to_namedtuple(agent_cache::AgentCache{S,R}) where {S,R}
-    attr_is_not_missing = Bool[!ismissing(getfield(agent_cache, f)) for f in cache_attrs]
-    present_attrs = cache_attrs[attr_is_not_missing]
-    return NamedTuple{present_attrs}(getfield(agent_cache, f) for f in present_attrs)
+function struct_to_trajectory_tuple(agent_cache::AgentCache{A,S,R}) where {A,S,R}
+    if ismissing(agent_cache.terminal)
+        return @NamedTuple{action::A}((agent_cache.action))
+    else
+        return @NamedTuple{action::A, state::S, reward::R, terminal::Bool}((agent_cache.action, agent_cache.state, agent_cache.reward, agent_cache.terminal))
+    end
 end
 
-function reset!(agent_cache::AgentCache{S,R}) where {S,R}
+
+# , (A, S, R, Bool)
+NamedTuple{(:a,:b,:c), Tuple{Int64, Int64, Int64}}((1, 2, 3))
+
+function reset!(agent_cache::AgentCache{A,S,R}) where {A,S,R}
     agent_cache.action = missing
     agent_cache.state = missing
     agent_cache.reward = missing
@@ -35,11 +41,11 @@ function reset!(agent_cache::AgentCache{S,R}) where {S,R}
     return nothing
 end
 
-function Base.isempty(agent_cache::AgentCache{S,R}) where {S,R}
+function Base.isempty(agent_cache::AgentCache{A,S,R}) where {A,S,R}
     ismissing(agent_cache.action) & ismissing(agent_cache.state) & ismissing(agent_cache.reward) & ismissing(agent_cache.terminal)
 end
 
-function update_state!(agent_cache::AgentCache{A,S,R}, env::E) where {A,S,R, E <: AbstractEnv}
+function update_state!(agent_cache::AgentCache, env::E) where {E <: AbstractEnv}
     agent_cache.state = state(env)
 end
 
@@ -56,16 +62,17 @@ is a Callable and its call method accepts varargs and keyword arguments to be
 passed to the policy. 
 
 """
-mutable struct Agent{P,T} <: AbstractPolicy
+mutable struct Agent{P,T,C} <: AbstractPolicy
     policy::P
     trajectory::T
-    cache::AgentCache # trajectory does not support partial inserting
+    cache::C # trajectory does not support partial inserting
 
     function Agent(policy::P, trajectory::T; env=missing) where {P,T}
         if !ismissing(env)
-            agent = new{P,T}(policy, trajectory, AgentCache(policy, env))
+            cache = AgentCache(policy, env)
+            agent = new{P,T, typeof(cache)}(policy, trajectory, cache)
         else
-            agent = new{P,T}(policy, trajectory, AgentCache())
+            agent = new{P,T, typeof(AgentCache())}(policy, trajectory, AgentCache())
         end
 
         if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
@@ -103,7 +110,7 @@ function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action
 end
 
-(agent::Agent)(::PreActStage, env::E) where {E <: AbstractEnv} = update_state!(agent.cache, env)
+(agent::Agent)(::PreActStage, env::AbstractEnv) = update_state!(agent.cache, env)
 
 function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
     update_reward!(agent.cache, env)
