@@ -90,6 +90,7 @@ function RLBase.optimise!(policy::AbstractPolicy, trajectory::Trajectory)
 end
 
 function update_trajectory!(trajectory::Trajectory, agent_cache::AgentCache)
+    print(agent_cache.status)
     if agent_cache.status == :sart
         push!(trajectory, sart_to_tuple(agent_cache))
     elseif agent_cache.status == :sar
@@ -111,7 +112,10 @@ end
 function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action = agent.policy(env, args...; kwargs...)
     agent.cache.action = action
-    agent.cache.status == :s && agent.cache.status == :sa
+    
+    if agent.cache.status == :s
+        agent.cache.status = :sa
+    end
 
     update_trajectory!(agent.trajectory, agent.cache)
     reset!(agent.cache)
@@ -120,7 +124,9 @@ end
 
 function (agent::Agent)(::PreActStage, env::AbstractEnv)
     update_state!(agent.cache, env)
-    agent.cache.status = :s
+    if agent.cache.status == :empty
+        agent.cache.status = :s
+    end
 end
 
 function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}

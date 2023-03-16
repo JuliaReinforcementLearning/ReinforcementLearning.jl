@@ -9,11 +9,7 @@ using JET, ReinforcementLearningCore, Test
         policy = RandomPolicy()
         cache_1 = AgentCache(policy, env)
         @test typeof(cache_1) == AgentCache{Int64, Int64, Float64}
-        @test ismissing(cache_1.state)
-        @test ismissing(cache_1.action)
-        @test ismissing(cache_1.reward)
-        @test ismissing(cache_1.terminal)
-
+        @test cache_1.status == :empty
         cache_1.state = 10
         cache_1.action = 1
         cache_1.reward = 10
@@ -24,14 +20,10 @@ using JET, ReinforcementLearningCore, Test
         @test cache_1.terminal == true
 
         RLCore.reset!(cache_1)
-        @test ismissing(cache_1.state)
-        @test ismissing(cache_1.action)
-        @test ismissing(cache_1.reward)
-        @test ismissing(cache_1.terminal)
-
+        @test cache_1.status == :empty
 
         cache_1.state = 1
-        @test RLCore.struct_to_trajectory_tuple(cache_1) == (state = 1,)
+        @test RLCore.state_to_tuple(cache_1) == (state = 1,)
         RLCore.reset!(cache_1)
 
         env.pos = 2
@@ -45,10 +37,10 @@ using JET, ReinforcementLearningCore, Test
         cache_1.state = 1
         cache_1.action = 1
         cache_1.terminal = true
-        @test RLCore.struct_to_trajectory_tuple(cache_1) == (state = 1, action = 1, reward = -1.0, terminal = true)
+        @test RLCore.sart_to_tuple(cache_1) == (state = 1, action = 1, reward = -1.0, terminal = true)
 
         cache_1.status = :sar
-        @test RLCore.struct_to_trajectory_tuple(cache_1) == (state = 1, action = 1, reward = -1.0)
+        @test RLCore.sar_to_tuple(cache_1) == (state = 1, action = 1, reward = -1.0)
     end
 
     a_1 = Agent(
@@ -85,7 +77,7 @@ using JET, ReinforcementLearningCore, Test
             @test agent.cache.status == :s
             @test state(env) == agent.cache.state
             @test agent(env) in (1,2)
-            @test agent.cache.status == :sa
+            @test agent.cache.status == :empty
             @test isempty(agent.cache)
             @test length(agent.trajectory.container) == 0 
             agent(PostActStage(), env)
@@ -94,7 +86,7 @@ using JET, ReinforcementLearningCore, Test
             agent(PreActStage(), env)
             @test state(env) == agent.cache.state
             @test agent(env) in (1,2)
-            @test agent.cache.status == :sart
+            @test agent.cache.status == :empty
             @test isempty(agent.cache)
             @test length(agent.trajectory.container) == 1
 
