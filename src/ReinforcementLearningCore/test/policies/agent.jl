@@ -1,5 +1,8 @@
 using ReinforcementLearningBase, ReinforcementLearningEnvironments
-using ReinforcementLearningCore: AgentCache
+using ReinforcementLearningCore: SART, SART_strict
+
+
+# SART{Int, Int, Float64}(1, 1, 1.0, false) |> SART_strict
 
 @testset "agent.jl" begin
     @testset "Agent Cache struct" begin

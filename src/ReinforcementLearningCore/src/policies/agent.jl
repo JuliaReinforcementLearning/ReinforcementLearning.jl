@@ -6,43 +6,50 @@ using Functors: @functor
 
 const cache_attrs = (:S, :SA, :SAR, :SART)
 
-mutable struct AgentCache{S,A,R}
+mutable struct SART{S,A,R}
+    state::Union{S, Missing}
+    action::Union{A, Missing}
+    reward::Union{R, Missing}
+    terminal::Union{Bool, Missing}
+
+    function SART(policy::AbstractPolicy, env::AbstractEnv)
+        new{typeof(policy(env)), typeof(state(env)), typeof(reward(env))}(policy(env), state(env), reward(env), false)
+    end
+
+    function SART()
+        new{Any, Any, Any}(0, 0, 0, false)
+    end
+end
+
+struct SART_strict{S,A,R}
     state::S
     action::A
     reward::R
     terminal::Bool
-    status::Symbol
 
-    function AgentCache(policy::AbstractPolicy, env::AbstractEnv)
-        new{typeof(policy(env)), typeof(state(env)), typeof(reward(env))}(policy(env), state(env), reward(env), false, :empty)
-    end
-
-    function AgentCache()
-        new{Any, Any, Any}(0, 0, 0, false, :empty)
+    function SART_strict(sart::SART{S,A,R}) where {S,A,R}
+        new{S,A,R}(sart.state, sart.action, sart.reward, sart.terminal)
     end
 end
 
-sart_to_tuple(agent_cache::AgentCache{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A, reward::R, terminal::Bool}((agent_cache.state::S, agent_cache.action::A, agent_cache.reward::R, agent_cache.terminal::Bool))
+sart_to_tuple(agent_cache::SART_strict{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A, reward::R, terminal::Bool}((agent_cache.state::S, agent_cache.action::A, agent_cache.reward::R, agent_cache.terminal::Bool))
 
-sar_to_tuple(agent_cache::AgentCache{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A, reward::R}((agent_cache.state::S, agent_cache.action::A, agent_cache.reward::R))
-
-sa_to_tuple(agent_cache::AgentCache{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A}((agent_cache.state::S, agent_cache.action::A))
-
-state_to_tuple(agent_cache::AgentCache{S,A,R}) where {S,A,R} = @NamedTuple{state::S}((agent_cache.state::S))
-
-function RLBase.reset!(agent_cache::AgentCache)
-    agent_cache.status = :empty
+function RLBase.reset!(sart::SART)
+    sart.state = missing
+    sart.action = missing
+    sart.reward = missing
+    sart.terminal = missing
     return nothing
 end
 
-Base.isempty(agent_cache::AgentCache) = agent_cache.status == :empty
+Base.isempty(sart::SART) = ismissing(sart.state) && ismissing(sart.action) && ismissing(sart.reward) && ismissing(sart.terminal)
 
-function update_state!(agent_cache::AgentCache, env::E) where {E <: AbstractEnv}
-    agent_cache.state = state(env)
+function update_state!(sart::SART, env::E) where {E <: AbstractEnv}
+    sart.state = state(env)
 end
 
-function update_reward!(agent_cache::AgentCache, env::E) where {E <: AbstractEnv}
-    agent_cache.reward = reward(env)
+function update_reward!(sart::SART, env::E) where {E <: AbstractEnv}
+    sart.reward = reward(env)
 end
 
 """
@@ -61,10 +68,10 @@ mutable struct Agent{P,T,C} <: AbstractPolicy
 
     function Agent(policy::P, trajectory::T; env=missing) where {P,T}
         if !ismissing(env)
-            cache = AgentCache(policy, env)
+            cache = SART(policy, env)
             agent = new{P,T, typeof(cache)}(policy, trajectory, cache)
         else
-            agent = new{P,T, typeof(AgentCache())}(policy, trajectory, AgentCache())
+            agent = new{P,T, typeof(SART())}(policy, trajectory, SART())
         end
 
         if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
@@ -89,18 +96,8 @@ function RLBase.optimise!(policy::AbstractPolicy, trajectory::Trajectory)
     end
 end
 
-function update_trajectory!(trajectory::Trajectory, agent_cache::AgentCache)
-    if agent_cache.status == :sart
-        push!(trajectory, sart_to_tuple(agent_cache))
-    elseif agent_cache.status == :sar
-        push!(trajectory, sar_to_tuple(agent_cache))
-    elseif agent_cache.status == :sa
-        push!(trajectory, sa_to_tuple(agent_cache))
-    elseif agent_cache.status == :s
-        push!(trajectory, state_to_tuple(agent_cache))
-    end
-
-    return
+function update_trajectory!(trajectory::Trajectory, sart::SART_strict)
+    push!(trajectory, sart_to_tuple(agent_cache))
 end
 
 @functor Agent (policy,)
@@ -111,27 +108,20 @@ end
 function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action = agent.policy(env, args...; kwargs...)
     agent.cache.action = action
-    
-    if agent.cache.status == :s
-        agent.cache.status = :sa
+    if !ismissing(agent.cache.terminal)
+        update_trajectory!(agent.trajectory, SART_strict(agent.cache))
     end
-
-    update_trajectory!(agent.trajectory, agent.cache)
     reset!(agent.cache)
     action
 end
 
 function (agent::Agent)(::PreActStage, env::AbstractEnv)
     update_state!(agent.cache, env)
-    if agent.cache.status == :empty
-        agent.cache.status = :s
-    end
 end
 
 function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
     update_reward!(agent.cache, env)
     update_state!(agent.cache, env)
     agent.cache.terminal = is_terminated(env)
-    agent.cache.status = :sart
     return
 end
