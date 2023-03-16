@@ -4,52 +4,44 @@ using Base.Threads: @spawn
 
 using Functors: @functor
 
-const cache_attrs = (:state, :action, :reward, :terminal)
+const cache_attrs = (:S, :SA, :SAR, :SART)
 
 mutable struct AgentCache{S,A,R}
-    state::Union{Missing, S}
-    action::Union{Missing, A}
-    reward::Union{Missing, R}
-    terminal::Union{Missing, Bool}
+    state::S
+    action::A
+    reward::R
+    terminal::Bool
+    status::Symbol
 
     function AgentCache(policy::AbstractPolicy, env::AbstractEnv)
-        new{typeof(policy(env)), typeof(state(env)), typeof(reward(env))}(missing, missing, missing)
+        new{typeof(policy(env)), typeof(state(env)), typeof(reward(env))}(policy(env), state(env), reward(env), :empty)
     end
 
     function AgentCache()
-        new{Any, Any, Any}(missing, missing, missing, missing)
+        new{Any, Any, Any}(0, 0, 0, :empty)
     end
 end
 
-function struct_to_trajectory_tuple(agent_cache::AgentCache{S,A,R}) where {S,A,R}
-    if !ismissing(agent_cache.terminal)
-        return @NamedTuple{state::S, action::A, reward::R, terminal::Bool}((agent_cache.state, agent_cache.action, agent_cache.reward, agent_cache.terminal))
-    elseif !ismissing(agent_cache.reward)
-        return @NamedTuple{state::S, action::A, reward::R}((agent_cache.state, agent_cache.action, agent_cache.reward))
-    elseif !ismissing(agent_cache.action)
-        return @NamedTuple{state::S, action::A}((agent_cache.state, agent_cache.action))
-    else
-        return @NamedTuple{state::S}((agent_cache.state))
-    end
-end
+sart_to_tuple(agent_cache::AgentCache{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A, reward::R, terminal::Bool}((agent_cache.state::S, agent_cache.action::A, agent_cache.reward::R, agent_cache.terminal::Bool))
 
-function reset!(agent_cache::AgentCache{S,A,R}) where {S,A,R}
-    agent_cache.state = missing
-    agent_cache.action = missing
-    agent_cache.reward = missing
-    agent_cache.terminal = missing
+sar_to_tuple(agent_cache::AgentCache{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A, reward::R}((agent_cache.state::S, agent_cache.action::A, agent_cache.reward::R))
+
+sa_to_tuple(agent_cache::AgentCache{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A}((agent_cache.state::S, agent_cache.action::A))
+
+state_to_tuple(agent_cache::AgentCache{S,A,R}) where {S,A,R} = @NamedTuple{state::S}((agent_cache.state::S))
+
+function reset!(agent_cache::AgentCache)
+    agent_cache.status = :empty
     return nothing
 end
 
-function Base.isempty(agent_cache::AgentCache{S,A,R}) where {S,A,R}
-    ismissing(agent_cache.action) & ismissing(agent_cache.state) & ismissing(agent_cache.reward) & ismissing(agent_cache.terminal)
-end
+Base.isempty(agent_cache::AgentCache) = agent_cache.status == :empty
 
 function update_state!(agent_cache::AgentCache, env::E) where {E <: AbstractEnv}
     agent_cache.state = state(env)
 end
 
-function update_reward!(agent_cache::AgentCache{S,A,R}, env::E) where {S,A,R, E <: AbstractEnv}
+function update_reward!(agent_cache::AgentCache, env::E) where {E <: AbstractEnv}
     agent_cache.reward = reward(env)
 end
 
@@ -97,6 +89,20 @@ function RLBase.optimise!(policy::AbstractPolicy, trajectory::Trajectory)
     end
 end
 
+function update_trajectory!(trajectory::Trajectory, agent_cache::AgentCache)
+    if agent_cache.status == :sart
+        push!(trajectory, sart_to_tuple(agent_cache))
+    elseif agent_cache.status == :sar
+        push!(trajectory, sar_to_tuple(agent_cache))
+    elseif agent_cache.status == :sa
+        push!(trajectory, sa_to_tuple(agent_cache))
+    elseif agent_cache.status == :s
+        push!(trajectory, state_to_tuple(agent_cache))
+    end
+
+    return
+end
+
 @functor Agent (policy,)
 
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
@@ -105,7 +111,7 @@ end
 function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action = agent.policy(env, args...; kwargs...)
     agent.cache.action = action
-    push!(agent.trajectory, struct_to_trajectory_tuple(agent.cache))
+    update_trajectory!(agent.trajectory, agent.cache)
     reset!(agent.cache)
     action
 end
@@ -116,5 +122,6 @@ function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
     update_reward!(agent.cache, env)
     update_state!(agent.cache, env)
     agent.cache.terminal = is_terminated(env)
+    agent.cache.status = :sart
     return
 end

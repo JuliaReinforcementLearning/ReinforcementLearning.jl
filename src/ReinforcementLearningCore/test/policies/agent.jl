@@ -47,7 +47,7 @@ using JET, ReinforcementLearningCore, Test
         cache_1.terminal = true
         @test RLCore.struct_to_trajectory_tuple(cache_1) == (state = 1, action = 1, reward = -1.0, terminal = true)
 
-        cache_1.terminal = missing
+        cache_1.status = :sar
         @test RLCore.struct_to_trajectory_tuple(cache_1) == (state = 1, action = 1, reward = -1.0)
     end
 
