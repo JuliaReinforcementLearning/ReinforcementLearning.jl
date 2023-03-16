@@ -31,7 +31,7 @@ using JET, ReinforcementLearningCore, Test
 
 
         cache_1.state = 1
-        @test RLCore.struct_to_trajectory_tuple(cache_1) == (action = 1,)
+        @test RLCore.struct_to_trajectory_tuple(cache_1) == (state = 1,)
         RLCore.reset!(cache_1)
 
         env.pos = 2
@@ -45,7 +45,7 @@ using JET, ReinforcementLearningCore, Test
         cache_1.state = 1
         cache_1.action = 1
         cache_1.terminal = true
-        @test RLCore.struct_to_trajectory_tuple(cache_1) == (action = 1, state = 1, reward = -1.0, terminal = true)
+        @test RLCore.struct_to_trajectory_tuple(cache_1) == (state = 1, action = 1, reward = -1.0, terminal = true)
 
         cache_1.terminal = missing
         @test RLCore.struct_to_trajectory_tuple(cache_1) == (state = 1, action = 1, reward = -1.0)
