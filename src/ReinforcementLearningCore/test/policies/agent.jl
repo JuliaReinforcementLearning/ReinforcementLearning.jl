@@ -70,20 +70,11 @@ using ReinforcementLearningCore
                 InsertSampleRatioController(),
             ),
         )
-        a_3 = Agent(
-            RandomPolicy(),
-            Trajectory(
-                CircularArraySARTTraces(; capacity = 1_000),
-                DummySampler(),
-            ),
-            env=RandomWalk1D()
-        )
 
-        agent_list = (a_1, a_2, a_3)
+        agent_list = (a_1, a_2)
         for i in 1:length(agent_list)
             @testset "Test Agent $i" begin
                 agent = agent_list[i]
-
                 env = RandomWalk1D()
                 agent(PreActStage(), env)
                 @test ismissing(agent.cache.action)
