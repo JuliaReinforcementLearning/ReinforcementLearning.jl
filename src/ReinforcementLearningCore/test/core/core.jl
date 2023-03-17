@@ -42,13 +42,11 @@
                     CircularArraySARTTraces(; capacity = 1_000),
                     BatchSampler(1),
                     InsertSampleRatioController(n_inserted = -1),
-                ),
-                env=env
+                )
             )
-            stop_condition = StopAfterStep(123)
+            stop_condition = StopAfterStep(123; is_show_progress=false)
             hook = StepsPerEpisode()
             run(agent, env, stop_condition, hook)
-
             @test sum(hook[]) == length(agent.trajectory.container)
         end        
     end

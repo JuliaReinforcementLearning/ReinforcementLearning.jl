@@ -1,5 +1,6 @@
 using ReinforcementLearningBase, ReinforcementLearningEnvironments
-using ReinforcementLearningCore: ReinforcementLearningCore, SART, SART_strict, sart_to_tuple, state_agent_to_tuple
+using ReinforcementLearningCore: SART, sart_to_tuple
+using ReinforcementLearningCore
 
 @testset "agent.jl" begin
     @testset "Agent Cache struct" begin
@@ -34,7 +35,7 @@ using ReinforcementLearningCore: ReinforcementLearningCore, SART, SART_strict, s
         cache_1.state = 1
         cache_1.action = 1
         cache_1.terminal = true
-        @test RLCore.sart_to_tuple(SART_strict(cache_1)) == (state = 1, action = 1, reward = -1.0, terminal = true)
+        @test RLCore.sart_to_tuple(cache_1) == (state = 1, action = 1, reward = -1.0, terminal = true)
     end
 
     @testset "Trajectory SART struct compatibility" begin
@@ -46,10 +47,9 @@ using ReinforcementLearningCore: ReinforcementLearningCore, SART, SART_strict, s
         sart = SART()
         sart.state = 1
         sart.action = 1
+        push!(trajectory, sart_to_tuple(sart))
         sart.reward = 1.0
         sart.terminal = true
-
-        push!(trajectory, state_agent_to_tuple(sart))
         push!(trajectory, sart_to_tuple(sart))
         @test length(trajectory.container) == 1
     end

@@ -10,15 +10,10 @@ mutable struct SART{S,A,R}
     reward::Union{R, Missing}
     terminal::Union{Bool, Missing}
 
-    function SART(policy::AbstractPolicy, env::AbstractEnv)
-        new{typeof(state(env)), typeof(policy(env)), typeof(reward(env))}(missing, missing, missing, missing)
-    end
-
     function SART()
         new{Any, Any, Any}(missing, missing, missing, missing)
     end
 end
-
 
 sart_to_tuple(sart::SART{S,A,R}) where {S,A,R} = @NamedTuple{state::Union{S,Missing}, action::Union{A,Missing}, reward::Union{R,Missing}, terminal::Union{Bool,Missing}}((sart.state, sart.action, sart.reward, sart.terminal))
 
@@ -54,13 +49,8 @@ mutable struct Agent{P,T,C} <: AbstractPolicy
     trajectory::T
     cache::C # trajectory does not support partial inserting
 
-    function Agent(policy::P, trajectory::T; env=missing) where {P,T}
-        if !ismissing(env)
-            cache = SART(policy, env)
-            agent = new{P,T, typeof(cache)}(policy, trajectory, cache)
-        else
-            agent = new{P,T, typeof(SART())}(policy, trajectory, SART())
-        end
+    function Agent(policy::P, trajectory::T) where {P,T}
+        agent = new{P,T, typeof(SART())}(policy, trajectory, SART())
 
         if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
             bind(trajectory, @spawn(optimise!(policy, trajectory)))
