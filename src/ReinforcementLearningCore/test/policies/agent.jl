@@ -1,9 +1,5 @@
 using ReinforcementLearningBase, ReinforcementLearningEnvironments
-using ReinforcementLearningCore: SART, SART_strict
-using ReinforcementLearningCore
-
-
-# SART{Int, Int, Float64}(1, 1, 1.0, false) |> SART_strict
+using ReinforcementLearningCore: ReinforcementLearningCore, SART, SART_strict, sart_to_tuple, state_agent_to_tuple
 
 @testset "agent.jl" begin
     @testset "Agent Cache struct" begin
@@ -41,54 +37,73 @@ using ReinforcementLearningCore
         @test RLCore.sart_to_tuple(SART_strict(cache_1)) == (state = 1, action = 1, reward = -1.0, terminal = true)
     end
 
-    a_1 = Agent(
-        RandomPolicy(),
-        Trajectory(
-            CircularArraySARTTraces(; capacity = 1_000),
+    @testset "Trajectory SART struct compatibility" begin
+        trajectory = Trajectory(
+            CircularArraySARTTraces(; capacity = 1_000, reward=Float64=>()),
             DummySampler(),
-        ),
-    )
-    a_2 = Agent(
-        RandomPolicy(),
-        Trajectory(
-            CircularArraySARTTraces(; capacity = 1_000),
-            BatchSampler(1),
-            InsertSampleRatioController(),
-        ),
-    )
-    a_3 = Agent(
-        RandomPolicy(),
-        Trajectory(
-            CircularArraySARTTraces(; capacity = 1_000),
-            DummySampler(),
-        ),
-        env=RandomWalk1D()
-    )
+        )
 
-    agent_list = (a_1, a_2, a_3)
-    for i in 1:length(agent_list)
-        @testset "Test Agent $i" begin
-            agent = agent_list[i]
+        sart = SART()
+        sart.state = 1
+        sart.action = 1
+        sart.reward = 1.0
+        sart.terminal = true
 
-            env = RandomWalk1D()
-            agent(PreActStage(), env)
-            @test ismissing(agent.cache.action)
-            @test state(env) == agent.cache.state
-            @test agent(env) in (1,2)
-            @test ismissing(agent.cache.action)
-            @test isempty(agent.cache)
-            @test length(agent.trajectory.container) == 0 
-            agent(PostActStage(), env)
-            @test agent.cache.reward == 0. && agent.cache.terminal == false
-            agent(PreActStage(), env)
-            @test state(env) == agent.cache.state
-            @test agent(env) in (1,2)
-            @test isempty(agent.cache)
-            @test length(agent.trajectory.container) == 1
+        push!(trajectory, state_agent_to_tuple(sart))
+        push!(trajectory, sart_to_tuple(sart))
+        @test length(trajectory.container) == 1
+    end
 
-            #The following tests ensure the args and kwargs are passed to the policy. 
-            @test_throws "no method matching (::RandomPolicy" agent(env, 1)
-            @test_throws "no method matching (::RandomPolicy" agent(env, fake_kwarg = 1)
+    @testset "Agent Tests" begin
+        a_1 = Agent(
+            RandomPolicy(),
+            Trajectory(
+                CircularArraySARTTraces(; capacity = 1_000),
+                DummySampler(),
+            ),
+        )
+        a_2 = Agent(
+            RandomPolicy(),
+            Trajectory(
+                CircularArraySARTTraces(; capacity = 1_000),
+                BatchSampler(1),
+                InsertSampleRatioController(),
+            ),
+        )
+        a_3 = Agent(
+            RandomPolicy(),
+            Trajectory(
+                CircularArraySARTTraces(; capacity = 1_000),
+                DummySampler(),
+            ),
+            env=RandomWalk1D()
+        )
+
+        agent_list = (a_1, a_2, a_3)
+        for i in 1:length(agent_list)
+            @testset "Test Agent $i" begin
+                agent = agent_list[i]
+
+                env = RandomWalk1D()
+                agent(PreActStage(), env)
+                @test ismissing(agent.cache.action)
+                @test state(env) == agent.cache.state
+                @test agent(env) in (1,2)
+                @test ismissing(agent.cache.action)
+                @test isempty(agent.cache)
+                @test length(agent.trajectory.container) == 0 
+                agent(PostActStage(), env)
+                @test agent.cache.reward == 0. && agent.cache.terminal == false
+                agent(PreActStage(), env)
+                @test state(env) == agent.cache.state
+                @test agent(env) in (1,2)
+                @test isempty(agent.cache)
+                @test length(agent.trajectory.container) == 1
+
+                #The following tests ensure the args and kwargs are passed to the policy. 
+                @test_throws "no method matching (::RandomPolicy" agent(env, 1)
+                @test_throws "no method matching (::RandomPolicy" agent(env, fake_kwarg = 1)
+            end
         end
     end
 end
