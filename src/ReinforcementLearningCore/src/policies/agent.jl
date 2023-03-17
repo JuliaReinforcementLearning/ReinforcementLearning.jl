@@ -47,7 +47,7 @@ passed to the policy.
 mutable struct Agent{P,T,C} <: AbstractPolicy
     policy::P
     trajectory::T
-    cache::C # trajectory does not support partial inserting
+    cache::SART # need cache to collect SART elements as trajectory does not support partial inserting
 
     function Agent(policy::P, trajectory::T) where {P,T}
         agent = new{P,T, typeof(SART())}(policy, trajectory, SART())
@@ -59,7 +59,7 @@ mutable struct Agent{P,T,C} <: AbstractPolicy
     end
 end
 
-Agent(; policy, trajectory, env=missing) = Agent(policy, trajectory, cache)
+Agent(; policy, trajectory) = Agent(policy, trajectory)
 
 RLBase.optimise!(agent::Agent) = optimise!(TrajectoryStyle(agent.trajectory), agent)
 RLBase.optimise!(::SyncTrajectoryStyle, agent::Agent) =
