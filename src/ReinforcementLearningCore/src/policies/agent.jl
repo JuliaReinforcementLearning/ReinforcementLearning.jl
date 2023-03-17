@@ -41,7 +41,7 @@ end
 
 sart_to_tuple(sart::SART_strict{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A, reward::R, terminal::Bool}((sart.state::S, sart.action::A, sart.reward::R, sart.terminal::Bool))
 
-state_agent_to_tuple(sa::StateAgent) where {S,A} = @NamedTuple{state::S, action::A}((sa.state::S, sa.action::A))
+state_agent_to_tuple(sa::StateAgent_strict) where {S,A} = @NamedTuple{state::S, action::A}((sa.state::S, sa.action::A))
 
 function RLBase.reset!(sart::SART)
     sart.state = missing
