@@ -8,7 +8,7 @@ using ReinforcementLearningCore
         env = RandomWalk1D()
         policy = RandomPolicy()
         cache_1 = SART()
-        @test typeof(cache_1) == SART{Int64, Int64, Float64}
+        @test typeof(cache_1) == SART{Any, Any, Any}
         cache_1.state = 10
         cache_1.action = 1
         cache_1.reward = 10
