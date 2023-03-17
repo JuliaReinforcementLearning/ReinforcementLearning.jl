@@ -34,6 +34,8 @@ end
 
 sart_to_tuple(sart::SART_strict{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A, reward::R, terminal::Bool}((sart.state::S, sart.action::A, sart.reward::R, sart.terminal::Bool))
 
+sart_to_tuple(sart::SART) =  sart_to_tuple(SART_strict(sart))
+
 function RLBase.reset!(sart::SART)
     sart.state = missing
     sart.action = missing
@@ -96,10 +98,6 @@ function RLBase.optimise!(policy::AbstractPolicy, trajectory::Trajectory)
     end
 end
 
-function update_trajectory!(trajectory::Trajectory, sart::SART_strict)
-    push!(trajectory, sart_to_tuple(sart))
-end
-
 @functor Agent (policy,)
 
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
@@ -109,7 +107,7 @@ function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action = agent.policy(env, args...; kwargs...)
     agent.cache.action = action
     if !ismissing(agent.cache.terminal)
-        update_trajectory!(agent.trajectory, SART_strict(agent.cache))
+        push!(agent.trajectory, sart_to_tuple(agent.cache))
     end
     reset!(agent.cache)
     action
