@@ -19,33 +19,8 @@ mutable struct SART{S,A,R}
     end
 end
 
-struct SART_strict{S,A,R}
-    state::S
-    action::A
-    reward::R
-    terminal::Bool
 
-    function SART_strict(sart::SART{S,A,R}) where {S,A,R}
-        new{S,A,R}(sart.state, sart.action, sart.reward, sart.terminal)
-    end
-end
-
-struct StateAgent_strict{S,A}
-    state::S
-    action::A
-
-    function StateAgent_strict(sart::SART{S,A,R}) where {S,A,R}
-        new{S,A}(sart.state, sart.action)
-    end
-end
-
-sart_to_tuple(sart::SART_strict{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A, reward::R, terminal::Bool}((sart.state::S, sart.action::A, sart.reward::R, sart.terminal::Bool))
-
-sart_to_tuple(sart::SART) = sart_to_tuple(SART_strict(sart))
-
-state_agent_to_tuple(sa::StateAgent_strict{S,A}) where {S,A} = @NamedTuple{state::S, action::A}((sa.state::S, sa.action::A))
-
-state_agent_to_tuple(sart::SART) = state_agent_to_tuple(StateAgent_strict(sart))
+sart_to_tuple(sart::SART{S,A,R}) where {S,A,R} = @NamedTuple{state::Union{S,Missing}, action::Union{A,Missing}, reward::Union{R,Missing}, terminal::Union{Bool,Missing}}((sart.state, sart.action, sart.reward, sart.terminal))
 
 function RLBase.reset!(sart::SART)
     sart.state = missing
@@ -117,11 +92,7 @@ end
 function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action = agent.policy(env, args...; kwargs...)
     agent.cache.action = action
-    if !ismissing(agent.cache.terminal)
-        push!(agent.trajectory, sart_to_tuple(agent.cache))
-    else
-        push!(agent.trajectory, state_agent_to_tuple(agent.cache))
-    end
+    push!(agent.trajectory, sart_to_tuple(agent.cache))
     reset!(agent.cache)
     action
 end
@@ -132,7 +103,6 @@ end
 
 function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
     update_reward!(agent.cache, env)
-    update_state!(agent.cache, env)
     agent.cache.terminal = is_terminated(env)
     return
 end
