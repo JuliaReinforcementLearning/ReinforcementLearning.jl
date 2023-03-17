@@ -4,8 +4,6 @@ using Base.Threads: @spawn
 
 using Functors: @functor
 
-const cache_attrs = (:S, :SA, :SAR, :SART)
-
 mutable struct SART{S,A,R}
     state::Union{S, Missing}
     action::Union{A, Missing}
@@ -13,7 +11,7 @@ mutable struct SART{S,A,R}
     terminal::Union{Bool, Missing}
 
     function SART(policy::AbstractPolicy, env::AbstractEnv)
-        new{typeof(policy(env)), typeof(state(env)), typeof(reward(env))}(missing, missing, missing, missing)
+        new{typeof(state(env)), typeof(policy(env)), typeof(reward(env))}(missing, missing, missing, missing)
     end
 
     function SART()
@@ -32,9 +30,18 @@ struct SART_strict{S,A,R}
     end
 end
 
+struct StateAgent_strict{S,A}
+    state::S
+    action::A
+
+    function StateAgent_strict(sart::SART{S,A,R}) where {S,A,R}
+        new{S,A}(sart.state, sart.action)
+    end
+end
+
 sart_to_tuple(sart::SART_strict{S,A,R}) where {S,A,R} = @NamedTuple{state::S, action::A, reward::R, terminal::Bool}((sart.state::S, sart.action::A, sart.reward::R, sart.terminal::Bool))
 
-sart_to_tuple(sart::SART) =  sart_to_tuple(SART_strict(sart))
+state_agent_to_tuple(sa::StateAgent) where {S,A} = @NamedTuple{state::S, action::A}((sa.state::S, sa.action::A))
 
 function RLBase.reset!(sart::SART)
     sart.state = missing
@@ -108,6 +115,8 @@ function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     agent.cache.action = action
     if !ismissing(agent.cache.terminal)
         push!(agent.trajectory, sart_to_tuple(agent.cache))
+    else
+        push!(agent.trajectory, state_agent_to_tuple(agent.cache))
     end
     reset!(agent.cache)
     action
