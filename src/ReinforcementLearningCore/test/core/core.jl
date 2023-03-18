@@ -1,3 +1,5 @@
+using ReinforcementLearningCore: SRT
+
 @testset "core" begin
     @testset "simple workflow" begin
         @testset "StopAfterStep" begin
@@ -43,7 +45,7 @@
                     BatchSampler(1),
                     InsertSampleRatioController(n_inserted = -1),
                 ),
-                cache=SRT{Int, Float64, Bool}(),
+                SRT{Any, Any, Any}(),
             )
             stop_condition = StopAfterStep(123; is_show_progress=false)
             hook = StepsPerEpisode()

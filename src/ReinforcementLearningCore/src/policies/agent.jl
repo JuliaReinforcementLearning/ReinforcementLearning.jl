@@ -26,10 +26,16 @@ mutable struct Agent{P,T,C} <: AbstractPolicy
         end
         agent
     end
+
+    function Agent(policy::P, trajectory::T, cache::C) where {P,T,C}
+        agent = new{P,T,C}(policy, trajectory, cache)
+
+        if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
+            bind(trajectory, @spawn(optimise!(policy, trajectory)))
+        end
+        agent
+    end
 end
-
-Agent(; policy, trajectory, cache=SRT()) = Agent(policy, trajectory, cache)
-
 
 RLBase.optimise!(agent::Agent) = optimise!(TrajectoryStyle(agent.trajectory), agent)
 RLBase.optimise!(::SyncTrajectoryStyle, agent::Agent) =
