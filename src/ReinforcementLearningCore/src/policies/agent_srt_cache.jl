@@ -31,15 +31,7 @@ function update!(cache::SRT{S,R,T}, reward::R, terminal::T) where {S,R,T}
     cache.terminal = terminal
 end
 
-function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
-    update!(agent.cache, reward(env), is_terminated(env))
-end
-
-function (agent::Agent)(::PostExperimentStage, env::E) where {E <: AbstractEnv}
-    RLBase.reset(agent.cache)
-end
-
-function RLBase.reset(cache::SRT)
+function RLBase.reset!(cache::SRT)
     cache.state = nothing
     cache.reward = nothing
     cache.terminal = nothing
