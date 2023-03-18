@@ -72,6 +72,7 @@ using ReinforcementLearningCore
             end
 
             @testset "Test update! method" begin
+                env = RandomWalk1D()
                 agent = agent_list[i]
                 agent(PostActStage(), env)
                 update!(agent, 7)

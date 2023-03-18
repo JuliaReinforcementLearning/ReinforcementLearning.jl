@@ -69,10 +69,6 @@ function update!(agent::Agent{P,Tr,SRT}, state::S) where {P <: AbstractPolicy, T
     agent.cache = SRT(agent.cache, state)
 end
 
-function update!(agent::Agent{Any,Any,SRT{Nothing,R,T}}, state::S) where {S,R,T}
-    agent.cache = SRT{S,R,T}(state, agent.cache.reward, agent.cache.terminal)
-end
-
 RLBase.optimise!(agent::Agent) = optimise!(TrajectoryStyle(agent.trajectory), agent)
 RLBase.optimise!(::SyncTrajectoryStyle, agent::Agent) =
     optimise!(agent.policy, agent.trajectory)
@@ -103,4 +99,8 @@ end
 
 function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
     agent.cache = SRT{Nothing, Any, Bool}(nothing, reward(env), is_terminated(env))
+end
+
+function (agent::Agent)(::PostExperimentStage, env::E) where {E <: AbstractEnv}
+    agent.cache = SRT()
 end
