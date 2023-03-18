@@ -15,10 +15,10 @@ end
 Base.push!(t::Trajectory, srt::SRT) = throw(ArgumentError("action must be supplied when pushing SRT to trajectory"))
 
 function Base.push!(t::Trajectory, srt::SRT{S,R,T}, action::A) where {S,A,R,T}
-    if (srt.reward != nothing) & (srt.terminal != nothing)
-        push!(t, @NamedTuple{state::S, action::A, reward::R, terminal::T}((srt.state, action, srt.reward, srt.terminal)))
-    else
+    if isnothing(srt.reward) | isnothing(srt.terminal)
         push!(t, @NamedTuple{state::S, action::A}((srt.state, action)))
+    else
+        push!(t, @NamedTuple{state::S, action::A, reward::R, terminal::T}((srt.state, action, srt.reward, srt.terminal)))
     end
 end
 
