@@ -4,16 +4,22 @@ using ReinforcementLearningCore
 
 @testset "agent.jl" begin
     @testset "Agent Cache struct" begin
-        srt = SRT{Nothing, Float64, Bool}(nothing, 1.0, true)
-        @test SRT(srt, 2).state == 2
-        srt_1 = SRT{Nothing, Int, Bool}(nothing, 1, true)
-        @test SRT(srt_1, 3).state == 3
+        srt = SRT{Int64, Float64, Bool}()
+        update!(srt, 2)
+        @test srt.state == 2
+        update!(srt, 1.0, true)
+        @test srt.reward == 1.0
+        @test srt.terminal == true
     end
 
     @testset "Trajectory SART struct compatibility" begin
         srt_1 = SRT()
-        srt_2 = SRT{Any, Nothing, Nothing}(1, nothing, nothing)
-        srt_3 = SRT{Any, Any, Bool}(1, 1.0, true)
+        srt_2 = SRT{Any, Nothing, Nothing}()
+        srt_2.state = 1
+        srt_3 = SRT{Any, Any, Bool}()
+        srt_3.state = 1
+        srt_3.reward = 1.0
+        srt_3.terminal = true
         trajectory = Trajectory(
             CircularArraySARTTraces(; capacity = 1_000, reward=Float64=>()),
             DummySampler(),
