@@ -59,3 +59,6 @@ function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action
 end
 
+function update!(agent::Agent, state::S) where {S}
+    update!(agent.cache, state)
+end

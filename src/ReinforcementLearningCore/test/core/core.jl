@@ -42,7 +42,8 @@
                     CircularArraySARTTraces(; capacity = 1_000),
                     BatchSampler(1),
                     InsertSampleRatioController(n_inserted = -1),
-                )
+                ),
+                cache=SRT{Int, Float64, Bool}(),
             )
             stop_condition = StopAfterStep(123; is_show_progress=false)
             hook = StepsPerEpisode()

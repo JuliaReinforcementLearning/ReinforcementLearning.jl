@@ -1,46 +1,46 @@
-struct SRT{S,R,T}
-    state::S
-    reward::R
-    terminal::T
+mutable struct SRT{S,R,T}
+    state::Union{S,Nothing}
+    reward::Union{R,Nothing}
+    terminal::Union{T,Nothing}
 
     function SRT()
-        new{Nothing, Nothing, Nothing}(nothing, nothing, nothing)
+        new{Any, Any, Any}(nothing, nothing, nothing)
     end
 
-    function SRT{S,R,T}(state::S, reward::R, terminal::T) where {S,R,T}
-        new{S,R,T}(state, reward, terminal)
-    end
-
-    function SRT(srt::SRT{Nothing,R,T}, state::S) where {S,R,T}
-        new{S,R,T}(state, srt.reward, srt.terminal)
-    end
-
-    function SRT(srt::SRT{Nothing,Nothing,Nothing}, state::S) where {S}
-        new{S,Nothing,Nothing}(state, srt.reward, srt.terminal)
+    function SRT{S,R,T}() where {S,R,T}
+        new{S,R,T}(nothing, nothing, nothing)
     end
 end
 
 Base.push!(t::Trajectory, srt::SRT) = throw(ArgumentError("action must be supplied when pushing SRT to trajectory"))
 
-function Base.push!(t::Trajectory, srt::SRT{S,Nothing,Nothing}, action::A) where {S,A}
-    push!(t, @NamedTuple{state::S, action::A}((srt.state, action)))
-end
-
 function Base.push!(t::Trajectory, srt::SRT{S,R,T}, action::A) where {S,A,R,T}
-    push!(t, @NamedTuple{state::S, action::A, reward::R, terminal::T}((srt.state, action, srt.reward, srt.terminal)))
+    if srt.reward != nothing & srt.terminal == nothing
+        push!(t, @NamedTuple{state::S, action::A, reward::R, terminal::T}((srt.state, action, srt.reward, srt.terminal)))
+    else
+        push!(t, @NamedTuple{state::S, action::A}((srt.state, action)))
+    end
 end
 
-Base.isempty(srt::SRT{Nothing,Nothing,Nothing}) = true
-Base.isempty(srt::SRT) = false
+function update!(cache::SRT{S,R,T}, state::S) where {S,R,T}
+    cache.state = state
+end
 
-function update!(agent::Agent{P,Tr,SRT}, state::S) where {P <: AbstractPolicy, Tr <: Trajectory, S}
-    agent.cache = SRT(agent.cache, state)
+function update!(cache::SRT{S,R,T}, reward::R, terminal::T) where {S,R,T}
+    cache.reward = reward
+    cache.terminal = terminal
 end
 
 function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
-    agent.cache = SRT{Nothing, Any, Bool}(nothing, reward(env), is_terminated(env))
+    update!(agent.cache, reward(env), is_terminated(env))
 end
 
 function (agent::Agent)(::PostExperimentStage, env::E) where {E <: AbstractEnv}
-    agent.cache = SRT()
+    RLBase.reset(agent.cache)
+end
+
+function RLBase.reset(cache::SRT)
+    cache.state = nothing
+    cache.reward = nothing
+    cache.terminal = nothing
 end
