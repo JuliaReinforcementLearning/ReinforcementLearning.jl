@@ -4,36 +4,36 @@ using Base.Threads: @spawn
 
 using Functors: @functor
 
-mutable struct SART{S,A,R}
-    state::Union{S, Missing}
-    action::Union{A, Missing}
-    reward::Union{R, Missing}
-    terminal::Union{Bool, Missing}
+struct SRT{S,R,T}
+    state::S
+    reward::R
+    terminal::T
 
-    function SART()
-        new{Any, Any, Any}(missing, missing, missing, missing)
+    function SRT()
+        new{Nothing, Nothing, Nothing}(nothing, nothing, nothing, nothing)
+    end
+
+    function SRT{S,R,T}(state::S, reward::R, terminal::T) where {S,R,T}
+        new{S,A,R,T}(state, reward, terminal)
+    end
+
+    function SRT(sart::SRT{S,R,T}, state::S) where {S,R,T}
+        new{S,R,T}(state, sart.reward, sart.terminal)
     end
 end
 
-sart_to_tuple(sart::SART{S,A,R}) where {S,A,R} = @NamedTuple{state::Union{S,Missing}, action::Union{A,Missing}, reward::Union{R,Missing}, terminal::Union{Bool,Missing}}((sart.state, sart.action, sart.reward, sart.terminal))
-
-function RLBase.reset!(sart::SART)
-    sart.state = missing
-    sart.action = missing
-    sart.reward = missing
-    sart.terminal = missing
-    return nothing
+function Base.push!(t::Trajectory, sart::SRT{S,Nothing,Nothing}, action::A) where {S,A}
+    push!(t, @NamedTuple{state::S, action::A}((sart.state, action)))
 end
 
-Base.isempty(sart::SART) = ismissing(sart.state) && ismissing(sart.action) && ismissing(sart.reward) && ismissing(sart.terminal)
-
-function update_state!(sart::SART, env::E) where {E <: AbstractEnv}
-    sart.state = state(env)
+function Base.push!(t::Trajectory, sart::SRT{S,R,T}, action::A) where {S,A,R,T}
+    push!(t, @NamedTuple{state::S, action::A, reward::R, terminal::T}((sart.state, action, sart.reward, sart.terminal)))
 end
 
-function update_reward!(sart::SART, env::E) where {E <: AbstractEnv}
-    sart.reward = reward(env)
-end
+Base.push!(cache::SRT{Nothing,R,T}, state::S) where {S,R,T} = agent.cache = SRT{S,R,T}(agent.cache, state)
+
+Base.isempty(sart::SRT{Nothing,Nothing,Nothing}) = true
+Base.isempty(sart::SRT) = false
 
 """
     Agent(;policy, trajectory) <: AbstractPolicy
@@ -47,10 +47,10 @@ passed to the policy.
 mutable struct Agent{P,T,C} <: AbstractPolicy
     policy::P
     trajectory::T
-    cache::SART # need cache to collect SART elements as trajectory does not support partial inserting
+    cache::C # need cache to collect elements as trajectory does not support partial inserting
 
     function Agent(policy::P, trajectory::T) where {P,T}
-        agent = new{P,T, typeof(SART())}(policy, trajectory, SART())
+        agent = new{P,T, typeof(SRT())}(policy, trajectory, SRT())
 
         if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
             bind(trajectory, @spawn(optimise!(policy, trajectory)))
@@ -81,18 +81,15 @@ end
 # in Oolong.jl with a wrapper
 function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action = agent.policy(env, args...; kwargs...)
-    agent.cache.action = action
-    push!(agent.trajectory, sart_to_tuple(agent.cache))
-    reset!(agent.cache)
+    push!(agent.trajectory, agent.cache, action)
     action
 end
 
 function (agent::Agent)(::PreActStage, env::AbstractEnv)
-    update_state!(agent.cache, env)
+    agent.cache = push!(agent.cache, state(env))
 end
 
 function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
-    update_reward!(agent.cache, env)
-    agent.cache.terminal = is_terminated(env)
+    agent.cache = SRT{Nothing, Nothing, Any, Bool}(nothing, reward(env), is_terminated(env))
     return
 end
