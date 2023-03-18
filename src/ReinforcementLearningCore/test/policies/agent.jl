@@ -83,6 +83,8 @@ using ReinforcementLearningCore
                 agent(PostActStage(), env)
                 update!(agent, 7)
                 @test agent.cache.state == 7
+                RLBase.reset!(agent.cache)
+                @test agent.cache.state == nothing
             end 
         end
     end
