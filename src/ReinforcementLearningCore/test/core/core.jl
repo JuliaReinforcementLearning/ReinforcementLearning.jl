@@ -1,4 +1,5 @@
 using ReinforcementLearningCore: SRT
+using ReinforcementLearningBase
 
 @testset "core" begin
     @testset "simple workflow" begin
@@ -42,7 +43,7 @@ using ReinforcementLearningCore: SRT
                 RandomPolicy(legal_action_space(env)),
                 Trajectory(
                     CircularArraySARTTraces(; capacity = 1_000),
-                    DummySampler(),
+                    BatchSampler(1),
                     InsertSampleRatioController(n_inserted = -1),
                 ),
                 SRT{Any, Any, Any}(),
