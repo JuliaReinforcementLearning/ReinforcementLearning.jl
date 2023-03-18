@@ -1,57 +1,33 @@
 using ReinforcementLearningBase, ReinforcementLearningEnvironments
-using ReinforcementLearningCore: SART, sart_to_tuple
+using ReinforcementLearningCore: SRT, update!
 using ReinforcementLearningCore
 
 @testset "agent.jl" begin
     @testset "Agent Cache struct" begin
-        @test typeof(SART()) == SART{Any, Any, Any}
-        env = RandomWalk1D()
-        policy = RandomPolicy()
-        cache_1 = SART()
-        @test typeof(cache_1) == SART{Any, Any, Any}
-        cache_1.state = 10
-        cache_1.action = 1
-        cache_1.reward = 10
-        cache_1.terminal = true
-        @test cache_1.action == 1
-        @test cache_1.state == 10
-        @test cache_1.reward == 10.0
-        @test cache_1.terminal == true
-
-        RLCore.reset!(cache_1)
-        @test ismissing(cache_1.state)
-        @test ismissing(cache_1.action)
-        @test ismissing(cache_1.reward)
-        @test ismissing(cache_1.terminal)
-
-        env.pos = 2
-        RLCore.update_state!(cache_1, env)
-        @test cache_1.state == 2
-
-        env.pos = 1
-        RLCore.update_reward!(cache_1, env)
-        @test cache_1.reward == -1
-
-        cache_1.state = 1
-        cache_1.action = 1
-        cache_1.terminal = true
-        @test RLCore.sart_to_tuple(cache_1) == (state = 1, action = 1, reward = -1.0, terminal = true)
+        srt = SRT{Nothing, Float64, Bool}(nothing, 1.0, true)
+        @test SRT(srt, 2).state == 2
+        srt_1 = SRT{Nothing, Int, Bool}(nothing, 1, true)
+        @test SRT(srt_1, 3).state == 3
     end
 
     @testset "Trajectory SART struct compatibility" begin
+        srt_1 = SRT()
+        srt_2 = SRT{Any, Nothing, Nothing}(1, nothing, nothing)
+        srt_3 = SRT{Any, Any, Bool}(1, 1.0, true)
         trajectory = Trajectory(
             CircularArraySARTTraces(; capacity = 1_000, reward=Float64=>()),
             DummySampler(),
         )
-
-        sart = SART()
-        sart.state = 1
-        sart.action = 1
-        push!(trajectory, sart_to_tuple(sart))
-        sart.reward = 1.0
-        sart.terminal = true
-        push!(trajectory, sart_to_tuple(sart))
+        
+        @test_throws ArgumentError push!(trajectory, srt_1)
+        push!(trajectory, srt_2, 1)
+        @test length(trajectory.container) == 0
+        push!(trajectory, srt_3, 2)
         @test length(trajectory.container) == 1
+        @test trajectory.container[:action] == [1]
+        push!(trajectory, srt_3, 3)
+        @test trajectory.container[:action] == [1, 2]
+        @test trajectory.container[:state] == [1, 1]
     end
 
     @testset "Agent Tests" begin
@@ -77,24 +53,34 @@ using ReinforcementLearningCore
                 agent = agent_list[i]
                 env = RandomWalk1D()
                 agent(PreActStage(), env)
-                @test ismissing(agent.cache.action)
+                @test agent.cache.state != nothing
+                @test agent.cache.reward == nothing
+                @test agent.cache.terminal == nothing
                 @test state(env) == agent.cache.state
                 @test agent(env) in (1,2)
-                @test ismissing(agent.cache.action)
-                @test isempty(agent.cache)
                 @test length(agent.trajectory.container) == 0 
                 agent(PostActStage(), env)
                 @test agent.cache.reward == 0. && agent.cache.terminal == false
                 agent(PreActStage(), env)
                 @test state(env) == agent.cache.state
                 @test agent(env) in (1,2)
-                @test isempty(agent.cache)
                 @test length(agent.trajectory.container) == 1
 
                 #The following tests ensure the args and kwargs are passed to the policy. 
                 @test_throws "no method matching (::RandomPolicy" agent(env, 1)
                 @test_throws "no method matching (::RandomPolicy" agent(env, fake_kwarg = 1)
+
+                @test update!(agent, 3)
             end
+
+            @testset "Test update! method" begin
+                agent = agent_list[i]
+                agent(PostActStage(), env)
+                update!(agent, 7)
+                @test agent.cache.state == 7
+            end 
         end
     end
 end
+
+
