@@ -69,8 +69,6 @@ using ReinforcementLearningCore
                 #The following tests ensure the args and kwargs are passed to the policy. 
                 @test_throws "no method matching (::RandomPolicy" agent(env, 1)
                 @test_throws "no method matching (::RandomPolicy" agent(env, fake_kwarg = 1)
-
-                @test update!(agent, 3)
             end
 
             @testset "Test update! method" begin
