@@ -12,7 +12,7 @@ mutable struct SRT{S,R,T}
     end
 end
 
-Base.push!(t::Trajectory, srt::SRT) = throw(ArgumentError("action must be supplied when pushing SRT to trajectory"))
+Base.push!(t::Trajectory, srt::SRT) = throw(ArgumentError("action must be supplied when pushing SRT to trajectory. Use `Base.push!(t::Trajectory, srt::SRT; action::A)` to do so"))
 
 function Base.push!(t::Trajectory, srt::SRT{S,R,T}, action::A) where {S,A,R,T}
     if isnothing(srt.reward) | isnothing(srt.terminal)
