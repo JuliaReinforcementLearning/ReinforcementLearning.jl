@@ -154,14 +154,14 @@
 
 ### ReinforcementLearningCore.jl
 
-#### v0.9.2-dev
+#### v0.9.2
 
 - Use correct Flux.stack function signature
 - Reduce allocations, improve performance of `RandomPolicy`
 - Chase down JET.jl errors, fix
-- Add tests for `StopAfterStep`,  `StopAfterEpisode`
+- Add tests for `StopAfterStep`, `StopAfterEpisode`
 - Add tests, improve performance of `RewardsPerEpisode`
-- Refactor Agent for 20x speedup
+- Refactor Agent for speedup
 
 #### v0.8.11
 
