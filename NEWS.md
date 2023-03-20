@@ -161,6 +161,7 @@
 - Chase down JET.jl errors, fix
 - Add tests for `StopAfterStep`,  `StopAfterEpisode`
 - Add tests, improve performance of `RewardsPerEpisode`
+- Refactor Agent for 20x speedup
 
 #### v0.8.11
 

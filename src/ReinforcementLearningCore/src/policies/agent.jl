@@ -13,21 +13,29 @@ is a Callable and its call method accepts varargs and keyword arguments to be
 passed to the policy. 
 
 """
-mutable struct Agent{P,T} <: AbstractPolicy
+mutable struct Agent{P,T,C} <: AbstractPolicy
     policy::P
     trajectory::T
-    cache::NamedTuple # trajectory do not support partial inserting
+    cache::C # need cache to collect elements as trajectory does not support partial inserting
 
-    function Agent(policy::P, trajectory::T, cache=NamedTuple()) where {P,T}
-        agent = new{P,T}(policy, trajectory, cache)
+    function Agent(policy::P, trajectory::T) where {P,T}
+        agent = new{P,T, SRT}(policy, trajectory, SRT())
+
+        if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
+            bind(trajectory, @spawn(optimise!(policy, trajectory)))
+        end
+        agent
+    end
+
+    function Agent(policy::P, trajectory::T, cache::C) where {P,T,C}
+        agent = new{P,T,C}(policy, trajectory, cache)
+
         if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
             bind(trajectory, @spawn(optimise!(policy, trajectory)))
         end
         agent
     end
 end
-
-Agent(; policy, trajectory, cache=NamedTuple()) = Agent(policy, trajectory, cache)
 
 RLBase.optimise!(agent::Agent) = optimise!(TrajectoryStyle(agent.trajectory), agent)
 RLBase.optimise!(::SyncTrajectoryStyle, agent::Agent) =
@@ -44,18 +52,28 @@ end
 
 @functor Agent (policy,)
 
+function (agent::Agent)(::PreActStage, env::AbstractEnv)
+    update!(agent, state(env))
+end
+
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
 function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action = agent.policy(env, args...; kwargs...)
-    push!(agent.trajectory, (agent.cache..., action=action))
-    agent.cache = (;)
+    push!(agent.trajectory, agent.cache, action)
     action
 end
 
-(agent::Agent)(::PreActStage, env::AbstractEnv) =
-    agent.cache = (agent.cache..., state=state(env))
+function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
+    update!(agent.cache, reward(env), is_terminated(env))
+end
 
-(agent::Agent)(::PostActStage, env::AbstractEnv) =
-    agent.cache = (agent.cache..., reward=reward(env), terminal=is_terminated(env))
+function (agent::Agent)(::PostExperimentStage, env::E) where {E <: AbstractEnv}
+    RLBase.reset!(agent.cache)
+end
+
+function update!(agent::Agent, state::S) where {S}
+    update!(agent.cache, state)
+end
+
