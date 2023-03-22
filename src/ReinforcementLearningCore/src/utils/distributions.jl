@@ -25,9 +25,14 @@ GPU compatible and automatically differentiable version for the logpdf function 
 diagonal covariance. Adding an epsilon value to guarantee numeric stability if sigma is 
 exactly zero (e.g. if relu is used in output layer).
 """
-function diagnormlogpdf(μ, σ, x; ϵ = 1.0f-8)
+function diagnormlogpdf(μ::AbstractVector, σ::AbstractVector, x::AbstractVector; ϵ = 1.0f-8)
     v = (σ .+ ϵ) .^2
     -0.5f0*(log(prod(v)) .+ inv.(v)'*((x .- μ).^2) .+ length(μ)*log2π)
+end
+
+function diagnormlogpdf(μ::AbstractMatrix, σ::AbstractMatrix, x::AbstractMatrix; ϵ = 1.0f-8)
+    logpdfs = diagnormlogpdf(unsqueeze.((μ, σ, x), 2)...)
+    return dropdims(logpdfs, dims = 2)
 end
 
 #3D tensor version
