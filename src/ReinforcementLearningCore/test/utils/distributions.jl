@@ -105,7 +105,7 @@ using Test, LinearAlgebra, Distributions, ReinforcementLearningCore
                 x = [4f0, 4f0]
                 d2 = MvNormal(μ2,Σ2)
                 @testset "mvnormlogpdf" begin
-                    @test logpdf(d1, x) ≈ only(mvnormlogpdf(cu(μ1), cu(L1), cu(x)))
+                    @test logpdf(d1, x) ≈ sum(mvnormlogpdf(cu(μ1), cu(L1), cu(x)))
                 end
                 @testset "mvnormkldivergence" begin
                     @test kldivergence(d1, d2) ≈ mvnormkldivergence(cu(μ1), cu(L1), cu(μ2), cu(L2))

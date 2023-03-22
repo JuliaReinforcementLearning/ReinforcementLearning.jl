@@ -63,17 +63,18 @@ action_samples x batch_size).  Return a 3D matrix of size (1 x action_samples x
 batch_size). 
 """
 function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ=1.0f-8) where {A<:AbstractArray}
-    logp = [mvnormlogpdf(μ[:, :, k], LorU[:, :, k], x[:, :, k]) for k in 1:size(x, 3)]
+    logp = [mvnormlogpdf(μs, LorUs, xs) for (μs, LorUs, xs) in zip(eachslice(μ, dims = 3), eachslice(LorU, dims = 3), eachslice(x, dims = 3))]
     return unsqueeze(stack(logp; dims=2), dims=1) #returns a 3D vector 
 end
 
-#Used for mvnormlogpdf
+#Used for mvnormlogpdf and mvnormkldivergence
 """
     logdetLorU(LorU::AbstractMatrix)
+
 Log-determinant of the Positive-Semi-Definite matrix A = L*U (cholesky lower and upper triangulars), given L or U. 
 Has a sign uncertainty for non PSD matrices.
 """
-function logdetLorU(LorU::CuArray)
+function logdetLorU(LorU::Union{A, LowerTriangular{T, A}, UpperTriangular{T, A}}) where {T, A <: CuArray}
     return 2*sum(log.(diag(LorU)))
 end
 
