@@ -74,12 +74,12 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, 
 end
 
 """
-    (model::GaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
+    (model::GaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
 
 Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batch_size)`.
 `state` must be 3D tensor with dimensions `(state_size x 1 x batch_size)`. Always returns the logpdf of each action along.
 """
-function (model::GaussianNetwork)(rng::AbstractRNG, s, action_samples::Int)
+function (model::GaussianNetwork)(rng::AbstractRNG, s::AbstractArray{<:Any, 3}, action_samples::Int)
     x = model.pre(s)
     μ, raw_σ = model.μ(x), model.σ(x)
     σ = clamp.(raw_σ, model.min_σ, model.max_σ)
@@ -134,7 +134,7 @@ end
 @functor CovGaussianNetwork
 
 """
-    (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}; is_sampling::Bool=false, is_return_log_prob::Bool=false)
 
 This function is compatible with a multidimensional action space. To work with covariance matrices, the outputs are 3D tensors.  If
 sampling, return an actions tensor with dimensions `(action_size x action_samples
@@ -151,7 +151,7 @@ retrieved with `Σ = Flux.stack(map(l -> l*l', eachslice(L, dims=3)); dims=3)`
 - `is_return_log_prob::Bool=false`, whether to calculate the conditional
   probability of getting actions in the given state.
 """
-function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}; is_sampling::Bool=false, is_return_log_prob::Bool=false)
     batch_size = size(state, 3)
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
@@ -196,15 +196,15 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractVecOrMat; 
 end
 
 """
-    (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
+    (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
 
-Sample `action_samples` actions given `state` and return the `actions,
+Sample `action_samples` actions per state in `state` and return the `actions,
 logpdf(actions)`.  This function is compatible with a multidimensional action
 space.  The outputs are 3D tensors with dimensions
 `(action_size x action_samples x batch_size)` and `(1 x action_samples x
 batch_size)` for `actions` and `logdpf` respectively.
 """
-function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
+function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
     batch_size = size(state, 3) #3
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
@@ -223,7 +223,7 @@ function (model::CovGaussianNetwork)(state::AbstractArray, args...; kwargs...)
 end
 
 """
-    (model::CovGaussianNetwork)(state, action)
+    (model::CovGaussianNetwork)(state::AbstractArray, action::AbstractArray)
     
 Return the logpdf of the model sampling `action` when in `state`.  State must be
 a 3D tensor with dimensions `(state_size x 1 x batch_size)`.  Multiple actions may
@@ -231,7 +231,7 @@ be taken per state, `action` must have dimensions `(action_size x
 action_samples_per_state x batch_size)`. Returns a 3D tensor with dimensions `(1 x
 action_samples_per_state x batch_size)`.
 """
-function (model::CovGaussianNetwork)(state::AbstractArray, action::AbstractArray)
+function (model::CovGaussianNetwork)(state::AbstractArray{<:Any, 3}, action::AbstractArray{<:Any, 3})
     da = size(action, 1)
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
@@ -324,7 +324,7 @@ function (model::CategoricalNetwork)(state::AbstractArray, args...; kwargs...)
 end
 
 """
-    (model::CategoricalNetwork)([rng::AbstractRNG,] state::AbstractArray, [mask::AbstractArray{Bool},] action_samples::Int)
+    (model::CategoricalNetwork)([rng::AbstractRNG,] state::AbstractArray{<:Any, 3}, [mask::AbstractArray{Bool},] action_samples::Int)
 
 Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batch_size)`. 
 Always returns the *logits* of each action along in a tensor with the same dimensions. The optional argument `mask` must be
