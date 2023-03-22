@@ -32,7 +32,7 @@ end
 
 #3D tensor version
 function diagnormlogpdf(μ::AbstractArray{T,3}, σ::AbstractArray{T,3}, x::AbstractArray{T,3}; ϵ = 1.0f-8) where T
-    logp = [diagnormlogpdf(μ[:, :, k], σ[:, :, k], x[:, :, k]) for k in 1:size(x, 3)]
+    logp = [diagnormlogpdf(μs, σ, xs) for (μs, σ, xs) in zip(eachslice(μ, dims = 3), eachslice(σ, dims = 3), eachslice(x, dims = 3))]
     return reduce((x,y)->cat(x,y,dims=3), logp) #returns a 3D vector 
 end
 
