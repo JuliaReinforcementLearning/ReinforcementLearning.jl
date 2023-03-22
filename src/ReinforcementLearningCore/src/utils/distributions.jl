@@ -21,7 +21,7 @@ end
 """
     diagnormlogpdf(μ, σ, x; ϵ = 1.0f-8)
 
-GPU automatic differentiable version for the logpdf function of normal distributions with 
+GPU compatible and automatically differentiable version for the logpdf function of normal distributions with 
 diagonal covariance. Adding an epsilon value to guarantee numeric stability if sigma is 
 exactly zero (e.g. if relu is used in output layer).
 """
@@ -39,7 +39,7 @@ end
 """
     mvnormlogpdf(μ::AbstractVecOrMat, L::AbstractMatrix, x::AbstractVecOrMat)
 
-GPU automatic differentiable version for the logpdf function of multivariate
+GPU compatible and automatically differentiable version for the logpdf function of multivariate
 normal distributions.  Takes as inputs `mu` the mean vector, `L` the lower
 triangular matrix of the cholesky decomposition of the covariance matrix, and
 `x` a matrix of samples where each column is a sample.  Return a Vector
