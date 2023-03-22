@@ -12,5 +12,6 @@ using Flux
     include("core/core.jl")
     include("core/hooks.jl")
     include("core/stop_conditions.jl")
+    include("policies/agent.jl")
     include("utils/utils.jl")
 end

@@ -3,6 +3,7 @@
 ## ReinforcementLearning.jl@v0.10.2
 
 - Pin sub-packages to pre-refactor versions
+- Agent calls now accept keyword arguments that will be passed to the policy. E.g. if the policy accepts a testmode.
 
 ### ReinforcementLearningExperiments.jl
 
@@ -153,13 +154,14 @@
 
 ### ReinforcementLearningCore.jl
 
-#### v0.9.2-dev
+#### v0.9.2
 
 - Use correct Flux.stack function signature
 - Reduce allocations, improve performance of `RandomPolicy`
 - Chase down JET.jl errors, fix
-- Add tests for `StopAfterStep`,  `StopAfterEpisode`
+- Add tests for `StopAfterStep`, `StopAfterEpisode`
 - Add tests, improve performance of `RewardsPerEpisode`
+- Refactor Agent for speedup
 
 #### v0.8.11
 

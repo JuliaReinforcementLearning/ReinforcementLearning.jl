@@ -1,3 +1,6 @@
+using ReinforcementLearningCore: SRT
+using ReinforcementLearningBase
+
 @testset "core" begin
     @testset "simple workflow" begin
         @testset "StopAfterStep" begin
@@ -33,5 +36,22 @@
 
             @test sum(hook[]) == length(agent.trajectory.container)
         end
+
+        @testset "StopAfterStep, use type stable Agent" begin
+            env = RandomWalk1D()
+            agent = Agent(
+                RandomPolicy(legal_action_space(env)),
+                Trajectory(
+                    CircularArraySARTTraces(; capacity = 1_000),
+                    BatchSampler(1),
+                    InsertSampleRatioController(n_inserted = -1),
+                ),
+                SRT{Any, Any, Any}(),
+            )            
+            stop_condition = StopAfterStep(123; is_show_progress=false)
+            hook = StepsPerEpisode()
+            run(agent, env, stop_condition, hook)
+            @test sum(hook[]) == length(agent.trajectory.container)
+        end        
     end
 end
