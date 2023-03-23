@@ -13,9 +13,5 @@ using Statistics
 
 include("policies/multi_agent.jl")
 include("policies/maddpg.jl")
-include("policies/DIAL.jl")
-
-#include("extensions/MessageTrajectory.jl")
-include("extensions/CoordGraph.jl")
 
 end

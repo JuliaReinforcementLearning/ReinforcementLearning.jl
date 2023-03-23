@@ -3,7 +3,6 @@
 # To : Type of observation_space
 # P  : Type of environment most common: PyObject
 
-
 mutable struct PettingZooEnv{Ta,To,P} <: AbstractEnv
     pyenv::P
     observation_space::To

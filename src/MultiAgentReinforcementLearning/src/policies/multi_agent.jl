@@ -41,7 +41,7 @@ function (A::MultiAgentManager)(stage::AbstractStage, env::AbstractEnv)
 end
 
 function (A::MultiAgentManager{<:Agent})(::PostActStage, env::AbstractEnv)
-    # in the multi agent case, the immediat rewards are updated when last player took its action
+    # in the multi agent case, the immediate rewards are updated when last player took its action
     if A.cur_player == last(players(env))
         for (p, agent) in A.agents
             agent.cache = (agent.cache..., reward=reward(env, p), terminal=is_terminated(env))        
@@ -54,5 +54,3 @@ function RLBase.optimise!(A::MultiAgentManager)
         RLBase.optimise!(agent)
     end
 end
-
-
