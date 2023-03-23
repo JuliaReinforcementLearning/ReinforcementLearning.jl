@@ -100,7 +100,7 @@ function (p::DDPGPolicy)(env::AbstractEnv)
         p.update_step += 1
     end
 
-    D = device(p.actor)
+    D = device(p.actor) isa Nothing ? Val(:cpu) : device(p.actor)
     s = DynamicStyle(env) == SEQUENTIAL ? state(env) : state(env, player)
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     actions = p.actor(send_to_device(D, s)) |> vec |> send_to_host

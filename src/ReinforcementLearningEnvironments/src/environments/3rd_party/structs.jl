@@ -1,12 +1,18 @@
-mutable struct PettingzooEnv{Ta,To,P} <: AbstractEnv
+# Parametrization:
+# Ta : Type of action_space
+# To : Type of observation_space
+# P  : Type of environment most common: PyObject
+
+
+mutable struct PettingZooEnv{Ta,To,P} <: AbstractEnv
     pyenv::P
     observation_space::To
     action_space::Ta
     state::P
     seed::Union{Int, Nothing}
-    ts::Int
+    rewards::Dict{String, Any}
 end
-export PettingzooEnv
+export PettingZooEnv
 
 struct GymEnv{T,Ta,To,P} <: AbstractEnv
     pyenv::P

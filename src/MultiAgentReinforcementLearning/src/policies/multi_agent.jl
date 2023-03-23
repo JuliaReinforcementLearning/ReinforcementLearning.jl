@@ -15,7 +15,7 @@ environment from their own perspective and get updated independently.
 """
 MultiAgentManager(policies...) =
     MultiAgentManager(Dict{Any,Any}(nameof(p) => p for p in policies))
-  
+
 RLBase.prob(A::MultiAgentManager, env::AbstractEnv, args...) = prob(A[A.cur_player].policy, env, args...)
 
 (A::MultiAgentManager)(env::AbstractEnv) = A(env, DynamicStyle(env))
@@ -40,8 +40,19 @@ function (A::MultiAgentManager)(stage::AbstractStage, env::AbstractEnv)
     A[A.cur_player](stage, env)
 end
 
+function (A::MultiAgentManager{<:Agent})(::PostActStage, env::AbstractEnv)
+    # in the multi agent case, the immediat rewards are updated when last player took its action
+    if A.cur_player == last(players(env))
+        for (p, agent) in A.agents
+            agent.cache = (agent.cache..., reward=reward(env, p), terminal=is_terminated(env))        
+        end
+    end
+end
+
 function RLBase.optimise!(A::MultiAgentManager)
     for (_, agent) in A.agents
         RLBase.optimise!(agent)
     end
 end
+
+
