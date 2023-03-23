@@ -101,13 +101,13 @@ function mvnormkldivergence(μ1::AbstractVecOrMat, L1M::AbstractMatrix, μ2::Abs
     U2i = inv(U2)	
     M2i = U2i*L2i	
     X = M2i*M1	
-    trace = tr(X) # trace of inv(Σ2) * Σ1	
+    trace = sum(diag(X)) # trace of inv(Σ2) * Σ1	
     sqmahal = sum(abs2.(L2i*(μ2 .- μ1))) #mahalanobis square distance	
     return (logdet - d + trace + sqmahal)/2	
 end	
 
 function mvnormkldivergence(μ1::AbstractArray{T, 3}, L1::AbstractArray{T, 3}, μ2::AbstractArray{T, 3}, L2::AbstractArray{T, 3}) where T <: Real
-    it = zip((eachslice(x, dims = 3) for x in (μ1, L1, μ2, L2))...)
+    it = zip(eachslice(μ1, dims = 3), eachslice(L1, dims = 3), eachslice(μ2, dims = 3), eachslice(L2, dims = 3))
     kldivs = [mvnormkldivergence(m1,l1,m2,l2) for (m1,l1,m2,l2) in it]
     return reshape(kldivs, :, 1, length(kldivs))
 end
