@@ -1,5 +1,5 @@
 using Test, Flux, CUDA, ChainRulesCore, LinearAlgebra, Distributions, ReinforcementLearningCore
-using Flux: params, gradient
+using Flux: params, gradient, unsqueeze
 @testset "Approximators" begin
     #= These may need to be updated due to recent changes
     @testset "TabularApproximator" begin
@@ -91,6 +91,7 @@ using Flux: params, gradient
                 @testset "Multiple actions per state" begin
                     #Same with multiple actions sampled
                     action_saver = []
+                    state = unsqueeze(state, 2)
                     g = Flux.gradient(Flux.params(gn)) do 
                         a, logp = gn(state, 3)
                         ChainRulesCore.ignore_derivatives() do 
@@ -112,9 +113,9 @@ using Flux: params, gradient
             if CUDA.functional()
                 CUDA.allowscalar(false)
                 gn = GaussianNetwork(Dense(20,15), Dense(15,10), Dense(15,10, softplus)) |> gpu
+                state = rand(20,3)  |> gpu #batch of 3 states
                 @testset "Forward pass compatibility" begin
                     @test Flux.params(gn) == Flux.Params([gn.pre.weight, gn.pre.bias, gn.μ.weight, gn.μ.bias, gn.σ.weight, gn.σ.bias])
-                    state = rand(20,3)  |> gpu #batch of 3 states
                     m, L = gn(state)
                     @test size(m) == size(L) == (10,3)
                     a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
@@ -149,6 +150,7 @@ using Flux: params, gradient
                     end
                     @testset "Multiple actions sampling" begin
                         action_saver = []
+                        state = unsqueeze(state, 2)
                         g = Flux.gradient(Flux.params(gn)) do 
                             a, logp = gn(CUDA.CURAND.RNG(), state, 3)
                             ChainRulesCore.ignore_derivatives() do 
