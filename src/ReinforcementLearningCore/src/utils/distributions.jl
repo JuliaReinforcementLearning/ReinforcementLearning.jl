@@ -64,7 +64,8 @@ action_samples x batch_size).  Return a 3D matrix of size (1 x action_samples x
 batch_size). 
 """
 function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ=1.0f-8) where {A<:AbstractArray}
-    logp = [mvnormlogpdf(μs, LorUs, xs) for (μs, LorUs, xs) in zip(eachslice(μ, dims = 3), eachslice(LorU, dims = 3), eachslice(x, dims = 3))]
+    it = zip(eachslice(μ, dims = 3), eachslice(LorU, dims = 3), eachslice(x, dims = 3))
+    logp = [mvnormlogpdf(μs, LorUs, xs) for (μs, LorUs, xs) in it]
     return unsqueeze(stack(logp; dims=2), dims=1) #returns a 3D vector 
 end
 
@@ -88,7 +89,7 @@ logdetLorU(LorU::AbstractMatrix) = logdet(LorU)*2
 GPU differentiable implementation of the kl_divergence between two MultiVariate Gaussian distributions with mean vectors `μ1, μ2` respectively and 	
 with cholesky decomposition of covariance matrices `L1, L2`.	
 """	
-function mvnormkldivergence(μ1, L1M, μ2, L2M)
+function mvnormkldivergence(μ1::AbstractVecOrMat, L1M::AbstractMatrix, μ2::AbstractVecOrMat, L2M::AbstractMatrix)
     L1 = LowerTriangular(L1M)	
     L2 = LowerTriangular(L2M)	
     U1 = UpperTriangular(permutedims(L1M))	
@@ -105,19 +106,30 @@ function mvnormkldivergence(μ1, L1M, μ2, L2M)
     return (logdet - d + trace + sqmahal)/2	
 end	
 
+function mvnormkldivergence(μ1::AbstractArray{T, 3}, L1::AbstractArray{T, 3}, μ2::AbstractArray{T, 3}, L2::AbstractArray{T, 3}) where T <: Real
+    it = zip((eachslice(x, dims = 3) for x in (μ1, L1, μ2, L2))...)
+    kldivs = [mvnormkldivergence(m1,l1,m2,l2) for (m1,l1,m2,l2) in it]
+    return reshape(kldivs, :, 1, length(kldivs))
+end
+
 """	
     diagnormkldivergence(μ1, σ1, μ2, σ2)	
 
 GPU differentiable implementation of the kl_divergence between two MultiVariate Gaussian distributions with mean vectors `μ1, μ2` respectively and 	
-diagonal standard deviations `σ1, σ2`. Arguments must be Vectors or single-column Matrices.	
+diagonal standard deviations `σ1, σ2`. Arguments must be Vectors or arrays of column vectors.	
 """	
-function diagnormkldivergence(μ1, σ1, μ2, σ2)	
+function diagnormkldivergence(μ1::T, σ1::T, μ2::T, σ2::T) where T <: AbstractVecOrMat	
     v1, v2 = σ1.^2, σ2.^2
     d = size(μ1,1)	
     logdet = sum(log.(v2), dims = 1) - sum(log.(v1), dims = 1) 	
     trace = sum(v1 ./ v2, dims = 1)	
     sqmahal = sum((μ2 .- μ1) .^2 ./ v2, dims = 1)	
     return (logdet .- d .+ trace .+ sqmahal) ./ 2	
+end
+
+function diagnormkldivergence(μ1::T, σ1::T, μ2::T, σ2::T) where T <: AbstractArray{<: Real, 3}
+    divs = diagnormkldivergence(dropdims(μ1, dims = 2), dropdims(σ1, dims = 2), dropdims(μ2, dims = 2), dropdims(σ2, dims = 2))
+    return unsqueeze(divs, 2)
 end
 
 """	
