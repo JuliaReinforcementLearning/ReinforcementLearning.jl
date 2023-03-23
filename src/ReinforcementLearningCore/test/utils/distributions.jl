@@ -43,8 +43,8 @@ using Test, LinearAlgebra, Distributions, ReinforcementLearningCore, CUDA
                 σ2 = [6f0 6f0; 5f0 5f0]
                 d2 = MvNormal(μ2[:, 1], LinearAlgebra.Diagonal(map(abs2, σ2[:, 1])))
                 @testset "diagnormlogpdf" begin
+                    logpdfs = diagnormlogpdf(μ1, σ1, x)
                     for i in 1:2
-                        logpdfs = diagnormlogpdf(μ1, σ1, x)
                         @test size(logpdfs) == (1, 2)
                         @test logpdf(d1, x[:, i]) ≈ logpdfs[i]
                     end
