@@ -5293,3 +5293,5 @@ normkldivergence
 sqmahal
 logdpf
 devmode
+logpdfs
+kldivs
