@@ -23,22 +23,18 @@ end
 
 GPU compatible and automatically differentiable version for the logpdf function of normal distributions with 
 diagonal covariance. Adding an epsilon value to guarantee numeric stability if sigma is 
-exactly zero (e.g. if relu is used in output layer).
+exactly zero (e.g. if relu is used in output layer). Accepts arguments of the same shape:
+vectors, matrices or 3D array (with dimension 2 of size 1).
 """
-function diagnormlogpdf(μ::AbstractVector, σ::AbstractVector, x::AbstractVector; ϵ = 1.0f-8)
+function diagnormlogpdf(μ::AbstractVecOrMat, σ::AbstractVecOrMat, x::AbstractVecOrMat; ϵ = 1.0f-8)
     v = (σ .+ ϵ) .^2
-    -0.5f0*(log(prod(v)) .+ inv.(v)'*((x .- μ).^2) .+ length(μ)*log2π)
+    -0.5f0 .* (log.(prod(v, dims = 1)) .+ sum(((x .- μ).^2)./v, dims = 1) .+ size(μ, 1)*log2π)
 end
 
-function diagnormlogpdf(μ::AbstractMatrix, σ::AbstractMatrix, x::AbstractMatrix; ϵ = 1.0f-8)
-    logpdfs = diagnormlogpdf(unsqueeze.((μ, σ, x), 2)...)
-    return dropdims(logpdfs, dims = 2)
-end
-
-#3D tensor version
+#3D tensor version, simply reshape it to 2D, then back to 3D
 function diagnormlogpdf(μ::AbstractArray{T,3}, σ::AbstractArray{T,3}, x::AbstractArray{T,3}; ϵ = 1.0f-8) where T
-    logp = [diagnormlogpdf(μs, σ, xs) for (μs, σ, xs) in zip(eachslice(μ, dims = 3), eachslice(σ, dims = 3), eachslice(x, dims = 3))]
-    return reduce((x,y)->cat(x,y,dims=3), logp) #returns a 3D vector 
+    logpdfs2d = diagnormlogpdf(dropdims(μ, dims = 2), dropdims(σ, dims = 2), dropdims(x, dims = 2))
+    return unsqueeze(logpdfs2d, 2)
 end
 
 """
@@ -118,10 +114,10 @@ diagonal standard deviations `σ1, σ2`. Arguments must be Vectors or single-col
 function diagnormkldivergence(μ1, σ1, μ2, σ2)	
     v1, v2 = σ1.^2, σ2.^2
     d = size(μ1,1)	
-    logdet = sum(log.(v2)) - sum(log.(v1)) 	
-    trace = sum(v1 ./ v2)	
-    sqmahal = sum((μ2 .- μ1) .^2 ./ v2)	
-    return (logdet - d + trace + sqmahal)/2	
+    logdet = sum(log.(v2), dims = 1) - sum(log.(v1), dims = 1) 	
+    trace = sum(v1 ./ v2, dims = 1)	
+    sqmahal = sum((μ2 .- μ1) .^2 ./ v2, dims = 1)	
+    return (logdet .- d .+ trace .+ sqmahal) ./ 2	
 end
 
 """	
