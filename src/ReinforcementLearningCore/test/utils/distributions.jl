@@ -1,6 +1,20 @@
 using Test, LinearAlgebra, Distributions, ReinforcementLearningCore, CUDA
 
 @testset "utils/distributions" begin
+    @testset "logdetLorU" begin
+        M = [2f0 -1f0; -1f0 2f0]
+        C = cholesky(M)
+        L, U = C.L, C.U
+        logdetM = logdet(M)
+        @test logdetM == ReinforcementLearningCore.logdetLorU(L) 
+        @test logdetM == ReinforcementLearningCore.logdetLorU(U)
+        if CUDA.functional()
+            L_d = cu(L)
+            U_d = cu(U)
+            @test logdetM == ReinforcementLearningCore.logdetLorU(L_d) 
+            @test logdetM == ReinforcementLearningCore.logdetLorU(U_d)
+        end
+    end
     @testset "On CPU" begin
         @testset "1D Gaussian" begin
             μ1 = 10f0
