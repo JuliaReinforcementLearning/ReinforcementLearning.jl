@@ -33,8 +33,8 @@ end
 
 #3D tensor version, simply reshape it to 2D, then back to 3D
 function diagnormlogpdf(μ::AbstractArray{T,3}, σ::AbstractArray{T,3}, x::AbstractArray{T,3}; ϵ = 1.0f-8) where T
-    logpdfs2d = diagnormlogpdf(dropdims(μ, dims = 2), dropdims(σ, dims = 2), dropdims(x, dims = 2))
-    return unsqueeze(logpdfs2d, 2)
+    logpdfs2d = diagnormlogpdf(reshape(μ, size(μ, 1), :), reshape(σ, size(σ, 1), :), reshape(x, size(x, 1), :))
+    return reshape(logpdfs2d, 1, :, size(μ,3))
 end
 
 """
@@ -66,7 +66,7 @@ batch_size).
 function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ=1.0f-8) where {A<:AbstractArray}
     it = zip(eachslice(μ, dims = 3), eachslice(LorU, dims = 3), eachslice(x, dims = 3))
     logp = [mvnormlogpdf(μs, LorUs, xs) for (μs, LorUs, xs) in it]
-    return unsqueeze(stack(logp; dims=2), dims=1) #returns a 3D vector 
+    return unsqueeze(stack(logp; dims=2), dims=1)
 end
 
 #Used for mvnormlogpdf and mvnormkldivergence
