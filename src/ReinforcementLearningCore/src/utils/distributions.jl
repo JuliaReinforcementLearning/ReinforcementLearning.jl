@@ -26,15 +26,9 @@ diagonal covariance. Adding an epsilon value to guarantee numeric stability if s
 exactly zero (e.g. if relu is used in output layer). Accepts arguments of the same shape:
 vectors, matrices or 3D array (with dimension 2 of size 1).
 """
-function diagnormlogpdf(μ::AbstractVecOrMat, σ::AbstractVecOrMat, x::AbstractVecOrMat; ϵ = 1.0f-8)
+function diagnormlogpdf(μ::AbstractArray, σ::AbstractArray, x::AbstractArray; ϵ = 1.0f-8)
     v = (σ .+ ϵ) .^2
     -0.5f0 .* (log.(prod(v, dims = 1)) .+ sum(((x .- μ).^2)./v, dims = 1) .+ size(μ, 1)*log2π)
-end
-
-#3D tensor version, simply reshape it to 2D, then back to 3D
-function diagnormlogpdf(μ::AbstractArray{T,3}, σ::AbstractArray{T,3}, x::AbstractArray{T,3}; ϵ = 1.0f-8) where T
-    logpdfs2d = diagnormlogpdf(reshape(μ, size(μ, 1), :), reshape(σ, size(σ, 1), :), reshape(x, size(x, 1), :))
-    return reshape(logpdfs2d, 1, :, size(μ,3))
 end
 
 """
@@ -129,7 +123,7 @@ end
 
 function diagnormkldivergence(μ1::T, σ1::T, μ2::T, σ2::T) where T <: AbstractArray{<: Real, 3}
     divs = diagnormkldivergence(dropdims(μ1, dims = 2), dropdims(σ1, dims = 2), dropdims(μ2, dims = 2), dropdims(σ2, dims = 2))
-    return unsqueeze(divs, 2)
+    return unsqueeze(divs, dims = 2)
 end
 
 """	
