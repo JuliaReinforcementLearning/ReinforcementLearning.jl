@@ -91,7 +91,7 @@ using Flux: params, gradient, unsqueeze
                 @testset "Multiple actions per state" begin
                     #Same with multiple actions sampled
                     action_saver = []
-                    state = unsqueeze(state, 2)
+                    state = unsqueeze(state, dims = 2)
                     g = Flux.gradient(Flux.params(gn)) do 
                         a, logp = gn(state, 3)
                         ChainRulesCore.ignore_derivatives() do 
@@ -150,7 +150,7 @@ using Flux: params, gradient, unsqueeze
                     end
                     @testset "Multiple actions sampling" begin
                         action_saver = []
-                        state = unsqueeze(state, 2)
+                        state = unsqueeze(state, dims = 2)
                         g = Flux.gradient(Flux.params(gn)) do 
                             a, logp = gn(CUDA.CURAND.RNG(), state, 3)
                             ChainRulesCore.ignore_derivatives() do 
@@ -296,7 +296,6 @@ using Flux: params, gradient, unsqueeze
                 for (grad1, grad2) in zip(g4,g3)
                     @test grad1 ≈ grad2
                 end
-                CUDA.allowscalar(true) #to avoid breaking other tests 
             end
         end
     end
