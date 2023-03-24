@@ -239,9 +239,8 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
     actor_loss = - mean(qij .* (logp_π_new_μ .+ logp_π_new_L))
     μ_old_s, L_old_s, μ_s, L_d_s, μ_d_s, L_s = map(x->eachslice(x, dims =3), (μ_old, L_old, μ, L_d, μ_d, L)) #slice all tensors along 3rd dim
 
-    klμ = mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_s, L_d_s))
-    klΣ = mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_d_s, L_s))
-    
+    klμ = sum(mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_s, L_d_s)))
+    klΣ = sum(mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_d_s, L_s)))
     ignore_derivatives() do
         p.α -= p.α_scale*(p.ϵμ - klμ) 
         p.αΣ -= p.αΣ_scale*(p.ϵΣ - klΣ) 
@@ -273,8 +272,8 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
     logp_π_new_μ = diagnormlogpdf(μ, σ_d, actions)
     logp_π_new_σ = diagnormlogpdf(μ_d, σ, actions)
     actor_loss = -mean(qij .* (logp_π_new_μ .+ logp_π_new_σ))
-    klμ = mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))
-    klΣ = mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_d_s, σ_s))
+    klμ = sum(mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_s, σ_d_s)))
+    klΣ = sum(mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_d_s, σ_s)))
     
     ignore_derivatives() do
         p.α -= p.α_scale*(p.ϵμ - klμ) 
