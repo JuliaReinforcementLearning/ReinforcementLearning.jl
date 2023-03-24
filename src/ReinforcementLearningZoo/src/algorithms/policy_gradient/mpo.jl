@@ -175,7 +175,7 @@ function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
         end
 
         #Improve actor towards qij (M-step)
-        ps = Flux.params(p.actor)#, p.α, p.αΣ)
+        ps = Flux.params(p.actor)
         gs = gradient(ps) do 
             mpo_loss(p, qij, states, action_samples, current_action_dist)
         end
