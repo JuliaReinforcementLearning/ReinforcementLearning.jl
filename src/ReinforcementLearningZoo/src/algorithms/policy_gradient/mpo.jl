@@ -261,11 +261,9 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
 end
 
 #In the case of diagonal covariance (with GaussianNetwork), 
-function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, actions, μ_logσ_old::Tuple)
-    μ_old, logσ_old = μ_logσ_old
-    σ_old = exp.(logσ_old)
-    μ, logσ = p.actor(p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
-    σ = exp.(logσ)
+function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, actions, μ_σ_old::Tuple)
+    μ_old, σ_old = μ_σ_old
+    μ, σ = p.actor(p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
     μ_d, σ_d = ignore_derivatives() do
         μ, σ #decoupling
     end
