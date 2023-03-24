@@ -267,13 +267,12 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
         μ, σ #decoupling
     end
     #decoupled logp for mu and sigma
-    μ_old_s, σ_old_s, μ_s, σ_d_s, μ_d_s, σ_s = map(x->eachslice(x, dims =3), (μ_old, σ_old, μ, σ_d, μ_d, σ)) #slice all tensors along 3rd dim
 
     logp_π_new_μ = diagnormlogpdf(μ, σ_d, actions)
     logp_π_new_σ = diagnormlogpdf(μ_d, σ, actions)
     actor_loss = -mean(qij .* (logp_π_new_μ .+ logp_π_new_σ))
-    klμ = sum(mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_s, σ_d_s)))
-    klΣ = sum(mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_d_s, σ_s)))
+    klμ = mean(diagnormkldivergence(μ_old, σ_old, μ, σ_d))
+    klΣ = mean(diagnormkldivergence(μ_old, σ_old, μ_d, σ))
     
     ignore_derivatives() do
         p.α -= p.α_scale*(p.ϵμ - klμ) 
