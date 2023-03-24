@@ -9,21 +9,16 @@ Multi-agent Deep Deterministic Policy Gradient(MADDPG) implemented in Julia. By 
 See the paper https://arxiv.org/abs/1706.02275 for more details.
 
 # Keyword arguments
-- `agents::Dict{<:Any, <:Agent}`, here each agent collects its own information. While updating the policy, each **critic** will assemble all agents' 
+- `agents::Dict{S, <: AbstractPolicy}`, here each agent collects its own information. While updating the policy, each **critic** will assemble all agents' 
   trajectory to update its own network. **Note that** here the policy of the `Agent` should be `DDPGPolicy` wrapped by `NamedPolicy`, see the relative 
   experiment([`MADDPG_KuhnPoker`](https://juliareinforcementlearning.org/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker/#JuliaRL\\_MADDPG\\_KuhnPoker) or [`MADDPG_SpeakerListener`](https://juliareinforcementlearning.org/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener/#JuliaRL\\_MADDPG\\_SpeakerListener)) for references.
-- `traces`, set to `SARTS` if you are apply to an environment of `MINIMAL_ACTION_SET`, or `SLARTSL` if you are to apply to an environment of `FULL_ACTION_SET`.
-- `batch_size::Int`
 - `update_freq::Int`
 - `update_step::Int`, count the step.
-- `rng::AbstractRNG`.
 """
-mutable struct MADDPGManager{T <: AbstractPolicy} <: AbstractPolicy
-    agents::Dict{<:Any, T}
-    batch_size::Int
+mutable struct MADDPGManager{T <: AbstractPolicy, S} <: AbstractPolicy
+    agents::Dict{S, T}
     update_freq::Int
     update_step::Int
-    rng::AbstractRNG
 end
 
 # used for simultaneous environments.
@@ -36,16 +31,16 @@ function (π::MADDPGManager)(env::AbstractEnv)
         for (player, agent) in π.agents)
 end
 
-function (π::MADDPGManager{<: Agent})(::PreActStage, env::AbstractEnv)
+function (π::MADDPGManager{<: Agent, <:Any})(::PreActStage, env::AbstractEnv)
     for (player, agent) in π.agents
-        agent.cache = (agent.cache..., state=state(env, player))
+        update!(agent, state(env, player))
     end
     
 end
 
-function (π::MADDPGManager{<: Agent})(::PostActStage, env::AbstractEnv)
+function (π::MADDPGManager{<: Agent, <: Any})(::PostActStage, env::AbstractEnv)
     for (player, agent) in π.agents
-        agent.cache = (agent.cache..., reward=reward(env, player), terminal=is_terminated(env))
+        update!(agent.cache, reward(env, player), is_terminated(env))
     end
 end
 
@@ -64,7 +59,6 @@ function RLBase.optimise!(π::MADDPGManager)
 
     for (_, agent) in π.agents
         length(agent.trajectory.container) > agent.policy.update_after || return
-        length(agent.trajectory.container) > π.batch_size || return
     end
 
     # get training data

@@ -1,8 +1,8 @@
 export MultiAgentManager
 
-Base.@kwdef mutable struct MultiAgentManager{T <: AbstractPolicy} <: AbstractPolicy
-    agents::Dict{S,T} where {S<: Union{String, Symbol, Integer}}
-    cur_player::Union{String, Symbol, Integer} = first(keys(agents))
+Base.@kwdef mutable struct MultiAgentManager{T <: AbstractPolicy, S} <: AbstractPolicy
+    agents::Dict{S,T}
+    cur_player::S = first(keys(agents))
 end
 
 Base.getindex(A::MultiAgentManager, x) = getindex(A.agents, x)
@@ -13,8 +13,6 @@ Base.getindex(A::MultiAgentManager, x) = getindex(A.agents, x)
 This is the simplest form of multiagent system. At each step they observe the
 environment from their own perspective and get updated independently.
 """
-MultiAgentManager(policies...) =
-    MultiAgentManager(Dict{Any,Any}(nameof(p) => p for p in policies))
 
 RLBase.prob(A::MultiAgentManager, env::AbstractEnv, args...) = prob(A[A.cur_player].policy, env, args...)
 
@@ -24,6 +22,7 @@ function (A::MultiAgentManager)(env::AbstractEnv, ::Sequential)
     while current_player(env) == chance_player(env)
         env |> legal_action_space |> rand |> env
     end
+    A.cur_player = current_player(env)
     return A[A.cur_player](env)
 end
 
@@ -44,7 +43,7 @@ function (A::MultiAgentManager{<:Agent})(::PostActStage, env::AbstractEnv)
     # in the multi agent case, the immediate rewards are updated when last player took its action
     if A.cur_player == last(players(env))
         for (p, agent) in A.agents
-            agent.cache = (agent.cache..., reward=reward(env, p), terminal=is_terminated(env))        
+            update!(agent.cache, reward(env, p), is_terminated(env))
         end
     end
 end

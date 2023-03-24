@@ -6,6 +6,7 @@ const MultiAgentRL = MultiAgentReinforcementLearning
 
 using ReinforcementLearningBase
 using ReinforcementLearningCore
+using ReinforcementLearningCore: update!
 using ReinforcementLearningTrajectories
 using Random
 using Flux

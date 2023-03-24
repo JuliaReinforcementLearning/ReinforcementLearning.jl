@@ -7,7 +7,7 @@
 # ---
 
 using PyCall
-using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearning
 using Flux
 using Flux: glorot_uniform
 
@@ -24,11 +24,11 @@ function RLCore.Experiment(
     is_enable_double_DQN=true
 )
     rng = StableRNG(seed)
-    env = discrete2standard_discrete(PettingzooEnv("mpe.simple_v2"; seed=seed))
+    env = discrete2standard_discrete(PettingZooEnv("mpe.simple_v2"; seed=seed))
     ns, na = length(state(env)), length(action_space(env))
 
     agent = Agent(
-        policy=QBasedPolicy(
+        QBasedPolicy(
             learner=DQNLearner(
                 approximator=Approximator(
                     model=TwinNetwork(
@@ -54,7 +54,7 @@ function RLCore.Experiment(
                 rng=rng,
             ),
         ),
-        trajectory=Trajectory(
+        Trajectory(
             container=CircularArraySARTTraces(
                 capacity=1000,
                 state=Float32 => (ns,),

@@ -70,7 +70,7 @@ printMeanRewardhook = DoEveryNEpisode(;n=1000) do t, policy, env
     # polluting the original env.
 
     hook = TotalRewardPerEpisode(;is_display_on_exit=false)
-    run(policy, ReinforcementLearning.PettingzooEnv("mpe.simple_spread_v2"; seed=123, continuous_actions=true), StopAfterEpisode(10), hook)
+    run(policy, ReinforcementLearning.PettingZooEnv("mpe.simple_spread_v2"; seed=123, continuous_actions=true), StopAfterEpisode(10), hook)
 
     # now you can report the result of the hook.
     println("\navg reward at episode $t is: $(mean(hook.rewards))")
