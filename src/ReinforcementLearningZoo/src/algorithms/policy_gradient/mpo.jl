@@ -175,7 +175,7 @@ function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
         end
 
         #Improve actor towards qij (M-step)
-        ps = Flux.params(p.actor)#, p.α, p.αΣ)
+        ps = Flux.params(p.actor)
         gs = gradient(ps) do 
             mpo_loss(p, qij, states, action_samples, current_action_dist)
         end
@@ -239,9 +239,8 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
     actor_loss = - mean(qij .* (logp_π_new_μ .+ logp_π_new_L))
     μ_old_s, L_old_s, μ_s, L_d_s, μ_d_s, L_s = map(x->eachslice(x, dims =3), (μ_old, L_old, μ, L_d, μ_d, L)) #slice all tensors along 3rd dim
 
-    klμ = mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_s, L_d_s))
-    klΣ = mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_d_s, L_s))
-    
+    klμ = sum(mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_s, L_d_s)))
+    klΣ = sum(mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_d_s, L_s)))
     ignore_derivatives() do
         p.α -= p.α_scale*(p.ϵμ - klμ) 
         p.αΣ -= p.αΣ_scale*(p.ϵΣ - klΣ) 
@@ -261,22 +260,19 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
 end
 
 #In the case of diagonal covariance (with GaussianNetwork), 
-function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, actions, μ_logσ_old::Tuple)
-    μ_old, logσ_old = μ_logσ_old
-    σ_old = exp.(logσ_old)
-    μ, logσ = p.actor(p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
-    σ = exp.(logσ)
+function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, actions, μ_σ_old::Tuple)
+    μ_old, σ_old = μ_σ_old
+    μ, σ = p.actor(p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
     μ_d, σ_d = ignore_derivatives() do
         μ, σ #decoupling
     end
     #decoupled logp for mu and sigma
-    μ_old_s, σ_old_s, μ_s, σ_d_s, μ_d_s, σ_s = map(x->eachslice(x, dims =3), (μ_old, σ_old, μ, σ_d, μ_d, σ)) #slice all tensors along 3rd dim
 
     logp_π_new_μ = diagnormlogpdf(μ, σ_d, actions)
     logp_π_new_σ = diagnormlogpdf(μ_d, σ, actions)
     actor_loss = -mean(qij .* (logp_π_new_μ .+ logp_π_new_σ))
-    klμ = mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_s, σ_d_s))
-    klΣ = mean(diagnormkldivergence.(μ_old_s, σ_old_s, μ_d_s, σ_s))
+    klμ = mean(diagnormkldivergence(μ_old, σ_old, μ, σ_d))
+    klΣ = mean(diagnormkldivergence(μ_old, σ_old, μ_d, σ))
     
     ignore_derivatives() do
         p.α -= p.α_scale*(p.ϵμ - klμ) 

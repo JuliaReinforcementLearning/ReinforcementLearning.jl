@@ -149,10 +149,10 @@ function RLBase.prob(
     if p.update_step < p.n_random_start
         @error "todo"
     else
-        μ, logσ =
+        μ, σ =
             p.approximator.actor(send_to_device(device(p.approximator), state)) |>
             send_to_host
-        StructArray{Normal}((μ, exp.(logσ)))
+        StructArray{Normal}((μ, σ))
     end
 end
 
@@ -286,14 +286,14 @@ function _update!(p::PPOPolicy, t::Any)
             gs = gradient(ps) do
                 v′ = AC.critic(s) |> vec
                 if AC.actor isa GaussianNetwork
-                    μ, logσ = AC.actor(s)
+                    μ, σ = AC.actor(s)
                     if ndims(a) == 2
-                        log_p′ₐ = vec(sum(normlogpdf(μ, exp.(logσ), a), dims=1))
+                        log_p′ₐ = vec(sum(normlogpdf(μ, σ, a), dims=1))
                     else
-                        log_p′ₐ = normlogpdf(μ, exp.(logσ), a)
+                        log_p′ₐ = normlogpdf(μ, σ, a)
                     end
                     entropy_loss =
-                        mean(size(logσ, 1) * (log(2.0f0π) + 1) .+ sum(logσ; dims=1)) / 2
+                        mean(size(σ, 1) * (log(2.0f0π) + 1) .+ sum(log.(σ); dims=1)) / 2
                 else
                     # actor is assumed to return discrete logits
                     raw_logit′ = AC.actor(s)

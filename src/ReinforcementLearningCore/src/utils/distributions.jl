@@ -21,25 +21,20 @@ end
 """
     diagnormlogpdf(μ, σ, x; ϵ = 1.0f-8)
 
-GPU automatic differentiable version for the logpdf function of normal distributions with 
+GPU compatible and automatically differentiable version for the logpdf function of normal distributions with 
 diagonal covariance. Adding an epsilon value to guarantee numeric stability if sigma is 
-exactly zero (e.g. if relu is used in output layer).
+exactly zero (e.g. if relu is used in output layer). Accepts arguments of the same shape:
+vectors, matrices or 3D array (with dimension 2 of size 1).
 """
-function diagnormlogpdf(μ, σ, x; ϵ = 1.0f-8)
+function diagnormlogpdf(μ::AbstractArray, σ::AbstractArray, x::AbstractArray; ϵ = 1.0f-8)
     v = (σ .+ ϵ) .^2
-    -0.5f0*(log(prod(v)) .+ inv.(v)'*((x .- μ).^2) .+ length(μ)*log2π)
-end
-
-#3D tensor version
-function diagnormlogpdf(μ::AbstractArray{<:Any,3}, σ::AbstractArray{<:Any,3}, x::AbstractArray{<:Any,3}; ϵ = 1.0f-8)
-    logp = [diagnormlogpdf(μ[:, :, k], σ[:, :, k], x[:, :, k]) for k in 1:size(x, 3)]
-    return reduce((x,y)->cat(x,y,dims=3), logp) #returns a 3D vector 
+    -0.5f0 .* (log.(prod(v, dims = 1)) .+ sum(((x .- μ).^2)./v, dims = 1) .+ size(μ, 1)*log2π)
 end
 
 """
     mvnormlogpdf(μ::AbstractVecOrMat, L::AbstractMatrix, x::AbstractVecOrMat)
 
-GPU automatic differentiable version for the logpdf function of multivariate
+GPU compatible and automatically differentiable version for the logpdf function of multivariate
 normal distributions.  Takes as inputs `mu` the mean vector, `L` the lower
 triangular matrix of the cholesky decomposition of the covariance matrix, and
 `x` a matrix of samples where each column is a sample.  Return a Vector
@@ -63,17 +58,19 @@ action_samples x batch_size).  Return a 3D matrix of size (1 x action_samples x
 batch_size). 
 """
 function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ=1.0f-8) where {A<:AbstractArray}
-    logp = [mvnormlogpdf(μ[:, :, k], LorU[:, :, k], x[:, :, k]) for k in 1:size(x, 3)]
-    return unsqueeze(stack(logp; dims=2), dims=1) #returns a 3D vector 
+    it = zip(eachslice(μ, dims = 3), eachslice(LorU, dims = 3), eachslice(x, dims = 3))
+    logp = [mvnormlogpdf(μs, LorUs, xs) for (μs, LorUs, xs) in it]
+    return unsqueeze(stack(logp; dims=2), dims=1)
 end
 
-#Used for mvnormlogpdf
+#Used for mvnormlogpdf and mvnormkldivergence
 """
     logdetLorU(LorU::AbstractMatrix)
+
 Log-determinant of the Positive-Semi-Definite matrix A = L*U (cholesky lower and upper triangulars), given L or U. 
 Has a sign uncertainty for non PSD matrices.
 """
-function logdetLorU(LorU::CuArray)
+function logdetLorU(LorU::Union{A, LowerTriangular{T, A}, UpperTriangular{T, A}}) where {T, A <: CuArray}
     return 2*sum(log.(diag(LorU)))
 end
 
@@ -86,7 +83,7 @@ logdetLorU(LorU::AbstractMatrix) = logdet(LorU)*2
 GPU differentiable implementation of the kl_divergence between two MultiVariate Gaussian distributions with mean vectors `μ1, μ2` respectively and 	
 with cholesky decomposition of covariance matrices `L1, L2`.	
 """	
-function mvnormkldivergence(μ1, L1M, μ2, L2M)
+function mvnormkldivergence(μ1::AbstractVecOrMat, L1M::AbstractMatrix, μ2::AbstractVecOrMat, L2M::AbstractMatrix)
     L1 = LowerTriangular(L1M)	
     L2 = LowerTriangular(L2M)	
     U1 = UpperTriangular(permutedims(L1M))	
@@ -98,24 +95,35 @@ function mvnormkldivergence(μ1, L1M, μ2, L2M)
     U2i = inv(U2)	
     M2i = U2i*L2i	
     X = M2i*M1	
-    trace = tr(X) # trace of inv(Σ2) * Σ1	
+    trace = sum(diag(X)) # trace of inv(Σ2) * Σ1	
     sqmahal = sum(abs2.(L2i*(μ2 .- μ1))) #mahalanobis square distance	
     return (logdet - d + trace + sqmahal)/2	
 end	
+
+function mvnormkldivergence(μ1::AbstractArray{T, 3}, L1::AbstractArray{T, 3}, μ2::AbstractArray{T, 3}, L2::AbstractArray{T, 3}) where T <: Real
+    it = zip(eachslice(μ1, dims = 3), eachslice(L1, dims = 3), eachslice(μ2, dims = 3), eachslice(L2, dims = 3))
+    kldivs = [mvnormkldivergence(m1,l1,m2,l2) for (m1,l1,m2,l2) in it]
+    return reshape(kldivs, :, 1, length(kldivs))
+end
 
 """	
     diagnormkldivergence(μ1, σ1, μ2, σ2)	
 
 GPU differentiable implementation of the kl_divergence between two MultiVariate Gaussian distributions with mean vectors `μ1, μ2` respectively and 	
-diagonal standard deviations `σ1, σ2`. Arguments must be Vectors or single-column Matrices.	
+diagonal standard deviations `σ1, σ2`. Arguments must be Vectors or arrays of column vectors.	
 """	
-function diagnormkldivergence(μ1, σ1, μ2, σ2)	
+function diagnormkldivergence(μ1::T, σ1::T, μ2::T, σ2::T) where T <: AbstractVecOrMat	
     v1, v2 = σ1.^2, σ2.^2
     d = size(μ1,1)	
-    logdet = sum(log.(v2)) - sum(log.(v1)) 	
-    trace = sum(v1 ./ v2)	
-    sqmahal = sum((μ2 .- μ1) .^2 ./ v2)	
-    return (logdet - d + trace + sqmahal)/2	
+    logdet = sum(log.(v2), dims = 1) - sum(log.(v1), dims = 1) 	
+    trace = sum(v1 ./ v2, dims = 1)	
+    sqmahal = sum((μ2 .- μ1) .^2 ./ v2, dims = 1)	
+    return (logdet .- d .+ trace .+ sqmahal) ./ 2	
+end
+
+function diagnormkldivergence(μ1::T, σ1::T, μ2::T, σ2::T) where T <: AbstractArray{<: Real, 3}
+    divs = diagnormkldivergence(dropdims(μ1, dims = 2), dropdims(σ1, dims = 2), dropdims(μ2, dims = 2), dropdims(σ2, dims = 2))
+    return unsqueeze(divs, dims = 2)
 end
 
 """	

@@ -1,5 +1,5 @@
-using Test, Flux, CUDA, ChainRulesCore, LinearAlgebra, Distributions
-using Flux: params, gradient
+using Test, Flux, CUDA, ChainRulesCore, LinearAlgebra, Distributions, ReinforcementLearningCore
+using Flux: params, gradient, unsqueeze
 @testset "Approximators" begin
     #= These may need to be updated due to recent changes
     @testset "TabularApproximator" begin
@@ -51,109 +51,121 @@ using Flux: params, gradient
     end=#
 
     @testset "GaussianNetwork" begin
-        @testset "identity normalizer" begin
-            pre = Dense(20,15)
-            μ = Dense(15,10)
-            logσ = Dense(15,10)
-            gn = GaussianNetwork(pre, μ, logσ)
-            @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, logσ.weight, logσ.bias])
-            state = rand(Float32, 20,3) #batch of 3 states
-            m, L = gn(state)
-            @test size(m) == size(L) == (10,3)
-            a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
-            @test size(a) == (10,3)
-            @test size(logp) == (1,3)
-            @test logp ≈ sum(normlogpdf(m, exp.(L), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
-            @test logp ≈ gn(state, a)
-            as, logps = gn(Flux.unsqueeze(state,dims = 2), 5) #sample 5 actions
-            @test size(as) == (10,5,3)
-            @test size(logps) == (1,5,3)
-            logps2 = gn(Flux.unsqueeze(state,dims = 2), as)
-            @test logps2 ≈ logps
-            action_saver = []
-            g = Flux.gradient(Flux.params(gn)) do 
-                a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
-                ChainRulesCore.ignore_derivatives() do 
-                    push!(action_saver, a)
-                end
-                sum(logp)
-            end
-            g2 = Flux.gradient(Flux.params(gn)) do 
-                logp = gn(state, only(action_saver))
-                sum(logp)
-            end
-            #Check that gradients are identical
-            for (grad1, grad2) in zip(g,g2)
-                @test grad1 ≈ grad2
-            end
-            #Same with multiple actions sampled
-            empty!(action_saver)
-            g = Flux.gradient(Flux.params(gn)) do 
-                a, logp = gn(state, 3)
-                ChainRulesCore.ignore_derivatives() do 
-                    push!(action_saver, a)
-                end
-                sum(logp)
-            end
-            g2 = Flux.gradient(Flux.params(gn)) do 
-                logp = gn(state, only(action_saver))
-                sum(logp)
-            end
-            for (grad1, grad2) in zip(g,g2)
-                @test grad1 ≈ grad2
-            end
-        end
-        @testset "CUDA" begin
-            if CUDA.functional()
-                pre = Dense(20,15) |> gpu
-                μ = Dense(15,10) |> gpu
-                logσ = Dense(15,10) |> gpu
-                gn = GaussianNetwork(pre, μ, logσ)
-                @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, logσ.weight, logσ.bias])
-                state = rand(Float32, 20,3)  |> gpu #batch of 3 states
+        @testset "On CPU" begin
+            gn = GaussianNetwork(Dense(20,15), Dense(15,10), Dense(15,10, softplus))
+            state = rand(Float32,20,3) #batch of 3 states
+            @testset "Correctness of outputs" begin
                 m, L = gn(state)
                 @test size(m) == size(L) == (10,3)
-                a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
+                a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
                 @test size(a) == (10,3)
                 @test size(logp) == (1,3)
-                @test logp ≈ sum(normlogpdf(m, exp.(L), a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
+                @test logp ≈ sum(normlogpdf(m, L, a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
                 @test logp ≈ gn(state, a)
-                as, logps = gn(CUDA.CURAND.RNG(), Flux.unsqueeze(state,dims = 2), 5) #sample 5 actions
+                as, logps = gn(Flux.unsqueeze(state,dims = 2), 5) #sample 5 actions
                 @test size(as) == (10,5,3)
                 @test size(logps) == (1,5,3)
                 logps2 = gn(Flux.unsqueeze(state,dims = 2), as)
                 @test logps2 ≈ logps
-                action_saver = []
-                g = Flux.gradient(Flux.params(gn)) do 
+            end
+            @testset "Correctness of gradients" begin
+                @testset "One action per state" begin
+                    @test Flux.params(gn) == Flux.Params([gn.pre.weight, gn.pre.bias, gn.μ.weight, gn.μ.bias, gn.σ.weight, gn.σ.bias])
+                    action_saver = Matrix[]
+                    g = Flux.gradient(Flux.params(gn)) do 
+                        a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
+                        ChainRulesCore.ignore_derivatives() do 
+                            push!(action_saver, a)
+                        end
+                        sum(logp)
+                    end
+                    g2 = Flux.gradient(Flux.params(gn)) do 
+                        logp = gn(state, only(action_saver))
+                        sum(logp)
+                    end
+                    #Check that gradients are identical
+                    for (grad1, grad2) in zip(g,g2)
+                        @test grad1 ≈ grad2
+                    end
+                end
+                @testset "Multiple actions per state" begin
+                    #Same with multiple actions sampled
+                    action_saver = []
+                    state = unsqueeze(state, dims = 2)
+                    g = Flux.gradient(Flux.params(gn)) do 
+                        a, logp = gn(state, 3)
+                        ChainRulesCore.ignore_derivatives() do 
+                            push!(action_saver, a)
+                        end
+                        sum(logp)
+                    end
+                    g2 = Flux.gradient(Flux.params(gn)) do 
+                        logp = gn(state, only(action_saver))
+                        sum(logp)
+                    end
+                    for (grad1, grad2) in zip(g,g2)
+                        @test grad1 ≈ grad2
+                    end
+                end
+            end
+        end
+        @testset "CUDA" begin
+            if CUDA.functional()
+                CUDA.allowscalar(false)
+                gn = GaussianNetwork(Dense(20,15), Dense(15,10), Dense(15,10, softplus)) |> gpu
+                state = rand(20,3)  |> gpu #batch of 3 states
+                @testset "Forward pass compatibility" begin
+                    @test Flux.params(gn) == Flux.Params([gn.pre.weight, gn.pre.bias, gn.μ.weight, gn.μ.bias, gn.σ.weight, gn.σ.bias])
+                    m, L = gn(state)
+                    @test size(m) == size(L) == (10,3)
                     a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
-                    ChainRulesCore.ignore_derivatives() do 
-                        push!(action_saver, a)
+                    @test size(a) == (10,3)
+                    @test size(logp) == (1,3)
+                    @test logp ≈ sum(normlogpdf(m, L, a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
+                    @test logp ≈ gn(state, a)
+                    as, logps = gn(CUDA.CURAND.RNG(), Flux.unsqueeze(state,dims = 2), 5) #sample 5 actions
+                    @test size(as) == (10,5,3)
+                    @test size(logps) == (1,5,3)
+                    logps2 = gn(Flux.unsqueeze(state,dims = 2), as)
+                    @test logps2 ≈ logps
+                end
+                @testset "Backward pass compatibility" begin
+                    @testset "One action sampling" begin
+                        action_saver = CuMatrix[]
+                        g = Flux.gradient(Flux.params(gn)) do 
+                            a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
+                            ChainRulesCore.ignore_derivatives() do 
+                                push!(action_saver, a)
+                            end
+                            sum(logp)
+                        end
+                        g2 = Flux.gradient(Flux.params(gn)) do 
+                            logp = gn(state, only(action_saver))
+                            sum(logp)
+                        end
+                        #Check that gradients are identical
+                        for (grad1, grad2) in zip(g,g2)
+                            @test grad1 ≈ grad2
+                        end
                     end
-                    sum(logp)
-                end
-                g2 = Flux.gradient(Flux.params(gn)) do 
-                    logp = gn(state, only(action_saver))
-                    sum(logp)
-                end
-                #Check that gradients are identical
-                for (grad1, grad2) in zip(g,g2)
-                    @test grad1 ≈ grad2
-                end
-                #Same with multiple actions sampled
-                empty!(action_saver)
-                g = Flux.gradient(Flux.params(gn)) do 
-                    a, logp = gn(CUDA.CURAND.RNG(), state, 3)
-                    ChainRulesCore.ignore_derivatives() do 
-                        push!(action_saver, a)
+                    @testset "Multiple actions sampling" begin
+                        action_saver = []
+                        state = unsqueeze(state, dims = 2)
+                        g = Flux.gradient(Flux.params(gn)) do 
+                            a, logp = gn(CUDA.CURAND.RNG(), state, 3)
+                            ChainRulesCore.ignore_derivatives() do 
+                                push!(action_saver, a)
+                            end
+                            sum(logp)
+                        end
+                        g2 = Flux.gradient(Flux.params(gn)) do 
+                            logp = gn(state, only(action_saver))
+                            sum(logp)
+                        end
+                        for (grad1, grad2) in zip(g,g2)
+                            @test grad1 ≈ grad2
+                        end
                     end
-                    sum(logp)
-                end
-                g2 = Flux.gradient(Flux.params(gn)) do 
-                    logp = gn(state, only(action_saver))
-                    sum(logp)
-                end
-                for (grad1, grad2) in zip(g,g2)
-                    @test grad1 ≈ grad2
                 end
             end
         end
@@ -252,7 +264,7 @@ using Flux: params, gradient
                 s = Flux.stack(map(l -> l*l', eachslice(L, dims=3)); dims=3)
                 mvnormals = map(z -> MvNormal(Array(vec(z[1])), Array(z[2])), zip(eachslice(m, dims = 3), eachslice(s, dims = 3)))
                 logp_truth = [logpdf(mvn, cpu(a)) for (mvn, a) in zip(mvnormals, eachslice(as, dims = 3))]
-                @test Flux.stack(logp_truth,2) ≈ dropdims(cpu(logps); dims=1) #test against ground truth
+                @test reduce(hcat, collect(logp_truth)) ≈ dropdims(cpu(logps); dims=1) #test against ground truth
                 action_saver = []
                 g = Flux.gradient(Flux.params(gn)) do 
                     a, logp = gn(rng, Flux.unsqueeze(state,dims = 2), is_sampling = true, is_return_log_prob = true)
@@ -284,7 +296,6 @@ using Flux: params, gradient
                 for (grad1, grad2) in zip(g4,g3)
                     @test grad1 ≈ grad2
                 end
-                CUDA.allowscalar(true) #to avoid breaking other tests 
             end
         end
     end

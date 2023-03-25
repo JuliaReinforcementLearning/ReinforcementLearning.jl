@@ -37,6 +37,8 @@ mutable struct Agent{P,T,C} <: AbstractPolicy
     end
 end
 
+Agent(;policy, trajectory, cache = SRT()) = Agent(policy, trajectory, cache)
+
 RLBase.optimise!(agent::Agent) = optimise!(TrajectoryStyle(agent.trajectory), agent)
 RLBase.optimise!(::SyncTrajectoryStyle, agent::Agent) =
     optimise!(agent.policy, agent.trajectory)

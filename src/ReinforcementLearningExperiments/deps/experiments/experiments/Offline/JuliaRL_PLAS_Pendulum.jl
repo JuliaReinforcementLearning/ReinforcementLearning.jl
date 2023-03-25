@@ -65,7 +65,7 @@ function RLCore.Experiment(
                     Dense(64, 64, relu),
                 ),
                 μ = Chain(Dense(64, latent_dims, init = init)),
-                logσ = Chain(Dense(64, latent_dims, init = init)),
+                σ = Chain(Dense(64, latent_dims, softplus, init = init)),
             ),
             decoder = Chain(
                 Dense(ns + latent_dims, 64, relu; init = init),

@@ -27,21 +27,22 @@ end
 export GaussianNetwork
 
 """
-    GaussianNetwork(;pre=identity, μ, logσ, min_σ=0f0, max_σ=Inf32)
+    GaussianNetwork(;pre=identity, μ, σ, min_σ=0f0, max_σ=Inf32)
 
-Returns `μ` and `logσ` when called.  Create a distribution to sample from using
-`Normal.(μ, exp.(logσ))`. `min_σ` and `max_σ` are used to clip the output from
-`logσ`. `pre` is a shared body before the two heads of the NN.
+Returns `μ` and `σ` when called.  Create a distribution to sample from using
+`Normal.(μ, σ)`. `min_σ` and `max_σ` are used to clip the output from
+`σ`. `pre` is a shared body before the two heads of the NN. σ should be > 0. 
+You may enforce this using a `softplus` output activation. 
 """
 Base.@kwdef struct GaussianNetwork{P,U,S}
     pre::P = identity
     μ::U
-    logσ::S
+    σ::S
     min_σ::Float32 = 0.0f0
     max_σ::Float32 = Inf32
 end
 
-GaussianNetwork(pre, μ, logσ) = GaussianNetwork(pre, μ, logσ, 0.0f0, Inf32)
+GaussianNetwork(pre, μ, σ) = GaussianNetwork(pre, μ, σ, 0.0f0, Inf32)
 
 @functor GaussianNetwork
 
@@ -54,10 +55,9 @@ This function is compatible with a multidimensional action space.
 """
 function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, is_return_log_prob::Bool=false)
     x = model.pre(s)
-    μ, raw_logσ = model.μ(x), model.logσ(x)
-    logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
+    μ, raw_σ = model.μ(x), model.σ(x)
+    σ = clamp.(raw_σ, model.min_σ, model.max_σ)
     if is_sampling
-        σ = exp.(logσ)
         z = ignore_derivatives() do
             noise = randn(rng, Float32, size(μ))
             μ .+ σ .* noise
@@ -69,22 +69,20 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, 
             return z
         end
     else
-        return μ, logσ
+        return μ, σ
     end
 end
 
 """
-    (model::GaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
+    (model::GaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
 
 Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batch_size)`.
 `state` must be 3D tensor with dimensions `(state_size x 1 x batch_size)`. Always returns the logpdf of each action along.
 """
-function (model::GaussianNetwork)(rng::AbstractRNG, s, action_samples::Int)
+function (model::GaussianNetwork)(rng::AbstractRNG, s::AbstractArray{<:Any, 3}, action_samples::Int)
     x = model.pre(s)
-    μ, raw_logσ = model.μ(x), model.logσ(x)
-    logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
-
-    σ = exp.(logσ)
+    μ, raw_σ = model.μ(x), model.σ(x)
+    σ = clamp.(raw_σ, model.min_σ, model.max_σ)
     z = ignore_derivatives() do
         noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
         μ .+ σ .* noise
@@ -103,9 +101,8 @@ end
 
 function (model::GaussianNetwork)(state, action)
     x = model.pre(state)
-    μ, raw_logσ = model.μ(x), model.logσ(x)
-    logσ = clamp.(raw_logσ, log(model.min_σ), log(model.max_σ))
-    σ = exp.(logσ)
+    μ, raw_σ = model.μ(x), model.σ(x)
+    σ = clamp.(raw_σ, model.min_σ, model.max_σ)
     logp_π = sum(normlogpdf(μ, σ, action) .- (2.0f0 .* (log(2.0f0) .- action .- softplus.(-2.0f0 .* action))), dims=1)
     return logp_π
 end
@@ -137,7 +134,7 @@ end
 @functor CovGaussianNetwork
 
 """
-    (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}; is_sampling::Bool=false, is_return_log_prob::Bool=false)
 
 This function is compatible with a multidimensional action space. To work with covariance matrices, the outputs are 3D tensors.  If
 sampling, return an actions tensor with dimensions `(action_size x action_samples
@@ -154,7 +151,7 @@ retrieved with `Σ = Flux.stack(map(l -> l*l', eachslice(L, dims=3)); dims=3)`
 - `is_return_log_prob::Bool=false`, whether to calculate the conditional
   probability of getting actions in the given state.
 """
-function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}; is_sampling::Bool=false, is_return_log_prob::Bool=false)
     batch_size = size(state, 3)
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
@@ -164,7 +161,11 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state; is_sampling::Bool=
     if is_sampling
         z = ignore_derivatives() do
             noise = randn(rng, eltype(μ), da, 1, batch_size)
-            Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)); dims=3)
+            z = copy(μ)
+            for (m, l, n) in zip(eachslice(z, dims = 3), eachslice(L, dims=3), eachslice(noise, dims = 3))
+                m .+= l * n
+            end
+            z
         end
         if is_return_log_prob
             logp_π = mvnormlogpdf(μ, L, z)
@@ -195,15 +196,15 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractVecOrMat; 
 end
 
 """
-    (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
+    (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
 
-Sample `action_samples` actions given `state` and return the `actions,
+Sample `action_samples` actions per state in `state` and return the `actions,
 logpdf(actions)`.  This function is compatible with a multidimensional action
 space.  The outputs are 3D tensors with dimensions
 `(action_size x action_samples x batch_size)` and `(1 x action_samples x
 batch_size)` for `actions` and `logdpf` respectively.
 """
-function (model::CovGaussianNetwork)(rng::AbstractRNG, state, action_samples::Int)
+function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
     batch_size = size(state, 3) #3
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
@@ -222,7 +223,7 @@ function (model::CovGaussianNetwork)(state::AbstractArray, args...; kwargs...)
 end
 
 """
-    (model::CovGaussianNetwork)(state, action)
+    (model::CovGaussianNetwork)(state::AbstractArray, action::AbstractArray)
     
 Return the logpdf of the model sampling `action` when in `state`.  State must be
 a 3D tensor with dimensions `(state_size x 1 x batch_size)`.  Multiple actions may
@@ -230,7 +231,7 @@ be taken per state, `action` must have dimensions `(action_size x
 action_samples_per_state x batch_size)`. Returns a 3D tensor with dimensions `(1 x
 action_samples_per_state x batch_size)`.
 """
-function (model::CovGaussianNetwork)(state::AbstractArray, action::AbstractArray)
+function (model::CovGaussianNetwork)(state::AbstractArray{<:Any, 3}, action::AbstractArray{<:Any, 3})
     da = size(action, 1)
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
@@ -323,7 +324,7 @@ function (model::CategoricalNetwork)(state::AbstractArray, args...; kwargs...)
 end
 
 """
-    (model::CategoricalNetwork)([rng::AbstractRNG,] state::AbstractArray, [mask::AbstractArray{Bool},] action_samples::Int)
+    (model::CategoricalNetwork)([rng::AbstractRNG,] state::AbstractArray{<:Any, 3}, [mask::AbstractArray{Bool},] action_samples::Int)
 
 Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batch_size)`. 
 Always returns the *logits* of each action along in a tensor with the same dimensions. The optional argument `mask` must be
@@ -459,8 +460,7 @@ end
 Flux.@functor VAE
 
 function (model::VAE)(rng::AbstractRNG, state, action)
-    μ, logσ = model.encoder(vcat(state, action))
-    σ = exp.(logσ)
+    μ, σ = model.encoder(vcat(state, action))
     z = μ .+ σ .* randn(rng, Float32, size(μ))
     u = decode(model, state, z)
     return u, μ, σ
