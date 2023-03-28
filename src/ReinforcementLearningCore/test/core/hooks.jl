@@ -78,9 +78,10 @@ end
         env = RandomWalk1D()
         env.pos = 1
         policy = RandomPolicy(legal_action_space(env))
-        [h(PostActStage(), policy, env) for i in 1:4]
-        @test env.pos == 3
-
+        for t = 1:4
+            h(PostActStage(), policy, env)
+            @test env.pos == 1+ div(t,2)
+        end
         test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end
 end
@@ -165,8 +166,10 @@ end
         env = RandomWalk1D()
         env.pos = 1
         policy = RandomPolicy(legal_action_space(env))
-        [h(stage, policy, env) for j in 1:4]
-        @test env.pos == 3
+        for t in 1:4
+            h(stage, policy, env)
+            @test env.pos == 1 + div(t,2)
+        end     
         test_noop!(h, stages=[PreActStage(), PostActStage(), PreExperimentStage(), PostExperimentStage()])
     end
 end
