@@ -146,6 +146,11 @@ jobs:
       
       - name: Codecov
         uses: codecov/codecov-action@v3
+        with:
+          file: lcov.info
+      - uses: julia-actions/julia-processcoverage@v1
+      - name: "Run test with coverage report"
+        uses: julia-actions/julia-runtest@v1
 
   docs:
     name: Documentation
