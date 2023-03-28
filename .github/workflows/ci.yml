@@ -144,15 +144,8 @@ jobs:
             Pkg.build("ReinforcementLearningExperiments")
             Pkg.test("ReinforcementLearningExperiments")'
       
-      - name: "Coverage report"
-      - uses: julia-actions/julia-runtest@v1
-        if: contains(fromJson('["1"]'), matrix.version) && matrix.os == 'ubuntu-latest'
-      - uses: julia-actions/julia-processcoverage@v1
-        if: contains(fromJson('["1"]'), matrix.version) && matrix.os == 'ubuntu-latest'
-      - uses: codecov/codecov-action@v3
-        if: contains(fromJson('["1"]'), matrix.version) && matrix.os == 'ubuntu-latest'
-        with:
-          file: lcov.info
+      - name: Codecov
+        uses: codecov/codecov-action@v3
 
   docs:
     name: Documentation
