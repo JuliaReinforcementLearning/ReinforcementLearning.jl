@@ -200,7 +200,7 @@ function sample_actions(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, dist
     noise = randn(p.rng, eltype(μ), size(μ,1), N, size(μ,3))
     output = similar(noise)
     for k in axes(μ,3)
-        output[:,:,k] .= μ[:,:,k] .+ L[:,:,k] .* noise[:,:,k]
+        output[:,:,k] .= μ[:,:,k] .+ L[:,:,k] * noise[:,:,k]
     end
     output
 end
