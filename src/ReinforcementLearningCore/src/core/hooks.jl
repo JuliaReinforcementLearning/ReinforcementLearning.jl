@@ -323,7 +323,7 @@ end
 
 function (hook::DoEveryNStep)(::PostActStage, agent, env)
     hook.t += 1
-    if hook.t % hook.n == 0 && (hook.t > 1 || hook.n == 1)
+    if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
     end
     return
@@ -346,7 +346,7 @@ DoEveryNEpisode(f::F; n=1, t=0, stage::S=PostEpisodeStage()) where {S,F} =
 
 function (hook::DoEveryNEpisode{S})(::S, agent, env) where {S}
     hook.t += 1
-    if hook.t % hook.n == 0 && (hook.t > 1 || hook.n == 1)
+    if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
     end
     return
