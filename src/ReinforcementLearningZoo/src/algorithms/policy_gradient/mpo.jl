@@ -107,7 +107,6 @@ end
 
 #Here we apply the TD3 Q network approach. The original MPO paper uses retrace.
 function update_critic!(p::MPOPolicy, batches)
-    modulo = rand(p.rng, (0,1)) #we randomize this so that if the number of batches is odd, we do not train one critic more than the other.
     for (id, batch) in enumerate(batches)
         s, s′, a, r, t, = send_to_device(device(p.qnetwork1), batch)
         γ, τ = p.γ, p.τ
@@ -120,7 +119,7 @@ function update_critic!(p::MPOPolicy, batches)
 
         # Train Q Networks
         q_input = vcat(s, a)
-        if id % 2 == modulo
+        if id % 2 == 0
             q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
                 q1 = p.qnetwork1(q_input) |> vec
                 l = mse(q1, y)
@@ -200,7 +199,7 @@ function sample_actions(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, dist
     noise = randn(p.rng, eltype(μ), size(μ,1), N, size(μ,3))
     output = similar(noise)
     for k in axes(μ,3)
-        output[:,:,k] .= μ[:,:,k] .+ L[:,:,k] .* noise[:,:,k]
+        output[:,:,k] .= μ[:,:,k] .+ L[:,:,k] * noise[:,:,k]
     end
     output
 end
