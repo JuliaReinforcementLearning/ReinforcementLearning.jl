@@ -72,15 +72,16 @@ end
 
 @testset "DoEveryNStep" begin
     h_1 = DoEveryNStep((hook, agent, env) -> (env.pos += 1); n=2)
-    h_2 = DoEveryNStep((hook, agent, env) -> (env.pos += 1); n=2)
+    h_2 = DoEveryNStep((hook, agent, env) -> (env.pos += 1); n=1)
 
     for h in (h_1, h_2)
         env = RandomWalk1D()
         env.pos = 1
         policy = RandomPolicy(legal_action_space(env))
-        [h(PostActStage(), policy, env) for i in 1:4]
-        @test env.pos == 3
-
+        for t = 1:4
+            h(PostActStage(), policy, env)
+            @test env.pos == 1+ div(t,h.n)
+        end
         test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end
 end
@@ -155,7 +156,7 @@ end
 @testset "DoEveryNEpisode" begin
     h_1 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2, stage=PreEpisodeStage())
     h_2 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2, stage=PostEpisodeStage())
-    h_3 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2)
+    h_3 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=1)
     h_list = (h_1, h_2, h_3)
     stage_list = (PreEpisodeStage(), PostEpisodeStage(), PostEpisodeStage())
 
@@ -165,8 +166,10 @@ end
         env = RandomWalk1D()
         env.pos = 1
         policy = RandomPolicy(legal_action_space(env))
-        [h(stage, policy, env) for j in 1:4]
-        @test env.pos == 3
+        for t in 1:4
+            h(stage, policy, env)
+            @test env.pos == 1 + div(t,h.n)
+        end     
         test_noop!(h, stages=[PreActStage(), PostActStage(), PreExperimentStage(), PostExperimentStage()])
     end
 end
