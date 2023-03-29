@@ -60,7 +60,7 @@ jobs:
           paths: src/ReinforcementLearningBase
 
       - name: Test RLBase
-        if: (steps.RLBase-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        # if: (steps.RLBase-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
           julia --color=yes -e '
             using Pkg;
@@ -75,7 +75,7 @@ jobs:
           paths: src/ReinforcementLearningCore
 
       - name: Test RLCore
-        if: (steps.RLCore-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        # if: (steps.RLCore-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
           julia --color=yes -e '
             using Pkg;
@@ -92,7 +92,7 @@ jobs:
           paths: src/ReinforcementLearningZoo
 
       - name: Test RLZoo
-        if: (steps.RLZoo-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        # if: (steps.RLZoo-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
           julia --color=yes -e '
             using Pkg;
@@ -110,7 +110,7 @@ jobs:
           paths: src/ReinforcementLearningEnvironments
 
       - name: Test RLEnvironments
-        if: (steps.RLEnvironments-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        # if: (steps.RLEnvironments-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
           julia --color=yes -e '
             using Pkg;
@@ -140,7 +140,7 @@ jobs:
           paths: src/ReinforcementLearningExperiments
 
       - name: Test RLExperiments
-        if: (steps.RLZoo-changed.outputs.changed == 'true') || (steps.RLExperiments-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        # if: (steps.RLZoo-changed.outputs.changed == 'true') || (steps.RLExperiments-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
           julia --color=yes -e '
             using Pkg
