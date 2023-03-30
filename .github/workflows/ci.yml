@@ -159,23 +159,17 @@ jobs:
     name: Documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: marceloprado/has-changed-path@v1
-            id: documentation-changed
-            with:
-              paths: docs
       - uses: actions/checkout@v3
       - name: Setup python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.arch }}
-      - if: (steps.documentation-changed.outputs.changed == 'true')
-        run: python -m pip install --user matplotlib
+      - run: python -m pip install --user matplotlib
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1'
       - name: Build homepage
-        if: (steps.documentation-changed.outputs.changed == 'true')
         run: |
           cd docs/homepage
           julia --project --color=yes -e '
@@ -184,7 +178,6 @@ jobs:
             using Franklin;
             optimize()' > build.log
       - name: Make sure homepage is generated without error
-        if: (steps.documentation-changed.outputs.changed == 'true')
         run: |
           if grep -1 "Franklin Warning" build.log; then
             echo "Franklin reported a warning"
@@ -193,7 +186,6 @@ jobs:
             echo "Franklin did not report a warning"
           fi
       - name: Build docs
-        if: (steps.documentation-changed.outputs.changed == 'true')
         run: |
           cd docs
           julia --project --color=yes -e '
