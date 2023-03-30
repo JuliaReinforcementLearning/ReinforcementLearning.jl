@@ -159,10 +159,6 @@ jobs:
     name: Documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: marceloprado/has-changed-path@v1
-            id: documentation-changed
-            with:
-              paths: docs
       - uses: actions/checkout@v3
       - name: Setup python
         uses: actions/setup-python@v4
