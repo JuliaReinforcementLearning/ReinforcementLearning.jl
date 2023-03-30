@@ -165,7 +165,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.arch }}
-        run: python -m pip install --user matplotlib
+      - run: python -m pip install --user matplotlib
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1'
@@ -177,7 +177,6 @@ jobs:
             using NodeJS; run(`$(npm_cmd()) install highlight.js`);
             using Franklin;
             optimize()' > build.log
-
       - name: Make sure homepage is generated without error
         run: |
           if grep -1 "Franklin Warning" build.log; then
@@ -186,7 +185,6 @@ jobs:
           else
             echo "Franklin did not report a warning"
           fi
-
       - name: Build docs
         run: |
           cd docs
@@ -194,7 +192,6 @@ jobs:
             using Pkg; Pkg.instantiate();
             include("make.jl")'
           mv build homepage/__site/docs
-
       - name: Deploy to the main repo
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.event_name == 'push' }}
