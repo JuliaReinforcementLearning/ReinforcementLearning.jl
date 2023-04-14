@@ -7,7 +7,7 @@ using InteractiveUtils
 # ╔═╡ 29da80fe-dacb-11ed-37ae-d5aeeb215a55
 begin
 	import ReinforcementLearningCore: run, _run, RandomPolicy, Agent, StopWhenDone, StepsPerEpisode, PreExperimentStage, PreEpisodeStage, PreActStage, PostActStage, PostEpisodeStage, PostExperimentStage
-	import ReinforcementLearningBase: current_player, AbstractPolicy, AbstractEnv, reset!, RLBase, Observation
+	import ReinforcementLearningBase: current_player, AbstractPolicy, AbstractEnv, reset!, RLBase, Observation, MultiAgent, SEQUENTIAL, PERFECT_INFORMATION, DETERMINISTIC, TERMINAL_REWARD, ZERO_SUM, FULL_ACTION_SET, walk, fullspace, legal_action_space_mask
 	using ReinforcementLearningTrajectories
 	# import ReinforcementLearningEnvironments: TicTacToeEnv
 
@@ -18,22 +18,6 @@ begin
 		board::BitArray{3}
 		player::Symbol
 	end
-
-	
-	"""
-	    NamedPolicy(name=>policy)
-	A policy wrapper to provide a name. Mostly used in multi-agent environments.
-	"""
-	Base.@kwdef struct NamedPolicy{P} <: AbstractPolicy
-	    name::Symbol
-	    policy::P
-	end
-	
-	NamedPolicy((name, policy)) = NamedPolicy(Symbol(name), policy)
-	NamedPolicy(name::Int, policy::AbstractPolicy) = NamedPolicy(Symbol(name), policy)
-
-	
-	functor(x::NamedPolicy) = (policy = x.policy,), y -> @set x.policy = y.policy
 
 	struct MultiAgentPolicy <: AbstractPolicy
 	    agents::NamedTuple
@@ -55,7 +39,9 @@ begin
 	
 	        while !reset_condition(multiagent_policy, env) # one episode
 				for player in current_player_iterator(env)
-		            multiagent_policy[player](PreActStage(), env)
+					policy = multiagent_policy[player] # Select appropriate policy
+
+		            policy(PreActStage(), env)
 		            hook(PreActStage(), policy, env)
 		
 		            env |> policy |> env
@@ -83,7 +69,7 @@ begin
 	    hook(PostExperimentStage(), multiagent_policy, env)
 	    hook
 	end
-	(policy::NamedPolicy)(env::TicTacToeEnv1) = policy.policy.policy(env)
+	# (policy::NamedPolicy)(env::TicTacToeEnv1) = policy.policy.policy(env)
 
 	struct CurrentPlayerIterator
 		env::AbstractEnv
@@ -103,7 +89,7 @@ begin
 	    board = BitArray{3}(undef, 3, 3, 3)
 	    fill!(board, false)
 	    board[:, :, 1] .= true
-	    TicTacToeEnv1(board)
+	    TicTacToeEnv1(board, :Cross)
 	end
 	
 	function RLBase.reset!(env::TicTacToeEnv1)
@@ -129,7 +115,7 @@ begin
 	
 	Base.to_index(::TicTacToeEnv1, player) = player == :Cross ? 2 : 3
 
-	
+	Base.getindex(p::MultiAgentPolicy, s::Symbol) = p.agents[s]
 	RLBase.action_space(::TicTacToeEnv1, player) = Base.OneTo(9)
 	
 	RLBase.legal_action_space(env::TicTacToeEnv1, p) = findall(legal_action_space_mask(env))
@@ -241,6 +227,9 @@ begin
 	    end
 	    TIC_TAC_TOE_STATE_INFO
 	end
+
+
+	RLBase.current_player(env::TicTacToeEnv1) = env.player
 	
 	RLBase.NumAgentStyle(::TicTacToeEnv1) = MultiAgent(2)
 	RLBase.DynamicStyle(::TicTacToeEnv1) = SEQUENTIAL
@@ -271,9 +260,6 @@ end
 # ╔═╡ c3caf177-de58-47a0-badd-d0e15f43b46f
 multiagent_policy = MultiAgentPolicy((Cross = Agent(RandomPolicy(), trajectory_1), Nought = Agent(RandomPolicy(), trajectory_2)))
 
-# ╔═╡ 6dedbb73-fb77-4902-bb54-029fb9fdfa66
-multiagent_policy
-
 # ╔═╡ 6da17a4e-93b8-45a1-a20f-b3410b86b1cc
 begin
 	env = TicTacToeEnv1()
@@ -283,11 +269,11 @@ begin
 	is_terminated(env)
 end
 
-# ╔═╡ 8bcc33f0-7301-4143-a538-498fd5db987c
-print(state(env))
-
 # ╔═╡ f20dbc62-9f6c-49a0-bb50-02e11ff8be31
 current_player(env)
+
+# ╔═╡ 131160b7-509f-4b58-b8bb-6baf718db0f4
+multiagent_policy[:Nought](env)
 
 # ╔═╡ 9a30ddbd-ae39-4fb9-b1f6-cd863c783c30
 # TODO: Differentiate between simultaneous and sequential run functions
@@ -299,19 +285,25 @@ env
 # (env::TicTacToeEnv)(action::Int) = env(CartesianIndices((3, 3))[action])
 
 # ╔═╡ 735131a6-abc1-4a08-8523-09521f02b3b4
-env(first(multiagent_policy)(env))
+# env(first(multiagent_policy)(env))
 
 # ╔═╡ f2993133-8191-4cdf-adab-bc49412d285b
-begin
-	env1 = TicTacToeEnv1()
-	legal_action_space(env1)
-end
+# begin
+# 	env1 = TicTacToeEnv1()
+# 	legal_action_space(env1)
+# end
 
 # ╔═╡ a91e67bb-06de-4686-8560-54cf96e54008
-legal_action_space(env1)
+# legal_action_space(env1)
 
 # ╔═╡ 738b8dbb-9666-4405-84aa-bf4a9ac363b0
 # (env::TicTacToeEnv)(action::Int) = env(CartesianIndices((3, 3))[action])
+
+# ╔═╡ 1daf28e9-6832-45d4-a35c-d44c0291521c
+TicTacToeEnv1()
+
+# ╔═╡ e389bd82-9ff2-44d1-a23c-2ab7812c4305
+current_player(env)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1395,10 +1387,9 @@ version = "17.4.0+0"
 # ╠═29da80fe-dacb-11ed-37ae-d5aeeb215a55
 # ╠═8fae8fc4-e817-4dee-823d-e0b0e6489edb
 # ╠═c3caf177-de58-47a0-badd-d0e15f43b46f
-# ╠═6dedbb73-fb77-4902-bb54-029fb9fdfa66
-# ╠═8bcc33f0-7301-4143-a538-498fd5db987c
 # ╠═f20dbc62-9f6c-49a0-bb50-02e11ff8be31
 # ╠═6da17a4e-93b8-45a1-a20f-b3410b86b1cc
+# ╠═131160b7-509f-4b58-b8bb-6baf718db0f4
 # ╠═9a30ddbd-ae39-4fb9-b1f6-cd863c783c30
 # ╠═3e27c0c5-6201-402e-9228-976ae1f55e53
 # ╠═7610c8f1-6c9a-4887-8c65-d6e1d9bb964e
@@ -1406,5 +1397,7 @@ version = "17.4.0+0"
 # ╠═f2993133-8191-4cdf-adab-bc49412d285b
 # ╠═a91e67bb-06de-4686-8560-54cf96e54008
 # ╠═738b8dbb-9666-4405-84aa-bf4a9ac363b0
+# ╠═1daf28e9-6832-45d4-a35c-d44c0291521c
+# ╠═e389bd82-9ff2-44d1-a23c-2ab7812c4305
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
