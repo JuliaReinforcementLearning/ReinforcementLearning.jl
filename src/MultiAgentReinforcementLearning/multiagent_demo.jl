@@ -9,15 +9,27 @@ begin
 	import ReinforcementLearningCore: run, _run, RandomPolicy, Agent, StopWhenDone, StepsPerEpisode, PreExperimentStage, PreEpisodeStage, PreActStage, PostActStage, PostEpisodeStage, PostExperimentStage, RLCore
 	import ReinforcementLearningBase: current_player, AbstractPolicy, AbstractEnv, reset!, RLBase, MultiAgent, SEQUENTIAL, PERFECT_INFORMATION, DETERMINISTIC, TERMINAL_REWARD, ZERO_SUM, FULL_ACTION_SET, Observation, walk, fullspace, legal_action_space_mask, state, optimise!, is_terminated
 	using ReinforcementLearningTrajectories
+	using Random: Random, AbstractRNG
 	# import ReinforcementLearningEnvironments: TicTacToeEnv
-
-	import Functors: functor
-	using Setfield: @set
 
 	mutable struct TicTacToeEnv1 <: AbstractEnv
 		board::BitArray{3}
 		player::Symbol
 	end
+
+	function (p::RandomPolicy{Nothing,RNG})(env::TicTacToeEnv1) where {RNG<:AbstractRNG}
+		legal_action_space_ = RLBase.legal_action_space(env)
+		if length(legal_action_space_) >= 0
+    		return rand(p.rng, legal_action_space_)
+		else
+			return nothing
+		end
+	end
+
+	
+	import Functors: functor
+	using Setfield: @set
+
 
 	struct MultiAgentPolicy <: AbstractPolicy
 	    agents::NamedTuple
@@ -45,7 +57,7 @@ begin
 		            hook(PreActStage(), policy, env)
 
 					action = policy(env)
-		            env(player, action)
+		            env(action)
 					
 		            optimise!(policy)
 		
@@ -56,7 +68,7 @@ begin
 		                is_stop = true
 		                policy(PreActStage(), env)
 		                hook(PreActStage(), policy, env)
-		                # policy(env)  # let the policy see the last observation # NOTE: This fails for RandomPolicy because set of legal actions is empty
+		                # policy(env)  # let the policy see the last observation # NOTE: This fails for RandomPolicy because set of legal actions is empty, minor tweak to RandomPolicy code resolves this
 		                break
 		            end
 				end
@@ -130,24 +142,25 @@ begin
 	    end
 	end
 	
-	(env::TicTacToeEnv1)(player::Symbol, action::Int) = env(CartesianIndices((3, 3))[action])
+	(env::TicTacToeEnv1)(action::Int) = env(CartesianIndices((3, 3))[action])
 	
-	function (env::TicTacToeEnv1)(action::CartesianIndex{2}, player::Symbol)
+	function (env::TicTacToeEnv1)(action::CartesianIndex{2})
 	    env.board[action, 1] = false
-	    env.board[action, Base.to_index(env, player)] = true
+	    env.board[action, Base.to_index(env, current_player(env))] = true
 	end
-	
+
+	state(env::TicTacToeEnv1) = state(env, Observation{Int}(), 1)
 	state(env::TicTacToeEnv1, ::Observation{BitArray{3}}, p) = env.board
-	# state(env::TicTacToeEnv1, ::RLBase.AbstractStateStyle) = state(env::TicTacToeEnv1, Observation{Int}(), 1)
+	state(env::TicTacToeEnv1, ::RLBase.AbstractStateStyle) = state(env::TicTacToeEnv1, Observation{Int}(), 1)
 	state(env::TicTacToeEnv1, p) = state(env, Observation{Int}(), p)
 	state_space(env::TicTacToeEnv1, ::Observation{BitArray{3}}, p) = ArrayProductDomain(fill(false:true, 3, 3, 3))
 	state(env::TicTacToeEnv1, ::Observation{Int}, p) =
-	    get_tic_tac_toe_state_info()[state(env, Observation{String}())].index
+	    get_tic_tac_toe_state_info()[env].index
 	RLBase.state_space(env::TicTacToeEnv1, ::Observation{Int}, p) =
 	    Base.OneTo(length(get_tic_tac_toe_state_info()))
 	RLBase.state_space(env::TicTacToeEnv1, ::Observation{String}, p) = fullspace(String)
 
-	RLBase.state(env::TicTacToeEnv1, ::Observation{String}) = RLBase.state(env::TicTacToeEnv1, Observation{String}(), 1)
+	state(env::TicTacToeEnv1, ::Observation{String}) = state(env::TicTacToeEnv1, Observation{String}(), 1)
 	
 	function RLBase.state(env::TicTacToeEnv1, ::Observation{String}, p)
 	    buff = IOBuffer()
@@ -167,11 +180,11 @@ begin
 	    String(take!(buff))
 	end
 	
-	RLBase.is_terminated(env::TicTacToeEnv1) = get_tic_tac_toe_state_info()[state(env, Observation{String}())].is_terminated
+	RLBase.is_terminated(env::TicTacToeEnv1) = get_tic_tac_toe_state_info()[env].is_terminated
 	
 	function RLBase.reward(env::TicTacToeEnv1, player)
 	    if is_terminated(env)
-	        winner = get_tic_tac_toe_state_info()[state(env, Observation{String}())].winner
+	        winner = get_tic_tac_toe_state_info()[env].winner
 	        if isnothing(winner)
 	            0
 	        elseif winner === player
@@ -198,28 +211,28 @@ begin
 	            b[1, 3, p] & b[2, 2, p] & b[3, 1, p]
 	    end
 	end
-	
+
+
 	function get_tic_tac_toe_state_info()
 	    if isempty(TIC_TAC_TOE_STATE_INFO)
 	        @info "initializing tictactoe state info cache..."
 	        t = @elapsed begin
 	            n = 1
 	            root = TicTacToeEnv1()
-				
-	            TIC_TAC_TOE_STATE_INFO[state(root, Observation{String}())] =
+	            TIC_TAC_TOE_STATE_INFO[root] =
 	                (index=n, is_terminated=false, winner=nothing)
 	            walk(root) do env
-	                if !haskey(TIC_TAC_TOE_STATE_INFO, state(env, Observation{String}()))
+	                if !haskey(TIC_TAC_TOE_STATE_INFO, env)
 	                    n += 1
 	                    has_empty_pos = any(view(env.board, :, :, 1))
 	                    w = if is_win(env, :Cross)
 	                        :Cross
-						elseif is_win(env, :Nought)
+	                    elseif is_win(env, :Nought)
 	                        :Nought
 	                    else
 	                        nothing
 	                    end
-	                    TIC_TAC_TOE_STATE_INFO[state(env, Observation{String}())] = (
+	                    TIC_TAC_TOE_STATE_INFO[env] = (
 	                        index=n,
 	                        is_terminated=!(has_empty_pos && isnothing(w)),
 	                        winner=w,
@@ -232,7 +245,6 @@ begin
 	    TIC_TAC_TOE_STATE_INFO
 	end
 
-
 	RLBase.current_player(env::TicTacToeEnv1) = env.player
 	
 	RLBase.NumAgentStyle(::TicTacToeEnv1) = MultiAgent(2)
@@ -243,7 +255,7 @@ begin
 	    (Observation{String}(), Observation{Int}(), Observation{BitArray{3}}())
 	RLBase.RewardStyle(::TicTacToeEnv1) = TERMINAL_REWARD
 	RLBase.UtilityStyle(::TicTacToeEnv1) = ZERO_SUM
-	RLBase.ChanceStyle(::TicTacToeEnv1) = DETERMINISTIC							
+	RLBase.ChanceStyle(::TicTacToeEnv1) = DETERMINISTIC	
 end
 
 # ╔═╡ 8fae8fc4-e817-4dee-823d-e0b0e6489edb
@@ -269,53 +281,47 @@ begin
 	env = TicTacToeEnv1()
 	stop_condition = StopWhenDone()
 	hook = StepsPerEpisode()
-	# run(multiagent_policy, env, stop_condition, hook)
-	# is_terminated(env)
+	run(multiagent_policy, env, stop_condition, hook)
+	is_terminated(env)
 end
 
 # ╔═╡ f20dbc62-9f6c-49a0-bb50-02e11ff8be31
 current_player(env)
 
-# ╔═╡ 2abcdb94-8b21-4270-a4a9-2f3c6141a42a
-run(multiagent_policy, env, stop_condition, hook)
+# ╔═╡ 3927e426-26ea-4ded-8764-7e44aa0ca8ac
+print(state(env, Observation{String}()))
 
-# ╔═╡ 36350609-a565-467c-92c1-c1c02773145d
-multiagent_policy.agents[:Cross].cache
+# ╔═╡ 3d63928a-89c1-485d-b9b6-912b2ca46ffd
+is_win(env, :Cross)
+
+# ╔═╡ 83e6fef0-2fae-40d8-8b88-98089c72521c
+is_win(env, :Nought)
+
+# ╔═╡ 2abcdb94-8b21-4270-a4a9-2f3c6141a42a
+# run(multiagent_policy, env, stop_condition, hook)
 
 # ╔═╡ 131160b7-509f-4b58-b8bb-6baf718db0f4
-begin
-	# This could be a good test...
-	agent = multiagent_policy[:Nought]	
-	agent.cache.state = 1
-	agent.cache.reward = 1.0
-	agent.cache.terminal = false
-	action = agent(env)
-	action
-end
-
-# ╔═╡ 02ff41a4-66cf-4d8e-a99f-55f70f8019fa
-state(env, Observation{String}())
-
-# ╔═╡ 0535e7c2-39ea-4f52-9b4d-a9f7a4cac41e
-agent.cache
-
-# ╔═╡ 05648863-e202-4336-90fb-406ac5b940b5
-agent.cache
-
-# ╔═╡ f7a78c2d-2183-4f55-8fe2-492c23932b57
-get_tic_tac_toe_state_info()
-
-# ╔═╡ 15f41253-0257-46c1-a1dc-fd285a91164a
-agent.trajectory
-
+# begin
+# 	# This could be a good test...
+# 	agent = multiagent_policy[:Nought]	
+# 	agent.cache.state = 1
+# 	agent.cache.reward = 1.0
+# 	agent.cache.terminal = false
+# 	action = agent(env)
+# 	action
+# end
 
 # ╔═╡ 9a30ddbd-ae39-4fb9-b1f6-cd863c783c30
 # TODO: Differentiate between simultaneous and sequential run functions
+
+# ╔═╡ 540cbfae-a844-4550-aa89-58c30a335fbf
+# length(keys(get_tic_tac_toe_state_info()))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Functors = "d9f16b24-f501-4c13-a1f2-28368ffc5196"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 ReinforcementLearningBase = "e575027e-6cd6-5018-9292-cdc6200d2b44"
 ReinforcementLearningCore = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
 ReinforcementLearningTrajectories = "6486599b-a3cd-4e92-a99a-2cea90cc8c3c"
@@ -335,7 +341,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0-rc2"
 manifest_format = "2.0"
-project_hash = "96cfcabdeed9df176826329320ab4a8d709be5ae"
+project_hash = "780827e9ba851edb16965fdda059a91272804b77"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1396,14 +1402,12 @@ version = "17.4.0+0"
 # ╠═c3caf177-de58-47a0-badd-d0e15f43b46f
 # ╠═f20dbc62-9f6c-49a0-bb50-02e11ff8be31
 # ╠═6da17a4e-93b8-45a1-a20f-b3410b86b1cc
+# ╠═3927e426-26ea-4ded-8764-7e44aa0ca8ac
+# ╠═3d63928a-89c1-485d-b9b6-912b2ca46ffd
+# ╠═83e6fef0-2fae-40d8-8b88-98089c72521c
 # ╠═2abcdb94-8b21-4270-a4a9-2f3c6141a42a
-# ╠═36350609-a565-467c-92c1-c1c02773145d
 # ╠═131160b7-509f-4b58-b8bb-6baf718db0f4
-# ╠═02ff41a4-66cf-4d8e-a99f-55f70f8019fa
-# ╠═0535e7c2-39ea-4f52-9b4d-a9f7a4cac41e
-# ╠═05648863-e202-4336-90fb-406ac5b940b5
-# ╠═f7a78c2d-2183-4f55-8fe2-492c23932b57
-# ╠═15f41253-0257-46c1-a1dc-fd285a91164a
 # ╠═9a30ddbd-ae39-4fb9-b1f6-cd863c783c30
+# ╠═540cbfae-a844-4550-aa89-58c30a335fbf
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
