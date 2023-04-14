@@ -6,8 +6,8 @@ using InteractiveUtils
 
 # ╔═╡ 29da80fe-dacb-11ed-37ae-d5aeeb215a55
 begin
-	import ReinforcementLearningCore: run, _run, RandomPolicy, Agent, StopWhenDone, StepsPerEpisode, PreExperimentStage, PreEpisodeStage, PreActStage, PostActStage, PostEpisodeStage, PostExperimentStage
-	import ReinforcementLearningBase: current_player, AbstractPolicy, AbstractEnv, reset!, RLBase, Observation, MultiAgent, SEQUENTIAL, PERFECT_INFORMATION, DETERMINISTIC, TERMINAL_REWARD, ZERO_SUM, FULL_ACTION_SET, walk, fullspace, legal_action_space_mask
+	import ReinforcementLearningCore: run, _run, RandomPolicy, Agent, StopWhenDone, StepsPerEpisode, PreExperimentStage, PreEpisodeStage, PreActStage, PostActStage, PostEpisodeStage, PostExperimentStage, RLCore
+	import ReinforcementLearningBase: current_player, AbstractPolicy, AbstractEnv, reset!, RLBase, MultiAgent, SEQUENTIAL, PERFECT_INFORMATION, DETERMINISTIC, TERMINAL_REWARD, ZERO_SUM, FULL_ACTION_SET, Observation, walk, fullspace, legal_action_space_mask
 	using ReinforcementLearningTrajectories
 	# import ReinforcementLearningEnvironments: TicTacToeEnv
 
@@ -43,8 +43,10 @@ begin
 
 		            policy(PreActStage(), env)
 		            hook(PreActStage(), policy, env)
-		
-		            env |> policy |> env
+
+					action = policy(env)
+		            env(player, action)
+					
 		            optimise!(policy)
 		
 		            policy(PostActStage(), env)
@@ -135,10 +137,8 @@ begin
 	    env.board[action, Base.to_index(env, player)] = true
 	end
 	
-	# RLBase.current_player(env::TicTacToeEnv) = env.player
-	# RLBase.players(env::TicTacToeEnv) = (:Cross, :Nought)
-	
 	RLBase.state(env::TicTacToeEnv1, ::Observation{BitArray{3}}, p) = env.board
+	RLBase.state(env::TicTacToeEnv1, p) = RLBase.state(env, Observation{Int}(), p)
 	RLBase.state_space(env::TicTacToeEnv1, ::Observation{BitArray{3}}, p) = ArrayProductDomain(fill(false:true, 3, 3, 3))
 	RLBase.state(env::TicTacToeEnv1, ::Observation{Int}, p) =
 	    get_tic_tac_toe_state_info()[env].index
@@ -245,13 +245,13 @@ end
 # ╔═╡ 8fae8fc4-e817-4dee-823d-e0b0e6489edb
 begin
 	trajectory_1 = Trajectory(
-		CircularArraySARTTraces(; capacity = 1_000),
+		CircularArraySARTTraces(; capacity = 1),
 		BatchSampler(1),
 		InsertSampleRatioController(n_inserted = -1),
 	)
 
 	trajectory_2 = Trajectory(
-		CircularArraySARTTraces(; capacity = 1_000),
+		CircularArraySARTTraces(; capacity = 1),
 		BatchSampler(1),
 		InsertSampleRatioController(n_inserted = -1),
 	)
@@ -265,45 +265,41 @@ begin
 	env = TicTacToeEnv1()
 	stop_condition = StopWhenDone()
 	hook = StepsPerEpisode()
-	run(multiagent_policy, env, stop_condition, hook)
-	is_terminated(env)
+	# run(multiagent_policy, env, stop_condition, hook)
+	# is_terminated(env)
 end
 
 # ╔═╡ f20dbc62-9f6c-49a0-bb50-02e11ff8be31
 current_player(env)
 
+# ╔═╡ 2abcdb94-8b21-4270-a4a9-2f3c6141a42a
+run(multiagent_policy, env, stop_condition, hook)
+
+# ╔═╡ 36350609-a565-467c-92c1-c1c02773145d
+multiagent_policy.agents[:Cross].cache
+
 # ╔═╡ 131160b7-509f-4b58-b8bb-6baf718db0f4
-multiagent_policy[:Nought](env)
+begin
+	# This could be a good test...
+	agent = multiagent_policy[:Nought]	
+	agent.cache.state = 1
+	agent.cache.reward = 1.0
+	agent.cache.terminal = false
+	action = agent(env)
+	action
+end
+
+# ╔═╡ 0535e7c2-39ea-4f52-9b4d-a9f7a4cac41e
+agent.cache
+
+# ╔═╡ 05648863-e202-4336-90fb-406ac5b940b5
+agent.cache
+
+# ╔═╡ 15f41253-0257-46c1-a1dc-fd285a91164a
+agent.trajectory
 
 # ╔═╡ 9a30ddbd-ae39-4fb9-b1f6-cd863c783c30
 # TODO: Differentiate between simultaneous and sequential run functions
-
-# ╔═╡ 3e27c0c5-6201-402e-9228-976ae1f55e53
-env
-
-# ╔═╡ 7610c8f1-6c9a-4887-8c65-d6e1d9bb964e
-# (env::TicTacToeEnv)(action::Int) = env(CartesianIndices((3, 3))[action])
-
-# ╔═╡ 735131a6-abc1-4a08-8523-09521f02b3b4
-# env(first(multiagent_policy)(env))
-
-# ╔═╡ f2993133-8191-4cdf-adab-bc49412d285b
-# begin
-# 	env1 = TicTacToeEnv1()
-# 	legal_action_space(env1)
-# end
-
-# ╔═╡ a91e67bb-06de-4686-8560-54cf96e54008
-# legal_action_space(env1)
-
-# ╔═╡ 738b8dbb-9666-4405-84aa-bf4a9ac363b0
-# (env::TicTacToeEnv)(action::Int) = env(CartesianIndices((3, 3))[action])
-
-# ╔═╡ 1daf28e9-6832-45d4-a35c-d44c0291521c
-TicTacToeEnv1()
-
-# ╔═╡ e389bd82-9ff2-44d1-a23c-2ab7812c4305
-current_player(env)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -328,7 +324,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0-rc2"
 manifest_format = "2.0"
-project_hash = "55d7f544ec28c05698e6c66f684d0fb37776234f"
+project_hash = "96cfcabdeed9df176826329320ab4a8d709be5ae"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1389,15 +1385,12 @@ version = "17.4.0+0"
 # ╠═c3caf177-de58-47a0-badd-d0e15f43b46f
 # ╠═f20dbc62-9f6c-49a0-bb50-02e11ff8be31
 # ╠═6da17a4e-93b8-45a1-a20f-b3410b86b1cc
+# ╠═2abcdb94-8b21-4270-a4a9-2f3c6141a42a
+# ╠═36350609-a565-467c-92c1-c1c02773145d
 # ╠═131160b7-509f-4b58-b8bb-6baf718db0f4
+# ╠═0535e7c2-39ea-4f52-9b4d-a9f7a4cac41e
+# ╠═05648863-e202-4336-90fb-406ac5b940b5
+# ╠═15f41253-0257-46c1-a1dc-fd285a91164a
 # ╠═9a30ddbd-ae39-4fb9-b1f6-cd863c783c30
-# ╠═3e27c0c5-6201-402e-9228-976ae1f55e53
-# ╠═7610c8f1-6c9a-4887-8c65-d6e1d9bb964e
-# ╠═735131a6-abc1-4a08-8523-09521f02b3b4
-# ╠═f2993133-8191-4cdf-adab-bc49412d285b
-# ╠═a91e67bb-06de-4686-8560-54cf96e54008
-# ╠═738b8dbb-9666-4405-84aa-bf4a9ac363b0
-# ╠═1daf28e9-6832-45d4-a35c-d44c0291521c
-# ╠═e389bd82-9ff2-44d1-a23c-2ab7812c4305
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
