@@ -5,15 +5,6 @@ mutable struct TicTacToeEnv <: AbstractEnv
     player::Symbol
 end
 
-function (p::RandomPolicy{Nothing,RNG})(env::TicTacToeEnv) where {RNG<:AbstractRNG}
-    legal_action_space_ = RLBase.legal_action_space(env)
-    if length(legal_action_space_) >= 0
-        return rand(p.rng, legal_action_space_)
-    else
-        return nothing
-    end
-end
-
 function TicTacToeEnv()
     board = BitArray{3}(undef, 3, 3, 3)
     fill!(board, false)

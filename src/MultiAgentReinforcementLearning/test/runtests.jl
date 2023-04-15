@@ -2,6 +2,7 @@ using Test
 using ReinforcementLearningEnvironments
 using ReinforcementLearningTrajectories
 using ReinforcementLearningCore
+using MultiAgentReinforcementLearning
 
 trajectory_1 = Trajectory(
     CircularArraySARTTraces(; capacity = 1),
@@ -17,14 +18,13 @@ trajectory_2 = Trajectory(
 
 multiagent_policy = MultiAgentPolicy((Cross = Agent(RandomPolicy(), trajectory_1), Nought = Agent(RandomPolicy(), trajectory_2)))
 
-env = TicTacToeEnv1()
+env = TicTacToeEnv()
 stop_condition = StopWhenDone()
 hook = StepsPerEpisode()
 run(multiagent_policy, env, stop_condition, hook)
 is_terminated(env)
 
-
-# TODO: Split up TicTacToeEnv and MultiAgent tests
-is_win(env, :Cross)
-
-is_win(env, :Nought)
+@testset "Basic TicTacToeEnv env checks" begin
+    # TODO: Split up TicTacToeEnv and MultiAgent tests
+    @test is_win(env, :Cross) != is_win(env, :Nought)
+end

@@ -1,9 +1,12 @@
+module MultiAgentReinforcementLearning
+
+export MultiAgentPolicy
+
 using ReinforcementLearningBase
-using ReinforcementLearningCore
 
-import Functors: functor
-using Setfield: @set
-
+import ReinforcementLearningCore: RLCore
+import Base.getindex
+import Base.iterate
 
 struct MultiAgentPolicy <: AbstractPolicy
     agents::NamedTuple
@@ -27,7 +30,7 @@ Base.iterate(current_player_iterator::CurrentPlayerIterator, env) = (current_pla
 
 Base.getindex(p::MultiAgentPolicy, s::Symbol) = p.agents[s]
 
-function _run(multiagent_policy::MultiAgentPolicy, env::AbstractEnv, stop_condition, hook, reset_condition)
+function RLCore._run(multiagent_policy::MultiAgentPolicy, env::AbstractEnv, stop_condition, hook, reset_condition)
 
     hook(PreExperimentStage(), multiagent_policy, env)
     multiagent_policy(PreExperimentStage(), env)
@@ -71,3 +74,5 @@ function _run(multiagent_policy::MultiAgentPolicy, env::AbstractEnv, stop_condit
     hook(PostExperimentStage(), multiagent_policy, env)
     hook
 end
+
+end # module
