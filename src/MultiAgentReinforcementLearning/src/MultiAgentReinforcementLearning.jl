@@ -17,6 +17,15 @@ struct MultiAgentPolicy <: AbstractPolicy
     end
 end
 
+struct MultiAgentHook <: AbstractHook
+    hooks::NamedTuple
+
+    function MultiAgentHook(hooks::NamedTuple)
+        new(hooks)
+    end
+end
+
+
 (p::MultiAgentPolicy)(env::AbstractEnv) = nothing # Default does nothing, but might be useful for some environments to clean up / pass final state to agents
 
 struct CurrentPlayerIterator
@@ -42,7 +51,7 @@ function RLCore._run(
     multiagent_policy::MultiAgentPolicy,
     env::AbstractEnv,
     stop_condition,
-    hook,
+    hook::MultiAgentHook,
     reset_condition,
 )
     _run(
@@ -80,27 +89,27 @@ function (multiagent::MultiAgentPolicy)(::PostEpisodeStage, env::AbstractEnv)
     end
 end
 
-function (hook::AbstractHook)(::PreEpisodeStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
-    for agent in multiagent
-        hook(PreEpisodeStage(), agent, env)
+function (multiagenthook::MultiAgentHook)(::PreEpisodeStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
+    for (name, agent) in pairs(multiagent)
+        multiagenthook[name](PreEpisodeStage(), agent, env)
     end
 end
 
-function (hook::AbstractHook)(::PreActStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
-    for agent in multiagent
-        hook(PreActStage(), agent, env)
+function (hook::MultiAgentHook)(::PreActStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
+    for (name, agent) in pairs(multiagent)
+        multiagenthook[name](PreActStage(), agent, env)
     end
 end
 
-function (hook::AbstractHook)(::PostActStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
-    for agent in multiagent
-        hook(PostActStage(), agent, env)
+function (hook::MultiAgentHook)(::PostActStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
+    for (name, agent) in pairs(multiagent)
+        multiagenthook[name](PostActStage(), agent, env)
     end
 end
 
-function (hook::AbstractHook)(::PostEpisodeStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
-    for agent in multiagent
-        hook(PostEpisodeStage(),agent, env)
+function (hook::MultiAgentHook)(::PostEpisodeStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
+    for (name, agent) in pairs(multiagent)
+        multiagenthook[name](PostEpisodeStage(), agent, env)
     end
 end
 
