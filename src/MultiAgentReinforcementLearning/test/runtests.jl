@@ -5,6 +5,7 @@ using ReinforcementLearningCore
 using ReinforcementLearningBase
 using MultiAgentReinforcementLearning
 
+# import MultiAgentReinforcementLearning: MultiAgentHook
 @testset "Basic TicTacToeEnv (Sequential) env checks" begin
     trajectory_1 = Trajectory(
         CircularArraySARTTraces(; capacity = 1),
@@ -18,17 +19,19 @@ using MultiAgentReinforcementLearning
         InsertSampleRatioController(n_inserted = -1),
     )
 
-    multiagent_policy = MultiAgentPolicy((
-        Cross = Agent(RandomPolicy(), trajectory_1),
-        Nought = Agent(RandomPolicy(), trajectory_2),
+    multiagent_policy = MultiAgentPolicy((;
+        :Cross => Agent(RandomPolicy(), trajectory_1),
+        :Nought => Agent(RandomPolicy(), trajectory_2),
     ))
+
+    multiagent_hook = MultiAgentHook((; :Cross => StepsPerEpisode(), :Nought => StepsPerEpisode()))
 
     env = TicTacToeEnv()
     stop_condition = StopWhenDone()
     hook = StepsPerEpisode()
 
     @test length(RLBase.legal_action_space(env)) == 9
-    run(multiagent_policy, env, stop_condition, hook)
+    run(multiagent_policy, env, stop_condition, multiagent_hook)
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLEnvs.is_win(env, :Cross) != RLEnvs.is_win(env, :Nought)
@@ -56,10 +59,10 @@ end
 
     env = RockPaperScissorsEnv()
     stop_condition = StopWhenDone()
-    hook = StepsPerEpisode()
+    multiagent_hook = MultiAgentHook((; Symbol(1) => StepsPerEpisode(), Symbol(2) => StepsPerEpisode()))
 
     @test length(RLBase.legal_action_space(env)) == 9
-    run(multiagent_policy, env, stop_condition, hook)
+    run(multiagent_policy, env, stop_condition, multiagent_hook)
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLEnvs.is_win(env, :Cross) != RLEnvs.is_win(env, :Nought)
