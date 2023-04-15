@@ -31,7 +31,7 @@ function (p::RandomPolicy{Nothing,RNG})(env) where {RNG<:AbstractRNG}
     if length(legal_action_space_) == 0
         return nothing
     else
-                return rand(p.rng, legal_action_space_)
+        return rand(p.rng, legal_action_space_)
     end
 end
 
