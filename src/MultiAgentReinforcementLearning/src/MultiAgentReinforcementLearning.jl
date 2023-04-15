@@ -3,6 +3,7 @@ module MultiAgentReinforcementLearning
 export MultiAgentPolicy
 
 using ReinforcementLearningBase
+using ReinforcementLearningCore
 
 import ReinforcementLearningCore: RLCore
 import Base.getindex

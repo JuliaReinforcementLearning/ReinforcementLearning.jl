@@ -1,5 +1,7 @@
 export TicTacToeEnv
 
+import ReinforcementLearningBase: RLBase
+
 mutable struct TicTacToeEnv <: AbstractEnv
     board::BitArray{3}
     player::Symbol
@@ -54,18 +56,18 @@ function (env::TicTacToeEnv)(action::CartesianIndex{2})
     env.board[action, Base.to_index(env, current_player(env))] = true
 end
 
-state(env::TicTacToeEnv) = state(env, Observation{Int}(), 1)
-state(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = env.board
-state(env::TicTacToeEnv, ::RLBase.AbstractStateStyle) = state(env::TicTacToeEnv, Observation{Int}(), 1)
-state(env::TicTacToeEnv, p) = state(env, Observation{Int}(), p)
-state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = ArrayProductDomain(fill(false:true, 3, 3, 3))
+RLBase.state(env::TicTacToeEnv) = state(env, Observation{Int}(), 1)
+RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = env.board
+RLBase.state(env::TicTacToeEnv, ::RLBase.AbstractStateStyle) = state(env::TicTacToeEnv, Observation{Int}(), 1)
+RLBase.state(env::TicTacToeEnv, p) = state(env, Observation{Int}(), p)
+RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = ArrayProductDomain(fill(false:true, 3, 3, 3))
 state(env::TicTacToeEnv, ::Observation{Int}, p) =
     get_tic_tac_toe_state_info()[env].index
 RLBase.state_space(env::TicTacToeEnv, ::Observation{Int}, p) =
     Base.OneTo(length(get_tic_tac_toe_state_info()))
 RLBase.state_space(env::TicTacToeEnv, ::Observation{String}, p) = fullspace(String)
 
-state(env::TicTacToeEnv, ::Observation{String}) = state(env::TicTacToeEnv, Observation{String}(), 1)
+RLBase.state(env::TicTacToeEnv, ::Observation{String}) = state(env::TicTacToeEnv, Observation{String}(), 1)
 
 function RLBase.state(env::TicTacToeEnv, ::Observation{String}, p)
     buff = IOBuffer()

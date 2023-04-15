@@ -2,6 +2,7 @@ using Test
 using ReinforcementLearningEnvironments
 using ReinforcementLearningTrajectories
 using ReinforcementLearningCore
+using ReinforcementLearningBase
 using MultiAgentReinforcementLearning
 
 trajectory_1 = Trajectory(
@@ -22,9 +23,9 @@ env = TicTacToeEnv()
 stop_condition = StopWhenDone()
 hook = StepsPerEpisode()
 run(multiagent_policy, env, stop_condition, hook)
-is_terminated(env)
+RLBase.is_terminated(env)
 
 @testset "Basic TicTacToeEnv env checks" begin
     # TODO: Split up TicTacToeEnv and MultiAgent tests
-    @test is_win(env, :Cross) != is_win(env, :Nought)
+    @test RLEnvs.is_win(env, :Cross) != RLEnvs.is_win(env, :Nought)
 end
