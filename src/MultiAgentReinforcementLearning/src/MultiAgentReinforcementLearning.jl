@@ -25,13 +25,21 @@ function current_player_iterator(env)
     return CurrentPlayerIterator(env)
 end
 
-Base.iterate(current_player_iterator::CurrentPlayerIterator) = (current_player(current_player_iterator.env), current_player_iterator.env)
+Base.iterate(current_player_iterator::CurrentPlayerIterator) =
+    (current_player(current_player_iterator.env), current_player_iterator.env)
 
-Base.iterate(current_player_iterator::CurrentPlayerIterator, env) = (current_player(current_player_iterator.env), current_player_iterator.env)
+Base.iterate(current_player_iterator::CurrentPlayerIterator, env) =
+    (current_player(current_player_iterator.env), current_player_iterator.env)
 
 Base.getindex(p::MultiAgentPolicy, s::Symbol) = p.agents[s]
 
-function RLCore._run(multiagent_policy::MultiAgentPolicy, env::AbstractEnv, stop_condition, hook, reset_condition)
+function RLCore._run(
+    multiagent_policy::MultiAgentPolicy,
+    env::AbstractEnv,
+    stop_condition,
+    hook,
+    reset_condition,
+)
 
     hook(PreExperimentStage(), multiagent_policy, env)
     multiagent_policy(PreExperimentStage(), env)
@@ -50,17 +58,17 @@ function RLCore._run(multiagent_policy::MultiAgentPolicy, env::AbstractEnv, stop
 
                 action = policy(env)
                 env(action)
-                
+
                 optimise!(policy)
-    
+
                 policy(PostActStage(), env)
                 hook(PostActStage(), policy, env)
-    
+
                 if stop_condition(policy, env)
                     is_stop = true
                     policy(PreActStage(), env)
                     hook(PreActStage(), policy, env)
-                    # policy(env)  # let the policy see the last observation # NOTE: This fails for RandomPolicy because set of legal actions is empty, minor tweak to RandomPolicy code resolves this
+                    policy(env)  # let the policy see the last observation
                     break
                 end
             end
