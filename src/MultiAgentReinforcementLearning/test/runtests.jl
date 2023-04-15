@@ -5,10 +5,6 @@ using ReinforcementLearningCore
 using ReinforcementLearningBase
 using MultiAgentReinforcementLearning
 
-
-
-
-
 @testset "Basic TicTacToeEnv env checks" begin
     trajectory_1 = Trajectory(
         CircularArraySARTTraces(; capacity = 1),
@@ -34,7 +30,7 @@ using MultiAgentReinforcementLearning
     stop_condition = StopWhenDone()
     hook = StepsPerEpisode()
 
-    @test RLBase.legal_action_space(env)
+    @test length(RLBase.legal_action_space(env)) == 9
     run(multiagent_policy, env, stop_condition, hook)
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
