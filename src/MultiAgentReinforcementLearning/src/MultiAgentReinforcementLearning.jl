@@ -17,6 +17,8 @@ struct MultiAgentPolicy <: AbstractPolicy
     end
 end
 
+(p::MultiAgentPolicy)(env::AbstractEnv) = nothing # Default does nothing, but might be useful for some environments to clean up / pass final state to agents
+
 struct CurrentPlayerIterator
     env::AbstractEnv
 end
@@ -68,7 +70,7 @@ function RLCore._run(
                     is_stop = true
                     policy(PreActStage(), env)
                     hook(PreActStage(), policy, env)
-                    policy(env)  # let the policy see the last observation
+                    multiagent_policy(env)  # let the policy see the last observation
                     break
                 end
             end

@@ -24,15 +24,11 @@ RandomPolicy(s = nothing; rng = Random.GLOBAL_RNG) = RandomPolicy(s, rng)
 
 RLBase.optimise!(::RandomPolicy, x::NamedTuple) = nothing
 
-(p::RandomPolicy{S,RNG})(env) where {S,RNG<:AbstractRNG} = rand(p.rng, p.action_space)
+(p::RandomPolicy{S,RNG})(env::AbstractEnv) where {S,RNG<:AbstractRNG} = rand(p.rng, p.action_space)
 
-function (p::RandomPolicy{Nothing,RNG})(env) where {RNG<:AbstractRNG}
+function (p::RandomPolicy{Nothing,RNG})(env::AbstractEnv) where {RNG<:AbstractRNG}
     legal_action_space_ = RLBase.legal_action_space(env)
-    if length(legal_action_space_) == 0
-        return nothing
-    else
-        return rand(p.rng, legal_action_space_)
-    end
+    return rand(p.rng, legal_action_space_)
 end
 
 
