@@ -1,6 +1,7 @@
 module MultiAgentReinforcementLearning
 
 export MultiAgentPolicy
+export MultiAgentHook
 
 using ReinforcementLearningBase
 using ReinforcementLearningCore
@@ -46,6 +47,10 @@ Base.iterate(p::MultiAgentPolicy) = iterate(p.agents)
 Base.iterate(p::MultiAgentPolicy, s) = iterate(p.agents, s)
 
 Base.getindex(p::MultiAgentPolicy, s::Symbol) = p.agents[s]
+Base.getindex(h::MultiAgentHook, s::Symbol) = h.hooks[s]
+
+Base.keys(p::MultiAgentPolicy) = keys(p.agents)
+Base.keys(p::MultiAgentHook) = keys(p.hooks)
 
 function RLCore._run(
     multiagent_policy::MultiAgentPolicy,
@@ -89,27 +94,27 @@ function (multiagent::MultiAgentPolicy)(::PostEpisodeStage, env::AbstractEnv)
     end
 end
 
-function (multiagenthook::MultiAgentHook)(::PreEpisodeStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
+function (hook::MultiAgentHook)(::PreEpisodeStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
     for (name, agent) in pairs(multiagent)
-        multiagenthook[name](PreEpisodeStage(), agent, env)
+        hook[name](PreEpisodeStage(), agent, env)
     end
 end
 
 function (hook::MultiAgentHook)(::PreActStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
     for (name, agent) in pairs(multiagent)
-        multiagenthook[name](PreActStage(), agent, env)
+        hook[name](PreActStage(), agent, env)
     end
 end
 
 function (hook::MultiAgentHook)(::PostActStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
     for (name, agent) in pairs(multiagent)
-        multiagenthook[name](PostActStage(), agent, env)
+        hook[name](PostActStage(), agent, env)
     end
 end
 
 function (hook::MultiAgentHook)(::PostEpisodeStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
     for (name, agent) in pairs(multiagent)
-        multiagenthook[name](PostEpisodeStage(), agent, env)
+        hook[name](PostEpisodeStage(), agent, env)
     end
 end
 
@@ -181,27 +186,23 @@ function _run(
         hook(PreEpisodeStage(), multiagent_policy, env)
 
         while !reset_condition(multiagent_policy, env) # one episode
-            for player in current_player_iterator(env)
-                policy = multiagent_policy[player] # Select appropriate policy
+            multiagent_policy(PreActStage(), env)
+            hook(PreActStage(), multiagent_policy, env)
 
+            actions = multiagent_policy(env)
+            env(actions)
+
+            optimise!(multiagent_policy)
+
+            multiagent_policy(PostActStage(), env)
+            hook(PostActStage(), multiagent_policy, env)
+
+            if stop_condition(multiagent_policy, env)
+                is_stop = true
                 multiagent_policy(PreActStage(), env)
                 hook(PreActStage(), multiagent_policy, env)
-
-                actions = multiagent_policy(env)
-                env(actions)
-
-                optimise!(multiagent_policy)
-
-                multiagent_policy(PostActStage(), env)
-                hook(PostActStage(), multiagent_policy, env)
-
-                if stop_condition(multiagent_policy, env)
-                    is_stop = true
-                    multiagent_policy(PreActStage(), env)
-                    hook(PreActStage(), multiagent_policy, env)
-                    multiagent_policy(env)  # let the policy see the last observation
-                    break
-                end
+                multiagent_policy(env)  # let the policy see the last observation
+                break
             end
         end # end of an episode
 
