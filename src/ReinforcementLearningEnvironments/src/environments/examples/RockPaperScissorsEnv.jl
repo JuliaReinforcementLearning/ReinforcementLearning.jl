@@ -11,7 +11,7 @@ Base.@kwdef mutable struct RockPaperScissorsEnv <: AbstractEnv
     is_done::Bool = false
 end
 
-RLBase.players(::RockPaperScissorsEnv) = (1, 2)
+RLBase.players(::RockPaperScissorsEnv) = (Symbol(1), Symbol(2))
 
 """
 Note that although this is a two player game. The current player is always a

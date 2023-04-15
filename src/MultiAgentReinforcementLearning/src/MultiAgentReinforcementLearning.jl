@@ -34,6 +34,7 @@ Base.iterate(current_player_iterator::CurrentPlayerIterator, env) =
     (current_player(current_player_iterator.env), current_player_iterator.env)
 
 Base.iterate(p::MultiAgentPolicy) = iterate(p.agents)
+Base.iterate(p::MultiAgentPolicy, s) = iterate(p.agents, s)
 
 Base.getindex(p::MultiAgentPolicy, s::Symbol) = p.agents[s]
 
