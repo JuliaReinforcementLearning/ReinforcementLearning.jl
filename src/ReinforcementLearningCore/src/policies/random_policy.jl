@@ -28,10 +28,10 @@ RLBase.optimise!(::RandomPolicy, x::NamedTuple) = nothing
 
 function (p::RandomPolicy{Nothing,RNG})(env) where {RNG<:AbstractRNG}
     legal_action_space_ = RLBase.legal_action_space(env)
-    if length(legal_action_space_) >= 0
-        return rand(p.rng, legal_action_space_)
-    else
+    if length(legal_action_space_) == 0
         return nothing
+    else
+                return rand(p.rng, legal_action_space_)
     end
 end
 
