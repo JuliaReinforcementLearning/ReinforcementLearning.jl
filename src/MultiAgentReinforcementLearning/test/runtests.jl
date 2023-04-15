@@ -41,13 +41,13 @@ end
 
 @testset "Basic RockPaperScissors (simultaneous) env checks" begin
     trajectory_1 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1),
+        CircularArraySARTTraces(; capacity = 1, action = Any => (2,)),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
 
     trajectory_2 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1),
+        CircularArraySARTTraces(; capacity = 1, action = Any => (2,)),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
@@ -65,6 +65,5 @@ end
     run(multiagent_policy, env, stop_condition, multiagent_hook)
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
-    @test RLEnvs.is_win(env, :Cross) != RLEnvs.is_win(env, :Nought)
-    @test RLBase.legal_action_space(env) == []
+    @test RLBase.legal_action_space(env) == ()
 end

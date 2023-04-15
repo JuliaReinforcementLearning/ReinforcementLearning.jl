@@ -118,6 +118,11 @@ function (hook::MultiAgentHook)(::PostEpisodeStage, multiagent::MultiAgentPolicy
     end
 end
 
+
+function (multiagent::MultiAgentPolicy)(env::AbstractEnv)
+    return (agent(env) for agent in multiagent)
+end
+
 function _run(
     multiagent_policy::MultiAgentPolicy,
     env::AbstractEnv,
