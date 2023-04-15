@@ -119,43 +119,43 @@
 
     @testset "SequentialEnv" begin
         env =  RockPaperScissorsEnv()
-        env′ = SequentialEnv(env)
-        RLBase.test_interfaces!(env′)
-        RLBase.test_runnable!(env′)
-
+        RLBase.test_interfaces!(env)
+        RLBase.test_runnable!(env)
+    
         # https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/issues/393
-        @test RLBase.current_player(env′) == 1
-        @test action_space(env′) == action_space(env′, 1)
-
-        env′('💎')
-
-        @test RLBase.current_player(env′) == 2
-        @test is_terminated(env′) == false
-
-        reset!(env′)
-
-        @test RLBase.current_player(env′) == 1
-        @test reward(env′) == 0
-        @test is_terminated(env′) == false
-
-        env′('💎')
-
-        @test reward(env′) == 0
-        @test reward(env′, 1) == 0
-        @test reward(env′, 2) == 0
-        @test is_terminated(env′) == false
-
-        env′('📃')
-
-        @test reward(env′, 1) == -1
-        @test reward(env′, 2) == 1
-        @test is_terminated(env′) == true
-
-        reset!(env′)
-        @test reward(env′) == 0
-        @test reward(env′, 1) == 0
-        @test reward(env′, 2) == 0
-        @test is_terminated(env′) == false
-        @test RLBase.current_player(env′) == 1
+        @test RLBase.current_player(env) == 1
+        @test action_space(env) == action_space(env, 1)
+    
+        env('💎')
+    
+        @test RLBase.current_player(env) == 2
+        @test is_terminated(env) == false
+    
+        reset!(env)
+    
+        @test RLBase.current_player(env) == 1
+        @test reward(env) == 0
+        @test is_terminated(env) == false
+    
+        env('💎')
+    
+        @test reward(env) == 0
+        @test reward(env, 1) == 0
+        @test reward(env, 2) == 0
+        @test is_terminated(env) == false
+    
+        env('📃')
+    
+        @test reward(env, 1) == -1
+        @test reward(env, 2) == 1
+        @test is_terminated(env) == true
+    
+        reset!(env)
+        @test reward(env) == 0
+        @test reward(env, 1) == 0
+        @test reward(env, 2) == 0
+        @test is_terminated(env) == false
+        @test RLBase.current_player(env) == 1
     end
+    
 end
