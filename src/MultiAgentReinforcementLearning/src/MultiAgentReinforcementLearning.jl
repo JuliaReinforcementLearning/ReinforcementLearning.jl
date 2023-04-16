@@ -26,8 +26,7 @@ struct MultiAgentHook{NT<: NamedTuple} <: AbstractHook
     end
 end
 
-
-(p::MultiAgentPolicy)(env::AbstractEnv) = nothing # Default does nothing, but might be useful for some environments to clean up / pass final state to agents
+# (p::MultiAgentPolicy)(env::AbstractEnv) = nothing # Default does nothing, but might be useful for some environments to clean up / pass final state to agents
 
 struct CurrentPlayerIterator{E<:AbstractEnv}
     env::E
@@ -120,6 +119,10 @@ end
 function (multiagent::MultiAgentPolicy)(env::AbstractEnv)
     return (agent(env) for agent in multiagent)
 end
+
+# function RLCore.check(policy::MultiAgentPolicy, env::AbstractEnv)
+#     keys(policy) == keys(env
+# end
 
 function _run(
     multiagent_policy::MultiAgentPolicy,

@@ -5,6 +5,41 @@ using ReinforcementLearningCore
 using ReinforcementLearningBase
 using MultiAgentReinforcementLearning
 
+
+@testset "MultiAgentPolicy" begin
+    trajectory_1 = Trajectory(
+        CircularArraySARTTraces(; capacity = 1),
+        BatchSampler(1),
+        InsertSampleRatioController(n_inserted = -1),
+    )
+
+    trajectory_2 = Trajectory(
+        CircularArraySARTTraces(; capacity = 1),
+        BatchSampler(1),
+        InsertSampleRatioController(n_inserted = -1),
+    )
+
+    multiagent_policy = MultiAgentPolicy((;
+        :Cross => Agent(RandomPolicy(), trajectory_1),
+        :Nought => Agent(RandomPolicy(), trajectory_2),
+    ))
+
+    @test multiagent_policy.agents[:Cross].policy isa RandomPolicy
+end
+
+@testset "MultiAgentHook" begin
+    multiagent_hook = MultiAgentHook((; :Cross => StepsPerEpisode(), :Nought => StepsPerEpisode()))
+    @test multiagent_hook.hooks[:Cross] isa StepsPerEpisode
+end
+
+@testset "current_player_iterator" begin
+    env = TicTacToeEnv()
+    @test collect(current_player_iterator(env)) == [:Cross, :Nought]
+    env = RockPaperScissorsEnv()
+    @test collect(current_player_iterator(env)) == [Symbol(1), Symbol(2)]
+end
+
+
 # import MultiAgentReinforcementLearning: MultiAgentHook
 @testset "Basic TicTacToeEnv (Sequential) env checks" begin
     trajectory_1 = Trajectory(
