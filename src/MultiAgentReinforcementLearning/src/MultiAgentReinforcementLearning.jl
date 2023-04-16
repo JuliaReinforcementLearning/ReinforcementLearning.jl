@@ -1,5 +1,8 @@
 module MultiAgentReinforcementLearning
 
+const MultiAgentRL = MultiAgentReinforcementLearning
+export MultiAgentRL
+
 export MultiAgentPolicy
 export MultiAgentHook
 
