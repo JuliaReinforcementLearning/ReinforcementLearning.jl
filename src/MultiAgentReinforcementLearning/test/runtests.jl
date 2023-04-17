@@ -34,9 +34,9 @@ end
 
 @testset "current_player_iterator" begin
     env = TicTacToeEnv()
-    @test collect(current_player_iterator(env)) == [:Cross, :Nought]
+    @test collect(MultiAgentRL.current_player_iterator(env)) == [:Cross, :Nought]
     env = RockPaperScissorsEnv()
-    @test collect(current_player_iterator(env)) == [Symbol(1), Symbol(2)]
+    @test collect(MultiAgentRL.current_player_iterator(env)) == [Symbol(1), Symbol(2)]
 end
 
 
