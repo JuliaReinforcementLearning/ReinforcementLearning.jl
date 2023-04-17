@@ -10,16 +10,16 @@ import ReinforcementLearningCore: RLCore
 import Base.getindex
 import Base.iterate
 
-struct MultiAgentPolicy <: AbstractPolicy
-    agents::NamedTuple
+struct MultiAgentPolicy{NT<: NamedTuple} <: AbstractPolicy
+    agents::NT
 
     function MultiAgentPolicy(agents::NamedTuple)
         new(agents)
     end
 end
 
-struct MultiAgentHook <: AbstractHook
-    hooks::NamedTuple
+struct MultiAgentHook{NT<: NamedTuple} <: AbstractHook
+    hooks::NamedTuple::NT
 
     function MultiAgentHook(hooks::NamedTuple)
         new(hooks)
@@ -29,19 +29,17 @@ end
 
 (p::MultiAgentPolicy)(env::AbstractEnv) = nothing # Default does nothing, but might be useful for some environments to clean up / pass final state to agents
 
-struct CurrentPlayerIterator
-    env::AbstractEnv
+struct CurrentPlayerIterator{E<:AbstractEnv}
+    env::E
 end
 
 function current_player_iterator(env)
     return CurrentPlayerIterator(env)
 end
 
-Base.iterate(current_player_iterator::CurrentPlayerIterator) =
-    (current_player(current_player_iterator.env), current_player_iterator.env)
 
-Base.iterate(current_player_iterator::CurrentPlayerIterator, env) =
-    (current_player(current_player_iterator.env), current_player_iterator.env)
+Base.iterate(current_player_iterator::CurrentPlayerIterator, env = current_player_iterator.env) =
+    (current_player(current_player_iterator.env), env)
 
 Base.iterate(p::MultiAgentPolicy) = iterate(p.agents)
 Base.iterate(p::MultiAgentPolicy, s) = iterate(p.agents, s)
