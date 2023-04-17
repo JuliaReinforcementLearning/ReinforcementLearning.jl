@@ -35,10 +35,6 @@ struct CurrentPlayerIterator{E<:AbstractEnv}
     env::E
 end
 
-function current_player_iterator(env)
-    return CurrentPlayerIterator(env)
-end
-
 
 Base.iterate(current_player_iterator::CurrentPlayerIterator, env = current_player_iterator.env) =
     (current_player(current_player_iterator.env), env)
