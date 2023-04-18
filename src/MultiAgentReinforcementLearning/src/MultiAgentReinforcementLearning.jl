@@ -35,10 +35,7 @@ struct CurrentPlayerIterator{E<:AbstractEnv}
     env::E
 end
 
-Base.iterate(current_player_iterator::CurrentPlayerIterator) =
-    (current_player(current_player_iterator.env), current_player_iterator.env)
-
-Base.iterate(current_player_iterator::CurrentPlayerIterator, env) =
+Base.iterate(current_player_iterator::CurrentPlayerIterator, env=current_player_iterator.env) =
     (current_player(current_player_iterator.env), env)
 
 Base.iterate(p::MultiAgentPolicy) = iterate(p.agents)
@@ -50,16 +47,17 @@ Base.getindex(h::MultiAgentHook, s::Symbol) = h.hooks[s]
 Base.keys(p::MultiAgentPolicy) = keys(p.agents)
 Base.keys(p::MultiAgentHook) = keys(p.hooks)
 
-function RLCore._run(
+function Base.run(
     multiagent_policy::MultiAgentPolicy,
-    env::AbstractEnv,
+    env::E,
     stop_condition,
     hook::MultiAgentHook,
     reset_condition,
-)
-    _run(
-        multiagent_policy::MultiAgentPolicy,
-        env::AbstractEnv,
+) where {E<:AbstractEnv}
+    keys(multiagent_policy) == keys(hook) || throw(ArgumentError("MultiAgentPolicy and MultiAgentHook must have the same keys"))
+    Base.run(
+        multiagent_policy,
+        env,
         DynamicStyle(env), # Dispatch on sequential / simultaneous traits
         stop_condition,
         hook,
@@ -67,72 +65,14 @@ function RLCore._run(
     )
 end
 
-
-function (multiagent::MultiAgentPolicy)(::PreEpisodeStage, env::AbstractEnv)
-    for agent in multiagent
-        agent(PreEpisodeStage(), env)
-    end
-end
-
-function (multiagent::MultiAgentPolicy)(::PreActStage, env::AbstractEnv)
-    for agent in multiagent
-        agent(PreActStage(), env)
-    end
-end
-
-function (multiagent::MultiAgentPolicy)(::PostActStage, env::AbstractEnv)
-    for agent in multiagent
-        agent(PostActStage(), env)
-    end
-end
-
-function (multiagent::MultiAgentPolicy)(::PostEpisodeStage, env::AbstractEnv)
-    for agent in multiagent
-        agent(PostEpisodeStage(), env)
-    end
-end
-
-function (hook::MultiAgentHook)(::PreEpisodeStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
-    for (name, agent) in pairs(multiagent)
-        hook[name](PreEpisodeStage(), agent, env)
-    end
-end
-
-function (hook::MultiAgentHook)(::PreActStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
-    for (name, agent) in pairs(multiagent)
-        hook[name](PreActStage(), agent, env)
-    end
-end
-
-function (hook::MultiAgentHook)(::PostActStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
-    for (name, agent) in pairs(multiagent)
-        hook[name](PostActStage(), agent, env)
-    end
-end
-
-function (hook::MultiAgentHook)(::PostEpisodeStage, multiagent::MultiAgentPolicy, env::AbstractEnv)
-    for (name, agent) in pairs(multiagent)
-        hook[name](PostEpisodeStage(), agent, env)
-    end
-end
-
-
-function (multiagent::MultiAgentPolicy)(env::AbstractEnv)
-    return (agent(env) for agent in multiagent)
-end
-
-# function RLCore.check(policy::MultiAgentPolicy, env::AbstractEnv)
-#     keys(policy) == keys(env
-# end
-
-function _run(
+function Base.run(
     multiagent_policy::MultiAgentPolicy,
-    env::AbstractEnv,
+    env::E,
     ::Sequential,
     stop_condition,
     hook,
     reset_condition,
-)
+) where {E<:AbstractEnv}
     hook(PreExperimentStage(), multiagent_policy, env)
     multiagent_policy(PreExperimentStage(), env)
     is_stop = false
@@ -176,51 +116,74 @@ function _run(
     hook
 end
 
-function _run(
+function Base.run(
     multiagent_policy::MultiAgentPolicy,
-    env::AbstractEnv,
+    env::E,
     ::Simultaneous,
     stop_condition,
     hook,
     reset_condition,
-)
-    hook(PreExperimentStage(), multiagent_policy, env)
-    multiagent_policy(PreExperimentStage(), env)
-    is_stop = false
-    while !is_stop
-        reset!(env)
-        multiagent_policy(PreEpisodeStage(), env)
-        hook(PreEpisodeStage(), multiagent_policy, env)
+) where {E<:AbstractEnv}
+    RLCore._run(
+        multiagent_policy,
+        env,
+        stop_condition,
+        hook,
+        reset_condition,
+    )
+end
 
-        while !reset_condition(multiagent_policy, env) # one episode
-            multiagent_policy(PreActStage(), env)
-            hook(PreActStage(), multiagent_policy, env)
-
-            actions = multiagent_policy(env)
-            env(actions)
-
-            optimise!(multiagent_policy)
-
-            multiagent_policy(PostActStage(), env)
-            hook(PostActStage(), multiagent_policy, env)
-
-            if stop_condition(multiagent_policy, env)
-                is_stop = true
-                multiagent_policy(PreActStage(), env)
-                hook(PreActStage(), multiagent_policy, env)
-                multiagent_policy(env)  # let the policy see the last observation
-                break
-            end
-        end # end of an episode
-
-        if is_terminated(env)
-            multiagent_policy(PostEpisodeStage(), env)  # let the policy see the last observation
-            hook(PostEpisodeStage(), multiagent_policy, env)
-        end
+function (multiagent::MultiAgentPolicy)(::PreEpisodeStage, env::E) where {E<:AbstractEnv}
+    for agent in multiagent
+        agent(PreEpisodeStage(), env)
     end
-    multiagent_policy(PostExperimentStage(), env)
-    hook(PostExperimentStage(), multiagent_policy, env)
-    hook
+end
+
+function (multiagent::MultiAgentPolicy)(::PreActStage, env::E) where {E<:AbstractEnv}
+    for agent in multiagent
+        agent(PreActStage(), env)
+    end
+end
+
+function (multiagent::MultiAgentPolicy)(::PostActStage, env::E) where {E<:AbstractEnv}
+    for agent in multiagent
+        agent(PostActStage(), env)
+    end
+end
+
+function (multiagent::MultiAgentPolicy)(::PostEpisodeStage, env::E) where {E<:AbstractEnv}
+    for agent in multiagent
+        agent(PostEpisodeStage(), env)
+    end
+end
+
+function (hook::MultiAgentHook)(::PreEpisodeStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
+    for (name, agent) in pairs(multiagent)
+        hook[name](PreEpisodeStage(), agent, env)
+    end
+end
+
+function (hook::MultiAgentHook)(::PreActStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
+    for (name, agent) in pairs(multiagent)
+        hook[name](PreActStage(), agent, env)
+    end
+end
+
+function (hook::MultiAgentHook)(::PostActStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
+    for (name, agent) in pairs(multiagent)
+        hook[name](PostActStage(), agent, env)
+    end
+end
+
+function (hook::MultiAgentHook)(::PostEpisodeStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
+    for (name, agent) in pairs(multiagent)
+        hook[name](PostEpisodeStage(), agent, env)
+    end
+end
+
+
+function (multiagent::MultiAgentPolicy)(env::E) where {E<:AbstractEnv}
+    return (agent(env) for agent in multiagent)
 end
 
 end # module
