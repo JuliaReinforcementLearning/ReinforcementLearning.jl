@@ -118,6 +118,11 @@ end
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLBase.legal_action_space(env) == ()
+
+    env = RockPaperScissorsEnv()
+    (multiagent_policy)(PreActStage(), env)
+    # multiagent_policy(env)
+    @test [multiagent_policy(env)...] == [('📃', '✂'), ('💎', '✂')]
 end
 
 
