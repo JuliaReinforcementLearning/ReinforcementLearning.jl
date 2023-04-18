@@ -32,11 +32,17 @@ end
     @test multiagent_hook.hooks[:Cross] isa StepsPerEpisode
 end
 
-@testset "current_player_iterator" begin
+@testset "CurrentPlayerIterator" begin
     env = TicTacToeEnv()
-    @test collect(MultiAgentRL.current_player_iterator(env)) == [:Cross, :Nought]
-    env = RockPaperScissorsEnv()
-    @test collect(MultiAgentRL.current_player_iterator(env)) == [Symbol(1), Symbol(2)]
+    player_log = []
+    i = 0
+    for player in MultiAgentRL.CurrentPlayerIterator(env)
+        i += 1
+        push!(player_log, player)
+        env(1)
+        i == 2 && break
+    end
+    @test player_log == [:Cross, :Nought]
 end
 
 

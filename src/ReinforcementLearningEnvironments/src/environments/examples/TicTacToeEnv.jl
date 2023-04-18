@@ -54,6 +54,7 @@ end
 function (env::TicTacToeEnv)(action::CartesianIndex{2})
     env.board[action, 1] = false
     env.board[action, Base.to_index(env, current_player(env))] = true
+    env.player = env.player == :Cross ? :Nought : :Cross
 end
 
 RLBase.state(env::TicTacToeEnv) = state(env, Observation{Int}(), 1)

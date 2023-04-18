@@ -16,16 +16,16 @@ import Base.iterate
 struct MultiAgentPolicy{NT<: NamedTuple} <: AbstractPolicy
     agents::NT
 
-    function MultiAgentPolicy(agents::NamedTuple)
-        new(agents)
+    function MultiAgentPolicy(agents::NT) where {NT<: NamedTuple}
+        new{NT}(agents)
     end
 end
 
 struct MultiAgentHook{NT<: NamedTuple} <: AbstractHook
-    hooks::NamedTuple::NT
+    hooks::NT
 
-    function MultiAgentHook(hooks::NamedTuple)
-        new(hooks)
+    function MultiAgentHook(hooks::NT) where {NT<: NamedTuple}
+        new{NT}(hooks)
     end
 end
 
@@ -35,8 +35,10 @@ struct CurrentPlayerIterator{E<:AbstractEnv}
     env::E
 end
 
+Base.iterate(current_player_iterator::CurrentPlayerIterator) =
+    (current_player(current_player_iterator.env), current_player_iterator.env)
 
-Base.iterate(current_player_iterator::CurrentPlayerIterator, env = current_player_iterator.env) =
+Base.iterate(current_player_iterator::CurrentPlayerIterator, env) =
     (current_player(current_player_iterator.env), env)
 
 Base.iterate(p::MultiAgentPolicy) = iterate(p.agents)
@@ -140,7 +142,7 @@ function _run(
         hook(PreEpisodeStage(), multiagent_policy, env)
 
         while !reset_condition(multiagent_policy, env) # one episode
-            for player in current_player_iterator(env)
+            for player in CurrentPlayerIterator(env)
                 policy = multiagent_policy[player] # Select appropriate policy
 
                 policy(PreActStage(), env)
