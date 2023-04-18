@@ -102,8 +102,8 @@ end
     stop_condition = StopWhenDone()
     multiagent_hook = MultiAgentHook((; Symbol(1) => StepsPerEpisode(), Symbol(2) => StepsPerEpisode()))
 
-    @test Base.iterate(MultiAgentRL.CurrentPlayerIterator(env))[1][1] == :Cross
-    @test Base.iterate(MultiAgentRL.CurrentPlayerIterator(env), env)[1][1] == :Cross
+    @test Base.iterate(MultiAgentRL.CurrentPlayerIterator(env))[1] == SimultaneousPlayer()
+    @test Base.iterate(MultiAgentRL.CurrentPlayerIterator(env), env)[1] == SimultaneousPlayer()
     @test Base.iterate(multiagent_policy)[1] isa Agent
     @test Base.iterate(multiagent_policy, 1)[1] isa Agent
     
