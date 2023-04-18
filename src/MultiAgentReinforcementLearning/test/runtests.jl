@@ -102,9 +102,25 @@ end
     stop_condition = StopWhenDone()
     multiagent_hook = MultiAgentHook((; Symbol(1) => StepsPerEpisode(), Symbol(2) => StepsPerEpisode()))
 
+    @test Base.iterate(MultiAgentRL.CurrentPlayerIterator(env))[1][1] == :Cross
+    @test Base.iterate(MultiAgentRL.CurrentPlayerIterator(env), env)[1][1] == :Cross
+    @test Base.iterate(multiagent_policy)[1] isa Agent
+    @test Base.iterate(multiagent_policy, 1)[1] isa Agent
+    
+    @test Base.getindex(multiagent_policy, Symbol(1)) isa Agent
+    @test Base.getindex(multiagent_hook, Symbol(1)) isa StepsPerEpisode
+
+    @test Base.keys(multiagent_policy) == (Symbol(1), Symbol(2))
+    @test Base.keys(multiagent_hook) == (Symbol(1), Symbol(2))
+
     @test length(RLBase.legal_action_space(env)) == 9
     run(multiagent_policy, env, stop_condition, multiagent_hook)
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLBase.legal_action_space(env) == ()
 end
+
+
+
+Base.keys(p::MultiAgentPolicy) = keys(p.agents)
+Base.keys(p::MultiAgentHook) = keys(p.hooks)
