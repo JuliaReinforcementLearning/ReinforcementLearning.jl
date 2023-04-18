@@ -29,14 +29,21 @@ struct MultiAgentHook{NT<: NamedTuple} <: AbstractHook
     end
 end
 
+next_player!(env::E) where {E<:AbstractEnv} = nothing
+
 # (p::MultiAgentPolicy)(env::AbstractEnv) = nothing # Default does nothing, but might be useful for some environments to clean up / pass final state to agents
 
 struct CurrentPlayerIterator{E<:AbstractEnv}
     env::E
 end
 
-Base.iterate(current_player_iterator::CurrentPlayerIterator, env=current_player_iterator.env) =
+Base.iterate(current_player_iterator::CurrentPlayerIterator) =
     (current_player(current_player_iterator.env), env)
+
+function Base.iterate(current_player_iterator::CurrentPlayerIterator, env)
+    MultiAgentRL.next_player!(env)
+    return (current_player(current_player_iterator.env), env)
+end
 
 Base.iterate(p::MultiAgentPolicy) = iterate(p.agents)
 Base.iterate(p::MultiAgentPolicy, s) = iterate(p.agents, s)
@@ -134,56 +141,56 @@ function Base.run(
 end
 
 function (multiagent::MultiAgentPolicy)(::PreEpisodeStage, env::E) where {E<:AbstractEnv}
-    for agent in multiagent
-        agent(PreEpisodeStage(), env)
+    for player in players(env)
+        multiagent[player](PreEpisodeStage(), env)
     end
 end
 
 function (multiagent::MultiAgentPolicy)(::PreActStage, env::E) where {E<:AbstractEnv}
-    for agent in multiagent
-        agent(PreActStage(), env)
+    for player in players(env)
+        multiagent[player](PreActStage(), env)
     end
 end
 
 function (multiagent::MultiAgentPolicy)(::PostActStage, env::E) where {E<:AbstractEnv}
-    for agent in multiagent
-        agent(PostActStage(), env)
+    for player in players(env)
+        multiagent[player](PostActStage(), env)
     end
 end
 
 function (multiagent::MultiAgentPolicy)(::PostEpisodeStage, env::E) where {E<:AbstractEnv}
-    for agent in multiagent
-        agent(PostEpisodeStage(), env)
+    for player in players(env)
+        multiagent[player](PostEpisodeStage(), env)
     end
 end
 
 function (hook::MultiAgentHook)(::PreEpisodeStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
-    for (name, agent) in pairs(multiagent)
-        hook[name](PreEpisodeStage(), agent, env)
+    for player in players(env)
+        hook[player](PreEpisodeStage(), multiagent[name], env)
     end
 end
 
 function (hook::MultiAgentHook)(::PreActStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
-    for (name, agent) in pairs(multiagent)
-        hook[name](PreActStage(), agent, env)
+    for player in players(env)
+        hook[player](PreActStage(), multiagent[player], env)
     end
 end
 
 function (hook::MultiAgentHook)(::PostActStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
-    for (name, agent) in pairs(multiagent)
-        hook[name](PostActStage(), agent, env)
+    for player in players(env)
+        hook[player](PostActStage(), multiagent[player], env)
     end
 end
 
 function (hook::MultiAgentHook)(::PostEpisodeStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
-    for (name, agent) in pairs(multiagent)
-        hook[name](PostEpisodeStage(), agent, env)
+    for player in players(env)
+        hook[player](PostEpisodeStage(), multiagent[player], env)
     end
 end
 
 
 function (multiagent::MultiAgentPolicy)(env::E) where {E<:AbstractEnv}
-    return (agent(env) for agent in multiagent)
+    return (multiagent[player](env, player) for player in players(env))
 end
 
 end # module

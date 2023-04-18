@@ -1,6 +1,7 @@
 export TicTacToeEnv
 
 import ReinforcementLearningBase: RLBase
+import MultiAgentReinforcementLearning: MultiAgentRL
 
 mutable struct TicTacToeEnv <: AbstractEnv
     board::BitArray{3}
@@ -54,6 +55,9 @@ end
 function (env::TicTacToeEnv)(action::CartesianIndex{2})
     env.board[action, 1] = false
     env.board[action, Base.to_index(env, current_player(env))] = true
+end
+
+function MultiAgentRL.next_player!(env::TicTacToeEnv)
     env.player = env.player == :Cross ? :Nought : :Cross
 end
 
