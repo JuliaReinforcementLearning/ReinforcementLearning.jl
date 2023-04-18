@@ -36,7 +36,7 @@ end
     env = TicTacToeEnv()
     player_log = []
     i = 0
-    for player in MultiAgentRL.CurrentPlayerIterator(env)
+    for player in env
         i += 1
         push!(player_log, player)
         env(1)
@@ -102,8 +102,8 @@ end
     stop_condition = StopWhenDone()
     multiagent_hook = MultiAgentHook((; Symbol(1) => StepsPerEpisode(), Symbol(2) => StepsPerEpisode()))
 
-    @test Base.iterate(MultiAgentRL.CurrentPlayerIterator(env))[1] == SimultaneousPlayer()
-    @test Base.iterate(MultiAgentRL.CurrentPlayerIterator(env), env)[1] == SimultaneousPlayer()
+    @test Base.iterate(env)[1] == SimultaneousPlayer()
+    @test Base.iterate(env, env)[1] == SimultaneousPlayer()
     @test Base.iterate(multiagent_policy)[1] isa Agent
     @test Base.iterate(multiagent_policy, 1)[1] isa Agent
     
