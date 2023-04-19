@@ -4,7 +4,6 @@ using ReinforcementLearningTrajectories
 using ReinforcementLearningCore
 using ReinforcementLearningBase
 using MultiAgentReinforcementLearning
-TicTacToeEnv([1 0 1; 0 1 1; 1 1 1;;; 0 0 0; 1 0 0; 0 0 0;;; 0 1 0; 0 0 0; 0 0 0], :Nought)
 
 @testset "MultiAgentPolicy" begin
     trajectory_1 = Trajectory(
@@ -36,7 +35,7 @@ end
     env = TicTacToeEnv()
     player_log = []
     i = 0
-    for player in CurrentPlayerIterator(env)
+    for player in MultiAgentRL.CurrentPlayerIterator(env)
         i += 1
         push!(player_log, player)
         env(1)
@@ -82,13 +81,13 @@ end
 
 @testset "Basic RockPaperScissors (simultaneous) env checks" begin
     trajectory_1 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1, action = Any => (2,)),
+        CircularArraySARTTraces(; capacity = 1, action = Any => (1,), state = Any => (1,), reward = Any => (2,)),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
 
     trajectory_2 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1, action = Any => (2,)),
+        CircularArraySARTTraces(; capacity = 1, action = Any => (1,), state = Any => (1,), reward = Any => (2,)),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
@@ -102,8 +101,8 @@ end
     stop_condition = StopWhenDone()
     multiagent_hook = MultiAgentHook((; Symbol(1) => StepsPerEpisode(), Symbol(2) => StepsPerEpisode()))
 
-    @test Base.iterate(env)[1] == SimultaneousPlayer()
-    @test Base.iterate(env, env)[1] == SimultaneousPlayer()
+    @test Base.iterate(MultiAgentRL.CurrentPlayerIterator(env))[1] == SimultaneousPlayer()
+    @test Base.iterate(MultiAgentRL.CurrentPlayerIterator(env), env)[1] == SimultaneousPlayer()
     @test Base.iterate(multiagent_policy)[1] isa Agent
     @test Base.iterate(multiagent_policy, 1)[1] isa Agent
     
@@ -122,10 +121,8 @@ end
     env = RockPaperScissorsEnv()
     (multiagent_policy)(PreActStage(), env)
     # multiagent_policy(env)
+    a = multiagent_policy(env)
+    [i for i in a]
+    env(a)
     @test [multiagent_policy(env)...] == [('📃', '✂'), ('💎', '✂')]
 end
-
-
-
-Base.keys(p::MultiAgentPolicy) = keys(p.agents)
-Base.keys(p::MultiAgentHook) = keys(p.hooks)

@@ -31,7 +31,6 @@ function (p::RandomPolicy{Nothing,RNG})(env::AbstractEnv) where {RNG<:AbstractRN
     return rand(p.rng, legal_action_space_)
 end
 
-
 #####
 
 RLBase.prob(p::RandomPolicy, env::AbstractEnv) = prob(p, state(env))

@@ -9,6 +9,8 @@ export MultiAgentHook
 using ReinforcementLearningBase
 using ReinforcementLearningCore
 
+using Random # for RandomPolicy
+
 import ReinforcementLearningCore: RLCore
 import Base.getindex
 import Base.iterate
@@ -148,13 +150,13 @@ end
 
 function (multiagent::MultiAgentPolicy)(::PreActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
-        multiagent[player](PreActStage(), env)
+        update!(multiagent[player], state(env, player))
     end
 end
 
 function (multiagent::MultiAgentPolicy)(::PostActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
-        multiagent[player](PostActStage(), env)
+        update!(multiagent[player].cache, reward(env, player), is_terminated(env))
     end
 end
 
@@ -188,6 +190,11 @@ function (hook::MultiAgentHook)(::PostEpisodeStage, multiagent::MultiAgentPolicy
     end
 end
 
+# move to RLCore?
+function (p::RandomPolicy{Nothing,RNG})(env::E, player::Symbol) where {E<:AbstractEnv, RNG<:AbstractRNG}
+    legal_action_space_ = RLBase.legal_action_space(env, player)
+    return rand(p.rng, legal_action_space_)
+end
 
 function (multiagent::MultiAgentPolicy)(env::E) where {E<:AbstractEnv}
     return (multiagent[player](env, player) for player in players(env))

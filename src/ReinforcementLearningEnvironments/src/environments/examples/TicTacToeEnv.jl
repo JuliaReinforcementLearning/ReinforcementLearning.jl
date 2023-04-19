@@ -150,7 +150,7 @@ function get_tic_tac_toe_state_info()
                         is_terminated=!(has_empty_pos && isnothing(w)),
                         winner=w,
                     )
-                    next_player!(env)
+                    MultiAgentRL.next_player!(env)
                 end
             end
         end

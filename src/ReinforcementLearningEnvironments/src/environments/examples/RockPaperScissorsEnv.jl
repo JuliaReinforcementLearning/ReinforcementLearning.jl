@@ -19,6 +19,8 @@ dummy simultaneous player.
 """
 RLBase.current_player(::RockPaperScissorsEnv) = SIMULTANEOUS_PLAYER
 
+RLBase.action_space(::RockPaperScissorsEnv, ::Union{Int,Symbol}) = ('💎', '📃', '✂')
+
 RLBase.action_space(::RockPaperScissorsEnv, ::Int) = ('💎', '📃', '✂')
 
 RLBase.action_space(::RockPaperScissorsEnv, ::SimultaneousPlayer) =
