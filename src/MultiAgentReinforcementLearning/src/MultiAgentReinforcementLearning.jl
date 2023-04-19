@@ -33,12 +33,16 @@ next_player!(env::E) where {E<:AbstractEnv} = nothing
 
 # (p::MultiAgentPolicy)(env::AbstractEnv) = nothing # Default does nothing, but might be useful for some environments to clean up / pass final state to agents
 
-Base.iterate(env::E) where {E<:AbstractEnv} =
-    (current_player(env), env)
+struct CurrentPlayerIterator{E<:AbstractEnv}
+    env::E
+end
 
-function Base.iterate(env::E, env) where {E<:AbstractEnv}
-    MultiAgentRL.next_player!(env)
-    return (current_player(env), env)
+Base.iterate(current_player_iterator::CurrentPlayerIterator) =
+    (current_player(current_player_iterator.env), current_player_iterator.env)
+
+function Base.iterate(current_player_iterator::CurrentPlayerIterator, state)
+    MultiAgentRL.next_player!(current_player_iterator.env)
+    return (current_player(current_player_iterator.env), state)
 end
 
 Base.iterate(p::MultiAgentPolicy) = iterate(p.agents)
@@ -85,7 +89,7 @@ function Base.run(
         hook(PreEpisodeStage(), multiagent_policy, env)
 
         while !reset_condition(multiagent_policy, env) # one episode
-            for player in env
+            for player in CurrentPlayerIterator(env)
                 policy = multiagent_policy[player] # Select appropriate policy
 
                 policy(PreActStage(), env)
@@ -162,7 +166,7 @@ end
 
 function (hook::MultiAgentHook)(::PreEpisodeStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
     for player in players(env)
-        hook[player](PreEpisodeStage(), multiagent[name], env)
+        hook[player](PreEpisodeStage(), multiagent[player], env)
     end
 end
 
