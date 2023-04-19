@@ -70,9 +70,9 @@ jobs:
       - uses: codecov/codecov-action@v1
 
       - uses: marceloprado/has-changed-path@v1
-        id: RLCore-changed
+        id: RLBase-changed
         with:
-          paths: src/ReinforcementLearningCore
+          paths: src/ReinforcementLearningBase
 
       - name: Test RLCore
         if: (steps.RLBase-changed.outputs.changed == 'true') || (steps.RLCore-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
