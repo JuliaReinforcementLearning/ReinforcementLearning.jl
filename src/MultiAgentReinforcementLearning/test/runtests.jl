@@ -4,7 +4,7 @@ using ReinforcementLearningTrajectories
 using ReinforcementLearningCore
 using ReinforcementLearningBase
 using MultiAgentReinforcementLearning
-
+TicTacToeEnv([1 0 1; 0 1 1; 1 1 1;;; 0 0 0; 1 0 0; 0 0 0;;; 0 1 0; 0 0 0; 0 0 0], :Nought)
 
 @testset "MultiAgentPolicy" begin
     trajectory_1 = Trajectory(
@@ -36,7 +36,7 @@ end
     env = TicTacToeEnv()
     player_log = []
     i = 0
-    for player in env
+    for player in CurrentPlayerIterator(env)
         i += 1
         push!(player_log, player)
         env(1)
