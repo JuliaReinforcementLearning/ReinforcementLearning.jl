@@ -39,8 +39,8 @@ For multi-agent environments, we usually implement the most detailed one.
 """
 RLBase.state(::RockPaperScissorsEnv, ::Observation, p) = 1
 
-RLBase.reward(env::RockPaperScissorsEnv) = env.is_done ? env.reward : (0, 0)
-RLBase.reward(env::RockPaperScissorsEnv, p::Int) = reward(env)[p]
+RLBase.reward(env::RockPaperScissorsEnv) = env.is_done ? env.reward : (; Symbol(1) => 0, Symbol(2) => 0)
+RLBase.reward(env::RockPaperScissorsEnv, p::Symbol) = reward(env)[p]
 
 RLBase.is_terminated(env::RockPaperScissorsEnv) = env.is_done
 RLBase.reset!(env::RockPaperScissorsEnv) = env.is_done = false

@@ -150,13 +150,13 @@ end
 
 function (multiagent::MultiAgentPolicy)(::PreActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
-        update!(multiagent[player], state(env, player))
+        RLCore.update!(multiagent[player], state(env, player))
     end
 end
 
 function (multiagent::MultiAgentPolicy)(::PostActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
-        update!(multiagent[player].cache, reward(env, player), is_terminated(env))
+        RLCore.update!(multiagent[player].cache, reward(env, player), is_terminated(env))
     end
 end
 
