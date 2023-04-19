@@ -47,11 +47,11 @@ RLBase.reset!(env::RockPaperScissorsEnv) = env.is_done = false
 
 function (env::RockPaperScissorsEnv)((x, y))
     if x == y
-        env.reward = (0, 0)
+        env.reward = (; Symbol(1) => 0, Symbol(2) => 0)
     elseif x == '💎' && y == '✂' || x == '✂' && y == '📃' || x == '📃' && y == '💎'
-        env.reward = (1, -1)
+        env.reward = (; Symbol(1) => 1, Symbol(2) => -1)
     else
-        env.reward = (-1, 1)
+        env.reward = (; Symbol(1) => -1, Symbol(2) => 1)
     end
     env.is_done = true
 end
