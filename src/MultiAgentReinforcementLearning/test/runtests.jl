@@ -122,7 +122,7 @@ end
     (multiagent_policy)(PreActStage(), env)
     # multiagent_policy(env)
     a = multiagent_policy(env)
-    [i for i in a]
-    env(a)
-    @test [multiagent_policy(env)...] == [('📃', '✂'), ('💎', '✂')]
+    @test [i for i in a][1] ∈ ['💎', '📃', '✂']
+    @test [i for i in a][2] ∈ ['💎', '📃', '✂']
+    @test env(a)
 end

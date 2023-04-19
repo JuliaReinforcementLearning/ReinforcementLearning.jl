@@ -7,7 +7,7 @@ export RockPaperScissorsEnv
 simultaneous, zero sum game.
 """
 Base.@kwdef mutable struct RockPaperScissorsEnv <: AbstractEnv
-    reward::Tuple{Int,Int} = (0, 0)
+    reward::NamedTuple{(Symbol("1"), Symbol("2")), Tuple{Int64, Int64}} = (; Symbol(1) => 0, Symbol(2) => 0)
     is_done::Bool = false
 end
 
