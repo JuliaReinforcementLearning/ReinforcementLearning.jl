@@ -87,9 +87,9 @@ jobs:
       - uses: codecov/codecov-action@v1
 
       - uses: marceloprado/has-changed-path@v1
-        id: RLExperiments-changed
+        id: RLCore-changed
         with:
-          paths: src/ReinforcementLearningExperiments
+          paths: src/ReinforcementLearningCore
 
       - name: Test MultiAgentRL
         if: (steps.RLBase-changed.outputs.changed == 'true') || (steps.RLCore-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
