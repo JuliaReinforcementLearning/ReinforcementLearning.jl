@@ -105,8 +105,8 @@ jobs:
             using Pkg
             Pkg.develop(path="src/ReinforcementLearningBase")
             Pkg.develop(path="src/ReinforcementLearningCore")
-            Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.develop(path="src/MultiAgentReinforcementLearning")
+            Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.test("MultiAgentReinforcementLearning", coverage=true)'
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v3
