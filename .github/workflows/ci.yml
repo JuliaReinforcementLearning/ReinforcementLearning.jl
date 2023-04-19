@@ -70,9 +70,9 @@ jobs:
       - uses: codecov/codecov-action@v1
 
       - uses: marceloprado/has-changed-path@v1
-        id: RLBase-changed
+        id: RLCore-changed
         with:
-          paths: src/ReinforcementLearningBase
+          paths: src/ReinforcementLearningCore
 
       - name: Test RLCore
         if: (steps.RLBase-changed.outputs.changed == 'true') || (steps.RLCore-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
@@ -87,9 +87,9 @@ jobs:
       - uses: codecov/codecov-action@v1
 
       - uses: marceloprado/has-changed-path@v1
-        id: RLCore-changed
+        id: MultiAgentRL-changed
         with:
-          paths: src/ReinforcementLearningCore
+          paths: src/MultiAgentReinforcementLearning
 
       - name: Test MultiAgentRL
         if: (steps.RLBase-changed.outputs.changed == 'true') || (steps.RLCore-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
@@ -105,9 +105,9 @@ jobs:
       - uses: codecov/codecov-action@v1
 
       - uses: marceloprado/has-changed-path@v1
-        id: MultiAgentRL-changed
+        id: RLZoo-changed
         with:
-          paths: src/MultiAgentReinforcementLearning
+          paths: src/ReinforcementLearningZoo
 
       - name: Test RLZoo
         if: (steps.RLBase-changed.outputs.changed == 'true') || (steps.RLCore-changed.outputs.changed == 'true') || (steps.RLZoo-changed.outputs.changed == 'true') || (steps.MultiAgentRL-changed.outputs.changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
