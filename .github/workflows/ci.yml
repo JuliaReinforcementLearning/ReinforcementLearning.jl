@@ -201,7 +201,7 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: |
-          docs/**
+            docs/**
   
       - name: Setup python
         uses: actions/setup-python@v4
