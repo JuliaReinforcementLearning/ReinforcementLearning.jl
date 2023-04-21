@@ -3,7 +3,6 @@ using ReinforcementLearningEnvironments
 using ReinforcementLearningTrajectories
 using ReinforcementLearningCore
 using ReinforcementLearningBase
-using MultiAgentReinforcementLearning
 
 @testset "MultiAgentPolicy" begin
     trajectory_1 = Trajectory(
