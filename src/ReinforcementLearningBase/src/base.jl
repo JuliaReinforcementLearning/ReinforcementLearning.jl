@@ -112,7 +112,6 @@ function test_interfaces!(env)
 
             RLBase.next_player!(X)
             RLBase.next_player!(Y)
-            end
         end
     end
 
