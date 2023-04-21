@@ -181,12 +181,6 @@ function (hook::MultiAgentHook)(::PostEpisodeStage, multiagent::MultiAgentPolicy
     end
 end
 
-# move to RLCore?
-function (p::RandomPolicy{Nothing,RNG})(env::E, player::Symbol) where {E<:AbstractEnv, RNG<:AbstractRNG}
-    legal_action_space_ = RLBase.legal_action_space(env, player)
-    return rand(p.rng, legal_action_space_)
-end
-
 function (multiagent::MultiAgentPolicy)(env::E) where {E<:AbstractEnv}
     return (multiagent[player](env, player) for player in players(env))
 end
