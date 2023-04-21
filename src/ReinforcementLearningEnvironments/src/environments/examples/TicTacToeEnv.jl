@@ -58,6 +58,7 @@ function (env::TicTacToeEnv)(action::CartesianIndex{2})
 end
 
 function RLBase.next_player!(env::TicTacToeEnv)
+
     env.player = env.player == :Cross ? :Nought : :Cross
 end
 
@@ -67,7 +68,7 @@ RLBase.state(env::TicTacToeEnv) = state(env, Observation{Int}(), 1)
 RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = env.board
 RLBase.state(env::TicTacToeEnv, ::RLBase.AbstractStateStyle) = state(env::TicTacToeEnv, Observation{Int}(), 1)
 RLBase.state(env::TicTacToeEnv, ::Observation{Int}, p) =
-    get_tic_tac_toe_state_info()[env].index
+    get_tic_tac_toe_state_info()[env.board].index
 
 RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = ArrayProductDomain(fill(false:true, 3, 3, 3))
 RLBase.state_space(env::TicTacToeEnv, ::Observation{Int}, p) =
@@ -94,11 +95,11 @@ function RLBase.state(env::TicTacToeEnv, ::Observation{String}, p)
     String(take!(buff))
 end
 
-RLBase.is_terminated(env::TicTacToeEnv) = get_tic_tac_toe_state_info()[env].is_terminated
+RLBase.is_terminated(env::TicTacToeEnv) = get_tic_tac_toe_state_info()[env.board].is_terminated
 
 function RLBase.reward(env::TicTacToeEnv, player)
     if is_terminated(env)
-        winner = get_tic_tac_toe_state_info()[env].winner
+        winner = get_tic_tac_toe_state_info()[env.board].winner
         if isnothing(winner)
             0
         elseif winner === player
@@ -132,7 +133,7 @@ function get_tic_tac_toe_state_info()
         t = @elapsed begin
             n = 1
             root = TicTacToeEnv()
-            TIC_TAC_TOE_STATE_INFO[root] =
+            TIC_TAC_TOE_STATE_INFO[root.board] =
                 (index=n, is_terminated=false, winner=nothing)
             walk(root) do env
                 if !haskey(TIC_TAC_TOE_STATE_INFO, env)
@@ -145,13 +146,13 @@ function get_tic_tac_toe_state_info()
                     else
                         nothing
                     end
-                    TIC_TAC_TOE_STATE_INFO[env] = (
+                    TIC_TAC_TOE_STATE_INFO[env.board] = (
                         index=n,
                         is_terminated=!(has_empty_pos && isnothing(w)),
                         winner=w,
                     )
-                    RLBase.next_player!(env)
                 end
+                RLBase.next_player!(env)
             end
         end
         @info "finished initializing tictactoe state info cache in $t seconds"

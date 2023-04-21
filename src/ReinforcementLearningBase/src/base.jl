@@ -165,6 +165,7 @@ function test_interfaces!(env)
                     @test state(env, p) ∈ state_space(env, p)
                     rewards[i] += reward(env, p)
                 end
+                next_player!(env)
             end
             # even the game is already terminated
             # make sure each player can still get some necessary info
@@ -213,6 +214,7 @@ function test_runnable!(env, n=1000; rng=Random.GLOBAL_RNG)
             if is_terminated(env)
                 reset!(env)
             end
+            next_player!(env)
         end
         reset!(env)
     end
