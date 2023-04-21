@@ -34,7 +34,7 @@ Base.iterate(current_player_iterator::CurrentPlayerIterator) =
     (current_player(current_player_iterator.env), current_player_iterator.env)
 
 function Base.iterate(current_player_iterator::CurrentPlayerIterator, state)
-    RLCore.next_player!(current_player_iterator.env)
+    next_player!(current_player_iterator.env)
     return (current_player(current_player_iterator.env), state)
 end
 
