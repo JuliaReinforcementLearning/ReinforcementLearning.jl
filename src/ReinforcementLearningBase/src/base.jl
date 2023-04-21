@@ -211,10 +211,11 @@ function test_runnable!(env, n=1000; rng=Random.GLOBAL_RNG)
             s = state(env)
             @test s in S
             env(a)
+            next_player!(env)
+
             if is_terminated(env)
                 reset!(env)
             end
-            next_player!(env)
         end
         reset!(env)
     end
