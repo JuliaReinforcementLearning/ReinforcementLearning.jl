@@ -1,17 +1,8 @@
-module MultiAgentReinforcementLearning
-
-const MultiAgentRL = MultiAgentReinforcementLearning
-export MultiAgentRL
-
 export MultiAgentPolicy
 export MultiAgentHook
 
-using ReinforcementLearningBase
-using ReinforcementLearningCore
-
 using Random # for RandomPolicy
 
-import ReinforcementLearningCore: RLCore
 import Base.getindex
 import Base.iterate
 
@@ -199,5 +190,3 @@ end
 function (multiagent::MultiAgentPolicy)(env::E) where {E<:AbstractEnv}
     return (multiagent[player](env, player) for player in players(env))
 end
-
-end # module
