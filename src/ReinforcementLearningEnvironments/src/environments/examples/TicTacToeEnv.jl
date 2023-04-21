@@ -18,6 +18,7 @@ end
 function RLBase.reset!(env::TicTacToeEnv)
     fill!(env.board, false)
     env.board[:, :, 1] .= true
+    env.player = :Cross
 end
 
 struct TicTacToeInfo
