@@ -12,7 +12,7 @@ on:
   push:
     branches:
       - main
-    tags: '*'
+    tags: "*"
   workflow_dispatch:
 jobs:
   test:
@@ -22,13 +22,13 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1'
+          - "1"
         os:
           - ubuntu-latest
         arch:
           - x64
         python-version:
-          - '3.8'
+          - "3.8"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -60,7 +60,7 @@ jobs:
         with:
           files: |
             src/ReinforcementLearningBase/**
-  
+
       - name: Test RLBase
         if: (steps.RLBase-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
@@ -77,7 +77,7 @@ jobs:
         with:
           files: |
             src/ReinforcementLearningCore/**
-  
+
       - name: Test RLCore
         if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
@@ -99,7 +99,7 @@ jobs:
             src/ReinforcementLearningZoo/**
 
       - name: Test RLZoo
-        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (steps.RLZoo-changed.outputs.any_changed == 'true') || (steps.MultiAgentRL-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (steps.RLZoo-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
           julia --color=yes -e '
             using Pkg;
@@ -117,9 +117,9 @@ jobs:
         with:
           files: |
             src/ReinforcementLearningEnvironments/**
-  
+
       - name: Test RLEnvironments
-        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (steps.RLEnvironments-changed.outputs.any_changed == 'true') || (steps.MultiAgentRL-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (steps.RLEnvironments-changed.outputs.any_changed == 'true') ||  (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
           julia --color=yes -e '
             using Pkg;
@@ -129,14 +129,13 @@ jobs:
             Pkg.test("ReinforcementLearningEnvironments", coverage=true)'
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v3
-  
+
       - name: Get changed files
         id: RLDatasets-changed
         uses: tj-actions/changed-files@v35
         with:
           files: |
             src/ReinforcementLearningDatasets/**
-  
 
       # - name: Test RLDatasets
       #   if: (steps.RLDatasets-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
@@ -154,9 +153,9 @@ jobs:
         with:
           files: |
             src/ReinforcementLearningExperiments/**
-            
+
       - name: Test RLExperiments
-        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (steps.RLZoo-changed.outputs.any_changed == 'true') || (steps.RLExperiments-changed.outputs.any_changed == 'true') || (steps.MultiAgentRL-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (steps.RLZoo-changed.outputs.any_changed == 'true') || (steps.RLExperiments-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
           julia --color=yes -e '
             using Pkg
@@ -169,7 +168,7 @@ jobs:
             Pkg.test("ReinforcementLearningExperiments", coverage=true)'
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v3
-  
+
   docs:
     name: Documentation
     runs-on: ubuntu-latest
@@ -183,7 +182,7 @@ jobs:
         with:
           files: |
             docs/**
-  
+
       - name: Setup python
         uses: actions/setup-python@v4
         with:
@@ -193,7 +192,7 @@ jobs:
         run: python -m pip install --user matplotlib
       - uses: julia-actions/setup-julia@v1
         with:
-          version: '1'
+          version: "1"
       - name: Build homepage
         if: (steps.documentation-changed.outputs.any_changed == 'true')
         run: |
