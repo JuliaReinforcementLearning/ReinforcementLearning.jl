@@ -109,6 +109,10 @@ function test_interfaces!(env)
             @test state(Y) == state(X)
             @test reward(Y) == reward(X)
             @test is_terminated(Y) == is_terminated(X)
+
+            RLBase.next_player!(X)
+            RLBase.next_player!(Y)
+            end
         end
     end
 

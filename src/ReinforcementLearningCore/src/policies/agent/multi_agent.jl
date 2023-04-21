@@ -22,8 +22,6 @@ struct MultiAgentHook{NT<: NamedTuple} <: AbstractHook
     end
 end
 
-next_player!(env::E) where {E<:AbstractEnv} = nothing
-
 # (p::MultiAgentPolicy)(env::AbstractEnv) = nothing # Default does nothing, but might be useful for some environments to clean up / pass final state to agents
 
 struct CurrentPlayerIterator{E<:AbstractEnv}
