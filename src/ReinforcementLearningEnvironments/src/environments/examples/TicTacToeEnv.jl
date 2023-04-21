@@ -1,7 +1,7 @@
 export TicTacToeEnv
 
 import ReinforcementLearningBase: RLBase
-import MultiAgentReinforcementLearning: MultiAgentRL
+import MultiAgentReinforcementLearning: RLCore
 
 mutable struct TicTacToeEnv <: AbstractEnv
     board::BitArray{3}
@@ -57,7 +57,7 @@ function (env::TicTacToeEnv)(action::CartesianIndex{2})
     env.board[action, Base.to_index(env, current_player(env))] = true
 end
 
-function MultiAgentRL.next_player!(env::TicTacToeEnv)
+function RLCore.next_player!(env::TicTacToeEnv)
     env.player = env.player == :Cross ? :Nought : :Cross
 end
 
@@ -150,7 +150,7 @@ function get_tic_tac_toe_state_info()
                         is_terminated=!(has_empty_pos && isnothing(w)),
                         winner=w,
                     )
-                    MultiAgentRL.next_player!(env)
+                    RLCore.next_player!(env)
                 end
             end
         end
@@ -175,6 +175,6 @@ RLBase.ChanceStyle(::TicTacToeEnv) = DETERMINISTIC
 function RLBase.child(env::TicTacToeEnv, action)
     new_env = copy(env)
     new_env(action)
-    MultiAgentRL.next_player!(new_env)
+    RLCore.next_player!(new_env)
     new_env
 end
