@@ -43,8 +43,6 @@ end
     @test player_log == [:Cross, :Nought]
 end
 
-
-# import MultiAgentReinforcementLearning: MultiAgentHook
 @testset "Basic TicTacToeEnv (Sequential) env checks" begin
     trajectory_1 = Trajectory(
         CircularArraySARTTraces(; capacity = 1),

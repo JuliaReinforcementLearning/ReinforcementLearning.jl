@@ -1,7 +1,7 @@
 export TicTacToeEnv
 
 import ReinforcementLearningBase: RLBase
-import MultiAgentReinforcementLearning: RLCore
+import ReinforcementLearningCore: RLCore
 
 mutable struct TicTacToeEnv <: AbstractEnv
     board::BitArray{3}
