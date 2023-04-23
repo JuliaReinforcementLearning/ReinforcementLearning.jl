@@ -67,19 +67,21 @@ end
     stop_condition = StopWhenDone()
     hook = StepsPerEpisode()
 
-    @test reward(env, Symbol(1)) == 0
+    @test RLBase.reward(env, :Cross) == 0
     @test length(RLBase.legal_action_space(env)) == 9
     Base.run(multiagent_policy, env, stop_condition, multiagent_hook)
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLEnvs.is_win(env, :Cross) != RLEnvs.is_win(env, :Nought)
+    @test RLBase.reward(env, :Cross) == (RLBase.reward(env, :Nought) * -1)
+    @test RLBase.legal_action_space_mask(env, :Cross) == falses(9)
     @test RLBase.legal_action_space(env) == []
 
-    @test state(env, Observation{BitArray{3}}(), :Cross) isa BitArray{3}
-    @test state_space(env, Observation{BitArray{3}}(), :Cross) isa ArrayProductDomain
-    @test state_space(env, Observation{String}(), :Cross) isa String
-    @test state(env, Observation{String}(), :Cross) isa String
-    @test state(env, Observation{String}()) isa String
+    @test RLBase.state(env, Observation{BitArray{3}}(), :Cross) isa BitArray{3}
+    @test RLBase.state_space(env, Observation{BitArray{3}}(), :Cross) isa ArrayProductDomain
+    @test RLBase.state_space(env, Observation{String}(), :Cross) isa String
+    @test RLBase.state(env, Observation{String}(), :Cross) isa String
+    @test RLBase.state(env, Observation{String}()) isa String
     
 end
 
@@ -136,7 +138,7 @@ end
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLBase.legal_action_space(env) == ()
-    @test action_space(env, Symbol(1)) == ('💎', '📃', '✂')
+    @test RLBase.action_space(env, Symbol(1)) == ('💎', '📃', '✂')
     env = RockPaperScissorsEnv()
     (multiagent_policy)(PreActStage(), env)
     # multiagent_policy(env)
