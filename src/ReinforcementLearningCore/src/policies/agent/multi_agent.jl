@@ -49,9 +49,9 @@ function Base.run(
     multiagent_policy::MultiAgentPolicy,
     env::E,
     stop_condition,
-    hook::MultiAgentHook,
+    hook::H,
     reset_condition,
-) where {E<:AbstractEnv}
+) where {E<:AbstractEnv, H<:AbstractHook}
     keys(multiagent_policy) == keys(hook) || throw(ArgumentError("MultiAgentPolicy and MultiAgentHook must have the same keys"))
     Base.run(
         multiagent_policy,
