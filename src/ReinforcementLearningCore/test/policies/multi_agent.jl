@@ -75,10 +75,10 @@ end
     @test RLEnvs.is_win(env, :Cross) != RLEnvs.is_win(env, :Nought)
     @test RLBase.legal_action_space(env) == []
 
-    @test state(env, Observation{BitArray{3}}(), Symbol(1)) isa BitArray{3}
-    @test state_space(env, Observation{BitArray{3}}(), Symbol(1)) isa ArrayProductDomain
-    @test state_space(env, Observation{String}(), Symbol(1)) isa String
-    @test state(env, Observation{String}(), Symbol(1)) isa String
+    @test state(env, Observation{BitArray{3}}(), :Cross) isa BitArray{3}
+    @test state_space(env, Observation{BitArray{3}}(), :Cross) isa ArrayProductDomain
+    @test state_space(env, Observation{String}(), :Cross) isa String
+    @test state(env, Observation{String}(), :Cross) isa String
     @test state(env, Observation{String}()) isa String
     
 end
@@ -136,7 +136,7 @@ end
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLBase.legal_action_space(env) == ()
-
+    @test action_space(env, Symbol(1)) == ('💎', '📃', '✂')
     env = RockPaperScissorsEnv()
     (multiagent_policy)(PreActStage(), env)
     # multiagent_policy(env)
