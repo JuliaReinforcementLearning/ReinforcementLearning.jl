@@ -8,5 +8,9 @@
 
     @test length(state_space(env, Observation{Int}())) == 5478
 
+    @test RLBase.state(env, Observation{BitArray{3}}(), Symbol(1)) = env.board
+    @test RLBase.state_space(env, Observation{BitArray{3}}(), Symbol(1)) isa ArrayProductDomain
+    @test RLBase.state_space(env, Observation{String}(), Symbol(1)) isa String
+    @test RLBase.state(env, Observation{String}(), Symbol(1)) isa String
 end
 

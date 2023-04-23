@@ -159,7 +159,8 @@ function test_interfaces!(env)
                         @test state(env) == state(env, p)
                     end
                 end
-                a = rand(rng, legal_action_space(env))
+                @test legal_action_space(env, p) == legal_action_space(env)
+                a = rand(rng, legal_action_space(env, p))
                 env(a)
                 for (i, p) in enumerate(players(env))
                     @test state(env, p) ∈ state_space(env, p)
