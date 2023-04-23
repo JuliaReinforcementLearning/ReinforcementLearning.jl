@@ -67,14 +67,26 @@ end
     stop_condition = StopWhenDone()
     hook = StepsPerEpisode()
 
+    @test reward(env, Symbol(1)) == 0
     @test length(RLBase.legal_action_space(env)) == 9
-    run(multiagent_policy, env, stop_condition, multiagent_hook)
+    Base.run(multiagent_policy, env, stop_condition, multiagent_hook)
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLEnvs.is_win(env, :Cross) != RLEnvs.is_win(env, :Nought)
     @test RLBase.legal_action_space(env) == []
+
+    @test state(env, Observation{BitArray{3}}(), Symbol(1)) isa BitArray{3}
+    @test state_space(env, Observation{BitArray{3}}(), Symbol(1)) isa ArrayProductDomain
+    @test state_space(env, Observation{String}(), Symbol(1)) isa String
+    @test state(env, Observation{String}(), Symbol(1)) isa String
+    @test state(env, Observation{String}()) isa String
+    
 end
 
+@testset "next_player!" begin
+    env = TicTacToeEnv()
+    @test RLBase.next_player!(env)(env) == :Nought
+end
 
 @testset "Basic RockPaperScissors (simultaneous) env checks" begin
     trajectory_1 = Trajectory(
@@ -88,6 +100,16 @@ end
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
+
+    @test MultiAgentPolicy((;
+        Symbol(1) => Agent(RandomPolicy(), trajectory_1),
+        Symbol(2) => Agent(RandomPolicy(), trajectory_2),
+    )) isa MultiAgentPolicy
+
+    @test MultiAgentPolicy((;
+        Symbol(1) => Agent(RandomPolicy(), trajectory_1),
+        Symbol(2) => Agent(RandomPolicy(), trajectory_2),
+    )) isa MultiAgentPolicy
 
     multiagent_policy = MultiAgentPolicy((;
         Symbol(1) => Agent(RandomPolicy(), trajectory_1),
@@ -110,7 +132,7 @@ end
     @test Base.keys(multiagent_hook) == (Symbol(1), Symbol(2))
 
     @test length(RLBase.legal_action_space(env)) == 9
-    run(multiagent_policy, env, stop_condition, multiagent_hook)
+    Base.run(multiagent_policy, env, stop_condition, multiagent_hook)
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLBase.legal_action_space(env) == ()
