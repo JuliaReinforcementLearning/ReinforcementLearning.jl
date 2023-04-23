@@ -154,12 +154,12 @@ function test_interfaces!(env)
             reset!(env)
             rewards = [0.0 for p in players(env)]
             while !is_terminated(env)
-                if InformationStyle(env) === PERFECT_INFORMATION
-                    for p in players(env)
+                for p in players(env)
+                    if InformationStyle(env) === PERFECT_INFORMATION
                         @test state(env) == state(env, p)
                     end
+                    @test legal_action_space(env, p) == legal_action_space(env)
                 end
-                @test legal_action_space(env, p) == legal_action_space(env)
                 a = rand(rng, legal_action_space(env, p))
                 env(a)
                 for (i, p) in enumerate(players(env))
