@@ -158,7 +158,7 @@ function test_interfaces!(env)
                     if InformationStyle(env) === PERFECT_INFORMATION
                         @test state(env) == state(env, p)
                     end
-                    @test legal_action_space(env, p) == legal_action_space(env)
+                    @test legal_action_space(env, p) ∈ legal_action_space(env)
                 end
                 a = rand(rng, legal_action_space(env, p))
                 env(a)
