@@ -38,5 +38,5 @@ end
 
 @testset "players" begin
     @test simultaneous_player(TestEnv(10)) == SimultaneousPlayer()
-    @test players(TestEnv(10)) == (DefaultPlayer(),)
+    @test RLBase.players(TestEnv(10)) == (DefaultPlayer(),)
 end
