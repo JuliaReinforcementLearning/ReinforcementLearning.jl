@@ -36,7 +36,7 @@ end
     @test Base.hash(TestEnv(10), UInt64(0)) == Base.hash(TestEnv(10), UInt64(0))
 end
 
-@test "players" begin
-    simultaneous_player(TestEnv(10)) == SimultaneousPlayer()
-    players(TestEnv(10)) == (DefaultPlayer(),)
+@testset "players" begin
+    @test simultaneous_player(TestEnv(10)) == SimultaneousPlayer()
+    @test players(TestEnv(10)) == (DefaultPlayer(),)
 end
