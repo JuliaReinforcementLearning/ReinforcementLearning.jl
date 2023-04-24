@@ -26,6 +26,7 @@ julia = "1.3"
 
 [extras]
 ArcadeLearningEnvironment = "b7f77d8d-088d-5e02-8ac0-89aab2acc977"
+DomainSets = "5b8099bc-c8ec-5219-889f-1d9e522a28bf"
 OpenSpiel = "ceb70bd2-fe3f-44f0-b81f-41608acaf2f2"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
@@ -36,4 +37,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TimerOutputs = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
 
 [targets]
-test = ["ArcadeLearningEnvironment", "OpenSpiel", "OrdinaryDiffEq", "PyCall", "ReinforcementLearningCore", "StableRNGs", "Statistics", "Test", "TimerOutputs"]
+test = ["ArcadeLearningEnvironment", "DomainSets", "OpenSpiel", "OrdinaryDiffEq", "PyCall", "ReinforcementLearningCore", "StableRNGs", "Statistics", "Test", "TimerOutputs"]

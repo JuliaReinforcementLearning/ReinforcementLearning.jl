@@ -158,9 +158,13 @@ function test_interfaces!(env)
                     if InformationStyle(env) === PERFECT_INFORMATION
                         @test state(env) == state(env, p)
                     end
-                    @test legal_action_space(env, p) ∈ legal_action_space(env)
+                    if DynamicStyle(env) == Simultaneous()
+                        @test legal_action_space(env, p) ∈ legal_action_space(env)
+                    else
+                        @test legal_action_space(env, p) == legal_action_space(env)
+                    end
                 end
-                a = rand(rng, legal_action_space(env, p))
+                a = rand(rng, legal_action_space(env))
                 env(a)
                 for (i, p) in enumerate(players(env))
                     @test state(env, p) ∈ state_space(env, p)
