@@ -1,4 +1,6 @@
-struct TestEnv <: AbstractEnv
+using ReinforcementLearningBase
+
+struct TestEnv <: RLBase.AbstractEnv
     state::Int
 end
 
@@ -29,7 +31,7 @@ end
 end
 
 @testset "AbstractEnv" begin
-    @test TestEnv(10) isa AbstractEnv
+    @test TestEnv(10) isa RLBase.AbstractEnv
     @test TestEnv(10) == TestEnv(10)
     @test Base.hash(TestEnv(10), UInt64(0)) == Base.hash(TestEnv(10), UInt64(0))
 end
