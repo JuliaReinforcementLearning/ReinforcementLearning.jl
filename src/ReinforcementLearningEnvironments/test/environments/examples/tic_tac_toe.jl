@@ -2,6 +2,18 @@
     using DomainSets
     using ReinforcementLearningEnvironments, ReinforcementLearningBase, ReinforcementLearningCore
 
+    trajectory_1 = Trajectory(
+        CircularArraySARTTraces(; capacity = 1, action = Any => (1,), state = Any => (1,), reward = Any => (2,)),
+        BatchSampler(1),
+        InsertSampleRatioController(n_inserted = -1),
+    )
+
+    trajectory_2 = Trajectory(
+        CircularArraySARTTraces(; capacity = 1, action = Any => (1,), state = Any => (1,), reward = Any => (2,)),
+        BatchSampler(1),
+        InsertSampleRatioController(n_inserted = -1),
+    )
+
     env = TicTacToeEnv()
     stop_condition = StopWhenDone()
     multiagent_hook = MultiAgentHook((; Symbol(1) => StepsPerEpisode(), Symbol(2) => StepsPerEpisode()))
