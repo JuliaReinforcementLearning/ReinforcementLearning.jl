@@ -96,5 +96,10 @@ ActionStyle(env::RLBaseEnv) =
 current_player(env::RLBaseEnv) = CRL.player(env.env)
 players(env::RLBaseEnv) = CRL.players(env.env)
 
-# Advance to the next player. This is a no-op for single-player and simultaneous games.
+# 
+"""
+    next_player!(env::E) where {E<:AbstractEnv}
+
+Advance to the next player. This is a no-op for single-player and simultaneous games. `Sequential` `MultiAgent` games should implement this method.
+"""
 next_player!(env::E) where {E<:AbstractEnv} = nothing
