@@ -109,6 +109,9 @@ function test_interfaces!(env)
             @test state(Y) == state(X)
             @test reward(Y) == reward(X)
             @test is_terminated(Y) == is_terminated(X)
+
+            RLBase.next_player!(X)
+            RLBase.next_player!(Y)
         end
     end
 
@@ -151,17 +154,21 @@ function test_interfaces!(env)
             reset!(env)
             rewards = [0.0 for p in players(env)]
             while !is_terminated(env)
-                if InformationStyle(env) === PERFECT_INFORMATION
-                    for p in players(env)
+                for p in players(env)
+                    if InformationStyle(env) === PERFECT_INFORMATION
                         @test state(env) == state(env, p)
                     end
+                    # TODO: Make this test more specific...
+                    @test !(RLBase.legal_action_space(env, p) isa Nothing)
+                    @test !(RLBase.legal_action_space(env) isa Nothing)
                 end
-                a = rand(rng, legal_action_space(env))
+                a = rand(rng, RLBase.legal_action_space(env))
                 env(a)
                 for (i, p) in enumerate(players(env))
                     @test state(env, p) ∈ state_space(env, p)
                     rewards[i] += reward(env, p)
                 end
+                next_player!(env)
             end
             # even the game is already terminated
             # make sure each player can still get some necessary info
@@ -207,6 +214,8 @@ function test_runnable!(env, n=1000; rng=Random.GLOBAL_RNG)
             s = state(env)
             @test s in S
             env(a)
+            next_player!(env)
+
             if is_terminated(env)
                 reset!(env)
             end

@@ -7,11 +7,11 @@ export RockPaperScissorsEnv
 simultaneous, zero sum game.
 """
 Base.@kwdef mutable struct RockPaperScissorsEnv <: AbstractEnv
-    reward::Tuple{Int,Int} = (0, 0)
+    reward::NamedTuple{(Symbol("1"), Symbol("2")), Tuple{Int64, Int64}} = (; Symbol(1) => 0, Symbol(2) => 0)
     is_done::Bool = false
 end
 
-RLBase.players(::RockPaperScissorsEnv) = (1, 2)
+RLBase.players(::RockPaperScissorsEnv) = (Symbol(1), Symbol(2))
 
 """
 Note that although this is a two player game. The current player is always a
@@ -19,10 +19,7 @@ dummy simultaneous player.
 """
 RLBase.current_player(::RockPaperScissorsEnv) = SIMULTANEOUS_PLAYER
 
-# Defining the `action_space` of each independent player can help to transform
-# this SIMULTANEOUS environment into a SEQUENTIAL environment with
-# [`simultaneous2sequential`](@ref).
-RLBase.action_space(::RockPaperScissorsEnv, ::Int) = ('💎', '📃', '✂')
+RLBase.action_space(::RockPaperScissorsEnv, ::Symbol) = ('💎', '📃', '✂')
 
 RLBase.action_space(::RockPaperScissorsEnv, ::SimultaneousPlayer) =
     Tuple((i, j) for i in ('💎', '📃', '✂') for j in ('💎', '📃', '✂'))
@@ -40,19 +37,19 @@ For multi-agent environments, we usually implement the most detailed one.
 """
 RLBase.state(::RockPaperScissorsEnv, ::Observation, p) = 1
 
-RLBase.reward(env::RockPaperScissorsEnv) = env.is_done ? env.reward : (0, 0)
-RLBase.reward(env::RockPaperScissorsEnv, p::Int) = reward(env)[p]
+RLBase.reward(env::RockPaperScissorsEnv) = env.is_done ? env.reward : (; Symbol(1) => 0, Symbol(2) => 0)
+RLBase.reward(env::RockPaperScissorsEnv, p::Symbol) = reward(env)[p]
 
 RLBase.is_terminated(env::RockPaperScissorsEnv) = env.is_done
 RLBase.reset!(env::RockPaperScissorsEnv) = env.is_done = false
 
 function (env::RockPaperScissorsEnv)((x, y))
     if x == y
-        env.reward = (0, 0)
+        env.reward = (; Symbol(1) => 0, Symbol(2) => 0)
     elseif x == '💎' && y == '✂' || x == '✂' && y == '📃' || x == '📃' && y == '💎'
-        env.reward = (1, -1)
+        env.reward = (; Symbol(1) => 1, Symbol(2) => -1)
     else
-        env.reward = (-1, 1)
+        env.reward = (; Symbol(1) => -1, Symbol(2) => 1)
     end
     env.is_done = true
 end

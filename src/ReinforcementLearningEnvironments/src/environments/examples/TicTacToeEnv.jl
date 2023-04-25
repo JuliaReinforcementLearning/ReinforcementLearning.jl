@@ -1,62 +1,50 @@
 export TicTacToeEnv
 
-struct Nought end
-const NOUGHT = Nought()
-struct Cross end
-const CROSS = Cross()
+import ReinforcementLearningBase: RLBase
+import ReinforcementLearningCore: RLCore
 
-Base.:!(::Nought) = CROSS
-Base.:!(::Cross) = NOUGHT
-
-"""
-This is a typical two player, zero sum game. Here we'll also demonstrate how to
-implement an environment with multiple state representations.
-
-You might be interested in this [blog](http://www.occasionalenthusiast.com/tag/tic-tac-toe/)
-"""
 mutable struct TicTacToeEnv <: AbstractEnv
     board::BitArray{3}
-    player::Union{Nought,Cross}
+    player::Symbol
 end
 
 function TicTacToeEnv()
     board = BitArray{3}(undef, 3, 3, 3)
     fill!(board, false)
     board[:, :, 1] .= true
-    TicTacToeEnv(board, CROSS)
+    TicTacToeEnv(board, :Cross)
 end
 
 function RLBase.reset!(env::TicTacToeEnv)
     fill!(env.board, false)
     env.board[:, :, 1] .= true
-    env.player = CROSS
+    env.player = :Cross
 end
 
 struct TicTacToeInfo
     is_terminated::Bool
-    winner::Union{Nothing,Nought,Cross}
+    winner::Union{Nothing,Symbol}
 end
 
 const TIC_TAC_TOE_STATE_INFO = Dict{
     TicTacToeEnv,
     NamedTuple{
         (:index, :is_terminated, :winner),
-        Tuple{Int,Bool,Union{Nothing,Nought,Cross}},
+        Tuple{Int,Bool,Union{Nothing,Symbol}},
     },
 }()
 
 Base.hash(env::TicTacToeEnv, h::UInt) = hash(env.board, h)
 Base.isequal(a::TicTacToeEnv, b::TicTacToeEnv) = isequal(a.board, b.board)
 
-Base.to_index(::TicTacToeEnv, ::Cross) = 2
-Base.to_index(::TicTacToeEnv, ::Nought) = 3
+Base.to_index(::TicTacToeEnv, player) = player == :Cross ? 2 : 3
 
 RLBase.action_space(::TicTacToeEnv, player) = Base.OneTo(9)
 
 RLBase.legal_action_space(env::TicTacToeEnv, p) = findall(legal_action_space_mask(env))
 
 function RLBase.legal_action_space_mask(env::TicTacToeEnv, p)
-    if is_win(env, CROSS) || is_win(env, NOUGHT)
+    if is_win(env, :Cross) || is_win(env, :Nought)
         falses(9)
     else
         vec(env.board[:, :, 1])
@@ -67,20 +55,28 @@ end
 
 function (env::TicTacToeEnv)(action::CartesianIndex{2})
     env.board[action, 1] = false
-    env.board[action, Base.to_index(env, env.player)] = true
-    env.player = !env.player
+    env.board[action, Base.to_index(env, current_player(env))] = true
 end
 
-RLBase.current_player(env::TicTacToeEnv) = env.player
-RLBase.players(env::TicTacToeEnv) = (CROSS, NOUGHT)
+function RLBase.next_player!(env::TicTacToeEnv)
 
+    env.player = env.player == :Cross ? :Nought : :Cross
+end
+
+RLBase.players(::TicTacToeEnv) = (:Cross, :Nought)
+
+RLBase.state(env::TicTacToeEnv) = state(env, Observation{Int}(), 1)
 RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = env.board
-RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = ArrayProductDomain(fill(false:true, 3, 3, 3))
+RLBase.state(env::TicTacToeEnv, ::RLBase.AbstractStateStyle) = state(env::TicTacToeEnv, Observation{Int}(), 1)
 RLBase.state(env::TicTacToeEnv, ::Observation{Int}, p) =
     get_tic_tac_toe_state_info()[env].index
+
+RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = ArrayProductDomain(fill(false:true, 3, 3, 3))
 RLBase.state_space(env::TicTacToeEnv, ::Observation{Int}, p) =
     Base.OneTo(length(get_tic_tac_toe_state_info()))
 RLBase.state_space(env::TicTacToeEnv, ::Observation{String}, p) = fullspace(String)
+
+RLBase.state(env::TicTacToeEnv, ::Observation{String}) = state(env::TicTacToeEnv, Observation{String}(), 1)
 
 function RLBase.state(env::TicTacToeEnv, ::Observation{String}, p)
     buff = IOBuffer()
@@ -144,10 +140,10 @@ function get_tic_tac_toe_state_info()
                 if !haskey(TIC_TAC_TOE_STATE_INFO, env)
                     n += 1
                     has_empty_pos = any(view(env.board, :, :, 1))
-                    w = if is_win(env, CROSS)
-                        CROSS
-                    elseif is_win(env, NOUGHT)
-                        NOUGHT
+                    w = if is_win(env, :Cross)
+                        :Cross
+                    elseif is_win(env, :Nought)
+                        :Nought
                     else
                         nothing
                     end
@@ -164,12 +160,14 @@ function get_tic_tac_toe_state_info()
     TIC_TAC_TOE_STATE_INFO
 end
 
+RLBase.current_player(env::TicTacToeEnv) = env.player
+
 RLBase.NumAgentStyle(::TicTacToeEnv) = MultiAgent(2)
 RLBase.DynamicStyle(::TicTacToeEnv) = SEQUENTIAL
 RLBase.ActionStyle(::TicTacToeEnv) = FULL_ACTION_SET
 RLBase.InformationStyle(::TicTacToeEnv) = PERFECT_INFORMATION
 RLBase.StateStyle(::TicTacToeEnv) =
-    (Observation{String}(), Observation{Int}(), Observation{BitArray{3}}())
+    (Observation{Int}(), Observation{String}(), Observation{BitArray{3}}())
 RLBase.RewardStyle(::TicTacToeEnv) = TERMINAL_REWARD
 RLBase.UtilityStyle(::TicTacToeEnv) = ZERO_SUM
 RLBase.ChanceStyle(::TicTacToeEnv) = DETERMINISTIC

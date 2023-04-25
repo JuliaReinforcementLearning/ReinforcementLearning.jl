@@ -11,8 +11,10 @@
         while !is_terminated(env)
             env(rand(rng, legal_action_space(env)))
         end
-        push!(rewards[1], reward(env, 1))
-        push!(rewards[2], reward(env, 2))
+        @test RLBase.reward(env, Symbol(1)) == (-1 * RLBase.reward(env, Symbol(2)))
+        @test RLBase.is_terminated(env) isa Bool
+        push!(rewards[1], RLBase.reward(env, Symbol(1)))
+        push!(rewards[2], RLBase.reward(env, Symbol(2)))
         reset!(env)
     end
 

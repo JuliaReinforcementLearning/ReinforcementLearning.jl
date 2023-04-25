@@ -24,9 +24,12 @@ RandomPolicy(s = nothing; rng = Random.GLOBAL_RNG) = RandomPolicy(s, rng)
 
 RLBase.optimise!(::RandomPolicy, x::NamedTuple) = nothing
 
-(p::RandomPolicy{Nothing,RNG})(env) where {RNG<:AbstractRNG} =
-    rand(p.rng, legal_action_space(env))
-(p::RandomPolicy{S,RNG})(env) where {S,RNG<:AbstractRNG} = rand(p.rng, p.action_space)
+(p::RandomPolicy{S,RNG})(env::AbstractEnv) where {S,RNG<:AbstractRNG} = rand(p.rng, p.action_space)
+
+function (p::RandomPolicy{Nothing,RNG})(env::AbstractEnv) where {RNG<:AbstractRNG}
+    legal_action_space_ = RLBase.legal_action_space(env)
+    return rand(p.rng, legal_action_space_)
+end
 
 #####
 
@@ -86,4 +89,9 @@ function RLBase.prob(
     else
         0.0
     end
+end
+
+function (p::RandomPolicy{Nothing,RNG})(env::E, player::Symbol) where {E<:AbstractEnv, RNG<:AbstractRNG}
+    legal_action_space_ = RLBase.legal_action_space(env, player)
+    return rand(p.rng, legal_action_space_)
 end

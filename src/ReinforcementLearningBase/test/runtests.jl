@@ -8,5 +8,6 @@ using POMDPs
 using POMDPTools: Deterministic
 
 @testset "ReinforcementLearningBase" begin
-include("CommonRLInterface.jl")
+    include("CommonRLInterface.jl")
+    include("interface.jl")
 end

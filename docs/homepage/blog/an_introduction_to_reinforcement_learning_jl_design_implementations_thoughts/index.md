@@ -384,7 +384,9 @@ In offline reinforcement learning, we often assume the experience is prepared ah
 
 ### 3.4 Multi-Agent Reinforcement Learning
 
-In our initial workflow, there's only one agent interacting with the environment. To expand it to the multi-agent setting, a policy wrapper of `MultiAgentPolicy` is added. At each stage, it fetch necessary information and forward the `env` to its children. Then based on the current player of the `env`, it selects the right child and generate an action properly.
+In our initial workflow, there's only one agent interacting with the environment. To expand it to the multi-agent setting, a policy wrapper of `MultiAgentPolicy` and `MultiAgentHook` is added. At each stage, it fetches necessary information and forward the `env` to its children. Then based on the current player of the `env`, it selects the right child and generate an action properly.
+
+There are two `MultiAgent` cases, `Sequential` and `Simultaneous`. For `Sequential` environments, `RLBase.next_player!` and `current_player` must be implemented so that the `Base.run` loop knows the order of play. For `Simultaneous`, the working assumption is that all players provided in `MultiAgentPolicy` play every turn. Two basic examples are provided, `TicTacToeEnv` and `RockPaperScissorsEnv`.
 
 #### Counterfactual Regret Minimization
 
@@ -398,10 +400,10 @@ For each policy in our package, we provide at least an `Experiment` to make sure
 
 It's hard to imagine that it's been years since we created this package. The following tips are what we learned during this period:
 
-1. Keep interfaces stupid simple and minimal
+1. Keep interfaces simple and minimal
 
     Adding new APIs is very cheap, but soon you will be the only one who knows
-    how to use them. Keeping APIs stupid simple and minimal will force you
+    how to use them. Keeping APIs simple and minimal will force you
     rethink your existing design and come up with a more natural one. Actually,
     the multi-dispatch in Julia encourages you to generalize the interfaces as
     much as possible.

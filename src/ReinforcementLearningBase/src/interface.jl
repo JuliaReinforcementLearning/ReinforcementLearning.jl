@@ -102,7 +102,7 @@ abstract type AbstractNumAgentStyle <: AbstractEnvStyle end
 `n` must be ≥ 2.
 """
 function MultiAgent(n::Integer)
-    if n < 0
+    if n < 1
         throw(ArgumentError("number of agents must be > 1, get $n"))
     elseif n == 1
         throw(ArgumentError("do you mean `SINGLE_AGENT`?"))
@@ -561,6 +561,7 @@ Treat the `env` as a game tree. Create an independent child after applying
 @api function child(env::AbstractEnv, action)
     new_env = copy(env)
     new_env(action)
+    next_player!(new_env) # NoOp for simultaneous games and single player games
     new_env
 end
 
