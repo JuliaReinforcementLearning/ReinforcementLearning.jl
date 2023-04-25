@@ -234,7 +234,7 @@ function (multiagent::MultiAgentPolicy)(env::E) where {E<:AbstractEnv}
 end
 
 function RLBase.optimise!(multiagent::MultiAgentPolicy)
-    for player in players(env)
-        RLCore.optimise!(multiagent[player])
+    for policy in multiagent
+        RLCore.optimise!(policy)
     end
 end
