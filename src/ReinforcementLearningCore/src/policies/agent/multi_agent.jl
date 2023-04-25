@@ -232,3 +232,9 @@ end
 function (multiagent::MultiAgentPolicy)(env::E) where {E<:AbstractEnv}
     return (multiagent[player](env, player) for player in players(env))
 end
+
+function RLBase.optimise!(multiagent::MultiAgentPolicy)
+    for player in players(env)
+        RLCore.optimise!(multiagent[player])
+    end
+end
