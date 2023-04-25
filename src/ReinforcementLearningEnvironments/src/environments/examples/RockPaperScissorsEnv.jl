@@ -7,7 +7,7 @@ export RockPaperScissorsEnv
 simultaneous, zero sum game.
 """
 Base.@kwdef mutable struct RockPaperScissorsEnv <: AbstractEnv
-    reward::NamedTuple{(Symbol("1"), Symbol("2")), Tuple{Int64, Int64}} = (; Symbol(1) => 0, Symbol(2) => 0)
+    reward::NamedTuple{(Symbol(1), Symbol(2)), Tuple{Int64, Int64}} = (; Symbol(1) => 0, Symbol(2) => 0)
     is_done::Bool = false
 end
 
@@ -26,8 +26,8 @@ RLBase.action_space(::RockPaperScissorsEnv, ::SimultaneousPlayer) =
 
 RLBase.action_space(env::RockPaperScissorsEnv) = action_space(env, SIMULTANEOUS_PLAYER)
 
-RLBase.legal_action_space(env::RockPaperScissorsEnv, p) =
-    is_terminated(env) ? () : action_space(env, p)
+RLBase.legal_action_space(env::RockPaperScissorsEnv, p::Symbol) =
+    is_terminated(env) ? () : action_space(env, p::Symbol)
 
 "Since it's a one-shot game, the state space doesn't have much meaning."
 RLBase.state_space(::RockPaperScissorsEnv, ::Observation, p) = Base.OneTo(1)
