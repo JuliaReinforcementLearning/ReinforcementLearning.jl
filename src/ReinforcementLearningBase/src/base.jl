@@ -159,10 +159,10 @@ function test_interfaces!(env)
                         @test state(env) == state(env, p)
                     end
                     # TODO: Make this test more specific...
-                    @test !(legal_action_space(env, p) isa Nothing)
-                    @test !(legal_action_space(env) isa Nothing)
+                    @test !(RLBase.legal_action_space(env, p) isa Nothing)
+                    @test !(RLBase.legal_action_space(env) isa Nothing)
                 end
-                a = rand(rng, legal_action_space(env))
+                a = rand(rng, RLBase.legal_action_space(env))
                 env(a)
                 for (i, p) in enumerate(players(env))
                     @test state(env, p) ∈ state_space(env, p)
