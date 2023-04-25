@@ -6,6 +6,11 @@ using Random # for RandomPolicy
 import Base.getindex
 import Base.iterate
 
+"""
+    MultiAgentPolicy(agents::NT) where {NT<: NamedTuple}
+
+MultiAgentPolicy is a policy struct that contains `<:AbstractPolicy` structs indexed by the player's symbol.
+"""
 struct MultiAgentPolicy{NT<: NamedTuple} <: AbstractPolicy
     agents::NT
 
@@ -14,6 +19,11 @@ struct MultiAgentPolicy{NT<: NamedTuple} <: AbstractPolicy
     end
 end
 
+"""
+    MultiAgentHook(hooks::NT) where {NT<: NamedTuple}
+
+MultiAgentHook is a hook struct that contains `<:AbstractoHook` structs indexed by the player's symbol.
+"""
 struct MultiAgentHook{NT<: NamedTuple} <: AbstractHook
     hooks::NT
 
@@ -22,8 +32,11 @@ struct MultiAgentHook{NT<: NamedTuple} <: AbstractHook
     end
 end
 
-# (p::MultiAgentPolicy)(env::AbstractEnv) = nothing # Default does nothing, but might be useful for some environments to clean up / pass final state to agents
+"""
+    CurrentPlayerIterator(env::E) where {E<:AbstractEnv}
 
+`CurrentPlayerIterator`` is an iterator that iterates over the players in the environment, returning the `current_player`` for each iteration. This is only necessary for `MultiAgent` environments. After each iteration, `RLBase.next_player!` is called to advance the `current_player`. As long as ``RLBase.next_player!` is defined for the environment, this iterator will work correctly in the `Base.run`` function.
+"""
 struct CurrentPlayerIterator{E<:AbstractEnv}
     env::E
 end
@@ -45,13 +58,25 @@ Base.getindex(h::MultiAgentHook, s::Symbol) = h.hooks[s]
 Base.keys(p::MultiAgentPolicy) = keys(p.agents)
 Base.keys(p::MultiAgentHook) = keys(p.hooks)
 
+
+"""
+    Base.run(
+        multiagent_policy::MultiAgentPolicy,
+        env::E,
+        stop_condition,
+        hook::MultiAgentHook,
+        reset_condition,
+    ) where {E<:AbstractEnv, H<:AbstractHook}
+
+This run function dispatches games using `MultiAgentPolicy` and `MultiAgentHook` to the appropriate `run` function based on the `Sequential` or `Simultaneous` trait of the environment.
+"""
 function Base.run(
     multiagent_policy::MultiAgentPolicy,
     env::E,
     stop_condition,
-    hook::H,
+    hook::MultiAgentHook,
     reset_condition,
-) where {E<:AbstractEnv, H<:AbstractHook}
+) where {E<:AbstractEnv}
     keys(multiagent_policy) == keys(hook) || throw(ArgumentError("MultiAgentPolicy and MultiAgentHook must have the same keys"))
     Base.run(
         multiagent_policy,
@@ -63,12 +88,24 @@ function Base.run(
     )
 end
 
+"""
+    Base.run(
+        multiagent_policy::MultiAgentPolicy,
+        env::E,
+        ::Sequential,
+        stop_condition,
+        hook::MultiAgentHook,
+        reset_condition,
+    ) where {E<:AbstractEnv, H<:AbstractHook}
+
+This run function handles `MultiAgent` games with the `Sequential` trait. It iterates over the `current_player` for each turn in the environment, and runs the full `run` loop, like in the `SingleAgent` case. If the `stop_condition` is met, the function breaks out of the loop and calls `optimise!` on the policy again. Finally, it calls `optimise!` on the policy one last time and returns the `MultiAgentHook`.
+"""
 function Base.run(
     multiagent_policy::MultiAgentPolicy,
     env::E,
     ::Sequential,
     stop_condition,
-    hook,
+    hook::MultiAgentHook,
     reset_condition,
 ) where {E<:AbstractEnv}
     hook(PreExperimentStage(), multiagent_policy, env)
@@ -114,12 +151,25 @@ function Base.run(
     hook
 end
 
+
+"""
+    Base.run(
+        multiagent_policy::MultiAgentPolicy,
+        env::E,
+        ::Simultaneous,
+        stop_condition,
+        hook::MultiAgentHook,
+        reset_condition,
+    ) where {E<:AbstractEnv, H<:AbstractHook}
+
+This run function handles `MultiAgent` games with the `Simultaneous` trait. It iterates over the players in the environment, and for each player, it selects the appropriate policy from the `MultiAgentPolicy`. All agent actions are collected before the environment is updated. After each player has taken an action, it calls `optimise!` on the policy. If the `stop_condition` is met, the function breaks out of the loop and calls `optimise!` on the policy again. Finally, it calls `optimise!` on the policy one last time and returns the `MultiAgentHook`.
+"""
 function Base.run(
     multiagent_policy::MultiAgentPolicy,
     env::E,
     ::Simultaneous,
     stop_condition,
-    hook,
+    hook::MultiAgentHook,
     reset_condition,
 ) where {E<:AbstractEnv}
     RLCore._run(
