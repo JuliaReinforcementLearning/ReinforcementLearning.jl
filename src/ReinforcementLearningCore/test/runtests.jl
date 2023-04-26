@@ -13,5 +13,7 @@ using Flux
     include("core/hooks.jl")
     include("core/stop_conditions.jl")
     include("policies/agent.jl")
+    include("policies/multi_agent.jl")
+    include("policies/q_based_policy.jl")
     include("utils/utils.jl")
 end
