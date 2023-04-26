@@ -21,11 +21,12 @@
 
 ### ReinforcementLearningEnvironments.jl
 
-#### dev
+#### v0.7.2
 
 - Reduce allocations, improve performance of `RandomWalk1D`
 - Add tests to `RandomWalk1D`
 - Chase down JET.jl errors, fix
+- Update `TicTacToeEnv` and `RockPaperScissorsEnv` to support new `MultiAgentPolicy` setup
 
 #### v0.6.12
 
@@ -140,9 +141,10 @@
 
 ### ReinforcementLearningBase.jl
 
-#### dev
+#### v0.9.7
 
 - Update POMDPModelTools -> POMDPTools
+- Add `next_player!` method to support `Sequential` `MultiAgent` environments
 
 #### v0.9.6
 
@@ -154,6 +156,10 @@
 
 ### ReinforcementLearningCore.jl
 
+#### v0.9.3
+
+- Add back multi-agent support with `MultiAgentPolicy` and `MultiAgentHook`
+
 #### v0.9.2
 
 - Use correct Flux.stack function signature
@@ -161,7 +167,7 @@
 - Chase down JET.jl errors, fix
 - Add tests for `StopAfterStep`, `StopAfterEpisode`
 - Add tests, improve performance of `RewardsPerEpisode`
-- Refactor Agent for speedup
+- Refactor `Agent` for speedup
 
 #### v0.8.11
 
