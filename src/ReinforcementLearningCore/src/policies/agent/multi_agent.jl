@@ -230,7 +230,7 @@ function (hook::MultiAgentHook)(::PostEpisodeStage, multiagent::MultiAgentPolicy
 end
 
 function (multiagent::MultiAgentPolicy)(env::E) where {E<:AbstractEnv}
-    return (multiagent[player](env, player) for player in players(env))
+    return (multiagent[player](env) for player in players(env))
 end
 
 function RLBase.optimise!(multiagent::MultiAgentPolicy)
