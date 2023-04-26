@@ -121,24 +121,24 @@
         env =  RockPaperScissorsEnv()
         RLBase.test_interfaces!(env)
         RLBase.test_runnable!(env)
-    
+
         @test RLBase.current_player(env) == SimultaneousPlayer()
-    
+
         env(['💎', '📃'])
-    
+
         @test is_terminated(env) == true
-    
+
         reset!(env)
-    
+
         @test reward(env) == (; Symbol(1) => 0, Symbol(2) => 0)
         @test is_terminated(env) == false
-    
+
         env(['💎', '📃'])
-    
+
         @test reward(env, Symbol(1)) == -1
         @test reward(env, Symbol(2)) == 1
         @test is_terminated(env) == true
-    
+
         reset!(env)
         @test reward(env) == (; Symbol(1) => 0, Symbol(2) => 0)
         @test reward(env, Symbol(1)) == 0

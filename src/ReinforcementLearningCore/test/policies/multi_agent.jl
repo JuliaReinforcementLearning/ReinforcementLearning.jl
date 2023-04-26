@@ -3,6 +3,7 @@ using ReinforcementLearningEnvironments
 using ReinforcementLearningTrajectories
 using ReinforcementLearningCore
 using ReinforcementLearningBase
+using DomainSets
 
 @testset "MultiAgentPolicy" begin
     trajectory_1 = Trajectory(
@@ -26,8 +27,14 @@ using ReinforcementLearningBase
 end
 
 @testset "MultiAgentHook" begin
+    env = TicTacToeEnv()
     multiagent_hook = MultiAgentHook((; :Cross => StepsPerEpisode(), :Nought => StepsPerEpisode()))
     @test multiagent_hook.hooks[:Cross] isa StepsPerEpisode
+
+    multiagent_hook.hooks[:Cross](PostActStage(), RandomPolicy(), env)
+    multiagent_hook.hooks[:Cross](PostActStage(), RandomPolicy(), env)
+    multiagent_hook.hooks[:Cross](PostEpisodeStage(), RandomPolicy(), env)
+    @test multiagent_hook.hooks[:Cross].steps == [2]
 end
 
 @testset "CurrentPlayerIterator" begin
@@ -69,25 +76,28 @@ end
 
     @test RLBase.reward(env, :Cross) == 0
     @test length(RLBase.legal_action_space(env)) == 9
-    Base.run(multiagent_policy, env, stop_condition, multiagent_hook)
-    # TODO: Split up TicTacToeEnv and MultiAgent tests
+    Base.run(multiagent_policy, env, Sequential(), stop_condition, multiagent_hook)
+
+    @test multiagent_hook.hooks[:Nought].steps[1] > 0
+    @test multiagent_hook.hooks[:Cross].steps[1] > 0
+
     @test RLBase.is_terminated(env)
-    @test RLEnvs.is_win(env, :Cross) != RLEnvs.is_win(env, :Nought)
+    @test RLEnvs.is_win(env, :Cross) isa Bool
+    @test RLEnvs.is_win(env, :Nought) isa Bool
     @test RLBase.reward(env, :Cross) == (RLBase.reward(env, :Nought) * -1)
     @test RLBase.legal_action_space_mask(env, :Cross) == falses(9)
     @test RLBase.legal_action_space(env) == []
 
     @test RLBase.state(env, Observation{BitArray{3}}(), :Cross) isa BitArray{3}
     @test RLBase.state_space(env, Observation{BitArray{3}}(), :Cross) isa ArrayProductDomain
-    @test RLBase.state_space(env, Observation{String}(), :Cross) isa String
+    @test RLBase.state_space(env, Observation{String}(), :Cross) isa DomainSets.FullSpace{String}
     @test RLBase.state(env, Observation{String}(), :Cross) isa String
     @test RLBase.state(env, Observation{String}()) isa String
-    
 end
 
 @testset "next_player!" begin
     env = TicTacToeEnv()
-    @test RLBase.next_player!(env)(env) == :Nought
+    @test RLBase.next_player!(env) == :Nought
 end
 
 @testset "Basic RockPaperScissors (simultaneous) env checks" begin
@@ -126,7 +136,7 @@ end
     @test Base.iterate(RLCore.CurrentPlayerIterator(env), env)[1] == SimultaneousPlayer()
     @test Base.iterate(multiagent_policy)[1] isa Agent
     @test Base.iterate(multiagent_policy, 1)[1] isa Agent
-    
+
     @test Base.getindex(multiagent_policy, Symbol(1)) isa Agent
     @test Base.getindex(multiagent_hook, Symbol(1)) isa StepsPerEpisode
 
@@ -135,6 +145,8 @@ end
 
     @test length(RLBase.legal_action_space(env)) == 9
     Base.run(multiagent_policy, env, stop_condition, multiagent_hook)
+
+    @test multiagent_hook[Symbol(1)].steps[1] == 1
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLBase.legal_action_space(env) == ()

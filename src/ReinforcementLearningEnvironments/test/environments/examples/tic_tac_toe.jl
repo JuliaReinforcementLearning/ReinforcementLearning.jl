@@ -1,4 +1,4 @@
-@testset "TicTacToeEnv" begin
+testset "TicTacToeEnv" begin
     using DomainSets
     using ReinforcementLearningEnvironments, ReinforcementLearningBase, ReinforcementLearningCore
 
@@ -37,5 +37,3 @@
     Base.run(multiagent_policy, env, stop_condition, multiagent_hook)
     @test RLBase.legal_action_space_mask(env, :Cross) == falses(9)
 end
-
-
