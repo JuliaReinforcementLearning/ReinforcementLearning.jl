@@ -27,8 +27,14 @@ using DomainSets
 end
 
 @testset "MultiAgentHook" begin
+    env = TicTacToeEnv()
     multiagent_hook = MultiAgentHook((; :Cross => StepsPerEpisode(), :Nought => StepsPerEpisode()))
     @test multiagent_hook.hooks[:Cross] isa StepsPerEpisode
+
+    multiagent_hook.hooks[:Cross](PostActStage(), RandomPolicy(), env)
+    multiagent_hook.hooks[:Cross](PostActStage(), RandomPolicy(), env)
+    multiagent_hook.hooks[:Cross](PostEpisodeStage(), RandomPolicy(), env)
+    @test multiagent_hook.hooks[:Cross].steps == [2]
 end
 
 @testset "CurrentPlayerIterator" begin
@@ -70,8 +76,11 @@ end
 
     @test RLBase.reward(env, :Cross) == 0
     @test length(RLBase.legal_action_space(env)) == 9
-    Base.run(multiagent_policy, env, stop_condition, multiagent_hook)
-    # TODO: Split up TicTacToeEnv and MultiAgent tests
+    Base.run(multiagent_policy, env, Sequential(), stop_condition, multiagent_hook)
+
+    @test multiagent_hook.hooks[:Nought].steps[1] > 0
+    @test multiagent_hook.hooks[:Cross].steps[1] > 0
+
     @test RLBase.is_terminated(env)
     @test RLEnvs.is_win(env, :Cross) isa Bool
     @test RLEnvs.is_win(env, :Nought) isa Bool

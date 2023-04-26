@@ -75,7 +75,7 @@ function Base.run(
     env::E,
     stop_condition,
     hook::MultiAgentHook,
-    reset_condition,
+    reset_condition=ResetAtTerminal()
 ) where {E<:AbstractEnv}
     keys(multiagent_policy) == keys(hook) || throw(ArgumentError("MultiAgentPolicy and MultiAgentHook must have the same keys"))
     Base.run(
@@ -105,21 +105,21 @@ function Base.run(
     env::E,
     ::Sequential,
     stop_condition,
-    hook::MultiAgentHook,
-    reset_condition,
+    multiagent_hook::MultiAgentHook,
+    reset_condition=ResetAtTerminal(),
 ) where {E<:AbstractEnv}
-    hook(PreExperimentStage(), multiagent_policy, env)
+    multiagent_hook(PreExperimentStage(), multiagent_policy, env)
     multiagent_policy(PreExperimentStage(), env)
     is_stop = false
     while !is_stop
         reset!(env)
         multiagent_policy(PreEpisodeStage(), env)
-        hook(PreEpisodeStage(), multiagent_policy, env)
+        multiagent_hook(PreEpisodeStage(), multiagent_policy, env)
 
         while !reset_condition(multiagent_policy, env) # one episode
             for player in CurrentPlayerIterator(env)
                 policy = multiagent_policy[player] # Select appropriate policy
-
+                hook = multiagent_hook[player] # Select appropriate hook
                 policy(PreActStage(), env)
                 hook(PreActStage(), policy, env)
 
@@ -133,8 +133,8 @@ function Base.run(
 
                 if stop_condition(policy, env)
                     is_stop = true
-                    policy(PreActStage(), env)
-                    hook(PreActStage(), policy, env)
+                    multiagent_policy(PreActStage(), env)
+                    multiagent_hook(PreActStage(), policy, env)
                     multiagent_policy(env)  # let the policy see the last observation
                     break
                 end
@@ -143,12 +143,12 @@ function Base.run(
 
         if is_terminated(env)
             multiagent_policy(PostEpisodeStage(), env)  # let the policy see the last observation
-            hook(PostEpisodeStage(), multiagent_policy, env)
+            multiagent_hook(PostEpisodeStage(), multiagent_policy, env)
         end
     end
     multiagent_policy(PostExperimentStage(), env)
-    hook(PostExperimentStage(), multiagent_policy, env)
-    hook
+    multiagent_hook(PostExperimentStage(), multiagent_policy, env)
+    multiagent_policy
 end
 
 
@@ -170,7 +170,7 @@ function Base.run(
     ::Simultaneous,
     stop_condition,
     hook::MultiAgentHook,
-    reset_condition,
+    reset_condition=ResetAtTerminal(),
 ) where {E<:AbstractEnv}
     RLCore._run(
         multiagent_policy,
