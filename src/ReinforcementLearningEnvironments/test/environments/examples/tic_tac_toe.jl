@@ -1,4 +1,4 @@
-testset "TicTacToeEnv" begin
+@testset "TicTacToeEnv" begin
     using DomainSets
     using ReinforcementLearningEnvironments, ReinforcementLearningBase, ReinforcementLearningCore
 
