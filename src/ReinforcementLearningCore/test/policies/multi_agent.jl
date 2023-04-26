@@ -3,6 +3,7 @@ using ReinforcementLearningEnvironments
 using ReinforcementLearningTrajectories
 using ReinforcementLearningCore
 using ReinforcementLearningBase
+using DomainSets
 
 @testset "MultiAgentPolicy" begin
     trajectory_1 = Trajectory(
@@ -72,22 +73,22 @@ end
     Base.run(multiagent_policy, env, stop_condition, multiagent_hook)
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
-    @test RLEnvs.is_win(env, :Cross) != RLEnvs.is_win(env, :Nought)
+    @test RLEnvs.is_win(env, :Cross) isa Bool
+    @test RLEnvs.is_win(env, :Nought) isa Bool
     @test RLBase.reward(env, :Cross) == (RLBase.reward(env, :Nought) * -1)
     @test RLBase.legal_action_space_mask(env, :Cross) == falses(9)
     @test RLBase.legal_action_space(env) == []
 
     @test RLBase.state(env, Observation{BitArray{3}}(), :Cross) isa BitArray{3}
     @test RLBase.state_space(env, Observation{BitArray{3}}(), :Cross) isa ArrayProductDomain
-    @test RLBase.state_space(env, Observation{String}(), :Cross) isa String
+    @test RLBase.state_space(env, Observation{String}(), :Cross) isa DomainSets.FullSpace{String}
     @test RLBase.state(env, Observation{String}(), :Cross) isa String
     @test RLBase.state(env, Observation{String}()) isa String
-    
 end
 
 @testset "next_player!" begin
     env = TicTacToeEnv()
-    @test RLBase.next_player!(env)(env) == :Nought
+    @test RLBase.next_player!(env) == :Nought
 end
 
 @testset "Basic RockPaperScissors (simultaneous) env checks" begin

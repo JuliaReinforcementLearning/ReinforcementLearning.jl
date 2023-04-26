@@ -19,6 +19,8 @@ end
 
 (p::QBasedPolicy)(env) = p.explorer(p.learner(env), legal_action_space_mask(env))
 
+(p::QBasedPolicy)(env, player::Symbol) = p.explorer(p.learner(env), legal_action_space_mask(env, player))
+
 RLBase.prob(p::QBasedPolicy, env::AbstractEnv) =
     prob(p.explorer, p.learner(env), legal_action_space_mask(env))
 
