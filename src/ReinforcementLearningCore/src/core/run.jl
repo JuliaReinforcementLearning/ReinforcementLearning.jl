@@ -62,12 +62,12 @@ Base.show(io::IO, m::MIME"text/plain", t::Experiment{S}) where {S} = show(io, m,
 Base.run(ex::Experiment) = run(ex.policy, ex.env, ex.stop_condition, ex.hook)
 
 function Base.run(
-    policy::P,
-    env::E,
+    policy::AbstractPolicy,
+    env::AbstractEnv,
     stop_condition=StopAfterEpisode(1),
     hook=EmptyHook(),
     reset_condition=ResetAtTerminal()
-) where {P<:AbstractPolicy, E<:AbstractEnv}
+)
     policy, env = check(policy, env)
     _run(policy, env, stop_condition, hook, reset_condition)
 end
@@ -75,7 +75,7 @@ end
 "Inject some customized checkings here by overwriting this function"
 check(policy, env) = policy, env
 
-function _run(policy::P, env::E, stop_condition, hook, reset_condition) where {P<:AbstractPolicy, E<:AbstractEnv}
+function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook, reset_condition)
     hook(PreExperimentStage(), policy, env)
     policy(PreExperimentStage(), env)
     is_stop = false
