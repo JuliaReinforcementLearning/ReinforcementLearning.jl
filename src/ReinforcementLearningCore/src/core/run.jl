@@ -76,7 +76,6 @@ end
 check(policy, env) = policy, env
 
 function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook, reset_condition)
-
     hook(PreExperimentStage(), policy, env)
     policy(PreExperimentStage(), env)
     is_stop = false
