@@ -31,6 +31,12 @@ abstract type AbstractHook end
 
 (hook::AbstractHook)(args...) = nothing
 
+# Pass through if the hook logic doesn't need multiplayer customization
+function (hook::AbstractHook)(s::AbstractStage, agent, env, player::Symbol)
+    (hook)(s, agent, env)
+end
+
+
 struct ComposedHook{H} <: AbstractHook
     hooks::H
 end
@@ -102,6 +108,7 @@ Base.getindex(h::RewardsPerEpisode) = h.rewards
 
 (h::RewardsPerEpisode)(::PreEpisodeStage, agent, env) = push!(h.rewards, h.empty_vect)
 (h::RewardsPerEpisode)(::PostActStage, agent, env) = push!(h.rewards[end], reward(env))
+(h::RewardsPerEpisode)(::PostActStage, agent, env, player::Symbol) = push!(h.rewards[end], reward(env, player))
 
 #####
 # TotalRewardPerEpisode
@@ -130,6 +137,7 @@ end
 Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
 (h::TotalRewardPerEpisode)(::PostActStage, agent, env) = h.reward += reward(env)
+(h::TotalRewardPerEpisode)(::PostActStage, agent, env, player::Symbol) = h.reward += reward(env, player)
 
 function (hook::TotalRewardPerEpisode)(
     ::PostEpisodeStage,
@@ -199,6 +207,16 @@ function (hook::TotalBatchRewardPerEpisode)(
     env,
 )
     hook.reward .+= reward(env)
+    return
+end
+
+function (hook::TotalBatchRewardPerEpisode)(
+    ::PostActStage,
+    agent,
+    env,
+    player::Symbol,
+)
+    hook.reward .+= reward(env, player)
     return
 end
 
