@@ -10,8 +10,7 @@ using Flux
 
 @testset "ReinforcementLearningCore.jl" begin
     include("core/core.jl")
-    include("core/hooks.jl")
     include("core/stop_conditions.jl")
-    include("policies/agent.jl")
+    include("policies/policies.jl")
     include("utils/utils.jl")
 end
