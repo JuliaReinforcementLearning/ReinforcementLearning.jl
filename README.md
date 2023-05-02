@@ -154,7 +154,8 @@ subpackages. The relationship between them is depicted below:
 ## ✋ Getting Help
 Are you looking for help with ReinforcementLearning.jl? Here are ways to find help:
 1. Read the online documentation! Most likely the answer is already provided in an example or in the API documents. Search using the search bar in the upper left. 
-2. Chat with us in [Julia Slack](https://julialang.org/slack/) in the #reinforcement-learnin channel. 
+<!-- cspell:disable-next -->
+2. Chat with us in [Julia Slack](https://julialang.org/slack/) in the #reinforcement-learnin channel.
 3. Post a question in the [Julia discourse](https://discourse.julialang.org/) forum in the category "Machine Learning" and use "reinforcement-learning" as a tag.
 4. For issues with unexpected behavior or defects in ReinforcementLearning.jl, then please open an issue on the ReinforcementLearning [GitHub page](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl) with a minimal working example and steps to reproduce. 
 
