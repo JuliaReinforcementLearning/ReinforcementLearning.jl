@@ -81,7 +81,7 @@ function (agent::Agent)(::PostExperimentStage, env::E) where {E <: AbstractEnv}
     RLBase.reset!(agent.cache)
 end
 
-(agent::Agent)(::PostExperimentStage, p::Symbol, env::E) = (agent)(PostExperimentStage(), env)
+(agent::Agent)(::PostExperimentStage, p::Symbol, env::AbstractEnv) = (agent)(PostExperimentStage(), env)
 
 function update!(agent::Agent, state::S) where {S}
     update!(agent.cache, state)
