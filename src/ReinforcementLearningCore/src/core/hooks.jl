@@ -157,6 +157,20 @@ function (hook::TotalRewardPerEpisode)(
     hook.reward = 0
 end
 
+# Pass through as no need for multiplayer customization
+function (hook::TotalRewardPerEpisode)(
+    stage::Union{PostEpisodeStage, PostExperimentStage},
+    agent,
+    env,
+    player::Symbol
+)
+    hook(
+        stage,
+        agent,
+        env,
+    )
+end
+
 function Base.show(io::IO, hook::TotalRewardPerEpisode{true, F}) where {F<:Number}
     if length(hook.rewards) > 0
         println(io, lineplot(
@@ -262,6 +276,20 @@ function (hook::TotalBatchRewardPerEpisode{true, F})(
     display(hook)
 end
 
+# Pass through as no need for multiplayer customization
+function (hook::TotalBatchRewardPerEpisode)(
+    stage::Union{PostEpisodeStage, PostExperimentStage},
+    agent,
+    env,
+    player::Symbol
+)
+    hook(
+        stage,
+        agent,
+        env,
+    )
+end
+
 #####
 # BatchStepsPerEpisode
 #####
@@ -295,6 +323,20 @@ function (hook::BatchStepsPerEpisode)(
             hook.step[i] = 0
         end
     end
+end
+
+# Pass through as no need for multiplayer customization
+function (hook::BatchStepsPerEpisode)(
+    stage::PostActStage,
+    agent,
+    env,
+    player::Symbol
+)
+    hook(
+        stage,
+        agent,
+        env,
+    )
 end
 
 #####

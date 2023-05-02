@@ -39,11 +39,6 @@ end
 
     multiagent_hook = MultiAgentHook((; :Cross => composed_hook, :Nought => EmptyHook()))
     @test multiagent_hook.hooks[:Cross][3] isa StepsPerEpisode
-
-    multiagent_hook.hooks[:Cross](PostActStage(), RandomPolicy(), env)
-    multiagent_hook.hooks[:Cross](PostActStage(), RandomPolicy(), env)
-    multiagent_hook.hooks[:Cross](PostEpisodeStage(), RandomPolicy(), env)
-    @test multiagent_hook.hooks[:Cross].steps == [2]
 end
 
 @testset "CurrentPlayerIterator" begin
@@ -165,6 +160,11 @@ end
     Base.run(multiagent_policy, env, stop_condition, multiagent_hook)
 
     @test multiagent_hook[Symbol(1)][3].steps[1] == 1
+
+    @test 0 < multiagent_hook[Symbol(1)][6].times[1] < 1
+
+    # Add more hook tests here...
+
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLBase.legal_action_space(env) == ()
