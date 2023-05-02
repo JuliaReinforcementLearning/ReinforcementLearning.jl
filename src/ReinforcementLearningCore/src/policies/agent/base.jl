@@ -58,6 +58,8 @@ function (agent::Agent)(::PreActStage, env::AbstractEnv)
     update!(agent, state(env))
 end
 
+(agent::Agent)(::PreActStage, player::Symbol, env::AbstractEnv) = (agent)(PreActStage(), env)
+
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
@@ -67,13 +69,19 @@ function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action
 end
 
-function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
+function (agent::Agent)(::PostActStage, env::AbstractEnv) where {E <: AbstractEnv}
     update!(agent.cache, reward(env), is_terminated(env))
+end
+
+function (agent::Agent)(::PostActStage, p::Symbol, env::AbstractEnv)
+    update!(agent.cache, reward(env, p), is_terminated(env))
 end
 
 function (agent::Agent)(::PostExperimentStage, env::E) where {E <: AbstractEnv}
     RLBase.reset!(agent.cache)
 end
+
+(agent::Agent)(::PostExperimentStage, p::Symbol, env::E) = (agent)(PostExperimentStage(), env)
 
 function update!(agent::Agent, state::S) where {S}
     update!(agent.cache, state)
