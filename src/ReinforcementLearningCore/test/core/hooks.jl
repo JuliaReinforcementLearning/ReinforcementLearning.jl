@@ -10,14 +10,20 @@ function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), P
         policy = RandomPolicy(legal_action_space(env))
 
         hook_fieldnames = fieldnames(typeof(hook))
-        for stage in stages
-            hook_copy = deepcopy(hook)
-            hook_copy(stage, policy, env)
-            for field_ in hook_fieldnames
-                if getfield(hook, field_) isa Ref
-                    @test getfield(hook, field_)[] == getfield(hook_copy, field_)[]
-                else
-                    @test getfield(hook, field_) == getfield(hook_copy, field_)
+        for mode in [:MultiAgent, :SingleAgent]
+            for stage in stages
+                hook_copy = deepcopy(hook)
+                if mode == :SingleAgent
+                    hook_copy(stage, policy, env)
+                elseif mode == :MultiAgent
+                    hook_copy(stage, policy, env, :player_i)
+                end
+                for field_ in hook_fieldnames
+                    if getfield(hook, field_) isa Ref
+                        @test getfield(hook, field_)[] == getfield(hook_copy, field_)[]
+                    else
+                        @test getfield(hook, field_) == getfield(hook_copy, field_)
+                    end
                 end
             end
         end
