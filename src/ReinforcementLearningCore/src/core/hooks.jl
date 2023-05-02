@@ -32,12 +32,6 @@ abstract type AbstractHook end
 
 (hook::AbstractHook)(args...) = nothing
 
-# Pass through if the hook logic doesn't need multiplayer customization
-function (hook::AbstractHook)(s::AbstractStage, agent, env, player::Symbol)
-    (hook)(s, agent, env)
-end
-
-
 struct ComposedHook{T<:Tuple} <: AbstractHook
     hooks::T
     ComposedHook(hooks...) = new{typeof(hooks)}(hooks)
@@ -86,6 +80,8 @@ Base.getindex(h::StepsPerEpisode) = h.steps
 
 (hook::StepsPerEpisode)(::PostActStage, args...) = hook.count += 1
 
+(hook::StepsPerEpisode)(stage::Union{PostEpisodeStage,PostExperimentStage}, agent, env, ::Symbol) = hook(stage, agent, env)
+
 function (hook::StepsPerEpisode)(::Union{PostEpisodeStage,PostExperimentStage}, agent, env)
     push!(hook.steps, hook.count)
     hook.count = 0
@@ -116,6 +112,8 @@ end
 Base.getindex(h::RewardsPerEpisode) = h.rewards
 
 (h::RewardsPerEpisode)(::PreEpisodeStage, agent, env) = push!(h.rewards, h.empty_vect)
+(h::RewardsPerEpisode)(::PreEpisodeStage, agent, env, ::Symbol) = h(PreEpisodeStage(), agent, env)
+
 (h::RewardsPerEpisode)(::PostActStage, agent, env) = push!(h.rewards[end], reward(env))
 (h::RewardsPerEpisode)(::PostActStage, agent, env, player::Symbol) = push!(h.rewards[end], reward(env, player))
 
