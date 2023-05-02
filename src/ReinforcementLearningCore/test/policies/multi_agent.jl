@@ -159,8 +159,11 @@ end
     @test length(RLBase.legal_action_space(env)) == 9
     Base.run(multiagent_policy, env, stop_condition, multiagent_hook)
 
+    @test multiagent_hook[Symbol(1)][1].steps[1][1] == 1
+    @test -1 <= multiagent_hook[Symbol(1)][2].rewards[1][1] <= 1
     @test multiagent_hook[Symbol(1)][3].steps[1] == 1
-
+    @test -1 <= multiagent_hook[Symbol(1)][4].rewards[1][1] <= 1
+    @test -1 <= multiagent_hook[Symbol(1)][5].rewards[1][1] <= 1
     @test 0 < multiagent_hook[Symbol(1)][6].times[1] < 1
 
     # Add more hook tests here...
