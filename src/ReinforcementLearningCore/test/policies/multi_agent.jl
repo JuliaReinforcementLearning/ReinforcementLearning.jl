@@ -28,7 +28,16 @@ end
 
 @testset "MultiAgentHook" begin
     env = TicTacToeEnv()
-    multiagent_hook = MultiAgentHook((; :Cross => StepsPerEpisode(), :Nought => StepsPerEpisode()))
+    composed_hook = ComposedHook(
+        BatchStepsPerEpisode(),
+        RewardsPerEpisode(),
+        StepsPerEpisode(),
+        TotalBatchRewardPerEpisode(),
+        TotalRewardPerEpisode(),
+        TimePerStep()
+    )
+
+    multiagent_hook = MultiAgentHook((; :Cross => composed_hook, :Nought => EmptyHook()))
     @test multiagent_hook.hooks[:Cross] isa StepsPerEpisode
 
     multiagent_hook.hooks[:Cross](PostActStage(), RandomPolicy(), env)

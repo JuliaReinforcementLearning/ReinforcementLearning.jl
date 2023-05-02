@@ -1,5 +1,6 @@
 export AbstractHook,
     EmptyHook,
+    ComposedHook,
     StepsPerEpisode,
     RewardsPerEpisode,
     TotalRewardPerEpisode,
@@ -37,8 +38,9 @@ function (hook::AbstractHook)(s::AbstractStage, agent, env, player::Symbol)
 end
 
 
-struct ComposedHook{H} <: AbstractHook
-    hooks::H
+struct ComposedHook{T<:Tuple} <: AbstractHook
+    hooks::T
+    ComposedHook(hooks...) = new{typeof(hooks)}(hooks)
 end
 
 Base.:(+)(h1::AbstractHook, h2::AbstractHook) = ComposedHook((h1, h2))
@@ -46,7 +48,14 @@ Base.:(+)(h1::ComposedHook, h2::AbstractHook) = ComposedHook((h1.hooks..., h2))
 Base.:(+)(h1::AbstractHook, h2::ComposedHook) = ComposedHook((h1, h2.hooks...))
 Base.:(+)(h1::ComposedHook, h2::ComposedHook) = ComposedHook((h1.hooks..., h2.hooks...))
 
-(h::ComposedHook)(args...) = map(h -> h(args...), h.hooks)
+function (hook::ComposedHook)(stage::AbstractStage, args...; kw...)
+    for h in hook.hooks
+        h(stage, args...; kw...)
+    end
+    return
+end
+
+Base.getindex(hook::ComposedHook, inds...) = getindex(hook.hooks, inds...)
 
 #####
 # EmptyHook
