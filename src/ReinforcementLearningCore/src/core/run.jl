@@ -59,7 +59,10 @@ end
 
 Base.show(io::IO, m::MIME"text/plain", t::Experiment{S}) where {S} = show(io, m, convert(AnnotatedStructTree, t; description=string(S)))
 
-Base.run(ex::Experiment) = run(ex.policy, ex.env, ex.stop_condition, ex.hook)
+function Base.run(ex::Experiment)
+    run(ex.policy, ex.env, ex.stop_condition, ex.hook)
+    return ex
+end
 
 function Base.run(
     policy::AbstractPolicy,
