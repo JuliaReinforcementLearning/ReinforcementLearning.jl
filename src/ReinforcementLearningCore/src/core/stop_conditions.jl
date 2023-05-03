@@ -1,5 +1,5 @@
 export StopAfterStep,
-    StopAfterEpisode, StopWhenDone, StopSignal, StopAfterNoImprovement, StopAfterNSeconds
+    StopAfterEpisode, StopWhenDone, StopSignal, StopAfterNoImprovement, StopAfterNSeconds, ComposedStopCondition
 
 import ProgressMeter
 
