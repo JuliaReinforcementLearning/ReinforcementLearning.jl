@@ -11,7 +11,7 @@ end
     stop_3 = StopAfterStep(3)
 
     composed_stop = ComposedStopCondition(stop_10, stop_3)
-    @test sum([composed_stop() for i in 1:20]) == 3
+    @test sum([composed_stop() for i in 1:20]) == 18
 end
 
 @testset "StopAfterEpisode" begin
