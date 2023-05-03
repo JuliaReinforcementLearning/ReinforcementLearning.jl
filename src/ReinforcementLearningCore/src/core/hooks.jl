@@ -1,5 +1,6 @@
 export AbstractHook,
     EmptyHook,
+    ComposedHook,
     StepsPerEpisode,
     RewardsPerEpisode,
     TotalRewardPerEpisode,
@@ -31,8 +32,9 @@ abstract type AbstractHook end
 
 (hook::AbstractHook)(args...) = nothing
 
-struct ComposedHook{H} <: AbstractHook
-    hooks::H
+struct ComposedHook{T<:Tuple} <: AbstractHook
+    hooks::T
+    ComposedHook(hooks...) = new{typeof(hooks)}(hooks)
 end
 
 Base.:(+)(h1::AbstractHook, h2::AbstractHook) = ComposedHook((h1, h2))
@@ -40,7 +42,14 @@ Base.:(+)(h1::ComposedHook, h2::AbstractHook) = ComposedHook((h1.hooks..., h2))
 Base.:(+)(h1::AbstractHook, h2::ComposedHook) = ComposedHook((h1, h2.hooks...))
 Base.:(+)(h1::ComposedHook, h2::ComposedHook) = ComposedHook((h1.hooks..., h2.hooks...))
 
-(h::ComposedHook)(args...) = map(h -> h(args...), h.hooks)
+function (hook::ComposedHook)(stage::AbstractStage, args...; kw...)
+    for h in hook.hooks
+        h(stage, args...; kw...)
+    end
+    return
+end
+
+Base.getindex(hook::ComposedHook, inds...) = getindex(hook.hooks, inds...)
 
 #####
 # EmptyHook
@@ -70,6 +79,8 @@ end
 Base.getindex(h::StepsPerEpisode) = h.steps
 
 (hook::StepsPerEpisode)(::PostActStage, args...) = hook.count += 1
+
+(hook::StepsPerEpisode)(stage::Union{PostEpisodeStage,PostExperimentStage}, agent, env, ::Symbol) = hook(stage, agent, env)
 
 function (hook::StepsPerEpisode)(::Union{PostEpisodeStage,PostExperimentStage}, agent, env)
     push!(hook.steps, hook.count)
@@ -101,7 +112,10 @@ end
 Base.getindex(h::RewardsPerEpisode) = h.rewards
 
 (h::RewardsPerEpisode)(::PreEpisodeStage, agent, env) = push!(h.rewards, h.empty_vect)
+(h::RewardsPerEpisode)(::PreEpisodeStage, agent, env, ::Symbol) = h(PreEpisodeStage(), agent, env)
+
 (h::RewardsPerEpisode)(::PostActStage, agent, env) = push!(h.rewards[end], reward(env))
+(h::RewardsPerEpisode)(::PostActStage, agent, env, player::Symbol) = push!(h.rewards[end], reward(env, player))
 
 #####
 # TotalRewardPerEpisode
@@ -130,6 +144,7 @@ end
 Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
 (h::TotalRewardPerEpisode)(::PostActStage, agent, env) = h.reward += reward(env)
+(h::TotalRewardPerEpisode)(::PostActStage, agent, env, player::Symbol) = h.reward += reward(env, player)
 
 function (hook::TotalRewardPerEpisode)(
     ::PostEpisodeStage,
@@ -159,6 +174,20 @@ function (hook::TotalRewardPerEpisode{true, F})(
     env,
 ) where {F<:Number}
     display(hook)
+end
+
+# Pass through as no need for multiplayer customization
+function (hook::TotalRewardPerEpisode)(
+    stage::Union{PostEpisodeStage, PostExperimentStage},
+    agent,
+    env,
+    player::Symbol
+)
+    hook(
+        stage,
+        agent,
+        env,
+    )
 end
 
 #####
@@ -202,6 +231,16 @@ function (hook::TotalBatchRewardPerEpisode)(
     return
 end
 
+function (hook::TotalBatchRewardPerEpisode)(
+    ::PostActStage,
+    agent,
+    env,
+    player::Symbol,
+)
+    hook.reward .+= reward(env, player)
+    return
+end
+
 function (hook::TotalBatchRewardPerEpisode)(::PostEpisodeStage, agent, env)
     push!.(hook.rewards, hook.reward)
     hook.reward .= 0
@@ -233,6 +272,20 @@ function (hook::TotalBatchRewardPerEpisode{true, F})(
     env,
 ) where {F<:Number}
     display(hook)
+end
+
+# Pass through as no need for multiplayer customization
+function (hook::TotalBatchRewardPerEpisode)(
+    stage::Union{PostEpisodeStage, PostExperimentStage},
+    agent,
+    env,
+    player::Symbol
+)
+    hook(
+        stage,
+        agent,
+        env,
+    )
 end
 
 #####
@@ -268,6 +321,20 @@ function (hook::BatchStepsPerEpisode)(
             hook.step[i] = 0
         end
     end
+end
+
+# Pass through as no need for multiplayer customization
+function (hook::BatchStepsPerEpisode)(
+    stage::PostActStage,
+    agent,
+    env,
+    player::Symbol
+)
+    hook(
+        stage,
+        agent,
+        env,
+    )
 end
 
 #####

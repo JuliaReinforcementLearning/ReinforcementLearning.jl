@@ -97,7 +97,7 @@ end
 
 RLBase.is_terminated(env::TicTacToeEnv) = get_tic_tac_toe_state_info()[env].is_terminated
 
-function RLBase.reward(env::TicTacToeEnv, player)
+function RLBase.reward(env::TicTacToeEnv, player::Symbol)
     if is_terminated(env)
         winner = get_tic_tac_toe_state_info()[env].winner
         if isnothing(winner)
@@ -112,7 +112,7 @@ function RLBase.reward(env::TicTacToeEnv, player)
     end
 end
 
-function is_win(env::TicTacToeEnv, player)
+function is_win(env::TicTacToeEnv, player::Symbol)
     b = env.board
     p = Base.to_index(env, player)
     @inbounds begin

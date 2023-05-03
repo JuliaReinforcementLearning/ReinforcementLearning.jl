@@ -28,13 +28,17 @@ end
 
 @testset "MultiAgentHook" begin
     env = TicTacToeEnv()
-    multiagent_hook = MultiAgentHook((; :Cross => StepsPerEpisode(), :Nought => StepsPerEpisode()))
-    @test multiagent_hook.hooks[:Cross] isa StepsPerEpisode
+    composed_hook = ComposedHook(
+        BatchStepsPerEpisode(10),
+        RewardsPerEpisode(),
+        StepsPerEpisode(),
+        TotalBatchRewardPerEpisode(10),
+        TotalRewardPerEpisode(),
+        TimePerStep()
+    )
 
-    multiagent_hook.hooks[:Cross](PostActStage(), RandomPolicy(), env)
-    multiagent_hook.hooks[:Cross](PostActStage(), RandomPolicy(), env)
-    multiagent_hook.hooks[:Cross](PostEpisodeStage(), RandomPolicy(), env)
-    @test multiagent_hook.hooks[:Cross].steps == [2]
+    multiagent_hook = MultiAgentHook((; :Cross => composed_hook, :Nought => EmptyHook()))
+    @test multiagent_hook.hooks[:Cross][3] isa StepsPerEpisode
 end
 
 @testset "CurrentPlayerIterator" begin
@@ -130,7 +134,16 @@ end
 
     env = RockPaperScissorsEnv()
     stop_condition = StopWhenDone()
-    multiagent_hook = MultiAgentHook((; Symbol(1) => StepsPerEpisode(), Symbol(2) => StepsPerEpisode()))
+    composed_hook = ComposedHook(
+        BatchStepsPerEpisode(10),
+        RewardsPerEpisode(),
+        StepsPerEpisode(),
+        TotalBatchRewardPerEpisode(10),
+        TotalRewardPerEpisode(),
+        TimePerStep()
+    )
+
+    multiagent_hook = MultiAgentHook((; Symbol(1) => composed_hook, Symbol(2) => EmptyHook()))
 
     @test Base.iterate(RLCore.CurrentPlayerIterator(env))[1] == SimultaneousPlayer()
     @test Base.iterate(RLCore.CurrentPlayerIterator(env), env)[1] == SimultaneousPlayer()
@@ -138,7 +151,7 @@ end
     @test Base.iterate(multiagent_policy, 1)[1] isa Agent
 
     @test Base.getindex(multiagent_policy, Symbol(1)) isa Agent
-    @test Base.getindex(multiagent_hook, Symbol(1)) isa StepsPerEpisode
+    @test Base.getindex(multiagent_hook, Symbol(1))[3] isa StepsPerEpisode
 
     @test Base.keys(multiagent_policy) == (Symbol(1), Symbol(2))
     @test Base.keys(multiagent_hook) == (Symbol(1), Symbol(2))
@@ -146,7 +159,15 @@ end
     @test length(RLBase.legal_action_space(env)) == 9
     Base.run(multiagent_policy, env, stop_condition, multiagent_hook)
 
-    @test multiagent_hook[Symbol(1)].steps[1] == 1
+    @test multiagent_hook[Symbol(1)][1].steps[1][1] == 1
+    @test -1 <= multiagent_hook[Symbol(1)][2].rewards[1][1] <= 1
+    @test multiagent_hook[Symbol(1)][3].steps[1] == 1
+    @test -1 <= multiagent_hook[Symbol(1)][4].rewards[1][1] <= 1
+    @test -1 <= multiagent_hook[Symbol(1)][5].rewards[1][1] <= 1
+    @test 0 < multiagent_hook[Symbol(1)][6].times[1] < 1
+
+    # Add more hook tests here...
+
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLBase.legal_action_space(env) == ()

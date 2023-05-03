@@ -16,5 +16,6 @@ struct PreActStage <: AbstractStage end
 struct PostActStage <: AbstractStage end
 
 (p::AbstractPolicy)(::AbstractStage, ::AbstractEnv) = nothing
+(p::AbstractPolicy)(::AbstractStage, ::AbstractEnv, ::Symbol) = nothing
 
 RLBase.optimise!(::AbstractPolicy) = nothing

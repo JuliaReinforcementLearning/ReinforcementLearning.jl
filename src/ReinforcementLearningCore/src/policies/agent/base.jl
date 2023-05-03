@@ -67,11 +67,15 @@ function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
     action
 end
 
-function (agent::Agent)(::PostActStage, env::E) where {E <: AbstractEnv}
+function (agent::Agent)(::PostActStage, env::AbstractEnv)
     update!(agent.cache, reward(env), is_terminated(env))
 end
 
-function (agent::Agent)(::PostExperimentStage, env::E) where {E <: AbstractEnv}
+function (agent::Agent)(::PostActStage, p::Symbol, env::AbstractEnv)
+    update!(agent.cache, reward(env, p), is_terminated(env))
+end
+
+function (agent::Agent)(::PostExperimentStage, env::AbstractEnv)
     RLBase.reset!(agent.cache)
 end
 

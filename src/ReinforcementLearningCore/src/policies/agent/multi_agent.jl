@@ -177,7 +177,7 @@ end
 
 function (multiagent::MultiAgentPolicy)(::PreEpisodeStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
-        multiagent[player](PreEpisodeStage(), env)
+        multiagent[player](PreEpisodeStage(), env, player)
     end
 end
 
@@ -195,31 +195,13 @@ end
 
 function (multiagent::MultiAgentPolicy)(::PostEpisodeStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
-        multiagent[player](PostEpisodeStage(), env)
+        multiagent[player](PostEpisodeStage(), env, player)
     end
 end
 
-function (hook::MultiAgentHook)(::PreEpisodeStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
+function (hook::MultiAgentHook)(stage::S, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv,S<:AbstractStage}
     for player in players(env)
-        hook[player](PreEpisodeStage(), multiagent[player], env)
-    end
-end
-
-function (hook::MultiAgentHook)(::PreActStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
-    for player in players(env)
-        hook[player](PreActStage(), multiagent[player], env)
-    end
-end
-
-function (hook::MultiAgentHook)(::PostActStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
-    for player in players(env)
-        hook[player](PostActStage(), multiagent[player], env)
-    end
-end
-
-function (hook::MultiAgentHook)(::PostEpisodeStage, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
-    for player in players(env)
-        hook[player](PostEpisodeStage(), multiagent[player], env)
+        hook[player](stage, multiagent[player], env, player)
     end
 end
 
