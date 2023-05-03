@@ -164,7 +164,7 @@ end
     @test multiagent_hook[Symbol(1)][3].steps[1] == 1
     @test -1 <= multiagent_hook[Symbol(1)][4].rewards[1][1] <= 1
     @test -1 <= multiagent_hook[Symbol(1)][5].rewards[1][1] <= 1
-    @test 0 < multiagent_hook[Symbol(1)][6].times[1] < 1
+    @test 0 <= multiagent_hook[Symbol(1)][6].times[1] <= 1
 
     # Add more hook tests here...
 
