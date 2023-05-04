@@ -34,10 +34,10 @@ function try_parse_kw(s)
 end
 
 struct Experiment{S}
-    policy::Any
-    env::Any
-    stop_condition::Any
-    hook::Any
+    policy::AbstractPolicy
+    env::AbstractEnv
+    stop_condition::AbstractStopCondition
+    hook::AbstractHook
 end
 
 Experiment(args...) = Experiment{Symbol()}(args...)
@@ -67,8 +67,8 @@ end
 function Base.run(
     policy::AbstractPolicy,
     env::AbstractEnv,
-    stop_condition=StopAfterEpisode(1),
-    hook=EmptyHook(),
+    stop_condition::AbstractStopCondition=StopAfterEpisode(1),
+    hook::AbstractHook=EmptyHook(),
     reset_condition=ResetAtTerminal()
 )
     policy, env = check(policy, env)
@@ -78,7 +78,11 @@ end
 "Inject some customized checkings here by overwriting this function"
 check(policy, env) = policy, env
 
-function _run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook, reset_condition)
+function _run(policy::AbstractPolicy,
+        env::AbstractEnv,
+        stop_condition::AbstractStopCondition,
+        hook::AbstractHook,
+        reset_condition)
     hook(PreExperimentStage(), policy, env)
     policy(PreExperimentStage(), env)
     is_stop = false

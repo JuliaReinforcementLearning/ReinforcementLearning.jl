@@ -69,7 +69,7 @@ This run function dispatches games using `MultiAgentPolicy` and `MultiAgentHook`
 function Base.run(
     multiagent_policy::MultiAgentPolicy,
     env::E,
-    stop_condition,
+    stop_condition::AbstractStopCondition,
     hook::MultiAgentHook,
     reset_condition=ResetAtTerminal()
 ) where {E<:AbstractEnv}
@@ -99,7 +99,7 @@ function Base.run(
     multiagent_policy::MultiAgentPolicy,
     env::E,
     ::Sequential,
-    stop_condition,
+    stop_condition::AbstractStopCondition,
     multiagent_hook::MultiAgentHook,
     reset_condition=ResetAtTerminal(),
 ) where {E<:AbstractEnv}
@@ -162,7 +162,7 @@ function Base.run(
     multiagent_policy::MultiAgentPolicy,
     env::E,
     ::Simultaneous,
-    stop_condition,
+    stop_condition::AbstractStopCondition,
     hook::MultiAgentHook,
     reset_condition=ResetAtTerminal(),
 ) where {E<:AbstractEnv}

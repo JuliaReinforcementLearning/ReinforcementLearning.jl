@@ -1,8 +1,10 @@
-export StopAfterStep,
+export AbstractStopCondition, StopAfterStep,
     StopAfterEpisode, StopWhenDone, StopSignal, StopAfterNoImprovement, StopAfterNSeconds, ComposedStopCondition
 
 import ProgressMeter
 
+
+abstract type AbstractStopCondition end
 
 #####
 # ComposedStopCondition
@@ -13,7 +15,7 @@ import ProgressMeter
 
 The result of `stop_conditions` is reduced by `reducer`. The default `reducer` is the `any` function, which means that the condition is true when any one of the `stop_conditions...` is true. Can be replaced by any function returning a boolean. For example `reducer = x->sum(x) >= 2` will require at least two of the conditions to be true.
 """
-struct ComposedStopCondition{S,T}
+struct ComposedStopCondition{S,T} <: AbstractStopCondition
     stop_conditions::S
     reducer::T
     function ComposedStopCondition(stop_conditions...; reducer = any)
@@ -33,7 +35,7 @@ end
 
 Return `true` after being called `step` times.
 """
-mutable struct StopAfterStep{Tl}
+mutable struct StopAfterStep{Tl} <: AbstractStopCondition
     step::Int
     cur::Int
     "IGNORE"
@@ -72,7 +74,7 @@ end
 
 Return `true` after being called `episode`. If `is_show_progress` is `true`, the `ProgressMeter` will be used to show progress.
 """
-mutable struct StopAfterEpisode{Tl}
+mutable struct StopAfterEpisode{Tl} <: AbstractStopCondition
     episode::Int
     cur::Int
     "IGNORE"
@@ -124,7 +126,7 @@ patience: Number of epochs with no improvement after which training will be stop
 
 Return `true` after the monitored metric has stopped improving.
 """
-mutable struct StopAfterNoImprovement{T<:Number,F}
+mutable struct StopAfterNoImprovement{T<:Number,F} <: AbstractStopCondition
     fn::F
     patience::Int
     δ::T
@@ -163,7 +165,7 @@ end
 
 Return `true` if the environment is terminated.
 """
-struct StopWhenDone end
+struct StopWhenDone <: AbstractStopCondition end
 
 (s::StopWhenDone)(agent, env) = is_terminated(env)
 
@@ -196,7 +198,7 @@ parameter:
 stop training after N seconds
 
 """
-Base.@kwdef mutable struct StopAfterNSeconds
+Base.@kwdef mutable struct StopAfterNSeconds <: AbstractStopCondition
     budget::Float64
     deadline::Float64 = 0.0
 end
