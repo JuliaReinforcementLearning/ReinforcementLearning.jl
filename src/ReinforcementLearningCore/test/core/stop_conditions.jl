@@ -6,6 +6,14 @@
     @test sum([stop_() for i in 1:20]) == 11
 end
 
+@testset "ComposedStopCondition" begin
+    stop_10 = StopAfterStep(10)
+    stop_3 = StopAfterStep(3)
+
+    composed_stop = ComposedStopCondition(stop_10, stop_3)
+    @test sum([composed_stop() for i in 1:20]) == 18
+end
+
 @testset "StopAfterEpisode" begin
     stop_1 = StopAfterEpisode(2)
     stop_2 = StopAfterEpisode(2; is_show_progress=false)

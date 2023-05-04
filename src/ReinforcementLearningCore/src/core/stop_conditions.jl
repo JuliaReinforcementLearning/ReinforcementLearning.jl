@@ -1,7 +1,29 @@
 export StopAfterStep,
-    StopAfterEpisode, StopWhenDone, StopSignal, StopAfterNoImprovement, StopAfterNSeconds
+    StopAfterEpisode, StopWhenDone, StopSignal, StopAfterNoImprovement, StopAfterNSeconds, ComposedStopCondition
 
 import ProgressMeter
+
+
+#####
+# ComposedStopCondition
+#####
+
+"""
+    ComposedStopCondition(stop_conditions...; reducer = any)
+
+The result of `stop_conditions` is reduced by `reducer`. The default `reducer` is the `any` function, which means that the condition is true when any one of the `stop_conditions...` is true. Can be replaced by any function returning a boolean. For example `reducer = x->sum(x) >= 2` will require at least two of the conditions to be true.
+"""
+struct ComposedStopCondition{S,T}
+    stop_conditions::S
+    reducer::T
+    function ComposedStopCondition(stop_conditions...; reducer = any)
+        new{typeof(stop_conditions),typeof(reducer)}(stop_conditions, reducer)
+    end
+end
+
+function (s::ComposedStopCondition)(args...)
+    s.reducer(sc(args...) for sc in s.stop_conditions)
+end
 
 #####
 # StopAfterStep
