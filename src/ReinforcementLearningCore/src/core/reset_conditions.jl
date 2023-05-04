@@ -1,5 +1,5 @@
 export AbstractResetCondition, ResetAtTerminal, ResetAfterNSteps
-
+  
 abstract type AbstractResetCondition end
 
 """
