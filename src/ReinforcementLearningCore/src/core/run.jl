@@ -33,14 +33,14 @@ function try_parse_kw(s)
     NamedTuple(kw)
 end
 
-struct Experiment{S}
-    policy::AbstractPolicy
-    env::AbstractEnv
-    stop_condition::AbstractStopCondition
-    hook::AbstractHook
+struct Experiment{P<:AbstractPolicy, E<:AbstractEnv, S<:AbstractStopCondition, H<:AbstractHook, R::AbstractResetCondition}
+    description::String
+    policy::P
+    env::E
+    stop_condition::S
+    hook::H
+    reset_condition::R
 end
-
-Experiment(args...) = Experiment{Symbol()}(args...)
 
 function Experiment(s::String)
     m = match(r"(?<source>\w+)_(?<method>\w+)_(?<env>\w+)(\((?<game>.*)\))?", s)
@@ -54,7 +54,7 @@ function Experiment(s::String)
     env = m[:env]
     kw_args = isnothing(m[:game]) ? (;) : try_parse_kw(m[:game])
     ex = Experiment(Val(Symbol(source)), Val(Symbol(method)), Val(Symbol(env)); kw_args...)
-    Experiment{Symbol(s)}(ex.policy, ex.env, ex.stop_condition, ex.hook)
+    Experiment{}(ex.policy, ex.env, ex.stop_condition, ex.hook)
 end
 
 Base.show(io::IO, m::MIME"text/plain", t::Experiment{S}) where {S} = show(io, m, convert(AnnotatedStructTree, t; description=string(S)))
