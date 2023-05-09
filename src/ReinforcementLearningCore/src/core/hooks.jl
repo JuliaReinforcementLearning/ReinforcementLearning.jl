@@ -153,6 +153,7 @@ function (hook::TotalRewardPerEpisode)(
 )
     push!(hook.rewards, hook.reward)
     hook.reward = 0
+    return
 end
 
 function Base.show(io::IO, hook::TotalRewardPerEpisode{true, F}) where {F<:Number}
@@ -166,6 +167,7 @@ function Base.show(io::IO, hook::TotalRewardPerEpisode{true, F}) where {F<:Numbe
     else
         println(io, typeof(hook))
     end
+    return
 end
 
 function (hook::TotalRewardPerEpisode{true, F})(
@@ -174,6 +176,7 @@ function (hook::TotalRewardPerEpisode{true, F})(
     env,
 ) where {F<:Number}
     display(hook)
+    return
 end
 
 # Pass through as no need for multiplayer customization
@@ -188,6 +191,7 @@ function (hook::TotalRewardPerEpisode)(
         agent,
         env,
     )
+    return
 end
 
 #####
