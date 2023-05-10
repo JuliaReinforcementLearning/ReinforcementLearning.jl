@@ -61,7 +61,7 @@ end
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
-function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
+function (agent::Agent{P,T,C})(env::AbstractEnv, args...; kwargs...) where {P,T,C}
     action = agent.policy(env, args...; kwargs...)
     push!(agent.trajectory, agent.cache, action)
     action
@@ -79,7 +79,7 @@ function (agent::Agent)(::PostExperimentStage, env::AbstractEnv)
     RLBase.reset!(agent.cache)
 end
 
-function update!(agent::Agent, state::S) where {S}
+function update!(agent::Agent{P,T,C}, state::S) where {P,T,C,S}
     update!(agent.cache, state)
 end
 
