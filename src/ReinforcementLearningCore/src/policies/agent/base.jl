@@ -79,10 +79,6 @@ function update!(agent::Agent, ::PostExperimentStage, env::AbstractEnv, player::
     RLBase.reset!(agent.cache)
 end
 
-function update!(agent::Agent, ::PostExperimentStage, env::AbstractEnv)
-    RLBase.reset!(agent.cache)
-end
-
 function update!(agent::Agent{P,T,C}, state::S) where {P,T,C,S}
     update!(agent.cache, state)
 end

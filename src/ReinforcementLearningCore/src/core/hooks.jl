@@ -48,7 +48,7 @@ Base.:(+)(h1::ComposedHook, h2::ComposedHook) = ComposedHook((h1.hooks..., h2.ho
     _update!(stage, policy, env, hook_tuple...)
 end
 
-_update!(stage::AbstractStage, policy::P, env::E) where {T <: Tuple, P <: AbstractPolicy, E <: AbstractEnv} = nothing
+_update!(stage::AbstractStage, policy::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = nothing
 
 function update!(composed_hook::ComposedHook{T},
                             stage::AbstractStage,
