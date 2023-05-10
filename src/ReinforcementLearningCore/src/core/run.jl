@@ -2,6 +2,7 @@ export @E_cmd, Experiment
 
 
 import Parsers
+import CommonRLInterface: act!
 
 macro E_cmd(s)
     Experiment(s)
@@ -96,7 +97,7 @@ function _run(policy::AbstractPolicy,
             update!(hook, PreActStage(), policy, env)
 
             action = choose!(policy, env)
-            RLBase.act!(env, action)
+            act!(env, action)
 
             optimise!(policy)
 

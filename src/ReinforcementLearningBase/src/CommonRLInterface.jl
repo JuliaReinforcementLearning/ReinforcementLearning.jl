@@ -87,7 +87,7 @@ legal_action_space(env::RLBaseEnv) = CRL.valid_actions(env.env)
 legal_action_space_mask(env::RLBaseEnv) = CRL.valid_action_mask(env.env)
 reset!(env::RLBaseEnv) = CRL.reset!(env.env)
 
-(env::RLBaseEnv)(a) = env.r = CRL.act!(env.env, a)
+(env::RLBaseEnv)(a) = env.r = CommonRLInterface.act!(env.env, a)
 Base.copy(env::CommonRLEnv) = RLBaseEnv(CRL.clone(env.env), env.r)
 
 ActionStyle(env::RLBaseEnv) =

@@ -5,6 +5,7 @@ using Random # for RandomPolicy
 
 import Base.getindex
 import Base.iterate
+import CommonRLInterface: act!
 
 """
     MultiAgentPolicy(agents::NT) where {NT<: NamedTuple}
@@ -119,7 +120,7 @@ function Base.run(
                 update!(hook, PreActStage(), policy, env)
                 
                 action = choose!(policy, env)
-                RLBase.act!(env, action)
+                act!(env, action)
 
                 optimise!(policy)
 
@@ -222,7 +223,7 @@ function update!(composed_hook::ComposedHook{T},
 end
 
 function choose!(multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
-    return (choose!(multiagent[player],env, player) for player in players(env))
+    return (choose!(multiagent[player], env, player) for player in players(env))
 end
 
 function RLBase.optimise!(multiagent::MultiAgentPolicy)
