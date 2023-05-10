@@ -68,21 +68,21 @@ function RLBase.choose!(agent::Agent{P,T,C}, env::AbstractEnv) where {P,T,C}
 end
 
 # Multiagent Version
-function RLBase.choose!(agent::Agent{P,T,C}, env::AbstractEnv, p::Symbol) where {P,T,C}
+function RLBase.choose!(agent::Agent{P,T,C}, env::E, p::Symbol) where {P,T,C,E<:AbstractEnv}
     action = choose!(agent.policy, env, p)
     push!(agent.trajectory, agent.cache, action)
     action
 end
 
-function update!(agent::Agent, ::PostActStage, env::AbstractEnv)
+function update!(agent::Agent{P,T,C}, ::PostActStage, env::E) where {P,T,C,E<:AbstractEnv}
     update!(agent.cache, reward(env), is_terminated(env))
 end
 
-function update!(agent::Agent, ::PostExperimentStage, env::AbstractEnv)
+function update!(agent::Agent, ::PostExperimentStage, env::E) where {E<:AbstractEnv}
     RLBase.reset!(agent.cache)
 end
 
-function update!(agent::Agent, ::PostExperimentStage, env::AbstractEnv, player::Symbol)
+function update!(agent::Agent, ::PostExperimentStage, env::E, player::Symbol) where {E<:AbstractEnv}
     RLBase.reset!(agent.cache)
 end
 
