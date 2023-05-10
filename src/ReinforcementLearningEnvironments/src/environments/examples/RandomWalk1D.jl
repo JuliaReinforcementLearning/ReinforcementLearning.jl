@@ -28,7 +28,7 @@ end
 
 RLBase.action_space(env::RandomWalk1D) = env.action_space
 
-function CommonRLInterface.act!(env::RandomWalk1D, action::Int)
+function RLBase.act!(env::RandomWalk1D, action::Int)
     env.pos += env.actions[action]
     if env.pos > env.N
         env.pos = env.N

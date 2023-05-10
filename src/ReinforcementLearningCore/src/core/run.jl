@@ -2,7 +2,6 @@ export @E_cmd, Experiment
 
 
 import Parsers
-import CommonRLInterface: act!
 
 macro E_cmd(s)
     Experiment(s)

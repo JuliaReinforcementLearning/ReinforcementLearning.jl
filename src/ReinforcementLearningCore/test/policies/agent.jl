@@ -72,9 +72,9 @@ using ReinforcementLearningCore
                 @test choose!(agent, env) in (1,2)
                 @test length(agent.trajectory.container) == 1
 
-                #The following tests ensure the args and kwargs are passed to the policy. 
-                @test_throws "no method matching (::RandomPolicy" choose!(agent, env, 1)
-                @test_throws "no method matching (::RandomPolicy" choose!(agent, env, fake_kwarg = 1)
+                #The following tests checks args / kwargs passed to policy cause an error
+                @test_throws "MethodError: no method matching choose!(::Agent{RandomPolicy" choose!(agent, env, 1)
+                @test_throws "MethodError: no method matching choose!(::Agent{RandomPolicy" choose!(agent, env, fake_kwarg = 1)
             end
 
             @testset "Test update! method" begin

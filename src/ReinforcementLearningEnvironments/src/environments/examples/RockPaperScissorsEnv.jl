@@ -46,7 +46,7 @@ RLBase.is_terminated(env::RockPaperScissorsEnv) = env.is_done
 RLBase.reset!(env::RockPaperScissorsEnv) = env.is_done = false
 
 # TODO: Consider using CRL.all_act! and adjusting run function accordingly
-function CommonRLInterface.act!(env::RockPaperScissorsEnv, (x, y))
+function RLBase.act!(env::RockPaperScissorsEnv, (x, y))
     if x == y
         env.reward = (; Symbol(1) => 0, Symbol(2) => 0)
     elseif x == '💎' && y == '✂' || x == '✂' && y == '📃' || x == '📃' && y == '💎'

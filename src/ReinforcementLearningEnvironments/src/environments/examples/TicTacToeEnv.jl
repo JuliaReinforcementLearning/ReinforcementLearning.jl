@@ -52,7 +52,7 @@ function RLBase.legal_action_space_mask(env::TicTacToeEnv, p)
     end
 end
 
-CommonRLInterface.act!(env::TicTacToeEnv, action::Int) = env(CartesianIndices((3, 3))[action])
+RLBase.act!(env::TicTacToeEnv, action::Int) = env(CartesianIndices((3, 3))[action])
 
 function (env::TicTacToeEnv)(action::CartesianIndex{2})
     env.board[action, 1] = false

@@ -5,7 +5,6 @@ using Random # for RandomPolicy
 
 import Base.getindex
 import Base.iterate
-import CommonRLInterface: act!
 
 """
     MultiAgentPolicy(agents::NT) where {NT<: NamedTuple}
