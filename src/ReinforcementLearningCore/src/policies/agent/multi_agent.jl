@@ -222,7 +222,7 @@ function update!(composed_hook::ComposedHook{T},
     _update!(stage, policy, env, player, composed_hook.hooks...)
 end
 
-function choose!(multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
+function RLBase.choose!(multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
     return (choose!(multiagent[player], env, player) for player in players(env))
 end
 

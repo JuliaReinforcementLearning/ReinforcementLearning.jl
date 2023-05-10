@@ -48,7 +48,7 @@ end
     for player in RLCore.CurrentPlayerIterator(env)
         i += 1
         push!(player_log, player)
-        env(1)
+        act!(env, 1)
         i == 2 && break
     end
     @test player_log == [:Cross, :Nought]
@@ -175,8 +175,8 @@ end
     env = RockPaperScissorsEnv()
     update!(multiagent_policy, PreActStage(), env)
     # multiagent_policy(env)
-    a = multiagent_policy(env)
+    a = choose!(multiagent_policy, env)
     @test [i for i in a][1] ∈ ['💎', '📃', '✂']
     @test [i for i in a][2] ∈ ['💎', '📃', '✂']
-    @test env(a)
+    @test act!(env, a)
 end

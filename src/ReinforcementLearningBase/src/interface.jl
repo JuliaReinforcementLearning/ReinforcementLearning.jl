@@ -560,7 +560,7 @@ Treat the `env` as a game tree. Create an independent child after applying
 """
 @api function child(env::AbstractEnv, action)
     new_env = copy(env)
-    new_env(action)
+    act!(new_env, action)
     next_player!(new_env) # NoOp for simultaneous games and single player games
     new_env
 end
