@@ -54,7 +54,7 @@ end
 
 @functor Agent (policy,)
 
-function (agent::Agent)(::PreActStage, env::AbstractEnv)
+function update!(agent::Agent, ::PreActStage, env::AbstractEnv)
     update!(agent, state(env))
 end
 
@@ -67,15 +67,19 @@ function (agent::Agent{P,T,C})(env::AbstractEnv, args...; kwargs...) where {P,T,
     action
 end
 
-function (agent::Agent)(::PostActStage, env::AbstractEnv)
+function update!(agent::Agent, ::PostActStage, env::AbstractEnv)
     update!(agent.cache, reward(env), is_terminated(env))
 end
 
-function (agent::Agent)(::PostActStage, p::Symbol, env::AbstractEnv)
-    update!(agent.cache, reward(env, p), is_terminated(env))
+function update!(agent::Agent, ::PostExperimentStage, env::AbstractEnv)
+    RLBase.reset!(agent.cache)
 end
 
-function (agent::Agent)(::PostExperimentStage, env::AbstractEnv)
+function update!(agent::Agent, ::PostExperimentStage, env::AbstractEnv, player::Symbol)
+    RLBase.reset!(agent.cache)
+end
+
+function update!(agent::Agent, ::PostExperimentStage, env::AbstractEnv)
     RLBase.reset!(agent.cache)
 end
 

@@ -43,7 +43,7 @@ Base.:(+)(h1::ComposedHook, h2::AbstractHook) = ComposedHook((h1.hooks..., h2))
 Base.:(+)(h1::AbstractHook, h2::ComposedHook) = ComposedHook((h1, h2.hooks...))
 Base.:(+)(h1::ComposedHook, h2::ComposedHook) = ComposedHook((h1.hooks..., h2.hooks...))
 
-@inline function _update!(stage::AbstractStage, policy::P, env::E, hook::H, hook_tuple...) where {T <: Tuple, P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
+@inline function _update!(stage::AbstractStage, policy::P, env::E, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
     update!(hook, stage, policy, env)
     _update!(stage, policy, env, hook_tuple...)
 end

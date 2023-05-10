@@ -58,16 +58,16 @@ using ReinforcementLearningCore
             @testset "Test Agent $i" begin
                 agent = agent_list[i]
                 env = RandomWalk1D()
-                agent(PreActStage(), env)
+                update!(agent, PreActStage(), env)
                 @test agent.cache.state != nothing
                 @test agent.cache.reward == nothing
                 @test agent.cache.terminal == nothing
                 @test state(env) == agent.cache.state
                 @test agent(env) in (1,2)
                 @test length(agent.trajectory.container) == 0 
-                agent(PostActStage(), env)
+                update!(agent, PostActStage(), env)
                 @test agent.cache.reward == 0. && agent.cache.terminal == false
-                agent(PreActStage(), env)
+                update!(agent, PreActStage(), env)
                 @test state(env) == agent.cache.state
                 @test agent(env) in (1,2)
                 @test length(agent.trajectory.container) == 1
@@ -80,7 +80,7 @@ using ReinforcementLearningCore
             @testset "Test update! method" begin
                 env = RandomWalk1D()
                 agent = agent_list[i]
-                agent(PostActStage(), env)
+                update!(agent, PostActStage(), env)
                 update!(agent, 7)
                 @test agent.cache.state == 7
                 RLBase.reset!(agent.cache)

@@ -104,18 +104,18 @@ function Base.run(
     reset_condition::AbstractResetCondition=ResetAtTerminal(),
 ) where {E<:AbstractEnv}
     update!(multiagent_hook, PreExperimentStage(), multiagent_policy, env)
-    multiagent_policy(PreExperimentStage(), env)
+    update!(multiagent_policy, PreExperimentStage(), env)
     is_stop = false
     while !is_stop
         reset!(env)
-        multiagent_policy(PreEpisodeStage(), env)
+        update!(multiagent_policy, PreEpisodeStage(), env)
         update!(multiagent_hook, PreEpisodeStage(), multiagent_policy, env)
 
         while !reset_condition(multiagent_policy, env) # one episode
             for player in CurrentPlayerIterator(env)
                 policy = multiagent_policy[player] # Select appropriate policy
                 hook = multiagent_hook[player] # Select appropriate hook
-                policy(PreActStage(), env)
+                update!(policy, PreActStage(), env)
                 update!(hook, PreActStage(), policy, env)
 
                 action = policy(env)
@@ -123,12 +123,12 @@ function Base.run(
 
                 optimise!(policy)
 
-                policy(PostActStage(), env)
+                update!(policy, PostActStage(), env)
                 update!(hook, PostActStage(), policy, env)
 
                 if stop_condition(policy, env)
                     is_stop = true
-                    multiagent_policy(PreActStage(), env)
+                    update!(multiagent_policy, PreActStage(), env)
                     update!(multiagent_hook, PreActStage(), policy, env)
                     multiagent_policy(env)  # let the policy see the last observation
                     break
@@ -137,11 +137,11 @@ function Base.run(
         end # end of an episode
 
         if is_terminated(env)
-            multiagent_policy(PostEpisodeStage(), env)  # let the policy see the last observation
+            update!(multiagent_policy, PostEpisodeStage(), env)  # let the policy see the last observation
             update!(multiagent_hook, PostEpisodeStage(), multiagent_policy, env)
         end
     end
-    multiagent_policy(PostExperimentStage(), env)
+    update!(multiagent_policy, PostExperimentStage(), env)
     update!(multiagent_hook, PostExperimentStage(), multiagent_policy, env)
     multiagent_policy
 end
@@ -175,27 +175,27 @@ function Base.run(
     )
 end
 
-function (multiagent::MultiAgentPolicy)(::PreEpisodeStage, env::E) where {E<:AbstractEnv}
+function update!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:AbstractStage, E<:AbstractEnv}
     for player in players(env)
-        multiagent[player](PreEpisodeStage(), env, player)
+        update!(multiagent[player], stage, env, player)
     end
 end
 
-function (multiagent::MultiAgentPolicy)(::PreActStage, env::E) where {E<:AbstractEnv}
+function update!(multiagent::MultiAgentPolicy, ::PreActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
         update!(multiagent[player], state(env, player))
     end
 end
 
-function (multiagent::MultiAgentPolicy)(::PostActStage, env::E) where {E<:AbstractEnv}
+function update!(multiagent::MultiAgentPolicy, ::PostActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
         update!(multiagent[player].cache, reward(env, player), is_terminated(env))
     end
 end
 
-function (multiagent::MultiAgentPolicy)(::PostEpisodeStage, env::E) where {E<:AbstractEnv}
+function update!(multiagent::MultiAgentPolicy, ::PostExperimentStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
-        multiagent[player](PostEpisodeStage(), env, player)
+        update!(multiagent[player], PostEpisodeStage(), env, player)
     end
 end
 
@@ -205,18 +205,18 @@ function update!(hook::MultiAgentHook, stage::S, multiagent::MultiAgentPolicy, e
     end
 end
 
-@inline function _update!(stage::AbstractStage, policy::P, env::E, player::Symbol, hook::H, hook_tuple...) where {T <: Tuple, P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
+@inline function _update!(stage::AbstractStage, policy::P, env::E, player::Symbol, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
     update!(hook, stage, policy, env, player)
     _update!(stage, policy, env, player, hook_tuple...)
 end
 
-_update!(stage::AbstractStage, policy::P, env::E, player::Symbol) where {T <: Tuple, P <: AbstractPolicy, E <: AbstractEnv} = nothing
+_update!(stage::AbstractStage, policy::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = nothing
 
 function update!(composed_hook::ComposedHook{T},
                             stage::AbstractStage,
                             policy::P,
                             env::E,
-                            player::Symbol,
+                            player::Symbol
                             ) where {T <: Tuple, P <: AbstractPolicy, E <: AbstractEnv}
     _update!(stage, policy, env, player, composed_hook.hooks...)
 end

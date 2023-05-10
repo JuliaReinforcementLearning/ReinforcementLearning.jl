@@ -173,7 +173,7 @@ end
     @test RLBase.legal_action_space(env) == ()
     @test RLBase.action_space(env, Symbol(1)) == ('💎', '📃', '✂')
     env = RockPaperScissorsEnv()
-    (multiagent_policy)(PreActStage(), env)
+    update!(multiagent_policy, PreActStage(), env)
     # multiagent_policy(env)
     a = multiagent_policy(env)
     @test [i for i in a][1] ∈ ['💎', '📃', '✂']
