@@ -87,9 +87,9 @@ end
 
 Base.getindex(h::StepsPerEpisode) = h.steps
 
-RLCore.update!(hook::StepsPerEpisode, ::PostActStage, args...) = hook.count += 1
+update!(hook::StepsPerEpisode, ::PostActStage, args...) = hook.count += 1
 
-RLCore.update!(hook::StepsPerEpisode, stage::Union{PostEpisodeStage,PostExperimentStage}, agent, env, ::Symbol) = update!(hook, stage, agent, env)
+update!(hook::StepsPerEpisode, stage::Union{PostEpisodeStage,PostExperimentStage}, agent, env, ::Symbol) = update!(hook, stage, agent, env)
 
 function update!(hook::StepsPerEpisode, ::Union{PostEpisodeStage,PostExperimentStage}, agent, env)
     push!(hook.steps, hook.count)
@@ -120,11 +120,11 @@ end
 
 Base.getindex(h::RewardsPerEpisode) = h.rewards
 
-RLCore.update!(h::RewardsPerEpisode, ::PreEpisodeStage, agent, env) = push!(h.rewards, h.empty_vect)
-RLCore.update!(h::RewardsPerEpisode, ::PreEpisodeStage, agent, env, ::Symbol) = update!(h, PreEpisodeStage(), agent, env)
+update!(h::RewardsPerEpisode, ::PreEpisodeStage, agent, env) = push!(h.rewards, h.empty_vect)
+update!(h::RewardsPerEpisode, ::PreEpisodeStage, agent, env, ::Symbol) = update!(h, PreEpisodeStage(), agent, env)
 
-RLCore.update!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.rewards[end], reward(env))
-RLCore.update!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.rewards[end], reward(env, player))
+update!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.rewards[end], reward(env))
+update!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.rewards[end], reward(env, player))
 
 #####
 # TotalRewardPerEpisode
@@ -152,8 +152,8 @@ end
 
 Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
-RLCore.update!(h::TotalRewardPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = h.reward += reward(env)
-RLCore.update!(h::TotalRewardPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = h.reward += reward(env, player)
+update!(h::TotalRewardPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = h.reward += reward(env)
+update!(h::TotalRewardPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = h.reward += reward(env, player)
 
 function update!(hook::TotalRewardPerEpisode,
     ::PostEpisodeStage,

@@ -149,7 +149,7 @@ function Base.run(policy, env, stop_condition)
 end
 ```
 
-Note that by default, `(policy::AbstractPolicy)(::AbstractStage, env)` will do nothing and the workflow is simplified to the earlier version. For the specific policy `Agent`, it will update its internal `policy` and `trajectory` at each stage:
+Note that by default, `update!(policy::AbstractPolicy, ::AbstractStage, env)` will do nothing and the workflow is simplified to the earlier version. For the specific policy `Agent`, it will update its internal `policy` and `trajectory` at each stage:
 
 - `update!(policy, trajectory, env, stage)` (Read as `update!` the inner `policy` given a `trajectory`, `env` and the current `stage`)
 - `update!(trajectory, policy, env, stage)` (Read as `update!` the inner `trajectory` given a `policy`, `env` and the current `stage`)
