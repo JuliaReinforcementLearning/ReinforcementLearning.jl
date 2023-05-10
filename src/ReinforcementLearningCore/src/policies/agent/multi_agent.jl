@@ -117,9 +117,9 @@ function Base.run(
                 hook = multiagent_hook[player] # Select appropriate hook
                 update!(policy, PreActStage(), env)
                 update!(hook, PreActStage(), policy, env)
-
-                action = policy(env)
-                env(action)
+                
+                action = choose!(policy, env)
+                RLBase.act!(env, action)
 
                 optimise!(policy)
 
@@ -130,7 +130,7 @@ function Base.run(
                     is_stop = true
                     update!(multiagent_policy, PreActStage(), env)
                     update!(multiagent_hook, PreActStage(), policy, env)
-                    multiagent_policy(env)  # let the policy see the last observation
+                    choose!(multiagent_policy, env)  # let the policy see the last observation
                     break
                 end
             end
@@ -221,8 +221,8 @@ function update!(composed_hook::ComposedHook{T},
     _update!(stage, policy, env, player, composed_hook.hooks...)
 end
 
-function (multiagent::MultiAgentPolicy)(env::E) where {E<:AbstractEnv}
-    return (multiagent[player](env, player) for player in players(env))
+function choose!(multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
+    return (choose!(multiagent[player],env, player) for player in players(env))
 end
 
 function RLBase.optimise!(multiagent::MultiAgentPolicy)

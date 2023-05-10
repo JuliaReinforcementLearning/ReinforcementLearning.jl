@@ -61,8 +61,8 @@ end
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
-function (agent::Agent{P,T,C})(env::AbstractEnv, args...; kwargs...) where {P,T,C}
-    action = agent.policy(env, args...; kwargs...)
+function choose!(agent::Agent{P,T,C}, env::AbstractEnv) where {P,T,C}
+    action = choose!(agent.policy, env)
     push!(agent.trajectory, agent.cache, action)
     action
 end
