@@ -19,7 +19,7 @@ CRL.@provide CRL.actions(env::CommonRLEnv) = action_space(env.env)
 CRL.@provide CRL.terminated(env::CommonRLEnv) = is_terminated(env.env)
 
 CRL.@provide function CRL.act!(env::CommonRLEnv, a)
-    env.env(a)
+    act!(env.env, a)
     reward(env.env)
 end
 
