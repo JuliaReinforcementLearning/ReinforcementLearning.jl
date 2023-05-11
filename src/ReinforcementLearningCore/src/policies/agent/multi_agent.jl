@@ -126,7 +126,7 @@ function Base.run(
                 update!(policy, PostActStage(), env)
                 update!(hook, PostActStage(), policy, env)
 
-                if stop_condition(policy, env)
+                if stop(stop_condition, policy, env)
                     is_stop = true
                     update!(multiagent_policy, PreActStage(), env)
                     update!(multiagent_hook, PreActStage(), policy, env)
