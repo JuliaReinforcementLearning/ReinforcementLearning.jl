@@ -62,14 +62,14 @@ end
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
 function RLBase.plan!(agent::Agent{P,T,C}, env::AbstractEnv) where {P,T,C}
-    action = plan!(agent.policy, env)
+    action = RLBase.plan!(agent.policy, env)
     push!(agent.trajectory, agent.cache, action)
     action
 end
 
 # Multiagent Version
 function RLBase.plan!(agent::Agent{P,T,C}, env::E, p::Symbol) where {P,T,C,E<:AbstractEnv}
-    action = plan!(agent.policy, env, p)
+    action = RLBase.plan!(agent.policy, env, p)
     push!(agent.trajectory, agent.cache, action)
     action
 end

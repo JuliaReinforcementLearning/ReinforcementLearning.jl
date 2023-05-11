@@ -9,13 +9,13 @@ end
 
 GumbelSoftmaxExplorer(; rng = Random.GLOBAL_RNG) = GumbelSoftmaxExplorer(rng)
 
-function plan!(p::GumbelSoftmaxExplorer, v::AbstractVector{T}) where {T}
+function RLBase.plan!(p::GumbelSoftmaxExplorer, v::AbstractVector{T}) where {T}
     logits = logsoftmax(v)
     u = rand(p.rng, T, length(logits))
     argmax(logits .- log.(-log.(u)))
 end
 
-function plan!(p::GumbelSoftmaxExplorer,
+function RLBase.plan!(p::GumbelSoftmaxExplorer,
     v::AbstractVector{T},
     mask::AbstractVector{Bool},
 ) where {T}

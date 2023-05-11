@@ -20,7 +20,7 @@ end
 plan!(s::WeightedSoftmaxExplorer, values::AbstractVector{T}) where {T} =
     sample(s.rng, Weights(softmax(values), one(T)))
 
-function plan!(s::WeightedSoftmaxExplorer, values::AbstractVector{T}, mask) where {T}
+function RLBase.plan!(s::WeightedSoftmaxExplorer, values::AbstractVector{T}, mask) where {T}
     values[.!mask] .= typemin(T)
     s(values)
 end

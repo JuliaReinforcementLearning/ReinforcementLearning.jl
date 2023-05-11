@@ -90,7 +90,7 @@ end
 get_ϵ(s::EpsilonGreedyExplorer) = get_ϵ(s, s.step)
 
 """
-    plan!(s::EpsilonGreedyExplorer, values; step) where T
+    RLBase.plan!(s::EpsilonGreedyExplorer, values; step) where T
 
 !!! note
     If multiple values with the same maximum value are found.
@@ -99,13 +99,13 @@ get_ϵ(s::EpsilonGreedyExplorer) = get_ϵ(s, s.step)
     `NaN` will be filtered unless all the values are `NaN`.
     In that case, a random one will be returned.
 """
-function plan!(s::EpsilonGreedyExplorer{<:Any,true}, values)
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values)
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values)[2]) : rand(s.rng, 1:length(values))
 end
 
-function plan!(s::EpsilonGreedyExplorer{<:Any,false}, values)
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values)
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? findmax(values)[2] : rand(s.rng, 1:length(values))
@@ -114,7 +114,7 @@ end
 #####
 
 plan!(s::EpsilonGreedyExplorer{<:Any,true}, x, mask::Trues) = s(x)
-function plan!(s::EpsilonGreedyExplorer{<:Any,true}, values, mask)
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values, mask)
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values, mask)[2]) :
@@ -122,7 +122,7 @@ function plan!(s::EpsilonGreedyExplorer{<:Any,true}, values, mask)
 end
 
 plan!(s::EpsilonGreedyExplorer{<:Any,false}, x, mask::Trues) = s(x)
-function plan!(s::EpsilonGreedyExplorer{<:Any,false}, values, mask)
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values, mask)
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? findmax(values, mask)[2] : rand(s.rng, findall(mask))

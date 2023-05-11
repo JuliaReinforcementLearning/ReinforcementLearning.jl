@@ -63,18 +63,18 @@ using ReinforcementLearningCore
                 @test agent.cache.reward == nothing
                 @test agent.cache.terminal == nothing
                 @test state(env) == agent.cache.state
-                @test plan!(agent, env) in (1,2)
+                @test RLBase.plan!(agent, env) in (1,2)
                 @test length(agent.trajectory.container) == 0 
                 update!(agent, PostActStage(), env)
                 @test agent.cache.reward == 0. && agent.cache.terminal == false
                 update!(agent, PreActStage(), env)
                 @test state(env) == agent.cache.state
-                @test plan!(agent, env) in (1,2)
+                @test RLBase.plan!(agent, env) in (1,2)
                 @test length(agent.trajectory.container) == 1
 
                 #The following tests checks args / kwargs passed to policy cause an error
-                @test_throws "MethodError: no method matching plan!(::Agent{RandomPolicy" plan!(agent, env, 1)
-                @test_throws "MethodError: no method matching plan!(::Agent{RandomPolicy" plan!(agent, env, fake_kwarg = 1)
+                @test_throws "MethodError: no method matching plan!(::Agent{RandomPolicy" RLBase.plan!(agent, env, 1)
+                @test_throws "MethodError: no method matching plan!(::Agent{RandomPolicy" RLBase.plan!(agent, env, fake_kwarg = 1)
             end
 
             @testset "Test update! method" begin

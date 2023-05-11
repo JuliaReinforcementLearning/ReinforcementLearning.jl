@@ -28,7 +28,7 @@ plan!(s::WeightedExplorer{true}, values::AbstractVector{T}) where {T} =
 plan!(s::WeightedExplorer{false}, values::AbstractVector{T}) where {T} =
     sample(s.rng, Weights(values))
 
-function plan!(s::WeightedExplorer, values, mask)
+function RLBase.plan!(s::WeightedExplorer, values, mask)
     values[.!mask] .= 0
     s(values)
 end
