@@ -64,7 +64,7 @@ function update!(composed_hook::ComposedHook{T},
     env::E,
     p::Symbol
     ) where {T <: Tuple, P <: AbstractPolicy, E <: AbstractEnv}
-_update!(stage, policy, env, p, composed_hook.hooks...)
+    _update!(stage, policy, env, p, composed_hook.hooks...)
 end
 
 @inline function _update!(stage::AbstractStage, policy::P, env::E, p::Symbol, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
@@ -80,7 +80,7 @@ function update!(composed_hook::ComposedHook{T},
     env::E,
     p::Symbol
     ) where {T <: Tuple, P <: AbstractPolicy, E <: AbstractEnv}
-_update!(stage, policy, env, p, composed_hook.hooks...)
+    _update!(stage, policy, env, p, composed_hook.hooks...)
 end
 
 Base.getindex(hook::ComposedHook, inds...) = getindex(hook.hooks, inds...)
