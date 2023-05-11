@@ -61,15 +61,15 @@ end
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
-function RLBase.choose!(agent::Agent{P,T,C}, env::AbstractEnv) where {P,T,C}
-    action = choose!(agent.policy, env)
+function RLBase.plan!(agent::Agent{P,T,C}, env::AbstractEnv) where {P,T,C}
+    action = plan!(agent.policy, env)
     push!(agent.trajectory, agent.cache, action)
     action
 end
 
 # Multiagent Version
-function RLBase.choose!(agent::Agent{P,T,C}, env::E, p::Symbol) where {P,T,C,E<:AbstractEnv}
-    action = choose!(agent.policy, env, p)
+function RLBase.plan!(agent::Agent{P,T,C}, env::E, p::Symbol) where {P,T,C,E<:AbstractEnv}
+    action = plan!(agent.policy, env, p)
     push!(agent.trajectory, agent.cache, action)
     action
 end

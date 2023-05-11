@@ -19,7 +19,7 @@ import Markdown
 #####
 
 """
-    choose!(π::AbstractPolicy, env) -> action
+    plan!(π::AbstractPolicy, env) -> action
 
 Policy is the most basic concept in reinforcement learning. Unlike the
 definition in some other packages, here a policy is defined as a functional
@@ -37,7 +37,7 @@ object which takes in an environment and returns an action.
     original `env` untouched.
 """
 @api abstract type AbstractPolicy end
-@api choose!(π::AbstractPolicy, env)
+@api plan!(π::AbstractPolicy, env)
 
 """
     optimise!(π::AbstractPolicy, experience)

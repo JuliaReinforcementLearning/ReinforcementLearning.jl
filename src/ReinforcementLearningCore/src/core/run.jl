@@ -95,7 +95,7 @@ function _run(policy::AbstractPolicy,
             update!(policy, PreActStage(), env)
             update!(hook, PreActStage(), policy, env)
 
-            action = choose!(policy, env)
+            action = plan!(policy, env)
             act!(env, action)
 
             optimise!(policy)
@@ -107,7 +107,7 @@ function _run(policy::AbstractPolicy,
                 is_stop = true
                 update!(policy, PreActStage(), env)
                 update!(hook, PreActStage(), policy, env)
-                choose!(policy, env)  # let the policy see the last observation
+                plan!(policy, env)  # let the policy see the last observation
                 break
             end
         end # end of an episode

@@ -17,9 +17,9 @@ end
 
 @functor QBasedPolicy (learner,)
 
-RLBase.choose!(p::QBasedPolicy, env::E) where {E <: AbstractEnv} = p.explorer(p.learner(env), legal_action_space_mask(env))
+RLBase.plan!(p::QBasedPolicy, env::E) where {E <: AbstractEnv} = p.explorer(p.learner(env), legal_action_space_mask(env))
 
-function RLBase.choose!(p::QBasedPolicy, env::E, player::Symbol) where {E<:AbstractEnv}
+function RLBase.plan!(p::QBasedPolicy, env::E, player::Symbol) where {E<:AbstractEnv}
     legal_action_space_ = RLBase.legal_action_space_mask(env, player)
     return p.explorer(p.learner(env), legal_action_space_)
 end
