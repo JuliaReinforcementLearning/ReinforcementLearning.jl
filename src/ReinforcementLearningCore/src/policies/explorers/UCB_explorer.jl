@@ -21,7 +21,7 @@ end
 UCBExplorer(na; c = 2.0, ϵ = 1e-10, step = 1, rng = Random.GLOBAL_RNG) =
     UCBExplorer(c, fill(ϵ, na), 1, rng)
 
-function (p::UCBExplorer)(values::AbstractArray)
+function plan!(p::UCBExplorer, values::AbstractArray)
     v, inds = find_all_max(@. values + p.c * sqrt(log(p.step + 1) / p.actioncounts))
     action = rand(p.rng, inds)
     p.actioncounts[action] += 1

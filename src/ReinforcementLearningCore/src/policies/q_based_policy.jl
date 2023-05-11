@@ -17,11 +17,13 @@ end
 
 @functor QBasedPolicy (learner,)
 
-RLBase.plan!(p::QBasedPolicy, env::E) where {E <: AbstractEnv} = p.explorer(estimate_reward(p.learner, env), legal_action_space_mask(env))
+function RLBase.plan!(p::QBasedPolicy, env::E) where {E <: AbstractEnv}
+    RLBase.plan!(p.explorer, estimate_reward(p.learner, env), legal_action_space_mask(env))
+end
 
 function RLBase.plan!(p::QBasedPolicy, env::E, player::Symbol) where {E<:AbstractEnv}
     legal_action_space_ = RLBase.legal_action_space_mask(env, player)
-    return p.explorer(estimate_reward(p.learner, env), legal_action_space_)
+    return RLBase.plan!(p.explorer, estimate_reward(p.learner, env), legal_action_space_)
 end
 
 RLBase.prob(p::QBasedPolicy, env::AbstractEnv) =

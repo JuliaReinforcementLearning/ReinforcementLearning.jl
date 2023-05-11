@@ -3,17 +3,17 @@ export AbstractExplorer
 using FillArrays: Trues
 
 """
-    (p::AbstractExplorer)(x)
-    (p::AbstractExplorer)(x, mask)
+    plan!(p::AbstractExplorer, x)
+    plan!(p::AbstractExplorer, x, mask)
 
 Define how to select an action based on action values.
 """
 abstract type AbstractExplorer end
 
-function (p::AbstractExplorer)(x) end
-function (p::AbstractExplorer)(x, mask) end
+function plan!(p::AbstractExplorer, x) end
+function plan!(p::AbstractExplorer, x, mask) end
 
-(p::AbstractExplorer)(x, mask::Trues) = p(x)
+plan!(p::AbstractExplorer, x, mask::Trues) = plan!(p, x)
 
 """
     prob(p::AbstractExplorer, x) -> AbstractDistribution
