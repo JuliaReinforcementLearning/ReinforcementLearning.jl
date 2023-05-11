@@ -17,7 +17,7 @@ function WeightedSoftmaxExplorer(; rng = Random.GLOBAL_RNG)
     WeightedSoftmaxExplorer(rng)
 end
 
-plan!(s::WeightedSoftmaxExplorer, values::AbstractVector{T}) where {T} =
+RLBase.plan!(s::WeightedSoftmaxExplorer, values::AbstractVector{T}) where {T} =
     sample(s.rng, Weights(softmax(values), one(T)))
 
 function RLBase.plan!(s::WeightedSoftmaxExplorer, values::AbstractVector{T}, mask) where {T}

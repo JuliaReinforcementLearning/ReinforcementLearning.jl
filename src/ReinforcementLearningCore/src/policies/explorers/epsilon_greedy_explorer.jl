@@ -113,7 +113,7 @@ end
 
 #####
 
-plan!(s::EpsilonGreedyExplorer{<:Any,true}, x, mask::Trues) = s(x)
+RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, x, mask::Trues) = s(x)
 function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values, mask)
     ϵ = get_ϵ(s)
     s.step += 1
@@ -121,7 +121,7 @@ function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values, mask)
     rand(s.rng, findall(mask))
 end
 
-plan!(s::EpsilonGreedyExplorer{<:Any,false}, x, mask::Trues) = s(x)
+RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, x, mask::Trues) = s(x)
 function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values, mask)
     ϵ = get_ϵ(s)
     s.step += 1
@@ -197,10 +197,10 @@ end
 # the GreedyExplorer is much faster.
 struct GreedyExplorer <: AbstractExplorer end
 
-plan!(s::GreedyExplorer, x, mask::Trues) = s(x)
+RLBase.plan!(s::GreedyExplorer, x, mask::Trues) = s(x)
 
-plan!(s::GreedyExplorer, values) = findmax(values)[2]
-plan!(s::GreedyExplorer, values, mask) = findmax(values, mask)[2]
+RLBase.plan!(s::GreedyExplorer, values) = findmax(values)[2]
+RLBase.plan!(s::GreedyExplorer, values, mask) = findmax(values, mask)[2]
 
 RLBase.prob(s::GreedyExplorer, values) =
     Categorical(onehot(findmax(values)[2], 1:length(values)); check_args=false)

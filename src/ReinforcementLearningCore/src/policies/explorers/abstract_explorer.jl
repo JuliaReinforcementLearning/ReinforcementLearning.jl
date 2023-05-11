@@ -13,7 +13,7 @@ abstract type AbstractExplorer end
 function RLBase.plan!(p::AbstractExplorer, x) end
 function RLBase.plan!(p::AbstractExplorer, x, mask) end
 
-plan!(p::AbstractExplorer, x, mask::Trues) = RLBase.plan!(p, x)
+RLBase.plan!(p::AbstractExplorer, x, mask::Trues) = RLBase.plan!(p, x)
 
 """
     prob(p::AbstractExplorer, x) -> AbstractDistribution
