@@ -17,16 +17,16 @@ end
 
 @functor QBasedPolicy (learner,)
 
-function RLBase.plan!(p::QBasedPolicy, env::E) where {E <: AbstractEnv}
+function RLBase.plan!(p::QBasedPolicy{L,Ex}, env::E) where {L,Ex,E <: AbstractEnv}
     RLBase.plan!(p.explorer, estimate_reward(p.learner, env), legal_action_space_mask(env))
 end
 
-function RLBase.plan!(p::QBasedPolicy, env::E, player::Symbol) where {E<:AbstractEnv}
+function RLBase.plan!(p::QBasedPolicy{L,Ex}, env::E, player::Symbol) where {L,Ex,E<:AbstractEnv}
     legal_action_space_ = RLBase.legal_action_space_mask(env, player)
     return RLBase.plan!(p.explorer, estimate_reward(p.learner, env), legal_action_space_)
 end
 
-RLBase.prob(p::QBasedPolicy, env::AbstractEnv) =
+RLBase.prob(p::QBasedPolicy{L,Ex}, env::AbstractEnv) where {L,Ex} =
     prob(p.explorer, estimate_reward(p.learner, env), legal_action_space_mask(env))
 
-RLBase.optimise!(p::QBasedPolicy, x::NamedTuple) = optimise!(p.learner, x)
+RLBase.optimise!(p::QBasedPolicy{L,Ex}, x::NamedTuple) where {L,Ex} = optimise!(p.learner, x)
