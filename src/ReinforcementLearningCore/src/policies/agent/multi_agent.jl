@@ -10,23 +10,23 @@ import Base.iterate
     MultiAgentPolicy(agents::NT) where {NT<: NamedTuple}
 MultiAgentPolicy is a policy struct that contains `<:AbstractPolicy` structs indexed by the player's symbol.
 """
-struct MultiAgentPolicy{NT<: NamedTuple} <: AbstractPolicy
-    agents::NT
+struct MultiAgentPolicy{names,T} <: AbstractPolicy
+    agents::NamedTuple{names,T}
 
-    function MultiAgentPolicy(agents::NT) where {NT<: NamedTuple}
-        new{NT}(agents)
+    function MultiAgentPolicy(agents::NamedTuple{names,T}) where {names,T}
+        new{names,T}(agents)
     end
 end
 
 """
     MultiAgentHook(hooks::NT) where {NT<: NamedTuple}
-MultiAgentHook is a hook struct that contains `<:AbstractoHook` structs indexed by the player's symbol.
+MultiAgentHook is a hook struct that contains `<:AbstractHook` structs indexed by the player's symbol.
 """
-struct MultiAgentHook{NT<: NamedTuple} <: AbstractHook
-    hooks::NT
+struct MultiAgentHook{names,T} <: AbstractHook
+    hooks::NamedTuple{names,T}
 
-    function MultiAgentHook(hooks::NT) where {NT<: NamedTuple}
-        new{NT}(hooks)
+    function MultiAgentHook(hooks::NamedTuple{names,T}) where {names,T}
+        new{names,T}(hooks)
     end
 end
 
