@@ -58,31 +58,6 @@ function update!(composed_hook::ComposedHook{T},
     _update!(stage, policy, env, composed_hook.hooks...)
 end
 
-function update!(composed_hook::ComposedHook{T},
-    stage::AbstractStage,
-    policy::P,
-    env::E,
-    p::Symbol
-    ) where {T <: Tuple, P <: AbstractPolicy, E <: AbstractEnv}
-    _update!(stage, policy, env, p, composed_hook.hooks...)
-end
-
-@inline function _update!(stage::AbstractStage, policy::P, env::E, p::Symbol, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
-    update!(hook, stage, policy, env, p)
-    _update!(stage, policy, env, p, hook_tuple...)
-end
-
-_update!(stage::AbstractStage, policy::P, env::E, p::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = nothing
-
-function update!(composed_hook::ComposedHook{T},
-    stage::AbstractStage,
-    policy::P,
-    env::E,
-    p::Symbol
-    ) where {T <: Tuple, P <: AbstractPolicy, E <: AbstractEnv}
-    _update!(stage, policy, env, p, composed_hook.hooks...)
-end
-
 Base.getindex(hook::ComposedHook, inds...) = getindex(hook.hooks, inds...)
 
 #####
