@@ -91,9 +91,7 @@ function _update!(
     for i in 1:min(n + 1, length(R))
         G = R[end-i+1] + γ * G
         s, a = S[end-i], A[end-i]
-        if !(a isa NoOp)
-            update!(Q, (s, a) => Q(s, a) - G)
-        end
+        update!(Q, (s, a) => Q(s, a) - G)
     end
 end
 

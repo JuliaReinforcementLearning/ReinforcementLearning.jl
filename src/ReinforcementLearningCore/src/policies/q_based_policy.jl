@@ -18,10 +18,18 @@ end
 @functor QBasedPolicy (learner,)
 
 function RLBase.plan!(p::QBasedPolicy{L,Ex}, env::E) where {L,Ex,E <: AbstractEnv}
-    RLBase.plan!(p.explorer, estimate_reward(p.learner, env), legal_action_space_mask(env))
+    RLBase.plan!(p.explorer, p.learner, env)
+end
+
+function RLBase.plan!(explorer::Ex, learner::L, env::E) where {Ex,L,E<:AbstractEnv}
+    RLBase.plan!(explorer, estimate_reward(learner, env), legal_action_space_mask(env))
 end
 
 function RLBase.plan!(p::QBasedPolicy{L,Ex}, env::E, player::Symbol) where {L,Ex,E<:AbstractEnv}
+    RLBase.plan!(p.explorer, p.learner, env, player)
+end
+
+function RLBase.plan!(explorer::Ex, learner::L, env::E, player::Symbol) where {Ex,L,E<:AbstractEnv}
     legal_action_space_ = RLBase.legal_action_space_mask(env, player)
     return RLBase.plan!(p.explorer, estimate_reward(p.learner, env), legal_action_space_)
 end
