@@ -31,7 +31,7 @@ end
 
 function RLBase.plan!(explorer::Ex, learner::L, env::E, player::Symbol) where {Ex<:AbstractExplorer,L<:AbstractLearner,E<:AbstractEnv}
     legal_action_space_ = RLBase.legal_action_space_mask(env, player)
-    return RLBase.plan!(p.explorer, estimate_reward(p.learner, env), legal_action_space_)
+    return RLBase.plan!(explorer, estimate_reward(learner, env), legal_action_space_)
 end
 
 RLBase.prob(p::QBasedPolicy{L,Ex}, env::AbstractEnv) where {L<:AbstractLearner,Ex<:AbstractExplorer} =
