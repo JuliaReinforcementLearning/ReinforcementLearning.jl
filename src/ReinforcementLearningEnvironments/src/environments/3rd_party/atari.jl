@@ -91,7 +91,7 @@ update_screen!(env::AtariEnv{true}, screen) =
 update_screen!(env::AtariEnv{false}, screen) =
     ArcadeLearningEnvironment.getScreenRGB!(env.ale, vec(screen))
 
-function (env::AtariEnv{is_gray_scale,is_terminal_on_life_loss})(
+function RLBase.act!(env::AtariEnv{is_gray_scale,is_terminal_on_life_loss},
     a,
 ) where {is_gray_scale,is_terminal_on_life_loss}
     r = 0.0f0
