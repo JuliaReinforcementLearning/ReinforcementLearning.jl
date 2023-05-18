@@ -175,27 +175,24 @@ function Base.run(
     )
 end
 
+# Default behavior for multi-agent, simultaneous `update!` is to iterate over all players and call `update!` on the appropriate policy
 function update!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:AbstractStage, E<:AbstractEnv}
     for player in players(env)
         update!(multiagent[player], stage, env, player)
     end
 end
 
+# Like in the single-agent case, update! at the PreActStage() calls update! on each player with the state of the environment
 function update!(multiagent::MultiAgentPolicy, ::PreActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
         update!(multiagent[player], state(env, player))
     end
 end
 
+# Like in the single-agent case, update! at the PostActStage() calls update! on each player with the reward and termination status of the environment
 function update!(multiagent::MultiAgentPolicy, ::PostActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
         update!(multiagent[player].cache, reward(env, player), is_terminated(env))
-    end
-end
-
-function update!(multiagent::MultiAgentPolicy, ::PostExperimentStage, env::E) where {E<:AbstractEnv}
-    for player in players(env)
-        update!(multiagent[player], PostEpisodeStage(), env, player)
     end
 end
 

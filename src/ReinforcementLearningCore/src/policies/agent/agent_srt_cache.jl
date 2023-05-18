@@ -24,12 +24,13 @@ struct SART{S,A,R,T}
     terminal::T
 end
 
-function Base.push!(ts::Traces, xs::SA)
+# This method is used to push a state and action to a trace 
+function Base.push!(ts::CircularArraySARTTraces, xs::SA)
     push!(ts.traces[1].trace, xs.state)
     push!(ts.traces[2].trace, xs.action)
 end
 
-function Base.push!(ts::Traces, xs::SART)
+function Base.push!(ts::CircularArraySARTTraces, xs::SART)
     push!(ts.traces[1].trace, xs.state)
     push!(ts.traces[2].trace, xs.action)
     push!(ts.traces[3], xs.reward)
