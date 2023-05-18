@@ -99,13 +99,13 @@ get_ϵ(s::EpsilonGreedyExplorer) = get_ϵ(s, s.step)
     `NaN` will be filtered unless all the values are `NaN`.
     In that case, a random one will be returned.
 """
-function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values)
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values::Vector{I}) where {I<:Integer}
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values)[2]) : rand(s.rng, 1:length(values))
 end
 
-function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values)
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values::Vector{I}) where {I<:Integer}
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? findmax(values)[2] : rand(s.rng, 1:length(values))
@@ -113,16 +113,16 @@ end
 
 #####
 
-RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, x, mask::Trues) = s(x)
-function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values, mask)
+RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, x, mask::Trues) = RLBase.plan!(s, x)
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values, mask::BitArray)
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values, mask)[2]) :
     rand(s.rng, findall(mask))
 end
 
-RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, x, mask::Trues) = s(x)
-function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values, mask)
+RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, x, mask::Trues) = RLBase.plan!(s, x)
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values, mask::BitArray)
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? findmax(values, mask)[2] : rand(s.rng, findall(mask))
