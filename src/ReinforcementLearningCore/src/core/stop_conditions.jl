@@ -63,7 +63,7 @@ function check_stop(s::StopAfterStep, args...)
     _stop_after_step(s)
 end
 
-stop(s::StopAfterStep{Nothing}, args...) = _stop_after_step(s)
+check_stop(s::StopAfterStep{Nothing}, args...) = _stop_after_step(s)
 
 #####
 # StopAfterEpisode
@@ -167,7 +167,7 @@ Return `true` if the environment is terminated.
 """
 struct StopWhenDone <: AbstractStopCondition end
 
-stop(s::StopWhenDone, agent, env) = is_terminated(env)
+check_stop(s::StopWhenDone, agent, env) = is_terminated(env)
 
 #####
 # StopSignal
@@ -187,7 +187,7 @@ end
 Base.getindex(s::StopSignal) = s.is_stop[]
 Base.setindex!(s::StopSignal, v::Bool) = s.is_stop[] = v
 
-stop(s::StopSignal, agent, env) = s[]
+check_stop(s::StopSignal, agent, env) = s[]
 
 """
 StopAfterNSeconds
@@ -211,4 +211,4 @@ function StopAfterNSeconds(budget::Float64)
     RLBase.reset!(s)
 end
 
-stop(s::StopAfterNSeconds, _...) = time() > s.deadline
+check_stop(s::StopAfterNSeconds, _...) = time() > s.deadline
