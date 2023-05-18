@@ -21,9 +21,8 @@ import Markdown
 """
     plan!(π::AbstractPolicy, env) -> action
 
-Policy is the most basic concept in reinforcement learning. Unlike the
-definition in some other packages, here a policy is defined as a functional
-object which takes in an environment and returns an action.
+The policy is the most basic concept in reinforcement learning. Here an agent's
+action is determined by a `plan!` which takes an environment and policy and returns an action.
 
 !!! note
     See discussions
