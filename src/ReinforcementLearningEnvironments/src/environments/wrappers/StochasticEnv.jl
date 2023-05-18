@@ -25,7 +25,7 @@ function RLBase.reset!(env::StochasticEnv)
     end
 end
 
-function (env::StochasticEnv)(a)
+function RLBase.plan!(env::StochasticEnv, a)
     env.env(a)
     while current_player(env.env) == chance_player(env.env)
         p = prob(env.env)

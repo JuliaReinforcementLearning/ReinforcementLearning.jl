@@ -11,7 +11,7 @@ Base.getindex(env::AbstractEnvWrapper) = env.env
 Base.getindex(env::AbstractEnvWrapper, ::typeof(!)) = env[][!]
 Base.getindex(env::AbstractEnv, ::typeof(!)) = env
 
-(env::AbstractEnvWrapper)(args...; kwargs...) = env[](args...; kwargs...)
+RLBase.plan!(env::AbstractEnvWrapper, args...; kwargs...) = env[](args...; kwargs...)
 
 for f in vcat(RLBase.ENV_API, RLBase.MULTI_AGENT_ENV_API)
     @eval RLBase.$f(x::AbstractEnvWrapper, args...; kwargs...) = $f(x[], args...; kwargs...)

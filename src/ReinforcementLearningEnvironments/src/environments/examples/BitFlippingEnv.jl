@@ -27,7 +27,7 @@ RLBase.action_space(env::BitFlippingEnv) = Base.OneTo(env.N)
 
 RLBase.legal_action_space(env::BitFlippingEnv) = Base.OneTo(env.N)
 
-function (env::BitFlippingEnv)(action::Int)
+function RLBase.plan!(env::BitFlippingEnv, action::Int)
     env.t += 1
     if 1 <= action <= env.N
         env.state[action] = !env.state[action]

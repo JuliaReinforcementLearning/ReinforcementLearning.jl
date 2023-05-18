@@ -81,7 +81,7 @@ RLBase.action_space(env::PettingzooEnv, player::DefaultPlayer) = env.action_spac
 
 ## action functions ========================================================================================================================
 
-function (env::PettingzooEnv)(actions::Dict, players::Tuple)
+function RLBase.plan!(env::PettingzooEnv, actions::Dict, players::Tuple)
     @assert length(actions) == length(players)
     env.ts += 1
     for p in players
@@ -89,21 +89,21 @@ function (env::PettingzooEnv)(actions::Dict, players::Tuple)
     end
 end
 
-function (env::PettingzooEnv)(actions::Dict, player)
+function RLBase.plan!(env::PettingzooEnv, actions::Dict, player)
     @assert length(actions) == length(players(env))
     for p in players(env)
         env(actions[p])
     end
 end
 
-function (env::PettingzooEnv)(actions::Dict{String, Int})
+function RLBase.plan!(env::PettingzooEnv, actions::Dict{String, Int})
     @assert length(actions) == length(players(env))
     for p in env.pyenv.agents
         pycall(env.pyenv.step, PyObject, actions[p])
     end
 end
 
-function (env::PettingzooEnv)(actions::Dict{String, Real})
+function RLBase.plan!(env::PettingzooEnv, actions::Dict{String, Real})
     @assert length(actions) == length(players(env))
     env.ts += 1
     for p in env.pyenv.agents
@@ -111,11 +111,11 @@ function (env::PettingzooEnv)(actions::Dict{String, Real})
     end
 end
 
-function (env::PettingzooEnv)(action::Vector)
+function RLBase.plan!(env::PettingzooEnv, action::Vector)
     pycall(env.pyenv.step, PyObject, np.array(action; dtype=np.float32))
 end
 
-function (env::PettingzooEnv)(action::Integer)
+function RLBase.plan!(env::PettingzooEnv, action::Integer)
     env.ts += 1
     pycall(env.pyenv.step, PyObject, action)
 end

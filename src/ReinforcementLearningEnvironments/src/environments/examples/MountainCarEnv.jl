@@ -104,13 +104,13 @@ function RLBase.reset!(env::MountainCarEnv{T}) where {T}
     nothing
 end
 
-function (env::MountainCarEnv)(a::AbstractFloat)
+function RLBase.plan!(env::MountainCarEnv, a::AbstractFloat)
     @assert a in action_space(env)
     env.action = a
     _step!(env, a)
 end
 
-function (env::MountainCarEnv)(a::Int)
+function RLBase.plan!(env::MountainCarEnv, a::Int)
     @assert a in action_space(env)
     env.action = a
     _step!(env, a - 2)

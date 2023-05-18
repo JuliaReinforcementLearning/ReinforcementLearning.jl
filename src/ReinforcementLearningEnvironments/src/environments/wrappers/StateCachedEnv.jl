@@ -14,7 +14,7 @@ end
 
 StateCachedEnv(env) = StateCachedEnv(state(env), env, true)
 
-function (env::StateCachedEnv)(args...; kwargs...)
+function RLBase.plan!(env::StateCachedEnv, args...; kwargs...)
     env.env(args...; kwargs...)
     env.is_state_cached = false
 end
