@@ -98,7 +98,7 @@ function RLBase.reset!(env::AcrobotEnv{T}) where {T<:Number}
 end
 
 # governing equations as per python gym
-function RLBase.plan!(env::AcrobotEnv{T}, a) where {T<:Number}
+function RLBase.act!(env::AcrobotEnv{T}, a) where {T<:Number}
     env.action = a
     env.t += 1
     torque = env.avail_torque[a]

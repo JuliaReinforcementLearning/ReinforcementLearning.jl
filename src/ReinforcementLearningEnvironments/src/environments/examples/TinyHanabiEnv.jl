@@ -54,8 +54,8 @@ RLBase.current_player(env::TinyHanabiEnv) =
         2
     end
 
-RLBase.plan!(env::TinyHanabiEnv, action, ::ChancePlayer) = push!(env.cards, action)
-RLBase.plan!(env::TinyHanabiEnv, action, ::Int) = push!(env.actions, action)
+RLBase.act!(env::TinyHanabiEnv, action, ::ChancePlayer) = push!(env.cards, action)
+RLBase.act!(env::TinyHanabiEnv, action, ::Int) = push!(env.actions, action)
 
 RLBase.action_space(env::TinyHanabiEnv, ::Int) = Base.OneTo(3)
 RLBase.action_space(env::TinyHanabiEnv, ::ChancePlayer) = Base.OneTo(2)
@@ -96,8 +96,8 @@ RLBase.is_terminated(env::TinyHanabiEnv) = length(env.actions) == 2
 RLBase.reward(env::TinyHanabiEnv, player) =
     is_terminated(env) ? env.reward_table[env.actions..., env.cards...] : 0
 
-RLBase.plan!(env::TinyHanabiEnv, action::Int, ::ChancePlayer) = push!(env.cards, action)
-RLBase.plan!(env::TinyHanabiEnv, action::Int, ::Int) = push!(env.actions, action)
+RLBase.act!(env::TinyHanabiEnv, action::Int, ::ChancePlayer) = push!(env.cards, action)
+RLBase.act!(env::TinyHanabiEnv, action::Int, ::Int) = push!(env.actions, action)
 
 RLBase.NumAgentStyle(::TinyHanabiEnv) = MultiAgent(2)
 RLBase.DynamicStyle(::TinyHanabiEnv) = SEQUENTIAL

@@ -9,7 +9,7 @@
     rewards = [[], []]
     for _ in 1:50_000
         while !is_terminated(env)
-            env(rand(rng, legal_action_space(env)))
+            RLBase.act!(env, rand(rng, legal_action_space(env)))
         end
         @test RLBase.reward(env, Symbol(1)) == (-1 * RLBase.reward(env, Symbol(2)))
         @test RLBase.is_terminated(env) isa Bool

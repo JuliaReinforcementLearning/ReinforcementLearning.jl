@@ -51,7 +51,7 @@ function RLBase.reward(env::PigEnv, player)
     end
 end
 
-function RLBase.plan!(env::PigEnv, action, player::Int)
+function RLBase.act!(env::PigEnv, action, player::Int)
     if action == :roll
         env.is_chance_player_active = true
     else
@@ -64,7 +64,7 @@ function RLBase.plan!(env::PigEnv, action, player::Int)
     end
 end
 
-function RLBase.plan!(env::PigEnv, action, ::ChancePlayer)
+function RLBase.act!(env::PigEnv, action, ::ChancePlayer)
     env.is_chance_player_active = false
     if action == 1
         env.tmp_score = 0

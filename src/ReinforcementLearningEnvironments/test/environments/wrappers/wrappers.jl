@@ -43,7 +43,7 @@
         RLBase.test_runnable!(env′)
 
         while !is_terminated(env′)
-            env′(:listen)
+            RLBase.act!(env′, :listen)
             n -= 1
             @test n >= 0
         end
@@ -62,7 +62,7 @@
         RLBase.test_runnable!(env′)
 
         while !is_terminated(env′)
-            env′(rand(rng, legal_action_space(env′)))
+            RLBase.act!(env′, rand(rng, legal_action_space(env′)))
             @test reward(env′) ∈ (-1, 0, 1)
         end
     end
@@ -76,7 +76,7 @@
         RLBase.test_runnable!(env′)
 
         while !is_terminated(env′)
-            env′(rand(rng, legal_action_space(env′)))
+            RLBase.act!(env′, rand(rng, legal_action_space(env′)))
             @test reward(env′) ∈ (-1, 0, 1)
         end
     end
@@ -90,7 +90,7 @@
         RLBase.test_runnable!(env′)
 
         while !is_terminated(env′)
-            env′(rand(rng, legal_action_space(env′)))
+            RLBase.act!(env′, rand(rng, legal_action_space(env′)))
             s1 = state(env)
             s2 = state(env)
             @test s1 === s2
@@ -124,7 +124,7 @@
 
         @test RLBase.current_player(env) == SimultaneousPlayer()
 
-        env(['💎', '📃'])
+        RLBase.act!(env, ['💎', '📃'])
 
         @test is_terminated(env) == true
 
@@ -133,7 +133,7 @@
         @test reward(env) == (; Symbol(1) => 0, Symbol(2) => 0)
         @test is_terminated(env) == false
 
-        env(['💎', '📃'])
+        RLBase.act!(env, ['💎', '📃'])
 
         @test reward(env, Symbol(1)) == -1
         @test reward(env, Symbol(2)) == 1

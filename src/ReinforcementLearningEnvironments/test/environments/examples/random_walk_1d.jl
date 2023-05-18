@@ -11,7 +11,7 @@
     rewards = []
     for _ = 1:N
         while !is_terminated(env)
-            env(rand(rng, legal_action_space(env)))
+            RLBase.act!(env, rand(rng, legal_action_space(env)))
         end
         push!(rewards, reward(env))
         reset!(env)
@@ -25,18 +25,18 @@ end
 @testset "RandomPolicy / RandomWalk1D Performance Specs" begin
     env = RandomWalk1D()
     reward(env)
-    env(1)
+    RLBase.act!(env, 1)
     @test (@allocated reward(env)) == 0
-    @test (@allocated env(1)) == 0
+    @test (@allocated RLBase.act!(env, 1)) == 0
 
     # Test zero allocations for RandomPolicy calls
     p = RandomPolicy(legal_action_space(env))
-    p(env)
-    @test (@allocated p(env)) == 0
+    RLBase.plan(p, env)
+    @test (@allocated RLBase.plan(p, env)) == 0
 
     p_ = RandomPolicy()
-    p_(env)
-    @test (@allocated p_(env)) == 0
+    RLBase.plan(p_, env)
+    @test (@allocated RLBase.plan(p_, env)) == 0
 end
 
 @testset "Reward Dispatch" begin
@@ -49,7 +49,7 @@ end
     # Reach positive outcome
     env = RandomWalk1D()
     for i = 1:(env.N+1)
-        env(1)
+        RLBase.act!(env, 1)
     end
     @test env.pos == 1
     @test reward(env) == -1
@@ -58,7 +58,7 @@ end
     # Reach negative outcome
     env = RandomWalk1D()
     for i = 1:(env.N+1)
-        env(2)
+        RLBase.act!(env, 2)
     end
     @test env.pos == env.N
     @test reward(env) == 1
@@ -67,9 +67,9 @@ end
     # Reach starting position
     env = RandomWalk1D()
     @test env.pos == 4
-    env(1)
+    RLBase.act!(env, 1)
     @test env.pos == 3
-    env(2)
+    RLBase.act!(env, 2)
     @test env.pos == 4
     @test reward(env) == 0
     @test (@allocated reward(env)) == 0

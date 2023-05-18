@@ -103,13 +103,13 @@ function RLBase.reset!(env::CartPoleEnv{T}) where {T}
     nothing
 end
 
-function RLBase.plan!(env::CartPoleEnv, a::AbstractFloat)
+function RLBase.act!(env::CartPoleEnv, a::AbstractFloat)
     @assert a in action_space(env)
     env.action = a
     _step!(env, a)
 end
 
-function RLBase.plan!(env::CartPoleEnv, a::Int)
+function RLBase.act!(env::CartPoleEnv, a::Int)
     @assert a in action_space(env)
     env.action = a
     _step!(env, a == 2 ? 1 : -1)
