@@ -11,7 +11,7 @@
         @test state(env) in state_space(env)
         r = 0.0
         while !is_terminated(env)
-            env(rand(rng, action_space(env)))
+            RLBase.act!(env, rand(rng, action_space(env)))
             r += reward(env)
         end
         push!(rewards, r)

@@ -10,7 +10,7 @@
     N = 50_000
     for _ in 1:N
         while !is_terminated(env)
-            env(rand(rng, legal_action_space(env)))
+            RLBase.act!(env, rand(rng, legal_action_space(env)))
         end
         push!(rewards, reward(env))
         reset!(env)

@@ -54,7 +54,7 @@ Base.copy(env::OpenSpielEnv) = OpenSpielEnv(copy(env.state), env.game)
 
 RLBase.reset!(env::OpenSpielEnv) = env.state = new_initial_state(env.game)
 
-(env::OpenSpielEnv)(action::Integer) = apply_action(env.state, action)
+RLBase.act!(env::OpenSpielEnv, action::Integer) = apply_action(env.state, action)
 
 RLBase.current_player(env::OpenSpielEnv) = OpenSpiel.current_player(env.state)
 RLBase.chance_player(env::OpenSpielEnv) = convert(Int, OpenSpiel.CHANCE_PLAYER)

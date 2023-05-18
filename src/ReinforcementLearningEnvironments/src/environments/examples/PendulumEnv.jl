@@ -91,7 +91,7 @@ function RLBase.reset!(env::PendulumEnv{A,T}) where {A,T}
     nothing
 end
 
-function (env::PendulumEnv)(a)
+function RLBase.act!(env::PendulumEnv, a)
     @assert a in action_space(env)
     env.action = torque(env, a)
     _step!(env, env.action)
