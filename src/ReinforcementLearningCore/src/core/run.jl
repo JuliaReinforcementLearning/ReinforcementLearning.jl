@@ -103,7 +103,7 @@ function _run(policy::AbstractPolicy,
             update!(policy, PostActStage(), env)
             update!(hook, PostActStage(), policy, env)
 
-            if stop(stop_condition, policy, env)
+            if check_stop(stop_condition, policy, env)
                 is_stop = true
                 update!(policy, PreActStage(), env)
                 update!(hook, PreActStage(), policy, env)
