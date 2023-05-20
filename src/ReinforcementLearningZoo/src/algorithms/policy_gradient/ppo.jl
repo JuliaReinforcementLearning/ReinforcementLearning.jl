@@ -184,10 +184,10 @@ function RLBase.prob(p::PPOPolicy, env::AbstractEnv)
     prob(p, s, mask)
 end
 
-(p::PPOPolicy)(env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
+RLBase.plan!((p::PPOPolicy, env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
 
 # !!! https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/533/files#r728920324
-(p::PPOPolicy)(env::AbstractEnv) = rand.(p.rng, prob(p, env))
+RLBase.plan!((p::PPOPolicy, env::AbstractEnv) = rand.(p.rng, prob(p, env))
 
 function (agent::Agent{<:PPOPolicy})(env::MultiThreadEnv)
     dist = prob(agent.policy, env)

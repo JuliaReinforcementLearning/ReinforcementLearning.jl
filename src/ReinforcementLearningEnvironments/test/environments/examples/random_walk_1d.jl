@@ -31,12 +31,12 @@ end
 
     # Test zero allocations for RandomPolicy calls
     p = RandomPolicy(legal_action_space(env))
-    RLCore.plan!(p, env)
-    @test (@allocated RLCore.plan!(p, env)) == 0
+    RLBase.plan!(p, env)
+    @test (@allocated RLBase.plan!(p, env)) == 0
 
     p_ = RandomPolicy()
-    RLCore.plan!(p_, env)
-    @test (@allocated RLCore.plan!(p_, env)) == 0
+    RLBase.plan!(p_, env)
+    @test (@allocated RLBase.plan!(p_, env)) == 0
 end
 
 @testset "Reward Dispatch" begin

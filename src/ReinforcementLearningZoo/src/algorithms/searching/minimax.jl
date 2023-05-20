@@ -13,9 +13,9 @@ Base.@kwdef mutable struct MinimaxPolicy{F} <: AbstractPolicy
     v::Float64 = 0.0
 end
 
-(p::MinimaxPolicy)(env::AbstractEnv) = p(env, DynamicStyle(env), NumAgentStyle(env))
+RLBase.plan!((p::MinimaxPolicy, env::AbstractEnv) = p(env, DynamicStyle(env), NumAgentStyle(env))
 
-function (p::MinimaxPolicy)(env::AbstractEnv, ::Sequential, ::MultiAgent{2})
+function RLBase.plan!((p::MinimaxPolicy, env::AbstractEnv, ::Sequential, ::MultiAgent{2})
     if is_terminated(env)
         rand(action_space(env))  # just a dummy action
     else

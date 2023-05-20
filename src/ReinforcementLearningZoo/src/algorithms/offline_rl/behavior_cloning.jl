@@ -32,7 +32,7 @@ function BehaviorCloningPolicy(;
     BehaviorCloningPolicy(approximator, explorer, sampler, min_reservoir_history)
 end
 
-function (p::BehaviorCloningPolicy)(env::AbstractEnv)
+function RLBase.plan!((p::BehaviorCloningPolicy, env::AbstractEnv)
     s = state(env)
     s_batch = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s_batch = send_to_device(device(p.approximator), s_batch)

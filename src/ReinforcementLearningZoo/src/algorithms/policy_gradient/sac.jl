@@ -115,7 +115,7 @@ function SACPolicy(;
 end
 
 # TODO: handle Training/Testing mode
-function (p::SACPolicy)(env)
+function RLBase.plan!((p::SACPolicy, env)
     p.update_step += 1
 
     if p.update_step <= p.start_steps
