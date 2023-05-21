@@ -80,7 +80,7 @@ end
 
 Flux.@functor MPOPolicy
 
-function RLBase.plan!((p::MPOPolicy, env; testmode = false)
+function RLBase.plan!(p::MPOPolicy, env; testmode = false)
     D = device(p.actor)
     s = send_to_device(D, state(env))
     if !testmode

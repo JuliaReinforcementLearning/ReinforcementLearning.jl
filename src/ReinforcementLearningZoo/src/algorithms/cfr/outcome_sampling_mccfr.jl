@@ -17,7 +17,7 @@ struct OutcomeSamplingMCCFRPolicy{S,B,R<:AbstractRNG} <: AbstractCFRPolicy
     rng::R
 end
 
-RLBase.plan!((p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv) = p.behavior_policy(env)
+RLBase.plan!(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv) = p.behavior_policy(env)
 
 RLBase.prob(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv) = prob(p.behavior_policy, env)
 

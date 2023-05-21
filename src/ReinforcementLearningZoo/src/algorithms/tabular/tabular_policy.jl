@@ -14,7 +14,7 @@ Base.@kwdef struct TabularPolicy{S,A} <: AbstractPolicy
     n_action::Union{Int, Nothing} = nothing
 end
 
-RLBase.plan!((p::TabularPolicy, env::AbstractEnv) = p(state(env))
+RLBase.plan!(p::TabularPolicy, env::AbstractEnv) = p(state(env))
 (p::TabularPolicy{S})(s::S) where {S} = p.table[s]
 
 function RLBase.update!(p::TabularPolicy, target::Pair)

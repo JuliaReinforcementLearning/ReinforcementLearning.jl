@@ -27,7 +27,7 @@ mutable struct TabularCFRPolicy{S,T,R<:AbstractRNG} <: AbstractCFRPolicy
     n_iteration::Int
 end
 
-RLBase.plan!((p::TabularCFRPolicy, env::AbstractEnv) = p.behavior_policy(env)
+RLBase.plan!(p::TabularCFRPolicy, env::AbstractEnv) = p.behavior_policy(env)
 
 RLBase.prob(p::TabularCFRPolicy, env::AbstractEnv) = prob(p.behavior_policy, env)
 

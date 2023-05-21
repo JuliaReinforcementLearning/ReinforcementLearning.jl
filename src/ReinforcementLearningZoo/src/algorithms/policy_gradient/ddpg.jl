@@ -108,7 +108,7 @@ function DDPGPolicy(;
 end
 
 # TODO: handle Training/Testing mode
-function RLBase.plan!((p::DDPGPolicy, env, player::Any=nothing)
+function RLBase.plan!(p::DDPGPolicy, env, player::Any=nothing)
     p.update_step += 1
 
     if p.update_step <= p.start_steps

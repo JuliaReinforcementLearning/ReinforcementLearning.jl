@@ -16,7 +16,7 @@ struct ExternalSamplingMCCFRPolicy{S,B,R<:AbstractRNG} <: AbstractCFRPolicy
     rng::R
 end
 
-RLBase.plan!((p::ExternalSamplingMCCFRPolicy, env::AbstractEnv) = p.behavior_policy(env)
+RLBase.plan!(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv) = p.behavior_policy(env)
 
 RLBase.prob(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv) = prob(p.behavior_policy, env)
 

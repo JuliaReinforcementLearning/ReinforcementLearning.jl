@@ -112,7 +112,7 @@ function TD3Policy(;
 end
 
 # TODO: handle Training/Testing mode
-function RLBase.plan!((p::TD3Policy, env)
+function RLBase.plan!(p::TD3Policy, env)
     p.update_step += 1
 
     if p.update_step <= p.start_steps
