@@ -33,7 +33,7 @@ end
 
 @functor BasicDQNLearner (approximator,)
 
-RLBase.optimise!(L::BasicDQNLearner, s::AbstractArray) = RLBase.optimise(L.approximator, s)
+RLBase.optimise!(L::BasicDQNLearner, s::AbstractArray) = RLBase.optimise!(L.approximator, s)
 
 function RLCore.optimise!(
     learner::BasicDQNLearner,
