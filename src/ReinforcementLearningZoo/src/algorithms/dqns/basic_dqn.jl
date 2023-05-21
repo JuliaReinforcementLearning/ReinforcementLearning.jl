@@ -48,8 +48,8 @@ function RLCore.optimise!(
     a = CartesianIndex.(a, 1:length(a))
 
     gs = gradient(params(Q)) do
-        q = Q(s)[a]
-        q′ = vec(maximum(Q(s′); dims=1))
+        q = RLCore.estimate_reward(Q, s)[a]
+        q′ = vec(maximum(RLCore.estimate_reward(Q, s′); dims=1))
         G = @. r + γ * (1 - t) * q′
         loss = loss_func(G, q)
         ignore_derivatives() do

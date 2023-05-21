@@ -34,7 +34,7 @@ end
 
 @functor QRDQNLearner (approximator,)
 
-(L::QRDQNLearner)(s::AbstractArray) = vec(mean(reshape(L.approximator(s), L.n_quantile, :), dims=1))
+RLBase.optimise(L::QRDQNLearner, s::AbstractArray) = vec(mean(reshape(RLCore.estimate_reward(L.approximator, s), L.n_quantile, :), dims=1))
 
 function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
     A = learner.approximator
@@ -55,7 +55,7 @@ function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
     y = reshape(r, 1, batch_size) .+ γ .* reshape(1 .- t, 1, batch_size) .* target_quantile_aₜ
 
     gs = gradient(params(A)) do
-        q = reshape(Q(s), N, :, batch_size)
+        q = reshape(RLCore.estimate_reward(Q, s), N, :, batch_size)
         @views ŷ = q[:, a]
 
         loss = loss_func(ŷ, y)
