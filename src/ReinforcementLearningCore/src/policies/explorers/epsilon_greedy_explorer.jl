@@ -114,15 +114,16 @@ end
 #####
 
 RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, x, mask::Trues) = RLBase.plan!(s, x)
-function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values, mask::BitArray)
+
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values::Vector{I}, mask::M) where {I<:Real, M<:Union{BitVector, Vector{Bool}}}
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values, mask)[2]) :
     rand(s.rng, findall(mask))
 end
 
-RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, x, mask::Trues) = RLBase.plan!(s, x)
-function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values, mask::BitArray)
+RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, x::Vector{I}, mask::Trues) where{I<:Real} = RLBase.plan!(s, x)
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values::Vector{I}, mask::M) where {I<:Real, M<:Union{BitVector, Vector{Bool}}}
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? findmax(values, mask)[2] : rand(s.rng, findall(mask))
