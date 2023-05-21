@@ -36,7 +36,7 @@ function BestResponsePolicy(policy, env, best_responder;)
     p
 end
 
-function RLBase.plan!((p::BestResponsePolicy, env::AbstractEnv)
+function RLBase.plan!(p::BestResponsePolicy, env::AbstractEnv)
     if current_player(env) == p.best_responder
         best_response_action(p, env)
     else
