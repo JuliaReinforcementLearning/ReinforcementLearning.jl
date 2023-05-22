@@ -55,11 +55,11 @@ end
 embed(x, Nₑₘ) = cos.(Float32(π) .* (1:Nₑₘ) .* reshape(x, 1, :))
 
 # the last dimension is batch_size
-function (learner::IQNLearner)(s::AbstractArray)
+function RLCore.estimate_reward(learner::IQNLearner, s::A) where {A<:AbstractArray}
     batch_size = size(s)[end]
     τ = rand(learner.device_rng, Float32, learner.K, batch_size)
     τₑₘ = embed(τ, learner.Nₑₘ)
-    quantiles = learner.approximator(s, τₑₘ)
+    quantiles = RLCore.estimate_reward(learner.approximator, s, τₑₘ)
     dropdims(mean(quantiles; dims=2); dims=2)
 end
 

@@ -20,7 +20,7 @@ end
 
 @functor REMDQNLearner (approximator,)
 
-function (L::REMDQNLearner)(s::AbstractArray)
+function RLCore.estimate_reward(L::REMDQNLearner, s::A) where {A<:AbstractArray}
     q = reshape(L.approximator(s), :, L.ensemble_num)
     vec(mean(q, dims=2))
 end
