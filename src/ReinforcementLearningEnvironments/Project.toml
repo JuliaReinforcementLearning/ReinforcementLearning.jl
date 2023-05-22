@@ -4,9 +4,7 @@ version = "0.8.0"
 
 [deps]
 CommonRLInterface = "d842c3ba-07a1-494f-bbec-f5741b0a3e98"
-Conda = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
-Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
