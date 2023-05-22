@@ -50,7 +50,7 @@ function RLBase.prob(π::DeepCFR, env::AbstractEnv)
     send_to_host(σ)
 end
 
-(π::DeepCFR)(env::AbstractEnv) =
+RLBase.plan!(π::DeepCFR, env::AbstractEnv) =
     sample(π.rng, action_space(env), Weights(prob(π, env), 1.0))
 
 "Run one interation"

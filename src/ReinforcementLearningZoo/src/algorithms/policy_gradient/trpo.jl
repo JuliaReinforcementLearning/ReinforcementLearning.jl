@@ -28,12 +28,12 @@ end
 IsPolicyGradient(::Type{<:TRPO}) = IsPolicyGradient()
 @functor TRPO (approximator, baseline)
 
-function (π::TRPO)(env::AbstractEnv)
+function RLBase.plan!(π::TRPO, env::AbstractEnv)
     res = env |> state |> send_to_device(π) |> π.approximator |> send_to_host
     rand(π.rng, action_distribution(π.dist, res)[1])
 end
 
-function (p::Agent{<:TRPO})(::PostEpisodeStage, env::AbstractEnv)
+function RLBase.update!(p::Agent{<:TRPO}, ::PostEpisodeStage, env::AbstractEnv)
     p.trajectory.container[] = true
     optimise!(p.policy, p.trajectory.container)
     empty!(p.trajectory.container)

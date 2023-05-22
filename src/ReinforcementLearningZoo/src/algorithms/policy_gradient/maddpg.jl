@@ -25,23 +25,23 @@ mutable struct MADDPGManager <: AbstractPolicy
 end
 
 # used for simultaneous environments.
-function (π::MADDPGManager)(env::AbstractEnv)
+function RLCore.plan!(π::MADDPGManager, env::AbstractEnv)
     while current_player(env) == chance_player(env)
         env |> legal_action_space |> rand |> env
     end
     Dict(
-        player => agent.policy(env)
+        player => RLCore.plan!(agent.policy, env)
         for (player, agent) in π.agents)
 end
 
-function (π::MADDPGManager)(stage::Union{PreEpisodeStage,PostActStage}, env::AbstractEnv)
+function RLCore.update!(π::MADDPGManager, stage::Union{PreEpisodeStage,PostActStage}, env::AbstractEnv)
     # only need to update trajectory.
     for (_, agent) in π.agents
         update!(agent.trajectory, agent.policy, env, stage)
     end
 end
 
-function (π::MADDPGManager)(stage::PreActStage, env::AbstractEnv, actions)
+function RLCore.update!(π::MADDPGManager, stage::PreActStage, env::AbstractEnv, actions)
     # update each agent's trajectory.
     for (player, agent) in π.agents
         update!(agent.trajectory, agent.policy, env, stage, actions[player])
@@ -51,7 +51,7 @@ function (π::MADDPGManager)(stage::PreActStage, env::AbstractEnv, actions)
     update!(π, env)
 end
 
-function (π::MADDPGManager)(stage::PostEpisodeStage, env::AbstractEnv)
+function RLCore.update!(π::MADDPGManager, stage::PostEpisodeStage, env::AbstractEnv)
     # collect state and a dummy action to each agent's trajectory here.
     for (_, agent) in π.agents
         update!(agent.trajectory, agent.policy, env, stage)

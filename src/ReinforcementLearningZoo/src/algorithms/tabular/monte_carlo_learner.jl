@@ -41,9 +41,9 @@ Base.@kwdef struct MonteCarloLearner{A,K,S} <: Any
     sampling::S = NO_SAMPLING
 end
 
-(learner::MonteCarloLearner)(env::AbstractEnv) = learner(state(env))
-(learner::MonteCarloLearner)(s) = learner.approximator(s)
-(learner::MonteCarloLearner)(s, a) = learner.approximator(s, a)
+RLCore.estimate_reward(learner::MonteCarloLearner, env::AbstractEnv) = RLCore.estimate_reward(learner, state(env))
+RLCore.estimate_reward(learner::MonteCarloLearner, s) = RLCore.estimate_reward(learner.approximator, s)
+RLCore.estimate_reward(learner::MonteCarloLearner, s, a) = RLCore.estimate_reward(learner.approximator, s, a)
 
 function RLBase.update!(::VBasedPolicy{<:MonteCarloLearner}, ::Any) end
 

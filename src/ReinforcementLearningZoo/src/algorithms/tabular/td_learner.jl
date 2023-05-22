@@ -22,9 +22,9 @@ Base.@kwdef struct TDLearner{A} <: Any
     n::Int = 0
 end
 
-(L::TDLearner)(env::AbstractEnv) = L.approximator(state(env))
-(L::TDLearner)(s) = L.approximator(s)
-(L::TDLearner)(s, a) = L.approximator(s, a)
+RLCore.estimate_reward(L::TDLearner, env::AbstractEnv) = RLCore.estimate_reward(L.approximator, state(env))
+RLCore.estimate_reward(L::TDLearner, s) = RLCore.estimate_reward(L.approximator, s)
+RLCore.estimate_reward(L::TDLearner, s, a) = RLCore.estimate_reward(L.approximator, s, a)
 
 ## update policies
 
@@ -280,9 +280,9 @@ Base.@kwdef struct TDλReturnLearner{Tapp} <: Any
     λ::Float64
 end
 
-(L::TDλReturnLearner)(env::AbstractEnv) = L(state(env))
-(L::TDλReturnLearner)(s) = L.approximator(s)
-(L::TDλReturnLearner)(s, a) = L.approximator(s, a)
+RLCore.estimate_reward(L::TDλReturnLearner, env::AbstractEnv) = RLCore.estimate_reward(L, state(env))
+RLCore.estimate_reward(L::TDλReturnLearner, s) = RLCore.estimate_reward(L.approximator, s)
+RLCore.estimate_reward(L::TDλReturnLearner, s, a) = RLCore.estimate_reward(L.approximator, s, a)
 
 function RLBase.update!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PreActStage) end
 

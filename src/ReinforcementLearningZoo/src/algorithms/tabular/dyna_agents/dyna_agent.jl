@@ -7,14 +7,14 @@ Base.@kwdef struct DynaAgent{P,M,T} <: AbstractPolicy
     plan_step::Int = 10
 end
 
-(p::DynaAgent)(env::AbstractEnv) = p.policy(env)
+RLBase.plan!(p::DynaAgent, env::AbstractEnv) = RLBase.plan!(p.policy, env)
 
-function (agent::DynaAgent)(stage::AbstractStage, env::AbstractEnv)
+function RLCore.update!(agent::DynaAgent, stage::AbstractStage, env::AbstractEnv)
     update!(agent.trajectory, agent.policy, env, stage)
     dyna_update!(agent, env, stage)
 end
 
-function (agent::DynaAgent)(stage::PreActStage, env::AbstractEnv, action)
+function RLCore.update!(agent::DynaAgent, stage::PreActStage, env::AbstractEnv, action)
     update!(agent.trajectory, agent.policy, env, stage, action)
     dyna_update!(agent, env, stage)
 end

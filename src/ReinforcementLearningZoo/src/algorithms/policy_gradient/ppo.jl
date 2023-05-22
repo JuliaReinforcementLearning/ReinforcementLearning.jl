@@ -189,7 +189,7 @@ RLBase.plan!(p::PPOPolicy, env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
 # !!! https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/533/files#r728920324
 RLBase.plan!(p::PPOPolicy, env::AbstractEnv) = rand.(p.rng, prob(p, env))
 
-function (agent::Agent{<:PPOPolicy})(env::MultiThreadEnv)
+function RLBase.plan!(agent::Agent{<:PPOPolicy}, env::MultiThreadEnv)
     dist = prob(agent.policy, env)
     action = rand.(agent.policy.rng, dist)
     if ndims(action) == 2

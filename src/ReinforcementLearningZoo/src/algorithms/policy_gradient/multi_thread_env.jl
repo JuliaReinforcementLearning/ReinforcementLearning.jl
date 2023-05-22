@@ -154,31 +154,31 @@ end
 # Patches
 #####
 
-(env::MultiThreadEnv)(action::EnrichedAction) = env(action.action)
+RLBase.act!(env::MultiThreadEnv, action::EnrichedAction) = RLBase.act!(env, action.action)
 
-function (π::QBasedPolicy)(env::MultiThreadEnv, ::MinimalActionSet, A)
+function RLBase.plan!(π::QBasedPolicy, env::MultiThreadEnv, ::MinimalActionSet, A)
     [A[i][a] for (i, a) in enumerate(π.explorer(π.learner(env)))]
 end
 
-function (π::QBasedPolicy)(env::MultiThreadEnv, ::FullActionSet, A)
+function RLBase.plan!(π::QBasedPolicy, env::MultiThreadEnv, ::FullActionSet, A)
     [
         A[i][a] for
-        (i, a) in enumerate(π.explorer(π.learner(env), legal_action_space_mask(env)))
+        (i, a) in enumerate(RLBase.plan!(π.explorer, RLCore.estimate_reward(π.learner, env), legal_action_space_mask(env)))
     ]
 end
 
-function (π::QBasedPolicy)(
+function RLBase.plan!(π::QBasedPolicy, 
     env::MultiThreadEnv,
     ::MinimalActionSet,
     ::Space{<:Vector{<:Base.OneTo{<:Integer}}},
 )
-    π.explorer(π.learner(env))
+    RLBase.plan!(π.explorer, RLCore.estimate_reward(π.learner, env))
 end
 
-function (π::QBasedPolicy)(
+function RLBase.plan!(π::QBasedPolicy,
     env::MultiThreadEnv,
     ::FullActionSet,
     ::Space{<:Vector{<:Base.OneTo{<:Integer}}},
 )
-    π.explorer(π.learner(env), legal_action_space_mask(env))
+    RLBase.plan!(π.explorer, RLCore.estimate_reward(π.learner, env), legal_action_space_mask(env))
 end

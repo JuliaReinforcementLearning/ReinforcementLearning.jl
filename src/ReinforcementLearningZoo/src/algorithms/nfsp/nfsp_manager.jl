@@ -11,7 +11,7 @@ mutable struct NFSPAgentManager <: AbstractPolicy
 end
 
 ## interactions between the policy and env.
-function (π::NFSPAgentManager)(env::AbstractEnv)
+function RLBase.plan!(π::NFSPAgentManager, env::AbstractEnv)
     player = current_player(env)
     if player == chance_player(env)
         env |> legal_action_space |> rand

@@ -28,7 +28,7 @@ mutable struct NFSPAgent <: AbstractPolicy
 end
 
 ## interactions when evaluation.
-(π::NFSPAgent)(env::AbstractEnv) = π.sl_agent(env)
+RLBase.plan!(π::NFSPAgent, env::AbstractEnv) = RLBase.plan!(π.sl_agent, env)
 
 RLBase.prob(π::NFSPAgent, env::AbstractEnv, args...) = prob(π.sl_agent.policy, env, args...)
 

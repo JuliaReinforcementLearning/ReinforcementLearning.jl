@@ -91,12 +91,12 @@ function RLBase.prob(policy::VMPOPolicy{<:ActorCritic,Categorical}, env::Abstrac
     Categorical(p; check_args=false)
 end
 
-function (agent::Agent{<:VMPOPolicy{<:ActorCritic,Categorical}})(env::AbstractEnv)
+function RLBase.plan!(agent::Agent{<:VMPOPolicy{<:ActorCritic,Categorical}}, env::AbstractEnv)
     dist = prob(agent.policy, env)
     rand(agent.policy.rng, dist)
 end
 
-function (policy::VMPOPolicy{<:ActorCritic,Categorical})(
+function RLBase.plan!(policy::VMPOPolicy{<:ActorCritic,Categorical},
     state::AbstractArray,
     action::AbstractArray,
 )
@@ -119,7 +119,7 @@ function RLBase.prob(
     Normal(μ, σ)
 end
 
-function (agent::Agent{<:VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal}})(
+function RLBase.plan!(agent::Agent{<:VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal}},
     env::AbstractEnv,
 )
     s = send_to_device(device(agent.policy.approximator), state(env))
@@ -130,7 +130,7 @@ function (agent::Agent{<:VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal}})(
     clamp.(a, -m, m) |> send_to_host |> first
 end
 
-function (policy::VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal})(
+function RLBase.estimate_reward(policy::VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal},
     state::AbstractArray,
     action::AbstractArray,
 )

@@ -32,11 +32,11 @@ end
 
 Functors.functor(x::A2CLearner) = (app=x.approximator,), y -> @set x.approximator = y.app
 
-function (learner::A2CLearner)(env::MultiThreadEnv)
+function RLCore.estimate_reward(learner::A2CLearner, env::MultiThreadEnv)
     learner.approximator.actor(send_to_device(device(learner), state(env))) |> send_to_host
 end
 
-function (learner::A2CLearner)(env)
+function RLCore.estimate_reward(learner::A2CLearner, env)
     s = state(env)
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s = send_to_device(device(learner), s)

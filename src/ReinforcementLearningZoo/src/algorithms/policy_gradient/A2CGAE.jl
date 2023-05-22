@@ -31,7 +31,7 @@ end
 Functors.functor(x::A2CGAELearner) =
     (app=x.approximator,), y -> @set x.approximator = y.app
 
-(learner::A2CGAELearner)(env::MultiThreadEnv) =
+RLBase.estimate_reward(learner::A2CGAELearner, env::MultiThreadEnv) =
     learner.approximator.actor(send_to_device(device(learner), state(env))) |> send_to_host
 
 function RLBase.update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)

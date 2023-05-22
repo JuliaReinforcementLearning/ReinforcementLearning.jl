@@ -31,7 +31,7 @@ function RLCore.estimate_reward(L::RainbowLearner, s::A) where {A<:AbstractArray
     sum(q, dims=1)
 end
 
-function (learner::RainbowLearner)(env::AbstractEnv)
+function RLBase.plan!(learner::RainbowLearner, env::AbstractEnv)
     s = send_to_device(device(learner.approximator), state(env))
     s = unsqueeze(s, dims=ndims(s) + 1)
     s |> learner |> vec |> send_to_host

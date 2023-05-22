@@ -29,12 +29,12 @@ end
 
 Functors.functor(x::MACLearner) = (app=x.approximator,), y -> @set x.approximator = y.app
 
-function (learner::MACLearner)(env::MultiThreadEnv)
+function RLCore.estimate_reward(learner::MACLearner, env::MultiThreadEnv)
     learner.approximator.actor(send_to_device(device(learner.approximator), state(env))) |>
     send_to_host
 end
 
-function (learner::MACLearner)(env)
+function RLCore.estimate_reward((learner::MACLearner, env)
     s = state(env)
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s = send_to_device(device(learner.approximator), s)
