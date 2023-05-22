@@ -34,7 +34,7 @@ function RLCore.estimate_reward(learner::MACLearner, env::MultiThreadEnv)
     send_to_host
 end
 
-function RLCore.estimate_reward((learner::MACLearner, env)
+function RLCore.estimate_reward(learner::MACLearner, env)
     s = state(env)
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s = send_to_device(device(learner.approximator), s)
