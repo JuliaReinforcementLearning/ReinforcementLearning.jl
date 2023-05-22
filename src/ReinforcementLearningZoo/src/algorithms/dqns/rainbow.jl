@@ -28,7 +28,7 @@ end
 function RLCore.estimate_reward(L::RainbowLearner, s::A) where {A<:AbstractArray}
     logits = RLCore.estimate_reward(L.approximator, s)
     q = L.support .* softmax(reshape(logits, :, L.n_actions))
-    sum(q, dims=1)
+    sum(q, dims=1) |> vec
 end
 
 function RLBase.plan!(learner::RainbowLearner, env::AbstractEnv)
