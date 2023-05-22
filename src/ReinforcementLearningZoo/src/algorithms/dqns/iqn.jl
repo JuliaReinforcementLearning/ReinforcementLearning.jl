@@ -63,9 +63,9 @@ function RLCore.estimate_reward(learner::IQNLearner, s::A) where {A<:AbstractArr
     dropdims(mean(quantiles; dims=2); dims=2)
 end
 
-function RLBase.plan!(L::IQNLearner, env::AbstractEnv)
-    s = env |> state |> send_to_device(L)
-    q = s |> unsqueeze(dims=ndims(s) + 1) |> L |> vec
+function RLCore.estimate_reward(L::IQNLearner, env::E) where {E<:AbstractEnv}
+    s = env |> state |> send_to_device(L.approximator)
+    q = s |> unsqueeze(dims=ndims(s) + 1) |> x -> RLCore.estimate_reward(L, x) |> vec
     q
 end
 
