@@ -34,7 +34,8 @@ end
 
 @functor QRDQNLearner (approximator,)
 
-RLCore.estimate_reward(L::QRDQNLearner, s::AbstractArray) = vec(mean(reshape(RLCore.estimate_reward(L.approximator, s), L.n_quantile, :), dims=1))
+RLCore.estimate_reward(L::QRDQNLearner, e::E) where {E<:AbstractEnv} = RLCore.estimate_reward(L,state(env))
+RLCore.estimate_reward(L::QRDQNLearner, s::A) where {A<:AbstractArray} = vec(mean(reshape(RLCore.estimate_reward(L.approximator, s), L.n_quantile, :), dims=1))
 
 function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
     A = learner.approximator
