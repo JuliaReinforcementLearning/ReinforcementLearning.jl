@@ -200,7 +200,7 @@ function RLBase.plan!(agent::Agent{<:PPOPolicy}, env::MultiThreadEnv)
     EnrichedAction(action; action_log_prob=vec(action_log_prob))
 end
 
-function RLBase.update!(
+function RLCore.update!(
     p::PPOPolicy,
     t::Union{PPOTrajectory,MaskedPPOTrajectory},
     ::AbstractEnv,
@@ -331,7 +331,7 @@ function _update!(p::PPOPolicy, t::Any)
     end
 end
 
-function RLBase.update!(
+function RLCore.update!(
     trajectory::Union{PPOTrajectory,MaskedPPOTrajectory},
     ::PPOPolicy,
     env::MultiThreadEnv,

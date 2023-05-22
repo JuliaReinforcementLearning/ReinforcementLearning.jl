@@ -41,7 +41,7 @@ function RLCore.estimate_reward((learner::MACLearner, env)
     learner.approximator.actor(s) |> vec |> send_to_host
 end
 
-function RLBase.update!(
+function RLCore.update!(
     learner::MACLearner,
     t::CircularArraySARTTrajectory,
     ::AbstractEnv,

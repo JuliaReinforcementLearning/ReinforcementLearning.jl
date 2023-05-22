@@ -106,7 +106,7 @@ function (l::FQE)(state::AbstractArray, action::AbstractArray)
     value = l.q_network(input)
 end
 
-function RLBase.update!(l::FQE, batch::NamedTuple{SARTS})
+function RLCore.update!(l::FQE, batch::NamedTuple{SARTS})
     policy = l.policy
     Q, Qₜ = l.q_network, l.target_q_network
 

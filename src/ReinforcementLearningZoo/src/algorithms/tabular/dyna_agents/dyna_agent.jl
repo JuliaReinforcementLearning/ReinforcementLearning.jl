@@ -32,7 +32,7 @@ end
 
 # 1. model learning
 # By default we do nothing
-function RLBase.update!(
+function RLCore.update!(
     ::AbstractEnvironmentModel,
     ::Any,
     ::AbstractPolicy,
@@ -42,7 +42,7 @@ function RLBase.update!(
 
 # 3. policy learning
 # By default we do nothing
-function RLBase.update!(
+function RLCore.update!(
     ::AbstractPolicy,
     ::AbstractEnvironmentModel,
     ::Any,

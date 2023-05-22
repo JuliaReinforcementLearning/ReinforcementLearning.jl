@@ -16,7 +16,7 @@ end
 
 (learner::DoubleLearner)(env) = learner.L1(env) .+ learner.L2(env)
 
-function RLBase.update!(
+function RLCore.update!(
     L::DoubleLearner{<:TDLearner},
     t::Any,
     ::AbstractEnv,
@@ -40,7 +40,7 @@ function RLBase.update!(
     end
 end
 
-function RLBase.update!(L::DoubleLearner{<:TDLearner}, t::Any, ::AbstractEnv, ::PreActStage)
+function RLCore.update!(L::DoubleLearner{<:TDLearner}, t::Any, ::AbstractEnv, ::PreActStage)
     if rand(L.rng, Bool)
         L, Lₜ = L.L1, L.L2
     else
@@ -61,7 +61,7 @@ function RLBase.update!(L::DoubleLearner{<:TDLearner}, t::Any, ::AbstractEnv, ::
     end
 end
 
-function RLBase.update!(
+function RLCore.update!(
     t::Any,
     # not very elegant
     ::Union{

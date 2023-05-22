@@ -33,7 +33,7 @@ function RLBase.plan!(π::TRPO, env::AbstractEnv)
     rand(π.rng, action_distribution(π.dist, res)[1])
 end
 
-function RLBase.update!(p::Agent{<:TRPO}, ::PostEpisodeStage, env::AbstractEnv)
+function RLCore.update!(p::Agent{<:TRPO}, ::PostEpisodeStage, env::AbstractEnv)
     p.trajectory.container[] = true
     optimise!(p.policy, p.trajectory.container)
     empty!(p.trajectory.container)

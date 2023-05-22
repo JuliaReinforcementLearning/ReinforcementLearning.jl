@@ -106,7 +106,7 @@ function (l::BCQLearner)(env)
     action[idx]
 end
 
-function RLBase.update!(l::BCQLearner, batch::NamedTuple{SARTS})
+function RLCore.update!(l::BCQLearner, batch::NamedTuple{SARTS})
     update_vae!(l, batch)
     if l.update_step >= l.start_step
         update_learner!(l, batch)

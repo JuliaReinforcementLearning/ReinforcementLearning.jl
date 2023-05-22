@@ -39,7 +39,7 @@ end
 (π::OfflinePolicy)(env, ::FullActionSet, A) =
     A[findmax(π.learner(env), legal_action_space_mask(env))[2]]
 
-function RLBase.update!(p::OfflinePolicy, traj::Any, ::AbstractEnv, ::PreExperimentStage)
+function RLCore.update!(p::OfflinePolicy, traj::Any, ::AbstractEnv, ::PreExperimentStage)
     l = p.learner
     if in(:pretrain_step, fieldnames(typeof(l)))
         println("Pretrain...")
@@ -50,7 +50,7 @@ function RLBase.update!(p::OfflinePolicy, traj::Any, ::AbstractEnv, ::PreExperim
     end
 end
 
-function RLBase.update!(p::OfflinePolicy, traj::Any, ::AbstractEnv, ::PreActStage)
+function RLCore.update!(p::OfflinePolicy, traj::Any, ::AbstractEnv, ::PreActStage)
     l = p.learner
     l.update_step += 1
 

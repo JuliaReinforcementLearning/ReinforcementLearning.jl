@@ -129,7 +129,7 @@ function RLBase.plan!(p::DDPGPolicy, env, player::Any=nothing)
     end
 end
 
-function RLBase.update!(
+function RLCore.update!(
     p::DDPGPolicy,
     traj::CircularArraySARTTrajectory,
     ::AbstractEnv,
@@ -141,7 +141,7 @@ function RLBase.update!(
     update!(p, batch)
 end
 
-function RLBase.update!(p::DDPGPolicy, batch::NamedTuple{SARTS})
+function RLCore.update!(p::DDPGPolicy, batch::NamedTuple{SARTS})
     s, a, r, t, s′ = send_to_device(device(p), batch)
 
     A = p.behavior_actor

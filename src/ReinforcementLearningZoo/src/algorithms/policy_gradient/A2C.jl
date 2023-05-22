@@ -43,7 +43,7 @@ function RLCore.estimate_reward(learner::A2CLearner, env)
     learner.approximator.actor(s) |> vec |> send_to_host
 end
 
-function RLBase.update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
+function RLCore.update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
     length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
     learner.update_step += 1
     if learner.update_step % learner.update_freq == 0

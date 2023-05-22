@@ -133,7 +133,7 @@ function (l::BEARLearner)(env)
     action[idx]
 end
 
-function RLBase.update!(l::BEARLearner, batch::NamedTuple{SARTS})
+function RLCore.update!(l::BEARLearner, batch::NamedTuple{SARTS})
     D = device(l.qnetwork1)
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     γ, τ, λ = l.γ, l.τ, l.λ

@@ -23,7 +23,7 @@ mutable struct PrioritizedSweepingSamplingModel <: AbstractEnvironmentModel
     )
 end
 
-function RLBase.update!(
+function RLCore.update!(
     m::PrioritizedSweepingSamplingModel,
     t::Any,
     p::AbstractPolicy,
@@ -43,7 +43,7 @@ function RLBase.update!(
     end
 end
 
-function RLBase.update!(m::PrioritizedSweepingSamplingModel, transition::Tuple)
+function RLCore.update!(m::PrioritizedSweepingSamplingModel, transition::Tuple)
     s, a, r, d, s′, P = transition
     m.experiences[(s, a)] = (r, d, s′)
     if P >= m.θ

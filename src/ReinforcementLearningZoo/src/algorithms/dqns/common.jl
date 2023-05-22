@@ -4,7 +4,7 @@
 
 const PERLearners = Union{PrioritizedDQNLearner,RainbowLearner,IQNLearner}
 
-function RLBase.update!(
+function RLCore.update!(
     learner::Union{DQNLearner,QRDQNLearner,REMDQNLearner,PERLearners},
     t::Any,
 )
@@ -28,7 +28,7 @@ function RLBase.update!(
     end
 end
 
-function RLBase.update!(
+function RLCore.update!(
     trajectory::PrioritizedTrajectory,
     p::QBasedPolicy{<:PERLearners},
     env::AbstractEnv,

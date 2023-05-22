@@ -62,7 +62,7 @@ function RLCore.update!(π::MADDPGManager, stage::PostEpisodeStage, env::Abstrac
 end
 
 # update policy
-function RLBase.update!(π::MADDPGManager, env::AbstractEnv)
+function RLCore.update!(π::MADDPGManager, env::AbstractEnv)
     π.update_step += 1
     π.update_step % π.update_freq == 0 || return
 

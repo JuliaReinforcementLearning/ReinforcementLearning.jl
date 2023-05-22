@@ -15,7 +15,7 @@ Base.@kwdef mutable struct ExperienceBasedSamplingModel{R} <: AbstractEnvironmen
     rng::R = Random.GLOBAL_RNG
 end
 
-function RLBase.update!(
+function RLCore.update!(
     m::ExperienceBasedSamplingModel,
     t::Any,
     ::AbstractPolicy,
@@ -34,7 +34,7 @@ function RLBase.update!(
     end
 end
 
-function RLBase.update!(m::ExperienceBasedSamplingModel, transition::Tuple)
+function RLCore.update!(m::ExperienceBasedSamplingModel, transition::Tuple)
     s, a, r, d, s′ = transition
     if haskey(m.experiences, s)
         m.experiences[s][a] = (reward = r, terminal = d, nextstate = s′)

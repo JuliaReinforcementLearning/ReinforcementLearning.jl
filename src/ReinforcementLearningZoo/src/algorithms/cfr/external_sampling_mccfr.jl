@@ -31,7 +31,7 @@ function ExternalSamplingMCCFRPolicy(; state_type = String, rng = Random.GLOBAL_
     )
 end
 
-function RLBase.update!(p::ExternalSamplingMCCFRPolicy)
+function RLCore.update!(p::ExternalSamplingMCCFRPolicy)
     for (k, v) in p.nodes
         s = sum(v.cumulative_strategy)
         if s != 0
@@ -47,7 +47,7 @@ function RLBase.update!(p::ExternalSamplingMCCFRPolicy)
 end
 
 "Run one interation"
-function RLBase.update!(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv)
+function RLCore.update!(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv)
     for x in players(env)
         if x != chance_player(env)
             external_sampling(copy(env), x, p.nodes, p.rng)

@@ -110,7 +110,7 @@ function best_response_action(p, env)
     end
 end
 
-RLBase.update!(p::BestResponsePolicy, args...) = nothing
+RLCore.update!(p::BestResponsePolicy, args...) = nothing
 
 function RLBase.prob(p::BestResponsePolicy, env::AbstractEnv)
     if current_player(env) == p.best_responder

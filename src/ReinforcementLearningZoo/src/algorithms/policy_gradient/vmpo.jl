@@ -130,7 +130,7 @@ function RLBase.plan!(agent::Agent{<:VMPOPolicy{<:ActorCritic{<:GaussianNetwork}
     clamp.(a, -m, m) |> send_to_host |> first
 end
 
-function RLBase.estimate_reward(policy::VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal},
+function RLCore.estimate_reward!(policy::VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal},
     state::AbstractArray,
     action::AbstractArray,
 )
@@ -141,7 +141,7 @@ end
 
 ## update policy
 
-function RLBase.update!(p::VMPOPolicy, t::VMPOTrajectory, env::AbstractEnv, ::PreActStage)
+function RLCore.update!(p::VMPOPolicy, t::VMPOTrajectory, env::AbstractEnv, ::PreActStage)
     # in the first update, only state & action are inserted into trajectory
     length(t) == 0 && return
 
