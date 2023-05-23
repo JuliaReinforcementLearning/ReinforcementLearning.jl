@@ -15,7 +15,7 @@ struct PostEpisodeStage <: AbstractStage end
 struct PreActStage <: AbstractStage end
 struct PostActStage <: AbstractStage end
 
-update!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv) = nothing
-update!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv, ::Symbol) = nothing
+push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv) = nothing
+push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv, ::Symbol) = nothing
 
 RLBase.optimise!(::AbstractPolicy) = nothing

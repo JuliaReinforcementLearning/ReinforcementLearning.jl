@@ -1,3 +1,5 @@
+import Base: push!
+
 mutable struct SRT{S,R,T}
     state::Union{S,Nothing}
     reward::Union{R,Nothing}
@@ -47,11 +49,11 @@ function Base.push!(t::Trajectory, srt::SRT{S,R,T}, action::A) where {S,A,R,T}
     end
 end
 
-function update!(cache::SRT{S,R,T}, state::S) where {S,R,T}
+function push!(cache::SRT{S,R,T}, state::S) where {S,R,T}
     cache.state = state
 end
 
-function update!(cache::SRT{S,R,T}, reward::R, terminal::T) where {S,R,T}
+function push!(cache::SRT{S,R,T}, reward::R, terminal::T) where {S,R,T}
     cache.reward = reward
     cache.terminal = terminal
 end
