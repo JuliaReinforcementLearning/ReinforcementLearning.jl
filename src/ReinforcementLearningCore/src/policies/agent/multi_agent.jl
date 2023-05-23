@@ -137,10 +137,8 @@ function Base.run(
             end
         end # end of an episode
 
-        if is_terminated(env)
-            push!(multiagent_policy, PostEpisodeStage(), env)  # let the policy see the last observation
-            push!(multiagent_hook, PostEpisodeStage(), multiagent_policy, env)
-        end
+        push!(multiagent_policy, PostEpisodeStage(), env)  # let the policy see the last observation
+        push!(multiagent_hook, PostEpisodeStage(), multiagent_policy, env)
     end
     push!(multiagent_policy, PostExperimentStage(), env)
     push!(multiagent_hook, PostExperimentStage(), multiagent_policy, env)
