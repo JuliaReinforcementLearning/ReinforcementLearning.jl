@@ -141,7 +141,7 @@ end
 
 ## update policy
 
-function RLCore.update!(p::VMPOPolicy, t::VMPOTrajectory, env::AbstractEnv, ::PreActStage)
+function Base.push!(p::VMPOPolicy, t::VMPOTrajectory, env::AbstractEnv, ::PreActStage)
     # in the first update, only state & action are inserted into trajectory
     length(t) == 0 && return
 

@@ -9,12 +9,12 @@ end
 
 RLBase.plan!(p::DynaAgent, env::AbstractEnv) = RLBase.plan!(p.policy, env)
 
-function RLCore.update!(agent::DynaAgent, stage::AbstractStage, env::AbstractEnv)
+function Base.push!(agent::DynaAgent, stage::AbstractStage, env::AbstractEnv)
     update!(agent.trajectory, agent.policy, env, stage)
     dyna_update!(agent, env, stage)
 end
 
-function RLCore.update!(agent::DynaAgent, stage::PreActStage, env::AbstractEnv, action)
+function Base.push!(agent::DynaAgent, stage::PreActStage, env::AbstractEnv, action)
     update!(agent.trajectory, agent.policy, env, stage, action)
     dyna_update!(agent, env, stage)
 end

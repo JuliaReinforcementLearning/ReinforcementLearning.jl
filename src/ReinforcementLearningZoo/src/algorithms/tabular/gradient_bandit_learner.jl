@@ -10,9 +10,9 @@ end
 RLCore.estimate_reward!(learner::GradientBanditLearner, s::Int) = s |> learner.approximator |> softmax
 RLCore.estimate_reward!(learner::GradientBanditLearner, env::AbstractEnv) = RLCore.estimate_reward!(learner, state(env))
 
-function RLCore.update!(L::GradientBanditLearner, t::Any, ::AbstractEnv, ::PreActStage) end
+function Base.push!(L::GradientBanditLearner, t::Any, ::AbstractEnv, ::PreActStage) end
 
-function RLCore.update!(L::GradientBanditLearner, t::Any, ::AbstractEnv, ::PostActStage)
+function Base.push!(L::GradientBanditLearner, t::Any, ::AbstractEnv, ::PostActStage)
     A = L.approximator
     s, a, r = t[:state][end], t[:action][end], t[:reward][end]
     probs = s |> A |> softmax

@@ -1,13 +1,13 @@
 using ReinforcementLearningBase, ReinforcementLearningEnvironments
-using ReinforcementLearningCore: SRT, update!
+using ReinforcementLearningCore: SRT
 using ReinforcementLearningCore
 
 @testset "agent.jl" begin
     @testset "Agent Cache struct" begin
         srt = SRT{Int64, Float64, Bool}()
-        update!(srt, 2)
+        push!(srt, 2)
         @test srt.state == 2
-        update!(srt, 1.0, true)
+        push!(srt, 1.0, true)
         @test srt.reward == 1.0
         @test srt.terminal == true
     end
@@ -58,16 +58,16 @@ using ReinforcementLearningCore
             @testset "Test Agent $i" begin
                 agent = agent_list[i]
                 env = RandomWalk1D()
-                update!(agent, PreActStage(), env)
+                push!(agent, PreActStage(), env)
                 @test agent.cache.state != nothing
                 @test agent.cache.reward == nothing
                 @test agent.cache.terminal == nothing
                 @test state(env) == agent.cache.state
                 @test RLBase.plan!(agent, env) in (1,2)
                 @test length(agent.trajectory.container) == 0 
-                update!(agent, PostActStage(), env)
+                push!(agent, PostActStage(), env)
                 @test agent.cache.reward == 0. && agent.cache.terminal == false
-                update!(agent, PreActStage(), env)
+                push!(agent, PreActStage(), env)
                 @test state(env) == agent.cache.state
                 @test RLBase.plan!(agent, env) in (1,2)
                 @test length(agent.trajectory.container) == 1
@@ -77,11 +77,11 @@ using ReinforcementLearningCore
                 @test_throws "MethodError: no method matching plan!(::Agent{RandomPolicy" RLBase.plan!(agent, env, fake_kwarg = 1)
             end
 
-            @testset "Test update! method" begin
+            @testset "Test push! method" begin
                 env = RandomWalk1D()
                 agent = agent_list[i]
-                update!(agent, PostActStage(), env)
-                update!(agent, 7)
+                push!(agent, PostActStage(), env)
+                push!(agent, 7)
                 @test agent.cache.state == 7
                 RLBase.reset!(agent.cache)
                 @test agent.cache.state == nothing

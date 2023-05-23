@@ -3,7 +3,7 @@ export Agent
 using Base.Threads: @spawn
 
 using Functors: @functor
-
+import Base.push!
 """
     Agent(;policy, trajectory) <: AbstractPolicy
 
@@ -54,8 +54,8 @@ end
 
 @functor Agent (policy,)
 
-function update!(agent::Agent, ::PreActStage, env::AbstractEnv)
-    update!(agent, state(env))
+function Base.push!(agent::Agent, ::PreActStage, env::AbstractEnv)
+    push!(agent, state(env))
 end
 
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
@@ -74,19 +74,19 @@ function RLBase.plan!(agent::Agent{P,T,C}, env::E, p::Symbol) where {P,T,C,E<:Ab
     action
 end
 
-function update!(agent::Agent{P,T,C}, ::PostActStage, env::E) where {P,T,C,E<:AbstractEnv}
-    update!(agent.cache, reward(env), is_terminated(env))
+function Base.push!(agent::Agent{P,T,C}, ::PostActStage, env::E) where {P,T,C,E<:AbstractEnv}
+    push!(agent.cache, reward(env), is_terminated(env))
 end
 
-function update!(agent::Agent, ::PostExperimentStage, env::E) where {E<:AbstractEnv}
+function Base.push!(agent::Agent, ::PostExperimentStage, env::E) where {E<:AbstractEnv}
     RLBase.reset!(agent.cache)
 end
 
-function update!(agent::Agent, ::PostExperimentStage, env::E, player::Symbol) where {E<:AbstractEnv}
+function Base.push!(agent::Agent, ::PostExperimentStage, env::E, player::Symbol) where {E<:AbstractEnv}
     RLBase.reset!(agent.cache)
 end
 
-function update!(agent::Agent{P,T,C}, state::S) where {P,T,C,S}
-    update!(agent.cache, state)
+function Base.push!(agent::Agent{P,T,C}, state::S) where {P,T,C,S}
+    push!(agent.cache, state)
 end
 

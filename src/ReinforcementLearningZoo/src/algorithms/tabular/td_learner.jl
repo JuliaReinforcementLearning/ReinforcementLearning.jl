@@ -43,11 +43,11 @@ function RLCore.update!(
 end
 
 
-function RLCore.update!(L::TDLearner, t::Any, ::AbstractEnv, s::PreActStage)
+function Base.push!(L::TDLearner, t::Any, ::AbstractEnv, s::PreActStage)
     _update!(L, L.approximator, Val(L.method), t, s)
 end
 
-function RLCore.update!(L::TDLearner, t::Any, ::AbstractEnv, s::PostEpisodeStage)
+function Base.push!(L::TDLearner, t::Any, ::AbstractEnv, s::PostEpisodeStage)
     _update!(L, L.approximator, Val(L.method), t, s)
 end
 
@@ -284,9 +284,9 @@ RLCore.estimate_reward(L::TDλReturnLearner, env::AbstractEnv) = RLCore.estimate
 RLCore.estimate_reward(L::TDλReturnLearner, s) = RLCore.estimate_reward(L.approximator, s)
 RLCore.estimate_reward(L::TDλReturnLearner, s, a) = RLCore.estimate_reward(L.approximator, s, a)
 
-function RLCore.update!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PreActStage) end
+function Base.push!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PreActStage) end
 
-function RLCore.update!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PostEpisodeStage)
+function Base.push!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PostEpisodeStage)
     λ, γ, V = L.λ, L.γ, L.approximator
     R = t[:reward]
     S = @view t[:state][1:end-1]

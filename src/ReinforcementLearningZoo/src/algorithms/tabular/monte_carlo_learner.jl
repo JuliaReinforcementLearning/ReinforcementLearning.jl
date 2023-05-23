@@ -57,7 +57,7 @@ function RLCore.update!(
     update!(p.learner, t)
 end
 
-function RLCore.update!(L::MonteCarloLearner, t::Any, e::AbstractEnv, s::PostEpisodeStage)
+function Base.push!(L::MonteCarloLearner, t::Any, e::AbstractEnv, s::PostEpisodeStage)
     update!(L, t)
 end
 

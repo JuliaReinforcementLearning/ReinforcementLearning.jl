@@ -6,6 +6,7 @@ export AbstractStage,
     PreActStage,
     PostActStage
 
+import Base.push!
 abstract type AbstractStage end
 
 struct PreExperimentStage <: AbstractStage end
@@ -15,7 +16,7 @@ struct PostEpisodeStage <: AbstractStage end
 struct PreActStage <: AbstractStage end
 struct PostActStage <: AbstractStage end
 
-update!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv) = nothing
-update!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv, ::Symbol) = nothing
+Base.push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv) = nothing
+Base.push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv, ::Symbol) = nothing
 
 RLBase.optimise!(::AbstractPolicy) = nothing

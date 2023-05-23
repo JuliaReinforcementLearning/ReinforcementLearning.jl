@@ -9,7 +9,7 @@
 
 #### v0.3
 
-- Transition to `RLCore.estimate_reward`, `RLBase.act!`, `RLBase.plan!` and `RLCore.update!` syntax instead of functional objects for hooks, policies and environments
+- Transition to `RLCore.estimate_reward`, `RLBase.act!`, `RLBase.plan!` and `Base.push!` syntax instead of functional objects for hooks, policies and environments
 
 #### v0.2
 
@@ -31,7 +31,7 @@
 
 #### v0.8
 
-- Transition to `RLCore.estimate_reward`, `RLBase.act!`, `RLBase.plan!` and `RLCore.update!` syntax instead of functional objects for hooks, policies and environments
+- Transition to `RLCore.estimate_reward`, `RLBase.act!`, `RLBase.plan!` and `Base.push!` syntax instead of functional objects for hooks, policies and environments
 
 #### v0.7.2
 
@@ -98,7 +98,7 @@
 
 #### v0.7.0
 
-- Transition to `RLCore.estimate_reward`, `RLBase.act!`, `RLBase.plan!` and `RLCore.update!` syntax instead of functional objects for hooks, policies and environments
+- Transition to `RLCore.estimate_reward`, `RLBase.act!`, `RLBase.plan!` and `Base.push!` syntax instead of functional objects for hooks, policies and environments
 - Reduce excess `TDLearner` allocations by using Tuple instead of Array
 
 #### v0.4.1
@@ -168,7 +168,7 @@
 
 #### v0.12.0
 
-- Transition to `RLCore.estimate_reward`, `RLBase.act!`, `RLBase.plan!` and `RLCore.update!` syntax instead of functional objects for hooks, policies and environments
+- Transition to `RLCore.estimate_reward`, `RLBase.act!`, `RLBase.plan!` and `Base.push!` syntax instead of functional objects for hooks, policies and environments
 
 #### v0.9.7
 
@@ -187,7 +187,7 @@
 
 #### v0.10.0
 
-- Transition to `RLCore.estimate_reward`, `RLBase.act!`, `RLBase.plan!` and `RLCore.update!` syntax instead of functional objects for hooks, policies and environments
+- Transition to `RLCore.estimate_reward`, `RLBase.act!`, `RLBase.plan!` and `Base.push!` syntax instead of functional objects for hooks, policies and environments
 
 #### v0.9.3
 

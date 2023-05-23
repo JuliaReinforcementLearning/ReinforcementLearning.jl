@@ -5,6 +5,7 @@ using Random # for RandomPolicy
 
 import Base.getindex
 import Base.iterate
+import Base.push!
 
 """
     MultiAgentPolicy(agents::NT) where {NT<: NamedTuple}
@@ -103,33 +104,33 @@ function Base.run(
     multiagent_hook::MultiAgentHook,
     reset_condition::AbstractResetCondition=ResetAtTerminal(),
 ) where {E<:AbstractEnv}
-    update!(multiagent_hook, PreExperimentStage(), multiagent_policy, env)
-    update!(multiagent_policy, PreExperimentStage(), env)
+    push!(multiagent_hook, PreExperimentStage(), multiagent_policy, env)
+    push!(multiagent_policy, PreExperimentStage(), env)
     is_stop = false
     while !is_stop
         reset!(env)
-        update!(multiagent_policy, PreEpisodeStage(), env)
-        update!(multiagent_hook, PreEpisodeStage(), multiagent_policy, env)
+        push!(multiagent_policy, PreEpisodeStage(), env)
+        push!(multiagent_hook, PreEpisodeStage(), multiagent_policy, env)
 
         while !reset_condition(multiagent_policy, env) # one episode
             for player in CurrentPlayerIterator(env)
                 policy = multiagent_policy[player] # Select appropriate policy
                 hook = multiagent_hook[player] # Select appropriate hook
-                update!(policy, PreActStage(), env)
-                update!(hook, PreActStage(), policy, env)
+                push!(policy, PreActStage(), env)
+                push!(hook, PreActStage(), policy, env)
                 
                 action = RLBase.plan!(policy, env)
                 act!(env, action)
 
                 optimise!(policy)
 
-                update!(policy, PostActStage(), env)
-                update!(hook, PostActStage(), policy, env)
+                push!(policy, PostActStage(), env)
+                push!(hook, PostActStage(), policy, env)
 
                 if check_stop(stop_condition, policy, env)
                     is_stop = true
-                    update!(multiagent_policy, PreActStage(), env)
-                    update!(multiagent_hook, PreActStage(), policy, env)
+                    push!(multiagent_policy, PreActStage(), env)
+                    push!(multiagent_hook, PreActStage(), policy, env)
                     RLBase.plan!(multiagent_policy, env)  # let the policy see the last observation
                     break
                 end
@@ -137,12 +138,12 @@ function Base.run(
         end # end of an episode
 
         if is_terminated(env)
-            update!(multiagent_policy, PostEpisodeStage(), env)  # let the policy see the last observation
-            update!(multiagent_hook, PostEpisodeStage(), multiagent_policy, env)
+            push!(multiagent_policy, PostEpisodeStage(), env)  # let the policy see the last observation
+            push!(multiagent_hook, PostEpisodeStage(), multiagent_policy, env)
         end
     end
-    update!(multiagent_policy, PostExperimentStage(), env)
-    update!(multiagent_hook, PostExperimentStage(), multiagent_policy, env)
+    push!(multiagent_policy, PostExperimentStage(), env)
+    push!(multiagent_hook, PostExperimentStage(), multiagent_policy, env)
     multiagent_policy
 end
 
@@ -175,47 +176,47 @@ function Base.run(
     )
 end
 
-# Default behavior for multi-agent, simultaneous `update!` is to iterate over all players and call `update!` on the appropriate policy
-function update!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:AbstractStage, E<:AbstractEnv}
+# Default behavior for multi-agent, simultaneous `push!` is to iterate over all players and call `push!` on the appropriate policy
+function Base.push!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:AbstractStage, E<:AbstractEnv}
     for player in players(env)
-        update!(multiagent[player], stage, env, player)
+        push!(multiagent[player], stage, env, player)
     end
 end
 
-# Like in the single-agent case, update! at the PreActStage() calls update! on each player with the state of the environment
-function update!(multiagent::MultiAgentPolicy, ::PreActStage, env::E) where {E<:AbstractEnv}
+# Like in the single-agent case, push! at the PreActStage() calls push! on each player with the state of the environment
+function Base.push!(multiagent::MultiAgentPolicy, ::PreActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
-        update!(multiagent[player], state(env, player))
+        push!(multiagent[player], state(env, player))
     end
 end
 
-# Like in the single-agent case, update! at the PostActStage() calls update! on each player with the reward and termination status of the environment
-function update!(multiagent::MultiAgentPolicy, ::PostActStage, env::E) where {E<:AbstractEnv}
+# Like in the single-agent case, push! at the PostActStage() calls push! on each player with the reward and termination status of the environment
+function Base.push!(multiagent::MultiAgentPolicy, ::PostActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
-        update!(multiagent[player].cache, reward(env, player), is_terminated(env))
+        push!(multiagent[player].cache, reward(env, player), is_terminated(env))
     end
 end
 
-function update!(hook::MultiAgentHook, stage::S, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv,S<:AbstractStage}
+function Base.push!(hook::MultiAgentHook, stage::S, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv,S<:AbstractStage}
     for player in players(env)
-        update!(hook[player], stage, multiagent[player], env, player)
+        push!(hook[player], stage, multiagent[player], env, player)
     end
 end
 
-@inline function _update!(stage::AbstractStage, policy::P, env::E, player::Symbol, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
-    update!(hook, stage, policy, env, player)
-    _update!(stage, policy, env, player, hook_tuple...)
+@inline function _push!(stage::AbstractStage, policy::P, env::E, player::Symbol, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
+    push!(hook, stage, policy, env, player)
+    _push!(stage, policy, env, player, hook_tuple...)
 end
 
-_update!(stage::AbstractStage, policy::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = nothing
+_push!(stage::AbstractStage, policy::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = nothing
 
-function update!(composed_hook::ComposedHook{T},
+function Base.push!(composed_hook::ComposedHook{T},
                             stage::AbstractStage,
                             policy::P,
                             env::E,
                             player::Symbol
                             ) where {T <: Tuple, P <: AbstractPolicy, E <: AbstractEnv}
-    _update!(stage, policy, env, player, composed_hook.hooks...)
+    _push!(stage, policy, env, player, composed_hook.hooks...)
 end
 
 function RLBase.plan!(multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
