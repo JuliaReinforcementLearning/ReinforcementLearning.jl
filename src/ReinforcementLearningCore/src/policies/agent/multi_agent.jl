@@ -5,7 +5,7 @@ using Random # for RandomPolicy
 
 import Base.getindex
 import Base.iterate
-import Base: push!
+import Base.push!
 
 """
     MultiAgentPolicy(agents::NT) where {NT<: NamedTuple}
@@ -177,27 +177,27 @@ function Base.run(
 end
 
 # Default behavior for multi-agent, simultaneous `push!` is to iterate over all players and call `push!` on the appropriate policy
-function push!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:AbstractStage, E<:AbstractEnv}
+function Base.push!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:AbstractStage, E<:AbstractEnv}
     for player in players(env)
         push!(multiagent[player], stage, env, player)
     end
 end
 
 # Like in the single-agent case, push! at the PreActStage() calls push! on each player with the state of the environment
-function push!(multiagent::MultiAgentPolicy, ::PreActStage, env::E) where {E<:AbstractEnv}
+function Base.push!(multiagent::MultiAgentPolicy, ::PreActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
         push!(multiagent[player], state(env, player))
     end
 end
 
 # Like in the single-agent case, push! at the PostActStage() calls push! on each player with the reward and termination status of the environment
-function push!(multiagent::MultiAgentPolicy, ::PostActStage, env::E) where {E<:AbstractEnv}
+function Base.push!(multiagent::MultiAgentPolicy, ::PostActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
         push!(multiagent[player].cache, reward(env, player), is_terminated(env))
     end
 end
 
-function push!(hook::MultiAgentHook, stage::S, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv,S<:AbstractStage}
+function Base.push!(hook::MultiAgentHook, stage::S, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv,S<:AbstractStage}
     for player in players(env)
         push!(hook[player], stage, multiagent[player], env, player)
     end
@@ -210,7 +210,7 @@ end
 
 _push!(stage::AbstractStage, policy::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = nothing
 
-function push!(composed_hook::ComposedHook{T},
+function Base.push!(composed_hook::ComposedHook{T},
                             stage::AbstractStage,
                             policy::P,
                             env::E,

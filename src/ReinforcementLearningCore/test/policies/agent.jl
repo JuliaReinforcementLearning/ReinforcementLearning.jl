@@ -1,5 +1,5 @@
 using ReinforcementLearningBase, ReinforcementLearningEnvironments
-using ReinforcementLearningCore: SRT, push!
+using ReinforcementLearningCore: SRT
 using ReinforcementLearningCore
 
 @testset "agent.jl" begin
