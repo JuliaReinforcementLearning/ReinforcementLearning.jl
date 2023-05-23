@@ -7,8 +7,8 @@ Base.@kwdef struct GradientBanditLearner{A,B} <: Any
     baseline::B
 end
 
-RLCore.estimate_reward!(learner::GradientBanditLearner, s::Int) = s |> learner.approximator |> softmax
-RLCore.estimate_reward!(learner::GradientBanditLearner, env::AbstractEnv) = RLCore.estimate_reward!(learner, state(env))
+RLCore.forward!(learner::GradientBanditLearner, s::Int) = s |> learner.approximator |> softmax
+RLCore.forward!(learner::GradientBanditLearner, env::AbstractEnv) = RLCore.forward!(learner, state(env))
 
 function Base.push!(L::GradientBanditLearner, t::Any, ::AbstractEnv, ::PreActStage) end
 

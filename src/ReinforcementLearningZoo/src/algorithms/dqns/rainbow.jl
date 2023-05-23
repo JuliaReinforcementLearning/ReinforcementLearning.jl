@@ -25,8 +25,8 @@ end
 
 @functor RainbowLearner (support, approximator)
 
-function RLCore.estimate_reward(L::RainbowLearner, s::A) where {A<:AbstractArray}
-    logits = RLCore.estimate_reward(L.approximator, s)
+function RLCore.forward(L::RainbowLearner, s::A) where {A<:AbstractArray}
+    logits = RLCore.forward(L.approximator, s)
     q = L.support .* softmax(reshape(logits, :, L.n_actions))
     sum(q, dims=1) |> vec
 end

@@ -33,7 +33,7 @@ end
 
 @functor BasicDQNLearner (approximator,)
 
-RLCore.estimate_reward(L::BasicDQNLearner, s::AbstractArray) = RLCore.estimate_reward(L.approximator, s)
+RLCore.forward(L::BasicDQNLearner, s::AbstractArray) = RLCore.forward(L.approximator, s)
 
 function RLCore.optimise!(
     learner::BasicDQNLearner,
@@ -48,8 +48,8 @@ function RLCore.optimise!(
     a = CartesianIndex.(a, 1:length(a))
 
     gs = gradient(params(Q)) do
-        q = RLCore.estimate_reward(Q, s)[a]
-        q′ = vec(maximum(RLCore.estimate_reward(Q, s′); dims=1))
+        q = RLCore.forward(Q, s)[a]
+        q′ = vec(maximum(RLCore.forward(Q, s′); dims=1))
         G = @. r + γ * (1 - t) * q′
         loss = loss_func(G, q)
         ignore_derivatives() do

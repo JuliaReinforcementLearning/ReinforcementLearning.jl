@@ -14,7 +14,7 @@ Base.@kwdef mutable struct DQNLearner{A<:Approximator{<:TwinNetwork}} <: Abstrac
     loss::Float32 = 0.0f0
 end
 
-RLCore.estimate_reward(L::DQNLearner, s::A) where {A<:AbstractArray}  = RLCore.estimate_reward(L.approximator, s)
+RLCore.forward(L::DQNLearner, s::A) where {A<:AbstractArray}  = RLCore.forward(L.approximator, s)
 
 @functor DQNLearner (approximator,)
 

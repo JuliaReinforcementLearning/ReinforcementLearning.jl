@@ -163,7 +163,7 @@ end
 function RLBase.plan!(π::QBasedPolicy, env::MultiThreadEnv, ::FullActionSet, A)
     [
         A[i][a] for
-        (i, a) in enumerate(RLBase.plan!(π.explorer, RLCore.estimate_reward(π.learner, env), legal_action_space_mask(env)))
+        (i, a) in enumerate(RLBase.plan!(π.explorer, RLCore.forward(π.learner, env), legal_action_space_mask(env)))
     ]
 end
 
@@ -172,7 +172,7 @@ function RLBase.plan!(π::QBasedPolicy,
     ::MinimalActionSet,
     ::Space{<:Vector{<:Base.OneTo{<:Integer}}},
 )
-    RLBase.plan!(π.explorer, RLCore.estimate_reward(π.learner, env))
+    RLBase.plan!(π.explorer, RLCore.forward(π.learner, env))
 end
 
 function RLBase.plan!(π::QBasedPolicy,
@@ -180,5 +180,5 @@ function RLBase.plan!(π::QBasedPolicy,
     ::FullActionSet,
     ::Space{<:Vector{<:Base.OneTo{<:Integer}}},
 )
-    RLBase.plan!(π.explorer, RLCore.estimate_reward(π.learner, env), legal_action_space_mask(env))
+    RLBase.plan!(π.explorer, RLCore.forward(π.learner, env), legal_action_space_mask(env))
 end

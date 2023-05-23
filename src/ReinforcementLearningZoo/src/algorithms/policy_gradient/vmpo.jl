@@ -130,7 +130,7 @@ function RLBase.plan!(agent::Agent{<:VMPOPolicy{<:ActorCritic{<:GaussianNetwork}
     clamp.(a, -m, m) |> send_to_host |> first
 end
 
-function RLCore.estimate_reward!(policy::VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal},
+function RLCore.forward!(policy::VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal},
     state::AbstractArray,
     action::AbstractArray,
 )

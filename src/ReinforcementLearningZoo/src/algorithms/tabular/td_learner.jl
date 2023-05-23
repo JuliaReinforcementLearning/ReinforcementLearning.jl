@@ -22,9 +22,9 @@ Base.@kwdef struct TDLearner{A} <: Any
     n::Int = 0
 end
 
-RLCore.estimate_reward(L::TDLearner, env::AbstractEnv) = RLCore.estimate_reward(L.approximator, state(env))
-RLCore.estimate_reward(L::TDLearner, s) = RLCore.estimate_reward(L.approximator, s)
-RLCore.estimate_reward(L::TDLearner, s, a) = RLCore.estimate_reward(L.approximator, s, a)
+RLCore.forward(L::TDLearner, env::AbstractEnv) = RLCore.forward(L.approximator, state(env))
+RLCore.forward(L::TDLearner, s) = RLCore.forward(L.approximator, s)
+RLCore.forward(L::TDLearner, s, a) = RLCore.forward(L.approximator, s, a)
 
 ## update policies
 
@@ -280,9 +280,9 @@ Base.@kwdef struct TDλReturnLearner{Tapp} <: Any
     λ::Float64
 end
 
-RLCore.estimate_reward(L::TDλReturnLearner, env::AbstractEnv) = RLCore.estimate_reward(L, state(env))
-RLCore.estimate_reward(L::TDλReturnLearner, s) = RLCore.estimate_reward(L.approximator, s)
-RLCore.estimate_reward(L::TDλReturnLearner, s, a) = RLCore.estimate_reward(L.approximator, s, a)
+RLCore.forward(L::TDλReturnLearner, env::AbstractEnv) = RLCore.forward(L, state(env))
+RLCore.forward(L::TDλReturnLearner, s) = RLCore.forward(L.approximator, s)
+RLCore.forward(L::TDλReturnLearner, s, a) = RLCore.forward(L.approximator, s, a)
 
 function Base.push!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PreActStage) end
 
