@@ -185,6 +185,10 @@
 
 ### ReinforcementLearningCore.jl
 
+#### v0.10.1
+
+- Fix hook issue with 'extra' call; always run `push!` at end of episode, regardless of whether stopped or terminated
+
 #### v0.10.0
 
 - Transition to `RLCore.forward`, `RLBase.act!`, `RLBase.plan!` and `Base.push!` syntax instead of functional objects for hooks, policies and environments
