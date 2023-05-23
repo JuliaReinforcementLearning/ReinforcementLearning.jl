@@ -90,9 +90,9 @@ Base.getindex(h::StepsPerEpisode) = h.steps
 
 Base.push!(hook::StepsPerEpisode, ::PostActStage, args...) = hook.count += 1
 
-Base.push!(hook::StepsPerEpisode, stage::Union{PostEpisodeStage,PostExperimentStage}, agent, env, ::Symbol) = Base.push!(hook, stage, agent, env)
+Base.push!(hook::StepsPerEpisode, stage::PostEpisodeStage, agent, env, ::Symbol) = Base.push!(hook, stage, agent, env)
 
-function Base.push!(hook::StepsPerEpisode, ::Union{PostEpisodeStage,PostExperimentStage}, agent, env)
+function Base.push!(hook::StepsPerEpisode, ::PostEpisodeStage, agent, env)
     Base.push!(hook.steps, hook.count)
     hook.count = 0
 end
