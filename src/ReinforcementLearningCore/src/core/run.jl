@@ -112,10 +112,8 @@ function _run(policy::AbstractPolicy,
             end
         end # end of an episode
 
-        if is_terminated(env)
-            push!(policy, PostEpisodeStage(), env)  # let the policy see the last observation
-            push!(hook, PostEpisodeStage(), policy, env)
-        end
+        push!(policy, PostEpisodeStage(), env)  # let the policy see the last observation
+        push!(hook, PostEpisodeStage(), policy, env)
     end
     push!(policy, PostExperimentStage(), env)
     push!(hook, PostExperimentStage(), policy, env)

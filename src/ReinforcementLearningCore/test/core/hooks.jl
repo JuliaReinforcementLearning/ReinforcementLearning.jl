@@ -30,6 +30,12 @@ function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), P
     end
 end
 
+function test_run!(hook::AbstractHook)
+    hook_ = deepcopy(hook)
+    run(RandomPolicy(), RandomWalk1D(), StopAfterEpisode(10), hook_)
+    return hook_
+end
+
 @testset "TotalRewardPerEpisode" begin
     h_1 = TotalRewardPerEpisode(; is_display_on_exit=true)
     h_2 = TotalRewardPerEpisode(; is_display_on_exit=false)
@@ -42,6 +48,9 @@ end
     policy = RandomPolicy(legal_action_space(env))
 
     for h in (h_1, h_2, h_3, h_4, h_5)
+        h_ = test_run!(h)
+        @test length(h_.rewards) == 10
+
         push!(h, PostActStage(), policy, env)
         @test h.reward == 1
         push!(h, PostEpisodeStage(), policy, env)
@@ -65,6 +74,9 @@ end
     h_5 = TotalBatchRewardPerEpisode(10)
 
     for h in (h_1, h_2, h_3, h_4, h_5)
+        h_ = test_run!(h)
+        @test length(h_.rewards) == 10
+
         push!(h, PostActStage(), policy, env)
         @test h.reward == fill(1, 10)
         push!(h, PostEpisodeStage(), policy, env)
@@ -119,7 +131,7 @@ end
     @test h.steps == [100]
 
     push!(h, PostExperimentStage(), agent, env)
-    @test h.steps == [100, 0]
+    @test h.steps == [100]
 
     test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PreExperimentStage()])
 end
@@ -133,6 +145,9 @@ end
     h_3 = RewardsPerEpisode{Float16}()
 
     for h in (h_1, h_2, h_3)
+        h_ = test_run!(h)
+        @test length(h_.rewards) == 10
+
         push!(h, PreEpisodeStage(), agent, env)
         @test h.rewards == [[]]
 
