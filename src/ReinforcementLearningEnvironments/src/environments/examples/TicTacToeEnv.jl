@@ -60,7 +60,9 @@ function RLBase.act!(env::TicTacToeEnv, action::CartesianIndex{2})
 end
 
 function RLBase.next_player!(env::TicTacToeEnv)
-    env.player = env.player == :Cross ? :Nought : :Cross
+    if !is_terminated(env)
+        env.player = env.player == :Cross ? :Nought : :Cross
+    end
 end
 
 RLBase.players(::TicTacToeEnv) = (:Cross, :Nought)
