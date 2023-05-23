@@ -34,14 +34,14 @@ function RLCore.plan!(π::MADDPGManager, env::AbstractEnv)
         for (player, agent) in π.agents)
 end
 
-function RLCore.update!(π::MADDPGManager, stage::Union{PreEpisodeStage,PostActStage}, env::AbstractEnv)
+function Base.push!(π::MADDPGManager, stage::Union{PreEpisodeStage,PostActStage}, env::AbstractEnv)
     # only need to update trajectory.
     for (_, agent) in π.agents
         update!(agent.trajectory, agent.policy, env, stage)
     end
 end
 
-function RLCore.update!(π::MADDPGManager, stage::PreActStage, env::AbstractEnv, actions)
+function Base.push!(π::MADDPGManager, stage::PreActStage, env::AbstractEnv, actions)
     # update each agent's trajectory.
     for (player, agent) in π.agents
         update!(agent.trajectory, agent.policy, env, stage, actions[player])
@@ -51,7 +51,7 @@ function RLCore.update!(π::MADDPGManager, stage::PreActStage, env::AbstractEnv,
     update!(π, env)
 end
 
-function RLCore.update!(π::MADDPGManager, stage::PostEpisodeStage, env::AbstractEnv)
+function Base.push!(π::MADDPGManager, stage::PostEpisodeStage, env::AbstractEnv)
     # collect state and a dummy action to each agent's trajectory here.
     for (_, agent) in π.agents
         update!(agent.trajectory, agent.policy, env, stage)

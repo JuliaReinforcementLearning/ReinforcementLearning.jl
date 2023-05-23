@@ -40,7 +40,7 @@ function RLCore.update!(
     end
 end
 
-function RLCore.update!(L::DoubleLearner{<:TDLearner}, t::Any, ::AbstractEnv, ::PreActStage)
+function Base.push!(L::DoubleLearner{<:TDLearner}, t::Any, ::AbstractEnv, ::PreActStage)
     if rand(L.rng, Bool)
         L, Lₜ = L.L1, L.L2
     else
