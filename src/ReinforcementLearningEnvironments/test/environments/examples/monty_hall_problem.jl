@@ -11,8 +11,8 @@
 
     for _ in 1:N
         a = rand(rng, action_space(env))
-        env(a)
-        env(a)
+        RLBase.act!(env, a)
+        RLBase.act!(env, a)
         if reward(env) == RLEnvs.REWARD_OF_CAR
             n_win_car += 1
         end

@@ -22,13 +22,13 @@ function WeightedExplorer(; is_normalized::Bool = false, rng = Random.GLOBAL_RNG
     WeightedExplorer{is_normalized,typeof(rng)}(rng)
 end
 
-(s::WeightedExplorer{true})(values::AbstractVector{T}) where {T} =
+RLBase.plan!(s::WeightedExplorer{true}, values::AbstractVector{T}) where {T} =
     sample(s.rng, Weights(values, one(T)))
 
-(s::WeightedExplorer{false})(values::AbstractVector{T}) where {T} =
+RLBase.plan!(s::WeightedExplorer{false}, values::AbstractVector{T}) where {T} =
     sample(s.rng, Weights(values))
 
-function (s::WeightedExplorer)(values, mask)
+function RLBase.plan!(s::WeightedExplorer, values, mask)
     values[.!mask] .= 0
     s(values)
 end

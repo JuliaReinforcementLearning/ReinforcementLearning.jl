@@ -22,13 +22,13 @@ Base.@kwdef struct TDLearner{A} <: Any
     n::Int = 0
 end
 
-(L::TDLearner)(env::AbstractEnv) = L.approximator(state(env))
-(L::TDLearner)(s) = L.approximator(s)
-(L::TDLearner)(s, a) = L.approximator(s, a)
+RLCore.forward(L::TDLearner, env::AbstractEnv) = RLCore.forward(L.approximator, state(env))
+RLCore.forward(L::TDLearner, s) = RLCore.forward(L.approximator, s)
+RLCore.forward(L::TDLearner, s, a) = RLCore.forward(L.approximator, s, a)
 
 ## update policies
 
-function RLBase.update!(
+function RLCore.update!(
     p::QBasedPolicy{<:TDLearner},
     t::Any,
     e::AbstractEnv,
@@ -43,16 +43,16 @@ function RLBase.update!(
 end
 
 
-function RLBase.update!(L::TDLearner, t::Any, ::AbstractEnv, s::PreActStage)
+function Base.push!(L::TDLearner, t::Any, ::AbstractEnv, s::PreActStage)
     _update!(L, L.approximator, Val(L.method), t, s)
 end
 
-function RLBase.update!(L::TDLearner, t::Any, ::AbstractEnv, s::PostEpisodeStage)
+function Base.push!(L::TDLearner, t::Any, ::AbstractEnv, s::PostEpisodeStage)
     _update!(L, L.approximator, Val(L.method), t, s)
 end
 
 # for ExpectedSARSA
-function RLBase.update!(
+function RLCore.update!(
     L::TDLearner,
     t::Tuple,
     ::AbstractEnv,
@@ -63,7 +63,7 @@ end
 
 ## update trajectories
 
-function RLBase.update!(
+function RLCore.update!(
     t::Any,
     ::Union{
         QBasedPolicy{<:TDLearner},
@@ -91,9 +91,7 @@ function _update!(
     for i in 1:min(n + 1, length(R))
         G = R[end-i+1] + γ * G
         s, a = S[end-i], A[end-i]
-        if !(a isa NoOp)
-            update!(Q, (s, a) => Q(s, a) - G)
-        end
+        update!(Q, (s, a) => Q(s, a) - G)
     end
 end
 
@@ -207,7 +205,7 @@ end
 # DynaAgent
 #####
 
-function RLBase.update!(
+function RLCore.update!(
     p::QBasedPolicy{<:TDLearner},
     m::Union{ExperienceBasedSamplingModel,TimeBasedSamplingModel},
     ::Any,
@@ -228,7 +226,7 @@ function RLBase.update!(
     end
 end
 
-function RLBase.update!(
+function RLCore.update!(
     p::QBasedPolicy{<:TDLearner},
     m::PrioritizedSweepingSamplingModel,
     ::Any,
@@ -282,13 +280,13 @@ Base.@kwdef struct TDλReturnLearner{Tapp} <: Any
     λ::Float64
 end
 
-(L::TDλReturnLearner)(env::AbstractEnv) = L(state(env))
-(L::TDλReturnLearner)(s) = L.approximator(s)
-(L::TDλReturnLearner)(s, a) = L.approximator(s, a)
+RLCore.forward(L::TDλReturnLearner, env::AbstractEnv) = RLCore.forward(L, state(env))
+RLCore.forward(L::TDλReturnLearner, s) = RLCore.forward(L.approximator, s)
+RLCore.forward(L::TDλReturnLearner, s, a) = RLCore.forward(L.approximator, s, a)
 
-function RLBase.update!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PreActStage) end
+function Base.push!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PreActStage) end
 
-function RLBase.update!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PostEpisodeStage)
+function Base.push!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PostEpisodeStage)
     λ, γ, V = L.λ, L.γ, L.approximator
     R = t[:reward]
     S = @view t[:state][1:end-1]
@@ -310,7 +308,7 @@ function RLBase.update!(L::TDλReturnLearner, t::Any, ::AbstractEnv, ::PostEpiso
     end
 end
 
-function RLBase.update!(
+function RLCore.update!(
     t::Any,
     ::VBasedPolicy{<:TDλReturnLearner},
     ::AbstractEnv,

@@ -49,7 +49,7 @@ inconveniences is that we have to cache some intermediate data for future
 queries. Here we have to store `reward` and `is_terminated` in the instance of
 `env` for future queries.
 """
-function (env::MultiArmBanditsEnv)(action)
+function RLBase.act!(env::MultiArmBanditsEnv, action)
     env.reward = randn(env.rng) + env.true_values[action]
     env.is_terminated = true
 end

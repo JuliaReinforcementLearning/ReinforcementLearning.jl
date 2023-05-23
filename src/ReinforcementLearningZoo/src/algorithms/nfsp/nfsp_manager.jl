@@ -11,7 +11,7 @@ mutable struct NFSPAgentManager <: AbstractPolicy
 end
 
 ## interactions between the policy and env.
-function (π::NFSPAgentManager)(env::AbstractEnv)
+function RLBase.plan!(π::NFSPAgentManager, env::AbstractEnv)
     player = current_player(env)
     if player == chance_player(env)
         env |> legal_action_space |> rand
@@ -23,7 +23,7 @@ end
 RLBase.prob(π::NFSPAgentManager, env::AbstractEnv, args...) = prob(π.agents[current_player(env)], env, args...)
 
 ## update NFSPAgentManager
-function RLBase.update!(π::NFSPAgentManager, env::AbstractEnv)
+function RLCore.update!(π::NFSPAgentManager, env::AbstractEnv)
     while current_player(env) == chance_player(env)
         env |> legal_action_space |> rand |> env
     end

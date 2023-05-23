@@ -28,12 +28,12 @@ mutable struct NFSPAgent <: AbstractPolicy
 end
 
 ## interactions when evaluation.
-(π::NFSPAgent)(env::AbstractEnv) = π.sl_agent(env)
+RLBase.plan!(π::NFSPAgent, env::AbstractEnv) = RLBase.plan!(π.sl_agent, env)
 
 RLBase.prob(π::NFSPAgent, env::AbstractEnv, args...) = prob(π.sl_agent.policy, env, args...)
 
 ## update nfsp(also the env) when training.
-function RLBase.update!(π::NFSPAgent, env::AbstractEnv)
+function RLCore.update!(π::NFSPAgent, env::AbstractEnv)
     player = current_player(env)
     action = π.mode ? π.rl_agent(env) : π.sl_agent(env)
     π(PRE_ACT_STAGE, env, action)

@@ -79,7 +79,7 @@ function RLBase.reset!(env::PendulumNonInteractiveEnv{Fl}) where {Fl}
     nothing
 end
 
-function (env::PendulumNonInteractiveEnv{Fl})(a::Nothing) where {Fl}
+function RLBase.act!(env::PendulumNonInteractiveEnv{Fl}, a::Nothing) where {Fl}
     (g, l, m) = (env.parameters.gravity, env.parameters.length, env.parameters.mass)
     (dt, T) = (env.parameters.step_size, env.parameters.maximum_time)
     (theta, p_theta) = env.state

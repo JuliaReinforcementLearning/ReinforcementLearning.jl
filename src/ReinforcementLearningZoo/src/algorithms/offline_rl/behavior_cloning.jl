@@ -32,7 +32,7 @@ function BehaviorCloningPolicy(;
     BehaviorCloningPolicy(approximator, explorer, sampler, min_reservoir_history)
 end
 
-function (p::BehaviorCloningPolicy)(env::AbstractEnv)
+function RLBase.plan!(p::BehaviorCloningPolicy, env::AbstractEnv)
     s = state(env)
     s_batch = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s_batch = send_to_device(device(p.approximator), s_batch)
@@ -41,7 +41,7 @@ function (p::BehaviorCloningPolicy)(env::AbstractEnv)
     p.explorer(logits, legal_action_space_mask(env))
 end
 
-function RLBase.update!(p::BehaviorCloningPolicy, batch::NamedTuple{(:state, :action)})
+function RLCore.update!(p::BehaviorCloningPolicy, batch::NamedTuple{(:state, :action)})
     s = send_to_device(device(p.approximator), batch.state)
     a = send_to_device(device(p.approximator), batch.action)
     m = p.approximator
@@ -53,7 +53,7 @@ function RLBase.update!(p::BehaviorCloningPolicy, batch::NamedTuple{(:state, :ac
     update!(m, gs)
 end
 
-function RLBase.update!(p::BehaviorCloningPolicy, t::Any)
+function RLCore.update!(p::BehaviorCloningPolicy, t::Any)
     (length(t) <= p.min_reservoir_history || length(t) <= p.sampler.batch_size) && return
 
     _, batch = p.sampler(t)

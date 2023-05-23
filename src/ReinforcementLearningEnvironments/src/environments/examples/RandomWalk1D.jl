@@ -1,5 +1,7 @@
 export RandomWalk1D
 
+import CommonRLInterface
+
 """
     RandomWalk1D(;rewards=-1. => 1.0, N=7, start_pos=(N+1) ÷ 2, actions=[-1,1])
 
@@ -26,7 +28,7 @@ end
 
 RLBase.action_space(env::RandomWalk1D) = env.action_space
 
-function (env::RandomWalk1D)(action::Int)
+function RLBase.act!(env::RandomWalk1D, action::Int)
     env.pos += env.actions[action]
     if env.pos > env.N
         env.pos = env.N

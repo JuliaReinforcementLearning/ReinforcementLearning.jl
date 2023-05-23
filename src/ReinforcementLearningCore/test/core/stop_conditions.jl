@@ -1,9 +1,11 @@
-@testset "StopAfterStep" begin
-    stop_ = StopAfterStep(10)
-    @test sum([stop_() for i in 1:20]) == 11
+using ReinforcementLearningCore: check_stop
 
-    stop_ = StopAfterStep(10; is_show_progress=false)
-    @test sum([stop_() for i in 1:20]) == 11
+@testset "StopAfterStep" begin
+    stop_condition = StopAfterStep(10)
+    @test sum([check_stop(stop_condition) for i in 1:20]) == 11
+
+    stop_condition = StopAfterStep(10; is_show_progress=false)
+    @test sum([check_stop(stop_condition) for i in 1:20]) == 11
 end
 
 @testset "ComposedStopCondition" begin
@@ -11,7 +13,7 @@ end
     stop_3 = StopAfterStep(3)
 
     composed_stop = ComposedStopCondition(stop_10, stop_3)
-    @test sum([composed_stop() for i in 1:20]) == 18
+    @test sum([check_stop(composed_stop) for i in 1:20]) == 18
 end
 
 @testset "StopAfterEpisode" begin
@@ -19,13 +21,13 @@ end
     stop_2 = StopAfterEpisode(2; is_show_progress=false)
     stop_3 = StopAfterEpisode(2; is_show_progress=true)
 
-    for stop_ in (stop_1, stop_2)
+    for stop_condition in (stop_1, stop_2)
         env = RandomWalk1D()
         policy = RandomPolicy(legal_action_space(env))
-        @test stop_(policy, env) == false
+        @test check_stop(stop_condition, policy, env) == false
         env.pos = 7
-        @test stop_(policy, env) == false
-        @test stop_(policy, env) == true
+        @test check_stop(stop_condition, policy, env) == false
+        @test check_stop(stop_condition, policy, env) == true
     end
 end
 
@@ -34,13 +36,13 @@ end
     stop_2 = StopAfterNoImprovement(() -> 1.0, 10)
     stop_3 = StopAfterNoImprovement(() -> 1, 10)
 
-    for stop_ in [stop_1, stop_2, stop_3]
+    for stop_condition in [stop_1, stop_2, stop_3]
         env = RandomWalk1D()
         policy = RandomPolicy(legal_action_space(env))
 
-        @test sum([stop_(policy, env) for i in 1:11]) == 0
+        @test sum([check_stop(stop_condition, policy, env) for i in 1:11]) == 0
         env.pos = 7
-        @test sum([stop_(policy, env) for i in 1:11]) == 1
+        @test sum([check_stop(stop_condition, policy, env) for i in 1:11]) == 1
     end
 
     a_4 = 0.0f0
@@ -49,16 +51,16 @@ end
 
     plusone(a) = a += 1
 
-    stop_4 = StopAfterNoImprovement(() -> plusone(a_4), 10)
-    stop_5 = StopAfterNoImprovement(() -> plusone(a_5), 10)
-    stop_6 = StopAfterNoImprovement(() -> plusone(a_6), 10)
+    stop_condition_4 = StopAfterNoImprovement(() -> plusone(a_4), 10)
+    stop_condition_5 = StopAfterNoImprovement(() -> plusone(a_5), 10)
+    stop_condition_6 = StopAfterNoImprovement(() -> plusone(a_6), 10)
 
-    for stop_ in [stop_4, stop_5, stop_6]
+    for stop_condition in [stop_condition_4, stop_condition_5, stop_condition_6]
         env = RandomWalk1D()
         policy = RandomPolicy(legal_action_space(env))
 
-        @test sum([stop_(policy, env) for i in 1:11]) == 0
+        @test sum([check_stop(stop_condition, policy, env) for i in 1:11]) == 0
         env.pos = 7
-        @test sum([stop_(policy, env) for i in 1:11]) == 1
+        @test sum([check_stop(stop_condition, policy, env) for i in 1:11]) == 1
     end
 end

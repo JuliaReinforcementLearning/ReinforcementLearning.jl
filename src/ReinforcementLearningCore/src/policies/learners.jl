@@ -7,7 +7,8 @@ abstract type AbstractLearner end
 
 Base.show(io::IO, m::MIME"text/plain", L::AbstractLearner) = show(io, m, convert(AnnotatedStructTree, L))
 
-(L::AbstractLearner)(env::AbstractEnv) = env |> state |> send_to_device(L) |> L |> send_to_device(env)
+# Take Learner and Environment, get state, send to RLCore.forward(Learner, State)
+forward(L::Le, env::E) where {Le <: AbstractLearner, E <: AbstractEnv} = env |> state |> send_to_device(L.approximator) |> x -> forward(L, x) |> send_to_device(env) 
 
 Base.@kwdef mutable struct Approximator{M,O}
     model::M
@@ -18,7 +19,7 @@ Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(An
 
 @functor Approximator (model,)
 
-(A::Approximator)(args...; kwargs...) = A.model(args...; kwargs...)
+forward(A::Approximator, args...; kwargs...) = A.model(args...; kwargs...)
 
 RLBase.optimise!(A::Approximator, gs) =
     Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)

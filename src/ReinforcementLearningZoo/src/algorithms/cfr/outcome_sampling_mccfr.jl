@@ -17,7 +17,7 @@ struct OutcomeSamplingMCCFRPolicy{S,B,R<:AbstractRNG} <: AbstractCFRPolicy
     rng::R
 end
 
-(p::OutcomeSamplingMCCFRPolicy)(env::AbstractEnv) = p.behavior_policy(env)
+RLBase.plan!(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv) = p.behavior_policy(env)
 
 RLBase.prob(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv) = prob(p.behavior_policy, env)
 
@@ -34,7 +34,7 @@ function OutcomeSamplingMCCFRPolicy(; state_type = String, rng = Random.GLOBAL_R
 end
 
 "Run one interation"
-function RLBase.update!(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv)
+function RLCore.update!(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv)
     for x in players(env)
         if x != chance_player(env)
             outcome_sampling(copy(env), x, p.nodes, p.ϵ, 1.0, 1.0, 1.0, p.rng)
@@ -42,7 +42,7 @@ function RLBase.update!(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv)
     end
 end
 
-function RLBase.update!(p::OutcomeSamplingMCCFRPolicy)
+function RLCore.update!(p::OutcomeSamplingMCCFRPolicy)
     for (k, v) in p.nodes
         s = sum(v.cumulative_strategy)
         if s != 0

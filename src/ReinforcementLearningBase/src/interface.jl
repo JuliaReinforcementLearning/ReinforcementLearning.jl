@@ -19,11 +19,10 @@ import Markdown
 #####
 
 """
-    (π::AbstractPolicy)(env) -> action
+    plan!(π::AbstractPolicy, env) -> action
 
-Policy is the most basic concept in reinforcement learning. Unlike the
-definition in some other packages, here a policy is defined as a functional
-object which takes in an environment and returns an action.
+The policy is the most basic concept in reinforcement learning. Here an agent's
+action is determined by a `plan!` which takes an environment and policy and returns an action.
 
 !!! note
     See discussions
@@ -37,7 +36,7 @@ object which takes in an environment and returns an action.
     original `env` untouched.
 """
 @api abstract type AbstractPolicy end
-@api (π::AbstractPolicy)(env)
+@api plan!(π::AbstractPolicy, env)
 
 """
     optimise!(π::AbstractPolicy, experience)
@@ -72,7 +71,7 @@ Usually used in offline policies to evaluate the priorities of the experience.
 #####
 
 """
-    (env::AbstractEnv)(action, player=current_player(env))
+    act!(env::AbstractEnv, action, player=current_player(env))
 
 Super type of all reinforcement learning environments.
 """
@@ -407,7 +406,7 @@ abstract type AbstractEpisodeStyle end
 @api struct Spector end
 @api const SPECTOR = Spector()
 
-@api (env::AbstractEnv)(action, player=current_player(env))
+@api act!(env::AbstractEnv, action, player=current_player(env))
 
 """
 Make an independent copy of `env`, 
@@ -560,7 +559,7 @@ Treat the `env` as a game tree. Create an independent child after applying
 """
 @api function child(env::AbstractEnv, action)
     new_env = copy(env)
-    new_env(action)
+    act!(new_env, action)
     next_player!(new_env) # NoOp for simultaneous games and single player games
     new_env
 end

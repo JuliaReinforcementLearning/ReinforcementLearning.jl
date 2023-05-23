@@ -68,7 +68,7 @@ end
 
 RLBase.state_space(env::MontyHallEnv) = Base.OneTo(4)
 
-function (env::MontyHallEnv)(action)
+function RLBase.act!(env::MontyHallEnv, action)
     if isnothing(env.host_action)
         # first round
         env.guest_action = action

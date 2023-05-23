@@ -83,39 +83,41 @@ function _run(policy::AbstractPolicy,
         stop_condition::AbstractStopCondition,
         hook::AbstractHook,
         reset_condition::AbstractResetCondition)
-    hook(PreExperimentStage(), policy, env)
-    policy(PreExperimentStage(), env)
+    push!(hook, PreExperimentStage(), policy, env)
+    push!(policy, PreExperimentStage(), env)
     is_stop = false
     while !is_stop
         reset!(env)
-        policy(PreEpisodeStage(), env)
-        hook(PreEpisodeStage(), policy, env)
+        push!(policy, PreEpisodeStage(), env)
+        push!(hook, PreEpisodeStage(), policy, env)
 
         while !reset_condition(policy, env) # one episode
-            policy(PreActStage(), env)
-            hook(PreActStage(), policy, env)
+            push!(policy, PreActStage(), env)
+            push!(hook, PreActStage(), policy, env)
 
-            env |> policy |> env
+            action = RLBase.plan!(policy, env)
+            act!(env, action)
+
             optimise!(policy)
 
-            policy(PostActStage(), env)
-            hook(PostActStage(), policy, env)
+            push!(policy, PostActStage(), env)
+            push!(hook, PostActStage(), policy, env)
 
-            if stop_condition(policy, env)
+            if check_stop(stop_condition, policy, env)
                 is_stop = true
-                policy(PreActStage(), env)
-                hook(PreActStage(), policy, env)
-                policy(env)  # let the policy see the last observation
+                push!(policy, PreActStage(), env)
+                push!(hook, PreActStage(), policy, env)
+                RLBase.plan!(policy, env)  # let the policy see the last observation
                 break
             end
         end # end of an episode
 
         if is_terminated(env)
-            policy(PostEpisodeStage(), env)  # let the policy see the last observation
-            hook(PostEpisodeStage(), policy, env)
+            push!(policy, PostEpisodeStage(), env)  # let the policy see the last observation
+            push!(hook, PostEpisodeStage(), policy, env)
         end
     end
-    policy(PostExperimentStage(), env)
-    hook(PostExperimentStage(), policy, env)
+    push!(policy, PostExperimentStage(), env)
+    push!(hook, PostExperimentStage(), policy, env)
     hook
 end

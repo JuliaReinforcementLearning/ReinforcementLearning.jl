@@ -112,7 +112,7 @@ function TD3Policy(;
 end
 
 # TODO: handle Training/Testing mode
-function (p::TD3Policy)(env)
+function RLBase.plan!(p::TD3Policy, env)
     p.update_step += 1
 
     if p.update_step <= p.start_steps
@@ -126,7 +126,7 @@ function (p::TD3Policy)(env)
     end
 end
 
-function RLBase.update!(
+function RLCore.update!(
     p::TD3Policy,
     traj::CircularArraySARTTrajectory,
     ::AbstractEnv,
@@ -138,7 +138,7 @@ function RLBase.update!(
     update!(p, batch)
 end
 
-function RLBase.update!(p::TD3Policy, batch::NamedTuple{SARTS})
+function RLCore.update!(p::TD3Policy, batch::NamedTuple{SARTS})
     to_device(x) = send_to_device(device(p.behavior_actor), x)
     s, a, r, t, s′ = to_device(batch)
 

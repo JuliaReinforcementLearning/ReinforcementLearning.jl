@@ -3,7 +3,7 @@ export Agent
 using Base.Threads: @spawn
 
 using Functors: @functor
-
+import Base.push!
 """
     Agent(;policy, trajectory) <: AbstractPolicy
 
@@ -54,32 +54,39 @@ end
 
 @functor Agent (policy,)
 
-function (agent::Agent)(::PreActStage, env::AbstractEnv)
-    update!(agent, state(env))
+function Base.push!(agent::Agent, ::PreActStage, env::AbstractEnv)
+    push!(agent, state(env))
 end
 
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
-function (agent::Agent)(env::AbstractEnv, args...; kwargs...)
-    action = agent.policy(env, args...; kwargs...)
+function RLBase.plan!(agent::Agent{P,T,C}, env::AbstractEnv) where {P,T,C}
+    action = RLBase.plan!(agent.policy, env)
     push!(agent.trajectory, agent.cache, action)
     action
 end
 
-function (agent::Agent)(::PostActStage, env::AbstractEnv)
-    update!(agent.cache, reward(env), is_terminated(env))
+# Multiagent Version
+function RLBase.plan!(agent::Agent{P,T,C}, env::E, p::Symbol) where {P,T,C,E<:AbstractEnv}
+    action = RLBase.plan!(agent.policy, env, p)
+    push!(agent.trajectory, agent.cache, action)
+    action
 end
 
-function (agent::Agent)(::PostActStage, p::Symbol, env::AbstractEnv)
-    update!(agent.cache, reward(env, p), is_terminated(env))
+function Base.push!(agent::Agent{P,T,C}, ::PostActStage, env::E) where {P,T,C,E<:AbstractEnv}
+    push!(agent.cache, reward(env), is_terminated(env))
 end
 
-function (agent::Agent)(::PostExperimentStage, env::AbstractEnv)
+function Base.push!(agent::Agent, ::PostExperimentStage, env::E) where {E<:AbstractEnv}
     RLBase.reset!(agent.cache)
 end
 
-function update!(agent::Agent, state::S) where {S}
-    update!(agent.cache, state)
+function Base.push!(agent::Agent, ::PostExperimentStage, env::E, player::Symbol) where {E<:AbstractEnv}
+    RLBase.reset!(agent.cache)
+end
+
+function Base.push!(agent::Agent{P,T,C}, state::S) where {P,T,C,S}
+    push!(agent.cache, state)
 end
 

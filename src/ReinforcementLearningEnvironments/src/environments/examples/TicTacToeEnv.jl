@@ -2,6 +2,7 @@ export TicTacToeEnv
 
 import ReinforcementLearningBase: RLBase
 import ReinforcementLearningCore: RLCore
+import CommonRLInterface
 
 mutable struct TicTacToeEnv <: AbstractEnv
     board::BitArray{3}
@@ -51,9 +52,9 @@ function RLBase.legal_action_space_mask(env::TicTacToeEnv, p)
     end
 end
 
-(env::TicTacToeEnv)(action::Int) = env(CartesianIndices((3, 3))[action])
+RLBase.act!(env::TicTacToeEnv, action::Int) = RLBase.act!(env, CartesianIndices((3, 3))[action])
 
-function (env::TicTacToeEnv)(action::CartesianIndex{2})
+function RLBase.act!(env::TicTacToeEnv, action::CartesianIndex{2})
     env.board[action, 1] = false
     env.board[action, Base.to_index(env, current_player(env))] = true
 end

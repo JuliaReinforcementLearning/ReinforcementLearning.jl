@@ -125,10 +125,10 @@ function RLBase.prob(env::KuhnPokerEnv, ::ChancePlayer)
     end
 end
 
-(env::KuhnPokerEnv)(action::Int, p::Int) = env(KUHN_POKER_ACTIONS[action], p)
-(env::KuhnPokerEnv)(action::Int, p::ChancePlayer) = env(KUHN_POKER_CARDS[action], p)
-(env::KuhnPokerEnv)(action::Symbol, ::ChancePlayer) = push!(env.cards, action)
-(env::KuhnPokerEnv)(action::Symbol, ::Int) = push!(env.actions, action)
+RLBase.act!(env::KuhnPokerEnv, action::Int, p::Int) = RLBase.act!(env, KUHN_POKER_ACTIONS[action], p)
+RLBase.act!(env::KuhnPokerEnv, action::Int, p::ChancePlayer) = RLBase.act!(env, KUHN_POKER_CARDS[action], p)
+RLBase.act!(env::KuhnPokerEnv, action::Symbol, ::ChancePlayer) = push!(env.cards, action)
+RLBase.act!(env::KuhnPokerEnv, action::Symbol, ::Int) = push!(env.actions, action)
 
 RLBase.reward(::KuhnPokerEnv, ::ChancePlayer) = 0
 

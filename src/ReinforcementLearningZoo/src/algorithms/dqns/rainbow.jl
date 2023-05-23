@@ -25,13 +25,13 @@ end
 
 @functor RainbowLearner (support, approximator)
 
-function (L::RainbowLearner)(s::AbstractArray)
-    logits = L.approximator(s)
+function RLCore.forward(L::RainbowLearner, s::A) where {A<:AbstractArray}
+    logits = RLCore.forward(L.approximator, s)
     q = L.support .* softmax(reshape(logits, :, L.n_actions))
-    sum(q, dims=1)
+    sum(q, dims=1) |> vec
 end
 
-function (learner::RainbowLearner)(env::AbstractEnv)
+function RLBase.plan!(learner::RainbowLearner, env::AbstractEnv)
     s = send_to_device(device(learner.approximator), state(env))
     s = unsqueeze(s, dims=ndims(s) + 1)
     s |> learner |> vec |> send_to_host

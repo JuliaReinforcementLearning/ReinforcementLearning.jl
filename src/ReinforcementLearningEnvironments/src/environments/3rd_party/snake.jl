@@ -24,7 +24,7 @@ const SNAKE_GAME_ACTIONS = (
     CartesianIndex(0, -1),
 )
 
-function (env::SnakeGameEnv{A})(actions::Vector{CartesianIndex{2}}) where {A}
+function RLBase.act!(env::SnakeGameEnv{A}, actions::Vector{CartesianIndex{2}}) where {A}
     if A === MINIMAL_ACTION_SET
         # avoid turn back
         actions = [
@@ -38,8 +38,8 @@ function (env::SnakeGameEnv{A})(actions::Vector{CartesianIndex{2}}) where {A}
     env.is_terminated = !env.game(actions)
 end
 
-(env::SnakeGameEnv)(action::Int) = env([SNAKE_GAME_ACTIONS[action]])
-(env::SnakeGameEnv)(actions::Vector{Int}) = env(map(a -> SNAKE_GAME_ACTIONS[a], actions))
+RLBase.act!(env::SnakeGameEnv, action::Int) = env([SNAKE_GAME_ACTIONS[action]])
+RLBase.act!(env::SnakeGameEnv, actions::Vector{Int}) = env(map(a -> SNAKE_GAME_ACTIONS[a], actions))
 
 RLBase.action_space(env::SnakeGameEnv) = Base.OneTo(4)
 RLBase.state(env::SnakeGameEnv) = env.game.board

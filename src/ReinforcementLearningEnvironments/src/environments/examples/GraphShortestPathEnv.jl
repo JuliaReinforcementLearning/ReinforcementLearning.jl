@@ -46,7 +46,7 @@ function GraphShortestPathEnv(
     GraphShortestPathEnv(graph, pos, goal, max_steps, rng, 0, 0)
 end
 
-function (env::GraphShortestPathEnv)(action)
+function RLBase.act!(env::GraphShortestPathEnv, action)
     env.step += 1
     if env.graph[action, env.pos]
         env.pos = action

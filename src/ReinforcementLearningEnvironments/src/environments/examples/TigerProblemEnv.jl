@@ -22,7 +22,7 @@ Random.seed!(env::TigerProblemEnv, s) = seed!(env.rng, s)
 
 RLBase.action_space(::TigerProblemEnv) = (:listen, :open_left, :open_right)
 
-(env::TigerProblemEnv)(action) = env.action = action
+RLBase.act!(env::TigerProblemEnv, action) = env.action = action
 
 function RLBase.reward(env::TigerProblemEnv)
     if env.action == :listen

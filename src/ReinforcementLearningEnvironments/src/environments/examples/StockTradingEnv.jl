@@ -92,7 +92,7 @@ function StockTradingEnv(;
     env
 end
 
-function (env::StockTradingEnv)(actions)
+function RLBase.act!(env::StockTradingEnv, actions)
     init_asset = _total_asset(env)
 
     # sell first

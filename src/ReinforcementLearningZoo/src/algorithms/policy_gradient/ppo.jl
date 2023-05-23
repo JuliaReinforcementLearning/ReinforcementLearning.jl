@@ -184,12 +184,12 @@ function RLBase.prob(p::PPOPolicy, env::AbstractEnv)
     prob(p, s, mask)
 end
 
-(p::PPOPolicy)(env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
+RLBase.plan!(p::PPOPolicy, env::MultiThreadEnv) = rand.(p.rng, prob(p, env))
 
 # !!! https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/533/files#r728920324
-(p::PPOPolicy)(env::AbstractEnv) = rand.(p.rng, prob(p, env))
+RLBase.plan!(p::PPOPolicy, env::AbstractEnv) = rand.(p.rng, prob(p, env))
 
-function (agent::Agent{<:PPOPolicy})(env::MultiThreadEnv)
+function RLBase.plan!(agent::Agent{<:PPOPolicy}, env::MultiThreadEnv)
     dist = prob(agent.policy, env)
     action = rand.(agent.policy.rng, dist)
     if ndims(action) == 2
@@ -200,7 +200,7 @@ function (agent::Agent{<:PPOPolicy})(env::MultiThreadEnv)
     EnrichedAction(action; action_log_prob=vec(action_log_prob))
 end
 
-function RLBase.update!(
+function RLCore.update!(
     p::PPOPolicy,
     t::Union{PPOTrajectory,MaskedPPOTrajectory},
     ::AbstractEnv,
@@ -331,7 +331,7 @@ function _update!(p::PPOPolicy, t::Any)
     end
 end
 
-function RLBase.update!(
+function RLCore.update!(
     trajectory::Union{PPOTrajectory,MaskedPPOTrajectory},
     ::PPOPolicy,
     env::MultiThreadEnv,

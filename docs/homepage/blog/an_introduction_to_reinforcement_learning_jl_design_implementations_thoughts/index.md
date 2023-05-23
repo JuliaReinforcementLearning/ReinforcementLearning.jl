@@ -149,7 +149,7 @@ function Base.run(policy, env, stop_condition)
 end
 ```
 
-Note that by default, `(policy::AbstractPolicy)(::AbstractStage, env)` will do nothing and the workflow is simplified to the earlier version. For the specific policy `Agent`, it will update its internal `policy` and `trajectory` at each stage:
+Note that by default, `update!(policy::AbstractPolicy, ::AbstractStage, env)` will do nothing and the workflow is simplified to the earlier version. For the specific policy `Agent`, it will update its internal `policy` and `trajectory` at each stage:
 
 - `update!(policy, trajectory, env, stage)` (Read as `update!` the inner `policy` given a `trajectory`, `env` and the current `stage`)
 - `update!(trajectory, policy, env, stage)` (Read as `update!` the inner `trajectory` given a `policy`, `env` and the current `stage`)
@@ -250,7 +250,7 @@ struct VBasedPolicy{L,M} <: AbstractPolicy
     mapper::M
 end
 
-(p::VBasedPolicy)(env::AbstractEnv) = p.mapper(env, p.learner)
+RLBase.plan!(p::VBasedPolicy, env::AbstractEnv) = p.mapper(env, p.learner)
 ```
 
 Basically it contains two parts, a value `learner` $V$ and a mapper policy $\pi$. And all the updating to this policy will be forwarded to the inner `learner`.
@@ -302,7 +302,7 @@ struct QBasedPolicy{L, E} <: AbstractPolicy
     explorer::E
 end
 
-(p::QBasedPolicy)(env::AbstractEnv) = env |> p.learner |> p.explorer
+RLBase.plan!((p::QBasedPolicy, env::AbstractEnv) = env |> p.learner |> p.explorer
 ```
 
 Similar to the `VBasedPolicy`, when wrapped in an `Agent`, all updating to `QBasedPolicy` will be forwarded to the inner value `learner`. 
@@ -338,7 +338,7 @@ The biggest challenge to implement Prioritized DQN is to create a new Trajectory
 
 **IQN**
 
-For distributional reinforcement learning algorithms like C51\dcite{bellemare2017distributional} and IQN\dcite{dabney2018implicit}, the estimation is not the Q-values directly. But we can still fit them into the `QBasedPolicy`. The main change is to override the default implementation of `(p::QBasedPolicy)(env::AbstractEnv)` to use the Q value distribution.
+For distributional reinforcement learning algorithms like C51\dcite{bellemare2017distributional} and IQN\dcite{dabney2018implicit}, the estimation is not the Q-values directly. But we can still fit them into the `QBasedPolicy`. The main change is to override the default implementation of `RLBase.plan!((p::QBasedPolicy, env::AbstractEnv)` to use the Q value distribution.
 
 ### 3.2 Policy Gradient
 
@@ -379,7 +379,7 @@ And the corresponding updating to the trajectory is also provided by default.
 
 In offline reinforcement learning, we often assume the experience is prepared ahead. To adapt some of the above algorithms in the offline setting, we need to provide a more specific implementation of `update!(policy, batch)` and reuse it in `update!(policy, trajectory, env stage)` . For new offline algorithms, we only need to implement the following two methods:
 
-1. `(p::YourOfflinePolicy)(env::AbstreactEnv)`
+1. `RLBase.plan!((p::YourOfflinePolicy, env::AbstreactEnv)`
 2. `update!(p::YourOfflinePolicy, batch)`
 
 ### 3.4 Multi-Agent Reinforcement Learning

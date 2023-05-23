@@ -18,7 +18,7 @@ Base.@kwdef mutable struct PrioritizedDQNLearner{A<:Approximator{<:TwinNetwork}}
     loss::Float32 = 0.0f0
 end
 
-(L::PrioritizedDQNLearner)(s::AbstractArray) = L.approximator(s)
+RLCore.forward(L::PrioritizedDQNLearner, s::AbstractArray) = RLCore.forward(L.approximator, s)
 
 @functor PrioritizedDQNLearner (approximator,)
 

@@ -19,7 +19,7 @@ CRL.@provide CRL.actions(env::CommonRLEnv) = action_space(env.env)
 CRL.@provide CRL.terminated(env::CommonRLEnv) = is_terminated(env.env)
 
 CRL.@provide function CRL.act!(env::CommonRLEnv, a)
-    env.env(a)
+    act!(env.env, a)
     reward(env.env)
 end
 
@@ -87,7 +87,7 @@ legal_action_space(env::RLBaseEnv) = CRL.valid_actions(env.env)
 legal_action_space_mask(env::RLBaseEnv) = CRL.valid_action_mask(env.env)
 reset!(env::RLBaseEnv) = CRL.reset!(env.env)
 
-(env::RLBaseEnv)(a) = env.r = CRL.act!(env.env, a)
+act!(env::RLBaseEnv, a) = env.r = CommonRLInterface.act!(env.env, a)
 Base.copy(env::CommonRLEnv) = RLBaseEnv(CRL.clone(env.env), env.r)
 
 ActionStyle(env::RLBaseEnv) =

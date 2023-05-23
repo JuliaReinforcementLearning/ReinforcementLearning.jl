@@ -8,9 +8,9 @@ using Flux: params, gradient, unsqueeze
         @test A(1) == 0.0
         @test A(2) == 0.0
 
-        update!(A, 2 => A(2) - 3.0)
+        push!(A, 2 => A(2) - 3.0)
         @test A(2) == 1.5
-        update!(A, 2 => A(2) - 6.0)
+        push!(A, 2 => A(2) - 6.0)
         @test A(2) == 3.0
     end
 
@@ -25,7 +25,7 @@ using Flux: params, gradient, unsqueeze
         end
 
         old_params = deepcopy(collect(params(NN).params))
-        update!(NN, gs)
+        push!(NN, gs)
         new_params = collect(params(NN).params)
 
         @test old_params != new_params

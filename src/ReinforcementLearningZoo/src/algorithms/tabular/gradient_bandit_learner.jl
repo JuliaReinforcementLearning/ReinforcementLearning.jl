@@ -7,12 +7,12 @@ Base.@kwdef struct GradientBanditLearner{A,B} <: Any
     baseline::B
 end
 
-(learner::GradientBanditLearner)(s::Int) = s |> learner.approximator |> softmax
-(learner::GradientBanditLearner)(env::AbstractEnv) = learner(state(env))
+RLCore.forward!(learner::GradientBanditLearner, s::Int) = s |> learner.approximator |> softmax
+RLCore.forward!(learner::GradientBanditLearner, env::AbstractEnv) = RLCore.forward!(learner, state(env))
 
-function RLBase.update!(L::GradientBanditLearner, t::Any, ::AbstractEnv, ::PreActStage) end
+function Base.push!(L::GradientBanditLearner, t::Any, ::AbstractEnv, ::PreActStage) end
 
-function RLBase.update!(L::GradientBanditLearner, t::Any, ::AbstractEnv, ::PostActStage)
+function Base.push!(L::GradientBanditLearner, t::Any, ::AbstractEnv, ::PostActStage)
     A = L.approximator
     s, a, r = t[:state][end], t[:action][end], t[:reward][end]
     probs = s |> A |> softmax
@@ -21,7 +21,7 @@ function RLBase.update!(L::GradientBanditLearner, t::Any, ::AbstractEnv, ::PostA
     update!(A, s => -errors)
 end
 
-function RLBase.update!(
+function RLCore.update!(
     t::Any,
     ::QBasedPolicy{<:GradientBanditLearner},
     ::AbstractEnv,

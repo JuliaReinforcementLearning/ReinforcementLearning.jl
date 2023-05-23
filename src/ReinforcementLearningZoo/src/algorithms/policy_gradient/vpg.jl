@@ -25,12 +25,12 @@ end
 IsPolicyGradient(::Type{<:VPG}) = IsPolicyGradient()
 @functor VPG (approximator, baseline)
 
-function (π::VPG)(env::AbstractEnv)
-    res = env |> state |> send_to_device(π) |> π.approximator |> send_to_host
+function RLBase.plan!(π::VPG, env::AbstractEnv)
+    res = env |> state |> send_to_device(π) |> x -> RLCore.forward(π.approximator, x) |> send_to_host
     rand(π.rng, action_distribution(π.dist, res)[1])
 end
 
-function (p::Agent{<:VPG})(::PostEpisodeStage, env::AbstractEnv)
+function update!(p::Agent{<:VPG}, ::PostEpisodeStage, env::AbstractEnv)
     p.trajectory.container[] = true
     optimise!(p.policy, p.trajectory.container)
     empty!(p.trajectory.container)

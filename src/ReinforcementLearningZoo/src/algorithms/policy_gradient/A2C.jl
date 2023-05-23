@@ -32,18 +32,18 @@ end
 
 Functors.functor(x::A2CLearner) = (app=x.approximator,), y -> @set x.approximator = y.app
 
-function (learner::A2CLearner)(env::MultiThreadEnv)
+function RLCore.forward(learner::A2CLearner, env::MultiThreadEnv)
     learner.approximator.actor(send_to_device(device(learner), state(env))) |> send_to_host
 end
 
-function (learner::A2CLearner)(env)
+function RLCore.forward(learner::A2CLearner, env)
     s = state(env)
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s = send_to_device(device(learner), s)
     learner.approximator.actor(s) |> vec |> send_to_host
 end
 
-function RLBase.update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
+function RLCore.update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
     length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
     learner.update_step += 1
     if learner.update_step % learner.update_freq == 0

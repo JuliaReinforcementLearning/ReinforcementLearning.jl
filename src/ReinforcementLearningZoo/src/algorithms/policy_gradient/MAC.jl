@@ -29,19 +29,19 @@ end
 
 Functors.functor(x::MACLearner) = (app=x.approximator,), y -> @set x.approximator = y.app
 
-function (learner::MACLearner)(env::MultiThreadEnv)
+function RLCore.forward(learner::MACLearner, env::MultiThreadEnv)
     learner.approximator.actor(send_to_device(device(learner.approximator), state(env))) |>
     send_to_host
 end
 
-function (learner::MACLearner)(env)
+function RLCore.forward(learner::MACLearner, env)
     s = state(env)
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s = send_to_device(device(learner.approximator), s)
     learner.approximator.actor(s) |> vec |> send_to_host
 end
 
-function RLBase.update!(
+function RLCore.update!(
     learner::MACLearner,
     t::CircularArraySARTTrajectory,
     ::AbstractEnv,

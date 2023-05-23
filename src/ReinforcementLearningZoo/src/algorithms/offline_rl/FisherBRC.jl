@@ -124,7 +124,7 @@ function (l::FisherBRCLearner)(env)
     action = dropdims(l.policy(l.rng, s; is_sampling=true), dims=2)
 end
 
-function RLBase.update!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
+function RLCore.update!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
     if l.update_step == 0
         update_behavior_policy!(l.behavior_policy, batch)
     else

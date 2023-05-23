@@ -115,7 +115,7 @@ function SACPolicy(;
 end
 
 # TODO: handle Training/Testing mode
-function (p::SACPolicy)(env)
+function RLBase.plan!(p::SACPolicy, env)
     p.update_step += 1
 
     if p.update_step <= p.start_steps
@@ -140,7 +140,7 @@ function (p::SACPolicy)(env)
     end
 end
 
-function RLBase.update!(
+function RLCore.update!(
     p::SACPolicy,
     traj::CircularArraySARTTrajectory,
     ::AbstractEnv,
@@ -152,7 +152,7 @@ function RLBase.update!(
     update!(p, batch)
 end
 
-function RLBase.update!(p::SACPolicy, batch::NamedTuple{SARTS})
+function RLCore.update!(p::SACPolicy, batch::NamedTuple{SARTS})
     s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
 
     γ, τ, α = p.γ, p.τ, p.α

@@ -50,11 +50,11 @@ function RLBase.prob(π::DeepCFR, env::AbstractEnv)
     send_to_host(σ)
 end
 
-(π::DeepCFR)(env::AbstractEnv) =
+RLBase.plan!(π::DeepCFR, env::AbstractEnv) =
     sample(π.rng, action_space(env), Weights(prob(π, env), 1.0))
 
 "Run one interation"
-function RLBase.update!(π::DeepCFR, env::AbstractEnv)
+function RLCore.update!(π::DeepCFR, env::AbstractEnv)
     for p in players(env)
         if p != chance_player(env)
             for k in 1:π.K
@@ -67,7 +67,7 @@ function RLBase.update!(π::DeepCFR, env::AbstractEnv)
 end
 
 "Update Π (policy network)"
-function RLBase.update!(π::DeepCFR)
+function RLCore.update!(π::DeepCFR)
     Π = π.Π
     Π_losses = π.Π_losses
     Π_norms = π.Π_norms

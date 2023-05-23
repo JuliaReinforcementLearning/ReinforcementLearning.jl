@@ -41,14 +41,14 @@ Base.@kwdef struct MonteCarloLearner{A,K,S} <: Any
     sampling::S = NO_SAMPLING
 end
 
-(learner::MonteCarloLearner)(env::AbstractEnv) = learner(state(env))
-(learner::MonteCarloLearner)(s) = learner.approximator(s)
-(learner::MonteCarloLearner)(s, a) = learner.approximator(s, a)
+RLCore.forward(learner::MonteCarloLearner, env::AbstractEnv) = RLCore.forward(learner, state(env))
+RLCore.forward(learner::MonteCarloLearner, s) = RLCore.forward(learner.approximator, s)
+RLCore.forward(learner::MonteCarloLearner, s, a) = RLCore.forward(learner.approximator, s, a)
 
-function RLBase.update!(::VBasedPolicy{<:MonteCarloLearner}, ::Any) end
+function RLCore.update!(::VBasedPolicy{<:MonteCarloLearner}, ::Any) end
 
 "Only update at the end of an episode"
-function RLBase.update!(
+function RLCore.update!(
     p::VBasedPolicy{<:MonteCarloLearner},
     t::Any,
     ::AbstractEnv,
@@ -57,12 +57,12 @@ function RLBase.update!(
     update!(p.learner, t)
 end
 
-function RLBase.update!(L::MonteCarloLearner, t::Any, e::AbstractEnv, s::PostEpisodeStage)
+function Base.push!(L::MonteCarloLearner, t::Any, e::AbstractEnv, s::PostEpisodeStage)
     update!(L, t)
 end
 
 "Empty the trajectory at the end of an episode"
-function RLBase.update!(
+function RLCore.update!(
     t::Any,
     ::Union{
         VBasedPolicy{<:MonteCarloLearner},
@@ -75,7 +75,7 @@ function RLBase.update!(
     empty!(t)
 end
 
-function RLBase.update!(L::MonteCarloLearner, t::Any)
+function RLCore.update!(L::MonteCarloLearner, t::Any)
     _update!(L.kind, L.approximator, L.sampling, L, t)
 end
 

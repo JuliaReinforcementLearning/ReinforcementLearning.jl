@@ -27,7 +27,7 @@ mutable struct TabularCFRPolicy{S,T,R<:AbstractRNG} <: AbstractCFRPolicy
     n_iteration::Int
 end
 
-(p::TabularCFRPolicy)(env::AbstractEnv) = p.behavior_policy(env)
+RLBase.plan!(p::TabularCFRPolicy, env::AbstractEnv) = p.behavior_policy(env)
 
 RLBase.prob(p::TabularCFRPolicy, env::AbstractEnv) = prob(p.behavior_policy, env)
 
@@ -73,7 +73,7 @@ function TabularCFRPolicy(;
 end
 
 "Update the `behavior_policy`"
-function RLBase.update!(p::TabularCFRPolicy)
+function RLCore.update!(p::TabularCFRPolicy)
     for (k, v) in p.nodes
         s = sum(v.cumulative_strategy)
         if s != 0
@@ -89,7 +89,7 @@ function RLBase.update!(p::TabularCFRPolicy)
 end
 
 "Run one interation"
-function RLBase.update!(p::TabularCFRPolicy, env::AbstractEnv)
+function RLCore.update!(p::TabularCFRPolicy, env::AbstractEnv)
     w = p.is_linear_averaging ? max(p.n_iteration - p.weighted_averaging_delay, 0) : 1
     if p.is_alternating_update
         for x in players(env)

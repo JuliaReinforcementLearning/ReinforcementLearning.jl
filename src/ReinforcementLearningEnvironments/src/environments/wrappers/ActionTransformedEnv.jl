@@ -29,5 +29,5 @@ RLBase.action_space(env::ActionTransformedEnv, args...) =
 RLBase.legal_action_space(env::ActionTransformedEnv, args...) =
     env.action_space_mapping(legal_action_space(env.env, args...))
 
-(env::ActionTransformedEnv)(action, args...; kwargs...) =
-    env.env(env.action_mapping(action), args...; kwargs...)
+RLBase.act!(env::ActionTransformedEnv, action, args...; kwargs...) =
+    RLBase.act!(env.env, env.action_mapping(action), args...; kwargs...)

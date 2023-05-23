@@ -97,7 +97,7 @@ function (learner::CRRLearner)(env)
     end
 end
 
-function RLBase.update!(learner::CRRLearner, batch::NamedTuple)
+function RLCore.update!(learner::CRRLearner, batch::NamedTuple)
     if learner.continuous
         continuous_update!(learner, batch)
     else

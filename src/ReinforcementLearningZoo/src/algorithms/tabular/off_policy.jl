@@ -27,7 +27,7 @@ end
 
 Base.length(t::VectorWSARTTrajectory) = length(t[:terminal])
 
-function RLBase.update!(
+function RLCore.update!(
     p::OffPolicy,
     t::VectorWSARTTrajectory,
     e::AbstractEnv,
@@ -36,7 +36,7 @@ function RLBase.update!(
     update!(p.π_target, t, e, s)
 end
 
-function RLBase.update!(
+function RLCore.update!(
     t::VectorWSARTTrajectory,
     p::OffPolicy,
     env::AbstractEnv,
@@ -51,7 +51,7 @@ function RLBase.update!(
     push!(t[:weight], w)
 end
 
-function RLBase.update!(
+function RLCore.update!(
     t::VectorWSARTTrajectory,
     p::Union{
         OffPolicy{<:QBasedPolicy{<:TDLearner}},
@@ -63,7 +63,7 @@ function RLBase.update!(
     empty!(t)
 end
 
-function RLBase.update!(
+function RLCore.update!(
     t::VectorWSARTTrajectory,
     p::Union{
         OffPolicy{<:QBasedPolicy{<:TDLearner}},

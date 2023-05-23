@@ -14,9 +14,9 @@ function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), P
             for stage in stages
                 hook_copy = deepcopy(hook)
                 if mode == :SingleAgent
-                    hook_copy(stage, policy, env)
+                    push!(hook_copy, stage, policy, env)
                 elseif mode == :MultiAgent
-                    hook_copy(stage, policy, env, :player_i)
+                    push!(hook_copy, stage, policy, env, :player_i)
                 end
                 for field_ in hook_fieldnames
                     if getfield(hook, field_) isa Ref
@@ -42,12 +42,12 @@ end
     policy = RandomPolicy(legal_action_space(env))
 
     for h in (h_1, h_2, h_3, h_4, h_5)
-        h(PostActStage(), policy, env)
+        push!(h, PostActStage(), policy, env)
         @test h.reward == 1
-        h(PostEpisodeStage(), policy, env)
+        push!(h, PostEpisodeStage(), policy, env)
         @test h.reward == 0
         @test h.rewards == [1]
-        h(PostExperimentStage(), policy, env)
+        push!(h, PostExperimentStage(), policy, env)
 
         test_noop!(h; stages=[PreActStage(), PreEpisodeStage(), PreExperimentStage()])
     end
@@ -65,12 +65,12 @@ end
     h_5 = TotalBatchRewardPerEpisode(10)
 
     for h in (h_1, h_2, h_3, h_4, h_5)
-        h(PostActStage(), policy, env)
+        push!(h, PostActStage(), policy, env)
         @test h.reward == fill(1, 10)
-        h(PostEpisodeStage(), policy, env)
+        push!(h, PostEpisodeStage(), policy, env)
         @test h.reward == fill(0.0, 10)
         @test h.rewards == fill([1.0], 10)
-        h(PostExperimentStage(), policy, env)
+        push!(h, PostExperimentStage(), policy, env)
 
         test_noop!(h; stages=[PreActStage(), PreEpisodeStage(), PreExperimentStage()])
     end
@@ -85,7 +85,7 @@ end
         env.pos = 1
         policy = RandomPolicy(legal_action_space(env))
         for t = 1:4
-            h(PostActStage(), policy, env)
+            push!(h, PostActStage(), policy, env)
             @test env.pos == 1+ div(t,h.n)
         end
         test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
@@ -98,8 +98,8 @@ end
 
     sleep_vect = [0.01, 0.02, 0.03]
     for h in (h_1, h_2)
-        h(PostActStage(), 1, 1)
-        [(sleep(i); h(PostActStage(), 1, 1)) for i in sleep_vect]
+        push!(h, PostActStage(), 1, 1)
+        [(sleep(i); push!(h, PostActStage(), 1, 1)) for i in sleep_vect]
         @test all(0.1 .> h.times[2:end] .> 0)
         test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end
@@ -110,15 +110,15 @@ end
     agent = RandomPolicy()
     h = StepsPerEpisode()
 
-    [h(PostActStage()) for i in 1:100]
+    [push!(h, PostActStage()) for i in 1:100]
 
     @test h.count == 100
 
-    h(PostEpisodeStage(), agent, env)
+    push!(h, PostEpisodeStage(), agent, env)
     @test h.count == 0
     @test h.steps == [100]
 
-    h(PostExperimentStage(), agent, env)
+    push!(h, PostExperimentStage(), agent, env)
     @test h.steps == [100, 0]
 
     test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PreExperimentStage()])
@@ -133,17 +133,17 @@ end
     h_3 = RewardsPerEpisode{Float16}()
 
     for h in (h_1, h_2, h_3)
-        h(PreEpisodeStage(), agent, env)
+        push!(h, PreEpisodeStage(), agent, env)
         @test h.rewards == [[]]
 
         env.pos = 1
-        h(PostActStage(), agent, env)
+        push!(h, PostActStage(), agent, env)
         @test h.rewards == [[-1.0]]
         env.pos = 7
-        h(PostActStage(), agent, env)
+        push!(h, PostActStage(), agent, env)
         @test h.rewards == [[-1.0, 1.0]]
         env.pos = 3
-        h(PostActStage(), agent, env)
+        push!(h, PostActStage(), agent, env)
         @test h.rewards == [[-1.0, 1.0, 0.0]]
         test_noop!(h, stages=[PreActStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end
@@ -155,7 +155,7 @@ end
     agent = RandomPolicy()
 
     h = DoOnExit((agent, env) -> (env.pos += 1))
-    h(PostExperimentStage(), agent, env)
+    push!(h, PostExperimentStage(), agent, env)
     @test env.pos == 2
 end
 
@@ -173,7 +173,7 @@ end
         env.pos = 1
         policy = RandomPolicy(legal_action_space(env))
         for t in 1:4
-            h(stage, policy, env)
+            push!(h, stage, policy, env)
             @test env.pos == 1 + div(t,h.n)
         end     
         test_noop!(h, stages=[PreActStage(), PostActStage(), PreExperimentStage(), PostExperimentStage()])

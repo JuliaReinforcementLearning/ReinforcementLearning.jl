@@ -81,7 +81,7 @@ function (learner::BCQDLearner)(env)
     new_q |> vec |> send_to_host
 end
 
-function RLBase.update!(learner::BCQDLearner, batch::NamedTuple)
+function RLCore.update!(learner::BCQDLearner, batch::NamedTuple)
     AC = learner.approximator
     target_AC = learner.target_approximator
     γ, τ, θ = learner.γ, learner.τ, learner.θ

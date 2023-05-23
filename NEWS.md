@@ -7,6 +7,14 @@
 
 ### ReinforcementLearningExperiments.jl
 
+#### v0.3
+
+- Transition to `RLCore.forward`, `RLBase.act!`, `RLBase.plan!` and `Base.push!` syntax instead of functional objects for hooks, policies and environments
+
+#### v0.2
+
+- Drop `ReinforcementLearning.jl` from dependencies, use `ReinforcementLearningCore.jl` instead
+
 #### v0.1.4
 
 - Support `device_rng` in SAC [#606](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/606)
@@ -20,6 +28,10 @@
 - Added an experiment for DQN training on discrete `PendulumEnv` (#537)
 
 ### ReinforcementLearningEnvironments.jl
+
+#### v0.8
+
+- Transition to `RLCore.forward`, `RLBase.act!`, `RLBase.plan!` and `Base.push!` syntax instead of functional objects for hooks, policies and environments
 
 #### v0.7.2
 
@@ -84,6 +96,15 @@
 
 ### ReinforcementLearningZoo.jl
 
+#### v0.7.0
+
+- Transition to `RLCore.forward`, `RLBase.act!`, `RLBase.plan!` and `Base.push!` syntax instead of functional objects for hooks, policies and environments
+- Reduce excess `TDLearner` allocations by using Tuple instead of Array
+
+#### v0.4.1
+
+- Make keyword argument `n_actions` in `TabularPolicy` optional. [#300](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/300)
+
 #### v0.6.0
 
 - Extensive refactor based on RLBase.jl `v0.11`, most components not **yet** ported
@@ -127,6 +148,10 @@
 - Add some extra keyword parameters for `BehaviorCloningPolicy` to use it
   online. [#390](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/390)
 
+#### v0.4.0
+
+- Moved all the experiments into a new package `ReinforcementLearningExperiments.jl`. The related dependencies are also removed (`BSON.jl`, `StableRNGs.jl`, `TensorBoardLogger.jl`).
+
 ### ReinforcementLearningDatasets.jl
 
 #### v0.1.0
@@ -140,6 +165,10 @@
 ## ReinforcementLearning.jl@v0.9.0
 
 ### ReinforcementLearningBase.jl
+
+#### v0.12.0
+
+- Transition to `RLCore.forward`, `RLBase.act!`, `RLBase.plan!` and `Base.push!` syntax instead of functional objects for hooks, policies and environments
 
 #### v0.9.7
 
@@ -155,6 +184,10 @@
 - Add default `Base.:(==)` and `Base.hash` method for `AbstractEnv`. [#348](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/348)
 
 ### ReinforcementLearningCore.jl
+
+#### v0.10.0
+
+- Transition to `RLCore.forward`, `RLBase.act!`, `RLBase.plan!` and `Base.push!` syntax instead of functional objects for hooks, policies and environments
 
 #### v0.9.3
 
@@ -213,25 +246,3 @@
 
 - Removed `ResizeImage` preprocessor to reduce the dependency of `ImageTransformations`. 
 - Show unicode plot at the end of an experiment in the `TotalRewardPerEpisode` hook.
-
-### ReinforcementLearningZoo.jl
-
-#### Unreleased
-
-- Reduce excess `TDLearner` allocations by using Tuple instead of Array
-
-#### v0.4.1
-
-- Make keyword argument `n_actions` in `TabularPolicy` optional. [#300](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/300)
-
-#### v0.4.0
-
-- Moved all the experiments into a new package `ReinforcementLearningExperiments.jl`. The related dependencies are also removed (`BSON.jl`, `StableRNGs.jl`, `TensorBoardLogger.jl`).
-
-### ReinforcementLearningExperiments.jl
-
-#### dev
-
-- Drop `ReinforcementLearning.jl` from dependencies, use `ReinforcementLearningCore.jl` instead
-
-#### v0.1.0

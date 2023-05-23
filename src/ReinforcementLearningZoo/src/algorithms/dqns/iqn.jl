@@ -55,17 +55,17 @@ end
 embed(x, Nₑₘ) = cos.(Float32(π) .* (1:Nₑₘ) .* reshape(x, 1, :))
 
 # the last dimension is batch_size
-function (learner::IQNLearner)(s::AbstractArray)
+function RLCore.forward(learner::IQNLearner, s::A) where {A<:AbstractArray}
     batch_size = size(s)[end]
     τ = rand(learner.device_rng, Float32, learner.K, batch_size)
     τₑₘ = embed(τ, learner.Nₑₘ)
-    quantiles = learner.approximator(s, τₑₘ)
+    quantiles = RLCore.forward(learner.approximator, s, τₑₘ)
     dropdims(mean(quantiles; dims=2); dims=2)
 end
 
-function (L::IQNLearner)(env::AbstractEnv)
-    s = env |> state |> send_to_device(L)
-    q = s |> unsqueeze(dims=ndims(s) + 1) |> L |> vec
+function RLCore.forward(L::IQNLearner, env::E) where {E<:AbstractEnv}
+    s = env |> state |> send_to_device(L.approximator)
+    q = s |> unsqueeze(dims=ndims(s) + 1) |> x -> RLCore.forward(L, x) |> vec
     q
 end
 

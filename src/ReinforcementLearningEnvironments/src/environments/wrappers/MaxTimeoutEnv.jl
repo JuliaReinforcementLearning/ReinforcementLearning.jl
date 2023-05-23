@@ -14,8 +14,8 @@ Force `is_terminated(env)` return `true` after `max_t` interactions.
 MaxTimeoutEnv(env::E, max_t::Int; current_t::Int = 1) where {E<:AbstractEnv} =
     MaxTimeoutEnv(env, max_t, current_t)
 
-function (env::MaxTimeoutEnv)(args...; kwargs...)
-    env.env(args...; kwargs...)
+function RLBase.act!(env::MaxTimeoutEnv, args...; kwargs...)
+    RLBase.act!(env.env, args...; kwargs...)
     env.current_t = env.current_t + 1
 end
 

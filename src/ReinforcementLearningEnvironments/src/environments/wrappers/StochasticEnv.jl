@@ -21,17 +21,17 @@ function RLBase.reset!(env::StochasticEnv)
         p = prob(env.env)
         A = action_space(env.env)
         x = A[sample(env.rng, Weights(p, 1.0))]
-        env.env(x)
+        RLBase.act!(env.env, x)
     end
 end
 
-function (env::StochasticEnv)(a)
-    env.env(a)
+function RLBase.act!(env::StochasticEnv, a)
+    RLBase.act!(env.env, a)
     while current_player(env.env) == chance_player(env.env)
         p = prob(env.env)
         A = action_space(env.env)
         x = A[sample(env.rng, Weights(p, 1.0))]
-        env.env(x)
+        RLBase.act!(env.env, x)
     end
 end
 

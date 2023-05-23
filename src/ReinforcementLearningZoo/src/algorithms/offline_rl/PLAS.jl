@@ -99,7 +99,7 @@ function (l::PLASLearner)(env)
     action = dropdims(decode(l.vae.model, s, latent_action), dims=2)
 end
 
-function RLBase.update!(l::PLASLearner, batch::NamedTuple{SARTS})
+function RLCore.update!(l::PLASLearner, batch::NamedTuple{SARTS})
     if l.update_step == 0
         update_vae!(l, batch)
     else

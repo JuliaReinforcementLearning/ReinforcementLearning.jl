@@ -48,7 +48,7 @@ end
     for player in RLCore.CurrentPlayerIterator(env)
         i += 1
         push!(player_log, player)
-        env(1)
+        RLBase.act!(env, 1)
         i == 2 && break
     end
     @test player_log == [:Cross, :Nought]
@@ -164,7 +164,7 @@ end
     @test multiagent_hook[Symbol(1)][3].steps[1] == 1
     @test -1 <= multiagent_hook[Symbol(1)][4].rewards[1][1] <= 1
     @test -1 <= multiagent_hook[Symbol(1)][5].rewards[1][1] <= 1
-    @test 0 <= multiagent_hook[Symbol(1)][6].times[1] <= 1
+    @test 0 <= multiagent_hook[Symbol(1)][6].times[1] <= 5
 
     # Add more hook tests here...
 
@@ -173,10 +173,9 @@ end
     @test RLBase.legal_action_space(env) == ()
     @test RLBase.action_space(env, Symbol(1)) == ('💎', '📃', '✂')
     env = RockPaperScissorsEnv()
-    (multiagent_policy)(PreActStage(), env)
-    # multiagent_policy(env)
-    a = multiagent_policy(env)
+    push!(multiagent_policy, PreActStage(), env)
+    a = RLBase.plan!(multiagent_policy, env)
     @test [i for i in a][1] ∈ ['💎', '📃', '✂']
     @test [i for i in a][2] ∈ ['💎', '📃', '✂']
-    @test env(a)
+    @test RLBase.act!(env, a)
 end

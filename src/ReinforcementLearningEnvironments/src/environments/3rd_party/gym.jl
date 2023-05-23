@@ -52,7 +52,7 @@ function Base.copy(env::GymEnv)
     env
 end
 
-function (env::GymEnv{T})(action) where {T}
+function RLBase.act!(env::GymEnv{T}, action) where {T}
     if env.action_space isa Tuple
         action = Tuple(action)
     end
