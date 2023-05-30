@@ -60,7 +60,7 @@ batch_size).
 function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ=1.0f-8) where {A<:AbstractArray}
     it = zip(eachslice(μ, dims = 3), eachslice(LorU, dims = 3), eachslice(x, dims = 3))
     logp = [mvnormlogpdf(μs, LorUs, xs) for (μs, LorUs, xs) in it]
-    return unsqueeze(Flux.stack(logp; dims=2), dims=1)
+    return unsqueeze(stack(logp; dims=2), dims=1)
 end
 
 #Used for mvnormlogpdf and mvnormkldivergence
