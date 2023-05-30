@@ -143,7 +143,7 @@ If not sampling, returns `μ`
 with dimensions `(action_size x 1 x batch_size)` and `L`, the lower triangular of
 the cholesky decomposition of the covariance matrix, with dimensions
 `(action_size x action_size x batch_size)` The covariance matrices can be
-retrieved with `Σ = Flux.stack(map(l -> l*l', eachslice(L, dims=3)); dims=3)`
+retrieved with `Σ = stack(map(l -> l*l', eachslice(L, dims=3)); dims=3)`
 
 - `rng::AbstractRNG=Random.GLOBAL_RNG`
 - `is_sampling::Bool=false`, whether to sample from the obtained normal
@@ -212,7 +212,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:An
     L = vec_to_tril(cholesky_vec, da)
     z = ignore_derivatives() do
         noise = randn(rng, eltype(μ), da, action_samples, batch_size)
-        Flux.stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)); dims=3)
+        stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)); dims=3)
     end
     logp_π = mvnormlogpdf(μ, L, z)
     return z, logp_π
