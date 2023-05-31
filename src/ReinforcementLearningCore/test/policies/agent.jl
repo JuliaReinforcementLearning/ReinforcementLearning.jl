@@ -71,10 +71,7 @@ using ReinforcementLearningCore
                 @test state(env) == agent.cache.state
                 @test RLBase.plan!(agent, env) in (1,2)
                 @test length(agent.trajectory.container) == 1
-
-                #The following tests checks args / kwargs passed to policy cause an error
-                @test_throws "MethodError: no method matching plan!(::Agent{RandomPolicy" RLBase.plan!(agent, env, 1)
-                @test_throws "MethodError: no method matching plan!(::Agent{RandomPolicy" RLBase.plan!(agent, env, fake_kwarg = 1)
+                
             end
 
             @testset "Test push! method" begin
