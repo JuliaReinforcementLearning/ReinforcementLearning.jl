@@ -19,6 +19,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
 CommonRLInterface = "0.3"
+DelimitedFiles = "1"
 IntervalSets = "0.7"
 MacroTools = "0.5"
 ReinforcementLearningBase = "0.12"
