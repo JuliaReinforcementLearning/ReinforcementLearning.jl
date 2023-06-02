@@ -15,12 +15,11 @@ Neural Fitted Q-iteration as implemented in [1]
 # References
 [1] Riedmiller, M. (2005). Neural Fitted Q Iteration – First Experiences with a Data Efficient Neural Reinforcement Learning Method. In: Gama, J., Camacho, R., Brazdil, P.B., Jorge, A.M., Torgo, L. (eds) Machine Learning: ECML 2005. ECML 2005. Lecture Notes in Computer Science(), vol 3720. Springer, Berlin, Heidelberg. https://doi.org/10.1007/11564096_32
 """
-Base.@kwdef struct NFQ{A<:AbstractApproximator, F, R} <: AbstractLearner
+Base.@kwdef struct NFQ{A<:NeuralNetworkApproximator, F, R} <: AbstractLearner
     approximator::A
     num_iterations::Integer = 20
     epochs::Integer = 100
     loss_function::F = mse
-    sampler::BatchSampler{SARTS} = BatchSampler(32)
     rng::R = Random.GLOBAL_RNG
     γ::Float32 = 0.9f0
 end
@@ -30,11 +29,10 @@ function NFQ(;
     num_iterations::Integer = 20,
     epochs::Integer = 1000,
     loss_function::F = mse,
-    batch_size::Integer=32,
     rng=Random.GLOBAL_RNG,
     γ::Float32 = 0.9f0,
-    ) where {A<:AbstractApproximator, F}
-    NFQ(approximator, num_iterations, epochs, loss_function, BatchSampler{SARTS}(batch_size), rng, γ)
+    ) where {A<:NeuralNetworkApproximator, F}
+    NFQ(approximator, num_iterations, epochs, loss_function, rng, γ)
 end
 
 # Copied from BasicDQN but sure whether it's appropriate
@@ -43,26 +41,29 @@ Flux.functor(x::NFQ) = (Q = x.approximator,), y -> begin
     x
 end
 
-function (learner::NFQ)(env)
+function RLBase.plan!(learner::NFQ, env::AbstractEnv)
     as = action_space(env)
     return vcat(repeat(state(env), inner=(1, length(as))), transpose(as)) |> x -> send_to_device(device(learner.approximator), x) |> learner.approximator |> send_to_host |> vec
 end
 
-function RLBase.update!(learner::NFQ, traj::AbstractTrajectory, ::AbstractEnv, ::PreExperimentStage) end
-function RLBase.update!(learner::NFQ, traj::AbstractTrajectory, ::AbstractEnv, ::PreActStage) end
-function RLBase.update!(learner::NFQ, traj::AbstractTrajectory, ::AbstractEnv, ::PreEpisodeStage) end
-function RLBase.update!(learner::NFQ, traj::AbstractTrajectory, env::AbstractEnv, ::PostEpisodeStage)
-    isempty(traj) && return
-    inds, batch = sample(learner.rng, traj, learner.sampler)
-    update!(learner, batch, env)
+# Avoid optimisation in the middle of an episode
+function RLBase.optimise!(::NFQ, ::NamedTuple) end
+
+# Instead do optimisation at the end of an episode
+function Base.push!(agent::Agent{<:QBasedPolicy{<:NFQ}}, ::PostEpisodeStage, env::AbstractEnv)
+    for batch in agent.trajectory
+        _optimise!(agent.policy.learner, batch, env)
+    end
 end
 
-function RLBase.update!(learner::NFQ, batch::NamedTuple{SARTS}, env::AbstractEnv)
+function _optimise!(learner::NFQ, batch::NamedTuple, env::AbstractEnv)
     Q = learner.approximator
     γ = learner.γ
     loss_func = learner.loss_function
+
     as = action_space(env)
     las = length(as)
+
 
     (s, a, r, ss) = batch[[:state, :action, :reward, :next_state]]
     a = Float32.(a)
