@@ -101,7 +101,9 @@ function _run(policy::AbstractPolicy,
             push!(policy, PostActStage(), env)
             push!(hook, PostActStage(), policy, env)
 
-            optimise!(policy)
+            if is_terminated(env)
+                optimise!(policy)
+            end
 
             if check_stop(stop_condition, policy, env)
                 is_stop = true
