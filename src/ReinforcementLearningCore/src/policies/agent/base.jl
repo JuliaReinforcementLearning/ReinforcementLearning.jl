@@ -63,15 +63,26 @@ end
 # in Oolong.jl with a wrapper
 function RLBase.plan!(agent::Agent{P,T,C}, env::AbstractEnv) where {P,T,C}
     action = RLBase.plan!(agent.policy, env)
-    push!(agent.cache, action)
+    push!(agent.trajectory, agent.cache, action)
+    action
+end
+
+# Multiagent Version
+function RLBase.plan!(agent::Agent{P,T,C}, env::E, p::Symbol) where {P,T,C,E<:AbstractEnv}
+    action = RLBase.plan!(agent.policy, env, p)
+    push!(agent.trajectory, agent.cache, action)
     action
 end
 
 function Base.push!(agent::Agent{P,T,C}, ::PostActStage, env::E) where {P,T,C,E<:AbstractEnv}
-    push!(agent.trajectory, agent.cache, reward(env), is_terminated(env))
+    push!(agent.cache, reward(env), is_terminated(env))
 end
 
 function Base.push!(agent::Agent, ::PostExperimentStage, env::E) where {E<:AbstractEnv}
+    RLBase.reset!(agent.cache)
+end
+
+function Base.push!(agent::Agent, ::PostExperimentStage, env::E, player::Symbol) where {E<:AbstractEnv}
     RLBase.reset!(agent.cache)
 end
 

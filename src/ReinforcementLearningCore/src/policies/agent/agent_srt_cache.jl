@@ -1,16 +1,22 @@
 import Base.push!
 
-mutable struct SA{S,A}
+mutable struct SRT{S,R,T}
     state::Union{S,Nothing}
-    action::Union{A, Nothing}
+    reward::Union{R,Nothing}
+    terminal::Union{T,Nothing}
 
-    function SA()
-        new{Any, Any}(nothing, nothing)
+    function SRT()
+        new{Any, Any, Any}(nothing, nothing, nothing)
     end
 
-    function SA{S,A}() where {S,A}
-        new{S,A}(nothing, nothing)
+    function SRT{S,R,T}() where {S,R,T}
+        new{S,R,T}(nothing, nothing, nothing)
     end
+end
+
+struct SA{S,A}
+    state::S
+    action::A
 end
 
 struct SART{S,A,R,T}
@@ -20,6 +26,12 @@ struct SART{S,A,R,T}
     terminal::T
 end
 
+# This method is used to push a state and action to a trace 
+function Base.push!(ts::Union{CircularArraySARTTraces,ElasticArraySARTTraces}, xs::SA)
+    push!(ts.traces[1].trace, xs.state)
+    push!(ts.traces[2].trace, xs.action)
+end
+
 function Base.push!(ts::Union{CircularArraySARTTraces,ElasticArraySARTTraces}, xs::SART)
     push!(ts.traces[1].trace, xs.state)
     push!(ts.traces[2].trace, xs.action)
@@ -27,23 +39,27 @@ function Base.push!(ts::Union{CircularArraySARTTraces,ElasticArraySARTTraces}, x
     push!(ts.traces[4], xs.terminal)
 end
 
-Base.push!(t::Trajectory, srt::SA) = throw(ArgumentError("action must be supplied when pushing SRT to trajectory. Use `Base.push!(t::Trajectory, srt::SRT; action::A)` to do so"))
+Base.push!(t::Trajectory, srt::SRT) = throw(ArgumentError("action must be supplied when pushing SRT to trajectory. Use `Base.push!(t::Trajectory, srt::SRT; action::A)` to do so"))
 
-function Base.push!(t::Trajectory, sa::SA{S,A}, reward::R, terminal::T) where {S,A,R,T}
-    if !isnothing(sa.state) && !isnothing(sa.action)
+function Base.push!(t::Trajectory, srt::SRT{S,R,T}, action::A) where {S,A,R,T}
+    if isnothing(srt.reward) || isnothing(srt.terminal)
+        push!(t, SA{S,A}(srt.state::S, action))
+    else
         push!(t, SART{S,A,R,T}(srt.state::S, action, srt.reward::R, srt.terminal::T))
     end
 end
 
-function Base.push!(cache::SA{S,A}, state::S) where {S,A}
+function Base.push!(cache::SRT{S,R,T}, state::S) where {S,R,T}
     cache.state = state
 end
 
-function Base.push!(cache::SA{S,A}, action::A) where {S,A}
-    cache.action = action
+function Base.push!(cache::SRT{S,R,T}, reward::R, terminal::T) where {S,R,T}
+    cache.reward = reward
+    cache.terminal = terminal
 end
 
-function RLBase.reset!(cache::SA)
+function RLBase.reset!(cache::SRT)
     cache.state = nothing
-    cache.action = nothing
+    cache.reward = nothing
+    cache.terminal = nothing
 end

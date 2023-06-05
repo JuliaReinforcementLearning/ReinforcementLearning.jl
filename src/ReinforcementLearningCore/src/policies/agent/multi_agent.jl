@@ -188,22 +188,11 @@ function Base.push!(multiagent::MultiAgentPolicy, ::PreActStage, env::E) where {
     end
 end
 
-# Multiagent Version
-function RLBase.plan!(agent::Agent{P,T,C}, env::E, p::Symbol) where {P,T,C,E<:AbstractEnv}
-    action = RLBase.plan!(agent.policy, env, p)
-    push!(agent.cache, action)
-    action
-end
-
 # Like in the single-agent case, push! at the PostActStage() calls push! on each player with the reward and termination status of the environment
 function Base.push!(multiagent::MultiAgentPolicy, ::PostActStage, env::E) where {E<:AbstractEnv}
     for player in players(env)
-        push!(agent.trajectory, multiagent[player].cache, reward(env, player), is_terminated(env))
+        push!(multiagent[player].cache, reward(env, player), is_terminated(env))
     end
-end
-
-function Base.push!(agent::Agent, ::PostExperimentStage, env::E, player::Symbol) where {E<:AbstractEnv}
-    RLBase.reset!(agent.cache)
 end
 
 function Base.push!(hook::MultiAgentHook, stage::S, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv,S<:AbstractStage}
