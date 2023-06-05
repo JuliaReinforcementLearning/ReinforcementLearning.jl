@@ -95,3 +95,5 @@ function RLBase.prob(
         0.0
     end
 end
+
+RLBase.push!(::RandomPolicy, ::Any) = nothing

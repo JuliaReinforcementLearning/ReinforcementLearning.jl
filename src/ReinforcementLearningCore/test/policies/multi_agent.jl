@@ -179,3 +179,18 @@ end
     @test [i for i in a][2] ∈ ['💎', '📃', '✂']
     @test RLBase.act!(env, a)
 end
+
+@testset "Sequential Environments correctly ended by termination signal"
+    rng = StableRNGs.StableRNG(123)
+    e = env = TicTacToeEnv()
+    m = MultiAgentPolicy(NamedTuple((player => RandomPolicy(;rng=rng) for player in players(e))))
+    hooks = MultiAgentHook(NamedTuple((p => EmptyHook() for p ∈ players(e))))
+
+    let err = nothing
+        try
+            x = run(m, e, StopAfterEpisode(10), hooks)
+        catch err
+        end
+        @test !(err isa Exception)
+    end
+end

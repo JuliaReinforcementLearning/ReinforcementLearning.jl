@@ -112,7 +112,7 @@ function Base.run(
         push!(multiagent_policy, PreEpisodeStage(), env)
         push!(multiagent_hook, PreEpisodeStage(), multiagent_policy, env)
 
-        while !reset_condition(multiagent_policy, env) # one episode
+        while !(reset_condition(multiagent_policy, env) || is_stop) # one episode
             for player in CurrentPlayerIterator(env)
                 policy = multiagent_policy[player] # Select appropriate policy
                 hook = multiagent_hook[player] # Select appropriate hook
@@ -132,6 +132,10 @@ function Base.run(
                     push!(multiagent_policy, PreActStage(), env)
                     push!(multiagent_hook, PreActStage(), policy, env)
                     RLBase.plan!(multiagent_policy, env)  # let the policy see the last observation
+                    break
+                end
+
+                if reset_condition(multiagent_policy, env)
                     break
                 end
             end
