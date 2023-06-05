@@ -98,10 +98,10 @@ function _run(policy::AbstractPolicy,
             action = RLBase.plan!(policy, env)
             act!(env, action)
 
-            optimise!(policy)
-
             push!(policy, PostActStage(), env)
             push!(hook, PostActStage(), policy, env)
+
+            optimise!(policy)
 
             if check_stop(stop_condition, policy, env)
                 is_stop = true
