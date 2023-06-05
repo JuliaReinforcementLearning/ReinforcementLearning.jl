@@ -221,8 +221,8 @@ function RLBase.plan!(multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEn
     return (RLBase.plan!(multiagent[player], env, player) for player in players(env))
 end
 
-function RLBase.optimise!(multiagent::MultiAgentPolicy)
+function RLBase.optimise!(multiagent::MultiAgentPolicy, stage::AbstractStage)
     for policy in multiagent
-        RLCore.optimise!(policy)
+        RLCore.optimise!(policy, stage)
     end
 end

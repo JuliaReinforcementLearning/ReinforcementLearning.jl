@@ -39,16 +39,16 @@ end
 
 Agent(;policy, trajectory, cache = SRT()) = Agent(policy, trajectory, cache)
 
-RLBase.optimise!(agent::Agent) = optimise!(TrajectoryStyle(agent.trajectory), agent)
-RLBase.optimise!(::SyncTrajectoryStyle, agent::Agent) =
-    optimise!(agent.policy, agent.trajectory)
+RLBase.optimise!(agent::Agent, stage::AbstractStage) = optimise!(TrajectoryStyle(agent.trajectory), agent, stage)
+RLBase.optimise!(::SyncTrajectoryStyle, agent::Agent, stage::AbstractStage) =
+    optimise!(agent.policy, stage, agent.trajectory)
 
 # already spawn a task to optimise inner policy when initializing the agent
-RLBase.optimise!(::AsyncTrajectoryStyle, agent::Agent) = nothing
+RLBase.optimise!(::AsyncTrajectoryStyle, agent::Agent, stage::AbstractStage) = nothing
 
-function RLBase.optimise!(policy::AbstractPolicy, trajectory::Trajectory)
+function RLBase.optimise!(policy::AbstractPolicy, stage::AbstractStage, trajectory::Trajectory)
     for batch in trajectory
-        optimise!(policy, batch)
+        optimise!(policy, stage, batch)
     end
 end
 

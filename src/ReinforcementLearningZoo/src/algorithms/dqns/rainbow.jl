@@ -37,7 +37,7 @@ function RLBase.plan!(learner::RainbowLearner, env::AbstractEnv)
     s |> learner |> vec |> send_to_host
 end
 
-function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
+function RLBase.optimise!(learner::RainbowLearner, ::PostActStage, batch::NamedTuple)
     A = learner.approximator
     Q = A.model.source
     Qₜ = A.model.target
@@ -139,9 +139,9 @@ function project_distribution(supports, weights, target_support, delta_z, vmin, 
     reshape(sum(projection, dims=1), n_atoms, batch_size)
 end
 
-function RLBase.optimise!(policy::QBasedPolicy{<:RainbowLearner}, trajectory::Trajectory)
+function RLBase.optimise!(policy::QBasedPolicy{<:RainbowLearner}, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory
-        res = optimise!(policy, batch) |> send_to_host
+        res = optimise!(policy, PostActStage(), batch) |> send_to_host
         if !isnothing(res)
             k, p = res
             trajectory[:priority, k] = p

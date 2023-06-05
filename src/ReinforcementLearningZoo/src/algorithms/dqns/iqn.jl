@@ -69,7 +69,7 @@ function RLCore.forward(L::IQNLearner, env::E) where {E<:AbstractEnv}
     q
 end
 
-function RLBase.optimise!(learner::IQNLearner, batch::NamedTuple)
+function RLBase.optimise!(learner::IQNLearner, ::PostActStage, batch::NamedTuple)
     A = learner.approximator
     Z = A.model.source
     Zₜ = A.model.target

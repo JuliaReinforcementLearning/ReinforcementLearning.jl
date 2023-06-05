@@ -24,6 +24,7 @@ RLCore.forward(L::PrioritizedDQNLearner, s::AbstractArray) = RLCore.forward(L.ap
 
 function RLBase.optimise!(
     learner::PrioritizedDQNLearner,
+    ::PostActStage,
     batch::Union{
         NamedTuple{(:key, :priority, SS′ART...)},
         NamedTuple{(:key, :priority, SS′L′ART...)}
@@ -71,9 +72,9 @@ function RLBase.optimise!(
     k => p′
 end
 
-function RLBase.optimise!(policy::QBasedPolicy{<:PrioritizedDQNLearner}, trajectory::Trajectory)
+function RLBase.optimise!(policy::QBasedPolicy{<:PrioritizedDQNLearner}, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory
-        k, p = optimise!(policy, batch) |> send_to_host
+        k, p = optimise!(policy, PostActStage(), batch) |> send_to_host
         trajectory[:priority, k] = p
     end
 end

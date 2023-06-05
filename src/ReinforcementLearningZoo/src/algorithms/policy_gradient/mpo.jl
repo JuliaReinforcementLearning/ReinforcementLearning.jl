@@ -93,6 +93,7 @@ end
 
 function RLBase.optimise!(
     p::MPOPolicy,
+    ::PostActStage, 
     batches::NamedTuple{
         (:actor, :critic), 
         <: Tuple{

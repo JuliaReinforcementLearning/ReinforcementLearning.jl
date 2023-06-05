@@ -514,7 +514,7 @@ Flux.trainable(model::TwinNetwork) = (model.source,)
 
 (model::TwinNetwork)(args...) = model.source(args...)
 
-function RLBase.optimise!(A::Approximator{<:TwinNetwork}, gs)
+function RLBase.optimise!(A::Approximator{<:TwinNetwork}, ::PostActStage, gs)
     Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
     M = A.model
     M.n_optimise += 1

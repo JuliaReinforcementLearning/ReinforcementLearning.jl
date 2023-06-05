@@ -19,9 +19,7 @@ struct PostActStage <: AbstractStage end
 Base.push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv) = nothing
 Base.push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv, ::Symbol) = nothing
 
-RLBase.optimise!(::AbstractPolicy) = nothing
-
 RLBase.optimise!(policy::AbstractPolicy, ::PreEpisodeStage) = nothing
-RLBase.optimise!(policy::AbstractPolicy, ::PostEpisodeStage) = RLBase.optimise!(policy)
+RLBase.optimise!(policy::AbstractPolicy, ::PostEpisodeStage) = nothing
 RLBase.optimise!(policy::AbstractPolicy, ::PreActStage) = nothing
 RLBase.optimise!(policy::AbstractPolicy, ::PostActStage) = nothing
