@@ -114,7 +114,7 @@ function _run(policy::AbstractPolicy,
 
         push!(policy, PostEpisodeStage(), env)  # let the policy see the last observation
         push!(hook, PostEpisodeStage(), policy, env)
-        optimise!(policy, PostActStage())
+        optimise!(policy, PostEpisodeStage())
     end
     push!(policy, PostExperimentStage(), env)
     push!(hook, PostExperimentStage(), policy, env)
