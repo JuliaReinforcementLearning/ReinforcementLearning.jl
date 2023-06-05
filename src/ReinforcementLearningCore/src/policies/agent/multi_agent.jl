@@ -110,6 +110,7 @@ function Base.run(
     while !is_stop
         reset!(env)
         push!(multiagent_policy, PreEpisodeStage(), env)
+        optimise!(multiagent_policy, PreEpisodeStage())
         push!(multiagent_hook, PreEpisodeStage(), multiagent_policy, env)
 
         while !reset_condition(multiagent_policy, env) # one episode
@@ -117,19 +118,22 @@ function Base.run(
                 policy = multiagent_policy[player] # Select appropriate policy
                 hook = multiagent_hook[player] # Select appropriate hook
                 push!(policy, PreActStage(), env)
+                optimise!(policy, PreActStage())
                 push!(hook, PreActStage(), policy, env)
                 
                 action = RLBase.plan!(policy, env)
                 act!(env, action)
 
-                optimise!(policy)
+                
 
                 push!(policy, PostActStage(), env)
+                optimise!(policy, PostActStage())
                 push!(hook, PostActStage(), policy, env)
 
                 if check_stop(stop_condition, policy, env)
                     is_stop = true
                     push!(multiagent_policy, PreActStage(), env)
+                    optimise!(multiagent_policy, PreActStage())
                     push!(multiagent_hook, PreActStage(), policy, env)
                     RLBase.plan!(multiagent_policy, env)  # let the policy see the last observation
                     break
@@ -138,6 +142,7 @@ function Base.run(
         end # end of an episode
 
         push!(multiagent_policy, PostEpisodeStage(), env)  # let the policy see the last observation
+        optimise!(multiagent_policy, PostEpisodeStage())
         push!(multiagent_hook, PostEpisodeStage(), multiagent_policy, env)
     end
     push!(multiagent_policy, PostExperimentStage(), env)
@@ -221,7 +226,7 @@ function RLBase.plan!(multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEn
     return (RLBase.plan!(multiagent[player], env, player) for player in players(env))
 end
 
-function RLBase.optimise!(multiagent::MultiAgentPolicy, stage::AbstractStage)
+function RLBase.optimise!(multiagent::MultiAgentPolicy, stage::S) where {S<:Union{PostActStage, PostEpisodeStage, PreActStage, PreEpisodeStage}}
     for policy in multiagent
         RLCore.optimise!(policy, stage)
     end

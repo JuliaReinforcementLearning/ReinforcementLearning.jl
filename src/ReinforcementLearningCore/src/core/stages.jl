@@ -19,7 +19,6 @@ struct PostActStage <: AbstractStage end
 Base.push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv) = nothing
 Base.push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv, ::Symbol) = nothing
 
-RLBase.optimise!(policy::AbstractPolicy, ::PreEpisodeStage) = nothing
-RLBase.optimise!(policy::AbstractPolicy, ::PostEpisodeStage) = nothing
-RLBase.optimise!(policy::AbstractPolicy, ::PreActStage) = nothing
-RLBase.optimise!(policy::AbstractPolicy, ::PostActStage) = nothing
+RLBase.optimise!(policy::AbstractPolicy, ::S) where {S<:Union{PreEpisodeStage,PostEpisodeStage,PreActStage,PostActStage}} = nothing
+
+RLBase.optimise!(policy::AbstractPolicy, ::S, batch) where {S<:Union{PreEpisodeStage,PostEpisodeStage,PreActStage,PostActStage}} = nothing
