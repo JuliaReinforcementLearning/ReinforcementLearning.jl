@@ -20,3 +20,7 @@ Base.push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv) = nothing
 Base.push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv, ::Symbol) = nothing
 
 RLBase.optimise!(::AbstractPolicy) = nothing
+
+RLBase.optimise!(policy::AbstractPolicy, ::PostEpisodeStage) = RLBase.optimise!(policy)
+
+RLBase.optimise!(policy, ::PostActStage) = nothing
