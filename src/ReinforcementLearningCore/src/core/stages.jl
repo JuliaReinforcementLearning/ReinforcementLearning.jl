@@ -23,4 +23,7 @@ RLBase.optimise!(::AbstractPolicy) = nothing
 
 RLBase.optimise!(policy::AbstractPolicy, ::PostEpisodeStage) = RLBase.optimise!(policy)
 
+RLBase.optimise!(policy, ::PreEpisodeStage) = nothing
+RLBase.optimise!(policy, ::PostEpisodeStage) = nothing
+RLBase.optimise!(policy, ::PreActStage) = nothing
 RLBase.optimise!(policy, ::PostActStage) = nothing
