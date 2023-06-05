@@ -180,10 +180,10 @@ end
     @test RLBase.act!(env, a)
 end
 
-@testset "Sequential Environments correctly ended by termination signal"
-    rng = StableRNGs.StableRNG(123)
-    e = env = TicTacToeEnv()
-    m = MultiAgentPolicy(NamedTuple((player => RandomPolicy(;rng=rng) for player in players(e))))
+@testset "Sequential Environments correctly ended by termination signal" begin
+    #rng = StableRNGs.StableRNG(123)
+    e = TicTacToeEnv();
+    m = MultiAgentPolicy(NamedTuple((player => RandomPolicy() for player in players(e))))
     hooks = MultiAgentHook(NamedTuple((p => EmptyHook() for p ∈ players(e))))
 
     let err = nothing
