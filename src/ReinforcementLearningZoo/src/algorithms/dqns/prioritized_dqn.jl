@@ -68,7 +68,7 @@ function RLBase.optimise!(
         loss
     end
 
-    optimise!(A, gs)
+    optimise!(A, PostActStage(), gs)
     k => p′
 end
 
