@@ -186,14 +186,14 @@ function Base.push!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:Ab
 end
 
 # Like in the single-agent case, push! at the PreActStage() calls push! on each player with the state of the environment
-function Base.push!(multiagent::MultiAgentPolicy, ::PreActStage, env::E) where {E<:AbstractEnv}
+function Base.push!(multiagent::MultiAgentPolicy{names, T}, ::PreActStage, env::E) where {E<:AbstractEnv, names, T <: Agent}
     for player in players(env)
         push!(multiagent[player], state(env, player))
     end
 end
 
 # Like in the single-agent case, push! at the PostActStage() calls push! on each player with the reward and termination status of the environment
-function Base.push!(multiagent::MultiAgentPolicy, ::PostActStage, env::E) where {E<:AbstractEnv}
+function Base.push!(multiagent::MultiAgentPolicy{names, T}, ::PostActStage, env::E) where {E<:AbstractEnv, names, T <: Agent}
     for player in players(env)
         push!(multiagent[player].cache, reward(env, player), is_terminated(env))
     end
