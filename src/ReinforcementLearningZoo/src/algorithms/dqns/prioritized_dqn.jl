@@ -24,7 +24,6 @@ RLCore.forward(L::PrioritizedDQNLearner, s::AbstractArray) = RLCore.forward(L.ap
 
 function RLBase.optimise!(
     learner::PrioritizedDQNLearner,
-    ::PostActStage,
     batch::Union{
         NamedTuple{(:key, :priority, SS′ART...)},
         NamedTuple{(:key, :priority, SS′L′ART...)}
