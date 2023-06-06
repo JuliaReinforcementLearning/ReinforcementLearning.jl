@@ -18,7 +18,7 @@ RLCore.forward(L::DQNLearner, s::A) where {A<:AbstractArray}  = RLCore.forward(L
 
 @functor DQNLearner (approximator,)
 
-function RLBase.optimise!(learner::DQNLearner, ::PostActStage, batch::Union{NamedTuple{SS′ART},NamedTuple{SS′L′ART}})
+function RLBase.optimise!(learner::DQNLearner, batch::Union{NamedTuple{SS′ART},NamedTuple{SS′L′ART}})
     A = learner.approximator
     Q = A.model.source
     Qₜ = A.model.target

@@ -37,7 +37,7 @@ function RLBase.plan!(learner::RainbowLearner, env::AbstractEnv)
     s |> learner |> vec |> send_to_host
 end
 
-function RLBase.optimise!(learner::RainbowLearner, ::PostActStage, batch::NamedTuple)
+function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
     A = learner.approximator
     Q = A.model.source
     Qₜ = A.model.target
