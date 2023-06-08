@@ -112,7 +112,7 @@ function Base.run(
         push!(multiagent_policy, PreEpisodeStage(), env)
         push!(multiagent_hook, PreEpisodeStage(), multiagent_policy, env)
 
-        while !reset_condition(multiagent_policy, env) # one episode
+        while !(reset_condition(multiagent_policy, env) || is_stop) # one episode
             for player in CurrentPlayerIterator(env)
                 policy = multiagent_policy[player] # Select appropriate policy
                 hook = multiagent_hook[player] # Select appropriate hook
@@ -132,6 +132,10 @@ function Base.run(
                     push!(multiagent_policy, PreActStage(), env)
                     push!(multiagent_hook, PreActStage(), policy, env)
                     RLBase.plan!(multiagent_policy, env)  # let the policy see the last observation
+                    break
+                end
+
+                if reset_condition(multiagent_policy, env)
                     break
                 end
             end
@@ -182,14 +186,14 @@ function Base.push!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:Ab
 end
 
 # Like in the single-agent case, push! at the PreActStage() calls push! on each player with the state of the environment
-function Base.push!(multiagent::MultiAgentPolicy, ::PreActStage, env::E) where {E<:AbstractEnv}
+function Base.push!(multiagent::MultiAgentPolicy{names, T}, ::PreActStage, env::E) where {E<:AbstractEnv, names, T <: Agent}
     for player in players(env)
         push!(multiagent[player], state(env, player))
     end
 end
 
 # Like in the single-agent case, push! at the PostActStage() calls push! on each player with the reward and termination status of the environment
-function Base.push!(multiagent::MultiAgentPolicy, ::PostActStage, env::E) where {E<:AbstractEnv}
+function Base.push!(multiagent::MultiAgentPolicy{names, T}, ::PostActStage, env::E) where {E<:AbstractEnv, names, T <: Agent}
     for player in players(env)
         push!(multiagent[player].cache, reward(env, player), is_terminated(env))
     end
