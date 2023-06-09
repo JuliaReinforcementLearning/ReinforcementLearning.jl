@@ -39,16 +39,16 @@ function Base.push!(p::Agent{<:TRPO}, ::PostEpisodeStage, env::AbstractEnv)
     empty!(p.trajectory.container)
 end
 
-RLBase.optimise!(::Agent{<:TRPO}) = nothing
+RLBase.optimise!(::Agent{<:TRPO}, ::PostActStage) = nothing
 
-function RLBase.optimise!(π::TRPO, episode::Episode)
+function RLBase.optimise!(π::TRPO, ::PostActStage, episode::Episode)
     gain = discount_rewards(episode[:reward][:], π.γ)
     for inds in Iterators.partition(shuffle(π.rng, 1:length(episode)), π.batch_size)
         optimise!(π, (state=episode[:state][inds], action=episode[:action][inds], gain=gain[inds]))
     end
 end
 
-function RLBase.optimise!(p::TRPO, batch::NamedTuple{(:state, :action, :gain)})
+function RLBase.optimise!(p::TRPO, ::PostActStage, batch::NamedTuple{(:state, :action, :gain)})
     A = p.approximator
     B = p.baseline
     s, a, g = map(Array, batch) # !!! FIXME
