@@ -89,7 +89,7 @@ function _run(policy::AbstractPolicy,
     while !is_stop
         reset!(env)
         push!(policy, PreEpisodeStage(), env)
-        optimise!(policy, PreActStage())
+        optimise!(policy, PreEpisodeStage())
         push!(hook, PreEpisodeStage(), policy, env)
 
 
