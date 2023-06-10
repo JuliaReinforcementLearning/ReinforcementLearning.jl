@@ -23,7 +23,7 @@ Two kinds of epsilon-decreasing strategy are implemented here (`linear` and `exp
 - `decay_steps::Int=0`: the number of steps for epsilon to decay from `ϵ_init` to `ϵ_stable`.
 - `ϵ_stable::Float64`: the epsilon after `warmup_steps + decay_steps`.
 - `is_break_tie=false`: randomly select an action of the same maximum values if set to `true`.
-- `rng=Random.GLOBAL_RNG`: set the internal RNG.
+- `rng=Random.default_rng()`: set the internal RNG.
 
 # Example
 
@@ -52,7 +52,7 @@ function EpsilonGreedyExplorer(;
     decay_steps=0,
     step=1,
     is_break_tie=false,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 )
     EpsilonGreedyExplorer{kind,is_break_tie,typeof(rng)}(
         ϵ_stable,

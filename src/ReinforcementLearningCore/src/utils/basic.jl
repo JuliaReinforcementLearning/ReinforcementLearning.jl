@@ -46,7 +46,7 @@ function orthogonal(rng::AbstractRNG, d1, rest_dims...)
     reshape(m, d1, rest_dims...)
 end
 
-orthogonal(dims...) = orthogonal(Random.GLOBAL_RNG, dims...)
+orthogonal(dims...) = orthogonal(Random.default_rng(), dims...)
 orthogonal(rng::AbstractRNG) = (dims...) -> orthogonal(rng, dims...)
 
 #####

@@ -18,7 +18,7 @@ end
 - `c` is used to control the degree of exploration.
 - `seed`, set the seed of inner RNG.
 """
-UCBExplorer(na; c = 2.0, ϵ = 1e-10, step = 1, rng = Random.GLOBAL_RNG) =
+UCBExplorer(na; c = 2.0, ϵ = 1e-10, step = 1, rng = Random.default_rng()) =
     UCBExplorer(c, fill(ϵ, na), 1, rng)
 
 function RLBase.plan!(p::UCBExplorer, values::AbstractArray)

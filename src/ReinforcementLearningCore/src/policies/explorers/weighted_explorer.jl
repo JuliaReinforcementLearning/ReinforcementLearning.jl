@@ -4,7 +4,7 @@ using Random: AbstractRNG
 using StatsBase: sample, Weights
 
 """
-    WeightedExplorer(;is_normalized::Bool, rng=Random.GLOBAL_RNG)
+    WeightedExplorer(;is_normalized::Bool, rng=Random.default_rng())
 
 `is_normalized` is used to indicate if the fed action values
 are already normalized to have a sum of `1.0`.
@@ -18,7 +18,7 @@ struct WeightedExplorer{T,R<:AbstractRNG} <: AbstractExplorer
     rng::R
 end
 
-function WeightedExplorer(; is_normalized::Bool = false, rng = Random.GLOBAL_RNG)
+function WeightedExplorer(; is_normalized::Bool = false, rng = Random.default_rng())
     WeightedExplorer{is_normalized,typeof(rng)}(rng)
 end
 

@@ -12,7 +12,7 @@ mutable struct MontyHallEnv <: AbstractEnv
 end
 
 """
-    MontyHallEnv(;rng=Random.GLOBAL_RNG)
+    MontyHallEnv(;rng=Random.default_rng())
 
 Quoted from [wiki](https://en.wikipedia.org/wiki/Monty_Hall_problem):
 
@@ -24,7 +24,7 @@ Quoted from [wiki](https://en.wikipedia.org/wiki/Monty_Hall_problem):
 
 Here we'll introduce the first environment which is of [`FULL_ACTION_SET`](@ref).
 """
-function MontyHallEnv(; rng=Random.GLOBAL_RNG)
+function MontyHallEnv(; rng=Random.default_rng())
     doors = fill(:goat, 3)
     doors[rand(rng, 1:3)] = :car
     MontyHallEnv(doors, rng, nothing, nothing, nothing)

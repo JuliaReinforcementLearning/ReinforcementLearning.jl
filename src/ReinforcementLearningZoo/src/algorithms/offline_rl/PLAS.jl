@@ -49,7 +49,7 @@ can be implemented using a `VAE` in a `NeuralNetworkApproximator`.
 - `pretrain_step::Int = 1000`, the number of pre-training rounds.
 - `update_freq::Int = 50`, the frequency of updating the `approximator`.
 - `update_step::Int = 0`
-- `rng = Random.GLOBAL_RNG`
+- `rng = Random.default_rng()`
 """
 function PLASLearner(;
     policy,
@@ -66,7 +66,7 @@ function PLASLearner(;
     pretrain_step=10000,
     update_freq=50,
     update_step=0,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 )
     copyto!(policy, target_policy)  # force sync
     copyto!(qnetwork1, target_qnetwork1)  # force sync

@@ -49,7 +49,7 @@ GaussianNetwork(pre, μ, σ) = GaussianNetwork(pre, μ, σ, 0.0f0, Inf32)
 """
 This function is compatible with a multidimensional action space.
 
-- `rng::AbstractRNG=Random.GLOBAL_RNG`
+- `rng::AbstractRNG=Random.default_rng()`
 - `is_sampling::Bool=false`, whether to sample from the obtained normal distribution. 
 - `is_return_log_prob::Bool=false`, whether to calculate the conditional probability of getting actions in the given state.
 """
@@ -92,11 +92,11 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s::AbstractArray{<:Any, 3}, 
 end
 
 function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
-    model(Random.GLOBAL_RNG, state; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
+    model(Random.default_rng(), state; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
 end
 
 function (model::GaussianNetwork)(state, action_samples::Int)
-    model(Random.GLOBAL_RNG, state, action_samples)
+    model(Random.default_rng(), state, action_samples)
 end
 
 function (model::GaussianNetwork)(state, action)
@@ -145,7 +145,7 @@ the cholesky decomposition of the covariance matrix, with dimensions
 `(action_size x action_size x batch_size)` The covariance matrices can be
 retrieved with `Σ = stack(map(l -> l*l', eachslice(L, dims=3)); dims=3)`
 
-- `rng::AbstractRNG=Random.GLOBAL_RNG`
+- `rng::AbstractRNG=Random.default_rng()`
 - `is_sampling::Bool=false`, whether to sample from the obtained normal
   distribution. 
 - `is_return_log_prob::Bool=false`, whether to calculate the conditional
@@ -219,7 +219,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:An
 end
 
 function (model::CovGaussianNetwork)(state::AbstractArray, args...; kwargs...)
-    model(Random.GLOBAL_RNG, state, args...; kwargs...)
+    model(Random.default_rng(), state, args...; kwargs...)
 end
 
 """
@@ -283,7 +283,7 @@ an Array of `Bool` with the same size as `state` expect for the first dimension 
 have the length of the action vector. Actions mapped to `false` by mask have a logit equal to 
 `-Inf` and/or a zero-probability of being sampled.
 
-- `rng::AbstractRNG=Random.GLOBAL_RNG`
+- `rng::AbstractRNG=Random.default_rng()`
 - `is_sampling::Bool=false`, whether to sample from the obtained normal categorical distribution (returns a Flux.OneHotArray `z`). 
 - `is_return_log_prob::Bool=false`, whether to return the *logits* (i.e. the unnormalized logprobabilities) of getting the sampled actions in the given state.
 Only applies if `is_sampling` is true and will return `z, logits`.
@@ -320,7 +320,7 @@ function sample_categorical(rng, logits::AbstractArray)
 end
 
 function (model::CategoricalNetwork)(state::AbstractArray, args...; kwargs...)
-    model(Random.GLOBAL_RNG, state, args...; kwargs...)
+    model(Random.default_rng(), state, args...; kwargs...)
 end
 
 """
@@ -467,7 +467,7 @@ function (model::VAE)(rng::AbstractRNG, state, action)
 end
 
 function (model::VAE)(state, action)
-    return model(Random.GLOBAL_RNG, state, action)
+    return model(Random.default_rng(), state, action)
 end
 
 function decode(rng::AbstractRNG, model::VAE, state, z=nothing; is_normalize::Bool=true)
@@ -482,7 +482,7 @@ function decode(rng::AbstractRNG, model::VAE, state, z=nothing; is_normalize::Bo
 end
 
 function decode(model::VAE, state, z=nothing; is_normalize::Bool=true)
-    decode(Random.GLOBAL_RNG, model, state, z; is_normalize)
+    decode(Random.default_rng(), model, state, z; is_normalize)
 end
 
 function vae_loss(model::VAE, state, action)

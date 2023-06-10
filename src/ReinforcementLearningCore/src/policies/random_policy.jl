@@ -5,7 +5,7 @@ using Distributions: Categorical
 using FillArrays: Fill
 
 """
-    RandomPolicy(action_space=nothing; rng=Random.GLOBAL_RNG)
+    RandomPolicy(action_space=nothing; rng=Random.default_rng())
 
 If `action_space` is `nothing`, then it will use the `legal_action_space` at
 runtime to randomly select an action. Otherwise, a random element within
@@ -20,7 +20,7 @@ struct RandomPolicy{S,RNG<:AbstractRNG} <: AbstractPolicy
     rng::RNG
 end
 
-RandomPolicy(s = nothing; rng = Random.GLOBAL_RNG) = RandomPolicy(s, rng)
+RandomPolicy(s = nothing; rng = Random.default_rng()) = RandomPolicy(s, rng)
 
 RLBase.optimise!(::RandomPolicy, x::NamedTuple) = nothing
 

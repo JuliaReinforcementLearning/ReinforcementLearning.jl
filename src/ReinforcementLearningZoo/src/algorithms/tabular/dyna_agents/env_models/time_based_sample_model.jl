@@ -12,7 +12,7 @@ Base.@kwdef mutable struct TimeBasedSamplingModel{R} <: AbstractEnvironmentModel
     κ::Float64 = 1e-4
     t::Int = 0
     last_visit::Dict{Tuple{Any,Any},Int} = Dict{Tuple{Any,Any},Int}()
-    rng::R = Random.GLOBAL_RNG
+    rng::R = Random.default_rng()
 end
 
 function RLCore.update!(

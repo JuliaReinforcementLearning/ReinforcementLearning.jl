@@ -23,7 +23,7 @@ RLBase.prob(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv) = prob(p.behavior_
 RLBase.prob(p::ExternalSamplingMCCFRPolicy, env::AbstractEnv, action) =
     prob(p.behavior_policy, env, action)
 
-function ExternalSamplingMCCFRPolicy(; state_type = String, rng = Random.GLOBAL_RNG)
+function ExternalSamplingMCCFRPolicy(; state_type = String, rng = Random.default_rng())
     ExternalSamplingMCCFRPolicy(
         Dict{state_type,InfoStateNode}(),
         TabularRandomPolicy(; rng = rng, table = Dict{state_type,Vector{Float64}}()),

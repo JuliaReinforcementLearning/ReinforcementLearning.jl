@@ -26,7 +26,7 @@ that performs policy iteration based on a learned state-value function.
 - `ϵ_ασ = 0.00005f0`: Lagrange multiplier α_σ (continuous) hyperparameter
 - `n_epochs = 8`: update policy for n epochs
 - `dist = Categorical`: `Categorical` - discrete, `Normal` - continuous
-- `rng = Random.GLOBAL_RNG`
+- `rng = Random.default_rng()`
 
 By default, `dist` is set to `Categorical`, which means it will only work
 on environments of discrete actions. To work with environments of continuous
@@ -63,7 +63,7 @@ function VMPOPolicy(;
     ϵ_ασ=0.00005f0,
     n_epochs=8,
     dist=Categorical,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 )
     VMPOPolicy{typeof(approximator),dist,typeof(rng)}(
         approximator,

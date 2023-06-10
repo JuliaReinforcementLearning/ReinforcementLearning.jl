@@ -179,7 +179,7 @@ function RLCore.Experiment(
     save_dir = nothing,
     seed = 123,
 )
-    rng = Random.GLOBAL_RNG
+    rng = Random.default_rng()
     Random.seed!(rng, seed)
 
     if isnothing(save_dir)
