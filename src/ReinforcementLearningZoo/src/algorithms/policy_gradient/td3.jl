@@ -62,7 +62,7 @@ end
 - `act_limit = 1.0`, # noise added when outputing action
 - `act_noise = 0.1`, # noise added when outputing action
 - `update_step = 0`,
-- `rng = Random.GLOBAL_RNG`,
+- `rng = Random.default_rng()`,
 """
 function TD3Policy(;
     behavior_actor,
@@ -82,7 +82,7 @@ function TD3Policy(;
     act_limit=1.0,
     act_noise=0.1,
     update_step=0,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 )
     copyto!(behavior_actor, target_actor)  # force sync
     copyto!(behavior_critic, target_critic)  # force sync

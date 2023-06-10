@@ -43,7 +43,7 @@ end
     αΣ_scale = 100f0, #gradient descent learning rate for the lagrange penalty for the covariance decoupling (not used with categorical policy).
     τ = 1f-3, #polyak-averaging update parameter for the target Q-networks.
     max_grad_norm = 5f-1, #maximum gradient norm.
-    rng = Random.GLOBAL_RNG
+    rng = Random.default_rng()
     )
 
 Instantiate an MPO learner. The actor can be of type `GaussianNetwork`, `CovGaussianNetwork`,
@@ -71,7 +71,7 @@ with each policy network type.
 
 `p::MPOPolicy` logs several values during training. You can access them using `p.logs[::Symbol]`.
 """
-function MPOPolicy(;actor::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 1f-2, ϵΣ = 1f-4, α_scale = 1f0, αΣ_scale = 100f0, τ = 1f-3, max_grad_norm = 5f-1, rng = Random.GLOBAL_RNG) where Q <: Approximator
+function MPOPolicy(;actor::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 1f-2, ϵΣ = 1f-4, α_scale = 1f0, αΣ_scale = 100f0, τ = 1f-3, max_grad_norm = 5f-1, rng = Random.default_rng()) where Q <: Approximator
     @assert device(actor) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(actor) == device(rng) "The specified rng does not generate on the same device as the actor. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :actor_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :α, :αΣ, :kl))

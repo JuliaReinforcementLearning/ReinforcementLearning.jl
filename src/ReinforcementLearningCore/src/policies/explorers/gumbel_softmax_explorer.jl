@@ -7,7 +7,7 @@ struct GumbelSoftmaxExplorer <: AbstractExplorer
     rng::AbstractRNG
 end
 
-GumbelSoftmaxExplorer(; rng = Random.GLOBAL_RNG) = GumbelSoftmaxExplorer(rng)
+GumbelSoftmaxExplorer(; rng = Random.default_rng()) = GumbelSoftmaxExplorer(rng)
 
 function RLBase.plan!(p::GumbelSoftmaxExplorer, v::AbstractVector{T}) where {T}
     logits = logsoftmax(v)

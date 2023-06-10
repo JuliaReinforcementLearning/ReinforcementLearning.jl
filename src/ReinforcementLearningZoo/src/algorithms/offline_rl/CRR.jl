@@ -20,7 +20,7 @@ See paper: [Critic Regularized Regression](https://arxiv.org/abs/2006.15134).
 - `update_step::Int=0`
 - `target_update_freq::Int`: the frequency of syncing `target_approximator`.
 - `continuous::Bool`: type of action space.
-- `rng = Random.GLOBAL_RNG`
+- `rng = Random.default_rng()`
 """
 mutable struct CRRLearner{Aq<:ActorCritic,At<:ActorCritic,R<:AbstractRNG} <: Any
     approximator::Aq
@@ -56,7 +56,7 @@ function CRRLearner(;
     update_step::Int=0,
     target_update_freq::Int=100,
     continuous::Bool,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 ) where {Aq<:ActorCritic,At<:ActorCritic}
     copyto!(approximator, target_approximator)
     CRRLearner(

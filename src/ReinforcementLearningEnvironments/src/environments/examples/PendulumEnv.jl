@@ -36,7 +36,7 @@ end
 - `max_steps = 200`
 - `continuous::Bool = true`
 - `n_actions::Int = 3`
-- `rng = Random.GLOBAL_RNG`
+- `rng = Random.default_rng()`
 """
 function PendulumEnv(;
     T=Float64,
@@ -49,7 +49,7 @@ function PendulumEnv(;
     max_steps=200,
     continuous::Bool=true,
     n_actions::Int=3,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 )
     env = PendulumEnv{continuous,T}(
         PendulumEnvParams(max_speed, max_torque, g, m, l, dt, max_steps),

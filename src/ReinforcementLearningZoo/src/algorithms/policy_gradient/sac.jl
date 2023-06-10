@@ -54,8 +54,8 @@ end
 - `lr_alpha::Float32 = 0.003f0`, learning rate of tuning entropy.
 - `action_dims = 0`, the dimensionality of the action. if `automatic_entropy_tuning = true`, must enter this parameter.
 - `update_step = 0`,
-- `rng = Random.GLOBAL_RNG`, used to sample batch from trajectory or action from action distribution.
-- `device_rng = Random.GLOBAL_RNG`, should be set to `CUDA.CURAND.RNG()` if the `policy` is set to work with `CUDA.jl`
+- `rng = Random.default_rng()`, used to sample batch from trajectory or action from action distribution.
+- `device_rng = Random.default_rng()`, should be set to `CUDA.CURAND.RNG()` if the `policy` is set to work with `CUDA.jl`
 
 `policy` is expected to output a tuple `(μ, σ)` of mean and
 standard deviations for the desired action distributions, this
@@ -81,8 +81,8 @@ function SACPolicy(;
     action_dims=0,
     update_step=0,
     start_policy=update_step == 0 ? identity : policy,
-    rng=Random.GLOBAL_RNG,
-    device_rng=Random.GLOBAL_RNG
+    rng=Random.default_rng(),
+    device_rng=Random.default_rng()
 )
     copyto!(qnetwork1, target_qnetwork1)  # force sync
     copyto!(qnetwork2, target_qnetwork2)  # force sync

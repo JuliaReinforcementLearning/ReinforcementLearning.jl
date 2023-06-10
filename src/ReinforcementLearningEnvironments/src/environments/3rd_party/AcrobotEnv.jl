@@ -33,7 +33,7 @@ function AcrobotEnv(;
     g=T(9.8),
     dt=T(0.2),
     max_steps=200,
-    rng=Random.GLOBAL_RNG,
+    rng=Random.default_rng(),
     book_or_nips="book",
     avail_torque=[T(-1.0), T(0.0), T(1.0)]
 )

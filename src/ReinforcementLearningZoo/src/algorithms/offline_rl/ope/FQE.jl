@@ -53,7 +53,7 @@ function FQE(;
     update_freq=1,
     update_step=0,
     tar_update_freq=50,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 )
     copyto!(q_network, target_q_network) #force sync
     FQE(

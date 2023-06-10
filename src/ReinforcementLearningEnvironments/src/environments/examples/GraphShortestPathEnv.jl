@@ -31,7 +31,7 @@ Quoted **A.3** in the the paper [Decision Transformer: Reinforcement Learning vi
 
 """
 function GraphShortestPathEnv(
-    rng=Random.GLOBAL_RNG;
+    rng=Random.default_rng();
     n=20,
     sparsity=0.1,
     max_steps=10

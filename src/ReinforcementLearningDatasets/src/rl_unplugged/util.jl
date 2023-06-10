@@ -34,16 +34,16 @@ struct BufferedShuffle{T, R<:AbstractRNG} <: AbstractChannel{T}
 end
 
 """
-    buffered_shuffle(src::Channel{T}, buffer_size::Int; rng=Random.GLOBAL_RNG)
+    buffered_shuffle(src::Channel{T}, buffer_size::Int; rng=Random.default_rng())
 
 Returns a `BufferedShuffle` `Channel`. 
 
 Arguments:
 - `src::Channel{T}`. The source Channel.
 - `buffer_size::Int`. The size of the buffered channel.
-- `rng<:AbstractRNG` = Random.GLOBAL_RNG.
+- `rng<:AbstractRNG` = Random.default_rng().
 """
-function buffered_shuffle(src::Channel{T}, buffer_size::Int;rng=Random.GLOBAL_RNG) where T
+function buffered_shuffle(src::Channel{T}, buffer_size::Int;rng=Random.default_rng()) where T
     buffer = Array{T}(undef, buffer_size)
     p = Progress(buffer_size)
     Threads.@threads for i in 1:buffer_size
