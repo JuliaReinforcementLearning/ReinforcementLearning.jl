@@ -54,7 +54,7 @@ end
 # Keyword arguments
 - `T = Float64`
 - `continuous = false`
-- `rng = Random.GLOBAL_RNG`
+- `rng = Random.default_rng()`
 - `min_pos = -1.2`
 - `max_pos = 0.6`
 - `max_speed = 0.07`
@@ -67,7 +67,7 @@ end
 function MountainCarEnv(;
     T=Float64,
     continuous=false,
-    rng=Random.GLOBAL_RNG,
+    rng=Random.default_rng(),
     kwargs...
 )
     if continuous

@@ -68,7 +68,7 @@ end
 - `critic_loss_weight = 0.5f0`,
 - `entropy_loss_weight = 0.01f0`,
 - `dist = Categorical`,
-- `rng = Random.GLOBAL_RNG`,
+- `rng = Random.default_rng()`,
 
 By default, `dist` is set to `Categorical`, which means it will only works
 on environments of discrete actions. To work with environments of continuous
@@ -116,7 +116,7 @@ function PPOPolicy(;
     critic_loss_weight=0.5f0,
     entropy_loss_weight=0.01f0,
     dist=Categorical,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 )
     PPOPolicy{typeof(approximator),dist,typeof(rng)}(
         approximator,

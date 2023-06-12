@@ -3,7 +3,7 @@ export DoubleLearner
 using Random
 
 """
-    DoubleLearner(;L1, L2, rng=Random.GLOBAL_RNG)
+    DoubleLearner(;L1, L2, rng=Random.default_rng())
 
 This is a meta-learner, it will randomly select one learner and update another learner.
 The estimation of an observation is the sum of result from two learners.
@@ -11,7 +11,7 @@ The estimation of an observation is the sum of result from two learners.
 Base.@kwdef struct DoubleLearner{T1<:Any,T2<:Any,R<:AbstractRNG} <: Any
     L1::T1
     L2::T2
-    rng::R = Random.GLOBAL_RNG
+    rng::R = Random.default_rng()
 end
 
 (learner::DoubleLearner)(env) = learner.L1(env) .+ learner.L2(env)

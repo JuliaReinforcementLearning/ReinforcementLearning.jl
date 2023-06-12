@@ -24,7 +24,7 @@ RLBase.prob(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv) = prob(p.behavior_p
 RLBase.prob(p::OutcomeSamplingMCCFRPolicy, env::AbstractEnv, action) =
     prob(p.behavior_policy, env, action)
 
-function OutcomeSamplingMCCFRPolicy(; state_type = String, rng = Random.GLOBAL_RNG, ϵ = 0.6)
+function OutcomeSamplingMCCFRPolicy(; state_type = String, rng = Random.default_rng(), ϵ = 0.6)
     OutcomeSamplingMCCFRPolicy(
         Dict{state_type,InfoStateNode}(),
         TabularRandomPolicy(; rng = rng, table = Dict{state_type,Vector{Float64}}()),

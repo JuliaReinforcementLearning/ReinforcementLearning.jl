@@ -45,7 +45,7 @@ function AtariEnv(;
 
     ale = ALE_new()
     if isnothing(seed)
-        rng = Random.GLOBAL_RNG
+        rng = Random.default_rng()
     else
         setInt(ale, "random_seed", Int32(seed % typemax(Int32)))
         rng = MersenneTwister(hash(seed + 1))

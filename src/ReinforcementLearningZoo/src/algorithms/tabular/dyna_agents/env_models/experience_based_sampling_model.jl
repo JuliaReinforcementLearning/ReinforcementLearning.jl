@@ -12,7 +12,7 @@ in each sampling.
 Base.@kwdef mutable struct ExperienceBasedSamplingModel{R} <: AbstractEnvironmentModel
     experiences::Dict{Any,Dict{Any,Any}} = Dict{Any,Dict{Any,Any}}()
     sample_count::Int = 0
-    rng::R = Random.GLOBAL_RNG
+    rng::R = Random.default_rng()
 end
 
 function RLCore.update!(

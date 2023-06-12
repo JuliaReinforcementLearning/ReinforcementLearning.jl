@@ -14,7 +14,7 @@ to demonstrate how to write a [POMDP](https://en.wikipedia.org/wiki/Partially_ob
 Base.@kwdef mutable struct TigerProblemEnv <: AbstractEnv
     obs_prob::Float64 = 0.85
     action::Union{Nothing,Symbol} = nothing
-    rng::AbstractRNG = Random.GLOBAL_RNG
+    rng::AbstractRNG = Random.default_rng()
     tiger_pos::Int = rand(rng, 1:2)
 end
 

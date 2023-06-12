@@ -65,7 +65,7 @@ can be implemented using a `VAE` in a `NeuralNetworkApproximator`.
 - `batch_size::Int = 32`
 - `update_freq::Int = 50`, the frequency of updating the `approximator`.
 - `update_step::Int = 0`
-- `rng = Random.GLOBAL_RNG`
+- `rng = Random.default_rng()`
 """
 function BEARLearner(;
     policy,
@@ -89,7 +89,7 @@ function BEARLearner(;
     batch_size=32,
     update_freq=50,
     update_step=0,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 )
     copyto!(policy, target_policy)  # force sync
     copyto!(qnetwork1, target_qnetwork1)  # force sync

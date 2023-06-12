@@ -10,7 +10,7 @@ mutable struct MultiArmBanditsEnv <: AbstractEnv
 end
 
 """
-    MultiArmBanditsEnv(;true_reward=0., k = 10,rng=Random.GLOBAL_RNG)
+    MultiArmBanditsEnv(;true_reward=0., k = 10,rng=Random.default_rng())
 
 `true_reward` is the expected reward. `k` is the number of arms. See
 [multi-armed bandit](https://en.wikipedia.org/wiki/Multi-armed_bandit) for more
@@ -20,7 +20,7 @@ This is a **one-shot** game. The environment terminates immediately after taking
 in an action. Here we use it to demonstrate how to write a customized
 environment with only minimal interfaces defined.
 """
-function MultiArmBanditsEnv(; true_reward=0.0, k=10, rng=Random.GLOBAL_RNG)
+function MultiArmBanditsEnv(; true_reward=0.0, k=10, rng=Random.default_rng())
     true_values = true_reward .+ randn(rng, k)
     MultiArmBanditsEnv(true_reward, true_values, rng, 0.0, false)
 end

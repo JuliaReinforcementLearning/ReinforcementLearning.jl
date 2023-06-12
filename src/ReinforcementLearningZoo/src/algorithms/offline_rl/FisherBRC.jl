@@ -62,7 +62,7 @@ See paper: [Offline reinforcement learning with fisher divergence critic regular
 - `lr_alpha::Float32 = 0.003f0`, learning rate of tuning entropy.
 - `action_dims::Int = 0`, the dimensionality of the action.
 - `update_step::Int = 0`
-- `rng = Random.GLOBAL_RNG`
+- `rng = Random.default_rng()`
 
 `policy` is expected to output a tuple `(μ, σ)` of mean and
 standard deviations for the desired action distributions, this
@@ -87,7 +87,7 @@ function FisherBRCLearner(;
     behavior_lr_alpha=0.001f0,
     action_dims=0,
     update_step=0,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 )
     copyto!(qnetwork1, target_qnetwork1)  # force sync
     copyto!(qnetwork2, target_qnetwork2)  # force sync

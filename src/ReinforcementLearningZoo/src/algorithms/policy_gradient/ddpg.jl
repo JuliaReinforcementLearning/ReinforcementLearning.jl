@@ -63,7 +63,7 @@ end
 - `act_limit = 1.0`,
 - `act_noise = 0.1`,
 - `update_step = 0`,
-- `rng = Random.GLOBAL_RNG`,
+- `rng = Random.default_rng()`,
 """
 function DDPGPolicy(;
     behavior_actor,
@@ -81,7 +81,7 @@ function DDPGPolicy(;
     act_limit=1.0,
     act_noise=0.1,
     update_step=0,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 )
     copyto!(behavior_actor, target_actor)  # force sync
     copyto!(behavior_critic, target_critic)  # force sync

@@ -12,7 +12,7 @@ See the paper https://arxiv.org/abs/1603.01121 for more details.
 - `rl_agent::Agent`, Reinforcement Learning(RL) agent(default `QBasedPolicy` here, use `DQN` for example), which works to search the best response from the self-play process.
 - `sl_agent::Agent`, Supervisor Learning(SL) agent(use `BehaviorCloningPolicy` for example), which works to learn the best response from the rl_agent's policy.
 - `η`, anticipatory parameter, the probability to use `ϵ-greedy(Q)` policy when training the agent.
-- `rng=Random.GLOBAL_RNG`.
+- `rng=Random.default_rng()`.
 - `update_freq::Int`: the frequency of updating the agents' `approximator`.
 - `update_step::Int`, count the step.
 - `mode::Bool`, used when learning, true as BestResponse(rl_agent's output), false as AveragePolicy(sl_agent's output).

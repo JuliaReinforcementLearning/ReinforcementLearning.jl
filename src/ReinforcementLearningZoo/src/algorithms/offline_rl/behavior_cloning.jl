@@ -19,14 +19,14 @@ end
 - `explorer=GreedyExplorer()` 
 - `batch_size::Int = 32`
 - `min_reservoir_history::Int = 100`, number of transitions that should be experienced before updating the `approximator`. 
-- `rng = Random.GLOBAL_RNG`
+- `rng = Random.default_rng()`
 """
 function BehaviorCloningPolicy(;
     approximator::A,
     explorer::AbstractExplorer=GreedyExplorer(),
     batch_size::Int=32,
     min_reservoir_history::Int=100,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 ) where {A}
     sampler = BatchSampler{(:state, :action)}(batch_size; rng=rng)
     BehaviorCloningPolicy(approximator, explorer, sampler, min_reservoir_history)
