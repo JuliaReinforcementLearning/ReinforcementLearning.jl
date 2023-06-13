@@ -21,6 +21,7 @@ Neural Fitted Q-iteration as implemented in [1]
 [1] Riedmiller, M. (2005). Neural Fitted Q Iteration – First Experiences with a Data Efficient Neural Reinforcement Learning Method. In: Gama, J., Camacho, R., Brazdil, P.B., Jorge, A.M., Torgo, L. (eds) Machine Learning: ECML 2005. ECML 2005. Lecture Notes in Computer Science(), vol 3720. Springer, Berlin, Heidelberg. https://doi.org/10.1007/11564096_32
 """
 Base.@kwdef struct NFQ{A, R} <: AbstractLearner
+    action_space::AbstractVector
     approximator::A
     num_iterations::Integer = 20
     epochs::Integer = 100
@@ -30,6 +31,7 @@ Base.@kwdef struct NFQ{A, R} <: AbstractLearner
 end
 
 function NFQ(;
+    action_space::AbstractVector,
     approximator::A,
     num_iterations::Integer = 20,
     epochs::Integer = 1000,
@@ -37,7 +39,7 @@ function NFQ(;
     rng=Random.GLOBAL_RNG,
     γ::Float32 = 0.9f0,
     ) where {A}
-    NFQ(approximator, num_iterations, epochs, loss_function, rng, γ)
+    NFQ(action_space, approximator, num_iterations, epochs, loss_function, rng, γ)
 end
 
 # Copied from BasicDQN but sure whether it's appropriate
@@ -58,19 +60,11 @@ end
 # Avoid optimisation in the middle of an episode
 function RLBase.optimise!(::NFQ, ::NamedTuple) end
 
-# Instead do optimisation at the end of an episode
-function Base.push!(agent::Agent{<:QBasedPolicy{<:NFQ}}, ::PostEpisodeStage, env::AbstractEnv)
-    for batch in agent.trajectory
-        _optimise!(agent.policy.learner, batch, env)
-    end
-end
-
-function _optimise!(learner::NFQ, batch::NamedTuple, env::AbstractEnv)
+function RLBase.optimise!(learner::NFQ, ::PostEpisodeStage, batch::NamedTuple)
     Q = learner.approximator
     γ = learner.γ
     loss_func = learner.loss_function
-
-    as = action_space(env)
+    as = learner.action_space
     las = length(as)
 
 

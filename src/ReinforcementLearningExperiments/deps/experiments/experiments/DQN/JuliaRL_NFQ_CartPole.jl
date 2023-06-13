@@ -28,15 +28,16 @@ function RLCore.Experiment(
     agent = Agent(
         policy=QBasedPolicy(
             learner=NFQ(
+                action_space=action_space(env),
                 approximator=Approximator(
                     model=Chain(
-                        Dense(ns, 128, relu; init=glorot_uniform(rng)),
-                        Dense(128, 128, relu; init=glorot_uniform(rng)),
-                        Dense(128, na; init=glorot_uniform(rng)),
+                        Dense(ns+na, 64, relu; init=glorot_uniform(rng)),
+                        Dense(64, 64, relu; init=glorot_uniform(rng)),
+                        Dense(64, 1; init=glorot_uniform(rng)),
                     ) |> gpu,
                     optimiser=RMSProp()
                 ),
-                loss_func=huber_loss,
+                loss_function=huber_loss,
                 epochs=500,
                 num_iterations=10
             ),
