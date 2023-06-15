@@ -20,13 +20,13 @@ Neural Fitted Q-iteration as implemented in [1]
 # References
 [1] Riedmiller, M. (2005). Neural Fitted Q Iteration – First Experiences with a Data Efficient Neural Reinforcement Learning Method. In: Gama, J., Camacho, R., Brazdil, P.B., Jorge, A.M., Torgo, L. (eds) Machine Learning: ECML 2005. ECML 2005. Lecture Notes in Computer Science(), vol 3720. Springer, Berlin, Heidelberg. https://doi.org/10.1007/11564096_32
 """
-Base.@kwdef struct NFQ{A, R} <: AbstractLearner
+Base.@kwdef struct NFQ{A, R, F} <: AbstractLearner
     action_space::AbstractVector
     approximator::A
     num_iterations::Integer = 20
     epochs::Integer = 100
-    loss_function::Any = mse
-    rng::R = Random.GLOBAL_RNG
+    loss_function::F = mse
+    rng::R = Random.default_rng()
     γ::Float32 = 0.9f0
 end
 
@@ -36,7 +36,7 @@ function NFQ(;
     num_iterations::Integer = 20,
     epochs::Integer = 1000,
     loss_function::Any = mse,
-    rng=Random.GLOBAL_RNG,
+    rng=Random.default_rng(),
     γ::Float32 = 0.9f0,
     ) where {A}
     NFQ(action_space, approximator, num_iterations, epochs, loss_function, rng, γ)
