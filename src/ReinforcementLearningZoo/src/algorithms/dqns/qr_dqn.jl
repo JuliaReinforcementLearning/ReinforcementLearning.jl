@@ -66,5 +66,5 @@ function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
         loss
     end
 
-    optimise!(A, gs)
+    RLBase.optimise!(A, gs)
 end

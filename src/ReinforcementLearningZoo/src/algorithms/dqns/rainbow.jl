@@ -109,7 +109,7 @@ function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
         loss
     end
 
-    optimise!(A, gs)
+    RLBase.optimise!(A, gs)
 
     is_use_PER ? batch.key => updated_priorities : nothing
 end
@@ -141,7 +141,7 @@ end
 
 function RLBase.optimise!(policy::QBasedPolicy{<:RainbowLearner}, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory
-        res = optimise!(policy, PostActStage(), batch) |> send_to_host
+        res = RLBase.optimise!(policy, PostActStage(), batch) |> send_to_host
         if !isnothing(res)
             k, p = res
             trajectory[:priority, k] = p

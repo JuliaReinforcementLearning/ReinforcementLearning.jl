@@ -39,7 +39,7 @@ action is determined by a `plan!` which takes an environment and policy and retu
 @api plan!(π::AbstractPolicy, env)
 
 """
-    optimise!(π::AbstractPolicy, experience)
+   RLBase.optimise!(π::AbstractPolicy, experience)
 
 Optimise the policy `π` with online/offline experience or parameters.
 """

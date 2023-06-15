@@ -23,7 +23,7 @@ function _run(policy::AbstractPolicy,
             action = RLBase.plan!(policy, env)
             act!(env, action)
 
-            optimise!(policy)
+           RLBase.optimise!(policy)
 
             push!(policy, PostActStage(), env)
 

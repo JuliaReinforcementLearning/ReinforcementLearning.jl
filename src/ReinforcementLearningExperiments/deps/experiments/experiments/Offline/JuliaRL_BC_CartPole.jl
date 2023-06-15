@@ -82,7 +82,7 @@ function RLCore.Experiment(
 
     for i in 1:300
         _, batch = s(hook.records)
-        optimise!(bc, batch)
+        RLBase.optimise!(bc, batch)
     end
 
     hook = TotalRewardPerEpisode()

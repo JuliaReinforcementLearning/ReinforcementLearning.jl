@@ -39,6 +39,6 @@ RLBase.prob(p::QBasedPolicy{L,Ex}, env::AbstractEnv) where {L<:AbstractLearner,E
 
 function RLBase.optimise!(p::QBasedPolicy{L,Ex}, ::PostActStage, trajectory::Trajectory) where {L<:AbstractLearner,Ex<:AbstractExplorer} 
     for batch in trajectory
-        optimise!(p.learner, batch)
+       RLBase.optimise!(p.learner, batch)
     end
 end

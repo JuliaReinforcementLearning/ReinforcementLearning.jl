@@ -58,5 +58,5 @@ function RLCore.optimise!(
         loss
     end
 
-    optimise!(Q, gs)
+    RLBase.optimise!(Q, gs)
 end
