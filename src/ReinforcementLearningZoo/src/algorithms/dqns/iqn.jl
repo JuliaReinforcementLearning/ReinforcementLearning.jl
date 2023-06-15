@@ -69,7 +69,7 @@ function RLCore.forward(L::IQNLearner, env::E) where {E<:AbstractEnv}
     q
 end
 
-function RLBase.optimise!(learner::IQNLearner, ::PostActStage, trajectory::Trajectory)
+function RLBase.optimise!(learner::IQNLearner, batch::NamedTuple)
     A = learner.approximator
     Z = A.model.source
     Zₜ = A.model.target
@@ -78,55 +78,53 @@ function RLBase.optimise!(learner::IQNLearner, ::PostActStage, trajectory::Traje
     Nₑₘ = learner.Nₑₘ
     κ = learner.κ
     
-    for batch in trajectory
-        s, s′, a, r, t = map(x -> batch[x], SS′ART)
-        batch_size = length(t)
-        τ′ = rand(learner.device_rng, Float32, N′, batch_size)  # TODO: support β distribution
-        τₑₘ′ = embed(τ′, Nₑₘ)
-        zₜ = Zₜ(s′, τₑₘ′)
-        avg_zₜ = mean(zₜ, dims=2)
+    s, s′, a, r, t = map(x -> batch[x], SS′ART)
+    batch_size = length(t)
+    τ′ = rand(learner.device_rng, Float32, N′, batch_size)  # TODO: support β distribution
+    τₑₘ′ = embed(τ′, Nₑₘ)
+    zₜ = Zₜ(s′, τₑₘ′)
+    avg_zₜ = mean(zₜ, dims=2)
 
-        if haskey(batch, :next_legal_actions_mask)
-            masked_value = similar(batch.next_legal_actions_mask, Float32)
-            masked_value = fill!(masked_value, typemin(Float32))
-            masked_value[batch.next_legal_actions_mask] .= 0
-            avg_zₜ .+= masked_value
-        end
-
-        aₜ = argmax(avg_zₜ, dims=1)
-        aₜ = aₜ .+ typeof(aₜ)(CartesianIndices((0:0, 0:N′-1, 0:0)))
-        qₜ = reshape(zₜ[aₜ], :, batch_size)
-        target = reshape(r, 1, batch_size) .+ learner.γ * reshape(1 .- t, 1, batch_size) .* qₜ  # reshape to allow broadcast
-
-        τ = rand(learner.device_rng, Float32, N, batch_size)
-        τₑₘ = embed(τ, Nₑₘ)
-        a = CartesianIndex.(repeat(a, inner=N), 1:(N*batch_size))
-
-        gs = gradient(params(A)) do
-            z_raw = Z(s, τₑₘ)
-            z = reshape(z_raw, size(z_raw)[1:end-2]..., :)
-            q = z[a]
-
-            TD_error = reshape(target, N′, 1, batch_size) .- reshape(q, 1, N, batch_size)
-            # can't apply huber_loss in RLCore directly here
-            abs_error = abs.(TD_error)
-            quadratic = min.(abs_error, κ)
-            linear = abs_error .- quadratic
-            huber_loss = 0.5f0 .* quadratic .* quadratic .+ κ .* linear
-
-            # dropgrad
-            raw_loss =
-                abs.(reshape(τ, 1, N, batch_size) .- ignore_derivatives(TD_error .< 0)) .*
-                huber_loss ./ κ
-            loss_per_quantile = reshape(sum(raw_loss; dims=1), N, batch_size)
-            loss_per_element = mean(loss_per_quantile; dims=1)  # use as priorities
-            loss = mean(loss_per_element)
-            ignore_derivatives() do
-                learner.loss = loss
-            end
-            loss
-        end
-
-        optimise!(A, gs)
+    if haskey(batch, :next_legal_actions_mask)
+        masked_value = similar(batch.next_legal_actions_mask, Float32)
+        masked_value = fill!(masked_value, typemin(Float32))
+        masked_value[batch.next_legal_actions_mask] .= 0
+        avg_zₜ .+= masked_value
     end
+
+    aₜ = argmax(avg_zₜ, dims=1)
+    aₜ = aₜ .+ typeof(aₜ)(CartesianIndices((0:0, 0:N′-1, 0:0)))
+    qₜ = reshape(zₜ[aₜ], :, batch_size)
+    target = reshape(r, 1, batch_size) .+ learner.γ * reshape(1 .- t, 1, batch_size) .* qₜ  # reshape to allow broadcast
+
+    τ = rand(learner.device_rng, Float32, N, batch_size)
+    τₑₘ = embed(τ, Nₑₘ)
+    a = CartesianIndex.(repeat(a, inner=N), 1:(N*batch_size))
+
+    gs = gradient(params(A)) do
+        z_raw = Z(s, τₑₘ)
+        z = reshape(z_raw, size(z_raw)[1:end-2]..., :)
+        q = z[a]
+
+        TD_error = reshape(target, N′, 1, batch_size) .- reshape(q, 1, N, batch_size)
+        # can't apply huber_loss in RLCore directly here
+        abs_error = abs.(TD_error)
+        quadratic = min.(abs_error, κ)
+        linear = abs_error .- quadratic
+        huber_loss = 0.5f0 .* quadratic .* quadratic .+ κ .* linear
+
+        # dropgrad
+        raw_loss =
+            abs.(reshape(τ, 1, N, batch_size) .- ignore_derivatives(TD_error .< 0)) .*
+            huber_loss ./ κ
+        loss_per_quantile = reshape(sum(raw_loss; dims=1), N, batch_size)
+        loss_per_element = mean(loss_per_quantile; dims=1)  # use as priorities
+        loss = mean(loss_per_element)
+        ignore_derivatives() do
+            learner.loss = loss
+        end
+        loss
+    end
+
+    optimise!(A, gs)
 end

@@ -18,7 +18,7 @@ RLCore.forward(L::DQNLearner, s::A) where {A<:AbstractArray}  = RLCore.forward(L
 
 @functor DQNLearner (approximator,)
 
-function RLBase.optimise!(learner::DQNLearner, ::PostActStage, trajectory::Trajectory)
+function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
     A = learner.approximator
     Q = A.model.source
     Qₜ = A.model.target
@@ -26,29 +26,27 @@ function RLBase.optimise!(learner::DQNLearner, ::PostActStage, trajectory::Traje
     loss_func = learner.loss_func
     n = learner.n
 
-    for batch in trajectory
-        s, s′, a, r, t = map(x -> batch[x], SS′ART)
-        a = CartesianIndex.(a, 1:length(a))
+    s, s′, a, r, t = map(x -> batch[x], SS′ART)
+    a = CartesianIndex.(a, 1:length(a))
 
-        q′ = learner.is_enable_double_DQN ? Q(s′) : Qₜ(s′)
+    q′ = learner.is_enable_double_DQN ? Q(s′) : Qₜ(s′)
 
-        if haskey(batch, :next_legal_actions_mask)
-            q′ .+= ifelse.(batch[:next_legal_actions_mask], 0.0f0, typemin(Float32))
-        end
-
-        q′ₐ = learner.is_enable_double_DQN ? Qₜ(s′)[dropdims(argmax(q′, dims=1), dims=1)] : dropdims(maximum(q′; dims=1), dims=1)
-
-        G = r .+ γ^n .* (1 .- t) .* q′ₐ
-
-        gs = gradient(params(A)) do
-            qₐ = Q(s)[a]
-            loss = loss_func(G, qₐ)
-            ignore_derivatives() do
-                learner.loss = loss
-            end
-            loss
-        end
-
-        optimise!(A, gs)
+    if haskey(batch, :next_legal_actions_mask)
+        q′ .+= ifelse.(batch[:next_legal_actions_mask], 0.0f0, typemin(Float32))
     end
+
+    q′ₐ = learner.is_enable_double_DQN ? Qₜ(s′)[dropdims(argmax(q′, dims=1), dims=1)] : dropdims(maximum(q′; dims=1), dims=1)
+
+    G = r .+ γ^n .* (1 .- t) .* q′ₐ
+
+    gs = gradient(params(A)) do
+        qₐ = Q(s)[a]
+        loss = loss_func(G, qₐ)
+        ignore_derivatives() do
+            learner.loss = loss
+        end
+        loss
+    end
+
+    optimise!(A, gs)
 end

@@ -73,7 +73,7 @@ end
 
 function RLBase.optimise!(policy::QBasedPolicy{<:PrioritizedDQNLearner}, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory
-        k, p = optimise!(policy, PostActStage(), batch) |> send_to_host
+        k, p = optimise!(policy, batch) |> send_to_host
         trajectory[:priority, k] = p
     end
 end

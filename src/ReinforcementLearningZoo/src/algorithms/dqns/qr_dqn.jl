@@ -36,7 +36,7 @@ end
 
 RLCore.forward(L::QRDQNLearner, s::A) where {A<:AbstractArray} = vec(mean(reshape(RLCore.forward(L.approximator, s), L.n_quantile, :), dims=1))
 
-function RLBase.optimise!(learner::QRDQNLearner, ::PostActStage, trajectory::Trajectory)
+function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
     A = learner.approximator
     Q = A.model.source
     Qₜ = A.model.target
@@ -44,29 +44,27 @@ function RLBase.optimise!(learner::QRDQNLearner, ::PostActStage, trajectory::Tra
     N = learner.n_quantile
     loss_func = learner.loss_func
 
-    for batch in trajectory
-        s, s′, a, r, t = map(x -> batch[x], SS′ART)
-        batch_size = length(r)
-        a = CartesianIndex.(a, 1:batch_size)
+    s, s′, a, r, t = map(x -> batch[x], SS′ART)
+    batch_size = length(r)
+    a = CartesianIndex.(a, 1:batch_size)
 
-        target_quantiles = reshape(Qₜ(s′), N, :, batch_size)
-        qₜ = dropdims(mean(target_quantiles; dims=1); dims=1)
-        aₜ = dropdims(argmax(qₜ, dims=1); dims=1)
-        @views target_quantile_aₜ = target_quantiles[:, aₜ]
-        y = reshape(r, 1, batch_size) .+ γ .* reshape(1 .- t, 1, batch_size) .* target_quantile_aₜ
+    target_quantiles = reshape(Qₜ(s′), N, :, batch_size)
+    qₜ = dropdims(mean(target_quantiles; dims=1); dims=1)
+    aₜ = dropdims(argmax(qₜ, dims=1); dims=1)
+    @views target_quantile_aₜ = target_quantiles[:, aₜ]
+    y = reshape(r, 1, batch_size) .+ γ .* reshape(1 .- t, 1, batch_size) .* target_quantile_aₜ
 
-        gs = gradient(params(A)) do
-            q = reshape(Q(s), N, :, batch_size)
-            @views ŷ = q[:, a]
+    gs = gradient(params(A)) do
+        q = reshape(Q(s), N, :, batch_size)
+        @views ŷ = q[:, a]
 
-            loss = loss_func(ŷ, y)
+        loss = loss_func(ŷ, y)
 
-            ignore_derivatives() do
-                learner.loss = loss
-            end
-            loss
+        ignore_derivatives() do
+            learner.loss = loss
         end
-
-        optimise!(A, gs)
+        loss
     end
+
+    optimise!(A, gs)
 end
