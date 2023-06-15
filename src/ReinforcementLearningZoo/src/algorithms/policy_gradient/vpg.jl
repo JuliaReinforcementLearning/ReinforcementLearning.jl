@@ -1,6 +1,6 @@
 export VPG
 
-using Random: GLOBAL_RNG, shuffle
+using Random: Random, shuffle
 using Distributions: ContinuousDistribution, DiscreteDistribution, logpdf
 using Functors: @functor
 using Flux: params, softmax, gradient, logsoftmax
@@ -10,7 +10,7 @@ using ChainRulesCore: ignore_derivatives
 """
 Vanilla Policy Gradient
 """
-Base.@kwdef struct VPG{A,B,D} <: AbstractPolicy
+Base.@kwdef struct VPG{A,B,D, R} <: AbstractPolicy
     "For discrete actions, logits before softmax is expected. For continuous actions, a `Tuple` of arguments are expected to initialize `dist`"
     approximator::A
     baseline::B = nothing
@@ -19,7 +19,7 @@ Base.@kwdef struct VPG{A,B,D} <: AbstractPolicy
     "discount ratio"
     γ::Float32 = 0.99f0
     batch_size::Int = 1024
-    rng::AbstractRNG = GLOBAL_RNG
+    rng::R = Random.default_rng()
 end
 
 IsPolicyGradient(::Type{<:VPG}) = IsPolicyGradient()
@@ -30,13 +30,13 @@ function RLBase.plan!(π::VPG, env::AbstractEnv)
     rand(π.rng, action_distribution(π.dist, res)[1])
 end
 
-function update!(p::Agent{<:VPG}, ::PostEpisodeStage, env::AbstractEnv)
-    p.trajectory.container[] = true
-    optimise!(p.policy, p.trajectory.container)
-    empty!(p.trajectory.container)
+function optimise!(p::VPG, ::PostEpisodeStage, trajectory::Trajectory)
+    trajectory.container[] = true
+    for batch in trajectory
+        optimise!(p, batch)
+    end
+    empty!(trajectory.container)
 end
-
-RLBase.optimise!(::Agent{<:VPG}, ::PostActStage) = nothing
 
 function RLBase.optimise!(π::VPG, ::PostActStage, episode::Episode)
     gain = discount_rewards(episode[:reward][:], π.γ)
@@ -45,7 +45,7 @@ function RLBase.optimise!(π::VPG, ::PostActStage, episode::Episode)
     end
 end
 
-function RLBase.optimise!(p::VPG, ::PostActStage, batch::NamedTuple{(:state, :action, :gain)})
+function RLBase.optimise!(p::VPG, batch::NamedTuple{(:state, :action, :gain)})
     A = p.approximator
     B = p.baseline
     s, a, g = map(Array, batch) # !!! FIXME

@@ -1,11 +1,11 @@
 export RainbowLearner
 
-using Random: AbstractRNG, GLOBAL_RNG
+import Random
 using Flux: params, unsqueeze, softmax, gradient
 using Flux.Losses: logitcrossentropy
 using Functors: @functor
 
-Base.@kwdef mutable struct RainbowLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
+Base.@kwdef mutable struct RainbowLearner{A<:Approximator{<:TwinNetwork}, F, R} <: AbstractLearner
     approximator::A
     Vₘₐₓ::Float32
     Vₘᵢₙ::Float32
@@ -17,8 +17,8 @@ Base.@kwdef mutable struct RainbowLearner{A<:Approximator{<:TwinNetwork}} <: Abs
     delta_z::Float32 = convert(Float32, support.step)
     default_priority::Float32 = 1.0f2
     β_priority::Float32 = 0.5f0
-    loss_func::Any = (ŷ, y) -> logitcrossentropy(ŷ, y; agg=identity)
-    rng::AbstractRNG = GLOBAL_RNG
+    loss_func::F = (ŷ, y) -> logitcrossentropy(ŷ, y; agg=identity)
+    rng::R = Random.default_rng()
     # for logging
     loss::Float32 = 0.0f0
 end

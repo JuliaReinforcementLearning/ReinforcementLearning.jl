@@ -1,7 +1,7 @@
 export QRDQNLearner, quantile_huber_loss
 
 using ChainRulesCore: ignore_derivatives
-using Random: GLOBAL_RNG, AbstractRNG
+import Random
 using StatsBase: mean
 using Functors: @functor
 using Flux
@@ -22,12 +22,12 @@ function quantile_huber_loss(ŷ, y; κ=1.0f0)
     mean(sum(loss; dims=1))
 end
 
-Base.@kwdef mutable struct QRDQNLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
+Base.@kwdef mutable struct QRDQNLearner{A<:Approximator{<:TwinNetwork}, F, R} <: AbstractLearner
     approximator::A
     n_quantile::Int
-    loss_func::Any = quantile_huber_loss
+    loss_func::F = quantile_huber_loss
     γ::Float32 = 0.99f0
-    rng::AbstractRNG = GLOBAL_RNG
+    rng::R = Random.default_rng()
     # for recording
     loss::Float32 = 0.0f0
 end
@@ -36,7 +36,7 @@ end
 
 RLCore.forward(L::QRDQNLearner, s::A) where {A<:AbstractArray} = vec(mean(reshape(RLCore.forward(L.approximator, s), L.n_quantile, :), dims=1))
 
-function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
+function RLBase.optimise!(learner::QRDQNLearner, ::PostActStage, trajectory::Trajectory)
     A = learner.approximator
     Q = A.model.source
     Qₜ = A.model.target
@@ -44,27 +44,29 @@ function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
     N = learner.n_quantile
     loss_func = learner.loss_func
 
-    s, s′, a, r, t = map(x -> batch[x], SS′ART)
-    batch_size = length(r)
-    a = CartesianIndex.(a, 1:batch_size)
+    for batch in trajectory
+        s, s′, a, r, t = map(x -> batch[x], SS′ART)
+        batch_size = length(r)
+        a = CartesianIndex.(a, 1:batch_size)
 
-    target_quantiles = reshape(Qₜ(s′), N, :, batch_size)
-    qₜ = dropdims(mean(target_quantiles; dims=1); dims=1)
-    aₜ = dropdims(argmax(qₜ, dims=1); dims=1)
-    @views target_quantile_aₜ = target_quantiles[:, aₜ]
-    y = reshape(r, 1, batch_size) .+ γ .* reshape(1 .- t, 1, batch_size) .* target_quantile_aₜ
+        target_quantiles = reshape(Qₜ(s′), N, :, batch_size)
+        qₜ = dropdims(mean(target_quantiles; dims=1); dims=1)
+        aₜ = dropdims(argmax(qₜ, dims=1); dims=1)
+        @views target_quantile_aₜ = target_quantiles[:, aₜ]
+        y = reshape(r, 1, batch_size) .+ γ .* reshape(1 .- t, 1, batch_size) .* target_quantile_aₜ
 
-    gs = gradient(params(A)) do
-        q = reshape(Q(s), N, :, batch_size)
-        @views ŷ = q[:, a]
+        gs = gradient(params(A)) do
+            q = reshape(Q(s), N, :, batch_size)
+            @views ŷ = q[:, a]
 
-        loss = loss_func(ŷ, y)
+            loss = loss_func(ŷ, y)
 
-        ignore_derivatives() do
-            learner.loss = loss
+            ignore_derivatives() do
+                learner.loss = loss
+            end
+            loss
         end
-        loss
-    end
 
-    optimise!(A, gs)
+        optimise!(A, gs)
+    end
 end

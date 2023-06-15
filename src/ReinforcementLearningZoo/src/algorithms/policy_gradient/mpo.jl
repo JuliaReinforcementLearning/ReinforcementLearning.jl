@@ -28,6 +28,11 @@ mutable struct MPOPolicy{P<:Approximator,Q<:Approximator,R} <: AbstractPolicy
     logs::Dict{Symbol, Vector{Float32}}
 end
 
+function check(agent::Agent{<:MPOPolicy}, env)
+    error_string = "MPO requires a trajectory sampler that is a `MetaSampler` composed of two `MultiBatchSampler`. The first must be named `:actor` and sample `(:state,)`, the second must be named `:critic` and sample `SS′ART`"
+    @assert agent.trajectory.sampler isa MetaSampler{(:actor, :critic), Tuple{MultiBatchSampler{BatchSampler{(:state,)}}, MultiBatchSampler{BatchSampler{(:state, :next_state, :action, :reward, :terminal)}}}} error_string
+end
+
 
 """
     MPOPolicy(;
@@ -91,19 +96,16 @@ function RLBase.plan!(p::MPOPolicy, env; testmode = false)
     send_to_host(action)
 end
 
+
 function RLBase.optimise!(
     p::MPOPolicy,
-    ::PostActStage, 
-    batches::NamedTuple{
-        (:actor, :critic), 
-        <: Tuple{
-            <: Vector{<: NamedTuple{(:state,)}},
-            <: Vector{<: NamedTuple{SS′ART}}
-        }
-    }
-)
-    update_critic!(p, batches[:critic])
-    update_actor!(p, batches[:actor])
+    ::PostActStage,
+    trajectory::Trajectory)
+    
+    for batches in trajectory
+        update_critic!(p, batches[:critic])
+        update_actor!(p, batches[:actor])
+    end
 end
 
 #Here we apply the TD3 Q network approach. The original MPO paper uses retrace.

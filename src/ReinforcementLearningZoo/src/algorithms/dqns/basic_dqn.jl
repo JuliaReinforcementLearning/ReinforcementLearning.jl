@@ -37,26 +37,29 @@ RLCore.forward(L::BasicDQNLearner, s::AbstractArray) = RLCore.forward(L.approxim
 
 function RLCore.optimise!(
     learner::BasicDQNLearner,
-    batch::NamedTuple{SS′ART},
+    ::PostActStage,
+    trajectory::Trajectory
 )
 
     Q = learner.approximator
     γ = learner.γ
     loss_func = learner.loss_func
 
-    s, s′, a, r, t = send_to_device(device(Q), batch)
-    a = CartesianIndex.(a, 1:length(a))
+    for batch in trajectory
+        s, s′, a, r, t = send_to_device(device(Q), batch)
+        a = CartesianIndex.(a, 1:length(a))
 
-    gs = gradient(params(Q)) do
-        q = RLCore.forward(Q, s)[a]
-        q′ = vec(maximum(RLCore.forward(Q, s′); dims=1))
-        G = @. r + γ * (1 - t) * q′
-        loss = loss_func(G, q)
-        ignore_derivatives() do
-            learner.loss = loss
+        gs = gradient(params(Q)) do
+            q = RLCore.forward(Q, s)[a]
+            q′ = vec(maximum(RLCore.forward(Q, s′); dims=1))
+            G = @. r + γ * (1 - t) * q′
+            loss = loss_func(G, q)
+            ignore_derivatives() do
+                learner.loss = loss
+            end
+            loss
         end
-        loss
-    end
 
-    optimise!(Q, gs)
+        optimise!(Q, gs)
+    end
 end
