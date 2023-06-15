@@ -37,4 +37,4 @@ end
 RLBase.prob(p::QBasedPolicy{L,Ex}, env::AbstractEnv) where {L<:AbstractLearner,Ex<:AbstractExplorer} =
     prob(p.explorer, forward(p.learner, env), legal_action_space_mask(env))
 
-RLBase.optimise!(p::QBasedPolicy{L,Ex}, stage::S, x::NamedTuple) where {L<:AbstractLearner,Ex<:AbstractExplorer, S<:AbstractStage} = optimise!(p.learner, x)
+RLBase.optimise!(p::QBasedPolicy{L,Ex}, stage::S, t::Trajectory) where {L<:AbstractLearner,Ex<:AbstractExplorer, S<:AbstractStage} = optimise!(p.learner, stage, t)
