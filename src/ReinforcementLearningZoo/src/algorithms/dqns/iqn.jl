@@ -2,7 +2,7 @@ export IQNLearner, ImplicitQuantileNet
 
 using Functors: @functor
 using Flux: params, unsqueeze, gradient
-using Random: AbstractRNG, GLOBAL_RNG
+import Random
 using StatsBase: mean
 using ChainRulesCore: ignore_derivatives
 
@@ -36,7 +36,7 @@ function (net::ImplicitQuantileNet)(s, emb)
     reshape(quantiles, :, size(merged, 2), size(merged, 3))  # (n_action, N, batch_size)
 end
 
-Base.@kwdef mutable struct IQNLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
+Base.@kwdef mutable struct IQNLearner{A<:Approximator{<:TwinNetwork}, R1, R2} <: AbstractLearner
     approximator::A
     γ::Float32 = 0.99f0
     κ::Float32 = 1.0f0
@@ -44,8 +44,8 @@ Base.@kwdef mutable struct IQNLearner{A<:Approximator{<:TwinNetwork}} <: Abstrac
     N′::Int = 32
     Nₑₘ::Int = 64
     K::Int = 32
-    rng::AbstractRNG = GLOBAL_RNG
-    device_rng::AbstractRNG = rng
+    rng::R1 = default_rng()
+    device_rng::R2 = rng
     # for logging
     loss::Float32 = 0.0f0
 end

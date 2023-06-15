@@ -1,15 +1,15 @@
 export DQNLearner
 
-using Random: AbstractRNG, GLOBAL_RNG
+using Random: AbstractRNG
 using Functors: @functor
 
-Base.@kwdef mutable struct DQNLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
+Base.@kwdef mutable struct DQNLearner{A<:Approximator{<:TwinNetwork}, F, R} <: AbstractLearner
     approximator::A
-    loss_func::Any
+    loss_func::F
     n::Int = 1
     γ::Float32 = 0.99f0
     is_enable_double_DQN::Bool = true
-    rng::AbstractRNG = GLOBAL_RNG
+    rng::R = Random.default_rng()
     # for logging
     loss::Float32 = 0.0f0
 end

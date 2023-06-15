@@ -23,9 +23,9 @@ own customized algorithm.
 - `loss_func=huber_loss`: the loss function to use.
 - `γ::Float32=0.99f0`: discount rate.
 """
-Base.@kwdef mutable struct BasicDQNLearner{Q} <: AbstractLearner
+Base.@kwdef mutable struct BasicDQNLearner{Q, F} <: AbstractLearner
     approximator::Q
-    loss_func::Any = huber_loss
+    loss_func::F = huber_loss
     γ::Float32 = 0.99f0
     # for debugging
     loss::Float32 = 0.0f0
