@@ -7,7 +7,7 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo, ReinforcementLearningZoo
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using ReinforcementLearningEnvironments
 using Flux
 using Flux: glorot_uniform
