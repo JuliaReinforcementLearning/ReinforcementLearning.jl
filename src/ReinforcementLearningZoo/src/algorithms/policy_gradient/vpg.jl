@@ -38,10 +38,10 @@ function RLBase.optimise!(p::VPG, ::PostEpisodeStage, trajectory::Trajectory)
     empty!(trajectory.container)
 end
 
-function RLBase.optimise!(π::VPG, ::PostActStage, episode::Episode)
+function RLBase.optimise!(π::VPG, episode::Episode)
     gain = discount_rewards(episode[:reward][:], π.γ)
     for inds in Iterators.partition(shuffle(π.rng, 1:length(episode)), π.batch_size)
-        RLBase.optimise!(π, PostActStage(), (state=episode[:state][inds], action=episode[:action][inds], gain=gain[inds]))
+        RLBase.optimise!(π, (state=episode[:state][inds], action=episode[:action][inds], gain=gain[inds]))
     end
 end
 
@@ -56,7 +56,7 @@ function RLBase.optimise!(p::VPG, batch::NamedTuple{(:state, :action, :gain)})
         loss = 0
     else
         gs = gradient(params(B)) do
-            δ = g - vec(B(s))
+            δ = g - vec(RLCore.forward(B, s))
             loss = mean(δ .^ 2)
             ignore_derivatives() do
                 # @info "VPG/baseline" loss = loss δ

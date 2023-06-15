@@ -41,7 +41,7 @@ function RLCore.Experiment(
                         sync_freq=100
                     ),
                     optimiser=Adam(),
-                ) |> gpu,
+                ),
                 n=n,
                 γ=γ,
                 is_enable_double_DQN=is_enable_double_DQN,

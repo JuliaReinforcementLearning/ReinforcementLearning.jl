@@ -37,7 +37,7 @@ function RLCore.Experiment(
                         Dense(ns, 128, relu; init=glorot_uniform(rng)),
                         Dense(128, 128, relu; init=glorot_uniform(rng)),
                         Dense(128, na; init=glorot_uniform(rng)),
-                    ) |> gpu,
+                    ),
                     optimizer=Adam(),
                 ),
                 batch_size=32,

@@ -139,7 +139,7 @@ function project_distribution(supports, weights, target_support, delta_z, vmin, 
     reshape(sum(projection, dims=1), n_atoms, batch_size)
 end
 
-function RLBase.optimise!(policy::QBasedPolicy{<:RainbowLearner}, ::PostActStage, trajectory::Trajectory)
+function RLBase.optimise!(policy::QBasedPolicy{L, Ex}, ::PostActStage, trajectory::Trajectory) where {L<:RainbowLearner, Ex<:AbstractExplorer}
     for batch in trajectory
         res = RLBase.optimise!(policy, PostActStage(), batch) |> send_to_host
         if !isnothing(res)

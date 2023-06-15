@@ -34,7 +34,7 @@ function RLCore.Experiment(
             ψ=Dense(ns, n_hidden, relu; init=init),
             ϕ=Dense(Nₑₘ, n_hidden, relu; init=init),
             header=Dense(n_hidden, na; init=init),
-        ) |> gpu
+        )
 
     agent = Agent(
         policy=QBasedPolicy(
