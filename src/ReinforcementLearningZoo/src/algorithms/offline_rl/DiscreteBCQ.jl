@@ -16,7 +16,7 @@ See paper: [Benchmarking Batch Deep Reinforcement Learning Algorithms](https://a
 - `batch_size::Int=32`
 - `update_freq::Int`: the frequency of updating the `approximator`.
 - `update_step::Int = 0`
-- `rng = Random.GLOBAL_RNG`
+- `rng = Random.default_rng()`
 """
 mutable struct BCQDLearner{Aq<:ActorCritic,At<:ActorCritic,R<:AbstractRNG} <: Any
     approximator::Aq
@@ -44,7 +44,7 @@ function BCQDLearner(;
     batch_size::Int=32,
     update_freq::Int=10,
     update_step::Int=0,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 ) where {Aq<:ActorCritic,At<:ActorCritic}
     copyto!(approximator, target_approximator)
     BCQDLearner(

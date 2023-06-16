@@ -49,7 +49,7 @@ Some useful papers while implementing this algorithm:
 - `is_linear_averaging=true`
 - `weighted_averaging_delay=0`. The averaging delay in number of iterations. Only valid when `is_linear_averaging` is set to `true`.
 - `state_type=String`, the data type of information set.
-- `rng=Random.GLOBAL_RNG`
+- `rng=Random.default_rng()`
 """
 function TabularCFRPolicy(;
     is_reset_neg_regrets = true,
@@ -57,7 +57,7 @@ function TabularCFRPolicy(;
     weighted_averaging_delay = 0,
     is_alternating_update = true,
     state_type = String,
-    rng = Random.GLOBAL_RNG,
+    rng = Random.default_rng(),
     n_iteration = 1,
 )
     TabularCFRPolicy(

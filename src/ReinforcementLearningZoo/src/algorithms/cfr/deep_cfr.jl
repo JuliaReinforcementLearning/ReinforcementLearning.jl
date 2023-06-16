@@ -30,7 +30,7 @@ Base.@kwdef mutable struct DeepCFR{TP,TV,TMP,TMV,I,R,P} <: AbstractCFRPolicy
     batch_size_Π::Int = 32
     n_training_steps_V::Int = 1
     n_training_steps_Π::Int = 1
-    rng::R = Random.GLOBAL_RNG
+    rng::R = Random.default_rng()
     initializer::I = glorot_normal(rng)
     max_grad_norm::Float32 = 10.0f0
     # for logging

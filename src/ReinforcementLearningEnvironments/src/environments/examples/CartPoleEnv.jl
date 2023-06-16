@@ -60,7 +60,7 @@ end
 # Keyword arguments
 - `T = Float64`
 - `continuous = false`
-- `rng = Random.GLOBAL_RNG`
+- `rng = Random.default_rng()`
 - `gravity = T(9.8)`
 - `masscart = T(1.0)`
 - `masspole = T(0.1)`
@@ -71,7 +71,7 @@ end
 - `thetathreshold = 12.0 # degrees`
 - `xthreshold` = 2.4`
 """
-function CartPoleEnv(; T=Float64, continuous=false, rng=Random.GLOBAL_RNG, kwargs...)
+function CartPoleEnv(; T=Float64, continuous=false, rng=Random.default_rng(), kwargs...)
     params = CartPoleEnvParams{T}(; kwargs...)
     env = CartPoleEnv(params, zeros(T, 4), continuous ? zero(T) : zero(Int), false, 0, rng)
     reset!(env)

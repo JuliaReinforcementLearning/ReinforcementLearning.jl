@@ -5,7 +5,7 @@ using StatsBase: sample, Weights
 using Flux: softmax
 
 """
-    WeightedSoftmaxExplorer(;rng=Random.GLOBAL_RNG)
+    WeightedSoftmaxExplorer(;rng=Random.default_rng())
 
 See also: [`WeightedExplorer`](@ref)
 """
@@ -13,7 +13,7 @@ struct WeightedSoftmaxExplorer <: AbstractExplorer
     rng::AbstractRNG
 end
 
-function WeightedSoftmaxExplorer(; rng = Random.GLOBAL_RNG)
+function WeightedSoftmaxExplorer(; rng = Random.default_rng())
     WeightedSoftmaxExplorer(rng)
 end
 

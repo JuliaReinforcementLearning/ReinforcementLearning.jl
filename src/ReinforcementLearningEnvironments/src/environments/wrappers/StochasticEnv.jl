@@ -7,7 +7,7 @@ struct StochasticEnv{E<:AbstractEnv,R} <: AbstractEnvWrapper
     rng::R
 end
 
-function StochasticEnv(env; rng = Random.GLOBAL_RNG)
+function StochasticEnv(env; rng = Random.default_rng())
     ChanceStyle(env) === EXPLICIT_STOCHASTIC ||
         throw(ArgumentError("only environments of EXPLICIT_STOCHASTIC style is supported"))
     env = StochasticEnv(env, rng)

@@ -51,7 +51,7 @@ can be implemented using a `VAE` in a `NeuralNetworkApproximator`.
 - `start_step::Int = 1000`
 - `update_freq::Int = 50`, the frequency of updating the `approximator`.
 - `update_step::Int = 0`
-- `rng = Random.GLOBAL_RNG`
+- `rng = Random.default_rng()`
 """
 function BCQLearner(;
     policy,
@@ -69,7 +69,7 @@ function BCQLearner(;
     start_step=1000,
     update_freq=50,
     update_step=0,
-    rng=Random.GLOBAL_RNG
+    rng=Random.default_rng()
 )
     copyto!(policy, target_policy)  # force sync
     copyto!(qnetwork1, target_qnetwork1)  # force sync

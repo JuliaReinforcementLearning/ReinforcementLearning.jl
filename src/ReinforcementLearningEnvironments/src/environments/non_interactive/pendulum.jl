@@ -41,7 +41,7 @@ end
 - `mass = 1.0`
 - `step_size = 0.01`
 - `maximum_time = 10.0`
-- `rng = Random.GLOBAL_RNG`
+- `rng = Random.default_rng()`
 """
 function PendulumNonInteractiveEnv(;
     float_type = Float64,
@@ -50,7 +50,7 @@ function PendulumNonInteractiveEnv(;
     mass = 1.0,
     step_size = 0.01,
     maximum_time = 10.0,
-    rng = Random.GLOBAL_RNG,
+    rng = Random.default_rng(),
 )
     parameters = PendulumNonInteractiveEnvParams{float_type}(
         gravity,
