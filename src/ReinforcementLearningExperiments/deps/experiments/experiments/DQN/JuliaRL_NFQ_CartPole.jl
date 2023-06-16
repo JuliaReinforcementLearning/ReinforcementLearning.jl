@@ -1,7 +1,7 @@
 # ---
-# title: JuliaRL\_NFQ\_PendulumDiscrete
+# title: JuliaRL\_NFQ\_CartPole
 # cover: assets/JuliaRL_BasicDQN_CartPole.png
-# description: NFQ applied to discrete Pendulum
+# description: NFQ applied to the cartpole environment
 # date: 2023-06
 # author: "[Lucas Bex](https://github.com/CasBex)"
 # ---
@@ -13,7 +13,7 @@ using Flux
 using Flux: glorot_uniform
 
 using StableRNGs: StableRNG
-using Flux.Losses: huber_loss
+using Flux.Losses: mse
 
 function RLCore.Experiment(
     ::Val{:JuliaRL},
@@ -31,30 +31,32 @@ function RLCore.Experiment(
                 action_space=action_space(env),
                 approximator=Approximator(
                     model=Chain(
-                        Dense(ns+na, 64, relu; init=glorot_uniform(rng)),
-                        Dense(64, 64, relu; init=glorot_uniform(rng)),
-                        Dense(64, 1; init=glorot_uniform(rng)),
+                        Dense(ns+na, 5, σ; init=glorot_uniform(rng)),
+                        Dense(5, 5, σ; init=glorot_uniform(rng)),
+                        Dense(5, 1; init=glorot_uniform(rng)),
                     ) |> gpu,
                     optimiser=RMSProp()
                 ),
-                loss_function=huber_loss,
-                epochs=500,
-                num_iterations=10
+                loss_function=mse,
+                epochs=100,
+                num_iterations=10,
+                γ = 0.95f0
             ),
             explorer=EpsilonGreedyExplorer(
                 kind=:exp,
-                ϵ_stable=0.01,
-                decay_steps=500,
+                ϵ_stable=0.001,
+                warmup_steps=500,
                 rng=rng,
             ),
         ),
         trajectory=Trajectory(
             container=CircularArraySARTTraces(
-                capacity=1000,
+                capacity=10_000,
                 state=Float32 => (ns,),
+                action=Float32 => (na,),
             ),
             sampler=BatchSampler{SS′ART}(
-                batch_size=1000,
+                batch_size=10_000,
                 rng=rng
             ),
             controller=InsertSampleRatioController(
@@ -71,7 +73,7 @@ function RLCore.Experiment(
 
 #+ tangle=false
 using Plots
-pyplot() # hide
+# pyplot() # hide
 ex = E`JuliaRL_NFQ_CartPole`
 run(ex)
 plot(ex.hook.rewards)
