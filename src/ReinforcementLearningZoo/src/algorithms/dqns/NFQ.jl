@@ -30,27 +30,22 @@ Base.@kwdef struct NFQ{A, R, F} <: AbstractLearner
     γ::Float32 = 0.9f0
 end
 
-function NFQ(;
-    action_space::AbstractVector,
-    approximator::A,
-    num_iterations::Integer = 20,
-    epochs::Integer = 1000,
-    loss_function::Any = mse,
-    rng=Random.default_rng(),
-    γ::Float32 = 0.9f0,
-    ) where {A}
-    NFQ(action_space, approximator, num_iterations, epochs, loss_function, rng, γ)
-end
+# function NFQ(;
+#     action_space::AbstractVector,
+#     approximator::A,
+#     num_iterations::Integer = 20,
+#     epochs::Integer = 1000,
+#     loss_function::Any = mse,
+#     rng=Random.default_rng(),
+#     γ::Float32 = 0.9f0,
+#     ) where {A}
+#     NFQ(action_space, approximator, num_iterations, epochs, loss_function, rng, γ)
+# end
 
 # Copied from BasicDQN but sure whether it's appropriate
 @functor NFQ (approximator,)
 
 RLCore.forward(L::NFQ, s::AbstractArray) = RLCore.forward(L.approximator, s)
-
-# Flux.functor(x::NFQ) = (Q = x.approximator,), y -> begin
-#     x = @set x.approximator = y.Q
-#     x
-# end
 
 function RLCore.forward(learner::NFQ, env::AbstractEnv)
     as = action_space(env)
