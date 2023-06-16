@@ -1,7 +1,7 @@
 export QRDQNLearner, quantile_huber_loss
 
 using ChainRulesCore: ignore_derivatives
-using Random: GLOBAL_RNG, AbstractRNG
+import Random
 using StatsBase: mean
 using Functors: @functor
 using Flux
@@ -22,12 +22,12 @@ function quantile_huber_loss(ŷ, y; κ=1.0f0)
     mean(sum(loss; dims=1))
 end
 
-Base.@kwdef mutable struct QRDQNLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
+Base.@kwdef mutable struct QRDQNLearner{A<:Approximator{<:TwinNetwork}, F, R} <: AbstractLearner
     approximator::A
     n_quantile::Int
-    loss_func::Any = quantile_huber_loss
+    loss_func::F = quantile_huber_loss
     γ::Float32 = 0.99f0
-    rng::AbstractRNG = GLOBAL_RNG
+    rng::R = Random.default_rng()
     # for recording
     loss::Float32 = 0.0f0
 end
@@ -66,5 +66,5 @@ function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
         loss
     end
 
-    optimise!(A, gs)
+    RLBase.optimise!(A, gs)
 end

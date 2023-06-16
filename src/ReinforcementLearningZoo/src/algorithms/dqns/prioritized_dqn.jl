@@ -1,19 +1,19 @@
 export PrioritizedDQNLearner
 
-using Random: AbstractRNG, GLOBAL_RNG
+import Random
 using Functors: @functor
 using LinearAlgebra: dot
 using Flux
 using Flux: gradient, params
 
-Base.@kwdef mutable struct PrioritizedDQNLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
+Base.@kwdef mutable struct PrioritizedDQNLearner{A<:Approximator{<:TwinNetwork}, R} <: AbstractLearner
     approximator::A
     loss_func::Any  # !!! here the loss func must return the loss before reducing over the batch dimension
     n::Int = 1
     γ::Float32 = 0.99f0
     β_priority::Float32 = 0.5f0
     is_enable_double_DQN::Bool = true
-    rng::AbstractRNG = GLOBAL_RNG
+    rng::R = Random.default_rng()
     # for logging
     loss::Float32 = 0.0f0
 end
@@ -67,13 +67,13 @@ function RLBase.optimise!(
         loss
     end
 
-    optimise!(A, gs)
-    k => p′
+    RLBase.optimise!(A, gs)
+    k, p′
 end
 
-function RLBase.optimise!(policy::QBasedPolicy{<:PrioritizedDQNLearner}, ::PostActStage, trajectory::Trajectory)
+function RLBase.optimise!(policy::QBasedPolicy{L, Ex}, ::PostActStage, trajectory::Trajectory) where {L<:PrioritizedDQNLearner, Ex<:AbstractExplorer}
     for batch in trajectory
-        k, p = optimise!(policy, PostActStage(), batch) |> send_to_host
+        k, p = RLBase.optimise!(policy.learner, batch) |> send_to_host
         trajectory[:priority, k] = p
     end
 end
