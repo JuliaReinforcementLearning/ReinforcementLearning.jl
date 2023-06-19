@@ -37,8 +37,5 @@ end
 RLBase.prob(p::QBasedPolicy{L,Ex}, env::AbstractEnv) where {L<:AbstractLearner,Ex<:AbstractExplorer} =
     prob(p.explorer, forward(p.learner, env), legal_action_space_mask(env))
 
-function RLBase.optimise!(p::QBasedPolicy{L,Ex}, ::PreActStage, trajectory::Trajectory) where {L<:AbstractLearner,Ex<:AbstractExplorer} 
-    for batch in trajectory
-       RLBase.optimise!(p.learner, batch)
-    end
-end
+#the internal learner defines the optimization stage.
+RLBase.optimise!(p::QBasedPolicy, s::AbstractStage, trajectory::Trajectory) = RLBase.optimise!(p.learner, s, trajectory)
