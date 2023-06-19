@@ -48,11 +48,7 @@ function RLBase.optimise!(learner::NFQ, ::PostEpisodeStage, trajectory::Trajecto
     loss_func = learner.loss_function
     as = learner.action_space
     las = length(as)
-    batch = nothing
-    for b in trajectory
-        batch = b
-    end
-    batch === nothing && return
+    batch = ReinforcementLearningTrajectories.sample(trajectory)
     
     (s, a, r, ss) = batch[[:state, :action, :reward, :next_state]]
     a = Float32.(a)
