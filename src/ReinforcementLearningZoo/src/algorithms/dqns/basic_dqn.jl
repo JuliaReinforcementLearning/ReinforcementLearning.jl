@@ -23,9 +23,9 @@ own customized algorithm.
 - `loss_func=huber_loss`: the loss function to use.
 - `γ::Float32=0.99f0`: discount rate.
 """
-Base.@kwdef mutable struct BasicDQNLearner{Q} <: AbstractLearner
+Base.@kwdef mutable struct BasicDQNLearner{Q, F} <: AbstractLearner
     approximator::Q
-    loss_func::Any = huber_loss
+    loss_func::F = huber_loss
     γ::Float32 = 0.99f0
     # for debugging
     loss::Float32 = 0.0f0
@@ -37,13 +37,13 @@ RLCore.forward(L::BasicDQNLearner, s::AbstractArray) = RLCore.forward(L.approxim
 
 function RLCore.optimise!(
     learner::BasicDQNLearner,
-    batch::NamedTuple{SS′ART},
+    batch::NamedTuple
 )
 
     Q = learner.approximator
     γ = learner.γ
     loss_func = learner.loss_func
-
+    
     s, s′, a, r, t = send_to_device(device(Q), batch)
     a = CartesianIndex.(a, 1:length(a))
 
@@ -58,5 +58,5 @@ function RLCore.optimise!(
         loss
     end
 
-    optimise!(Q, gs)
+    RLBase.optimise!(Q, gs)
 end

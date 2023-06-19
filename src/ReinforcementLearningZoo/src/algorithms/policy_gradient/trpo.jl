@@ -35,7 +35,7 @@ end
 
 function Base.push!(p::Agent{<:TRPO}, ::PostEpisodeStage, env::AbstractEnv)
     p.trajectory.container[] = true
-    optimise!(p.policy, p.trajectory.container)
+    RLBase.optimise!(p.policy, p.trajectory.container)
     empty!(p.trajectory.container)
 end
 
@@ -44,7 +44,7 @@ RLBase.optimise!(::Agent{<:TRPO}, ::PostActStage) = nothing
 function RLBase.optimise!(π::TRPO, ::PostActStage, episode::Episode)
     gain = discount_rewards(episode[:reward][:], π.γ)
     for inds in Iterators.partition(shuffle(π.rng, 1:length(episode)), π.batch_size)
-        optimise!(π, (state=episode[:state][inds], action=episode[:action][inds], gain=gain[inds]))
+        RLBase.optimise!(π, (state=episode[:state][inds], action=episode[:action][inds], gain=gain[inds]))
     end
 end
 
@@ -66,7 +66,7 @@ function RLBase.optimise!(p::TRPO, ::PostActStage, batch::NamedTuple{(:state, :a
             end
             loss
         end
-        optimise!(B, gs)
+        RLBase.optimise!(B, gs)
     end
     
     # store logits as intermediate value

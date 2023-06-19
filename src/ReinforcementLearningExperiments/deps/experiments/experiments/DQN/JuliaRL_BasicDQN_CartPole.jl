@@ -7,7 +7,7 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo, ReinforcementLearningZoo
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using ReinforcementLearningEnvironments
 using Flux
 using Flux: glorot_uniform
@@ -33,7 +33,7 @@ function RLCore.Experiment(
                         Dense(ns, 128, relu; init=glorot_uniform(rng)),
                         Dense(128, 128, relu; init=glorot_uniform(rng)),
                         Dense(128, na; init=glorot_uniform(rng)),
-                    ) |> gpu,
+                    ),
                     optimiser=Adam(),
                 ),
                 loss_func=huber_loss,

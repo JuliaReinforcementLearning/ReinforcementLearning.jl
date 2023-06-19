@@ -1,11 +1,11 @@
 export RainbowLearner
 
-using Random: AbstractRNG, GLOBAL_RNG
+import Random
 using Flux: params, unsqueeze, softmax, gradient
 using Flux.Losses: logitcrossentropy
 using Functors: @functor
 
-Base.@kwdef mutable struct RainbowLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
+Base.@kwdef mutable struct RainbowLearner{A<:Approximator{<:TwinNetwork}, F, R} <: AbstractLearner
     approximator::A
     Vₘₐₓ::Float32
     Vₘᵢₙ::Float32
@@ -17,8 +17,8 @@ Base.@kwdef mutable struct RainbowLearner{A<:Approximator{<:TwinNetwork}} <: Abs
     delta_z::Float32 = convert(Float32, support.step)
     default_priority::Float32 = 1.0f2
     β_priority::Float32 = 0.5f0
-    loss_func::Any = (ŷ, y) -> logitcrossentropy(ŷ, y; agg=identity)
-    rng::AbstractRNG = GLOBAL_RNG
+    loss_func::F = (ŷ, y) -> logitcrossentropy(ŷ, y; agg=identity)
+    rng::R = Random.default_rng()
     # for logging
     loss::Float32 = 0.0f0
 end
@@ -109,7 +109,7 @@ function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
         loss
     end
 
-    optimise!(A, gs)
+    RLBase.optimise!(A, gs)
 
     is_use_PER ? batch.key => updated_priorities : nothing
 end
@@ -139,9 +139,9 @@ function project_distribution(supports, weights, target_support, delta_z, vmin, 
     reshape(sum(projection, dims=1), n_atoms, batch_size)
 end
 
-function RLBase.optimise!(policy::QBasedPolicy{<:RainbowLearner}, ::PostActStage, trajectory::Trajectory)
+function RLBase.optimise!(policy::QBasedPolicy{L, Ex}, ::PostActStage, trajectory::Trajectory) where {L<:RainbowLearner, Ex<:AbstractExplorer}
     for batch in trajectory
-        res = optimise!(policy, PostActStage(), batch) |> send_to_host
+        res = RLBase.optimise!(policy, PostActStage(), batch) |> send_to_host
         if !isnothing(res)
             k, p = res
             trajectory[:priority, k] = p
