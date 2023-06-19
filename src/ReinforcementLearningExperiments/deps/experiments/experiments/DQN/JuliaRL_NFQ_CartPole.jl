@@ -34,7 +34,7 @@ function RLCore.Experiment(
                         Dense(ns+na, 5, σ; init=glorot_uniform(rng)),
                         Dense(5, 5, σ; init=glorot_uniform(rng)),
                         Dense(5, 1; init=glorot_uniform(rng)),
-                    ) |> gpu,
+                    ),
                     optimiser=RMSProp()
                 ),
                 loss_function=mse,
