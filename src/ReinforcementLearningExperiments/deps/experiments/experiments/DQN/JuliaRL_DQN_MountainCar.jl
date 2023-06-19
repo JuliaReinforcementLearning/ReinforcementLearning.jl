@@ -26,20 +26,20 @@ function RLCore.Experiment(
     agent = Agent(
         policy = QBasedPolicy(
             learner = DQNLearner(
-                approximator = NeuralNetworkApproximator(
+                approximator = Approximator(
                     model = Chain(
                         Dense(ns, 64, relu; init = glorot_uniform(rng)),
                         Dense(64, 64, relu; init = glorot_uniform(rng)),
                         Dense(64, na; init = glorot_uniform(rng)),
-                    ) |> gpu,
+                    ),
                     optimizer = Adam(),
                 ),
-                target_approximator = NeuralNetworkApproximator(
+                target_approximator = Approximator(
                     model = Chain(
                         Dense(ns, 64, relu; init = glorot_uniform(rng)),
                         Dense(64, 64, relu; init = glorot_uniform(rng)),
                         Dense(64, na; init = glorot_uniform(rng)),
-                    ) |> gpu,
+                    ),
                     optimizer = Adam(),
                 ),
                 loss_func = huber_loss,
