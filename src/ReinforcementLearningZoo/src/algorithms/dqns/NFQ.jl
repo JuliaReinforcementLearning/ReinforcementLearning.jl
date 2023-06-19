@@ -39,6 +39,12 @@ function RLCore.forward(learner::NFQ, env::AbstractEnv)
     return vcat(repeat(state(env), inner=(1, length(as))), transpose(as)) |> x -> send_to_device(device(learner.approximator), x) |> x->RLCore.forward(learner, x) |> send_to_host |> vec 
 end
 
+function RLBase.optimise!(::NFQ, ::NamedTuple) end
+
+function RLBase.optimise!(p::QBasedPolicy{L,Ex}, s::PostEpisodeStage, trajectory::Trajectory) where {L<:NFQ,Ex<:AbstractExplorer} 
+       RLBase.optimise!(p.learner, s, trajectory)
+end
+
 function RLBase.optimise!(learner::NFQ, ::PostEpisodeStage, trajectory::Trajectory)
     Q = learner.approximator
     γ = learner.γ
