@@ -5,15 +5,15 @@ using Functors: @functor
 
 """
     NFQ{A<:AbstractApproximator, F, R} <: AbstractLearner
-    NFQ(approximator::A, num_iterations::Integer epochs::Integer, loss_function::F, batch_size::Integer, rng::R, γ::Float32) where {A<:AbstractApproximator, F, R}
+    NFQ(action_space::AbstractVector, approximator::A, num_iterations::Integer epochs::Integer, loss_function::F, rng::R, γ::Float32) where {A, F, R}
 Neural Fitted Q-iteration as implemented in [1]
 
 # Keyword arguments
-- `approximator::AbstractApproximator` neural network
+- `action_space::AbstractVector` Action space of the environment (necessary in the optimise! step)
+- `approximator::A` Q-function approximator (typically a neural network)
 - `num_iterations::Integer` number of value iteration iterations in FQI loop (i.e. the outer loop)
-- `epochs` number of epochs to train neural network per iteration
+- `epochs::Integer` number of epochs to train neural network per iteration
 - `loss_function::F` loss function of the NN
-- `sampler::BatchSampler{SARTS}` data sampler
 - `rng::R` random number generator
 - `γ::Float32` discount rate
 
