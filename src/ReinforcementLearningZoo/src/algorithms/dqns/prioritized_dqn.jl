@@ -71,9 +71,9 @@ function RLBase.optimise!(
     k, p′
 end
 
-function RLBase.optimise!(policy::QBasedPolicy{L, Ex}, ::PostActStage, trajectory::Trajectory) where {L<:PrioritizedDQNLearner, Ex<:AbstractExplorer}
+function RLBase.optimise!(learner::PrioritizedDQNLearner, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory
-        k, p = RLBase.optimise!(policy.learner, batch) |> send_to_host
+        k, p = RLBase.optimise!(learner, batch) |> send_to_host
         trajectory[:priority, k] = p
     end
 end
