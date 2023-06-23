@@ -18,6 +18,12 @@ RLCore.forward(L::DQNLearner, s::A) where {A<:AbstractArray}  = RLCore.forward(L
 
 @functor DQNLearner (approximator,)
 
+function RLCore.optimise!(learner::DQNLearner, ::PostActStage, trajectory::Trajectory)
+    for batch in trajectory
+        optimise!(learner, batch)
+    end
+end
+
 function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
     A = learner.approximator
     Q = A.model.source

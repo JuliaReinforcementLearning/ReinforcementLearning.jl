@@ -7,6 +7,11 @@ using Functors: @functor
 
 """
     QBasedPolicy(;learner, explorer)
+
+Wraps a learner and an explorer. The learner is a struct that should predict the Q-value of each legal
+action of an environment at its current state. It is typically a table or a neural network. 
+QBasedPolicy can be queried for an action with `RLBase.plan!`, the explorer will affect the action selection
+accordingly.
 """
 Base.@kwdef mutable struct QBasedPolicy{L,E} <: AbstractPolicy
     "estimate the Q value"
@@ -37,8 +42,5 @@ end
 RLBase.prob(p::QBasedPolicy{L,Ex}, env::AbstractEnv) where {L<:AbstractLearner,Ex<:AbstractExplorer} =
     prob(p.explorer, forward(p.learner, env), legal_action_space_mask(env))
 
-function RLBase.optimise!(p::QBasedPolicy{L,Ex}, ::PostActStage, trajectory::Trajectory) where {L<:AbstractLearner,Ex<:AbstractExplorer} 
-    for batch in trajectory
-       RLBase.optimise!(p.learner, batch)
-    end
-end
+#the internal learner defines the optimization stage.
+RLBase.optimise!(p::QBasedPolicy, s::AbstractStage, trajectory::Trajectory) = RLBase.optimise!(p.learner, s, trajectory)

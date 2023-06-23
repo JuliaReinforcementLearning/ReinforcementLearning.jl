@@ -10,6 +10,8 @@ Base.show(io::IO, m::MIME"text/plain", L::AbstractLearner) = show(io, m, convert
 # Take Learner and Environment, get state, send to RLCore.forward(Learner, State)
 forward(L::Le, env::E) where {Le <: AbstractLearner, E <: AbstractEnv} = env |> state |> send_to_device(L.approximator) |> x -> forward(L, x) |> send_to_device(env) 
 
+function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::Trajectory) end
+
 Base.@kwdef mutable struct Approximator{M,O}
     model::M
     optimiser::O
