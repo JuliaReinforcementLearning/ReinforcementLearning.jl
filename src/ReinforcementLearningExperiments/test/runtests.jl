@@ -3,6 +3,7 @@ using CUDA
 
 CUDA.allowscalar(false)
 
+run(E`JuliaRL_NFQ_CartPole`)
 run(E`JuliaRL_BasicDQN_CartPole`)
 run(E`JuliaRL_DQN_CartPole`)
 run(E`JuliaRL_PrioritizedDQN_CartPole`)

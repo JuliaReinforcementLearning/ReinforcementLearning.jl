@@ -1,6 +1,7 @@
 {
   "description": "DQN related experiments.",
   "order": [
+    "JuliaRL_NFQ_CartPole.jl",
     "JuliaRL_BasicDQN_CartPole.jl",
     "JuliaRL_BasicDQN_MountainCar.jl",
     "JuliaRL_BasicDQN_PendulumDiscrete.jl",
