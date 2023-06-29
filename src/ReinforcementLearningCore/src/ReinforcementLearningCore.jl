@@ -14,4 +14,7 @@ include("core/core.jl")
 include("policies/policies.jl")
 include("utils/utils.jl")
 
+# Global timer for TimerOutputs.jl
+const timer = TimerOutput()
+
 end # module
