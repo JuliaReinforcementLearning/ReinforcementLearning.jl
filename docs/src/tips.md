@@ -27,3 +27,8 @@ dependency, remember to update both `docs/Project.toml` and
     All the cells after the `#+ tangle=true` line in `Your_Experment.jl` will be extracted into the
     `ReinforcementLearningExperiments` package automatically. This feature is
     supported by [Weave.jl](https://weavejl.mpastell.com/stable/usage/#tangle).
+
+## How to enable debug timings for experiment runs?
+
+Call `RLCore.TimerOutputs.enable_debug_timings(RLCore)` and default timings for hooks, policies and optimization steps will be printed. How do I reset the timer? Call `RLCore.TimerOutputs.reset_timer!(RLCore.timer)`. How do I show the timer results? Call `RLCore.timer`.
+
