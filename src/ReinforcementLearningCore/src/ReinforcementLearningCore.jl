@@ -1,5 +1,6 @@
 module ReinforcementLearningCore
 
+using TimerOutputs
 using ReinforcementLearningBase
 using Reexport
 
