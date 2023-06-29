@@ -87,37 +87,38 @@ function _run(policy::AbstractPolicy,
     push!(policy, PreExperimentStage(), env)
     is_stop = false
     while !is_stop
-        @timeit_debug to "reset!" reset!(env)
-        @timeit_debug to "push!(policy) PreEpisodeStage" push!(policy, PreEpisodeStage(), env)
-        @timeit_debug to "optimise! PreEpisodeStage" optimise!(policy, PreEpisodeStage())
-        @timeit_debug to "push!(hook) PreEpisodeStage" push!(hook, PreEpisodeStage(), policy, env)
+        # NOTE: @timeit_debug statements are used for debug logging
+        @timeit_debug to "reset!"                            reset!(env)
+        @timeit_debug to "push!(policy) PreEpisodeStage"     push!(policy, PreEpisodeStage(), env)
+        @timeit_debug to "optimise! PreEpisodeStage"         optimise!(policy, PreEpisodeStage())
+        @timeit_debug to "push!(hook) PreEpisodeStage"       push!(hook, PreEpisodeStage(), policy, env)
 
 
         while !reset_condition(policy, env) # one episode
-            @timeit_debug to "push!(policy) PreActStage" push!(policy, PreActStage(), env)
-            @timeit_debug to "optimise! PreActStage" optimise!(policy, PreActStage())
-            @timeit_debug to "push!(hook) PreActStage" push!(hook, PreActStage(), policy, env)
+            @timeit_debug to "push!(policy) PreActStage"     push!(policy, PreActStage(), env)
+            @timeit_debug to "optimise! PreActStage"         optimise!(policy, PreActStage())
+            @timeit_debug to "push!(hook) PreActStage"       push!(hook, PreActStage(), policy, env)
 
-            action = @timeit_debug to "plan!" RLBase.plan!(policy, env)
-            @timeit_debug to "act!" act!(env, action)
+            action = @timeit_debug to "plan!"                RLBase.plan!(policy, env)
+            @timeit_debug to "act!"                          act!(env, action)
 
-            @timeit_debug to "push!(policy) PostActStage" push!(policy, PostActStage(), env)
-            @timeit_debug to "optimise! PostActStage" optimise!(policy, PostActStage())
-            @timeit_debug to "push!(hook) PostActStage" push!(hook, PostActStage(), policy, env)
+            @timeit_debug to "push!(policy) PostActStage"    push!(policy, PostActStage(), env)
+            @timeit_debug to "optimise! PostActStage"        optimise!(policy, PostActStage())
+            @timeit_debug to "push!(hook) PostActStage"      push!(hook, PostActStage(), policy, env)
 
             if check_stop(stop_condition, policy, env)
                 is_stop = true
-                @timeit_debug to "push!(policy) PreActStage" push!(policy, PreActStage(), env)
-                @timeit_debug to "optimise! PreActStage" optimise!(policy, PreActStage())
-                @timeit_debug to "push!(hook) PreActStage" push!(hook, PreActStage(), policy, env)
-                @timeit_debug to "plan!" RLBase.plan!(policy, env)  # let the policy see the last observation
+                @timeit_debug to "push!(policy) PreActStage"   push!(policy, PreActStage(), env)
+                @timeit_debug to "optimise! PreActStage"       optimise!(policy, PreActStage())
+                @timeit_debug to "push!(hook) PreActStage"     push!(hook, PreActStage(), policy, env)
+                @timeit_debug to "plan!"                       RLBase.plan!(policy, env)  # let the policy see the last observation
                 break
             end
         end # end of an episode
 
-        @timeit_debug to "push!(policy) PostEpisodeStage" push!(policy, PostEpisodeStage(), env)  # let the policy see the last observation
-        @timeit_debug to "optimise! PostEpisodeStage" optimise!(policy, PostEpisodeStage())
-        @timeit_debug to "push!(hook) PostEpisodeStage" push!(hook, PostEpisodeStage(), policy, env)
+        @timeit_debug to "push!(policy) PostEpisodeStage"      push!(policy, PostEpisodeStage(), env)  # let the policy see the last observation
+        @timeit_debug to "optimise! PostEpisodeStage"          optimise!(policy, PostEpisodeStage())
+        @timeit_debug to "push!(hook) PostEpisodeStage"        push!(hook, PostEpisodeStage(), policy, env)
 
     end
     push!(policy, PostExperimentStage(), env)
