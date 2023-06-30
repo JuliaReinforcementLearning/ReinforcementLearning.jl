@@ -1,5 +1,6 @@
 using ReinforcementLearningCore: SRT
 using ReinforcementLearningBase
+using TimerOutputs
 
 @testset "core" begin
     @testset "simple workflow" begin
