@@ -248,8 +248,8 @@ function _update!(p::PPOPolicy, t::Any)
         states_plus_values,
         γ,
         λ;
-        dims=2,
-        terminal=t[:terminal]
+        dims = 2,
+        terminal = t[:terminal],
     )
     returns = to_device(advantages .+ select_last_dim(states_plus_values, 1:n_rollout))
     advantages = to_device(advantages)
@@ -263,8 +263,11 @@ function _update!(p::PPOPolicy, t::Any)
         for i in 1:n_microbatches
             inds = rand_inds[(i-1)*microbatch_size+1:i*microbatch_size]
             if t isa MaskedPPOTrajectory
-                lam = select_last_dim(flatten_batch(select_last_dim(LAM, 2:n+1)), inds)
+                # lam = select_last_dim(flatten_batch(select_last_dim(LAM, 2:n+1)),inds,)
 
+                ### LEGAL ACTION MASK CORRECTION
+                lam = select_last_dim(select_last_dim(LAM, 2:n+1), inds)
+                ###
             else
                 lam = nothing
             end
@@ -305,8 +308,19 @@ function _update!(p::PPOPolicy, t::Any)
                     p′ = softmax(logit′)
                     log_p′ = logsoftmax(logit′)
                     log_p′ₐ = log_p′[a]
-                    entropy_loss = -sum(p′ .* log_p′) * 1 // size(p′, 2)
+                    # entropy_loss = -sum(p′ .* log_p′) * 1 // size(p′, 2)  
+                    
+                    ### ENTROPY LOSS CORRECTION
+                    sum_p_logp = 0.0
+                    for (i,val) in enumerate(p′)
+                        if val != 0
+                            sum_p_logp += val * log_p′[i]
+                        end
+                    end
+                    entropy_loss = -sum_p_logp * 1 // size(p′, 2)
+                    ###
                 end
+
                 ratio = exp.(log_p′ₐ .- log_p)
                 surr1 = ratio .* adv
                 surr2 = clamp.(ratio, 1.0f0 - clip_range, 1.0f0 + clip_range) .* adv
