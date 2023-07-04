@@ -255,8 +255,9 @@ Transform a vector containing the non-zero elements of a lower triangular da x d
 function vec_to_tril(cholesky_vec, da)
     batch_size = size(cholesky_vec, 3)
     c2idx(i, j) = ((2da - j) * (j - 1)) ÷ 2 + i #return the position in cholesky_vec of the element of the triangular matrix at coordinates (i,j)
+    softplusbeta(x) = log(exp(0.1f0 * x) +1)*10f0 #a softer softplus to avoid vanishing values
     function f(j) #return a slice (da x 1 x batchsize) containing the jth columns of the lower triangular cholesky decomposition of the covariance
-        tc_diag = softplus.(cholesky_vec[c2idx(j, j):c2idx(j, j), :, :])
+        tc_diag = softplusbeta.(cholesky_vec[c2idx(j, j):c2idx(j, j), :, :]) .+ 1f-5
         tc_other = cholesky_vec[c2idx(j, j)+1:c2idx(j + 1, j + 1)-1, :, :]
         zs = ignore_derivatives() do
             zs = similar(cholesky_vec, da - size(tc_other, 1) - 1, 1, batch_size)
