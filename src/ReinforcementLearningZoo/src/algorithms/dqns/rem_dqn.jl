@@ -25,6 +25,12 @@ function RLCore.forward(L::REMDQNLearner, s::A) where {A<:AbstractArray}
     vec(mean(q, dims=2))
 end
 
+function RLCore.optimise!(learner::REMDQNLearner, ::PostActStage, trajectory::Trajectory)
+    for batch in trajectory
+        optimise!(learner, batch)
+    end
+end
+
 function RLBase.optimise!(learner::REMDQNLearner, batch::NamedTuple)
     A = learner.approximator
     Q = A.model.source

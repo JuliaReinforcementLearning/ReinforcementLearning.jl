@@ -108,34 +108,35 @@ function Base.run(
     push!(multiagent_policy, PreExperimentStage(), env)
     is_stop = false
     while !is_stop
-        reset!(env)
-        push!(multiagent_policy, PreEpisodeStage(), env)
-        optimise!(multiagent_policy, PreEpisodeStage())
-        push!(multiagent_hook, PreEpisodeStage(), multiagent_policy, env)
+        # NOTE: @timeit_debug statements are for debug logging
+        @timeit_debug timer "reset!"                             reset!(env)
+        @timeit_debug timer "push!(policy) PreEpisodeStage"      push!(multiagent_policy, PreEpisodeStage(), env)
+        @timeit_debug timer "optimise! PreEpisodeStage"          optimise!(multiagent_policy, PreEpisodeStage())
+        @timeit_debug timer "push!(hook) PreEpisodeStage"        push!(multiagent_hook, PreEpisodeStage(), multiagent_policy, env)
 
         while !(reset_condition(multiagent_policy, env) || is_stop) # one episode
             for player in CurrentPlayerIterator(env)
                 policy = multiagent_policy[player] # Select appropriate policy
                 hook = multiagent_hook[player] # Select appropriate hook
-                push!(policy, PreActStage(), env)
-                optimise!(policy, PreActStage())
-                push!(hook, PreActStage(), policy, env)
+                @timeit_debug timer "push!(policy) PreActStage"    push!(policy, PreActStage(), env)
+                @timeit_debug timer "optimise! PreActStage"        optimise!(policy, PreActStage())
+                @timeit_debug timer "push!(hook) PreActStage"      push!(hook, PreActStage(), policy, env)
                 
-                action = RLBase.plan!(policy, env)
-                act!(env, action)
+                action = @timeit_debug timer "plan!"               RLBase.plan!(policy, env)
+                @timeit_debug timer "act!" act!(env, action)
 
                 
 
-                push!(policy, PostActStage(), env)
-                optimise!(policy, PostActStage())
-                push!(hook, PostActStage(), policy, env)
+                @timeit_debug timer "push!(policy) PostActStage"     push!(policy, PostActStage(), env)
+                @timeit_debug timer "optimise! PostActStage"         optimise!(policy, PostActStage())
+                @timeit_debug timer "push!(hook) PostActStage"       push!(hook, PostActStage(), policy, env)
 
                 if check_stop(stop_condition, policy, env)
                     is_stop = true
-                    push!(multiagent_policy, PreActStage(), env)
-                    optimise!(multiagent_policy, PreActStage())
-                    push!(multiagent_hook, PreActStage(), policy, env)
-                    RLBase.plan!(multiagent_policy, env)  # let the policy see the last observation
+                    @timeit_debug timer "push!(policy) PreActStage"  push!(multiagent_policy, PreActStage(), env)
+                    @timeit_debug timer "optimise! PreActStage"      optimise!(multiagent_policy, PreActStage())
+                    @timeit_debug timer "push!(hook) PreActStage"    push!(multiagent_hook, PreActStage(), policy, env)
+                    @timeit_debug timer "plan!"                      RLBase.plan!(multiagent_policy, env)  # let the policy see the last observation
                     break
                 end
 
@@ -145,9 +146,9 @@ function Base.run(
             end
         end # end of an episode
 
-        push!(multiagent_policy, PostEpisodeStage(), env)  # let the policy see the last observation
-        optimise!(multiagent_policy, PostEpisodeStage())
-        push!(multiagent_hook, PostEpisodeStage(), multiagent_policy, env)
+        @timeit_debug timer "push!(policy) PostEpisodeStage"         push!(multiagent_policy, PostEpisodeStage(), env)  # let the policy see the last observation
+        @timeit_debug timer "optimise! PostEpisodeStage"             optimise!(multiagent_policy, PostEpisodeStage())
+        @timeit_debug timer "push!(hook) PostEpisodeStage"           push!(multiagent_hook, PostEpisodeStage(), multiagent_policy, env)
     end
     push!(multiagent_policy, PostExperimentStage(), env)
     push!(multiagent_hook, PostExperimentStage(), multiagent_policy, env)

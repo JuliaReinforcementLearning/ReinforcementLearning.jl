@@ -35,6 +35,12 @@ end
 
 RLCore.forward(L::BasicDQNLearner, s::AbstractArray) = RLCore.forward(L.approximator, s)
 
+function RLCore.optimise!(learner::BasicDQNLearner, ::PostActStage, trajectory::Trajectory)
+    for batch in trajectory
+        optimise!(learner, batch)
+    end
+end
+
 function RLCore.optimise!(
     learner::BasicDQNLearner,
     batch::NamedTuple
