@@ -89,7 +89,7 @@ function _run(policy::AbstractPolicy,
     while !is_stop
         # NOTE: @timeit_debug statements are used for debug logging
         @timeit_debug timer "reset!"                            reset!(env)
-        @timeit_debug timer "push!(policy) PreEpisodeStage"     push!(policy, PreEpisodeStage(), env)
+        @timeit_debug timer "push!(policy) PreEpisodeStage"     push!(policy, PreEpisodeStage(), env) #get first state and push to traj
         @timeit_debug timer "optimise! PreEpisodeStage"         optimise!(policy, PreEpisodeStage())
         @timeit_debug timer "push!(hook) PreEpisodeStage"       push!(hook, PreEpisodeStage(), policy, env)
 
@@ -99,10 +99,10 @@ function _run(policy::AbstractPolicy,
             @timeit_debug timer "optimise! PreActStage"         optimise!(policy, PreActStage())
             @timeit_debug timer "push!(hook) PreActStage"       push!(hook, PreActStage(), policy, env)
 
-            action = @timeit_debug timer "plan!"                RLBase.plan!(policy, env)
+            action = @timeit_debug timer "plan!"                RLBase.plan!(policy, env) #get action
             @timeit_debug timer "act!"                          act!(env, action)
 
-            @timeit_debug timer "push!(policy) PostActStage"    push!(policy, PostActStage(), env)
+            @timeit_debug timer "push!(policy) PostActStage"    push!(policy, PostActStage(), env, action) #push a, r, t, s' to traj, update state cache
             @timeit_debug timer "optimise! PostActStage"        optimise!(policy, PostActStage())
             @timeit_debug timer "push!(hook) PostActStage"      push!(hook, PostActStage(), policy, env)
 
