@@ -56,18 +56,32 @@ end
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
-function RLBase.plan!(agent::Agent{P,T,C}, env::AbstractEnv) where {P,T,C}
+function RLBase.plan!(agent::Agent, env::AbstractEnv)
     RLBase.plan!(agent.policy, env)
 end
 
 # Multiagent Version
-function RLBase.plan!(agent::Agent{P,T,C}, env::E, p::Symbol) where {P,T,C,E<:AbstractEnv}
+function RLBase.plan!(agent::Agent, env::AbstractEnv, p::Symbol)
     action = RLBase.plan!(agent.policy, env, p)
     push!(agent.trajectory, agent.cache, action)
     action
 end
 
-function Base.push!(agent::Agent{P,T,C}, ::PostActStage, env::E, action) where {P,T,C,E<:AbstractEnv}
+function Base.push!(agent::Agent, ::PostActStage, env::AbstractEnv, action)
     next_state = state(env)
     push!(agent.trajectory, (state = next_state, action = action, reward = reward(env), terminal = is_terminated(env)))
+end
+
+function Base.push!(agent::Agent, ::PostEpisodeStage, env::E)
+    if haskey(agent.trajectory, :next_action) 
+        action = RLBase.plan!(agent.policy, env)
+        push!(agent.trajectory, PartialNamedTuple((action = action, )))
+    end
+end
+
+function Base.push!(agent::Agent, ::PostEpisodeStage, env::E, p::Symbol)
+    if haskey(agent.trajectory, :next_action) 
+        action = RLBase.plan!(agent.policy, env, p)
+        push!(agent.trajectory, PartialNamedTuple((action = action, )))
+    end
 end
