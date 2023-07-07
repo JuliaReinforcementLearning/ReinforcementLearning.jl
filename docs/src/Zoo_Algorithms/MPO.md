@@ -56,7 +56,7 @@ The next step is to wrap this policy into an `Agent`. An agent is a combination 
 
 ```julia
 trajectory = Trajectory(
-            CircularArraySARSTTraces(capacity = 1000, state = Float32 => (4,),action = Float32 => (1,)), 
+            CircularArraySARTSTraces(capacity = 1000, state = Float32 => (4,),action = Float32 => (1,)), 
             MetaSampler(
                 actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
                 critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 1000)

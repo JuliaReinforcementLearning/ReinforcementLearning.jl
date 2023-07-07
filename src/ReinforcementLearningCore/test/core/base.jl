@@ -8,7 +8,7 @@ using TimerOutputs
             agent = Agent(
                 RandomPolicy(),
                 Trajectory(
-                    CircularArraySARSTTraces(; capacity = 1_000),
+                    CircularArraySARTSTraces(; capacity = 1_000),
                     BatchSampler(1),
                     InsertSampleRatioController(n_inserted = -1),
                 ),
@@ -25,7 +25,7 @@ using TimerOutputs
             agent = Agent(
                 RandomPolicy(),
                 Trajectory(
-                    CircularArraySARSTTraces(; capacity = 1_000),
+                    CircularArraySARTSTraces(; capacity = 1_000),
                     BatchSampler(1),
                     InsertSampleRatioController(n_inserted = -1),
                 ),
@@ -43,7 +43,7 @@ using TimerOutputs
             agent = Agent(
                 RandomPolicy(legal_action_space(env)),
                 Trajectory(
-                    CircularArraySARSTTraces(; capacity = 1_000),
+                    CircularArraySARTSTraces(; capacity = 1_000),
                     BatchSampler(1),
                     InsertSampleRatioController(n_inserted = -1),
                 ),
@@ -63,7 +63,7 @@ using TimerOutputs
         agent = Agent(
             RandomPolicy(legal_action_space(env)),
             Trajectory(
-                CircularArraySARSTTraces(; capacity = 1_000),
+                CircularArraySARTSTraces(; capacity = 1_000),
                 BatchSampler(1),
                 InsertSampleRatioController(n_inserted = -1),
             ),

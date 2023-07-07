@@ -38,7 +38,7 @@ function RLCore.Experiment(
     agent = Agent(
         policy = policy,
         trajectory = Trajectory(
-            CircularArraySARSTTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (1,)),
+            CircularArraySARTSTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (1,)),
             MetaSampler(
                 actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
                 critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 2000)
@@ -78,7 +78,7 @@ function RLCore.Experiment(
     agent = Agent(
         policy = policy,
         trajectory = Trajectory(
-            CircularArraySARSTTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (2,)),
+            CircularArraySARTSTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (2,)),
             MetaSampler(
                 actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
                 critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 2000)
@@ -122,7 +122,7 @@ function RLCore.Experiment(
     agent = Agent(
         policy = policy,
         trajectory = Trajectory(
-            CircularArraySARSTTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (1,)),
+            CircularArraySARTSTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (1,)),
             MetaSampler(
                 actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
                 critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 2000)

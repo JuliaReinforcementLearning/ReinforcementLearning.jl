@@ -25,15 +25,6 @@ mutable struct Agent{P,T} <: AbstractPolicy
         end
         agent
     end
-
-    function Agent(policy::P, trajectory::T) where {P<:AbstractPolicy, T<:Trajectory}
-        agent = new{P,T}(policy, trajectory)
-
-        if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
-            bind(trajectory, @spawn(optimise!(policy, trajectory)))
-        end
-        agent
-    end
 end
 
 Agent(;policy, trajectory) = Agent(policy, trajectory)
@@ -70,14 +61,14 @@ function Base.push!(agent::Agent, ::PostActStage, env::AbstractEnv, action)
     push!(agent.trajectory, (state = next_state, action = action, reward = reward(env), terminal = is_terminated(env)))
 end
 
-function Base.push!(agent::Agent, ::PostEpisodeStage, env::E)
+function Base.push!(agent::Agent, ::PostEpisodeStage, env::AbstractEnv)
     if haskey(agent.trajectory, :next_action) 
         action = RLBase.plan!(agent.policy, env)
         push!(agent.trajectory, PartialNamedTuple((action = action, )))
     end
 end
 
-function Base.push!(agent::Agent, ::PostEpisodeStage, env::E, p::Symbol)
+function Base.push!(agent::Agent, ::PostEpisodeStage, env::AbstractEnv, p::Symbol)
     if haskey(agent.trajectory, :next_action) 
         action = RLBase.plan!(agent.policy, env, p)
         push!(agent.trajectory, PartialNamedTuple((action = action, )))
