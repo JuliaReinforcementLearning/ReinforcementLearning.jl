@@ -21,7 +21,7 @@ using ReinforcementLearningCore
         srt_3.reward = 1.0
         srt_3.terminal = true
         trajectory = Trajectory(
-            CircularArraySARTTraces(; capacity = 1_000, reward=Float64=>()),
+            CircularArraySARSTTraces(; capacity = 1_000, reward=Float64=>()),
             DummySampler(),
         )
         
@@ -40,14 +40,14 @@ using ReinforcementLearningCore
         a_1 = Agent(
             RandomPolicy(),
             Trajectory(
-                CircularArraySARTTraces(; capacity = 1_000),
+                CircularArraySARSTTraces(; capacity = 1_000),
                 DummySampler(),
             ),
         )
         a_2 = Agent(
             RandomPolicy(),
             Trajectory(
-                CircularArraySARTTraces(; capacity = 1_000),
+                CircularArraySARSTTraces(; capacity = 1_000),
                 BatchSampler(1),
                 InsertSampleRatioController(),
             ),

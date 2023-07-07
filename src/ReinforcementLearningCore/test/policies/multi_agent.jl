@@ -7,13 +7,13 @@ using DomainSets
 
 @testset "MultiAgentPolicy" begin
     trajectory_1 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1),
+        CircularArraySARSTTraces(; capacity = 1),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
 
     trajectory_2 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1),
+        CircularArraySARSTTraces(; capacity = 1),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
@@ -56,13 +56,13 @@ end
 
 @testset "Basic TicTacToeEnv (Sequential) env checks" begin
     trajectory_1 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1),
+        CircularArraySARSTTraces(; capacity = 1),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
 
     trajectory_2 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1),
+        CircularArraySARSTTraces(; capacity = 1),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
@@ -106,13 +106,13 @@ end
 
 @testset "Basic RockPaperScissors (simultaneous) env checks" begin
     trajectory_1 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1, action = Any => (1,), state = Any => (1,), reward = Any => (2,)),
+        CircularArraySARSTTraces(; capacity = 1, action = Any => (1,), state = Any => (1,), reward = Any => (2,)),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
 
     trajectory_2 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1, action = Any => (1,), state = Any => (1,), reward = Any => (2,)),
+        CircularArraySARSTTraces(; capacity = 1, action = Any => (1,), state = Any => (1,), reward = Any => (2,)),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
