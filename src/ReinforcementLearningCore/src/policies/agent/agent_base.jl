@@ -17,7 +17,7 @@ mutable struct Agent{P,T} <: AbstractPolicy
     policy::P
     trajectory::T
 
-    function Agent(policy::P, trajectory::T) where {P,T}
+    function Agent(policy::AbstractPolicy, trajectory::Trajectory)
         agent = new{P,T}(policy, trajectory)
 
         if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
@@ -26,8 +26,8 @@ mutable struct Agent{P,T} <: AbstractPolicy
         agent
     end
 
-    function Agent(policy::P, trajectory::T) where {P,T,C}
-        agent = new{P,T,C}(policy, trajectory)
+    function Agent(policy::AbstractPolicy, trajectory::Trajectory)
+        agent = new(policy, trajectory)
 
         if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
             bind(trajectory, @spawn(optimise!(policy, trajectory)))
