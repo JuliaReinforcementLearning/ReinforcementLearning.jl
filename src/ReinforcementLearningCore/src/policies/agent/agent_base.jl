@@ -62,9 +62,7 @@ end
 
 # Multiagent Version
 function RLBase.plan!(agent::Agent, env::AbstractEnv, p::Symbol)
-    action = RLBase.plan!(agent.policy, env, p)
-    push!(agent.trajectory, agent.cache, action)
-    action
+    RLBase.plan!(agent.policy, env, p)
 end
 
 function Base.push!(agent::Agent, ::PostActStage, env::AbstractEnv, action)
