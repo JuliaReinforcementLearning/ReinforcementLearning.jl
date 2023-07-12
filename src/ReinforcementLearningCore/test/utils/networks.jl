@@ -171,6 +171,30 @@ using Flux: params, gradient, unsqueeze
         end
     end
     @testset "CovGaussianNetwork" begin
+        @testset "utility functions" begin
+            cholesky_vec = [1:6;]
+            cholesky_mat = [RLCore.softplusbeta(1) 0 0; 2 RLCore.softplusbeta(4) 0; 3 5 RLCore.softplusbeta(6)]
+            @test RLCore.vec_to_tril(cholesky_vec, 3) ≈ cholesky_mat
+            for i in 1:3, j in 1:i
+                inds_mat = [1 0 0; 2 4 0; 3 5 6]
+                @test RLCore.cholesky_matrix_to_vector_index(i, j, 3) == inds_mat[i,j]
+            end
+            for x in -10:10
+                @test RLCore.softplusbeta(x,1) ≈ softplus(x) ≈ log(exp(x) +1)
+            end
+            for x in -10:10
+                @test RLCore.softplusbeta(x,2) ≈ log(exp(x/2) +1)*2 >= softplus(x)
+            end
+            for x in -10:10
+                @test RLCore.softplusbeta(x,0.5) ≈ log(exp(x/0.5) +1)*0.5 <= softplus(x)
+            end
+            cholesky_mats = stack([cholesky_mat for _ in 1:5], dims = 3)
+            cholesky_vecs = stack([reshape(cholesky_vec, :, 1) for _ in 1:5], dims = 3)
+            @test RLCore.vec_to_tril(cholesky_vecs, 3) ≈ cholesky_mats
+            for i in 1:3
+                @test RLCore.cholesky_columns(cholesky_vecs, i, 5, 3) ≈ reshape(cholesky_mats[:, i, :], 3, 1, :)
+            end
+        end
         @testset "identity normalizer" begin
             pre = Dense(20,15)
             μ = Dense(15,10)
