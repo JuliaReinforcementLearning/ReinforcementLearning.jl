@@ -55,11 +55,6 @@ function RLBase.plan!(agent::Agent, env::AbstractEnv)
     RLBase.plan!(agent.policy, env)
 end
 
-# Multiagent Version
-function RLBase.plan!(agent::Agent, env::AbstractEnv, p::Symbol)
-    RLBase.plan!(agent.policy, env, p)
-end
-
 function Base.push!(agent::Agent, ::PostActStage, env::AbstractEnv, action)
     next_state = state(env)
     push!(agent.trajectory, (state = next_state, action = action, reward = reward(env), terminal = is_terminated(env)))
@@ -68,13 +63,6 @@ end
 function Base.push!(agent::Agent, ::PostEpisodeStage, env::AbstractEnv)
     if haskey(agent.trajectory, :next_action) 
         action = RLBase.plan!(agent.policy, env)
-        push!(agent.trajectory, PartialNamedTuple((action = action, )))
-    end
-end
-
-function Base.push!(agent::Agent, ::PostEpisodeStage, env::AbstractEnv, p::Symbol)
-    if haskey(agent.trajectory, :next_action) 
-        action = RLBase.plan!(agent.policy, env, p)
         push!(agent.trajectory, PartialNamedTuple((action = action, )))
     end
 end
