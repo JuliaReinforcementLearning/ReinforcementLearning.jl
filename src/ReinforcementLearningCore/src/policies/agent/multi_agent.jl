@@ -186,6 +186,10 @@ function Base.push!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:Ab
 end
 
 # Like in the single-agent case, push! at the PreEpisodeStage() calls push! on each player.
+function Base.push!(agent::Agent, ::PreEpisodeStage, env::AbstractEnv, player::Symbol)
+    push!(agent.trajectory, (state = state(env, player),))
+end
+
 function Base.push!(multiagent::MultiAgentPolicy{names, T}, s::PreEpisodeStage, env::E) where {E<:AbstractEnv, names, T <: Agent}
     for player in players(env)
         push!(multiagent[player], s, env, player)
