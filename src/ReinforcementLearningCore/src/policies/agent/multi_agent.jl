@@ -185,17 +185,18 @@ function Base.push!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:Ab
     end
 end
 
-# Like in the single-agent case, push! at the PreActStage() calls push! on each player with the state of the environment
-function Base.push!(multiagent::MultiAgentPolicy{names, T}, ::PreActStage, env::E) where {E<:AbstractEnv, names, T <: Agent}
+# Like in the single-agent case, push! at the PreEpisodeStage() calls push! on each player.
+function Base.push!(multiagent::MultiAgentPolicy{names, T}, s::PreEpisodeStage, env::E) where {E<:AbstractEnv, names, T <: Agent}
     for player in players(env)
-        push!(multiagent[player], state(env, player))
+        push!(multiagent[player], s, env, player)
     end
 end
 
-# Like in the single-agent case, push! at the PostActStage() calls push! on each player with the reward and termination status of the environment
-function Base.push!(multiagent::MultiAgentPolicy{names, T}, ::PostActStage, env::E) where {E<:AbstractEnv, names, T <: Agent}
-    for player in players(env)
-        push!(multiagent[player].cache, reward(env, player), is_terminated(env))
+# Like in the single-agent case, push! at the PostActStage() calls push! on each player to store the action, reward, next_state, and terminal signal.
+function Base.push!(multiagent::MultiAgentPolicy{names, T}, ::PostActStage, env::E, actions) where {E<:AbstractEnv, names, T <: Agent}
+    for (player, action) in zip(players(env), actions)
+        next_state = state(env,player)
+        push!(multiagent[player].trajectory, (state = next_state, action = action, reward = reward(env, player), terminal = is_terminated(env)))
     end
 end
 
@@ -221,6 +222,7 @@ function Base.push!(composed_hook::ComposedHook{T},
     _push!(stage, policy, env, player, composed_hook.hooks...)
 end
 
+#For simultaneous players, plan! returns a Tuple of actions. 
 function RLBase.plan!(multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
     return (RLBase.plan!(multiagent[player], env, player) for player in players(env))
 end
