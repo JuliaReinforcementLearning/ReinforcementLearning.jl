@@ -3,11 +3,9 @@ module ReinforcementLearningCore
 using TimerOutputs
 using ReinforcementLearningBase
 using Reexport
-import StatsBase.sample
 const RLCore = ReinforcementLearningCore
 
 export RLCore
-export sample
 
 @reexport using ReinforcementLearningTrajectories
 
