@@ -1,11 +1,9 @@
+using Pkg
+if Base.UUID("438e738f-606a-5dbb-bf0a-cddfbfd45ab0") in Pkg.dependencies().keys
+    using PyCall
+end
 using ReinforcementLearningExperiments
 using CUDA
-
-using Requires
-
-
-
-using Requires
 
 
 
@@ -24,7 +22,16 @@ run(E`JuliaRL_MPODiscrete_CartPole`)
 run(E`JuliaRL_MPOContinuous_CartPole`)
 run(E`JuliaRL_MPOCovariance_CartPole`)
 run(E`JuliaRL_IDQN_TicTacToe`)
-@require PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0" run(E`JuliaRL_DQN_MPESimple`)
+
+# test PyCall experiments.
+# NOTE: Do NOT use E`...` macro as it will execute also if statement is false (beforehand?)
+if Base.UUID("438e738f-606a-5dbb-bf0a-cddfbfd45ab0") in Pkg.dependencies().keys
+    if PyCall.pyexists("pettingzoo.mpe")
+        x = RLCore.Experiment("JuliaRL_DQN_MPESimple")
+        run(x)
+    end
+end
+
 # run(E`JuliaRL_BC_CartPole`)
 # run(E`JuliaRL_VMPO_CartPole`)
 # run(E`JuliaRL_BasicDQN_MountainCar`)

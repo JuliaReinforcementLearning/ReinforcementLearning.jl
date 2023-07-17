@@ -1,14 +1,18 @@
 module ReinforcementLearningExperiments
 
 using Reexport
+using Pkg
 using Requires
 
-@reexport using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+@reexport using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo, ReinforcementLearningEnvironments
 
 const EXPERIMENTS_DIR = joinpath(@__DIR__, "experiments")
+# as long as there are not working experiments, this is not working properly
 # for f in readdir(EXPERIMENTS_DIR)
 #     include(joinpath(EXPERIMENTS_DIR, f))
 # end
+
+
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_NFQ_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_BasicDQN_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_DQN_CartPole.jl"))
@@ -23,10 +27,12 @@ include(joinpath(EXPERIMENTS_DIR, "JuliaRL_MPO_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "IDQN_TicTacToe.jl"))
 
 
+
 # dynamic loading environments
-function __init__() 
+function __init__()
+    #PyCall environments experiments
     @require PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0" include(
-        joinpath(EXPERIMENTS_DIR, "DQN_mpe_simple.jl")
+        joinpath(EXPERIMENTS_DIR, "pettingzoo_ex.jl")
     )
 end
 
