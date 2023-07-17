@@ -7,7 +7,6 @@
 # ---
 
 using StableRNGs
-using ReinforcementLearning
 using ReinforcementLearningBase
 using ReinforcementLearningZoo
 using ReinforcementLearningCore
@@ -16,7 +15,6 @@ using Flux
 using Flux.Losses: huber_loss
 using Flux: glorot_uniform
 
-using ProgressMeter
 
 
 rng = StableRNG(1234)
@@ -24,6 +22,71 @@ rng = StableRNG(1234)
 cap = 100
 
 RLCore.forward(L::DQNLearner, state::A) where {A <: Real} = RLCore.forward(L, [state])
+
+
+episodes_per_step = 25
+
+function RLCore.Experiment(
+    ::Val{:JuliaRL},
+    ::Val{:IDQN},
+    ::Val{:TicTacToe},
+    seed=123,
+    n=1,
+    γ=0.99f0,
+    is_enable_double_DQN=true
+)
+    rng = StableRNG(seed)
+    create_policy() = QBasedPolicy(
+            learner=DQNLearner(
+                approximator=Approximator(
+                    model=TwinNetwork(
+                        Chain(
+                            Dense(1, 512, relu; init=glorot_uniform(rng)),
+                            Dense(512, 256, relu; init=glorot_uniform(rng)),
+                            Dense(256, 9; init=glorot_uniform(rng)),
+                        );
+                        sync_freq=100
+                    ),
+                    optimiser=Adam(),
+                ),
+                n=n,
+                γ=γ,
+                is_enable_double_DQN=is_enable_double_DQN,
+                loss_func=huber_loss,
+                rng=rng,
+            ),
+            explorer=EpsilonGreedyExplorer(
+                kind=:exp,
+                ϵ_stable=0.01,
+                decay_steps=500,
+                rng=rng,
+            ),
+        )
+    
+    e  = TicTacToeEnv();
+    m = MultiAgentPolicy(NamedTuple((player =>
+                               Agent(player != :Cross ? create_policy() : RandomPolicy(;rng=rng),
+                                   Trajectory(
+                                       container=CircularArraySARTTraces(
+                                         capacity=cap,
+                                         state=Integer => (1,),
+                                       ),
+                                       sampler=NStepBatchSampler{SS′ART}(
+                                           n=n,
+                                           γ=γ,
+                                           batch_size=1,
+                                           rng=rng
+                                       ),
+                                       controller=InsertSampleRatioController(
+                                           threshold=1,
+                                           n_inserted=0
+                                       ))
+                               )
+                               for player in players(e)))
+                           );
+    hooks = MultiAgentHook(NamedTuple((p => TotalRewardPerEpisode() for p ∈ players(e))))
+    Experiment(m, e, StopAfterEpisode(episodes_per_step), hooks)
+end
 
 create_policy() = QBasedPolicy(
         learner=DQNLearner(
@@ -36,7 +99,7 @@ create_policy() = QBasedPolicy(
                     );
                     sync_freq=100
                 ),
-                optimiser=ADAM(),
+                optimiser=Adam(),
             ),
             n=32,
             γ=0.99f0,
@@ -75,9 +138,8 @@ m = MultiAgentPolicy(NamedTuple((player =>
                        );
 hooks = MultiAgentHook(NamedTuple((p => TotalRewardPerEpisode() for p ∈ players(e))))
 
-episodes_per_step = 25
 win_rates = (Cross=Float64[], Nought=Float64[])
-@showprogress for i ∈ 1:2
+for i ∈ 1:2
     run(m, e, StopAfterEpisode(episodes_per_step; is_show_progress=false), hooks)
     wr_cross = sum(hooks[:Cross].rewards)/(i*episodes_per_step)
     wr_nought = sum(hooks[:Nought].rewards)/(i*episodes_per_step)

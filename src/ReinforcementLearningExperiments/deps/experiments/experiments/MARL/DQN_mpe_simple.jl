@@ -17,14 +17,14 @@ using Flux.Losses: huber_loss
 function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:DQN},
-    ::Val{:MPESimple};
+    ::Val{:MPESimple},
     seed=123,
     n=1,
     γ=0.99f0,
     is_enable_double_DQN=true
 )
     rng = StableRNG(seed)
-    env = discrete2standard_discrete(PettingzooEnv("mpe.simple_v2"; seed=seed))
+    env = discrete2standard_discrete(PettingZooEnv("mpe.simple_v2"; seed=seed))
     ns, na = length(state(env)), length(action_space(env))
 
     agent = Agent(

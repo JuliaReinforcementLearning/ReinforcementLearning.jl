@@ -1,6 +1,10 @@
 using ReinforcementLearningExperiments
 using CUDA
 
+using Requires
+
+
+
 CUDA.allowscalar(false)
 
 run(E`JuliaRL_NFQ_CartPole`)
@@ -15,6 +19,8 @@ run(E`JuliaRL_VPG_CartPole`)
 run(E`JuliaRL_MPODiscrete_CartPole`)
 run(E`JuliaRL_MPOContinuous_CartPole`)
 run(E`JuliaRL_MPOCovariance_CartPole`)
+@require PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0" run(E`JuliaRL_DQN_MPESimple`)
+run(E`JuliaRL_IDQN_TicTacToe`)
 # run(E`JuliaRL_BC_CartPole`)
 # run(E`JuliaRL_VMPO_CartPole`)
 # run(E`JuliaRL_BasicDQN_MountainCar`)
