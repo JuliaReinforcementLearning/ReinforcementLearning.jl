@@ -21,11 +21,13 @@ include(joinpath(EXPERIMENTS_DIR, "JuliaRL_VPG_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_TRPO_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_MPO_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "IDQN_TicTacToe.jl"))
-@require PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0" include(
-    joinpath(EXPERIMENTS_DIR, "DQN_mpe_simple.jl")
-)
+
 
 # dynamic loading environments
-function __init__() end
+function __init__() 
+    @require PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0" include(
+        joinpath(EXPERIMENTS_DIR, "DQN_mpe_simple.jl")
+    )
+end
 
 end # module
