@@ -224,7 +224,7 @@ end
 
 function solve_mpodual(Q::AbstractArray, ϵ)    
     g(η) = η * ϵ + η * mean(logsumexp( Q ./η .- Float32(log(size(Q, 2))), dims = 2))
-    Optim.minimizer(optimize(g, eps(ϵ), 10f0))
+    Optim.minimizer(optimize(g, eps(ϵ), maximum(abs.(Q))))
 end
 
 #For CovGaussianNetwork

@@ -250,22 +250,41 @@ function (model::CovGaussianNetwork)(state::AbstractMatrix, action::AbstractMatr
 end
 
 """
+    cholesky_matrix_to_vector_index(i, j)
+
+Return the position in a cholesky_vec (of length da) of the element of the lower triangular matrix at coordinates (i,j).
+
+For example if `cholesky_vec = [1,2,3,4,5,6]`, the corresponding lower triangular matrix is
+```
+L = [1 0 0
+     2 4 0
+     3 5 6]
+```
+and `cholesky_matrix_to_vector_index(3, 2) == 5`
+
+"""
+cholesky_matrix_to_vector_index(i, j, da) = ((2da - j) * (j - 1)) ÷ 2 + i
+softplusbeta(x, beta = 10f0) = log(exp(x/beta) +1)*beta #a softer softplus to avoid vanishing values
+
+function cholesky_columns(cholesky_vec, j, batch_size, da) #return a slice (da x 1 x batchsize) containing the jth columns of the lower triangular cholesky decomposition of the covariance
+    diag_idx = cholesky_matrix_to_vector_index(j, j, da)
+    tc_diag = softplusbeta.(cholesky_vec[diag_idx:diag_idx, :, :]) .+ 1f-5
+    other_idxs = cholesky_matrix_to_vector_index(j, j, da)+1:cholesky_matrix_to_vector_index(j + 1, j + 1, da)-1 #indices of elements between two diagonal elements
+    tc_other = cholesky_vec[other_idxs, :, :]
+    zs = ignore_derivatives() do
+        zs = similar(cholesky_vec, da - size(tc_other, 1) - 1, 1, batch_size)
+        zs .= zero(eltype(cholesky_vec))
+        return zs
+    end
+    [zs; tc_diag; tc_other]
+end
+
+"""
 Transform a vector containing the non-zero elements of a lower triangular da x da matrix into that matrix.
 """
 function vec_to_tril(cholesky_vec, da)
-    batch_size = size(cholesky_vec, 3)
-    c2idx(i, j) = ((2da - j) * (j - 1)) ÷ 2 + i #return the position in cholesky_vec of the element of the triangular matrix at coordinates (i,j)
-    function f(j) #return a slice (da x 1 x batchsize) containing the jth columns of the lower triangular cholesky decomposition of the covariance
-        tc_diag = softplus.(cholesky_vec[c2idx(j, j):c2idx(j, j), :, :])
-        tc_other = cholesky_vec[c2idx(j, j)+1:c2idx(j + 1, j + 1)-1, :, :]
-        zs = ignore_derivatives() do
-            zs = similar(cholesky_vec, da - size(tc_other, 1) - 1, 1, batch_size)
-            zs .= zero(eltype(cholesky_vec))
-            return zs
-        end
-        [zs; tc_diag; tc_other]
-    end
-    return mapreduce(f, hcat, 1:da)
+    batch_size = size(cholesky_vec, 3)    
+    return mapreduce(j->cholesky_columns(cholesky_vec, j, batch_size, da), hcat, 1:da)
 end
 
 #####
