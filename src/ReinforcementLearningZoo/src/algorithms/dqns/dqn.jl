@@ -44,13 +44,13 @@ function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
         q_next .+= ifelse.(batch[:next_legal_actions_mask], 0.0f0, typemin(Float32))
     end
 
-    q_nextₐ = learner.is_enable_double_DQN ? Qₜ(s_next)[dropdims(argmax(q_next, dims=1), dims=1)] : dropdims(maximum(q_next; dims=1), dims=1)
+    q_next_action = learner.is_enable_double_DQN ? Qₜ(s_next)[dropdims(argmax(q_next, dims=1), dims=1)] : dropdims(maximum(q_next; dims=1), dims=1)
 
-    G = r .+ γ^n .* (1 .- t) .* q_nextₐ
+    R = r .+ γ^n .* (1 .- t) .* q_next_action
 
     gs = gradient(params(A)) do
         qₐ = Q(s)[a]
-        loss = loss_func(G, qₐ)
+        loss = loss_func(R, qₐ)
         ignore_derivatives() do
             learner.loss = loss
         end
