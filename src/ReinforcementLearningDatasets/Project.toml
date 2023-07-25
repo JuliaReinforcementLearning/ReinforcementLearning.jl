@@ -26,7 +26,7 @@ UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 [compat]
 CodecZlib = "0.7"
 DataDeps = "0.7"
-Flux = "0.13"
+Flux = "0.13, 0.14"
 HDF5 = "0.15"
 ImageCore = "0.9"
 NPZ = "0.4"
