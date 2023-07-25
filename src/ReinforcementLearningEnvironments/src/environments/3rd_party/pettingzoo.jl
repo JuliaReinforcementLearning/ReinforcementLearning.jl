@@ -83,21 +83,21 @@ RLBase.action_space(env::PettingZooEnv, player::DefaultPlayer) = env.action_spac
 
 function RLBase.act!(env::PettingZooEnv, actions::Dict{Symbol, Int})
     @assert length(actions) == length(players(env))
-    for p in env.pyenv.agents
+    for p ∈ players(env)
         pycall(env.pyenv.step, PyObject, actions[p])
     end
 end
 
 function RLBase.act!(env::PettingZooEnv, actions::Dict{Symbol, Real})
     @assert length(actions) == length(env.pyenv.agents)
-    for p in env.pyenv.agents
+    for p ∈ players(env)
         pycall(env.pyenv.step, PyObject, np.array(actions[p]; dtype=np.float32))
     end
 end
 
 function RLBase.act!(env::PettingZooEnv, actions::Dict{Symbol, Vector})
     @assert length(actions) == length(env.pyenv.agents)
-    for p in env.pyenv.agents
+    for p ∈ players(env)
         RLBase.act!(env, p)
     end
 end
