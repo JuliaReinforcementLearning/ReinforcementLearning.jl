@@ -201,7 +201,7 @@ function RLBase.plan!(agent::Agent, env::AbstractEnv, player::Symbol)
 end
 
 # Like in the single-agent case, push! at the PostActStage() calls push! on each player to store the action, reward, next_state, and terminal signal.
-function Base.push!(multiagent::MultiAgentPolicy, ::PostActStage, env::E, actions) where {E<:AbstractEnv, names}
+function Base.push!(multiagent::MultiAgentPolicy, ::PostActStage, env::E, actions) where {E<:AbstractEnv}
     for (player, action) in zip(players(env), actions)
         next_state = state(env,player)
         push!(multiagent[player].trajectory, (state = next_state, action = action, reward = reward(env, player), terminal = is_terminated(env)))
@@ -215,7 +215,7 @@ function Base.push!(agent::Agent, ::PostEpisodeStage, env::AbstractEnv, p::Symbo
     end
 end
 
-function Base.push!(hook::MultiAgentHook, stage::S, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv,S<:AbstractStage}
+function Base.push!(hook::MultiAgentHook, stage::S, multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv, S<:AbstractStage}
     for player in players(env)
         push!(hook[player], stage, multiagent[player], env, player)
     end
