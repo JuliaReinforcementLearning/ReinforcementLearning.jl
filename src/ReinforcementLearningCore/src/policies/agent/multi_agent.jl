@@ -181,7 +181,7 @@ end
 # Default behavior for multi-agent, simultaneous `push!` is to iterate over all players and call `push!` on the appropriate policy
 function Base.push!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:AbstractStage, E<:AbstractEnv}
     for player in players(env)
-        push!(multiagent[player], stage, env)
+        push!(multiagent[player], stage, env, player)
     end
 end
 
