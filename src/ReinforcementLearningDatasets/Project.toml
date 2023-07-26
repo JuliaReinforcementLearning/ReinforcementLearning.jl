@@ -1,7 +1,7 @@
 name = "ReinforcementLearningDatasets"
 uuid = "dd1544ca-2576-438c-a599-ae96278fd687"
 authors = ["findmyway", "Mobius1D"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 CodecZlib = "944b1d66-785c-5afd-91f1-9de20f533193"
