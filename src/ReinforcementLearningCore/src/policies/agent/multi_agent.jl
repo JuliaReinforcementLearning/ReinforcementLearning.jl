@@ -133,10 +133,12 @@ function Base.run(
 
                 if check_stop(stop_condition, policy, env)
                     is_stop = true
-                    @timeit_debug timer "push!(policy) PreActStage"  push!(multiagent_policy, PreActStage(), env)
-                    @timeit_debug timer "optimise! PreActStage"      optimise!(multiagent_policy, PreActStage())
-                    @timeit_debug timer "push!(hook) PreActStage"    push!(multiagent_hook, PreActStage(), policy, env)
-                    @timeit_debug timer "plan!"                      RLBase.plan!(multiagent_policy, env)  # let the policy see the last observation
+                    if !is_terminated(env)
+                        @timeit_debug timer "push!(policy) PreActStage"  push!(multiagent_policy, PreActStage(), env)
+                        @timeit_debug timer "optimise! PreActStage"      optimise!(multiagent_policy, PreActStage())
+                        @timeit_debug timer "push!(hook) PreActStage"    push!(multiagent_hook, PreActStage(), policy, env)
+                        @timeit_debug timer "plan!"                      RLBase.plan!(multiagent_policy, env)  # let the policy see the last observation
+                    end
                     break
                 end
 
@@ -228,7 +230,7 @@ function Base.push!(composed_hook::ComposedHook{T},
 end
 
 function RLBase.plan!(multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
-    return (RLBase.plan!(multiagent[player], env, player) for player in players(env))
+    return NamedTuple(player => RLBase.plan!(multiagent[player], env, player) for player in players(env))
 end
 
 function RLBase.optimise!(multiagent::MultiAgentPolicy, stage::S) where {S<:AbstractStage}
