@@ -102,21 +102,17 @@ function _run(policy::AbstractPolicy,
             action = @timeit_debug timer "plan!"                RLBase.plan!(policy, env)
             @timeit_debug timer "act!"                          act!(env, action)
 
-            @timeit_debug timer "push!(policy) PostActStage"    push!(policy, PostActStage(), env)
+            @timeit_debug timer "push!(policy) PostActStage"    push!(policy, PostActStage(), env, action)
             @timeit_debug timer "optimise! PostActStage"        optimise!(policy, PostActStage())
             @timeit_debug timer "push!(hook) PostActStage"      push!(hook, PostActStage(), policy, env)
 
             if check_stop(stop_condition, policy, env)
                 is_stop = true
-                @timeit_debug timer "push!(policy) PreActStage"   push!(policy, PreActStage(), env)
-                @timeit_debug timer "optimise! PreActStage"       optimise!(policy, PreActStage())
-                @timeit_debug timer "push!(hook) PreActStage"     push!(hook, PreActStage(), policy, env)
-                @timeit_debug timer "plan!"                       RLBase.plan!(policy, env)  # let the policy see the last observation
                 break
             end
         end # end of an episode
 
-        @timeit_debug timer "push!(policy) PostEpisodeStage"      push!(policy, PostEpisodeStage(), env)  # let the policy see the last observation
+        @timeit_debug timer "push!(policy) PostEpisodeStage"      push!(policy, PostEpisodeStage(), env)
         @timeit_debug timer "optimise! PostEpisodeStage"          optimise!(policy, PostEpisodeStage())
         @timeit_debug timer "push!(hook) PostEpisodeStage"        push!(hook, PostEpisodeStage(), policy, env)
 

@@ -1,4 +1,4 @@
-using ReinforcementLearningCore: SRT
+using ReinforcementLearningCore
 using ReinforcementLearningBase
 using TimerOutputs
 
@@ -8,7 +8,7 @@ using TimerOutputs
             agent = Agent(
                 RandomPolicy(),
                 Trajectory(
-                    CircularArraySARTTraces(; capacity = 1_000),
+                    CircularArraySARTSTraces(; capacity = 1_000),
                     BatchSampler(1),
                     InsertSampleRatioController(n_inserted = -1),
                 ),
@@ -18,14 +18,14 @@ using TimerOutputs
             hook = StepsPerEpisode()
             run(agent, env, stop_condition, hook)
 
-            @test sum(hook[]) == length(agent.trajectory.container)
+            @test sum(hook[]) + length(hook[]) - 1 == length(agent.trajectory.container)
         end
 
         @testset "StopAfterEpisode" begin
             agent = Agent(
                 RandomPolicy(),
                 Trajectory(
-                    CircularArraySARTTraces(; capacity = 1_000),
+                    CircularArraySARTSTraces(; capacity = 1_000),
                     BatchSampler(1),
                     InsertSampleRatioController(n_inserted = -1),
                 ),
@@ -35,25 +35,8 @@ using TimerOutputs
             hook = StepsPerEpisode()
             run(agent, env, stop_condition, hook)
 
-            @test sum(hook[]) == length(agent.trajectory.container)
-        end
-
-        @testset "StopAfterStep, use type stable Agent" begin
-            env = RandomWalk1D()
-            agent = Agent(
-                RandomPolicy(legal_action_space(env)),
-                Trajectory(
-                    CircularArraySARTTraces(; capacity = 1_000),
-                    BatchSampler(1),
-                    InsertSampleRatioController(n_inserted = -1),
-                ),
-                SRT{Any, Any, Any}(),
-            )            
-            stop_condition = StopAfterStep(123; is_show_progress=false)
-            hook = StepsPerEpisode()
-            run(agent, env, stop_condition, hook)
-            @test sum(hook[]) == length(agent.trajectory.container)
-        end        
+            @test length(hook[]) == 10
+        end      
     end
 
     @testset "Debug Timer" begin
@@ -63,11 +46,10 @@ using TimerOutputs
         agent = Agent(
             RandomPolicy(legal_action_space(env)),
             Trajectory(
-                CircularArraySARTTraces(; capacity = 1_000),
+                CircularArraySARTSTraces(; capacity = 1_000),
                 BatchSampler(1),
                 InsertSampleRatioController(n_inserted = -1),
-            ),
-            SRT{Any, Any, Any}(),
+            )
         )            
         stop_condition = StopAfterStep(123; is_show_progress=false)
         hook = StepsPerEpisode()

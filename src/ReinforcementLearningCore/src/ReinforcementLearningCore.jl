@@ -3,7 +3,6 @@ module ReinforcementLearningCore
 using TimerOutputs
 using ReinforcementLearningBase
 using Reexport
-
 const RLCore = ReinforcementLearningCore
 
 export RLCore
