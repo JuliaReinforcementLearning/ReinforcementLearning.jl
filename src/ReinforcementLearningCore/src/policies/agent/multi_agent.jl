@@ -203,8 +203,14 @@ end
 # Like in the single-agent case, push! at the PostActStage() calls push! on each player to store the action, reward, next_state, and terminal signal.
 function Base.push!(multiagent::MultiAgentPolicy, ::PostActStage, env::E, actions) where {E<:AbstractEnv}
     for (player, action) in zip(players(env), actions)
-        next_state = state(env,player)
-        push!(multiagent[player].trajectory, (state = next_state, action = action, reward = reward(env, player), terminal = is_terminated(env)))
+        next_state = state(env, player)
+        observation = (
+            state = next_state,
+            action = action,
+            reward = reward(env, player),
+            terminal = is_terminated(env)
+        )
+        push!(multiagent[player].trajectory, observation)
     end
 end
 
@@ -239,7 +245,7 @@ end
 
 #For simultaneous players, plan! returns a Tuple of actions. 
 function RLBase.plan!(multiagent::MultiAgentPolicy, env::E) where {E<:AbstractEnv}
-    return (RLBase.plan!(multiagent[player], env, player) for player in players(env))
+    return Tuple(RLBase.plan!(multiagent[player], env, player) for player in players(env))
 end
 
 function RLBase.optimise!(multiagent::MultiAgentPolicy, stage::S) where {S<:AbstractStage}
