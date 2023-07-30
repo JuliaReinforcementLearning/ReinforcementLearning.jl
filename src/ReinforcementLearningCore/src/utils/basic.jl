@@ -89,7 +89,15 @@ flatten_batch(x::AbstractArray) = reshape(x, size(x)[1:end-2]..., :)
 
 function find_all_max(x)
     v = maximum(x)
-    v, findall(==(v), x)
+    indices = Vector{Int}(undef, count(==(v), x))
+    j = 1
+    for i in eachindex(x)
+        if x[i] == v
+            indices[j] = i
+            j += 1
+        end
+    end
+    v, indices
 end
 
 find_all_max(x, mask::Trues) = find_all_max(x)
