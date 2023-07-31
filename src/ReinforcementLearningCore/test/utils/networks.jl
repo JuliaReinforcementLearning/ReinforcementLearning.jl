@@ -110,7 +110,7 @@ using Flux: params, gradient, unsqueeze
             end
         end
         @testset "CUDA" begin
-            if isdefined(:CUDA) && CUDA.functional()
+            if (@isdefined CUDA) && CUDA.functional()
                 CUDA.allowscalar(false)
                 gn = GaussianNetwork(Dense(20,15), Dense(15,10), Dense(15,10, softplus)) |> gpu
                 state = rand(20,3)  |> gpu #batch of 3 states
@@ -262,7 +262,7 @@ using Flux: params, gradient, unsqueeze
             end
         end
         @testset "CUDA" begin
-            if isdefined(:CUDA) && CUDA.functional()
+            if (@isdefined CUDA) && CUDA.functional()
                 CUDA.allowscalar(false) 
                 rng = CUDA.CURAND.RNG()
                 pre = Dense(20,15) |> gpu

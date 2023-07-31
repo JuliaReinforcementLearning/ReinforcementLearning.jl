@@ -8,7 +8,7 @@ using Test, LinearAlgebra, Distributions, ReinforcementLearningCore,Flux
         logdetM = logdet(M)
         @test logdetM == ReinforcementLearningCore.logdetLorU(L) 
         @test logdetM == ReinforcementLearningCore.logdetLorU(U)
-        if isdefined(:CUDA) && CUDA.functional()
+        if (@isdefined CUDA) && CUDA.functional()
             L_d = cu(L)
             U_d = cu(U)
             @test logdetM == ReinforcementLearningCore.logdetLorU(L_d) 
@@ -126,7 +126,7 @@ using Test, LinearAlgebra, Distributions, ReinforcementLearningCore,Flux
         end
     end
     @testset "CUDA" begin
-        if isdefined(:CUDA) && CUDA.functional()
+        if (@isdefined CUDA) && CUDA.functional()
             CUDA.allowscalar(false)
             #These only test GPU compatibility, exactness of results is tested above on the CPU
             @testset "Diagonal Gaussian" begin
