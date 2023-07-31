@@ -711,7 +711,7 @@ function RLBase.update!(l::FQE, batch::NamedTuple{SARTS})
     policy = l.policy
     Q, Qₜ = l.q_network, l.target_q_network
 
-    D = device(Q)
+    D = KernelAbstractions.get_backend(Q)
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     γ = l.γ
     batch_size = l.batch_size

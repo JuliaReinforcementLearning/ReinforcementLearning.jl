@@ -566,13 +566,13 @@ end
 ## interactions with the environment
 function (π::EDPolicy)(env::AbstractEnv)
     s = state(env)
-    s = send_to_device(device(π.learner), Flux.unsqueeze(s, ndims(s) + 1))
+    s = send_to_device(KernelAbstractions.get_backend(π.learner), Flux.unsqueeze(s, ndims(s) + 1))
     logits = π.learner(s) |> vec |> send_to_host
     ActionStyle(env) isa MinimalActionSet ? π.explorer(logits) : 
         π.explorer(logits, legal_action_space_mask(env))
 end
 # set the `_device` function for convenience transferring the variable to the corresponding device.
-_device(π::EDPolicy, x) = send_to_device(device(π.learner), x)
+_device(π::EDPolicy, x) = send_to_device(get_backend(π.learner), x)
 
 function RLBase.prob(π::EDPolicy, env::AbstractEnv; to_host::Bool = true)
     s = @ignore state(env) |> x -> Flux.unsqueeze(x, ndims(x) + 1) |> x -> _device(π, x)
