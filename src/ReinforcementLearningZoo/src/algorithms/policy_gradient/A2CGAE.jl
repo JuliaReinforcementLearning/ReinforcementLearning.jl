@@ -32,7 +32,7 @@ Functors.functor(x::A2CGAELearner) =
     (app=x.approximator,), y -> @set x.approximator = y.app
 
 RLCore.forward!(learner::A2CGAELearner, env::MultiThreadEnv) =
-    learner.approximator.actor(send_to_device(device(learner), state(env))) |> send_to_host
+    learner.approximator.actor(send_to_device(KernelAbstractions.get_backend(learner), state(env))) |> send_to_host
 
 function RLCore.update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
     length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
@@ -46,7 +46,7 @@ function _update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
     n = length(t)
 
     AC = learner.approximator
-    to_device(x) = send_to_device(device(AC), x)
+    to_device(x) = send_to_device(KernelAbstractions.get_backend(AC), x)
     γ = learner.γ
     λ = learner.λ
     w₁ = learner.actor_loss_weight

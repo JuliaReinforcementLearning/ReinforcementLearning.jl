@@ -118,7 +118,7 @@ function FisherBRCLearner(;
 end
 
 function (l::FisherBRCLearner)(env)
-    D = device(l.policy)
+    D = KernelAbstractions.get_backend(l.policy)
     s = send_to_device(D, state(env))
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     action = dropdims(l.policy(l.rng, s; is_sampling=true), dims=2)
@@ -133,7 +133,7 @@ function RLCore.update!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
 end
 
 function update_behavior_policy!(l::EntropyBC, batch::NamedTuple{SARTS})
-    D = device(l.policy)
+    D = KernelAbstractions.get_backend(l.policy)
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     # Update behavior policy with entropy
     gs = gradient(Flux.params(l.policy)) do
@@ -151,7 +151,7 @@ function update_behavior_policy!(l::EntropyBC, batch::NamedTuple{SARTS})
 end
 
 function update_learner!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
-    D = device(l.policy)
+    D = KernelAbstractions.get_backend(l.policy)
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     r .+= l.reward_bonus
     γ, τ, α = l.γ, l.τ, l.α

@@ -118,7 +118,7 @@ function RLBase.plan!(p::TD3Policy, env)
     if p.update_step <= p.start_steps
         p.start_policy(env)
     else
-        D = device(p.behavior_actor)
+        D = KernelAbstractions.get_backend(p.behavior_actor)
         s = state(env)
         s = Flux.unsqueeze(s, dims=ndims(s) + 1)
         action = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
@@ -139,7 +139,7 @@ function RLCore.update!(
 end
 
 function RLCore.update!(p::TD3Policy, batch::NamedTuple{SARTS})
-    to_device(x) = send_to_device(device(p.behavior_actor), x)
+    to_device(x) = send_to_device(KernelAbstractions.get_backend(p.behavior_actor), x)
     s, a, r, t, s′ = to_device(batch)
 
     actor = p.behavior_actor

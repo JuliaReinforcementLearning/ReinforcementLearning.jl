@@ -77,8 +77,8 @@ with each policy network type.
 `p::MPOPolicy` logs several values during training. You can access them using `p.logs[::Symbol]`.
 """
 function MPOPolicy(;actor::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 1f-2, ϵΣ = 1f-4, α_scale = 1f0, αΣ_scale = 100f0, τ = 1f-3, max_grad_norm = 5f-1, rng = Random.default_rng()) where Q <: Approximator
-    @assert device(actor) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
-    @assert device(actor) == device(rng) "The specified rng does not generate on the same device as the actor. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
+    @assert KernelAbstractions.get_backend(actor) == KernelAbstractions.get_backend(qnetwork1) == KernelAbstractions.get_backend(qnetwork2) "All network approximators must be on the same device"
+    @assert KernelAbstractions.get_backend(actor) == KernelAbstractions.get_backend(rng) "The specified rng does not generate on the same device as the actor. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :actor_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :α, :αΣ, :kl))
     MPOPolicy(actor, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, action_sample_size, ϵ, ϵμ, ϵΣ, 0f0, 0f0, α_scale, αΣ_scale, max_grad_norm, τ, rng, logs)
 end
@@ -86,7 +86,7 @@ end
 Flux.@functor MPOPolicy
 
 function RLBase.plan!(p::MPOPolicy, env; testmode = false)
-    D = device(p.actor)
+    D = KernelAbstractions.get_backend(p.actor)
     s = send_to_device(D, state(env))
     if !testmode
         action = p.actor.model(p.rng, s; is_sampling=!testmode)
@@ -111,7 +111,7 @@ end
 #Here we apply the TD3 Q network approach. The original MPO paper uses retrace.
 function update_critic!(p::MPOPolicy, batches)
     for (id, batch) in enumerate(batches)
-        s, s′, a, r, t, = send_to_device(device(p.qnetwork1), batch)
+        s, s′, a, r, t, = send_to_device(KernelAbstractions.get_backend(p.qnetwork1), batch)
         γ, τ = p.γ, p.τ
 
         a′ = RLCore.forward(p.actor, p.rng, s′; is_sampling=true, is_return_log_prob=false)
@@ -160,7 +160,7 @@ function update_critic!(p::MPOPolicy, batches)
 end
 
 function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
-    states_batches = [send_to_device(device(p.actor), reshape(batch[:state], size(batch[:state],1), 1, :)) for batch in batches] #vector of 3D tensors with dimensions (state_size x 1 x batch_size), sent to device
+    states_batches = [send_to_device(KernelAbstractions.get_backend(p.actor), reshape(batch[:state], size(batch[:state],1), 1, :)) for batch in batches] #vector of 3D tensors with dimensions (state_size x 1 x batch_size), sent to device
     current_action_dist_batches = [RLCore.forward(p.actor, p.rng, states, is_sampling = false) for states in states_batches] #π(.|s,Θᵢ) 
     action_samples_batches = [sample_actions(p, dist, p.action_sample_size) for dist in current_action_dist_batches] #3D tensor with dimensions (action_size x action_sample_size x batchsize)
     for (states, current_action_dist, action_samples) in zip(states_batches, current_action_dist_batches, action_samples_batches)

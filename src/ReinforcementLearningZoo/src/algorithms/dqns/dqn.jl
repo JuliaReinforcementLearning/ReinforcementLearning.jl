@@ -28,7 +28,7 @@ function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
     A = learner.approximator
     Q = A.model.source
     Qₜ = A.model.target
-    @assert device(Q) == device(Qₜ) || @warn "Q and target Q function have to be on the same device"
+    @assert KernelAbstractions.get_backend(Q) == KernelAbstractions.get_backend(Qₜ) || @warn "Q and target Q function have to be on the same device"
     
     γ = learner.γ
     loss_func = learner.loss_func
@@ -36,7 +36,7 @@ function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
 
     s, s_next, a, r, t = map(x -> batch[x], SS′ART)
     a = CartesianIndex.(a, 1:length(a))
-    s, s_next, a, r, t = send_to_device(device(Q), (s, s_next, a, r, t))
+    s, s_next, a, r, t = send_to_device(KernelAbstractions.get_backend(Q), (s, s_next, a, r, t))
 
     q_next = learner.is_enable_double_DQN ? Q(s_next) : Qₜ(s_next)
 

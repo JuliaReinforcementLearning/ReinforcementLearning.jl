@@ -125,7 +125,7 @@ function RLBase.plan!(p::SACPolicy, env)
         end
         action
     else
-        D = device(p.policy)
+        D = KernelAbstractions.get_backend(p.policy)
         s = send_to_device(D, state(env))
         s = Flux.unsqueeze(s, dims=ndims(s) + 1)
         # trainmode:
@@ -153,7 +153,7 @@ function RLCore.update!(
 end
 
 function RLCore.update!(p::SACPolicy, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
+    s, a, r, t, s′ = send_to_device(KernelAbstractions.get_backend(p.qnetwork1), batch)
 
     γ, τ, α = p.γ, p.τ, p.α
 
