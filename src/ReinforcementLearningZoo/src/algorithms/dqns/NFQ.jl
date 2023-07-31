@@ -36,7 +36,7 @@ RLCore.forward(L::NFQ, s::AbstractArray) = RLCore.forward(L.approximator, s)
 
 function RLCore.forward(learner::NFQ, env::AbstractEnv)
     as = action_space(env)
-    return vcat(repeat(state(env), inner=(1, length(as))), transpose(as)) |> x -> send_to_device(device(learner.approximator), x) |> x->RLCore.forward(learner, x) |> send_to_host |> vec 
+    return vcat(repeat(state(env), inner=(1, length(as))), transpose(as)) |> x -> send_to_device(RLCore.device(learner.approximator), x) |> x->RLCore.forward(learner, x) |> send_to_host |> vec 
 end
 
 function RLBase.optimise!(learner::NFQ, ::PostEpisodeStage, trajectory::Trajectory)
@@ -49,7 +49,7 @@ function RLBase.optimise!(learner::NFQ, ::PostEpisodeStage, trajectory::Trajecto
     
     (s, a, r, ss) = batch[[:state, :action, :reward, :next_state]]
     a = Float32.(a)
-    s, a, r, ss = map(x->send_to_device(device(Q), x), (s, a, r, ss))
+    s, a, r, ss = map(x->send_to_device(RLCore.device(Q), x), (s, a, r, ss))
     for i = 1:learner.num_iterations
         # Make an input x samples x |action space| array -- Q --> samples x |action space| -- max --> samples
         G = r .+ γ .* (cat(repeat(ss, inner=(1, 1, las)), reshape(repeat(as, outer=(1, size(ss, 2))), (1, size(ss, 2), las)), dims=1) |> x -> maximum(RLCore.forward(Q, x), dims=3) |> vec)

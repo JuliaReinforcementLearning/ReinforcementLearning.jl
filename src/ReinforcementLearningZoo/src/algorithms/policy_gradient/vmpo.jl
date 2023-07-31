@@ -86,7 +86,7 @@ end
 # discrete action
 
 function RLBase.prob(policy::VMPOPolicy{<:ActorCritic,Categorical}, env::AbstractEnv)
-    s = send_to_device(device(policy.approximator), state(env))
+    s = send_to_device(RLCore.device(policy.approximator), state(env))
     p = policy.approximator.actor(s) |> softmax |> send_to_host
     Categorical(p; check_args=false)
 end
@@ -114,7 +114,7 @@ function RLBase.prob(
     policy::VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal},
     env::AbstractEnv,
 )
-    s = send_to_device(device(policy.approximator), state(env))
+    s = send_to_device(RLCore.device(policy.approximator), state(env))
     μ, σ = policy.approximator.actor(agent.policy.rng, s)
     Normal(μ, σ)
 end
@@ -122,7 +122,7 @@ end
 function RLBase.plan!(agent::Agent{<:VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal}},
     env::AbstractEnv,
 )
-    s = send_to_device(device(agent.policy.approximator), state(env))
+    s = send_to_device(RLCore.device(agent.policy.approximator), state(env))
     # the action is an output of GaussianNetwork which is normalised by tanh(),
     # we increase its stability by limiting it to [-1 + eps, 1 - eps]
     a = agent.policy.approximator.actor(agent.policy.rng, s, is_sampling=true)
@@ -153,7 +153,7 @@ end
 
 function _update!(p::VMPOPolicy, t::VMPOTrajectory)
     AC = p.approximator
-    D = device(AC)
+    D = RLCore.device(AC)
     s = send_to_device(D, t[:state][:, 1:end-1])  # drop the last extra state
     a = send_to_device(D, t[:action][1:end-1])  # drop the last extra action
     is_discrete = isa(p, VMPOPolicy{<:ActorCritic,Categorical})

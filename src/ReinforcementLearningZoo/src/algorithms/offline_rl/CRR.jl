@@ -89,7 +89,7 @@ end
 function (learner::CRRLearner)(env)
     s = state(env)
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
-    s = send_to_device(device(learner), s)
+    s = send_to_device(RLCore.device(learner), s)
     if learner.continuous
         learner.approximator.actor(s; is_sampling=true) |> vec |> send_to_host
     else
@@ -114,7 +114,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
     policy_improvement_mode = learner.policy_improvement_mode
     ratio_upper_bound = learner.ratio_upper_bound
     advantage_estimator = learner.advantage_estimator
-    D = device(AC)
+    D = RLCore.device(AC)
 
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     a = reshape(a, :, batch_size)
@@ -180,7 +180,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
     policy_improvement_mode = learner.policy_improvement_mode
     ratio_upper_bound = learner.ratio_upper_bound
     advantage_estimator = learner.advantage_estimator
-    D = device(AC)
+    D = RLCore.device(AC)
 
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     a = CartesianIndex.(a, 1:batch_size)

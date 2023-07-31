@@ -30,14 +30,14 @@ end
 Functors.functor(x::MACLearner) = (app=x.approximator,), y -> @set x.approximator = y.app
 
 function RLCore.forward(learner::MACLearner, env::MultiThreadEnv)
-    learner.approximator.actor(send_to_device(device(learner.approximator), state(env))) |>
+    learner.approximator.actor(send_to_device(RLCore.device(learner.approximator), state(env))) |>
     send_to_host
 end
 
 function RLCore.forward(learner::MACLearner, env)
     s = state(env)
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
-    s = send_to_device(device(learner.approximator), s)
+    s = send_to_device(RLCore.device(learner.approximator), s)
     learner.approximator.actor(s) |> vec |> send_to_host
 end
 
@@ -64,7 +64,7 @@ function _update!(learner::MACLearner, t::CircularArraySARTTrajectory)
 
     AC = learner.approximator
     γ = learner.γ
-    D = device(AC)
+    D = RLCore.device(AC)
 
     states = send_to_device(D, states)
     states_flattened = flatten_batch(states) # (state_size..., n_thread * update_freq)

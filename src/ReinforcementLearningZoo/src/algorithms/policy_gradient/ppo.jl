@@ -150,14 +150,14 @@ function RLBase.prob(
         @error "todo"
     else
         μ, σ =
-            p.approximator.actor(send_to_device(device(p.approximator), state)) |>
+            p.approximator.actor(send_to_device(RLCore.device(p.approximator), state)) |>
             send_to_host
         StructArray{Normal}((μ, σ))
     end
 end
 
 function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArray, mask)
-    logits = p.approximator.actor(send_to_device(device(p.approximator), state))
+    logits = p.approximator.actor(send_to_device(RLCore.device(p.approximator), state))
     if !isnothing(mask)
         logits .+= ifelse.(mask, 0.0f0, typemin(Float32))
     end
@@ -224,7 +224,7 @@ function _update!(p::PPOPolicy, t::Any)
     w₁ = p.actor_loss_weight
     w₂ = p.critic_loss_weight
     w₃ = p.entropy_loss_weight
-    D = device(AC)
+    D = RLCore.device(AC)
     to_device(x) = send_to_device(D, x)
 
     n_envs, n_rollout = size(t[:terminal])

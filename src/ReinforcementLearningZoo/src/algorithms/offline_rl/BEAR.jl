@@ -124,7 +124,7 @@ function BEARLearner(;
 end
 
 function (l::BEARLearner)(env)
-    s = send_to_device(device(l.policy), state(env))
+    s = send_to_device(RLCore.device(l.policy), state(env))
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s = repeat(s, outer=(1, 1, l.p))
     action = l.policy(l.rng, s; is_sampling=true)
@@ -134,7 +134,7 @@ function (l::BEARLearner)(env)
 end
 
 function RLCore.update!(l::BEARLearner, batch::NamedTuple{SARTS})
-    D = device(l.qnetwork1)
+    D = RLCore.device(l.qnetwork1)
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     γ, τ, λ = l.γ, l.τ, l.λ
 

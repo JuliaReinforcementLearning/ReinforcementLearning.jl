@@ -65,7 +65,7 @@ function decode(rng::AbstractRNG, model::VAE, state, z=nothing; is_normalize::Bo
     if z === nothing
         # In BCQ case. In PLAS case if z !== nothing.
         z = clamp.(randn(rng, Float32, (model.latent_dims, size(state)[2:end]...)), -0.5f0, 0.5f0)
-        z = send_to_device(device(model), z)
+        z = send_to_device(RLCore.device(model), z)
     end
     a = model.decoder(vcat(state, z))
     if is_normalize
@@ -112,7 +112,7 @@ In BCQ, we use `PerturbationNetwork`: $\pi(s,a)\rightarrow a$ to model policy an
 `p` is a hyper-parameter used for repeating states to obtain better Q estimation. For example, BCQ repeats states and obtains the actions and Q-values. Then it chooses an action with the highest Q-value.
 ```julia
 function (l::BCQLearner)(env)
-    s = send_to_device(device(l.policy), state(env))
+    s = send_to_device(RLCore.device(l.policy), state(env))
     s = Flux.unsqueeze(s, ndims(s) + 1)
     s = repeat(s, outer=(1, 1, l.p))
     action = l.policy(s, decode(l.vae.model, s))

@@ -93,7 +93,7 @@ function PLASLearner(;
 end
 
 function (l::PLASLearner)(env)
-    s = send_to_device(device(l.policy), state(env))
+    s = send_to_device(RLCore.device(l.policy), state(env))
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     latent_action = tanh.(l.policy(s))
     action = dropdims(decode(l.vae.model, s, latent_action), dims=2)
@@ -108,7 +108,7 @@ function RLCore.update!(l::PLASLearner, batch::NamedTuple{SARTS})
 end
 
 function update_vae!(l::PLASLearner, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(l.vae), batch)
+    s, a, r, t, s′ = send_to_device(RLCore.device(l.vae), batch)
     a = reshape(a, :, l.batch_size)
     vae_grad = gradient(Flux.params(l.vae)) do
         recon_loss, kl_loss = vae_loss(l.vae.model, s, a)
@@ -118,7 +118,7 @@ function update_vae!(l::PLASLearner, batch::NamedTuple{SARTS})
 end
 
 function update_learner!(l::PLASLearner, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(l.qnetwork1), batch)
+    s, a, r, t, s′ = send_to_device(RLCore.device(l.qnetwork1), batch)
 
     γ, τ, λ = l.γ, l.τ, l.λ
 

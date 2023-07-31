@@ -43,8 +43,8 @@ Base.@kwdef mutable struct DeepCFR{TP,TV,TMP,TMV,I,R,P} <: AbstractCFRPolicy
 end
 
 function RLBase.prob(π::DeepCFR, env::AbstractEnv)
-    I = send_to_device(device(π.Π), state(env))
-    m = send_to_device(device(π.Π), ifelse.(legal_action_space_mask(env), 0.0f0, -Inf32))
+    I = send_to_device(RLCore.device(π.Π), state(env))
+    m = send_to_device(RLCore.device(π.Π), ifelse.(legal_action_space_mask(env), 0.0f0, -Inf32))
     logits = π.Π(Flux.unsqueeze(I, dims=ndims(I) + 1)) |> vec
     σ = softmax(logits .+ m)
     send_to_host(σ)
@@ -71,7 +71,7 @@ function RLCore.update!(π::DeepCFR)
     Π = π.Π
     Π_losses = π.Π_losses
     Π_norms = π.Π_norms
-    D = device(Π)
+    D = RLCore.device(Π)
     MΠ = π.MΠ
     ps = Flux.params(Π)
 
@@ -117,10 +117,10 @@ function update_advantage_networks(π, p)
     if length(MV) >= π.batch_size_V
         for i in 1:π.n_training_steps_V
             batch_inds = rand(π.rng, 1:length(MV), π.batch_size_V)
-            I = send_to_device(device(V), Flux.batch([MV[:I][i] for i in batch_inds]))
-            r̃ = send_to_device(device(V), Flux.batch([MV[:r̃][i] for i in batch_inds]))
-            t = send_to_device(device(V), Flux.batch([MV[:t][i] / π.t for i in batch_inds]))
-            m = send_to_device(device(V), Flux.batch([MV[:m][i] for i in batch_inds]))
+            I = send_to_device(RLCore.device(V), Flux.batch([MV[:I][i] for i in batch_inds]))
+            r̃ = send_to_device(RLCore.device(V), Flux.batch([MV[:r̃][i] for i in batch_inds]))
+            t = send_to_device(RLCore.device(V), Flux.batch([MV[:t][i] / π.t for i in batch_inds]))
+            m = send_to_device(RLCore.device(V), Flux.batch([MV[:m][i] for i in batch_inds]))
             ps = Flux.params(V)
             gs = gradient(ps) do
                 loss = mean(reshape(t, 1, :) .* ((r̃ .- V(I) .* m) .^ 2))
@@ -145,7 +145,7 @@ function external_sampling!(π::DeepCFR, env::AbstractEnv, p)
     elseif current_player(env) == p
         V = π.V[p]
         s = state(env)
-        I = send_to_device(device(V), Flux.unsqueeze(s, dims=ndims(s) + 1))
+        I = send_to_device(RLCore.device(V), Flux.unsqueeze(s, dims=ndims(s) + 1))
         A = action_space(env)
         m = legal_action_space_mask(env)
         σ = masked_regret_matching(V(I) |> send_to_host |> vec, m)
@@ -162,7 +162,7 @@ function external_sampling!(π::DeepCFR, env::AbstractEnv, p)
     else
         V = π.V[current_player(env)]
         s = state(env)
-        I = send_to_device(device(V), Flux.unsqueeze(s, dims=ndims(s) + 1))
+        I = send_to_device(RLCore.device(V), Flux.unsqueeze(s, dims=ndims(s) + 1))
         A = action_space(env)
         m = legal_action_space_mask(env)
         σ = masked_regret_matching(V(I) |> send_to_host |> vec, m)

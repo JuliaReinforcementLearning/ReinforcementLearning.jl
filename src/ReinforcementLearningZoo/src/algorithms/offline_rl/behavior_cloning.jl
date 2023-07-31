@@ -35,15 +35,15 @@ end
 function RLBase.plan!(p::BehaviorCloningPolicy, env::AbstractEnv)
     s = state(env)
     s_batch = Flux.unsqueeze(s, dims=ndims(s) + 1)
-    s_batch = send_to_device(device(p.approximator), s_batch)
+    s_batch = send_to_device(RLCore.device(p.approximator), s_batch)
     logits = p.approximator(s_batch) |> vec |> send_to_host # drop dimension
     typeof(ActionStyle(env)) == MinimalActionSet ? p.explorer(logits) :
     p.explorer(logits, legal_action_space_mask(env))
 end
 
 function RLCore.update!(p::BehaviorCloningPolicy, batch::NamedTuple{(:state, :action)})
-    s = send_to_device(device(p.approximator), batch.state)
-    a = send_to_device(device(p.approximator), batch.action)
+    s = send_to_device(RLCore.device(p.approximator), batch.state)
+    a = send_to_device(RLCore.device(p.approximator), batch.action)
     m = p.approximator
     gs = gradient(params(m)) do
         ŷ = m(s)
@@ -63,7 +63,7 @@ end
 function RLBase.prob(p::BehaviorCloningPolicy, env::AbstractEnv)
     s = state(env)
     m = p.approximator
-    s_batch = send_to_device(device(m), Flux.unsqueeze(s, dims=ndims(s) + 1))
+    s_batch = send_to_device(RLCore.device(m), Flux.unsqueeze(s, dims=ndims(s) + 1))
     values = m(s_batch) |> vec |> send_to_host
     typeof(ActionStyle(env)) == MinimalActionSet ? prob(p.explorer, values) :
     prob(p.explorer, values, legal_action_space_mask(env))
