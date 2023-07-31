@@ -3,11 +3,8 @@
 export device, send_to_device, send_to_host
 
 using Flux
-using CUDA
 using Adapt
 using Random
-
-import CUDA: device
 
 send_to_host(x) = send_to_device(Val(:cpu), x)
 
@@ -16,7 +13,6 @@ send_to_device(d) = x -> send_to_device(device(d), x)
 send_to_device(::Val{:cpu}, m) = fmap(x -> adapt(Array, x), m)
 
 # TODO: handle multi-devices
-send_to_device(::CuDevice, m) = fmap(CUDA.cu, m)
 
 """
     device(model)
@@ -33,13 +29,7 @@ device(x::AbstractArray) = device(parent(x))
 
 device(x::AbstractEnv) = Val(:cpu)  # TODO: we may support gpu later
 
-function device(x::Random.AbstractRNG)
-    if x isa CUDA.CURAND.RNG
-        device()
-    else
-        Val(:cpu)
-    end
-end
+device(x::Random.AbstractRNG) = Val(:cpu)
 
 function device(x::Union{Tuple,NamedTuple})
     d1 = device(first(x))
@@ -53,9 +43,3 @@ end
 # recognize Torch.jl
 # device(x::Tensor) = Val(Symbol(:gpu, x.device))
 
-# Since v0.1.10 CircularArrayBuffer will adapt internal buffer into GPU
-# But in RL.jl, we don't need that feature as far as I know
-
-import CircularArrayBuffers: CircularArrayBuffer
-
-send_to_device(d::CuDevice, m::CircularArrayBuffer) = send_to_device(d, collect(m))

@@ -63,17 +63,6 @@ function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ=1.0f-8) where {A<:AbstractArray}
     return unsqueeze(stack(logp; dims=2), dims=1)
 end
 
-#Used for mvnormlogpdf and mvnormkldivergence
-"""
-    logdetLorU(LorU::AbstractMatrix)
-
-Log-determinant of the Positive-Semi-Definite matrix A = L*U (cholesky lower and upper triangulars), given L or U. 
-Has a sign uncertainty for non PSD matrices.
-"""
-function logdetLorU(LorU::Union{A, LowerTriangular{T, A}, UpperTriangular{T, A}}) where {T, A <: CuArray}
-    return 2*sum(log.(diag(LorU)))
-end
-
 #Cpu fallback
 logdetLorU(LorU::AbstractMatrix) = logdet(LorU)*2
 
