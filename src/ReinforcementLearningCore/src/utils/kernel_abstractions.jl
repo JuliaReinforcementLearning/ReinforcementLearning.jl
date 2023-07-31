@@ -1,6 +1,6 @@
 # TODO: watch https://github.com/JuliaGPU/Adapt.jl/pull/52
 
-export get_backend, send_to_device, send_to_host
+export send_to_device, send_to_host
 
 using Flux
 using CUDA
