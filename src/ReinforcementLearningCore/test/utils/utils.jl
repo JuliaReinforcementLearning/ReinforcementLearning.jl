@@ -1,5 +1,5 @@
 include("base.jl")
-include("device.jl")
+include("kernel_abstractions.jl")
 include("stack_frames.jl")
 include("networks.jl")
 include("distributions.jl")
