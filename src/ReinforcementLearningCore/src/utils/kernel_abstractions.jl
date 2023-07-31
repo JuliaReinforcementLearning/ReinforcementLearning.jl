@@ -10,7 +10,7 @@ import KernelAbstractions
 
 send_to_host(x) = send_to_device(CPU(; static=false), x)
 
-send_to_device(d) = x -> send_to_device(get_backend(d), x)
+send_to_device(d) = x -> send_to_device(KernelAbstractions.get_backend(d), x)
 
 send_to_device(::CPU, m) = fmap(x -> adapt(Array, x), m)
 
