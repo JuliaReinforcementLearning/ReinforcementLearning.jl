@@ -18,7 +18,7 @@ send_to_device(::Val{:cpu}, m) = fmap(x -> adapt(Array, x), m)
 # TODO: handle multi-devices
 send_to_device(::CuDevice, m) = fmap(CUDA.cu, m)
 
-KernelAbstractions.get_backend(x) = get_backend(Flux.trainable(x))
+KernelAbstractions.get_backend(x) = KernelAbstractions.get_backend(Flux.trainable(x))
 KernelAbstractions.get_backend(x::Function) = nothing
 KernelAbstractions.get_backend(x::Tuple{}) = nothing
 KernelAbstractions.get_backend(x::NamedTuple{(),Tuple{}}) = nothing
@@ -28,9 +28,9 @@ KernelAbstractions.get_backend(x::Random.AbstractRNG) = CPU(;static=false)
 KernelAbstractions.get_backend(x::CUDA.CURAND.RNG) = CUDABackend()
 
 function KernelAbstractions.get_backend(x::Union{Tuple,NamedTuple})
-    d1 = get_backend(first(x))
+    d1 = KernelAbstractions.get_backend(first(x))
     if isnothing(d1)
-        get_backend(Base.tail(x))
+        KernelAbstractions.get_backend(Base.tail(x))
     else
         d1
     end
