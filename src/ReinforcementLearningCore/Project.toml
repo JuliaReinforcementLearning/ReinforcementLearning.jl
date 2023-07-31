@@ -55,4 +55,4 @@ ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["DomainSets", "Test", "Random", "ReinforcementLearningEnvironments"]
+test = ["CUDA", "DomainSets", "KernelAbstractions", "Test", "Random", "ReinforcementLearningEnvironments"]
