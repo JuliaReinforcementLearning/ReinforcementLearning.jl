@@ -342,12 +342,12 @@ function Flux.gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
 end
 
 #=
-    send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ? CUDA.CURAND.RNG() : GLOBAL_RNG)
+    send_to_device(device, p::MPOPolicy; rng = device isa CUDABackend ? CUDA.CURAND.RNG() : GLOBAL_RNG)
 
 Send all neural nets of the actor to a specified device.
 `rng` can be used to specificy a particular rng if desired, make sure this rng generates numbers on `device`. 
 =#
-function RLCore.send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ? CUDA.CURAND.RNG() : GLOBAL_RNG)
+function RLCore.send_to_device(device, p::MPOPolicy; rng = device isa CUDABackend ? CUDA.CURAND.RNG() : GLOBAL_RNG)
     sd(x) = send_to_device(device, x) 
     MPOPolicy(
         p.actor |> sd, 

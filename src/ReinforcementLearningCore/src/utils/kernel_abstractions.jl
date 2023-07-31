@@ -13,10 +13,10 @@ send_to_host(x) = send_to_device(CPU(; static=false), x)
 
 send_to_device(d) = x -> send_to_device(get_backend(d), x)
 
-send_to_device(::Val{:cpu}, m) = fmap(x -> adapt(Array, x), m)
+send_to_device(::CPU, m) = fmap(x -> adapt(Array, x), m)
 
 # TODO: handle multi-devices
-send_to_device(::CuDevice, m) = fmap(CUDA.cu, m)
+send_to_device(::CUDABackend, m) = fmap(CUDA.cu, m)
 
 KernelAbstractions.get_backend(x) = KernelAbstractions.get_backend(Flux.trainable(x))
 KernelAbstractions.get_backend(x::Function) = nothing
@@ -44,4 +44,4 @@ end
 
 import CircularArrayBuffers: CircularArrayBuffer
 
-send_to_device(d::CuDevice, m::CircularArrayBuffer) = send_to_device(d, collect(m))
+send_to_device(d::CUDABackend, m::CircularArrayBuffer) = send_to_device(d, collect(m))
