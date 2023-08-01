@@ -4,7 +4,13 @@ using ReinforcementLearningEnvironments
 using ReinforcementLearningTrajectories
 
 using Test
-using CUDA, cuDNN
+
+if Sys.isapple()
+    using Metal
+else
+    using CUDA, cuDNN
+end
+
 using CircularArrayBuffers
 using Flux
 

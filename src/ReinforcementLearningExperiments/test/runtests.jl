@@ -1,7 +1,11 @@
 using ReinforcementLearningExperiments
 
-using CUDA, cuDNN
-CUDA.allowscalar(false)
+if Sys.isapple()
+    using Metal
+else
+    using CUDA, cuDNN
+    CUDA.allowscalar(false)
+end
 
 run(E`JuliaRL_NFQ_CartPole`)
 run(E`JuliaRL_BasicDQN_CartPole`)
