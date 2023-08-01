@@ -120,7 +120,7 @@ function RLBase.plan!(p::TD3Policy, env)
     else
         s = state(env)
         s = Flux.unsqueeze(s, dims=ndims(s) + 1)
-        action = p.behavior_actor(s |> gpu |> vec |> cpu
+        action = p.behavior_actor(s) |> gpu |> vec |> cpu
         clamp(action[] + randn(p.rng) * p.act_noise, -p.act_limit, p.act_limit)
     end
 end
