@@ -89,11 +89,11 @@ end
 function (learner::CRRLearner)(env)
     s = state(env)
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
-    s = send_to_device(device(learner), s)
+    s = gpu(s)
     if learner.continuous
-        learner.approximator.actor(s; is_sampling=true) |> vec |> send_to_host
+        learner.approximator.actor(s; is_sampling=true) |> vec |> cpu
     else
-        learner.approximator.actor(s) |> vec |> send_to_host
+        learner.approximator.actor(s) |> vec |> cpu
     end
 end
 
@@ -114,9 +114,8 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
     policy_improvement_mode = learner.policy_improvement_mode
     ratio_upper_bound = learner.ratio_upper_bound
     advantage_estimator = learner.advantage_estimator
-    D = device(AC)
 
-    s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
+    s, a, r, t, s′ = (gpu(batch[x]) for x in SARTS)
     a = reshape(a, :, batch_size)
     r = reshape(r, :, batch_size)
     t = reshape(t, :, batch_size)
@@ -127,7 +126,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
 
     target = r .+ γ .* (1 .- t) .* expected_target_q
 
-    q_t = send_to_device(D, Matrix{Float32}(undef, learner.m, batch_size))
+    q_t = gpu(Matrix{Float32}(undef, learner.m, batch_size))
     for i in 1:learner.m
         a_sample = AC.actor(s; is_sampling=true)
         q_t[i, :] = AC.critic(vcat(s, a_sample))
@@ -180,12 +179,11 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
     policy_improvement_mode = learner.policy_improvement_mode
     ratio_upper_bound = learner.ratio_upper_bound
     advantage_estimator = learner.advantage_estimator
-    D = device(AC)
 
-    s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
+    s, a, r, t, s′ = (gpu(batch[x]) for x in SARTS)
     a = CartesianIndex.(a, 1:batch_size)
-    r = send_to_device(D, reshape(r, :, batch_size))
-    t = send_to_device(D, reshape(t, :, batch_size))
+    r = gpu(reshape(r, :, batch_size))
+    t = gpu(reshape(t, :, batch_size))
 
     target_a_t = softmax(target_AC.actor(s′))
     target_q_t = target_AC.critic(s′)

@@ -77,7 +77,7 @@ function RLCore.Experiment(
             lr_alpha=0.003f0,
             action_dims=action_dims,
             rng=rng,
-            device_rng=CUDA.functional() ? CUDA.CURAND.RNG() : rng
+            device_rng=(@isdefined CUDA) && CUDA.functional() ? CUDA.CURAND.RNG() : rng
         ),
         trajectory=CircularArraySARTTrajectory(
             capacity=10000,

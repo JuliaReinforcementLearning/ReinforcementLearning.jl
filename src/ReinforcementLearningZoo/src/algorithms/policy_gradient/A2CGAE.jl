@@ -32,7 +32,7 @@ Functors.functor(x::A2CGAELearner) =
     (app=x.approximator,), y -> @set x.approximator = y.app
 
 RLCore.forward!(learner::A2CGAELearner, env::MultiThreadEnv) =
-    learner.approximator.actor(send_to_device(device(learner), state(env))) |> send_to_host
+    learner.approximator.actor(gpu(learner), state(env))) |> cpu
 
 function RLCore.update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
     length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
@@ -46,7 +46,7 @@ function _update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
     n = length(t)
 
     AC = learner.approximator
-    to_device(x) = send_to_device(device(AC), x)
+
     γ = learner.γ
     λ = learner.λ
     w₁ = learner.actor_loss_weight
@@ -63,7 +63,7 @@ function _update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
             select_last_dim(x, 1:n) |> flatten_batch |> a -> CartesianIndex.(a, 1:length(a))
 
     rollout_values =
-        S |> flatten_batch |> AC.critic |> x -> reshape(x, :, n + 1) |> send_to_host
+        S |> flatten_batch |> AC.critic |> x -> reshape(x, :, n + 1) |> cpu
 
     advantages = generalized_advantage_estimation(
         t[:reward],
@@ -74,7 +74,7 @@ function _update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
         terminal=t[:terminal]
     )
 
-    gains = to_device(advantages + select_last_dim(rollout_values, 1:n))
+    gains = gpu(advantages + select_last_dim(rollout_values, 1:n))
 
     advantages = advantages |> flatten_batch |> to_device
 

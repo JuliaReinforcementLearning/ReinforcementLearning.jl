@@ -4,7 +4,7 @@ import ChainRulesCore: ignore_derivatives
 import LogExpFunctions.logsumexp
 import Flux.Losses: logitcrossentropy, mse
 import Flux.onehotbatch
-
+import Flux: gpu
 #Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
 #If using a CategoricalNetwork actor, α is used for αμ. αΣ is only used for [Cov]GaussianNetwork
 mutable struct MPOPolicy{P<:Approximator,Q<:Approximator,R} <: AbstractPolicy
@@ -77,8 +77,10 @@ with each policy network type.
 `p::MPOPolicy` logs several values during training. You can access them using `p.logs[::Symbol]`.
 """
 function MPOPolicy(;actor::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 1f-2, ϵΣ = 1f-4, α_scale = 1f0, αΣ_scale = 100f0, τ = 1f-3, max_grad_norm = 5f-1, rng = Random.default_rng()) where Q <: Approximator
-    @assert device(actor) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
-    @assert device(actor) == device(rng) "The specified rng does not generate on the same device as the actor. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
+    # TODO: Replace this with type checking for GPU support, GPU/CPU indication traits for actor / network types
+    # @assert device(actor) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
+    # Use rng_from_array to clean this up...
+    # @assert device(actor) == device(rng) "The specified rng does not generate on the same device as the actor. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :actor_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :α, :αΣ, :kl))
     MPOPolicy(actor, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, action_sample_size, ϵ, ϵμ, ϵΣ, 0f0, 0f0, α_scale, αΣ_scale, max_grad_norm, τ, rng, logs)
 end
@@ -86,14 +88,13 @@ end
 Flux.@functor MPOPolicy
 
 function RLBase.plan!(p::MPOPolicy, env; testmode = false)
-    D = device(p.actor)
-    s = send_to_device(D, state(env))
+    s = gpu(state(env))
     if !testmode
         action = p.actor.model(p.rng, s; is_sampling=!testmode)
     else
         action, _ = p.actor.model(p.rng, s; is_sampling=!testmode)
     end
-    send_to_host(action)
+    cpu(action)
 end
 
 
@@ -111,7 +112,7 @@ end
 #Here we apply the TD3 Q network approach. The original MPO paper uses retrace.
 function update_critic!(p::MPOPolicy, batches)
     for (id, batch) in enumerate(batches)
-        s, s′, a, r, t, = send_to_device(device(p.qnetwork1), batch)
+        s, s′, a, r, t, = gpu(batch)
         γ, τ = p.γ, p.τ
 
         a′ = RLCore.forward(p.actor, p.rng, s′; is_sampling=true, is_return_log_prob=false)
@@ -160,7 +161,7 @@ function update_critic!(p::MPOPolicy, batches)
 end
 
 function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
-    states_batches = [send_to_device(device(p.actor), reshape(batch[:state], size(batch[:state],1), 1, :)) for batch in batches] #vector of 3D tensors with dimensions (state_size x 1 x batch_size), sent to device
+    states_batches = [gpu(reshape(batch[:state], size(batch[:state],1), 1, :)) for batch in batches] #vector of 3D tensors with dimensions (state_size x 1 x batch_size), sent to device
     current_action_dist_batches = [RLCore.forward(p.actor, p.rng, states, is_sampling = false) for states in states_batches] #π(.|s,Θᵢ) 
     action_samples_batches = [sample_actions(p, dist, p.action_sample_size) for dist in current_action_dist_batches] #3D tensor with dimensions (action_size x action_sample_size x batchsize)
     for (states, current_action_dist, action_samples) in zip(states_batches, current_action_dist_batches, action_samples_batches)
@@ -168,7 +169,7 @@ function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
         repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
         input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
         Q = RLCore.forward(p.qnetwork1, input) 
-        η = solve_mpodual(send_to_host(Q), p.ϵ)
+        η = solve_mpodual(cpu(Q), p.ϵ)
         push!(p.logs[:η], η)
         qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batch_size)
 
@@ -342,19 +343,18 @@ function Flux.gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
 end
 
 #=
-    send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ? CUDA.CURAND.RNG() : GLOBAL_RNG)
+    gpu(p::MPOPolicy; rng = device isa CuDevice ? CUDA.CURAND.RNG() : GLOBAL_RNG)
 
-Send all neural nets of the actor to a specified device.
+Send all neural nets of the actor to GPU, if active.
 `rng` can be used to specificy a particular rng if desired, make sure this rng generates numbers on `device`. 
 =#
-function RLCore.send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ? CUDA.CURAND.RNG() : GLOBAL_RNG)
-    sd(x) = send_to_device(device, x) 
+function gpu(p::MPOPolicy; rng = (@isdefined CUDA) && CUDA.functional() ? CUDA.CURAND.RNG() : GLOBAL_RNG)
     MPOPolicy(
-        p.actor |> sd, 
-        p.qnetwork1 |> sd, 
-        p.qnetwork2 |> sd, 
-        p.target_qnetwork1 |> sd, 
-        p.target_qnetwork2 |> sd, 
+        p.actor |> gpu, 
+        p.qnetwork1 |> gpu, 
+        p.qnetwork2 |> gpu, 
+        p.target_qnetwork1 |> gpu, 
+        p.target_qnetwork2 |> gpu, 
         p.γ,
         p.action_sample_size, 
         p.ϵ, 
@@ -370,15 +370,6 @@ function RLCore.send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ?
         p.logs)
 end
 
-#=
-    send_to_host(p::MPOPolicy; rng = GLOBAL_RNG)
-
-Send all neural nets of the actor to the cpu.
-`rng` can be used to specificy a particular rng if desired. 
-=#
-function RLCore.send_to_host(p::MPOPolicy; rng = GLOBAL_RNG)
-    send_to_device(Val{:cpu}, p, rng = rng)
-end
 
 function grad_norm!(grad, max_norm)
     n = norm(grad)

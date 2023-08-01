@@ -54,9 +54,9 @@ using BenchmarkTools
         @test ac_cpu.optimizer === ac.optimizer
 
         D = ac.actor.model |> gpu |> device
-        @test D === device(ac) === device(ac.actor) == device(ac.critic)
 
-        A = send_to_device(D, rand(3))
+
+        A = gpu(rand(3))
         ac.actor(A)
         ac.critic(A)
     end=#
@@ -121,7 +121,7 @@ using BenchmarkTools
             end
         end
         @testset "CUDA" begin
-            if CUDA.functional()
+            if (@isdefined CUDA) && CUDA.functional()
                 CUDA.allowscalar(false)
                 gn = GaussianNetwork(Dense(20,15), Dense(15,10), Dense(15,10, softplus)) |> gpu
                 state = rand(20,3)  |> gpu #batch of 3 states
@@ -273,7 +273,7 @@ using BenchmarkTools
             end
         end
         @testset "CUDA" begin
-            if CUDA.functional()
+            if (@isdefined CUDA) && CUDA.functional()
                 CUDA.allowscalar(false) 
                 rng = CUDA.CURAND.RNG()
                 pre = Dense(20,15) |> gpu

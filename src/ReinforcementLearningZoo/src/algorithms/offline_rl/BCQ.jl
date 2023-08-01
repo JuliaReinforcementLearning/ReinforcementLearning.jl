@@ -97,7 +97,7 @@ function BCQLearner(;
 end
 
 function (l::BCQLearner)(env)
-    s = send_to_device(device(l.policy), state(env))
+    s = gpu(state(env))
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     s = repeat(s, outer=(1, 1, l.p))
     action = l.policy(s, decode(l.vae.model, s))
@@ -114,8 +114,7 @@ function RLCore.update!(l::BCQLearner, batch::NamedTuple{SARTS})
 end
 
 function update_vae!(l::BCQLearner, batch::NamedTuple{SARTS})
-    D = device(l.vae)
-    s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
+    s, a, r, t, s′ = (gpu(batch[x]) for x in SARTS)
     a = reshape(a, :, l.batch_size)
     vae_grad = gradient(Flux.params(l.vae)) do
         recon_loss, kl_loss = vae_loss(l.vae.model, s, a)
@@ -125,8 +124,7 @@ function update_vae!(l::BCQLearner, batch::NamedTuple{SARTS})
 end
 
 function update_learner!(l::BCQLearner, batch::NamedTuple{SARTS})
-    D = device(l.qnetwork1)
-    s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
+    s, a, r, t, s′ = (gpu(batch[x]) for x in SARTS)
 
     γ, τ, λ = l.γ, l.τ, l.λ
 

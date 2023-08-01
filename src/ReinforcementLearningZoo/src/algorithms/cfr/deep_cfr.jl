@@ -43,11 +43,11 @@ Base.@kwdef mutable struct DeepCFR{TP,TV,TMP,TMV,I,R,P} <: AbstractCFRPolicy
 end
 
 function RLBase.prob(π::DeepCFR, env::AbstractEnv)
-    I = send_to_device(device(π.Π), state(env))
-    m = send_to_device(device(π.Π), ifelse.(legal_action_space_mask(env), 0.0f0, -Inf32))
+    I = gpu(state(env))
+    m = gpu(ifelse.(legal_action_space_mask(env), 0.0f0, -Inf32))
     logits = π.Π(Flux.unsqueeze(I, dims=ndims(I) + 1)) |> vec
     σ = softmax(logits .+ m)
-    send_to_host(σ)
+    cpu(σ)
 end
 
 RLBase.plan!(π::DeepCFR, env::AbstractEnv) =
@@ -71,7 +71,6 @@ function RLCore.update!(π::DeepCFR)
     Π = π.Π
     Π_losses = π.Π_losses
     Π_norms = π.Π_norms
-    D = device(Π)
     MΠ = π.MΠ
     ps = Flux.params(Π)
 
@@ -81,11 +80,10 @@ function RLCore.update!(π::DeepCFR)
 
     for i in 1:π.n_training_steps_Π
         batch_inds = rand(π.rng, 1:length(MΠ), π.batch_size_Π)
-        I = send_to_device(D, Flux.batch([MΠ[:I][i] for i in batch_inds]))
-        σ = send_to_device(D, Flux.batch([MΠ[:σ][i] for i in batch_inds]))
-        t = send_to_device(D, Flux.batch([MΠ[:t][i] / π.t for i in batch_inds]))
-        m = send_to_device(
-            D,
+        I = gpu(Flux.batch([MΠ[:I][i] for i in batch_inds]))
+        σ = gpu(Flux.batch([MΠ[:σ][i] for i in batch_inds]))
+        t = gpu(Flux.batch([MΠ[:t][i] / π.t for i in batch_inds]))
+        m = gpu(
             Flux.batch([ifelse.(MΠ[:m][i], 0.0f0, -Inf32) for i in batch_inds]),
         )
         gs = gradient(ps) do
@@ -117,10 +115,10 @@ function update_advantage_networks(π, p)
     if length(MV) >= π.batch_size_V
         for i in 1:π.n_training_steps_V
             batch_inds = rand(π.rng, 1:length(MV), π.batch_size_V)
-            I = send_to_device(device(V), Flux.batch([MV[:I][i] for i in batch_inds]))
-            r̃ = send_to_device(device(V), Flux.batch([MV[:r̃][i] for i in batch_inds]))
-            t = send_to_device(device(V), Flux.batch([MV[:t][i] / π.t for i in batch_inds]))
-            m = send_to_device(device(V), Flux.batch([MV[:m][i] for i in batch_inds]))
+            I = gpu(Flux.batch([MV[:I][i] for i in batch_inds]))
+            r̃ = gpu(Flux.batch([MV[:r̃][i] for i in batch_inds]))
+            t = gpu(Flux.batch([MV[:t][i] / π.t for i in batch_inds]))
+            m = gpu(Flux.batch([MV[:m][i] for i in batch_inds]))
             ps = Flux.params(V)
             gs = gradient(ps) do
                 loss = mean(reshape(t, 1, :) .* ((r̃ .- V(I) .* m) .^ 2))
@@ -145,10 +143,10 @@ function external_sampling!(π::DeepCFR, env::AbstractEnv, p)
     elseif current_player(env) == p
         V = π.V[p]
         s = state(env)
-        I = send_to_device(device(V), Flux.unsqueeze(s, dims=ndims(s) + 1))
+        I = gpu(Flux.unsqueeze(s, dims=ndims(s) + 1))
         A = action_space(env)
         m = legal_action_space_mask(env)
-        σ = masked_regret_matching(V(I) |> send_to_host |> vec, m)
+        σ = masked_regret_matching(V(I) |> cpu |> vec, m)
         v = zeros(length(σ))
         v̄ = 0.0
         for i in 1:length(m)
@@ -162,10 +160,10 @@ function external_sampling!(π::DeepCFR, env::AbstractEnv, p)
     else
         V = π.V[current_player(env)]
         s = state(env)
-        I = send_to_device(device(V), Flux.unsqueeze(s, dims=ndims(s) + 1))
+        I = gpu(Flux.unsqueeze(s, dims=ndims(s) + 1))
         A = action_space(env)
         m = legal_action_space_mask(env)
-        σ = masked_regret_matching(V(I) |> send_to_host |> vec, m)
+        σ = masked_regret_matching(V(I) |> cpu |> vec, m)
         push!(π.MΠ, I=s, t=π.t, σ=σ, m=m)
         a = sample(π.rng, A, Weights(σ, 1.0))
         env(a)

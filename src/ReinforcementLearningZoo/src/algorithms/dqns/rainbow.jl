@@ -32,9 +32,9 @@ function RLCore.forward(L::RainbowLearner, s::A) where {A<:AbstractArray}
 end
 
 function RLBase.plan!(learner::RainbowLearner, env::AbstractEnv)
-    s = send_to_device(device(learner.approximator), state(env))
+    s = gpu(state(env))
     s = unsqueeze(s, dims=ndims(s) + 1)
-    s |> learner |> vec |> send_to_host
+    s |> learner |> vec |> cpu
 end
 
 function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
@@ -50,11 +50,10 @@ function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
     delta_z = learner.delta_z
     update_horizon = learner.update_horizon
 
-    D = device(Q)
-    states = send_to_device(D, batch.state)
-    rewards = send_to_device(D, batch.reward)
-    terminals = send_to_device(D, batch.terminal)
-    next_states = send_to_device(D, batch.next_state)
+    states = gpu(batch.state)
+    rewards = gpu(batch.reward)
+    terminals = gpu(batch.terminal)
+    next_states = gpu(batch.next_state)
 
     batch_size = length(terminals)
     actions = CartesianIndex.(batch.action, 1:batch_size)
@@ -69,7 +68,7 @@ function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
     next_q = reshape(sum(support .* next_probs, dims=1), n_actions, :)
 
     if haskey(batch, :next_legal_actions_mask)
-        l′ = send_to_device(D, batch[:next_legal_actions_mask])
+        l′ = gpu(batch[:next_legal_actions_mask])
         next_q .+= ifelse.(l′, 0.0f0, typemin(Float32))
     end
 
@@ -90,7 +89,7 @@ function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
         updated_priorities = Vector{Float32}(undef, batch_size)
         weights = 1.0f0 ./ ((batch.priority .+ 1.0f-10) .^ β)
         weights ./= maximum(weights)
-        weights = send_to_device(D, weights)
+        weights = gpu(weights)
         # TODO: init on device directly
     end
 
@@ -102,7 +101,7 @@ function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
         loss = is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1 // batch_size : mean(batch_losses)
         ignore_derivatives() do
             if is_use_PER
-                updated_priorities .= send_to_host(vec((batch_losses .+ 1.0f-10) .^ β))
+                updated_priorities .= cpu(vec((batch_losses .+ 1.0f-10) .^ β))
             end
             learner.loss = loss
         end
@@ -141,7 +140,7 @@ end
 
 function RLBase.optimise!(learner::RainbowLearner, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory
-        res = RLBase.optimise!(learner, batch) |> send_to_host
+        res = RLBase.optimise!(learner, batch) |> cpu
         if !isnothing(res)
             k, p = res
             trajectory[:priority, k] = p

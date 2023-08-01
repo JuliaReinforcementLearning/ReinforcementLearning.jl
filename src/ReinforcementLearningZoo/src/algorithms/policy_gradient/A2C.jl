@@ -33,14 +33,14 @@ end
 Functors.functor(x::A2CLearner) = (app=x.approximator,), y -> @set x.approximator = y.app
 
 function RLCore.forward(learner::A2CLearner, env::MultiThreadEnv)
-    learner.approximator.actor(send_to_device(device(learner), state(env))) |> send_to_host
+    learner.approximator.actor(gpu(state(env))) |> cpu
 end
 
 function RLCore.forward(learner::A2CLearner, env)
     s = state(env)
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
-    s = send_to_device(device(learner), s)
-    learner.approximator.actor(s) |> vec |> send_to_host
+    s = gpu(s)
+    learner.approximator.actor(s) |> vec |> cpu
 end
 
 function RLCore.update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
@@ -59,7 +59,7 @@ function _update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
     w₁ = learner.actor_loss_weight
     w₂ = learner.critic_loss_weight
     w₃ = learner.entropy_loss_weight
-    to_device = x -> send_to_device(device(AC), x)
+    to_device = x -> gpu(x)
 
     S = t[:state] |> to_device
     states = select_last_dim(S, 1:n)
@@ -69,14 +69,14 @@ function _update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
     actions = flatten_batch(actions)
     actions = CartesianIndex.(actions, 1:length(actions))
 
-    next_state_values = S |> select_last_frame |> AC.critic |> send_to_host
+    next_state_values = S |> select_last_frame |> AC.critic |> cpu
 
     gains =
         discount_rewards(
             t[:reward],
             γ;
             dims=2,
-            init=send_to_host(next_state_values),
+            init=cpu(next_state_values),
             terminal=t[:terminal]
         ) |> to_device
 

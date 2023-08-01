@@ -50,7 +50,7 @@ function RLCore.optimise!(
     γ = learner.γ
     loss_func = learner.loss_func
     
-    s, s′, a, r, t = send_to_device(device(Q), batch)
+    s, s′, a, r, t = gpu(batch)
     a = CartesianIndex.(a, 1:length(a))
 
     gs = gradient(params(Q)) do
@@ -66,3 +66,5 @@ function RLCore.optimise!(
 
     RLBase.optimise!(Q, gs)
 end
+
+rng_from_array()

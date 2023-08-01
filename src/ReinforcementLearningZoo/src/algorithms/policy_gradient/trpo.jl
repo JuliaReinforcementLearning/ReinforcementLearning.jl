@@ -29,7 +29,7 @@ IsPolicyGradient(::Type{<:TRPO}) = IsPolicyGradient()
 @functor TRPO (approximator, baseline)
 
 function RLBase.plan!(π::TRPO, env::AbstractEnv)
-    res = env |> state |> send_to_device(π) |> π.approximator |> send_to_host
+    res = env |> state |> gpu |> π.approximator |> cpu
     rand(π.rng, action_distribution(π.dist, res)[1])
 end
 

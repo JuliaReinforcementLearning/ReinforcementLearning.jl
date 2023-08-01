@@ -78,17 +78,16 @@ Functors.functor(x::FQE) = (Q=x.q_network, Qₜ=x.target_q_network), y -> begin
 end
 
 function (l::FQE)(env)
-    s = send_to_device(device(l.policy), state(env))
+    s = gpu(state(env))
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
     action = dropdims(l.policy(l.rng, s; is_sampling=true), dims=2)
 end
 
 function (l::FQE)(env, ::Val{:Eval})
     results = []
-    D = device(l.policy)
     for _ in 1:l.n_evals
         reset!(env)
-        s = send_to_device(D, state(env))
+        s = gpu(state(env))
         s = Flux.unsqueeze(s, dims=ndims(s) + 1)
         a = dropdims(l.policy(l.rng, s; is_sampling=true), dims=2)
         input = vcat(s, a)
@@ -99,9 +98,9 @@ function (l::FQE)(env, ::Val{:Eval})
 end
 
 function (l::FQE)(state::AbstractArray, action::AbstractArray)
-    D = device(l.q_network)
-    s = send_to_device(D, state)
-    a = send_to_device(D, reshape(action, :, l.batch_size))
+
+    s = gpu(state)
+    a = gpu(reshape(action, :, l.batch_size))
     input = vcat(s, a)
     value = l.q_network(input)
 end
@@ -110,8 +109,7 @@ function RLCore.update!(l::FQE, batch::NamedTuple{SARTS})
     policy = l.policy
     Q, Qₜ = l.q_network, l.target_q_network
 
-    D = device(Q)
-    s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
+    s, a, r, t, s′ = (gpu(batch[x]) for x in SARTS)
     γ = l.γ
     batch_size = l.batch_size
 
