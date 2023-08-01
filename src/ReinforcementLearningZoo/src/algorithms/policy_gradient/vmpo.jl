@@ -122,7 +122,7 @@ end
 function RLBase.plan!(agent::Agent{<:VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal}},
     env::AbstractEnv,
 )
-    s = gpu(state(env)
+    s = gpu(state(env))
     # the action is an output of GaussianNetwork which is normalised by tanh(),
     # we increase its stability by limiting it to [-1 + eps, 1 - eps]
     a = agent.policy.approximator.actor(agent.policy.rng, s, is_sampling=true)
