@@ -12,9 +12,9 @@ mutable struct MPOPolicy{P<:Approximator,Q<:Approximator,R} <: AbstractPolicy
     qnetwork1::Q
     qnetwork2::Q
     target_qnetwork1::Q
-    target_qnetwork2::Q 
+    target_qnetwork2::Q
     γ::Float32
-    action_sample_size::Int #K 
+    action_sample_size::Int #K
     ϵ::Float32  #KL bound on the non-parametric variational approximation to the actor
     ϵμ::Float32 #KL bound for the parametric actor training of mean estimations
     ϵΣ::Float32 #KL bound for the parametric actor training of (co)variance estimations
@@ -37,7 +37,7 @@ end
 """
     MPOPolicy(;
     actor::Approximator, #The policy approximating function. Can be a GaussianNetwork, a CovGaussianNetwork or a CategoricalNetwork.
-    qnetwork1::Q <: Approximator, #The Q-Value approximating function.  
+    qnetwork1::Q <: Approximator, #The Q-Value approximating function.
     qnetwork2::Q, #A second Q-Value approximator for double Q-learning.
     γ = 0.99f0, #Discount factor of rewards.
     action_sample_size::Int, #The number of actions to sample at the E-step (K in the MPO paper).
@@ -52,25 +52,25 @@ end
     )
 
 Instantiate an MPO learner. The actor can be of type `GaussianNetwork`, `CovGaussianNetwork`,
-or `CategoricalNetwork`. The original paper uses `CovGaussianNetwork` which approximates a 
+or `CategoricalNetwork`. The original paper uses `CovGaussianNetwork` which approximates a
 MvNormal policy. It has a better policy representation but requires more computation.
 
-This implementation uses double Q-learning and target Q-networks, 
-unlike the original MPO paper that uses retrace (WIP). The `Approximator` fields should 
-each come with their own `Optimiser` (e.g. `Adam`). 
+This implementation uses double Q-learning and target Q-networks,
+unlike the original MPO paper that uses retrace (WIP). The `Approximator` fields should
+each come with their own `Optimiser` (e.g. `Adam`).
 
-MPOPolicy requires batches of type 
+MPOPolicy requires batches of type
 ```
 NamedTuple{
-        (:actor, :critic), 
+        (:actor, :critic),
         <: Tuple{
             <: Vector{<: NamedTuple{(:state,)}},
             <: Vector{<: NamedTuple{SS′ART}}
         }
     }
-``` 
-to be trained. This type is obtained with a MetaSampler with two MultiBatchSampler: 
-a `:actor` and a `:critic` one. The :actor sampler must sample :state traces only 
+```
+to be trained. This type is obtained with a MetaSampler with two MultiBatchSampler:
+a `:actor` and a `:critic` one. The :actor sampler must sample :state traces only
 and the :critic needs SS′ART traces. See `ReinforcementLearningExperiments` for examples
 with each policy network type.
 
@@ -102,7 +102,7 @@ function RLBase.optimise!(
     p::MPOPolicy,
     ::PostActStage,
     trajectory::Trajectory)
-    
+
     for batches in trajectory
         update_critic!(p, batches[:critic])
         update_actor!(p, batches[:actor])
@@ -119,7 +119,7 @@ function update_critic!(p::MPOPolicy, batches)
         q′_input = vcat(s′, a′)
         q′ = min.(RLCore.forward(p.target_qnetwork1, q′_input), RLCore.forward(p.target_qnetwork2, q′_input))
 
-        y =  r .+ γ .* (1 .- t) .* vec(q′) 
+        y =  r .+ γ .* (1 .- t) .* vec(q′)
 
         # Train Q Networks
         q_input = vcat(s, a)
@@ -127,7 +127,7 @@ function update_critic!(p::MPOPolicy, batches)
             q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
                 q1 = RLCore.forward(p.qnetwork1, q_input) |> vec
                 l = mse(q1, y)
-                ignore_derivatives() do 
+                ignore_derivatives() do
                     push!(p.logs[:qnetwork1_loss], l)
                 end
                 return l
@@ -140,7 +140,7 @@ function update_critic!(p::MPOPolicy, batches)
             q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
                 q2 = RLCore.forward(p.qnetwork2, q_input) |> vec
                 l = mse(q2, y)
-                ignore_derivatives() do 
+                ignore_derivatives() do
                     push!(p.logs[:qnetwork2_loss], l)
                 end
                 return l
@@ -162,13 +162,13 @@ end
 
 function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
     states_batches = [gpu(reshape(batch[:state], size(batch[:state],1), 1, :)) for batch in batches] #vector of 3D tensors with dimensions (state_size x 1 x batch_size), sent to device
-    current_action_dist_batches = [RLCore.forward(p.actor, p.rng, states, is_sampling = false) for states in states_batches] #π(.|s,Θᵢ) 
+    current_action_dist_batches = [RLCore.forward(p.actor, p.rng, states, is_sampling = false) for states in states_batches] #π(.|s,Θᵢ)
     action_samples_batches = [sample_actions(p, dist, p.action_sample_size) for dist in current_action_dist_batches] #3D tensor with dimensions (action_size x action_sample_size x batchsize)
     for (states, current_action_dist, action_samples) in zip(states_batches, current_action_dist_batches, action_samples_batches)
         #Fit non-parametric variational distributions (E-step)
         repeated_states = reduce(hcat, Iterators.repeated(states, p.action_sample_size))
         input = vcat(repeated_states, action_samples) #repeat states along 2nd dimension and vcat with sampled actions to get state-action tensor
-        Q = RLCore.forward(p.qnetwork1, input) 
+        Q = RLCore.forward(p.qnetwork1, input)
         η = solve_mpodual(cpu(Q), p.ϵ)
         push!(p.logs[:η], η)
         qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batch_size)
@@ -179,10 +179,10 @@ function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
 
         #Improve actor towards qij (M-step)
         ps = Flux.params(p.actor)
-        gs = gradient(ps) do 
+        gs = gradient(ps) do
             mpo_loss(p, qij, states, action_samples, current_action_dist)
         end
-        
+
         if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), gs)
             error("Gradient contains NaN of Inf")
         end
@@ -191,7 +191,7 @@ function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
 
         Flux.Optimise.update!(p.actor.optimiser, ps, gs)
 
-        ignore_derivatives() do 
+        ignore_derivatives() do
             push!(p.logs[:α], p.α)
             push!(p.logs[:αΣ],p.αΣ)
         end
@@ -223,7 +223,7 @@ function sample_actions(p::MPOPolicy{<:Approximator{<:CategoricalNetwork}}, logi
     reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
 end
 
-function solve_mpodual(Q::AbstractArray, ϵ)    
+function solve_mpodual(Q::AbstractArray, ϵ)
     g(η) = η * ϵ + η * mean(logsumexp( Q ./η .- Float32(log(size(Q, 2))), dims = 2))
     Optim.minimizer(optimize(g, eps(ϵ), maximum(abs.(Q))))
 end
@@ -233,11 +233,11 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
     μ_old, L_old = μ_L_old
     μ, L = RLCore.forward(p.actor, p.rng, states, is_sampling = false)
     #decoupling
-    μ_d, L_d = ignore_derivatives() do 
-        μ, L 
-    end 
+    μ_d, L_d = ignore_derivatives() do
+        μ, L
+    end
     #decoupled logp for mu and L
-    logp_π_new_μ = mvnormlogpdf(μ, L_d, actions) 
+    logp_π_new_μ = mvnormlogpdf(μ, L_d, actions)
     logp_π_new_L = mvnormlogpdf(μ_d, L, actions)
     actor_loss = - mean(qij .* (logp_π_new_μ .+ logp_π_new_L))
     μ_old_s, L_old_s, μ_s, L_d_s, μ_d_s, L_s = map(x->eachslice(x, dims =3), (μ_old, L_old, μ, L_d, μ_d, L)) #slice all tensors along 3rd dim
@@ -245,13 +245,13 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
     klμ = sum(mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_s, L_d_s)))
     klΣ = sum(mean(mvnormkldivergence.(μ_old_s, L_old_s, μ_d_s, L_s)))
     ignore_derivatives() do
-        p.α -= p.α_scale*(p.ϵμ - klμ) 
-        p.αΣ -= p.αΣ_scale*(p.ϵΣ - klΣ) 
+        p.α -= p.α_scale*(p.ϵμ - klμ)
+        p.αΣ -= p.αΣ_scale*(p.ϵΣ - klΣ)
         p.α = clamp(p.α, 0f0, Inf32)
         p.αΣ = clamp(p.αΣ, 0f0, Inf32)
     end
 
-    lagrangeμ = - p.α * (p.ϵμ - klμ) 
+    lagrangeμ = - p.α * (p.ϵμ - klμ)
     lagrangeΣ = - p.αΣ * (p.ϵΣ - klΣ)
     ignore_derivatives() do #logging
         push!(p.logs[:actor_loss],actor_loss)
@@ -262,7 +262,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CovGaussianNetwork}}, qij, state
     return actor_loss + lagrangeμ + lagrangeΣ
 end
 
-#In the case of diagonal covariance (with GaussianNetwork), 
+#In the case of diagonal covariance (with GaussianNetwork),
 function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, actions, μ_σ_old::Tuple)
     μ_old, σ_old = μ_σ_old
     μ, σ = RLCore.forward(p.actor, p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
@@ -276,15 +276,15 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
     actor_loss = -mean(qij .* (logp_π_new_μ .+ logp_π_new_σ))
     klμ = mean(diagnormkldivergence(μ_old, σ_old, μ, σ_d))
     klΣ = mean(diagnormkldivergence(μ_old, σ_old, μ_d, σ))
-    
+
     ignore_derivatives() do
-        p.α -= p.α_scale*(p.ϵμ - klμ) 
-        p.αΣ -= p.αΣ_scale*(p.ϵΣ - klΣ) 
+        p.α -= p.α_scale*(p.ϵμ - klμ)
+        p.αΣ -= p.αΣ_scale*(p.ϵΣ - klΣ)
         p.α = clamp(p.α, 0f0, Inf32)
         p.αΣ = clamp(p.αΣ, 0f0, Inf32)
     end
 
-    lagrangeμ = - p.α * (p.ϵμ - klμ) 
+    lagrangeμ = - p.α * (p.ϵμ - klμ)
     lagrangeΣ = - p.αΣ * (p.ϵΣ - klΣ)
     ignore_derivatives() do #logging
         push!(p.logs[:actor_loss],actor_loss)
@@ -299,8 +299,8 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CategoricalNetwork}}, qij, state
     logits = RLCore.forward(p.actor, p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
     actor_loss = -  mean(qij .* log.(sum(softmax(logits, dims = 1) .* actions, dims = 1)))
     kl = kldivergence(softmax(logits_old, dims = 1), softmax(logits, dims = 1))/prod(size(qij)[2:3]) #divide to get average
-    
-    ignore_derivatives() do 
+
+    ignore_derivatives() do
         p.α -= 1*(p.ϵμ - kl)
         p.α = clamp(p.α, 0f0, Inf32)
     end
@@ -315,57 +315,29 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:CategoricalNetwork}}, qij, state
 end
 
 """
-    Flux.gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
+    gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
 
-Apply Flux.gpu to all neural nets of the actor. 
+Apply Flux.gpu to all neural nets of the actor.
 `rng` can be used to specificy a particular rng if desired, make sure this rng generates numbers on the correct device.
 """
-function Flux.gpu(p::MPOPolicy; rng = CUDA.CURAND.RNG())
+function gpu(p::MPOPolicy; rng = (@isdefined CUDA) && CUDA.functional() ? CUDA.CURAND.RNG() : GLOBAL_RNG)
     MPOPolicy(
-        p.actor |> gpu, 
-        p.qnetwork1 |> gpu, 
-        p.qnetwork2 |> gpu, 
-        p.target_qnetwork1 |> gpu, 
-        p.target_qnetwork2 |> gpu, 
-        p.γ, 
-        p.action_sample_size, 
-        p.ϵ, 
-        p.ϵμ, 
-        p.ϵΣ, 
-        p.α, 
+        p.actor |> gpu,
+        p.qnetwork1 |> gpu,
+        p.qnetwork2 |> gpu,
+        p.target_qnetwork1 |> gpu,
+        p.target_qnetwork2 |> gpu,
+        p.γ,
+        p.action_sample_size,
+        p.ϵ,
+        p.ϵμ,
+        p.ϵΣ,
+        p.α,
         p.αΣ,
         p.α_scale,
         p.αΣ_scale,
         p.max_grad_norm,
-        p.τ, 
-        rng,
-        p.logs)
-end
-
-#=
-    gpu(p::MPOPolicy; rng = device isa CuDevice ? CUDA.CURAND.RNG() : GLOBAL_RNG)
-
-Send all neural nets of the actor to GPU, if active.
-`rng` can be used to specificy a particular rng if desired, make sure this rng generates numbers on `device`. 
-=#
-function gpu(p::MPOPolicy; rng = (@isdefined CUDA) && CUDA.functional() ? CUDA.CURAND.RNG() : GLOBAL_RNG)
-    MPOPolicy(
-        p.actor |> gpu, 
-        p.qnetwork1 |> gpu, 
-        p.qnetwork2 |> gpu, 
-        p.target_qnetwork1 |> gpu, 
-        p.target_qnetwork2 |> gpu, 
-        p.γ,
-        p.action_sample_size, 
-        p.ϵ, 
-        p.ϵμ, 
-        p.ϵΣ, 
-        p.α, 
-        p.αΣ, 
-        p.α_scale,
-        p.αΣ_scale,
-        p.max_grad_norm,
-        p.τ, 
+        p.τ,
         rng,
         p.logs)
 end
