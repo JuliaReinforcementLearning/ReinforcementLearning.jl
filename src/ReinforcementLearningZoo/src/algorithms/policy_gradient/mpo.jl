@@ -1,5 +1,5 @@
 export MPOPolicy
-using LinearAlgebra, Flux, Optim, StatsBase, Random, CUDA
+using LinearAlgebra, Flux, Optim, StatsBase, Random
 import ChainRulesCore: ignore_derivatives
 import LogExpFunctions.logsumexp
 import Flux.Losses: logitcrossentropy, mse

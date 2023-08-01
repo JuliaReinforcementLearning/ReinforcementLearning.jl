@@ -12,7 +12,6 @@ using StableRNGs
 using Flux
 using Flux.Losses
 using IntervalSets
-using CUDA
 
 function RLCore.Experiment(
     ::Val{:JuliaRL},
