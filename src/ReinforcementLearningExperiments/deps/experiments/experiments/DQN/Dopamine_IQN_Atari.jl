@@ -38,7 +38,6 @@
 #+ tangle=true
 using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using ArcadeLearningEnvironment
-using CUDA
 using Flux
 using Flux.Losses: huber_loss
 using Dates

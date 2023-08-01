@@ -1,6 +1,6 @@
 using ReinforcementLearningExperiments
-using CUDA
 
+using CUDA
 CUDA.allowscalar(false)
 
 run(E`JuliaRL_NFQ_CartPole`)
