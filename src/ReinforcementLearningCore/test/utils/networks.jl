@@ -1,7 +1,18 @@
-using Test, Flux, CUDA, ChainRulesCore, LinearAlgebra, Distributions, ReinforcementLearningCore
-using Flux: params, gradient, unsqueeze
+using Test, Flux, ChainRulesCore, LinearAlgebra, Distributions, ReinforcementLearningCore
+using Flux: params, gradient, unsqueeze, InvDecay, gpu, cpu
+import ReinforcementLearningBase: RLBase
+# using Metal
+using BenchmarkTools
+
+# Flux.gpu_backend!("Metal")
 @testset "Approximators" begin
+    struct MockEnv <: RLBase.AbstractEnv end
+    RLBase.state(::MockEnv) = 1
+    A = TabularVApproximator(; n_state = 2, opt = InvDecay(1.0))
+    RLCore.forward(A, MockEnv())
+
     #= These may need to be updated due to recent changes
+
     @testset "TabularApproximator" begin
         A = TabularVApproximator(; n_state = 2, opt = InvDecay(1.0))
 

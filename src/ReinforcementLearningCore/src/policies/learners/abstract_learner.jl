@@ -1,6 +1,6 @@
 export AbstractLearner, Approximator
 
-import Flux
+using Flux
 using Functors: @functor
 
 abstract type AbstractLearner end
@@ -8,11 +8,13 @@ abstract type AbstractLearner end
 Base.show(io::IO, m::MIME"text/plain", L::AbstractLearner) = show(io, m, convert(AnnotatedStructTree, L))
 
 # Take Learner and Environment, get state, send to RLCore.forward(Learner, State)
-forward(L::Le, env::E) where {Le <: AbstractLearner, E <: AbstractEnv} = env |> state |> send_to_device(L.approximator) |> x -> forward(L, x) |> send_to_device(env) 
+function forward(L::Le, env::E) where {Le <: AbstractLearner, E <: AbstractEnv}
+    env |> state |> Flux.gpu |> (x -> forward(L, x)) |> Flux.cpu
+end
 
 function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::Trajectory) end
 
-Base.@kwdef mutable struct Approximator{M,O}
+Base.@kwdef mutable struct Approximator{M,O} <: AbstractLearner
     model::M
     optimiser::O
 end

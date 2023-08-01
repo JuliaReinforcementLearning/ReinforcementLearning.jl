@@ -1,4 +1,4 @@
-using Test, LinearAlgebra, Distributions, ReinforcementLearningCore, CUDA, Flux
+using Test, LinearAlgebra, Distributions, ReinforcementLearningCore, Flux
 
 @testset "utils/distributions" begin
     @testset "logdetLorU" begin
