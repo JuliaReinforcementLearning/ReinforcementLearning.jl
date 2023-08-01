@@ -32,7 +32,7 @@ Functors.functor(x::A2CGAELearner) =
     (app=x.approximator,), y -> @set x.approximator = y.app
 
 RLCore.forward!(learner::A2CGAELearner, env::MultiThreadEnv) =
-    learner.approximator.actor(gpu(learner), state(env))) |> cpu
+    learner.approximator.actor(gpu(state(env))) |> cpu
 
 function RLCore.update!(learner::A2CGAELearner, t::CircularArraySARTTrajectory)
     length(t) == 0 && return  # in the first update, only state & action is inserted into trajectory
