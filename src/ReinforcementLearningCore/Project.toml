@@ -34,6 +34,7 @@ ChainRulesCore = "1"
 CircularArrayBuffers = "0.1"
 Crayons = "4"
 CUDA = "4"
+cuDNN = "1"
 Distributions = "0.25"
 FillArrays = "0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 1"
 Flux = "0.13, 0.14"
@@ -50,10 +51,11 @@ julia = "1.9"
 
 [extras]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 DomainSets = "5b8099bc-c8ec-5219-889f-1d9e522a28bf"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["CUDA", "DomainSets", "Test", "Random", "ReinforcementLearningEnvironments"]
+test = ["CUDA", "cuDNN", "DomainSets", "Test", "Random", "ReinforcementLearningEnvironments"]

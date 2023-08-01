@@ -19,6 +19,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 CUDA = "4"
+cuDNN = "1"
 ChainRulesCore = "1"
 Distributions = "0.25"
 Flux = "0.13, 0.14"
@@ -34,8 +35,9 @@ julia = "1.9"
 
 [extras]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["CUDA", "Test"]
+test = ["CUDA", "cuDNN", "Test"]

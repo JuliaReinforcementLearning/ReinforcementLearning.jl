@@ -4,7 +4,7 @@ using ReinforcementLearningEnvironments
 using ReinforcementLearningTrajectories
 
 using Test
-using CUDA
+using CUDA, cuDNN
 using CircularArrayBuffers
 using Flux
 
