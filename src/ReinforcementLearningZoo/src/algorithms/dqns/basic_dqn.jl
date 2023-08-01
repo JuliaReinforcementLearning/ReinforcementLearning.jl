@@ -66,5 +66,3 @@ function RLCore.optimise!(
 
     RLBase.optimise!(Q, gs)
 end
-
-rng_from_array()
