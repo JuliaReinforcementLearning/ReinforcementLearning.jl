@@ -55,9 +55,11 @@ CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 DomainSets = "5b8099bc-c8ec-5219-889f-1d9e522a28bf"
 Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
+Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [targets]
-test = ["CUDA", "cuDNN", "DomainSets", "Metal", "Test", "Random", "ReinforcementLearningEnvironments"]
+test = ["CUDA", "cuDNN", "DomainSets", "Metal", "Preferences", "Random", "ReinforcementLearningEnvironments", "Test", "UUIDs"]
