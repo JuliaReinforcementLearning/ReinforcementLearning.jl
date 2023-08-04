@@ -12,6 +12,7 @@ using Statistics
 using OrdinaryDiffEq
 using TimerOutputs
 using Conda
+
 Conda.add("gym")
 
 @testset "ReinforcementLearningEnvironments" begin
