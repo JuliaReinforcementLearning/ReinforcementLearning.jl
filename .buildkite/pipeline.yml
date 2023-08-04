@@ -2,12 +2,28 @@ env:
   SECRET_CODECOV_TOKEN: "hmCvxMRTH8qx2QKtLc5h0xu/VLgawRpOj/zDGcMB0nsj15y3jZaF1vDoRGYyaEnavwxL6S3lgQYyEPOjlfPw6bbtIwdLpuMqw8Xb1nzqAKgkwsQgiT0khfbJnJnYiuTc9AdKpwRKsRsMcM+PgQEN1FvZ8jBO05oq7Dchdck8pb8nXx6UARQpR7a0fzhKeS4M96aMEfmxzDgy3eY6lfIeSPxoDHTuVd4zp8BzBuZjBKHtvA4OLYa3ITTQ7cSjiJllzzKnqea89Hp19JtpdzsPOHudfLu6z4ps5CmOtgxUuX5rN0AAbx8+XIJpnvX6CvjoJjtIL58/x9yAu/IhJdU9RA==;U2FsdGVkX1+JoWKEYnN/Wqi+8X5ZZIcqkLRd8UhErVCtXau6OD201NPB2PBr5aKUdJ+ZGFp3aDbLpJC2mK/29Q=="
 
 steps:
-  - label: "Julia v1"
+  - label: "Julia v1 RLCore"
     plugins:
       - JuliaCI/julia#v1:
           version: "1"
       - JuliaCI/julia-test#v1:
           project: ./src/ReinforcementLearningCore
+      - JuliaCI/julia-coverage#v1:
+          codecov: true
+  - label: "Julia v1 RLZoo"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "1"
+      - JuliaCI/julia-test#v1:
+          project: ./src/ReinforcementLearningZoo
+      - JuliaCI/julia-coverage#v1:
+          codecov: true
+  - label: "Julia v1 RLExperiments"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "1"
+      - JuliaCI/julia-test#v1:
+          project: ./src/ReinforcementLearningExperiments
       - JuliaCI/julia-coverage#v1:
           codecov: true
     agents:
