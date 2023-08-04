@@ -11,14 +11,9 @@ steps:
       - JuliaCI/julia-coverage#v1:
           codecov: true
     commands:
-      - |
-        julia --project=src/ReinforcementLearningCore --color=yes -e '
-            using Pkg;
-            Pkg.develop(path="src/ReinforcementLearningBase")
-            Pkg.develop(path="src/ReinforcementLearningCore")
-            Pkg.develop(path="src/ReinforcementLearningEnvironments")
-            Pkg.test("ReinforcementLearningCore", coverage=true)'
-
+      - julia --project=src/ReinforcementLearningCore -e 'using Pkg; Pkg.develop(path="src/ReinforcementLearningBase")'
+      - julia --project=src/ReinforcementLearningCore -e 'using Pkg; Pkg.develop(path="src/ReinforcementLearningCore")'
+      - julia --project=src/ReinforcementLearningCore -e 'using Pkg; Pkg.develop(path="src/ReinforcementLearningEnvironments")'
     agents:
       queue: "juliagpu"
       cuda: "*"
