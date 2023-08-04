@@ -7,11 +7,11 @@ steps:
       - JuliaCI/julia#v1:
           version: "1"
       - JuliaCI/julia-test#v1:
-          project: ./src/ReinforcementLearningCore
+          project: src/ReinforcementLearningCore
       - JuliaCI/julia-coverage#v1:
           codecov: true
     commands:
-      - -| julia --color=yes -e '
+      - -| julia --project=src/ReinforcementLearningCore --color=yes -e '
             using Pkg;
             Pkg.develop(path="src/ReinforcementLearningBase")
             Pkg.develop(path="src/ReinforcementLearningCore")
