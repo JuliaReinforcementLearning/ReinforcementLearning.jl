@@ -12,6 +12,7 @@ Base.@kwdef struct AnnotatedStructTree
 end
 
 annotated_fields(x) = annotated_fields(typeof(x))
+
 annotated_fields(::Type{T}) where {T} = fieldnames(T)
 
 annotations(x::UnionAll) = []
