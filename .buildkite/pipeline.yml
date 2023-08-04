@@ -6,6 +6,7 @@ steps:
     plugins:
       - JuliaCI/julia#v1:
           version: "1"
+      - commands: echo hello world
       - JuliaCI/julia-test#v1:
           project: ./src/ReinforcementLearningCore
       - JuliaCI/julia-coverage#v1:
