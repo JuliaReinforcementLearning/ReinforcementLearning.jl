@@ -113,7 +113,9 @@ jobs:
             src/ReinforcementLearningEnvironments/**
 
       - name: Test RLEnvironments
-        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (steps.RLEnvironments-changed.outputs.any_changed == 'true') ||  (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (steps.RLEnvironments-changed.outputs.any_changed == 'true') ||  (contains(github.event.pull_request.labels.*.name, 'Integration Test'))        
+        env:
+          PYTHON: ""
         run: |
           julia --color=yes -e '
             using Pkg;
