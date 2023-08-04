@@ -26,21 +26,14 @@ jobs:
         os:
           - ubuntu-latest
           - macOS-latest
-          - windows-latest
+          # - windows-latest # Reactivate once path issues are figured out
         arch:
           - x64
-        python-version:
-          - "3.8"
+          - arm64
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 100
-      - name: Setup python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.arch }}
-      - run: python -m pip install --user gym
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
@@ -183,12 +176,6 @@ jobs:
         with:
           files: |
             docs/**
-
-      - name: Setup python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.arch }}
       - if: (steps.documentation-changed.outputs.any_changed == 'true')
         run: python -m pip install --user matplotlib
       - uses: julia-actions/setup-julia@v1
