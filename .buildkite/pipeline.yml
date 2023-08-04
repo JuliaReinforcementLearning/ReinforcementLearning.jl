@@ -10,6 +10,11 @@ steps:
           project: ./src/ReinforcementLearningCore
       - JuliaCI/julia-coverage#v1:
           codecov: true
+    agents:
+      queue: "juliagpu"
+      cuda: "*"
+    if: build.message !~ /\[skip tests\]/
+    timeout_in_minutes: 60
   - label: "Julia v1 RLZoo"
     plugins:
       - JuliaCI/julia#v1:
@@ -18,6 +23,11 @@ steps:
           project: ./src/ReinforcementLearningZoo
       - JuliaCI/julia-coverage#v1:
           codecov: true
+    agents:
+      queue: "juliagpu"
+      cuda: "*"
+    if: build.message !~ /\[skip tests\]/
+    timeout_in_minutes: 60
   - label: "Julia v1 RLExperiments"
     plugins:
       - JuliaCI/julia#v1:
