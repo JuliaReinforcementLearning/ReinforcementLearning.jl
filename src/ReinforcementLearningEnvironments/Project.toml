@@ -18,7 +18,7 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
-CommonRLInterface = "0.3"
+CommonRLInterface = "^0.3.2"
 DelimitedFiles = "1"
 IntervalSets = "0.7"
 MacroTools = "0.5"
