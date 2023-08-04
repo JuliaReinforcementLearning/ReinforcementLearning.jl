@@ -1,10 +1,7 @@
 using Test, Flux, ChainRulesCore, LinearAlgebra, Distributions, ReinforcementLearningCore
 using Flux: params, gradient, unsqueeze, InvDecay, gpu, cpu
 import ReinforcementLearningBase: RLBase
-# using Metal
-using BenchmarkTools
 
-# Flux.gpu_backend!("Metal")
 @testset "Approximators" begin
     struct MockEnv <: RLBase.AbstractEnv end
     RLBase.state(::MockEnv) = 1
