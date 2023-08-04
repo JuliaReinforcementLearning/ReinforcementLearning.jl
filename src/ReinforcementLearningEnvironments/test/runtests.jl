@@ -14,7 +14,6 @@ using TimerOutputs
 using Conda
 
 Conda.add("gym")
-Conda.add("pettingzoo")
 Conda.add("numpy")
 
 @testset "ReinforcementLearningEnvironments" begin
