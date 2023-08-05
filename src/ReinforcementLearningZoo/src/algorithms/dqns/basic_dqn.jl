@@ -33,7 +33,7 @@ end
 
 @functor BasicDQNLearner (approximator,)
 
-RLCore.forward(L::BasicDQNLearner, s::AbstractArray) = RLCore.forward(L.approximator, s)
+RLCore.forward(L::BasicDQNLearner, s::A) where {A<:AbstractArray} = RLCore.forward(L.approximator, s)
 
 function RLCore.optimise!(learner::BasicDQNLearner, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory

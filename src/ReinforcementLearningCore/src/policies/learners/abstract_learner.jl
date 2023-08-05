@@ -14,9 +14,15 @@ end
 
 function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::Trajectory) end
 
-Base.@kwdef mutable struct Approximator{M,O} <: AbstractLearner
+
+
+struct Approximator{M,O} <: AbstractLearner
     model::M
     optimiser::O
+end
+
+function Approximator(; model, optimiser)
+    Approximator(gpu(model), optimiser) # Pass model to GPU (if available) upon creation
 end
 
 Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(AnnotatedStructTree, A))

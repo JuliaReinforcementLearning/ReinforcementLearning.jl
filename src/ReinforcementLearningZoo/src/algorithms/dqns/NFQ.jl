@@ -36,7 +36,7 @@ RLCore.forward(L::NFQ, s::AbstractArray) = RLCore.forward(L.approximator, s)
 
 function RLCore.forward(learner::NFQ, env::AbstractEnv)
     as = action_space(env)
-    return vcat(repeat(state(env), inner=(1, length(as))), transpose(as)) |> x -> gpu(x) |> x->RLCore.forward(learner, x) |> cpu |> vec 
+    return vcat(repeat(state(env), inner=(1, length(as))), transpose(as)) |> gpu |> x->RLCore.forward(learner, x) |> cpu |> vec 
 end
 
 function RLBase.optimise!(learner::NFQ, ::PostEpisodeStage, trajectory::Trajectory)
