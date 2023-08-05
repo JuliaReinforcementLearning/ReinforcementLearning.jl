@@ -15,8 +15,9 @@ using ReinforcementLearningExperiments
 using Flux
 println("Flux.GPU_BACKEND = $(Flux.GPU_BACKEND)")
 
-run(E`JuliaRL_NFQ_CartPole`)
 run(E`JuliaRL_BasicDQN_CartPole`)
+
+run(E`JuliaRL_NFQ_CartPole`)
 run(E`JuliaRL_DQN_CartPole`)
 # run(E`JuliaRL_PrioritizedDQN_CartPole`)
 run(E`JuliaRL_QRDQN_CartPole`)

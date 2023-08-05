@@ -18,11 +18,12 @@ function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::Trajectory) end
 
 struct Approximator{M,O} <: AbstractLearner
     model::M
-    optimiser::O
+    optimiser_state::O
 end
 
 function Approximator(; model, optimiser)
-    Approximator(gpu(model), optimiser) # Pass model to GPU (if available) upon creation
+    optimiser_state = Flux.setup(optimiser, model)
+    Approximator(gpu(model), optimiser_state) # Pass model to GPU (if available) upon creation
 end
 
 Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(AnnotatedStructTree, A))
@@ -31,5 +32,5 @@ Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(An
 
 forward(A::Approximator, args...; kwargs...) = A.model(args...; kwargs...)
 
-RLBase.optimise!(A::Approximator, gs) =
-    Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
+RLBase.optimise!(A::Approximator, grad) =
+    Flux.Optimise.update!(A.model, A.optimiser_state, grad)

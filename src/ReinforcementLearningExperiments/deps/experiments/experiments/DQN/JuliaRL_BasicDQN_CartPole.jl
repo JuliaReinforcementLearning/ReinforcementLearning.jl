@@ -49,6 +49,7 @@ function RLCore.Experiment(
             container=CircularArraySARTSTraces(
                 capacity=1000,
                 state=Float32 => (ns,),
+                terminal=Float32 => (), # Hack for https://github.com/JuliaGPU/GPUArrays.jl/issues/484
             ),
             sampler=BatchSampler{SS′ART}(
                 batch_size=32,
