@@ -47,12 +47,11 @@ function RLBase.optimise!(learner::NFQ, ::PostEpisodeStage, trajectory::Trajecto
     las = length(as)
     batch = ReinforcementLearningTrajectories.StatsBase.sample(trajectory)
     
-    (s, a, r, ss) = batch[[:state, :action, :reward, :next_state]]
-    a = Float32.(a)
-    s, a, r, ss = map(x->gpu(x), (s, a, r, ss))
+    s, s′, a, r, t = Flux.gpu(batch)
+
     for i = 1:learner.num_iterations
         # Make an input x samples x |action space| array -- Q --> samples x |action space| -- max --> samples
-        G = r .+ γ .* (cat(repeat(ss, inner=(1, 1, las)), reshape(repeat(as, outer=(1, size(ss, 2))), (1, size(ss, 2), las)), dims=1) |> x -> maximum(RLCore.forward(Q, x), dims=3) |> vec)
+        G = r .+ γ .* (cat(repeat(s′, inner=(1, 1, las)), reshape(repeat(as, outer=(1, size(s′, 2))), (1, size(s′, 2), las)), dims=1) |> x -> maximum(RLCore.forward(Q, x), dims=3) |> vec)
         for _ = 1:learner.epochs
             Flux.train!((x, y) -> loss_func(RLCore.forward(Q, x), y), Q.model, [(vcat(s, a), transpose(G))], Q.optimiser_state)
         end

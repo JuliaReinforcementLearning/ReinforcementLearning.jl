@@ -61,7 +61,7 @@ function RLCore.optimise!(
     grads = Flux.gradient(Q) do m
         # Evaluate model and loss inside gradient context:
         q = RLCore.forward(Q, s)[a]
-        q′ = maximum(RLCore.forward(Q, s′); dims=1) |> vec # TODO: pass to GPU
+        q′ = maximum(RLCore.forward(Q, s′); dims=1) |> vec
         G = @. r + γ * (1 - t) * q′
         loss = loss_func(G, q)
         ignore_derivatives() do
