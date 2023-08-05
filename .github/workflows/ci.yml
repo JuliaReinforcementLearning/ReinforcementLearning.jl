@@ -161,8 +161,8 @@ jobs:
           julia --color=yes -e '
             using Pkg;
             Pkg.develop(path="src/ReinforcementLearningBase")
-            Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.develop(path="src/ReinforcementLearningCore")
+            Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.develop(path="src/ReinforcementLearningZoo")
             Pkg.test("ReinforcementLearningZoo", coverage=true)'
       - uses: julia-actions/julia-processcoverage@v1
