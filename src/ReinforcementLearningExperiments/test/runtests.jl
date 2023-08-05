@@ -1,4 +1,3 @@
-using ReinforcementLearningExperiments
 using UUIDs
 using Preferences
 
@@ -12,6 +11,7 @@ else
     CUDA.allowscalar(false)
 end
 
+using ReinforcementLearningExperiments
 using Flux
 println("Flux.GPU_BACKEND = $(Flux.GPU_BACKEND)")
 

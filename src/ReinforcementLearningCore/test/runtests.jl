@@ -1,8 +1,3 @@
-using ReinforcementLearningBase
-using ReinforcementLearningCore
-using ReinforcementLearningEnvironments
-using ReinforcementLearningTrajectories
-
 using Test
 using UUIDs
 using Preferences
@@ -16,6 +11,11 @@ if Sys.isapple()
 else
     using CUDA, cuDNN
 end
+
+using ReinforcementLearningBase
+using ReinforcementLearningCore
+using ReinforcementLearningEnvironments
+using ReinforcementLearningTrajectories
 
 using CircularArrayBuffers
 using Flux

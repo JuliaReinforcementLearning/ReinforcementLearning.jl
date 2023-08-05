@@ -59,9 +59,8 @@ function _update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
     w₁ = learner.actor_loss_weight
     w₂ = learner.critic_loss_weight
     w₃ = learner.entropy_loss_weight
-    to_device = x -> gpu(x)
-
-    S = t[:state] |> to_device
+    
+    S = t[:state] |> gpu
     states = select_last_dim(S, 1:n)
     states_flattened = flatten_batch(states) # (state_size..., n_thread * update_freq)
 
@@ -78,7 +77,7 @@ function _update!(learner::A2CLearner, t::CircularArraySARTTrajectory)
             dims=2,
             init=cpu(next_state_values),
             terminal=t[:terminal]
-        ) |> to_device
+        ) |> gpu
 
     ps = Flux.params(AC)
     gs = gradient(ps) do
