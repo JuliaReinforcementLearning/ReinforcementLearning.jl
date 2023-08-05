@@ -19,6 +19,7 @@ end
 
 using CircularArrayBuffers
 using Flux
+
 println("Flux.GPU_BACKEND = $(Flux.GPU_BACKEND)")
 
 @testset "ReinforcementLearningCore.jl" begin
