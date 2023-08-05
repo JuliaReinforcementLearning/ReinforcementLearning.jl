@@ -2,6 +2,7 @@
 ArcadeLearningEnvironment = "b7f77d8d-088d-5e02-8ac0-89aab2acc977"
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DemoCards = "311a05b2-6137-4a5a-b473-18580a3d38b5"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"

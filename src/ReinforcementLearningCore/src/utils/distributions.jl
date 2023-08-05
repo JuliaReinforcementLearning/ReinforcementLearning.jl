@@ -2,6 +2,7 @@ export normlogpdf, mvnormlogpdf, diagnormlogpdf, mvnormkldivergence, diagnormkld
 
 using Flux: unsqueeze
 using LinearAlgebra
+using GPUArrays
 
 # watch https://github.com/JuliaStats/Distributions.jl/issues/1183
 const log2π = log(2.0f0π)
@@ -70,10 +71,9 @@ end
 Log-determinant of the Positive-Semi-Definite matrix A = L*U (cholesky lower and upper triangulars), given L or U. 
 Has a sign uncertainty for non PSD matrices.
 """
-function logdetLorU(LorU::Union{A, LowerTriangular{T, A}, UpperTriangular{T, A}}) where {T, A <: CuArray}
+function logdetLorU(LorU::Union{A, LowerTriangular{T, A}, UpperTriangular{T, A}}) where {T, A <: AbstractGPUArray}
     return 2*sum(log.(diag(LorU)))
 end
-
 #Cpu fallback
 logdetLorU(LorU::AbstractMatrix) = logdet(LorU)*2
 

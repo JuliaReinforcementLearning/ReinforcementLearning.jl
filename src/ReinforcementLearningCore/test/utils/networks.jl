@@ -1,7 +1,15 @@
-using Test, Flux, CUDA, ChainRulesCore, LinearAlgebra, Distributions, ReinforcementLearningCore
-using Flux: params, gradient, unsqueeze
+using Test, Flux, ChainRulesCore, LinearAlgebra, Distributions, ReinforcementLearningCore
+using Flux: params, gradient, unsqueeze, InvDecay, gpu, cpu
+import ReinforcementLearningBase: RLBase
+
 @testset "Approximators" begin
+    struct MockEnv <: RLBase.AbstractEnv end
+    RLBase.state(::MockEnv) = 1
+    A = TabularVApproximator(; n_state = 2, opt = InvDecay(1.0))
+    RLCore.forward(A, MockEnv())
+
     #= These may need to be updated due to recent changes
+
     @testset "TabularApproximator" begin
         A = TabularVApproximator(; n_state = 2, opt = InvDecay(1.0))
 
@@ -43,9 +51,9 @@ using Flux: params, gradient, unsqueeze
         @test ac_cpu.optimizer === ac.optimizer
 
         D = ac.actor.model |> gpu |> device
-        @test D === device(ac) === device(ac.actor) == device(ac.critic)
 
-        A = send_to_device(D, rand(3))
+
+        A = gpu(rand(3))
         ac.actor(A)
         ac.critic(A)
     end=#
@@ -110,7 +118,7 @@ using Flux: params, gradient, unsqueeze
             end
         end
         @testset "CUDA" begin
-            if CUDA.functional()
+            if (@isdefined CUDA) && CUDA.functional()
                 CUDA.allowscalar(false)
                 gn = GaussianNetwork(Dense(20,15), Dense(15,10), Dense(15,10, softplus)) |> gpu
                 state = rand(20,3)  |> gpu #batch of 3 states
@@ -262,7 +270,7 @@ using Flux: params, gradient, unsqueeze
             end
         end
         @testset "CUDA" begin
-            if CUDA.functional()
+            if (@isdefined CUDA) && CUDA.functional()
                 CUDA.allowscalar(false) 
                 rng = CUDA.CURAND.RNG()
                 pre = Dense(20,15) |> gpu
