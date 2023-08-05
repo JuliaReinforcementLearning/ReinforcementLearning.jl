@@ -26,7 +26,7 @@ IsPolicyGradient(::Type{<:VPG}) = IsPolicyGradient()
 @functor VPG (approximator, baseline)
 
 function RLBase.plan!(π::VPG, env::AbstractEnv)
-    res = env |> state |> send_to_device(π) |> x -> RLCore.forward(π.approximator, x) |> send_to_host
+    res = env |> state |> gpu |> x -> RLCore.forward(π.approximator, x) |> cpu
     rand(π.rng, action_distribution(π.dist, res)[1])
 end
 

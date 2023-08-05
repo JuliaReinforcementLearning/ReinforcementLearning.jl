@@ -16,7 +16,7 @@ function quantile_huber_loss(ŷ, y; κ=1.0f0)
     huber_loss = 0.5f0 .* quadratic .* quadratic .+ κ .* linear
 
     cum_prob = ignore_derivatives() do
-        send_to_device(device(y), range(0.5f0 / N; length=N, step=1.0f0 / N))
+        gpu(range(0.5f0 / N; length=N, step=1.0f0 / N))
     end
     loss = ignore_derivatives(abs.(cum_prob .- (Δ .< 0))) .* huber_loss
     mean(sum(loss; dims=1))

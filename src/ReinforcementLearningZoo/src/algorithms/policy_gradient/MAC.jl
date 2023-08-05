@@ -30,15 +30,15 @@ end
 Functors.functor(x::MACLearner) = (app=x.approximator,), y -> @set x.approximator = y.app
 
 function RLCore.forward(learner::MACLearner, env::MultiThreadEnv)
-    learner.approximator.actor(send_to_device(device(learner.approximator), state(env))) |>
-    send_to_host
+    learner.approximator.actor(gpu(state(env))) |>
+    cpu
 end
 
 function RLCore.forward(learner::MACLearner, env)
     s = state(env)
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
-    s = send_to_device(device(learner.approximator), s)
-    learner.approximator.actor(s) |> vec |> send_to_host
+    s = gpu(s)
+    learner.approximator.actor(s) |> vec |> cpu
 end
 
 function RLCore.update!(
@@ -64,9 +64,8 @@ function _update!(learner::MACLearner, t::CircularArraySARTTrajectory)
 
     AC = learner.approximator
     γ = learner.γ
-    D = device(AC)
 
-    states = send_to_device(D, states)
+    states = gpu(states)
     states_flattened = flatten_batch(states) # (state_size..., n_thread * update_freq)
 
 
@@ -75,22 +74,22 @@ function _update!(learner::MACLearner, t::CircularArraySARTTrajectory)
 
     if learner.bootstrap
         next_state = select_last_frame(t[:state])
-        next_state = send_to_device(D, next_state)
+        next_state = gpu(next_state)
         next_state_values = AC.critic(next_state)
 
         gains = discount_rewards(
             rewards,
             γ;
             dims=2,
-            init=send_to_host(next_state_values),
+            init=cpu(next_state_values),
             terminal=terminals
         )
-        gains = send_to_device(D, gains)
+        gains = gpu(gains)
     else
         next_state_flattened = flatten_batch(select_last_dim(t[:state], 2:n+1))
-        next_state_flattened = send_to_device(D, next_state_flattened)
+        next_state_flattened = gpu(next_state_flattened)
         rewards_flattened = flatten_batch(rewards)
-        rewards_flattened = send_to_device(D, rewards_flattened)
+        rewards_flattened = gpu(rewards_flattened)
     end
 
     action_values = AC.critic(states_flattened)

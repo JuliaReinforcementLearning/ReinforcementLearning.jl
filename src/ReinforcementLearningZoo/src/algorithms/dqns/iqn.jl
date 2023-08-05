@@ -64,7 +64,7 @@ function RLCore.forward(learner::IQNLearner, s::A) where {A<:AbstractArray}
 end
 
 function RLCore.forward(L::IQNLearner, env::E) where {E<:AbstractEnv}
-    s = env |> state |> send_to_device(L.approximator)
+    s = env |> state |> gpu
     q = s |> unsqueeze(dims=ndims(s) + 1) |> x -> RLCore.forward(L, x) |> vec
     q
 end

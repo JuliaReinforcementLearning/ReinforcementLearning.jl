@@ -73,12 +73,12 @@ end
 function (learner::BCQDLearner)(env)
     s = state(env)
     s = Flux.unsqueeze(s, dims=ndims(s) + 1)
-    s = send_to_device(device(learner), s)
+    s = gpu(s)
     q = learner.approximator.critic(s)
     prob = softmax(learner.approximator.actor(s), dims=1)
     mask = Float32.((prob ./ maximum(prob, dims=1)) .> learner.threshold)
     new_q = q .* mask .+ (1.0f0 .- mask) .* -1.0f8
-    new_q |> vec |> send_to_host
+    new_q |> vec |> cpu
 end
 
 function RLCore.update!(learner::BCQDLearner, batch::NamedTuple)
@@ -86,9 +86,8 @@ function RLCore.update!(learner::BCQDLearner, batch::NamedTuple)
     target_AC = learner.target_approximator
     γ, τ, θ = learner.γ, learner.τ, learner.θ
     batch_size = learner.batch_size
-    D = device(AC)
 
-    s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
+    s, a, r, t, s′ = (gpu(batch[x]) for x in SARTS)
     a = CartesianIndex.(a, 1:batch_size)
 
     prob = softmax(AC.actor(s′))

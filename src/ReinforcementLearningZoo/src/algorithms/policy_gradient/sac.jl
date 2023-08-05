@@ -125,13 +125,12 @@ function RLBase.plan!(p::SACPolicy, env)
         end
         action
     else
-        D = device(p.policy)
-        s = send_to_device(D, state(env))
+        s = gpu(state(env))
         s = Flux.unsqueeze(s, dims=ndims(s) + 1)
         # trainmode:
         action = p.policy(p.device_rng, s; is_sampling=true)
         action = dropdims(action, dims=ndims(action)) # Single action vec, drop second dim
-        send_to_host(action)
+        cpu(action)
 
         # testmode:
         # if testing dont sample an action, but act deterministically by
@@ -153,7 +152,7 @@ function RLCore.update!(
 end
 
 function RLCore.update!(p::SACPolicy, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
+    s, a, r, t, s′ = gpu(batch)
 
     γ, τ, α = p.γ, p.τ, p.α
 

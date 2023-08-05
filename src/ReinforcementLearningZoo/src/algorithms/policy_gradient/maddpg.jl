@@ -95,7 +95,7 @@ function RLCore.update!(π::MADDPGManager, env::AbstractEnv)
         ρ = p.ρ
 
         # by default A, C, Aₜ, Cₜ on the same device.
-        batches, s, a, s′ = send_to_device(device(A), (batches, s, a, s′))
+        batches, s, a, s′ = gpu((batches, s, a, s′))
         r = batches[player][:reward]
         t = batches[player][:terminal]
         # for training behavior_actor.

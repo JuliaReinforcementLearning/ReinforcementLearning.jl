@@ -86,8 +86,8 @@ end
 # discrete action
 
 function RLBase.prob(policy::VMPOPolicy{<:ActorCritic,Categorical}, env::AbstractEnv)
-    s = send_to_device(device(policy.approximator), state(env))
-    p = policy.approximator.actor(s) |> softmax |> send_to_host
+    s = gpu(state(env))
+    p = policy.approximator.actor(s) |> softmax |> cpu
     Categorical(p; check_args=false)
 end
 
@@ -114,7 +114,7 @@ function RLBase.prob(
     policy::VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal},
     env::AbstractEnv,
 )
-    s = send_to_device(device(policy.approximator), state(env))
+    s = gpu(state(env))
     μ, σ = policy.approximator.actor(agent.policy.rng, s)
     Normal(μ, σ)
 end
@@ -122,12 +122,12 @@ end
 function RLBase.plan!(agent::Agent{<:VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal}},
     env::AbstractEnv,
 )
-    s = send_to_device(device(agent.policy.approximator), state(env))
+    s = gpu(state(env))
     # the action is an output of GaussianNetwork which is normalised by tanh(),
     # we increase its stability by limiting it to [-1 + eps, 1 - eps]
     a = agent.policy.approximator.actor(agent.policy.rng, s, is_sampling=true)
     m = one(eltype(a)) - eps(eltype(a))
-    clamp.(a, -m, m) |> send_to_host |> first
+    clamp.(a, -m, m) |> cpu |> first
 end
 
 function RLCore.forward!(policy::VMPOPolicy{<:ActorCritic{<:GaussianNetwork},Normal},
@@ -153,9 +153,8 @@ end
 
 function _update!(p::VMPOPolicy, t::VMPOTrajectory)
     AC = p.approximator
-    D = device(AC)
-    s = send_to_device(D, t[:state][:, 1:end-1])  # drop the last extra state
-    a = send_to_device(D, t[:action][1:end-1])  # drop the last extra action
+    s = gpu(t[:state][:, 1:end-1])  # drop the last extra state
+    a = gpu(t[:action][1:end-1])  # drop the last extra action
     is_discrete = isa(p, VMPOPolicy{<:ActorCritic,Categorical})
     π_old = is_discrete ? AC.actor(s) |> softmax : nothing
     μ_old, σ_old = is_discrete ? (nothing, nothing) : begin
@@ -174,11 +173,11 @@ function _update!(p::VMPOPolicy, t::VMPOTrajectory)
 
     # calculate discounted rewards
     rewards = discount_rewards(rewards, p.γ, terminal=t[:terminal])
-    rewards = send_to_device(D, rewards)
+    rewards = gpu(rewards)
 
     # calculate advantages and sample top half of it
     advantages = rewards .- AC.critic(s)[1, :]
-    top_k_idx = sortperm(advantages |> send_to_host, rev=true)[1:length(advantages)÷2]
+    top_k_idx = sortperm(advantages |> cpu, rev=true)[1:length(advantages)÷2]
     top_k_advs = advantages[top_k_idx]
 
     for epoch in 1:p.n_epochs

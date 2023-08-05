@@ -1,9 +1,8 @@
 name = "ReinforcementLearningZoo"
 uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
-version = "0.8.2"
+version = "0.9.0"
 
 [deps]
-CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
@@ -20,6 +19,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 CUDA = "4"
+cuDNN = "1"
 ChainRulesCore = "1"
 Distributions = "0.25"
 Flux = "0.13, 0.14"
@@ -34,7 +34,11 @@ Zygote = "0.6"
 julia = "1.9"
 
 [extras]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
+Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [targets]
-test = ["Test"]
+test = ["CUDA", "cuDNN", "Preferences", "Test", "UUIDs"]

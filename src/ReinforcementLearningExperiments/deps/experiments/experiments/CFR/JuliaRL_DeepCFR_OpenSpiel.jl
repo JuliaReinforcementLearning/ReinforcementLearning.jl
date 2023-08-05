@@ -18,6 +18,7 @@ function RLCore.Experiment(
     n_iter = 300,
     seed = 123,
 )
+    rng = StableRNG(seed)
     @assert game == "leduc_poker"
     env = OpenSpielEnv(
         "leduc_poker";
@@ -59,7 +60,7 @@ function RLCore.Experiment(
         n_training_steps_Π = 2000,
         batch_size_V = 2048,
         batch_size_Π = 2048,
-        initializer = glorot_normal(CUDA.CURAND.default_rng()),
+        initializer = glorot_normal((@isdefined CUDA) && CUDA.functional() ? CUDA.CURAND.RNG() : rng),
     )
     Experiment(p, env, StopAfterStep(500, is_show_progress=!haskey(ENV, "CI")), EmptyHook(), "# run DeepcCFR on leduc_poker")
 end

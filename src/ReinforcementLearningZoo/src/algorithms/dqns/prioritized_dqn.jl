@@ -73,7 +73,7 @@ end
 
 function RLBase.optimise!(learner::PrioritizedDQNLearner, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory
-        k, p = RLBase.optimise!(learner, batch) |> send_to_host
+        k, p = RLBase.optimise!(learner, batch) |> cpu
         trajectory[:priority, k] = p
     end
 end
