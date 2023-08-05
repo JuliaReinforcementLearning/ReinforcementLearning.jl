@@ -118,10 +118,9 @@ function RLBase.plan!(p::TD3Policy, env)
     if p.update_step <= p.start_steps
         p.start_policy(env)
     else
-        D = device(p.behavior_actor)
         s = state(env)
         s = Flux.unsqueeze(s, dims=ndims(s) + 1)
-        action = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
+        action = p.behavior_actor(s) |> gpu |> vec |> cpu
         clamp(action[] + randn(p.rng) * p.act_noise, -p.act_limit, p.act_limit)
     end
 end
@@ -139,8 +138,7 @@ function RLCore.update!(
 end
 
 function RLCore.update!(p::TD3Policy, batch::NamedTuple{SARTS})
-    to_device(x) = send_to_device(device(p.behavior_actor), x)
-    s, a, r, t, s′ = to_device(batch)
+    s, a, r, t, s′ = gpu(batch)
 
     actor = p.behavior_actor
     critic = p.behavior_critic
@@ -153,7 +151,7 @@ function RLCore.update!(p::TD3Policy, batch::NamedTuple{SARTS})
             randn(p.rng, Float32, 1, p.batch_size) .* p.target_act_noise,
             -p.target_act_limit,
             p.target_act_limit,
-        ) |> to_device
+        ) |> gpu
     # add noise and clip to act_limit bounds
     a′ = clamp.(p.target_actor(s′) + target_noise, -p.act_limit, p.act_limit)
 

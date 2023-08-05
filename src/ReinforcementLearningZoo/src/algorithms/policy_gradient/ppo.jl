@@ -150,18 +150,18 @@ function RLBase.prob(
         @error "todo"
     else
         μ, σ =
-            p.approximator.actor(send_to_device(device(p.approximator), state)) |>
-            send_to_host
+            p.approximator.actor(gpu(state)) |>
+            cpu
         StructArray{Normal}((μ, σ))
     end
 end
 
 function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArray, mask)
-    logits = p.approximator.actor(send_to_device(device(p.approximator), state))
+    logits = p.approximator.actor(gpu(state))
     if !isnothing(mask)
         logits .+= ifelse.(mask, 0.0f0, typemin(Float32))
     end
-    logits = logits |> softmax |> send_to_host
+    logits = logits |> softmax |> cpu
     if p.update_step < p.n_random_start
         [
             Categorical(fill(1 / length(x), length(x)); check_args=false) for
@@ -224,23 +224,22 @@ function _update!(p::PPOPolicy, t::Any)
     w₁ = p.actor_loss_weight
     w₂ = p.critic_loss_weight
     w₃ = p.entropy_loss_weight
-    D = device(AC)
-    to_device(x) = send_to_device(D, x)
+
 
     n_envs, n_rollout = size(t[:terminal])
     @assert n_envs * n_rollout % n_microbatches == 0 "size mismatch"
     microbatch_size = n_envs * n_rollout ÷ n_microbatches
 
     n = length(t)
-    states_plus = to_device(t[:state])
+    states_plus = gpu(t[:state])
 
     if t isa MaskedPPOTrajectory
-        LAM = to_device(t[:legal_actions_mask])
+        LAM = gpu(t[:legal_actions_mask])
     end
 
     states_flatten_on_host = flatten_batch(select_last_dim(t[:state], 1:n))
     states_plus_values =
-        reshape(send_to_host(AC.critic(flatten_batch(states_plus))), n_envs, :)
+        reshape(cpu(AC.critic(flatten_batch(states_plus))), n_envs, :)
 
     # TODO: make generalized_advantage_estimation GPU friendly
     advantages = generalized_advantage_estimation(
@@ -251,11 +250,11 @@ function _update!(p::PPOPolicy, t::Any)
         dims=2,
         terminal=t[:terminal]
     )
-    returns = to_device(advantages .+ select_last_dim(states_plus_values, 1:n_rollout))
-    advantages = to_device(advantages)
+    returns = gpu(advantages .+ select_last_dim(states_plus_values, 1:n_rollout))
+    advantages = gpu(advantages)
 
     actions_flatten = flatten_batch(select_last_dim(t[:action], 1:n))
-    action_log_probs = select_last_dim(to_device(t[:action_log_prob]), 1:n)
+    action_log_probs = select_last_dim(gpu(t[:action_log_prob]), 1:n)
 
     # TODO: normalize advantage
     for epoch in 1:n_epochs
@@ -269,10 +268,10 @@ function _update!(p::PPOPolicy, t::Any)
                 lam = nothing
             end
 
-            # s = to_device(select_last_dim(states_flatten_on_host, inds))
+            # s = gpu(select_last_dim(states_flatten_on_host, inds))
             # !!! we need to convert it into a continuous CuArray otherwise CUDA.jl will complain scalar indexing
-            s = to_device(collect(select_last_dim(states_flatten_on_host, inds)))
-            a = to_device(collect(select_last_dim(actions_flatten, inds)))
+            s = gpu(collect(select_last_dim(states_flatten_on_host, inds)))
+            a = gpu(collect(select_last_dim(actions_flatten, inds)))
 
             if eltype(a) === Int
                 a = CartesianIndex.(a, 1:length(a))

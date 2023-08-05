@@ -114,10 +114,10 @@ function RLBase.plan!(p::DDPGPolicy, env, player::Any=nothing)
     if p.update_step <= p.start_steps
         p.start_policy(env)
     else
-        D = device(p.behavior_actor)
+
         s = DynamicStyle(env) == SEQUENTIAL ? state(env) : state(env, player)
         s = Flux.unsqueeze(s, dims=ndims(s) + 1)
-        actions = p.behavior_actor(send_to_device(D, s)) |> vec |> send_to_host
+        actions = p.behavior_actor(gpu(s)) |> vec |> cpu
         c =
             clamp.(
                 actions .+ randn(p.rng, p.na) .* repeat([p.act_noise], p.na),
@@ -142,7 +142,7 @@ function RLCore.update!(
 end
 
 function RLCore.update!(p::DDPGPolicy, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(p), batch)
+    s, a, r, t, s′ = gpu(batch)
 
     A = p.behavior_actor
     C = p.behavior_critic
