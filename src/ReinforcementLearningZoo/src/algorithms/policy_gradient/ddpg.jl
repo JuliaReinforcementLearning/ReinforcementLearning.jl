@@ -172,7 +172,7 @@ function RLCore.update!(p::DDPGPolicy, batch::NamedTuple{SARTS})
 
     update!(C, gs1)
 
-    gs2 = gradient(Flux.params(A)) do
+    gs2 = gradient(A) do
         loss = -mean(C(vcat(s, A(s))))
         ignore_derivatives() do
             p.actor_loss = loss

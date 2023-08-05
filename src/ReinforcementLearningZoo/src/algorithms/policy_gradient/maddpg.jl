@@ -155,7 +155,7 @@ function RLCore.update!(π::MADDPGManager, env::AbstractEnv)
 
         update!(C, gs1)
 
-        gs2 = gradient(Flux.params(A)) do
+        gs2 = gradient(A) do
             v = C(vcat(s, mu_actions)) |> vec
             if π.traces == SLARTSL
                 v .+= ifelse.(mu_l′, 0.0f0, typemin(Float32))

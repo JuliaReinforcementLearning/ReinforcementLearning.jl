@@ -135,7 +135,7 @@ function update_critic!(p::MPOPolicy, batches)
             if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
                 error("Gradient of Q_1 contains NaN of Inf")
             end
-            Flux.Optimise.update!(p.qnetwork1.optimiser, Flux.params(p.qnetwork1), q_grad_1)
+            Flux.Optimise.update!(p.qnetwork1.optimiser_state Flux.params(p.qnetwork1), q_grad_1)
         else
             q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
                 q2 = RLCore.forward(p.qnetwork2, q_input) |> vec
@@ -148,7 +148,7 @@ function update_critic!(p::MPOPolicy, batches)
             if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_2)
                 error("Gradient of Q_2 contains NaN of Inf")
             end
-            Flux.Optimise.update!(p.qnetwork2.optimiser, Flux.params(p.qnetwork2), q_grad_2)
+            Flux.Optimise.update!(p.qnetwork2.optimiser_state Flux.params(p.qnetwork2), q_grad_2)
         end
 
         for (dest, src) in zip(
@@ -189,7 +189,7 @@ function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
 
         grad_norm!(gs, p.max_grad_norm)
 
-        Flux.Optimise.update!(p.actor.optimiser, ps, gs)
+        Flux.Optimise.update!(p.actor.optimiser_state ps, gs)
 
         ignore_derivatives() do
             push!(p.logs[:α], p.α)
