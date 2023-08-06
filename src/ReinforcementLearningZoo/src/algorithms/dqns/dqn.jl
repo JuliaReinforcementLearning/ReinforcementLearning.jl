@@ -3,7 +3,7 @@ export DQNLearner
 using Random: AbstractRNG
 using Functors: @functor
 
-Base.@kwdef mutable struct DQNLearner{A<:Approximator{<:TwinNetwork}, F, R} <: AbstractLearner
+Base.@kwdef struct DQNLearner{A<:Approximator{<:TwinNetwork}, F, R} <: AbstractLearner
     approximator::A
     loss_func::F
     n::Int = 1
@@ -11,12 +11,13 @@ Base.@kwdef mutable struct DQNLearner{A<:Approximator{<:TwinNetwork}, F, R} <: A
     is_enable_double_DQN::Bool = true
     rng::R = Random.default_rng()
     # for logging
-    loss::Float32 = 0.0f0
+    loss::Vector{Float32} = Float32[0.0f0]
 end
 
-# RLCore.forward(L::DQNLearner, s::A) where {A<:AbstractArray}  = RLCore.forward(L.approximator, s)
 
 @functor DQNLearner (approximator,)
+
+RLCore.forward(L::DQNLearner, s::A) where {A<:AbstractArray}  = RLCore.forward(L.approximator, s)
 
 function RLCore.optimise!(learner::DQNLearner, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory
@@ -25,18 +26,17 @@ function RLCore.optimise!(learner::DQNLearner, ::PostActStage, trajectory::Traje
 end
 
 function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
+    optimiser_state = learner.approximator.optimiser_state
     A = learner.approximator
     Q = A.model.source
     Qₜ = A.model.target
 
-    
     γ = learner.γ
     loss_func = learner.loss_func
     n = learner.n
 
-    s, s_next, a, r, t = map(x -> batch[x], SS′ART)
+    s, s_next, a, r, t = map(x -> batch[x], SS′ART) |> Flux.gpu
     a = CartesianIndex.(a, 1:length(a))
-    s, s_next, a, r, t = gpu((s, s_next, a, r, t))
 
     q_next = learner.is_enable_double_DQN ? Q(s_next) : Qₜ(s_next)
 
@@ -48,14 +48,15 @@ function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
 
     R = r .+ γ^n .* (1 .- t) .* q_next_action
 
-    gs = gradient(params(A)) do
+    grads = gradient(Q) do Q
         qₐ = Q(s)[a]
         loss = loss_func(R, qₐ)
         ignore_derivatives() do
-            learner.loss = loss
+            learner.loss[1] = loss
         end
         loss
-    end
+    end |> Flux.cpu
 
-    RLBase.optimise!(A, gs)
+    # Optimization step
+    Flux.update!(optimiser_state, Flux.cpu(Q), grads[1])
 end

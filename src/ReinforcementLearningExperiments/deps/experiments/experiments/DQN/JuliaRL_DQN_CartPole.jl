@@ -1,8 +1,9 @@
+
 # ---
-# title: JuliaRL\_DQN\_CartPole
-# cover: assets/JuliaRL_DQN_CartPole.png
-# description: DQN applied to CartPole
-# date: 2022-06-12
+# title: JuliaRL\_BasicDQN\_CartPole
+# cover: assets/JuliaRL_BasicDQN_CartPole.png
+# description: The simplest example to demonstrate how to use BasicDQN
+# date: 2022-06-04
 # author: "[Jun Tian](https://github.com/findmyway)"
 # ---
 
@@ -15,14 +16,15 @@ using Flux: glorot_uniform
 using StableRNGs: StableRNG
 using Flux.Losses: huber_loss
 
+using Flux.Losses: huber_loss
+using Zygote
+using Statistics: mean
+
 function RLCore.Experiment(
     ::Val{:JuliaRL},
-    ::Val{:DQN},
+    ::Val{:BasicDQN},
     ::Val{:CartPole};
-    seed=123,
-    n=1,
-    γ=0.99f0,
-    is_enable_double_DQN=true
+    seed=123
 )
     rng = StableRNG(seed)
     env = CartPoleEnv(; T=Float32, rng=rng)
@@ -30,23 +32,16 @@ function RLCore.Experiment(
 
     agent = Agent(
         policy=QBasedPolicy(
-            learner=DQNLearner(
+            learner=BasicDQNLearner(
                 approximator=Approximator(
-                    model=TwinNetwork(
-                        Chain(
-                            Dense(ns, 128, relu; init=glorot_uniform(rng)),
-                            Dense(128, 128, relu; init=glorot_uniform(rng)),
-                            Dense(128, na; init=glorot_uniform(rng)),
-                        );
-                        sync_freq=100
+                    model=Chain(
+                        Dense(ns, 128, relu; init=glorot_uniform(rng)),
+                        Dense(128, 128, relu; init=glorot_uniform(rng)),
+                        Dense(128, na; init=glorot_uniform(rng)),
                     ),
                     optimiser=Adam(),
                 ),
-                n=n,
-                γ=γ,
-                is_enable_double_DQN=is_enable_double_DQN,
-                loss_func=huber_loss,
-                rng=rng,
+                loss_func=mse, # TODO: revert to huber_loss when https://github.com/JuliaGPU/GPUArrays.jl/issues/484 is fixed
             ),
             explorer=EpsilonGreedyExplorer(
                 kind=:exp,
@@ -59,10 +54,9 @@ function RLCore.Experiment(
             container=CircularArraySARTSTraces(
                 capacity=1000,
                 state=Float32 => (ns,),
+                terminal=Float32 => (), # TODO: revert to Bool when https://github.com/JuliaGPU/GPUArrays.jl/issues/484 is fixed
             ),
-            sampler=NStepBatchSampler{SS′ART}(
-                n=n,
-                γ=γ,
+            sampler=BatchSampler{SS′ART}(
                 batch_size=32,
                 rng=rng
             ),
@@ -72,18 +66,8 @@ function RLCore.Experiment(
             )
         )
     )
-
     stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook)
 end
 
-#+ tangle=false
-using Plots
-pyplot() #hide
-ex = E`JuliaRL_DQN_CartPole`
-run(ex)
-plot(ex.hook.rewards)
-savefig("assets/JuliaRL_DQN_CartPole.png") #hide
-
-# ![](assets/JuliaRL_DQN_CartPole.png)

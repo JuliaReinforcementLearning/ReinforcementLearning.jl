@@ -23,12 +23,12 @@ own customized algorithm.
 - `loss_func=huber_loss`: the loss function to use.
 - `γ::Float32=0.99f0`: discount rate.
 """
-Base.@kwdef mutable struct BasicDQNLearner{Q, F} <: AbstractLearner
+Base.@kwdef struct BasicDQNLearner{Q, F} <: AbstractLearner
     approximator::Q
     loss_func::F = huber_loss
     γ::Float32 = 0.99f0
     # for debugging
-    loss::Float32 = 0.0f0
+    loss::Vector{Float32} = Float32[0.0f0] # Vector so it's mutable
 end
 
 @functor BasicDQNLearner (approximator,)
@@ -54,16 +54,17 @@ function RLCore.optimise!(
     s, s′, a, r, t = Flux.gpu(batch)
     a = CartesianIndex.(a, 1:length(a))
 
-    model = approx.model
+    Q = approx.model
 
-    grads = Flux.gradient(model) do Q
+    q′ = maximum(Q(s′); dims=1) |> vec
+    G = @. r + γ * (1 - t) * q′
+
+    grads = Flux.gradient(Q) do Q
         # Evaluate model and loss inside gradient context:
         q = Q(s)[a]
-        q′ = maximum(Q(s′); dims=1) |> vec
-        G = @. r + γ * (1 - t) * q′
         loss_ = loss_func(G, q)
         Flux.ignore_derivatives() do
-            learner.loss = loss_
+            learner.loss[1] = loss_
         end
         loss_
     end |> Flux.cpu
