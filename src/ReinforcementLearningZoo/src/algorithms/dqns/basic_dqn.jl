@@ -45,30 +45,29 @@ function RLCore.optimise!(
     learner::BasicDQNLearner,
     batch::NamedTuple
 )
-    Q = learner.approximator
+    approx = learner.approximator
     optimiser_state = learner.approximator.optimiser_state
 
     γ = learner.γ
     loss_func = learner.loss_func
-    
-    a = CartesianIndex.(batch.action, 1:length(batch.action))
-    s, s′, nothing, r, t = batch
-    s, s′, r, t = Flux.gpu(s), Flux.gpu(s′), Flux.gpu(r), Flux.gpu(t)
 
-    # TODO: This can probably be made generic for all approximators??
-    # TODO: withgradient is unnecessary, gradient should be sufficient
-    # TODO: Look into batch / data loading / train! function
-    grads = Flux.gradient(Q) do m
+    s, s′, a, r, t = Flux.gpu(batch)
+    a = CartesianIndex.(a, 1:length(a))
+
+    model = approx.model
+
+    grads = Flux.gradient(model) do Q
         # Evaluate model and loss inside gradient context:
-        q = RLCore.forward(Q, s)[a]
-        q′ = maximum(RLCore.forward(Q, s′); dims=1) |> vec
+        q = Q(s)[a]
+        q′ = maximum(Q(s′); dims=1) |> vec
         G = @. r + γ * (1 - t) * q′
-        loss = loss_func(G, q)
+        loss_ = loss_func(G, q)
         Flux.ignore_derivatives() do
-            learner.loss = loss
+            learner.loss = loss_
         end
-        loss
-    end
+        loss_
+    end |> Flux.cpu
+
     # Optimization step
-    Flux.update!(optimiser_state, Q.model, grads[1])
+    Flux.update!(optimiser_state, Flux.cpu(model), grads[1])
 end
