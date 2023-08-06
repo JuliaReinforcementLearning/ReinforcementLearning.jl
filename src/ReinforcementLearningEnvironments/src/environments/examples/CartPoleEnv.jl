@@ -138,3 +138,5 @@ function _step!(env::CartPoleEnv, a)
         env.t > env.params.max_steps
     nothing
 end
+
+RLBase.NumAgentStyle(::CartPoleEnv) = SINGLE_AGENT
