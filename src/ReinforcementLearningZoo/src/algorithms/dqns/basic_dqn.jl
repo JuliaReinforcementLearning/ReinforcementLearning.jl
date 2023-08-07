@@ -75,5 +75,5 @@ function RLCore.optimise!(
     end |> Flux.cpu
 
     # Optimization step
-    Flux.update!(optimiser_state, Flux.cpu(model), grads[1])
+    Flux.update!(optimiser_state, Flux.cpu(Q), grads[1])
 end
