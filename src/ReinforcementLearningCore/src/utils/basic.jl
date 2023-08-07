@@ -10,6 +10,7 @@ export global_norm,
     orthogonal
 
 using FillArrays: Trues
+using GPUArrays
 
 #####
 # Zygote
@@ -98,6 +99,24 @@ function find_all_max(x)
         end
     end
     v, indices
+end
+
+function find_all_max(x::A) where {A <: AbstractArray}
+    v = maximum(x)
+    indices = Vector{Int}(undef, count(==(v), x))
+    j = 1
+    for i in eachindex(x)
+        if x[i] == v
+            indices[j] = i
+            j += 1
+        end
+    end
+    v, indices
+end
+
+function find_all_max(x::A) where {A <: AbstractGPUArray}
+    v = maximum(x)
+    v, findall(==(v), x)
 end
 
 find_all_max(x, mask::Trues) = find_all_max(x)
