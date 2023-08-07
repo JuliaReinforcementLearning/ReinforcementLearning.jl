@@ -41,6 +41,11 @@ function RLCore.optimise!(learner::BasicDQNLearner, ::PostActStage, trajectory::
     end
 end
 
+# Handle broadcast-related type instability
+function _q_metric(r, γ, t, q′)
+    r + γ * (1 - t) * q′
+end
+
 function RLCore.optimise!(
     learner::BasicDQNLearner,
     batch::NamedTuple
@@ -57,7 +62,7 @@ function RLCore.optimise!(
     Q = approx.model
 
     q′ = maximum(Q(s′); dims=1) |> vec
-    G = @. r + γ * (1 - t) * q′
+    G =  _q_metric.(r, γ, t, q′)
 
     grads = Flux.gradient(Q) do Q
         # Evaluate model and loss inside gradient context:
