@@ -32,7 +32,7 @@ function RLCore.Experiment(
 
     agent = Agent(
         policy=QBasedPolicy(
-            learner=BasicDQNLearner(
+            learner=DQNLearner(
                 approximator=Approximator(
                     model=Chain(
                         Dense(ns, 128, relu; init=glorot_uniform(rng)),
@@ -54,7 +54,6 @@ function RLCore.Experiment(
             container=CircularArraySARTSTraces(
                 capacity=1000,
                 state=Float32 => (ns,),
-                terminal=Float32 => (), # TODO: revert to Bool when https://github.com/JuliaGPU/GPUArrays.jl/issues/484 is fixed
             ),
             sampler=BatchSampler{SS′ART}(
                 batch_size=32,
@@ -70,4 +69,3 @@ function RLCore.Experiment(
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook)
 end
-
