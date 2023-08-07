@@ -25,9 +25,9 @@ function RLCore.optimise!(learner::DQNLearner, ::PostActStage, trajectory::Traje
     end
 end
 
-function generate_q_function(n)
-    @eval function q_function(r, γ, t, q_next_action)
-        return r + γ ^ $n * (1 - t) * q_next_action
+function generate_q_function(n::Int64)
+    @eval function q_function(r::Float32, γ::Float32, t::Bool, q_next_action::Float32)
+        return r + γ ^ $n * (1f0 - t) * q_next_action
     end
     return q_function
 end
@@ -54,7 +54,7 @@ function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
     q_next_action = learner.is_enable_double_DQN ? Qₜ(s_next)[dropdims(argmax(q_next, dims=1), dims=1)] : dropdims(maximum(q_next; dims=1), dims=1)
 
     q_function_ = generate_q_function(n)
-    R = q_function_.(r, γ, t, q_next_action)
+    R = q_function_.(r, (γ,), t, q_next_action)
 
     grads = gradient(Q) do Q
         qₐ = Q(s)[a]
