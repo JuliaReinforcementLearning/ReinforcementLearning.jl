@@ -1,5 +1,5 @@
 @testset "TotalBatchRewardPerEpisode" begin
-    env = RandomWalk1D()
+    env = MultiThreadEnv(RandomWalk1D())
     env.pos = 7
     policy = RandomPolicy(RLCore.legal_action_space(env))
 

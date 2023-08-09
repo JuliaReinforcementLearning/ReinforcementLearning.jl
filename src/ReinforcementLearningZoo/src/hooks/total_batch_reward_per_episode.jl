@@ -1,4 +1,6 @@
 
+export TotalBatchRewardPerEpisode
+
 #####
 # TotalBatchRewardPerEpisode
 #####
