@@ -46,6 +46,7 @@ function RLCore.Experiment(
             rng=rng,
         ),
         trajectory=Trajectory(container=CircularArraySARTTraces(capacity = 10000, state=Float32 => (ns,)), sampler = EpisodesSampler(), controller = InsertSampleRatioController(ratio = 1/10000))
+        #Note: an EpisodeSamplerRatioController would be more adapted here. 
     )
     stop_condition = StopAfterEpisode(100, is_show_progress=!haskey(ENV, "CI"))
 
