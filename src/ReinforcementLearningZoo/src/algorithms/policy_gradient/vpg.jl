@@ -31,18 +31,18 @@ function RLBase.plan!(π::VPG, env::AbstractEnv)
 end
 
 function RLBase.optimise!(p::VPG, ::PostEpisodeStage, trajectory::Trajectory)
-    trajectory.container[] = true
-    for batch in trajectory
-        RLBase.optimise!(p, batch)
+    has_optimized = false
+    for batch in trajectory #batch is a vector of Episode
+        gains = reduce(vcat, discount_rewards(ep[:reward], p.γ) for ep in batch)
+        states = reduce(vcat, ep[:state] for ep in batch)
+        actions = reduce(vcat, ep[:action] for ep in batch)
+        for inds in Iterators.partition(shuffle(π.rng, eachindex(gains)), π.batch_size)
+            RLBase.optimise!(π, (state=states[inds], action=actions[inds], gain=gains[inds]))
+        end
+        has_optimized = true
     end
-    empty!(trajectory.container)
-end
-
-function RLBase.optimise!(π::VPG, episode::Episode)
-    gain = discount_rewards(episode[:reward][:], π.γ)
-    for inds in Iterators.partition(shuffle(π.rng, 1:length(episode)), π.batch_size)
-        RLBase.optimise!(π, (state=episode[:state][inds], action=episode[:action][inds], gain=gain[inds]))
-    end
+    has_optimized && empty!(trajectory.container)
+    return nothing
 end
 
 function RLBase.optimise!(p::VPG, batch::NamedTuple{(:state, :action, :gain)})
