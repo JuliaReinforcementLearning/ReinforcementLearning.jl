@@ -147,20 +147,10 @@ end
     for h in (h_1, h_2, h_3)
         h_ = test_run!(h)
         @test length(h_.rewards) == 10
-
-        push!(h, PreEpisodeStage(), agent, env)
-        @test h.rewards == [[]]
-
-        env.pos = 1
-        push!(h, PostActStage(), agent, env)
-        @test h.rewards == [[-1.0]]
-        env.pos = 7
-        push!(h, PostActStage(), agent, env)
-        @test h.rewards == [[-1.0, 1.0]]
-        env.pos = 3
-        push!(h, PostActStage(), agent, env)
-        @test h.rewards == [[-1.0, 1.0, 0.0]]
-        test_noop!(h, stages=[PreActStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
+        @test sum(abs.(sum.(h_.rewards))) == 10
+        @test length(unique(length.(h_.rewards))) > 1
+        @test length(h_.empty_vect) == 0
+        test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end
 end
 

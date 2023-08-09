@@ -115,17 +115,21 @@ struct RewardsPerEpisode{T} <: AbstractHook where {T<:Number}
     end
 
     function RewardsPerEpisode()
-        new{Float64}(Vector{Vector{Float64}}(), Vector{Float64}())
+        RewardsPerEpisode{Float64}()
     end
 end
 
 Base.getindex(h::RewardsPerEpisode) = h.rewards
 
-Base.push!(h::RewardsPerEpisode, ::PreEpisodeStage, agent, env) = push!(h.rewards, h.empty_vect)
-Base.push!(h::RewardsPerEpisode, ::PreEpisodeStage, agent, env, ::Symbol) = push!(h, PreEpisodeStage(), agent, env)
+function Base.push!(h::RewardsPerEpisode, ::PostEpisodeStage, agent, env)
+    push!(h.rewards, copy(h.empty_vect))
+    empty!(h.empty_vect)
+end
 
-Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.rewards[end], reward(env))
-Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.rewards[end], reward(env, player))
+Base.push!(h::RewardsPerEpisode, ::PostEpisodeStage, agent, env, ::Symbol) = push!(h, PostEpisodeStage(), agent, env)
+
+Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.empty_vect, reward(env))
+Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.empty_vect, reward(env, player))
 
 #####
 # TotalRewardPerEpisode
