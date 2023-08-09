@@ -43,7 +43,7 @@ end
 
 # Handle broadcast-related type instability
 function _q_metric(r, γ, t, q′)
-    r + γ * (1 - t) * q′
+    r + γ * (1f0 - t) * q′
 end
 
 function RLCore.optimise!(
