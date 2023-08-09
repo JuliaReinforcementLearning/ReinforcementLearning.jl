@@ -1,4 +1,5 @@
 include("basic_dqn.jl")
+include("NFQ.jl")
 include("dqn.jl")
 include("prioritized_dqn.jl")
 include("qr_dqn.jl")

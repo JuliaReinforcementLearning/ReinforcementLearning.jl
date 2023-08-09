@@ -67,7 +67,7 @@ function RLCore.Experiment(
             ),
         ),
         trajectory=Trajectory(
-            container=CircularArraySARTTraces(
+            container=CircularArraySARTSTraces(
                 capacity=1000,
                 state=Float32 => (ns,),
             ),

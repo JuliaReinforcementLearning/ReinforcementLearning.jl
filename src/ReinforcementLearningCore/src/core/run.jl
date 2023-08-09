@@ -87,37 +87,34 @@ function _run(policy::AbstractPolicy,
     push!(policy, PreExperimentStage(), env)
     is_stop = false
     while !is_stop
-        reset!(env)
-        push!(policy, PreEpisodeStage(), env)
-        optimise!(policy, PreEpisodeStage())
-        push!(hook, PreEpisodeStage(), policy, env)
+        # NOTE: @timeit_debug statements are used for debug logging
+        @timeit_debug timer "reset!"                            reset!(env)
+        @timeit_debug timer "push!(policy) PreEpisodeStage"     push!(policy, PreEpisodeStage(), env)
+        @timeit_debug timer "optimise! PreEpisodeStage"         optimise!(policy, PreEpisodeStage())
+        @timeit_debug timer "push!(hook) PreEpisodeStage"       push!(hook, PreEpisodeStage(), policy, env)
 
 
         while !reset_condition(policy, env) # one episode
-            push!(policy, PreActStage(), env)
-            optimise!(policy, PreActStage())
-            push!(hook, PreActStage(), policy, env)
+            @timeit_debug timer "push!(policy) PreActStage"     push!(policy, PreActStage(), env)
+            @timeit_debug timer "optimise! PreActStage"         optimise!(policy, PreActStage())
+            @timeit_debug timer "push!(hook) PreActStage"       push!(hook, PreActStage(), policy, env)
 
-            action = RLBase.plan!(policy, env)
-            act!(env, action)
+            action = @timeit_debug timer "plan!"                RLBase.plan!(policy, env)
+            @timeit_debug timer "act!"                          act!(env, action)
 
-            push!(policy, PostActStage(), env)
-            optimise!(policy, PostActStage())
-            push!(hook, PostActStage(), policy, env)
+            @timeit_debug timer "push!(policy) PostActStage"    push!(policy, PostActStage(), env, action)
+            @timeit_debug timer "optimise! PostActStage"        optimise!(policy, PostActStage())
+            @timeit_debug timer "push!(hook) PostActStage"      push!(hook, PostActStage(), policy, env)
 
             if check_stop(stop_condition, policy, env)
                 is_stop = true
-                push!(policy, PreActStage(), env)
-                optimise!(policy, PreActStage())
-                push!(hook, PreActStage(), policy, env)
-                RLBase.plan!(policy, env)  # let the policy see the last observation
                 break
             end
         end # end of an episode
 
-        push!(policy, PostEpisodeStage(), env)  # let the policy see the last observation
-        optimise!(policy, PostEpisodeStage())
-        push!(hook, PostEpisodeStage(), policy, env)
+        @timeit_debug timer "push!(policy) PostEpisodeStage"      push!(policy, PostEpisodeStage(), env)
+        @timeit_debug timer "optimise! PostEpisodeStage"          optimise!(policy, PostEpisodeStage())
+        @timeit_debug timer "push!(hook) PostEpisodeStage"        push!(hook, PostEpisodeStage(), policy, env)
 
     end
     push!(policy, PostExperimentStage(), env)

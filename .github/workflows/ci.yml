@@ -15,8 +15,8 @@ on:
     tags: "*"
   workflow_dispatch:
 jobs:
-  test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+  test-RLBase:
+    name: RLBase - Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -25,20 +25,222 @@ jobs:
           - "1"
         os:
           - ubuntu-latest
+          - macOS-latest
+          # - windows-latest # Reactivate once path issues are figured out
         arch:
           - x64
-        python-version:
-          - "3.8"
+          # - arm64
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 100
-      - name: Setup python
-        uses: actions/setup-python@v4
+      - uses: julia-actions/setup-julia@v1
         with:
-          python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.arch }}
-      - run: python -m pip install --user gym
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+      - uses: actions/cache@v3
+        env:
+          cache-name: cache-artifacts
+        with:
+          path: ~/.julia/artifacts
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+            ${{ runner.os }}-test-
+            ${{ runner.os }}-
+      - name: Get changed files
+        id: RLBase-changed
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            src/ReinforcementLearningBase/**
+      - name: Test RLBase
+        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        run: |
+          julia --color=yes -e '
+            using Pkg;
+            Pkg.develop(path="src/ReinforcementLearningBase")
+            Pkg.test("ReinforcementLearningBase", coverage=true)'
+      - uses: julia-actions/julia-processcoverage@v1
+      - uses: codecov/codecov-action@v3
+  test-RLCore:
+    name: RLCore - Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - "1"
+        os:
+          - ubuntu-latest
+          - macOS-latest
+          # - windows-latest # Reactivate once path issues are figured out
+        arch:
+          - x64
+          # - arm64
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 100
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+      - uses: actions/cache@v3
+        env:
+          cache-name: cache-artifacts
+        with:
+          path: ~/.julia/artifacts
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+            ${{ runner.os }}-test-
+            ${{ runner.os }}-
+      - name: Get changed files
+        id: RLCore-changed
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            src/ReinforcementLearningCore/**
+            src/ReinforcementLearningBase/**
+      - name: Test RLCore
+        if: (steps.RLCore-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        run: |
+          julia --color=yes -e '
+            using Pkg;
+            Pkg.develop(path="src/ReinforcementLearningBase")
+            Pkg.develop(path="src/ReinforcementLearningCore")
+            Pkg.develop(path="src/ReinforcementLearningEnvironments")
+            Pkg.test("ReinforcementLearningCore", coverage=true)'
+      - uses: julia-actions/julia-processcoverage@v1
+      - uses: codecov/codecov-action@v3
+  test-RLZoo:
+    name: RLZoo - Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - "1"
+        os:
+          - ubuntu-latest
+          - macOS-latest
+          # - windows-latest # Reactivate once path issues are figured out
+        arch:
+          - x64
+          # - arm64
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 100
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+      - uses: actions/cache@v3
+        env:
+          cache-name: cache-artifacts
+        with:
+          path: ~/.julia/artifacts
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+            ${{ runner.os }}-test-
+            ${{ runner.os }}-
+      - name: Get changed files
+        id: RLZoo-changed
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            src/ReinforcementLearningZoo/**
+            src/ReinforcementLearningCore/**
+            src/ReinforcementLearningBase/**
+      - name: Test RLZoo
+        if: (steps.RLZoo-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        run: |
+          julia --color=yes -e '
+            using Pkg;
+            Pkg.develop(path="src/ReinforcementLearningBase")
+            Pkg.develop(path="src/ReinforcementLearningEnvironments")
+            Pkg.develop(path="src/ReinforcementLearningCore")
+            Pkg.develop(path="src/ReinforcementLearningZoo")
+            Pkg.test("ReinforcementLearningZoo", coverage=true)'
+      - uses: julia-actions/julia-processcoverage@v1
+      - uses: codecov/codecov-action@v3
+  test-RLEnvs:
+    name: RLEnvs - Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - "1"
+        os:
+          - ubuntu-latest
+          - macOS-latest
+          # - windows-latest # Reactivate once path issues are figured out
+        arch:
+          - x64
+          # - arm64
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 100
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+      - uses: actions/cache@v3
+        env:
+          cache-name: cache-artifacts
+        with:
+          path: ~/.julia/artifacts
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+            ${{ runner.os }}-test-
+            ${{ runner.os }}-
+      - name: Get changed files
+        id: RLEnvironments-changed
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            src/ReinforcementLearningEnvironments/**
+            src/ReinforcementLearningZoo/**
+            src/ReinforcementLearningCore/**
+            src/ReinforcementLearningBase/**
+      - name: Test RLEnvironments
+        if: (steps.RLEnvironments-changed.outputs.any_changed == 'true') ||  (contains(github.event.pull_request.labels.*.name, 'Integration Test'))        
+        env:
+          PYTHON: ""
+        run: |
+          julia --color=yes -e '
+            using Pkg;
+            Pkg.develop(path="src/ReinforcementLearningBase")
+            Pkg.develop(path="src/ReinforcementLearningCore")
+            Pkg.develop(path="src/ReinforcementLearningEnvironments")
+            Pkg.test("ReinforcementLearningEnvironments", coverage=true)'
+      - uses: julia-actions/julia-processcoverage@v1
+      - uses: codecov/codecov-action@v3
+  test-RLExperiments:
+    name: RLExperiments - Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - "1"
+        os:
+          - ubuntu-latest
+          - macOS-latest
+          # - windows-latest # Reactivate once path issues are figured out
+        arch:
+          - x64
+          # - arm64
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 100
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
@@ -55,106 +257,16 @@ jobs:
             ${{ runner.os }}-
 
       - name: Get changed files
-        id: RLBase-changed
-        uses: tj-actions/changed-files@v35
-        with:
-          files: |
-            src/ReinforcementLearningBase/**
-
-      - name: Test RLBase
-        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
-        run: |
-          julia --color=yes -e '
-            using Pkg;
-            Pkg.develop(path="src/ReinforcementLearningBase")
-            Pkg.test("ReinforcementLearningBase", coverage=true)'
-      - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v3
-
-      - name: Get changed files
-        id: RLCore-changed
-        uses: tj-actions/changed-files@v35
-        with:
-          files: |
-            src/ReinforcementLearningCore/**
-
-      - name: Test RLCore
-        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
-        run: |
-          julia --color=yes -e '
-            using Pkg;
-            Pkg.develop(path="src/ReinforcementLearningBase")
-            Pkg.develop(path="src/ReinforcementLearningCore")
-            Pkg.develop(path="src/ReinforcementLearningEnvironments")
-            Pkg.test("ReinforcementLearningCore", coverage=true)'
-      - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v3
-
-      - name: Get changed files
-        id: RLZoo-changed
-        uses: tj-actions/changed-files@v35
-        with:
-          files: |
-            src/ReinforcementLearningZoo/**
-
-      - name: Test RLZoo
-        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (steps.RLZoo-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
-        run: |
-          julia --color=yes -e '
-            using Pkg;
-            Pkg.develop(path="src/ReinforcementLearningBase")
-            Pkg.develop(path="src/ReinforcementLearningEnvironments")
-            Pkg.develop(path="src/ReinforcementLearningCore")
-            Pkg.develop(path="src/ReinforcementLearningZoo")
-            Pkg.test("ReinforcementLearningZoo", coverage=true)'
-      - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v3
-
-      - name: Get changed files
-        id: RLEnvironments-changed
-        uses: tj-actions/changed-files@v35
-        with:
-          files: |
-            src/ReinforcementLearningEnvironments/**
-
-      - name: Test RLEnvironments
-        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (steps.RLEnvironments-changed.outputs.any_changed == 'true') ||  (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
-        run: |
-          julia --color=yes -e '
-            using Pkg;
-            Pkg.develop(path="src/ReinforcementLearningBase")
-            Pkg.develop(path="src/ReinforcementLearningCore")
-            Pkg.develop(path="src/ReinforcementLearningEnvironments")
-            Pkg.test("ReinforcementLearningEnvironments", coverage=true)'
-      - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v3
-
-      - name: Get changed files
-        id: RLDatasets-changed
-        uses: tj-actions/changed-files@v35
-        with:
-          files: |
-            src/ReinforcementLearningDatasets/**
-
-      # - name: Test RLDatasets
-      #   if: (steps.RLDatasets-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
-      #   run: |
-      #     julia --color=yes -e '
-      #       using Pkg;
-      #       Pkg.develop(path="src/ReinforcementLearningDatasets")
-      #       Pkg.test("ReinforcementLearningDatasets", coverage=true)'
-      # - uses: julia-actions/julia-processcoverage@v1
-      # - uses: codecov/codecov-action@v3
-
-      - name: Get changed files
         id: RLExperiments-changed
         uses: tj-actions/changed-files@v35
         with:
           files: |
             src/ReinforcementLearningExperiments/**
-
+            src/ReinforcementLearningZoo/**
+            src/ReinforcementLearningCore/**
+            src/ReinforcementLearningBase/**
       - name: Test RLExperiments
-        if: (steps.RLBase-changed.outputs.any_changed == 'true') || (steps.RLCore-changed.outputs.any_changed == 'true') || (steps.RLZoo-changed.outputs.any_changed == 'true') || (steps.RLExperiments-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
+        if: (steps.RLExperiments-changed.outputs.any_changed == 'true') || (contains(github.event.pull_request.labels.*.name, 'Integration Test'))
         run: |
           julia --color=yes -e '
             using Pkg
@@ -167,7 +279,6 @@ jobs:
             Pkg.test("ReinforcementLearningExperiments", coverage=true)'
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v3
-
   docs:
     name: Documentation
     runs-on: ubuntu-latest
@@ -181,12 +292,6 @@ jobs:
         with:
           files: |
             docs/**
-
-      - name: Setup python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.arch }}
       - if: (steps.documentation-changed.outputs.any_changed == 'true')
         run: python -m pip install --user matplotlib
       - uses: julia-actions/setup-julia@v1

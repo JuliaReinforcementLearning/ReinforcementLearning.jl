@@ -11,6 +11,10 @@ using StableRNGs
 using Statistics
 using OrdinaryDiffEq
 using TimerOutputs
+using Conda
+
+Conda.add("gym")
+Conda.add("numpy")
 
 @testset "ReinforcementLearningEnvironments" begin
     include("environments/environments.jl")
