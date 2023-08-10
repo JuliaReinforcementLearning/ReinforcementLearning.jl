@@ -33,11 +33,11 @@ end
 function RLBase.optimise!(p::VPG, ::PostEpisodeStage, trajectory::Trajectory)
     has_optimized = false
     for batch in trajectory #batch is a vector of Episode
-        gains = reduce(vcat, discount_rewards(ep[:reward], p.γ) for ep in batch)
-        states = reduce(vcat, ep[:state] for ep in batch)
-        actions = reduce(vcat, ep[:action] for ep in batch)
-        for inds in Iterators.partition(shuffle(π.rng, eachindex(gains)), π.batch_size)
-            RLBase.optimise!(π, (state=states[inds], action=actions[inds], gain=gains[inds]))
+        gains = stack(discount_rewards(ep[:reward], p.γ) for ep in batch)
+        states = stack(ep[:state] for ep in batch)
+        actions = stack(ep[:action] for ep in batch)
+        for inds in Iterators.partition(shuffle(p.rng, eachindex(gains)), p.batch_size)
+            RLBase.optimise!(p, (state=selectdim(states,ndims(states),inds), action=selectdim(actions,ndims(actions),inds), gain=selectdim(gainss,ndims(gains),inds)))
         end
         has_optimized = true
     end
@@ -48,9 +48,9 @@ end
 function RLBase.optimise!(p::VPG, batch::NamedTuple{(:state, :action, :gain)})
     A = p.approximator
     B = p.baseline
-    s, a, g = map(Array, batch) # !!! FIXME
+    s, a, g = batch[:state], batch[:action], batch[:gain]
     local δ
-
+    println(s)
     if isnothing(B)
         δ = normalise(g)
         loss = 0
