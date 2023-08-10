@@ -2,7 +2,7 @@
 
 All algorithms in ReinforcementLearning.jl are based on a common `run` function defined in [run.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/main/src/ReinforcementLearningCore/src/core/run.jl) that will be dispatched based on the type of its arguments. As you can see, the run function first performs a check and then calls a "private" `_run(policy::AbstractPolicy, env::AbstractEnv, stop_condition, hook::AbstractHook)`, this is the main function we are interested in. It consists of an outer and an inner loop that will repeateadly call `optimise!(policy, stage, env)`. 
 
-Let's look at it closer in this simplified version (hooks are discussed [here](./How_to_use_hooks.md)):
+Let's look at it closer in this simplified version (hooks were removed and are discussed [here](./How_to_use_hooks.md), the macros you will find in the actual implementation are for debuging and may be ignored):
 
 ```julia
 function _run(policy::AbstractPolicy,
@@ -22,26 +22,23 @@ function _run(policy::AbstractPolicy,
             push!(policy, PreActStage(), env)
             optimise!(policy, PreActStage())
 
-            action = RLBase.plan!(policy, env)
+            RLBase.plan!(policy, env)
             act!(env, action)
 
-            push!(policy, PostActStage(), env)
+            push!(policy, PostActStage(), env, action)
             optimise!(policy, PostActStage())
 
             if check_stop(stop_condition, policy, env)
                 is_stop = true
-                push!(policy, PreActStage(), env)
-                optimise!(policy, PreActStage())
-                RLBase.plan!(policy, env)  # let the policy see the last observation
                 break
             end
         end # end of an episode
 
-        push!(policy, PostEpisodeStage(), env)  # let the policy see the last observation
+        push!(policy, PostEpisodeStage(), env)
         optimise!(policy, PostEpisodeStage())
-
     end
     push!(policy, PostExperimentStage(), env)
+    hook
 end
 
 ```
@@ -49,31 +46,26 @@ end
 Implementing a new algorithm mainly consists of creating your own `AbstractPolicy` (or `AbstractLearner`, see [this section](#using-resources-from-rlcore)) subtype, its action sampling method (by overloading `Base.push!(policy::YourPolicyType, env)`) and implementing its behavior at each stage. However, ReinforcemementLearning.jl provides plenty of pre-implemented utilities that you should use to 1) have less code to write 2) lower the chances of bugs and 3) make your code more understandable and maintainable (if you intend to contribute your algorithm). 
 
 ## Using Agents
-The recommended way is to use the policy wrapper `Agent`. An agent is itself an `AbstractPolicy` that wraps a policy and a trajectory (also called Experience Replay Buffer in RL literature). Agent comes with default implementations of `push!(agent, stage, env)` that will probably fit what you need at most stages so that you don't have to write them again. Looking at the [source code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/main/src/ReinforcementLearningCore/src/policies/agent.jl/), we can see that the default Agent calls are  
+The recommended way is to use the policy wrapper `Agent`. An agent is itself an `AbstractPolicy` that wraps a policy and a trajectory (also called Experience Replay Buffer in RL literature). Agent comes with default implementations of `push!(agent, stage, env)` and `plan!(agent, env)` that will probably fit what you need at most stages so that you don't have to write them again. Looking at the [source code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/main/src/ReinforcementLearningCore/src/policies/agent.jl/), we can see that the default Agent calls are  
 
 ```julia
-function RLBase.plan!(agent::Agent{P,T,C}, env::AbstractEnv) where {P,T,C}
-    action = RLBase.plan!(agent.policy, env)
-    push!(agent.trajectory, agent.cache, action)
-    action
+function Base.push!(agent::Agent, ::PreEpisodeStage, env::AbstractEnv)
+    push!(agent.trajectory, (state = state(env),))
 end
 
-function Base.push!(agent::Agent, ::PreActStage, env::AbstractEnv)
-    push!(agent, state(env))
-end
-
-function Base.push!(agent::Agent{P,T,C}, ::PostActStage, env::E) where {P,T,C,E<:AbstractEnv}
-    push!(agent.cache, reward(env), is_terminated(env))
+function Base.push!(agent::Agent, ::PostActStage, env::AbstractEnv, action)
+    next_state = state(env)
+    push!(agent.trajectory, (state = next_state, action = action, reward = reward(env), terminal = is_terminated(env)))
 end
 ```
 
- The first function, `RLBase.plan!(agent::Agent, env::AbstractEnv)`, is called at the `action = RLBase.plan!(policy, env)` line. It gets an action from the policy (since you implemented the `RLBase.plan!(your_new_policy, env)` function), then it pushes its `cache` and the action to the trajectory of the agent. Finally, it empties the cache and returns the action (which is immediately applied to env after). At the `PreActStage()` and the `PostActStage()`, the agent simply records the current state of the environment, the returned reward and the terminal state signal to its cache (to be pushed to the trajectory by the first function). Notice that the `PreActStage` push and plan are called at the end of the episode loop to store the very last state and actions in the trajectory. 
+ The function `RLBase.plan!(agent::Agent, env::AbstractEnv)`, is called at the `action = RLBase.plan!(policy, env)` line. It simply gets an action from the policy of the agent by calling `RLBase.plan!(your_new_policy, env)` function. At the `PreEpisodeStage()`, the agent pushes the initial state to the trajectory. At the `PostActStage()`, the agent pushes the transition to the trajectory.
 
 If you need a different behavior at some stages, then you can overload the `Base.push!(Agent{<:YourPolicyType}, [stage,] env)` or `Base.push!(Agent{<:Any, <: YourTrajectoryType}, [stage,] env)`, or `Base.plan!`, depending on whether you have a custom policy or just a custom trajectory. For example, many algorithms (such as PPO) need to store an additional trace of the logpdf of the sampled actions and thus overload the function at the `PreActStage()`.
 
 ## Updating the policy
 
-Finally, you need to implement the learning function by implementing `RLBase.optimise!(::YourPolicyType, ::Stage, ::Trajectory)`. By default this does nothing at all stages. Overload it on the stage where you wish to optimise (most often, at `PreActStage()`, `PostActStage()` or `PostEpisodeStage()`). This function should loop the trajectory to sample batches. Inside the loop, put whatever is required. For example:
+Finally, you need to implement the learning function by implementing `RLBase.optimise!(::YourPolicyType, ::Stage, ::Trajectory)`. By default this does nothing at all stages. Overload it on the stage where you wish to optimise (most often, at `PostActStage()` or `PostEpisodeStage()`). This function should loop the trajectory to sample batches. Inside the loop, put whatever is required. For example:
 
 ```julia
 function RLBase.optimise!(p::YourPolicyType, ::PostEpisodeStage, traj::Trajectory)
