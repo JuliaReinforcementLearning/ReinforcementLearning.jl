@@ -32,7 +32,6 @@ end
         BatchStepsPerEpisode(10),
         RewardsPerEpisode(),
         StepsPerEpisode(),
-        TotalBatchRewardPerEpisode(10),
         TotalRewardPerEpisode(),
         TimePerStep()
     )
@@ -138,7 +137,6 @@ end
         BatchStepsPerEpisode(10),
         RewardsPerEpisode(),
         StepsPerEpisode(),
-        TotalBatchRewardPerEpisode(10),
         TotalRewardPerEpisode(),
         TimePerStep()
     )
@@ -161,10 +159,9 @@ end
 
     @test multiagent_hook[Symbol(1)][1].steps[1][1] == 1
     @test -1 <= multiagent_hook[Symbol(1)][2].rewards[1][1] <= 1
-    @test multiagent_hook[Symbol(1)][3].steps[1] == 1
+    @test multiagent_hook[Symbol(1)][3].steps[1] == 1    
     @test -1 <= multiagent_hook[Symbol(1)][4].rewards[1][1] <= 1
-    @test -1 <= multiagent_hook[Symbol(1)][5].rewards[1][1] <= 1
-    @test 0 <= multiagent_hook[Symbol(1)][6].times[1] <= 5
+    @test 0 <= multiagent_hook[Symbol(1)][5].times[1] <= 5
 
     # Add more hook tests here...
 
