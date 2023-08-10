@@ -107,10 +107,9 @@ Store each reward of each step in every episode in the field of `rewards`.
 """
 struct RewardsPerEpisode{T} <: AbstractHook where {T<:Number}
     rewards::Vector{Vector{T}}
-    empty_vect::Vector{T}
 
     function RewardsPerEpisode{T}() where {T<:Number}
-        new{T}(Vector{Vector{T}}(), Vector{T}())
+        new{T}(Vector{Vector{T}}())
     end
 
     function RewardsPerEpisode()
@@ -120,8 +119,8 @@ end
 
 Base.getindex(h::RewardsPerEpisode) = h.rewards
 
-function Base.push!(h::RewardsPerEpisode, ::PreEpisodeStage, agent, env)
-    push!(h.rewards, Float64[])
+function Base.push!(h::RewardsPerEpisode{T}, ::PreEpisodeStage, agent, env) where {T<Number}
+    push!(h.rewards, T[])
 end
 
 Base.push!(h::RewardsPerEpisode, s::PreEpisodeStage, agent, env, ::Symbol) = push!(h, s, agent, env)
