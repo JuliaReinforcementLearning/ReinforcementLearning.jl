@@ -126,8 +126,8 @@ end
 
 Base.push!(h::RewardsPerEpisode, s::PreEpisodeStage, agent, env, ::Symbol) = push!(h, s, agent, env)
 
-Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.empty_vect, reward(env))
-Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.empty_vect, reward(env, player))
+Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(last(h.rewards), reward(env))
+Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(last(h.rewards), reward(env, player))
 
 #####
 # TotalRewardPerEpisode
