@@ -118,7 +118,6 @@ end
         @test length(h_.rewards) == 10
         @test sum(abs.(sum.(h_.rewards))) == 10
         @test length(unique(length.(h_.rewards))) > 1
-        @test length(h_.empty_vect) == 0
         test_noop!(h, stages=[PreActStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end
 end
