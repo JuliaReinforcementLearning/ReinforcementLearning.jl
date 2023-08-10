@@ -119,7 +119,7 @@ end
 
 Base.getindex(h::RewardsPerEpisode) = h.rewards
 
-function Base.push!(h::RewardsPerEpisode{T}, ::PreEpisodeStage, agent, env) where {T<Number}
+function Base.push!(h::RewardsPerEpisode{T}, ::PreEpisodeStage, agent, env) where {T<:Number}
     push!(h.rewards, T[])
 end
 
