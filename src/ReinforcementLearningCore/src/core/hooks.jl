@@ -124,7 +124,7 @@ function Base.push!(h::RewardsPerEpisode, ::PreEpisodeStage, agent, env)
     push!(h.rewards, Float64[])
 end
 
-Base.push!(h::RewardsPerEpisode, ::PostEpisodeStage, agent, env, ::Symbol) = push!(h, PostEpisodeStage(), agent, env)
+Base.push!(h::RewardsPerEpisode, s::PreEpisodeStage, agent, env, ::Symbol) = push!(h, s, agent, env)
 
 Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.empty_vect, reward(env))
 Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.empty_vect, reward(env, player))
