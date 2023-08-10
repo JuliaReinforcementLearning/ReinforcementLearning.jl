@@ -120,9 +120,8 @@ end
 
 Base.getindex(h::RewardsPerEpisode) = h.rewards
 
-function Base.push!(h::RewardsPerEpisode, ::PostEpisodeStage, agent, env)
-    push!(h.rewards, copy(h.empty_vect))
-    empty!(h.empty_vect)
+function Base.push!(h::RewardsPerEpisode, ::PreEpisodeStage, agent, env)
+    push!(h.rewards, Float64[])
 end
 
 Base.push!(h::RewardsPerEpisode, ::PostEpisodeStage, agent, env, ::Symbol) = push!(h, PostEpisodeStage(), agent, env)
