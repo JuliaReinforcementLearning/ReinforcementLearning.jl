@@ -42,11 +42,15 @@ end
 function RLBase.optimise!(p::TRPO, ::PostEpisodeStage, trajectory::Trajectory)
     has_optimized = false
     for batch in trajectory #batch is a vector of Episode
-        gains = stack(discount_rewards(ep[:reward], p.γ) for ep in batch)
-        states = stack(ep[:state] for ep in batch)
-        actions = stack(ep[:action] for ep in batch)
+        gains = vcat(discount_rewards(ep[:reward], p.γ) for ep in batch)
+        states = reduce(ep[:state] for ep in batch) do s, s2 
+            cat(s,s2, dims = ndims(first(batch[:state])))
+        end
+        actions = reduce(ep[:action] for ep in batch) do s, s2
+            cat(s, s2, dims = ndims(first(batch[:action])))
+        end
         for inds in Iterators.partition(shuffle(p.rng, eachindex(gains)), p.batch_size)
-            RLBase.optimise!(p, (state=selectdim(states,ndims(states),inds), action=selectdim(actions,ndims(actions),inds), gain=selectdim(gainss,ndims(gains),inds)))
+            RLBase.optimise!(p, (state=selectdim(states,ndims(states),inds), action=selectdim(actions,ndims(actions),inds), gain=gains[inds]))
         end
         has_optimized = true
     end
