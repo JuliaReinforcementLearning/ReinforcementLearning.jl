@@ -3,7 +3,6 @@ using CUDA
 
 CUDA.allowscalar(false)
 
-run(E`JuliaRL_NFQ_CartPole`)
 run(E`JuliaRL_BasicDQN_CartPole`)
 run(E`JuliaRL_DQN_CartPole`)
 # run(E`JuliaRL_PrioritizedDQN_CartPole`)
@@ -17,6 +16,7 @@ run(E`JuliaRL_MPODiscrete_CartPole`)
 run(E`JuliaRL_MPOContinuous_CartPole`)
 run(E`JuliaRL_MPOCovariance_CartPole`)
 run(E`JuliaRL_DQNCartPole_GPU`)
+run(E`JuliaRL_NFQ_CartPole`)
 # run(E`JuliaRL_BC_CartPole`)
 # run(E`JuliaRL_VMPO_CartPole`)
 # run(E`JuliaRL_BasicDQN_MountainCar`)
