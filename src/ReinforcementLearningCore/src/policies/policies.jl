@@ -1,3 +1,6 @@
 include("agent/agent.jl")
 include("random_policy.jl")
 include("q_based_policy.jl")
+include("learners.jl")
+include("approximator.jl")
+include("explorers/explorers.jl")

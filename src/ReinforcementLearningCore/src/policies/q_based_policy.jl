@@ -1,8 +1,5 @@
 export QBasedPolicy
 
-include("learners.jl")
-include("explorers/explorers.jl")
-
 using Functors: @functor
 
 """
