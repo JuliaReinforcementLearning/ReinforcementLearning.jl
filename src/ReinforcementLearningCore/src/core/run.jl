@@ -33,11 +33,11 @@ function try_parse_kw(s)
     NamedTuple(kw)
 end
 
-struct Experiment{S}
-    policy::Any
-    env::Any
-    stop_condition::Any
-    hook::Any
+struct Experiment{P,E,S,H}
+    policy::P
+    env::E
+    stop_condition::S
+    hook::H
 end
 
 Experiment(args...) = Experiment{Symbol()}(args...)
