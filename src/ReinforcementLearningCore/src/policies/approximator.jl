@@ -25,8 +25,8 @@ This is typically to stabilize Approximators that learn with a temporal differen
 loss, such as state or action-value networks. `sync_freq` is the number of updates of
 `network` between each update of the `target`. ρ (\rho) is "how much of the target is kept
 when updating it". The two common usages of TargetNetwork are 
-- use ρ = 0 to totally replace `target` with `network` evert sync_freq.
-- use ρ < 1 and sync_freq = 1 to let the target follow `network` with polyak averaging.
+- use ρ = 0 to totally replace `target` with `network` every sync_freq updates.
+- use ρ < 1 (but close to one) and sync_freq = 1 to let the target follow `network` with polyak averaging.
 
 Note to developpers: `target(::TargetNetwork)` will return the target model and 
 `target(::Approximator)` returns the model. You can therefore use this interface 
