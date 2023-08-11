@@ -1,4 +1,4 @@
-export AbstractLearner, Approximator
+export AbstractLearner
 
 import Flux
 using Functors: @functor

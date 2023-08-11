@@ -1,4 +1,5 @@
 using Flux
+export Approximator
 
 Base.@kwdef mutable struct Approximator{M,O}
     model::M
