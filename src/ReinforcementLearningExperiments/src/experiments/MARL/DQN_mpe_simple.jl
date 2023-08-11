@@ -30,20 +30,19 @@ function RLCore.Experiment(
     agent = Agent(
         policy=QBasedPolicy(
             learner=DQNLearner(
-                approximator=Approximator(
-                    model=TwinNetwork(
+                approximator=TargetNetwork(
+                    Approximator(
                         Chain(
                             Dense(ns, 128, relu; init=glorot_uniform(rng)),
                             Dense(128, 128, relu; init=glorot_uniform(rng)),
                             Dense(128, na; init=glorot_uniform(rng)),
-                        );
-                        sync_freq=100
-                    ),
-                    optimiser=Adam(),
+                            ),
+                        optimiser=Adam()
+                        ),
+                    sync_freq=100
                 ),
                 n=n,
                 γ=γ,
-                is_enable_double_DQN=is_enable_double_DQN,
                 loss_func=huber_loss,
                 rng=rng,
             ),
