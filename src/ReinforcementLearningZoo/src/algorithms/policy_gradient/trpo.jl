@@ -39,13 +39,23 @@ function Base.push!(p::Agent{<:TRPO}, ::PostEpisodeStage, env::AbstractEnv)
     empty!(p.trajectory.container)
 end
 
-RLBase.optimise!(::Agent{<:TRPO}, ::PostActStage) = nothing
-
-function RLBase.optimise!(π::TRPO, ::PostActStage, episode::Episode)
-    gain = discount_rewards(episode[:reward][:], π.γ)
-    for inds in Iterators.partition(shuffle(π.rng, 1:length(episode)), π.batch_size)
-        RLBase.optimise!(π, (state=episode[:state][inds], action=episode[:action][inds], gain=gain[inds]))
+function RLBase.optimise!(p::TRPO, ::PostEpisodeStage, trajectory::Trajectory)
+    has_optimized = false
+    for batch in trajectory #batch is a vector of Episode
+        gains = vcat(discount_rewards(ep[:reward], p.γ) for ep in batch)
+        states = reduce(ep[:state] for ep in batch) do s, s2 
+            cat(s,s2, dims = ndims(first(batch[:state])))
+        end
+        actions = reduce(ep[:action] for ep in batch) do s, s2
+            cat(s, s2, dims = ndims(first(batch[:action])))
+        end
+        for inds in Iterators.partition(shuffle(p.rng, eachindex(gains)), p.batch_size)
+            RLBase.optimise!(p, (state=selectdim(states,ndims(states),inds), action=selectdim(actions,ndims(actions),inds), gain=gains[inds]))
+        end
+        has_optimized = true
     end
+    has_optimized && empty!(trajectory.container)
+    return nothing
 end
 
 function RLBase.optimise!(p::TRPO, ::PostActStage, batch::NamedTuple{(:state, :action, :gain)})
