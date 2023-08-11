@@ -3,15 +3,16 @@ using CUDA
 
 CUDA.allowscalar(false)
 
-run(E`JuliaRL_NFQ_CartPole`)
 run(E`JuliaRL_BasicDQN_CartPole`)
 run(E`JuliaRL_DQN_CartPole`)
+run(E`JuliaRL_NFQ_CartPole`)
 # run(E`JuliaRL_PrioritizedDQN_CartPole`)
 run(E`JuliaRL_QRDQN_CartPole`)
 run(E`JuliaRL_REMDQN_CartPole`)
 run(E`JuliaRL_IQN_CartPole`)
 run(E`JuliaRL_Rainbow_CartPole`)
-# run(E`JuliaRL_VPG_CartPole`)
+#run(E`JuliaRL_VPG_CartPole`)
+#run(E`JuliaRL_TRPO_CartPole`)
 run(E`JuliaRL_MPODiscrete_CartPole`)
 run(E`JuliaRL_MPOContinuous_CartPole`)
 run(E`JuliaRL_MPOCovariance_CartPole`)

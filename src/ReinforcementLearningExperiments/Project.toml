@@ -14,6 +14,7 @@ ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
 ReinforcementLearningZoo = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
 Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
+cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [compat]
 Distributions = "0.25"
