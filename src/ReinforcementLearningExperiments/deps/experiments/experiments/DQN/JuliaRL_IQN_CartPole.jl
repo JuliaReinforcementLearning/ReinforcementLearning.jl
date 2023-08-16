@@ -39,16 +39,16 @@ function RLCore.Experiment(
     agent = Agent(
         policy=QBasedPolicy(
             learner=IQNLearner(
-                approximator=Approximator(
-                    model=TwinNetwork(
-                        ImplicitQuantileNet(
+                approximator=TargetNetwork(
+                    Approximator(
+                        model = ImplicitQuantileNet(
                             ψ=Dense(ns, n_hidden, relu; init=init),
                             ϕ=Dense(Nₑₘ, n_hidden, relu; init=init),
                             header=Dense(n_hidden, na; init=init),
                         ),
-                        sync_freq=100
-                    ),
-                    optimiser=Adam(0.001),
+                        optimiser=Adam()
+                        ),
+                    sync_freq=100
                 ),
                 κ=κ,
                 N=8,

@@ -26,7 +26,7 @@ end
 function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
     A = learner.approximator
     Q = model(A)
-    Qt = target(A)
+    Qt = RLCore.target(A)
     
     γ = learner.γ
     loss_func = learner.loss_func

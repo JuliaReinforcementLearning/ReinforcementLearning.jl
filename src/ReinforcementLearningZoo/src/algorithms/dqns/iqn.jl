@@ -36,7 +36,7 @@ function (net::ImplicitQuantileNet)(s, emb)
     reshape(quantiles, :, size(merged, 2), size(merged, 3))  # (n_action, N, batch_size)
 end
 
-Base.@kwdef mutable struct IQNLearner{A<:Approximator{<:TwinNetwork}, R1, R2} <: AbstractLearner
+Base.@kwdef mutable struct IQNLearner{A<:Union{Approximator, TargetNetwork}, R1, R2} <: AbstractLearner
     approximator::A
     γ::Float32 = 0.99f0
     κ::Float32 = 1.0f0
@@ -64,8 +64,9 @@ function RLCore.forward(learner::IQNLearner, s::A) where {A<:AbstractArray}
 end
 
 function RLCore.forward(L::IQNLearner, env::E) where {E<:AbstractEnv}
-    s = env |> state |> send_to_device(L.approximator)
-    q = s |> unsqueeze(dims=ndims(s) + 1) |> x -> RLCore.forward(L, x) |> vec
+    s = state(env) |> send_to_device(L.approximator)
+
+    q =  RLCore.forward(L, unsqueeze(s, dims=ndims(s) + 1)) |> vec
     q
 end
 
@@ -77,8 +78,8 @@ end
 
 function RLBase.optimise!(learner::IQNLearner, batch::NamedTuple)
     A = learner.approximator
-    Z = A.model.source
-    Zₜ = A.model.target
+    Z = model(A)
+    Zt = RLCore.target(A)
     N = learner.N
     N′ = learner.N′
     Nₑₘ = learner.Nₑₘ
@@ -88,26 +89,26 @@ function RLBase.optimise!(learner::IQNLearner, batch::NamedTuple)
     batch_size = length(t)
     τ′ = rand(learner.device_rng, Float32, N′, batch_size)  # TODO: support β distribution
     τₑₘ′ = embed(τ′, Nₑₘ)
-    zₜ = Zₜ(s′, τₑₘ′)
-    avg_zₜ = mean(zₜ, dims=2)
+    Zt = Zt(s′, τₑₘ′)
+    avg_Zt = mean(Zt, dims=2)
 
     if haskey(batch, :next_legal_actions_mask)
         masked_value = similar(batch.next_legal_actions_mask, Float32)
         masked_value = fill!(masked_value, typemin(Float32))
         masked_value[batch.next_legal_actions_mask] .= 0
-        avg_zₜ .+= masked_value
+        avg_Zt .+= masked_value
     end
 
-    aₜ = argmax(avg_zₜ, dims=1)
+    aₜ = argmax(avg_Zt, dims=1)
     aₜ = aₜ .+ typeof(aₜ)(CartesianIndices((0:0, 0:N′-1, 0:0)))
-    qₜ = reshape(zₜ[aₜ], :, batch_size)
+    qₜ = reshape(Zt[aₜ], :, batch_size)
     target = reshape(r, 1, batch_size) .+ learner.γ * reshape(1 .- t, 1, batch_size) .* qₜ  # reshape to allow broadcast
 
     τ = rand(learner.device_rng, Float32, N, batch_size)
     τₑₘ = embed(τ, Nₑₘ)
     a = CartesianIndex.(repeat(a, inner=N), 1:(N*batch_size))
 
-    gs = gradient(params(A)) do
+    gs = gradient(params(Z)) do
         z_raw = Z(s, τₑₘ)
         z = reshape(z_raw, size(z_raw)[1:end-2]..., :)
         q = z[a]
