@@ -23,7 +23,7 @@ function RLCore.Experiment(
         QBasedPolicy(
             learner=DQNLearner(
                 approximator=TargetNetwork(
-                    Approximator(
+                    model = Approximator(
                         Chain(
                             Dense(ns, 128, relu; init=glorot_uniform(rng)),
                             Dense(128, 128, relu; init=glorot_uniform(rng)),

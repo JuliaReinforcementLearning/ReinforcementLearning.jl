@@ -1,4 +1,4 @@
-export Approximator, TargetNetwork
+export Approximator, TargetNetwork, target, model
 
 using Flux
 
@@ -16,6 +16,7 @@ forward(A::Approximator, args...; kwargs...) = A.model(args...; kwargs...)
 RLBase.optimise!(A::Approximator, gs) = Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
 
 target(ap::Approximator) = ap.model #see TargetNetwork
+model(ap::Approximator) = ap.model #see TargetNetwork
 
 """
     TargetNetwork(network::Approximator; sync_freq::Int = 1, ρ::Float32 = 0f0)
@@ -28,9 +29,9 @@ when updating it". The two common usages of TargetNetwork are
 - use ρ = 0 to totally replace `target` with `network` every sync_freq updates.
 - use ρ < 1 (but close to one) and sync_freq = 1 to let the target follow `network` with polyak averaging.
 
-Note to developpers: `target(::TargetNetwork)` will return the target model and 
+Note to developpers: `model(::TargetNetwork)` will return the trainable model and `target(::TargetNetwork)` will return the target model and 
 `target(::Approximator)` returns the model. You can therefore use this interface 
-to create agents agnostic to whether the model has a target or not.
+to create policies agnostic to whether the model has a target or not. 
 """
 Base.@kwdef mutable struct TargetNetwork{M}
     source::Approximator{M}
@@ -44,15 +45,16 @@ function TargetNetwork(x; kw...)
     if haskey(kw, :ρ)
         @assert 0 <= kw[:ρ] <= 1 "ρ must in [0,1]"
     end
-    TargetNetwork(; source=x, target=deepcopy(x), kw...)
+    TargetNetwork(; source=x, target=deepcopy(x.model), kw...)
 end
 
 @functor TargetNetwork (source, target)
 
 Flux.trainable(model::TargetNetwork) = (model.source,)
 
-forward(tn::TargetNetwork, args...) = forward(tn.model, args...)
+forward(tn::TargetNetwork, args...) = forward(tn.source, args...)
 
+model(tn::TargetNetwork) = model(tn.source)
 target(tn::TargetNetwork) = tn.target
 
 function RLBase.optimise!(tn::TargetNetwork, gs)
@@ -60,9 +62,9 @@ function RLBase.optimise!(tn::TargetNetwork, gs)
     Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
     tn.n_optimise += 1
 
-    if M.n_optimise % M.sync_freq == 0
+    if tn.n_optimise % tn.sync_freq == 0
         # polyak averaging
-        for (dest, src) in zip(Flux.params(tn.target.model), Flux.params(tn.model))
+        for (dest, src) in zip(Flux.params(target(tn)), Flux.params(tn.source))
             dest .= tn.ρ .* dest .+ (1 - tn.ρ) .* src
         end
         tn.n_optimise = 0

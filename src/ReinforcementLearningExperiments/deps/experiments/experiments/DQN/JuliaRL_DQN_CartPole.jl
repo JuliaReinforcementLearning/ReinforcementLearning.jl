@@ -32,7 +32,7 @@ function RLCore.Experiment(
             learner=DQNLearner(
                 approximator=TargetNetwork(
                     Approximator(
-                        Chain(
+                        model = Chain(
                             Dense(ns, 128, relu; init=glorot_uniform(rng)),
                             Dense(128, 128, relu; init=glorot_uniform(rng)),
                             Dense(128, na; init=glorot_uniform(rng)),
