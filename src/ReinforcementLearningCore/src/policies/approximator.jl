@@ -59,23 +59,23 @@ function TargetNetwork(x; kw...)
     TargetNetwork(; network=x, target=deepcopy(x.model), kw...)
 end
 
-@functor TargetNetwork (source, target)
+@functor TargetNetwork (network, target)
 
-Flux.trainable(model::TargetNetwork) = (model.source,)
+Flux.trainable(model::TargetNetwork) = (model.network,)
 
-forward(tn::TargetNetwork, args...) = forward(tn.source, args...)
+forward(tn::TargetNetwork, args...) = forward(tn.network, args...)
 
-model(tn::TargetNetwork) = model(tn.source)
+model(tn::TargetNetwork) = model(tn.network)
 target(tn::TargetNetwork) = tn.target
 
 function RLBase.optimise!(tn::TargetNetwork, gs)
-    A = tn.source
+    A = tn.network
     Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
     tn.n_optimise += 1
 
     if tn.n_optimise % tn.sync_freq == 0
         # polyak averaging
-        for (dest, src) in zip(Flux.params(target(tn)), Flux.params(tn.source))
+        for (dest, src) in zip(Flux.params(target(tn)), Flux.params(tn.network))
             dest .= tn.ρ .* dest .+ (1 - tn.ρ) .* src
         end
         tn.n_optimise = 0
