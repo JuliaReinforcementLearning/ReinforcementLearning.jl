@@ -26,6 +26,7 @@ ReinforcementLearningEnvironments = "0.8"
 ReinforcementLearningZoo = "^0.8.3"
 StableRNGs = "1"
 Weave = "0.10"
+cuDNN = "1"
 julia = "1.9"
 
 [extras]
