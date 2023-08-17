@@ -2,6 +2,13 @@ export Approximator, TargetNetwork, target, model
 
 using Flux
 
+
+"""
+    Approximator(model, optimiser)
+
+Wraps a Flux trainable model and implements the `RLBase.optimise!(::Approximator, ::Gradient)` 
+interface. See the RLCore documentation for more information on proper usage.
+"""
 Base.@kwdef mutable struct Approximator{M,O}
     model::M
     optimiser::O
@@ -21,20 +28,24 @@ model(ap::Approximator) = ap.model #see TargetNetwork
 """
     TargetNetwork(network::Approximator; sync_freq::Int = 1, ρ::Float32 = 0f0)
 
-An extended Approximator that holds a target for the network to be updated towards. 
-This is typically to stabilize Approximators that learn with a temporal difference
-loss, such as state or action-value networks. `sync_freq` is the number of updates of
-`network` between each update of the `target`. ρ (\rho) is "how much of the target is kept
-when updating it". The two common usages of TargetNetwork are 
+Wraps an Approximator to hold a target network that is updated towards the model of the 
+approximator. 
+- `sync_freq` is the number of updates of `network` between each update of the `target`. 
+- ρ (\rho) is "how much of the target is kept when updating it". 
+
+The two common usages of TargetNetwork are 
 - use ρ = 0 to totally replace `target` with `network` every sync_freq updates.
 - use ρ < 1 (but close to one) and sync_freq = 1 to let the target follow `network` with polyak averaging.
 
-Note to developpers: `model(::TargetNetwork)` will return the trainable model and `target(::TargetNetwork)` will return the target model and 
-`target(::Approximator)` returns the model. You can therefore use this interface 
-to create policies agnostic to whether the model has a target or not. 
+Implements the `RLBase.optimise!(::TargetNetwork, ::Gradient)` interface to update the model with the gradient
+and the target with weights replacement or Polyak averaging.
+
+Note to developpers: `model(::TargetNetwork)` will return the trainable Flux model 
+and `target(::TargetNetwork)` returns the target model and `target(::Approximator)`
+returns the non-trainable Flux model. See the RLCore documentation.
 """
 Base.@kwdef mutable struct TargetNetwork{M}
-    source::Approximator{M}
+    network::Approximator{M}
     target::M
     sync_freq::Int = 1
     ρ::Float32 = 0.0f0
@@ -45,7 +56,7 @@ function TargetNetwork(x; kw...)
     if haskey(kw, :ρ)
         @assert 0 <= kw[:ρ] <= 1 "ρ must in [0,1]"
     end
-    TargetNetwork(; source=x, target=deepcopy(x.model), kw...)
+    TargetNetwork(; network=x, target=deepcopy(x.model), kw...)
 end
 
 @functor TargetNetwork (source, target)
