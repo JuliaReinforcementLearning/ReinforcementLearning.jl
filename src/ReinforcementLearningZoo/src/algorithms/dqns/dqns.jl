@@ -1,7 +1,7 @@
 include("basic_dqn.jl")
 include("NFQ.jl")
 include("dqn.jl")
-#include("prioritized_dqn.jl")
+include("prioritized_dqn.jl")
 #include("qr_dqn.jl")
 #include("rem_dqn.jl")
 include("iqn.jl")
