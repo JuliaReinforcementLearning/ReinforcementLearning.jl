@@ -6,7 +6,7 @@ using Flux.Losses: huber_loss
 using Flux: gradient, params
 using Functors: @functor
 
-Base.@kwdef mutable struct REMDQNLearner{A<:Approximator{<:TwinNetwork}} <: AbstractLearner
+Base.@kwdef mutable struct REMDQNLearner{A<:Union{Approximator,TargetNetwork}} <: AbstractLearner
     approximator::A
     ensemble_num::Int
     ensemble_method::Symbol
@@ -33,8 +33,8 @@ end
 
 function RLBase.optimise!(learner::REMDQNLearner, batch::NamedTuple)
     A = learner.approximator
-    Q = A.model.source
-    Qₜ = A.model.target
+    Q = model(A)
+    Qₜ = RLCore.target(A)
     γ = learner.γ
     n = learner.n
     loss_func = learner.loss_func
