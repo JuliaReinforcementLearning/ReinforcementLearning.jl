@@ -44,19 +44,17 @@ Note to developpers: `model(::TargetNetwork)` will return the trainable Flux mod
 and `target(::TargetNetwork)` returns the target model and `target(::Approximator)`
 returns the non-trainable Flux model. See the RLCore documentation.
 """
-Base.@kwdef mutable struct TargetNetwork{M}
+mutable struct TargetNetwork{M}
     network::Approximator{M}
     target::M
-    sync_freq::Int = 1
-    ρ::Float32 = 0.0f0
-    n_optimise::Int = 0
+    sync_freq::Int
+    ρ::Float32
+    n_optimise::Int
 end
 
-function TargetNetwork(x; kw...) 
-    if haskey(kw, :ρ)
-        @assert 0 <= kw[:ρ] <= 1 "ρ must in [0,1]"
-    end
-    TargetNetwork(; network=x, target=deepcopy(x.model), kw...)
+function TargetNetwork(x; sync_freq = 1, ρ = 0f0)
+    @assert 0 <= kw[:ρ] <= 1 "ρ must in [0,1]"
+    TargetNetwork(x, deepcopy(x.model), sync_freq, ρ, 0)
 end
 
 @functor TargetNetwork (network, target)
