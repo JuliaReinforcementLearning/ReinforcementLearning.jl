@@ -53,7 +53,7 @@ mutable struct TargetNetwork{M}
 end
 
 function TargetNetwork(x; sync_freq = 1, ρ = 0f0)
-    @assert 0 <= kw[:ρ] <= 1 "ρ must in [0,1]"
+    @assert 0 <= ρ <= 1 "ρ must in [0,1]"
     TargetNetwork(x, deepcopy(x.model), sync_freq, ρ, 0)
 end
 
