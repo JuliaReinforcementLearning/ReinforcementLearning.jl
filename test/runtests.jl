@@ -1,5 +1,6 @@
 using Test
-using ReinforcementLearning
+using ReinforcementLearningZoo
 
-@testset "ReinforcementLearning" begin
+@testset "ReinforcementLearningZoo" begin
+    include("operators.jl")
 end
