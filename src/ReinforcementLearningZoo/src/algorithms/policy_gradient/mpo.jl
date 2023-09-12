@@ -85,13 +85,13 @@ end
 
 Flux.@functor MPOPolicy
 
-function RLBase.plan!(p::MPOPolicy, env; testmode = false)
+function RLBase.plan!(p::MPOPolicy, env; testmode = false, is_return_log_prob = false)
     D = device(p.actor)
     s = send_to_device(D, state(env))
-    if !testmode
-        action = p.actor.model(p.rng, s; is_sampling=!testmode)
+    if !testmode 
+        action = p.actor.model(p.rng, s; is_sampling = true, is_return_log_prob = is_return_log_prob)
     else
-        action, _ = p.actor.model(p.rng, s; is_sampling=!testmode)
+        action, _ = p.actor.model(p.rng, s; is_sampling = false) 
     end
     send_to_host(action)
 end
