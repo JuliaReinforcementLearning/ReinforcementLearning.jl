@@ -2,7 +2,7 @@ import ReinforcementLearningCore
 @testset "retrace" begin
     batch = (state= [[1 2 3], [10 11 12]], 
         action = [[1 2 3],[10 11 12]], 
-        log_prob = [log.([0.2,0.2,0.2]), log.([0.1,0.1,0.1])],
+        action_log_problog_prob = [log.([0.2,0.2,0.2]), log.([0.1,0.1,0.1])],
         reward = [[1f0,2f0,3f0],[10f0,11f0,12f0]], 
         terminal= [[0,0,1], [0,0,0]], 
         next_state = [[2 3 4],[11 12 13]])
