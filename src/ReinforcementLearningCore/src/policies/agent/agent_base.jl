@@ -47,13 +47,24 @@ end
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
-function RLBase.plan!(agent::Agent, env::AbstractEnv)
-    RLBase.plan!(agent.policy, env)
+@generated function RLBase.plan!(agent::Agent{<:Any, Trajectory{EpisodesBuffer{names}}}, env::AbstractEnv)
+    if :action_log_prob in names
+        return :(RLBase.plan!(agent.policy, env))
+    else
+        return :(RLBase.plan!(agent.policy, env, is_return_log_prob = true)) #returns a tuple with the action and the log_prob.
+        #Note: it is expected that a policy that needs is_return_log_prob will implement a plan! function that accepts the above arguments.
+    end
+
 end
 
 function Base.push!(agent::Agent, ::PostActStage, env::AbstractEnv, action)
     next_state = state(env)
     push!(agent.trajectory, (state = next_state, action = action, reward = reward(env), terminal = is_terminated(env)))
+end
+
+function Base.push!(agent::Agent, ::PostActStage, env::AbstractEnv, action::Tuple)
+    next_state = state(env)
+    push!(agent.trajectory, (state = next_state, action = action[1], action_log_prob = action[2], reward = reward(env), terminal = is_terminated(env)))
 end
 
 function Base.push!(agent::Agent, ::PostEpisodeStage, env::AbstractEnv)
