@@ -41,6 +41,8 @@ function RLBase.optimise!(
     a = CartesianIndex.(a, 1:batch_size)
     k, p = batch.key, batch.priority
     p′ = similar(p)
+    s, s′, a, r, t = send_to_device(device(Q), (s, s′, a, r, t))
+    k, p, p′ = send_to_device(device(Q), (k, p, p′))
 
     w = 1.0f0 ./ ((p .+ 1.0f-10) .^ β)
     w ./= maximum(w)
