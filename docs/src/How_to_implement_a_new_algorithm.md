@@ -114,21 +114,8 @@ The sampler is the object that will fetch data in your trajectory to create the 
 
 ## Using resources from RLCore
 
-RL algorithms typically only differ partially  but broadly use the same mechanisms. The subpackage RLCore contains some utilities that you can reuse to implement your algorithm.
-
-### QBasedPolicy
-
-`QBasedPolicy` is a policy that wraps a Q-Value _learner_ (tabular or approximated) and an _explorer_. Use this wrapper to implement a policy that directly uses a Q-value function to 
-decide its next action. In that case, instead of creating an `AbstractPolicy` subtype for your algorithm, define an `AbstractLearner` subtype and specialize `RLBase.optimise!(::YourLearnerType, ::Stage, ::Trajectory)`. This way you will not have to code the interaction between your policy and the explorer yourself. 
-RLCore provides the most common explorers (such as epsilon-greedy, UCB, etc.). 
-
-### Neural and linear approximators
-
-If your algorithm uses a neural network or a linear approximator to approximate a function trained with `Flux.jl`, use the `Approximator`. Approximator 
-wraps a `Flux` model and an `Optimiser` (such as Adam or SGD). Your `optimise!(::PolicyOrLearner, batch)` function will probably consist in computing a gradient 
-and call the `RLCore.optimise!(app::Approximator, gradient::Flux.Grads)` after that. 
-
-Common model architectures are also provided such as the `GaussianNetwork` for continuous policies with diagonal multivariate policies; and `CovGaussianNetwork` for full covariance (very slow on GPUs at the moment).
+RL algorithms typically only differ partially  but broadly use the same mechanisms. The subpackage RLCore contains some modules that you can reuse to implement your algorithm. 
+These will take care of many aspects of training for you. See the [RLCore manual](./rlcore.md)
 
 ### Utils
 In utils/distributions.jl you will find implementations of gaussian log probabilities functions that are both GPU compatible and differentiable and that do not require the overhead of using Distributions.jl structs.

@@ -3,8 +3,7 @@ export AbstractExplorer
 using FillArrays: Trues
 
 """
-    RLBase.plan!(p::AbstractExplorer, x)
-    RLBase.plan!(p::AbstractExplorer, x, mask)
+    RLBase.plan!(p::AbstractExplorer, x[, mask])
 
 Define how to select an action based on action values.
 """

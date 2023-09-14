@@ -29,16 +29,16 @@ function RLCore.Experiment(
     agent = Agent(
         policy=QBasedPolicy(
             learner=QRDQNLearner(
-                approximator=Approximator(
-                    model=TwinNetwork(
-                        Chain(
-                            Dense(ns, 128, relu; init=glorot_uniform(rng)),
-                            Dense(128, 128, relu; init=glorot_uniform(rng)),
-                            Dense(128, N * na; init=glorot_uniform(rng)),
-                        );
+                approximator= TargetNetwork(
+                    Approximator(
+                        model= Chain(
+                                Dense(ns, 128, relu; init=glorot_uniform(rng)),
+                                Dense(128, 128, relu; init=glorot_uniform(rng)),
+                                Dense(128, N * na; init=glorot_uniform(rng)),
+                            );
+                            optimiser=Adam(),
+                            ),
                         sync_freq=100
-                    ),
-                    optimiser=Adam(),
                 ),
                 n_quantile=N,
                 loss_func=quantile_huber_loss,

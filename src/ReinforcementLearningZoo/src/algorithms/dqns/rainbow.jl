@@ -5,7 +5,7 @@ using Flux: params, unsqueeze, softmax, gradient
 using Flux.Losses: logitcrossentropy
 using Functors: @functor
 
-Base.@kwdef mutable struct RainbowLearner{A<:Approximator{<:TwinNetwork}, F, R} <: AbstractLearner
+Base.@kwdef mutable struct RainbowLearner{A<:Union{Approximator,TargetNetwork}, F, R} <: AbstractLearner
     approximator::A
     Vₘₐₓ::Float32
     Vₘᵢₙ::Float32
@@ -32,15 +32,15 @@ function RLCore.forward(L::RainbowLearner, s::A) where {A<:AbstractArray}
 end
 
 function RLBase.plan!(learner::RainbowLearner, env::AbstractEnv)
-    s = send_to_device(device(learner.approximator), state(env))
-    s = unsqueeze(s, dims=ndims(s) + 1)
-    s |> learner |> vec |> send_to_host
+    _s = send_to_device(device(learner.approximator), state(env))
+    s = unsqueeze(_s, dims=ndims(s) + 1)
+    RLCore.forward(learner, s) |> vec |> send_to_host
 end
 
 function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
     A = learner.approximator
-    Q = A.model.source
-    Qₜ = A.model.target
+    Q = model(A)
+    Qₜ = RLCore.target(A)
     γ = learner.γ
     β = learner.β_priority
     loss_func = learner.loss_func

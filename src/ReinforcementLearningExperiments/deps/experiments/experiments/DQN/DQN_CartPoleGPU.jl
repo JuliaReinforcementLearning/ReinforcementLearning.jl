@@ -22,23 +22,22 @@ function RLCore.Experiment(
     policy = Agent(
         QBasedPolicy(
             learner=DQNLearner(
-            approximator=Approximator(
-                model=TwinNetwork(
-                    Chain(
-                        Dense(ns, 128, relu; init = glorot_uniform(rng)),
-                        Dense(128, 128, relu; init = glorot_uniform(rng)),
-                        Dense(128, na; init = glorot_uniform(rng)),
-                    );
+                approximator=TargetNetwork(
+                    Approximator(
+                        model = Chain(
+                            Dense(ns, 128, relu; init=glorot_uniform(rng)),
+                            Dense(128, 128, relu; init=glorot_uniform(rng)),
+                            Dense(128, na; init=glorot_uniform(rng)),
+                            ),
+                        optimiser=Adam()
+                        ),
                     sync_freq=100
                 ),
-                optimiser=Adam(),
-            ) |> gpu,
-            n=n,
-            γ=γ,
-            is_enable_double_DQN=true,
-            loss_func=huber_loss,
-            rng=rng,
-        ),
+                n=n,
+                γ=γ,
+                loss_func=huber_loss,
+                rng=rng,
+            ),
         explorer=EpsilonGreedyExplorer(
             kind=:exp,
             ϵ_stable=0.01,
