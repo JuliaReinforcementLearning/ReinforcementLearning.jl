@@ -2,7 +2,7 @@ module ReinforcementLearningZoo
 
 using ReinforcementLearningBase
 using ReinforcementLearningCore
-
+import ReinforcementLearningCore.forward
 const RLZoo = ReinforcementLearningZoo
 export RLZoo
 

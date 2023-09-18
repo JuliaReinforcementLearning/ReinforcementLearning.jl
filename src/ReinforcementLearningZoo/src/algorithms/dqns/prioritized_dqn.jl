@@ -6,13 +6,12 @@ using LinearAlgebra: dot
 using Flux
 using Flux: gradient, params
 
-Base.@kwdef mutable struct PrioritizedDQNLearner{A<:Approximator{<:TwinNetwork}, R} <: AbstractLearner
+Base.@kwdef mutable struct PrioritizedDQNLearner{A<:Union{Approximator,TargetNetwork}, R} <: AbstractLearner
     approximator::A
     loss_func::Any  # !!! here the loss func must return the loss before reducing over the batch dimension
     n::Int = 1
     γ::Float32 = 0.99f0
     β_priority::Float32 = 0.5f0
-    is_enable_double_DQN::Bool = true
     rng::R = Random.default_rng()
     # for logging
     loss::Float32 = 0.0f0
@@ -30,8 +29,8 @@ function RLBase.optimise!(
     }
 )
     A = learner.approximator
-    Q = A.model.source
-    Qₜ = A.model.target
+    Q = model(A)
+    Qₜ = RLCore.target(A)
     γ = learner.γ
     β = learner.β_priority
     loss_func = learner.loss_func
@@ -42,17 +41,19 @@ function RLBase.optimise!(
     a = CartesianIndex.(a, 1:batch_size)
     k, p = batch.key, batch.priority
     p′ = similar(p)
+    s, s′, a, r, t = send_to_device(device(Q), (s, s′, a, r, t))
+    k, p, p′ = send_to_device(device(Q), (k, p, p′))
 
     w = 1.0f0 ./ ((p .+ 1.0f-10) .^ β)
     w ./= maximum(w)
 
-    q′ = learner.is_enable_double_DQN ? Q(s′) : Qₜ(s′)
+    q′ =Qₜ(s′)
 
     if haskey(batch, :next_legal_actions_mask)
         q′ .+= ifelse.(batch[:next_legal_actions_mask], 0.0f0, typemin(Float32))
     end
 
-    q′ₐ = learner.is_enable_double_DQN ? Qₜ(s′)[dropdims(argmax(q′, dims=1), dims=1)] : dropdims(maximum(q′; dims=1), dims=1)
+    q′ₐ = dropdims(maximum(q′; dims=1), dims=1)
 
     G = r .+ γ^n .* (1 .- t) .* q′ₐ
 

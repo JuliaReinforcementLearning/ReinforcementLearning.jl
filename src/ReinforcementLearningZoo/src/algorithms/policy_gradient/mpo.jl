@@ -7,12 +7,10 @@ import Flux.onehotbatch
 
 #Note: we use two Q networks, this is not used in the original publications, but there is no reason to not do it since the networks are trained the same way as for example SAC
 #If using a CategoricalNetwork actor, α is used for αμ. αΣ is only used for [Cov]GaussianNetwork
-mutable struct MPOPolicy{P<:Approximator,Q<:Approximator,R} <: AbstractPolicy
+mutable struct MPOPolicy{P<:Approximator,Q<:TargetNetwork,R} <: AbstractPolicy
     actor::P
     qnetwork1::Q
     qnetwork2::Q
-    target_qnetwork1::Q
-    target_qnetwork2::Q 
     γ::Float32
     action_sample_size::Int #K 
     ϵ::Float32  #KL bound on the non-parametric variational approximation to the actor
@@ -37,7 +35,7 @@ end
 """
     MPOPolicy(;
     actor::Approximator, #The policy approximating function. Can be a GaussianNetwork, a CovGaussianNetwork or a CategoricalNetwork.
-    qnetwork1::Q <: Approximator, #The Q-Value approximating function.  
+    qnetwork1::Q <: TargetNetwork, #The Q-Value approximating function with a target network.  
     qnetwork2::Q, #A second Q-Value approximator for double Q-learning.
     γ = 0.99f0, #Discount factor of rewards.
     action_sample_size::Int, #The number of actions to sample at the E-step (K in the MPO paper).
@@ -76,11 +74,11 @@ with each policy network type.
 
 `p::MPOPolicy` logs several values during training. You can access them using `p.logs[::Symbol]`.
 """
-function MPOPolicy(;actor::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 1f-2, ϵΣ = 1f-4, α_scale = 1f0, αΣ_scale = 100f0, τ = 1f-3, max_grad_norm = 5f-1, rng = Random.default_rng()) where Q <: Approximator
+function MPOPolicy(;actor::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 1f-2, ϵΣ = 1f-4, α_scale = 1f0, αΣ_scale = 100f0, τ = 1f-3, max_grad_norm = 5f-1, rng = Random.default_rng()) where Q <: TargetNetwork
     @assert device(actor) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(actor) == device(rng) "The specified rng does not generate on the same device as the actor. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :actor_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :α, :αΣ, :kl))
-    MPOPolicy(actor, qnetwork1, qnetwork2, deepcopy(qnetwork1), deepcopy(qnetwork2), γ, action_sample_size, ϵ, ϵμ, ϵΣ, 0f0, 0f0, α_scale, αΣ_scale, max_grad_norm, τ, rng, logs)
+    MPOPolicy(actor, qnetwork1, qnetwork2, γ, action_sample_size, ϵ, ϵμ, ϵΣ, 0f0, 0f0, α_scale, αΣ_scale, max_grad_norm, τ, rng, logs)
 end
 
 Flux.@functor MPOPolicy
@@ -116,7 +114,7 @@ function update_critic!(p::MPOPolicy, batches)
 
         a′ = RLCore.forward(p.actor, p.rng, s′; is_sampling=true, is_return_log_prob=false)
         q′_input = vcat(s′, a′)
-        q′ = min.(RLCore.forward(p.target_qnetwork1, q′_input), RLCore.forward(p.target_qnetwork2, q′_input))
+        q′ = min.(RLCore.target(p.qnetwork1)(q′_input), RLCore.target(p.qnetwork2)(q′_input))
 
         y =  r .+ γ .* (1 .- t) .* vec(q′) 
 
@@ -134,7 +132,7 @@ function update_critic!(p::MPOPolicy, batches)
             if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
                 error("Gradient of Q_1 contains NaN of Inf")
             end
-            Flux.Optimise.update!(p.qnetwork1.optimiser, Flux.params(p.qnetwork1), q_grad_1)
+           RLBase.optimise!(p.qnetwork1, q_grad_1)
         else
             q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
                 q2 = RLCore.forward(p.qnetwork2, q_input) |> vec
@@ -147,14 +145,7 @@ function update_critic!(p::MPOPolicy, batches)
             if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_2)
                 error("Gradient of Q_2 contains NaN of Inf")
             end
-            Flux.Optimise.update!(p.qnetwork2.optimiser, Flux.params(p.qnetwork2), q_grad_2)
-        end
-
-        for (dest, src) in zip(
-            Flux.params([p.target_qnetwork1, p.target_qnetwork2]),
-            Flux.params([p.qnetwork1, p.qnetwork2]),
-        )
-            dest .= (1 - τ) .* dest .+ τ .* src
+            RLBase.optimise!(p.qnetwork2, q_grad_2)
         end
     end
 end

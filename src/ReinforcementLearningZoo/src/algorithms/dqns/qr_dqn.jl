@@ -22,7 +22,7 @@ function quantile_huber_loss(ŷ, y; κ=1.0f0)
     mean(sum(loss; dims=1))
 end
 
-Base.@kwdef mutable struct QRDQNLearner{A<:Approximator{<:TwinNetwork}, F, R} <: AbstractLearner
+Base.@kwdef mutable struct QRDQNLearner{A<:Union{Approximator,TargetNetwork}, F, R} <: AbstractLearner
     approximator::A
     n_quantile::Int
     loss_func::F = quantile_huber_loss
@@ -44,8 +44,8 @@ end
 
 function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
     A = learner.approximator
-    Q = A.model.source
-    Qₜ = A.model.target
+    Q = model(A)
+    Qₜ = RLCore.target(A)
     γ = learner.γ
     N = learner.n_quantile
     loss_func = learner.loss_func

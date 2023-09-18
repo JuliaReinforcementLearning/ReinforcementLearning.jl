@@ -510,38 +510,3 @@ function vae_loss(model::VAE, state, action)
     kl_loss = -0.5f0 * mean(1.0f0 .+ log.(σ .^ 2) .- μ .^ 2 .- σ .^ 2)
     return recon_loss, kl_loss
 end
-
-#####
-# TwinNetwork
-#####
-
-export TwinNetwork
-
-Base.@kwdef mutable struct TwinNetwork{S,T}
-    source::S
-    target::T
-    sync_freq::Int = 1
-    ρ::Float32 = 0.0f0
-    n_optimise::Int = 0
-end
-
-TwinNetwork(x; kw...) = TwinNetwork(; source=x, target=deepcopy(x), kw...)
-
-@functor TwinNetwork (source, target)
-
-Flux.trainable(model::TwinNetwork) = (model.source,)
-
-(model::TwinNetwork)(args...) = model.source(args...)
-
-function RLBase.optimise!(A::Approximator{<:TwinNetwork}, gs)
-    Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
-    M = A.model
-    M.n_optimise += 1
-
-    if M.n_optimise % M.sync_freq == 0
-        # polyak averaging
-        for (dest, src) in zip(Flux.params(M.target), Flux.params(M.source))
-            dest .= M.ρ .* dest .+ (1 - M.ρ) .* src
-        end
-    end
-end
