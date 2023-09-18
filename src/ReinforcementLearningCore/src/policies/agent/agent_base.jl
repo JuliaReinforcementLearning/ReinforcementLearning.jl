@@ -48,13 +48,12 @@ end
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
 @generated function RLBase.plan!(agent::Agent{<:Any, Trajectory{EpisodesBuffer{names}}}, env::AbstractEnv)
-    if :action_log_prob in names
+    if !(:action_log_prob in names)
         return :(RLBase.plan!(agent.policy, env))
     else
         return :(RLBase.plan!(agent.policy, env, is_return_log_prob = true)) #returns a tuple with the action and the log_prob.
         #Note: it is expected that a policy that needs is_return_log_prob will implement a plan! function that accepts the above arguments.
     end
-
 end
 
 function Base.push!(agent::Agent, ::PostActStage, env::AbstractEnv, action)
