@@ -12,6 +12,7 @@ mutable struct MPOPolicy{P<:Approximator,Q<:TargetNetwork,R} <: AbstractPolicy
     qnetwork1::Q
     qnetwork2::Q
     γ::Float32
+    λ::Float32
     action_sample_size::Int #K 
     ϵ::Float32  #KL bound on the non-parametric variational approximation to the actor
     ϵμ::Float32 #KL bound for the parametric actor training of mean estimations
@@ -28,7 +29,7 @@ end
 
 function check(agent::Agent{<:MPOPolicy}, env)
     error_string = "MPO requires a trajectory sampler that is a `MetaSampler` composed of two `MultiBatchSampler`. The first must be named `:actor` and sample `(:state,)`, the second must be named `:critic` and sample `SS′ART`"
-    @assert agent.trajectory.sampler isa MetaSampler{(:actor, :critic), Tuple{MultiBatchSampler{BatchSampler{(:state,)}}, MultiBatchSampler{BatchSampler{(:state, :next_state, :action, :reward, :terminal)}}}} error_string
+    @assert agent.trajectory.sampler isa MetaSampler{(:actor, :critic), Tuple{MultiBatchSampler{BatchSampler{(:state,)}}, MultiBatchSampler{BatchSampler{(:state, :next_state, :action, :action_log_prob, :reward, :terminal)}}}} error_string
 end
 
 
@@ -38,6 +39,7 @@ end
     qnetwork1::Q <: TargetNetwork, #The Q-Value approximating function with a target network.  
     qnetwork2::Q, #A second Q-Value approximator for double Q-learning.
     γ = 0.99f0, #Discount factor of rewards.
+    λ = 1f0, #Discount factor of Retrace.
     action_sample_size::Int, #The number of actions to sample at the E-step (K in the MPO paper).
     ϵ = 0.1f0, #maximum kl divergence between the current policy and the E-step empirical policy.
     ϵμ = 1f-2, #maximum kl divergence between the current policy and the updated policy at the M-step w.r.t the mean or the logits.
@@ -53,9 +55,9 @@ Instantiate an MPO learner. The actor can be of type `GaussianNetwork`, `CovGaus
 or `CategoricalNetwork`. The original paper uses `CovGaussianNetwork` which approximates a 
 MvNormal policy. It has a better policy representation but requires more computation.
 
-This implementation uses double Q-learning and target Q-networks, 
-unlike the original MPO paper that uses retrace (WIP). The `Approximator` fields should 
-each come with their own `Optimiser` (e.g. `Adam`). 
+This implementation uses double Q-learning, `TargetNetwork`s and the retrace algorithm to compute
+the critic update operators. 
+The `Approximator` fields should each come with their own `Optimiser` (e.g. `Adam`). 
 
 MPOPolicy requires batches of type 
 ```
@@ -63,22 +65,22 @@ NamedTuple{
         (:actor, :critic), 
         <: Tuple{
             <: Vector{<: NamedTuple{(:state,)}},
-            <: Vector{<: NamedTuple{SS′ART}}
+            <: Vector{<: NamedTuple{(:state, :next_state, :action, :action_log_prob, :reward, :terminal)}}
         }
     }
 ``` 
 to be trained. This type is obtained with a MetaSampler with two MultiBatchSampler: 
 a `:actor` and a `:critic` one. The :actor sampler must sample :state traces only 
-and the :critic needs SS′ART traces. See `ReinforcementLearningExperiments` for examples
-with each policy network type.
+and the :critic needs (:state, :next_state, :action, :action_log_prob, :reward, :terminal) traces. 
+See `ReinforcementLearningExperiments` for examples with each policy network type.
 
 `p::MPOPolicy` logs several values during training. You can access them using `p.logs[::Symbol]`.
 """
-function MPOPolicy(;actor::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 1f-2, ϵΣ = 1f-4, α_scale = 1f0, αΣ_scale = 100f0, τ = 1f-3, max_grad_norm = 5f-1, rng = Random.default_rng()) where Q <: TargetNetwork
+function MPOPolicy(;actor::Approximator, qnetwork1::Q, qnetwork2::Q, γ = 0.99f0, λ = 1f0, action_sample_size::Int, ϵ = 0.1f0, ϵμ = 1f-2, ϵΣ = 1f-4, α_scale = 1f0, αΣ_scale = 100f0, τ = 1f-3, max_grad_norm = 5f-1, rng = Random.default_rng()) where Q <: TargetNetwork
     @assert device(actor) == device(qnetwork1) == device(qnetwork2) "All network approximators must be on the same device"
     @assert device(actor) == device(rng) "The specified rng does not generate on the same device as the actor. Use `CUDA.CURAND.RNG()` to work with a CUDA GPU"
     logs = Dict(s => Float32[] for s in (:qnetwork1_loss, :qnetwork2_loss, :actor_loss, :lagrangeμ_loss, :lagrangeΣ_loss, :η, :α, :αΣ, :kl))
-    MPOPolicy(actor, qnetwork1, qnetwork2, γ, action_sample_size, ϵ, ϵμ, ϵΣ, 0f0, 0f0, α_scale, αΣ_scale, max_grad_norm, τ, rng, logs)
+    MPOPolicy(actor, qnetwork1, qnetwork2, γ, λ, action_sample_size, ϵ, ϵμ, ϵΣ, 0f0, 0f0, α_scale, αΣ_scale, max_grad_norm, τ, rng, logs)
 end
 
 Flux.@functor MPOPolicy
@@ -109,18 +111,11 @@ end
 #Here we apply the TD3 Q network approach. The original MPO paper uses retrace.
 function update_critic!(p::MPOPolicy, batches)
     for (id, batch) in enumerate(batches)
-        s, s′, a, r, t, = send_to_device(device(p.qnetwork1), batch)
-        γ, τ = p.γ, p.τ
-
-        a′ = RLCore.forward(p.actor, p.rng, s′; is_sampling=true, is_return_log_prob=false)
-        q′_input = vcat(s′, a′)
-        q′ = min.(RLCore.target(p.qnetwork1)(q′_input), RLCore.target(p.qnetwork2)(q′_input))
-
-        y =  r .+ γ .* (1 .- t) .* vec(q′) 
-
+        
         # Train Q Networks
         q_input = vcat(s, a)
         if id % 2 == 0
+            y =  retrace_operator(p.qnetwork1, policy, batch, p.γ, p.λ)
             q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
                 q1 = RLCore.forward(p.qnetwork1, q_input) |> vec
                 l = mse(q1, y)
@@ -132,8 +127,9 @@ function update_critic!(p::MPOPolicy, batches)
             if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), q_grad_1)
                 error("Gradient of Q_1 contains NaN of Inf")
             end
-           RLBase.optimise!(p.qnetwork1, q_grad_1)
+            RLBase.optimise!(p.qnetwork1, q_grad_1)
         else
+            y =  retrace_operator(p.qnetwork2, policy, batch, p.γ, p.λ)
             q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
                 q2 = RLCore.forward(p.qnetwork2, q_input) |> vec
                 l = mse(q2, y)
