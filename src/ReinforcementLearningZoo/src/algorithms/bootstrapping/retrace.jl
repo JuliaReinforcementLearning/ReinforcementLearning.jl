@@ -7,7 +7,7 @@ export retrace
 function retrace_operator(qnetwork, policy, batch, γ, λ)
     s = batch[:state] |> send_to_device(qnetwork)
     a = batch[:action] |> send_to_device(qnetwork)
-    behavior_log_probs = batch[:action_log_problog_prob] |> send_to_device(qnetwork)
+    behavior_log_probs = batch[:action_log_prob] |> send_to_device(qnetwork)
     r = batch[:reward] |> send_to_device(qnetwork)
     t = last.(batch[:terminal]) |> send_to_device(qnetwork)
     ns = batch[:next_state] |> send_to_device(qnetwork)
