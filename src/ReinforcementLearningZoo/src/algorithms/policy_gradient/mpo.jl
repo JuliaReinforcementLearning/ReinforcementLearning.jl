@@ -111,11 +111,18 @@ end
 #Here we apply the TD3 Q network approach. The original MPO paper uses retrace.
 function update_critic!(p::MPOPolicy, batches)
     for (id, batch) in enumerate(batches)
-        
+        _s = map(batch[:state]) do states 
+            first(eachslice(states, dims = ndims(states)))
+        end
+        s = _s |> stack |> send_to_device(p.qnetwork1)
+        _a = map(batch[:action]) do actions
+            first(eachslice(actions, dims = ndims(actions)))
+        end
+        a = _a |> stack |> send_to_device(p.qnetwork1)
         # Train Q Networks
         q_input = vcat(s, a)
         if id % 2 == 0
-            y =  retrace_operator(p.qnetwork1, policy, batch, p.γ, p.λ)
+            y =  retrace_operator(p.qnetwork1, p.actor, batch, p.γ, p.λ)
             q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
                 q1 = RLCore.forward(p.qnetwork1, q_input) |> vec
                 l = mse(q1, y)
@@ -129,7 +136,7 @@ function update_critic!(p::MPOPolicy, batches)
             end
             RLBase.optimise!(p.qnetwork1, q_grad_1)
         else
-            y =  retrace_operator(p.qnetwork2, policy, batch, p.γ, p.λ)
+            y =  retrace_operator(p.qnetwork2, p.actor, batch, p.γ, p.λ)
             q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
                 q2 = RLCore.forward(p.qnetwork2, q_input) |> vec
                 l = mse(q2, y)
@@ -147,7 +154,7 @@ function update_critic!(p::MPOPolicy, batches)
 end
 
 function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
-    states_batches = [send_to_device(device(p.actor), reshape(batch[:state], size(batch[:state],1), 1, :)) for batch in batches] #vector of 3D tensors with dimensions (state_size x 1 x batch_size), sent to device
+    states_batches = [send_to_device(device(p.actor), reshape(batch[:state], size(batch[:state],1), 1, :)) for batch in batches] #vector of 3D tensors with dimensions (state_size x 1 x batchsize), sent to device
     current_action_dist_batches = [RLCore.forward(p.actor, p.rng, states, is_sampling = false) for states in states_batches] #π(.|s,Θᵢ) 
     action_samples_batches = [sample_actions(p, dist, p.action_sample_size) for dist in current_action_dist_batches] #3D tensor with dimensions (action_size x action_sample_size x batchsize)
     for (states, current_action_dist, action_samples) in zip(states_batches, current_action_dist_batches, action_samples_batches)
@@ -157,7 +164,7 @@ function update_actor!(p::MPOPolicy, batches::Vector{<:NamedTuple{(:state,)}})
         Q = RLCore.forward(p.qnetwork1, input) 
         η = solve_mpodual(send_to_host(Q), p.ϵ)
         push!(p.logs[:η], η)
-        qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batch_size)
+        qij = softmax(Q./η, dims = 2) # dims = (1 x actions_sample_size x batchsize)
 
         if any(x -> !isnothing(x) && any(y -> isnan(y) || isinf(y), x), qij)
             error("qij contains NaN of Inf")
@@ -201,10 +208,10 @@ function sample_actions(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, dist, N
 end
 
 function sample_actions(p::MPOPolicy{<:Approximator{<:CategoricalNetwork}}, logits, N)
-    batch_size = size(logits, 3) #3
+    batchsize = size(logits, 3) #3
     da = size(logits, 1)
     log_probs = logsoftmax(logits, dims = 1)
-    gumbels = -log.(-log.(rand(p.rng, da, N, batch_size))) .+ log_probs # Gumbel-Max trick
+    gumbels = -log.(-log.(rand(p.rng, da, N, batchsize))) .+ log_probs # Gumbel-Max trick
     z = getindex.(argmax(gumbels, dims = 1), 1)
     reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
 end
@@ -251,7 +258,7 @@ end
 #In the case of diagonal covariance (with GaussianNetwork), 
 function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, actions, μ_σ_old::Tuple)
     μ_old, σ_old = μ_σ_old
-    μ, σ = RLCore.forward(p.actor, p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
+    μ, σ = RLCore.forward(p.actor, p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batchsize)
     μ_d, σ_d = ignore_derivatives() do
         μ, σ #decoupling
     end
@@ -282,7 +289,7 @@ function mpo_loss(p::MPOPolicy{<:Approximator{<:GaussianNetwork}}, qij, states, 
 end
 
 function mpo_loss(p::MPOPolicy{<:Approximator{<:CategoricalNetwork}}, qij, states, actions, logits_old)
-    logits = RLCore.forward(p.actor, p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batch_size)
+    logits = RLCore.forward(p.actor, p.rng, states, is_sampling = false) #3D tensors with dimensions (action_size x 1 x batchsize)
     actor_loss = -  mean(qij .* log.(sum(softmax(logits, dims = 1) .* actions, dims = 1)))
     kl = kldivergence(softmax(logits_old, dims = 1), softmax(logits, dims = 1))/prod(size(qij)[2:3]) #divide to get average
     

@@ -58,7 +58,7 @@ multi threaded loading. Check out `rl_unplugged_atari_params()` for more info on
 - `shuffle_buffer_size::Int=10_000`: size of the shuffle_buffer used in loading AtariRLTransitions.
 - `tf_reader_bufsize::Int=1*1024*1024`: the size of the buffer `bufsize` that is used internally in `TFRecord.read`.
 - `tf_reader_sz::Int=10_000`: the size of the `Channel`, `channel_size` that is returned by `TFRecord.read`.
-- `batch_size::Int=256`: The number of samples within the batches that are returned by the `Channel`.
+- `batchsize::Int=256`: The number of samples within the batches that are returned by the `Channel`.
 - `n_preallocations::Int=nthreads()*12`: the size of the buffer in the `Channel` that is returned.
 
 !!! note
@@ -73,7 +73,7 @@ function rl_unplugged_atari_dataset(
     shuffle_buffer_size=10_000,
     tf_reader_bufsize=1*1024*1024,
     tf_reader_sz=10_000,
-    batch_size=256,
+    batchsize =256,
     n_preallocations=nthreads()*12
 )
     n = nthreads()
@@ -116,20 +116,20 @@ function rl_unplugged_atari_dataset(
     )
     
     buffer = AtariRLTransition(
-        Array{UInt8, 4}(undef, 84, 84, 4, batch_size),
-        Array{Int, 1}(undef, batch_size),
-        Array{Float32, 1}(undef, batch_size),
-        Array{Bool, 1}(undef, batch_size),
-        Array{UInt8, 4}(undef, 84, 84, 4, batch_size),
-        Array{Int, 1}(undef, batch_size),
-        Array{Int, 1}(undef, batch_size),
-        Array{Float32, 1}(undef, batch_size),
+        Array{UInt8, 4}(undef, 84, 84, 4, batchsize),
+        Array{Int, 1}(undef, batchsize),
+        Array{Float32, 1}(undef, batchsize),
+        Array{Bool, 1}(undef, batchsize),
+        Array{UInt8, 4}(undef, 84, 84, 4, batchsize),
+        Array{Int, 1}(undef, batchsize),
+        Array{Int, 1}(undef, batchsize),
+        Array{Float32, 1}(undef, batchsize),
     )
 
     taskref = Ref{Task}()
 
     res = RingBuffer(buffer;taskref=taskref, sz=n_preallocations) do buff
-        Threads.@threads for i in 1:batch_size
+        Threads.@threads for i in 1:batchsize
             batch!(buff, popfirst!(transitions), i)
         end
     end

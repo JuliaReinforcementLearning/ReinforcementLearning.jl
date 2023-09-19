@@ -14,7 +14,7 @@ mutable struct FQE{
     target_q_network::C_T
     n_evals::Int
     γ::Float32
-    batch_size::Int
+    batchsize::Int
     update_freq::Int
     update_step::Int
     tar_update_freq::Int
@@ -34,7 +34,7 @@ See [Hyperparameter Selection for Offline Reinforcement Learning](https://arxiv.
 - `target_q_network`, target critic used for evaluating target Q values.
 - `n_evals::Int`, number of evaluations to perform to return the performance of the policy.
 - `γ::Float32 = 0.99f0`, discount factor.
-- `batch_size::Int = 32`.
+- `batchsize::Int = 32`.
 - `update_freq::Int = 50`, frequency of updating the `target_q_network`.
 - `update_step::Int = 0`.
 - `tar_update_freq::Int = 50`
@@ -49,7 +49,7 @@ function FQE(;
     target_q_network,
     n_evals=20,
     γ=0.99f0,
-    batch_size=32,
+    batchsize =32,
     update_freq=1,
     update_step=0,
     tar_update_freq=50,
@@ -62,7 +62,7 @@ function FQE(;
         target_q_network,
         n_evals,
         γ,
-        batch_size,
+        batchsize,
         update_freq,
         update_step,
         tar_update_freq,
@@ -101,7 +101,7 @@ end
 function (l::FQE)(state::AbstractArray, action::AbstractArray)
     D = device(l.q_network)
     s = send_to_device(D, state)
-    a = send_to_device(D, reshape(action, :, l.batch_size))
+    a = send_to_device(D, reshape(action, :, l.batchsize))
     input = vcat(s, a)
     value = l.q_network(input)
 end
@@ -113,7 +113,7 @@ function RLCore.update!(l::FQE, batch::NamedTuple{SARTS})
     D = device(Q)
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     γ = l.γ
-    batch_size = l.batch_size
+    batchsize = l.batchsize
 
     loss_func = Flux.Losses.mse
 
@@ -122,7 +122,7 @@ function RLCore.update!(l::FQE, batch::NamedTuple{SARTS})
     target = r .+ γ .* (1 .- t) .* q′
 
     gs = gradient(params(Q)) do
-        q = Q(vcat(s, reshape(a, :, batch_size))) |> vec
+        q = Q(vcat(s, reshape(a, :, batchsize))) |> vec
         loss = loss_func(q, target)
         Zygote.ignore_derivatives() do
             l.loss = loss

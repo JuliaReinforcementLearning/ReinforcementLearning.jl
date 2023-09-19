@@ -16,7 +16,7 @@ mutable struct SACPolicy{
     γ::Float32
     τ::Float32
     α::Float32
-    batch_size::Int
+    batchsize::Int
     start_steps::Int
     start_policy::P
     update_after::Int
@@ -46,7 +46,7 @@ end
 - `γ::Float32 = 0.99f0`, reward discount rate.
 - `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
 - `α::Float32 = 0.2f0`, entropy term.
-- `batch_size = 32`,
+- `batchsize = 32`,
 - `start_steps = 10000`, number of steps where start_policy is used to sample actions
 - `update_after = 1000`, number of steps before starting to update policy
 - `update_freq = 50`, number of steps between each update
@@ -72,7 +72,7 @@ function SACPolicy(;
     γ=0.99f0,
     τ=0.005f0,
     α=0.2f0,
-    batch_size=32,
+    batchsize =32,
     start_steps=10000,
     update_after=1000,
     update_freq=50,
@@ -98,7 +98,7 @@ function SACPolicy(;
         γ,
         τ,
         α,
-        batch_size,
+        batchsize,
         start_steps,
         start_policy,
         update_after,
@@ -148,7 +148,7 @@ function RLCore.update!(
 )
     length(traj) > p.update_after || return
     p.update_step % p.update_freq == 0 || return
-    inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
+    inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batchsize))
     update!(p, batch)
 end
 

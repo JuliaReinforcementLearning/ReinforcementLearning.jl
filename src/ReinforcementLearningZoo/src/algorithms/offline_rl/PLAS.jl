@@ -18,7 +18,7 @@ mutable struct PLASLearner{
     γ::Float32
     τ::Float32
     λ::Float32
-    batch_size::Int
+    batchsize::Int
     pretrain_step::Int
     update_freq::Int
     update_step::Int
@@ -45,7 +45,7 @@ can be implemented using a `VAE` in a `NeuralNetworkApproximator`.
 - `γ::Float32 = 0.99f0`, reward discount rate.
 - `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
 - `λ::Float32 = 0.75f0`, used for Clipped Double Q-learning.
-- `batch_size::Int = 32`
+- `batchsize::Int = 32`
 - `pretrain_step::Int = 1000`, the number of pre-training rounds.
 - `update_freq::Int = 50`, the frequency of updating the `approximator`.
 - `update_step::Int = 0`
@@ -62,7 +62,7 @@ function PLASLearner(;
     γ=0.99f0,
     τ=0.005f0,
     λ=0.75f0,
-    batch_size=32,
+    batchsize =32,
     pretrain_step=10000,
     update_freq=50,
     update_step=0,
@@ -82,7 +82,7 @@ function PLASLearner(;
         γ,
         τ,
         λ,
-        batch_size,
+        batchsize,
         pretrain_step,
         update_freq,
         update_step,
@@ -109,7 +109,7 @@ end
 
 function update_vae!(l::PLASLearner, batch::NamedTuple{SARTS})
     s, a, r, t, s′ = send_to_device(device(l.vae), batch)
-    a = reshape(a, :, l.batch_size)
+    a = reshape(a, :, l.batchsize)
     vae_grad = gradient(Flux.params(l.vae)) do
         recon_loss, kl_loss = vae_loss(l.vae.model, s, a)
         0.5f0 * kl_loss + recon_loss
@@ -132,7 +132,7 @@ function update_learner!(l::PLASLearner, batch::NamedTuple{SARTS})
     y = r .+ γ .* (1 .- t) .* vec(q′)
 
     # Train Q Networks
-    a = reshape(a, :, l.batch_size)
+    a = reshape(a, :, l.batchsize)
     q_input = vcat(s, a)
 
     q_grad_1 = gradient(Flux.params(l.qnetwork1)) do

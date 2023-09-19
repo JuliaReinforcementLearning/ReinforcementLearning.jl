@@ -150,8 +150,8 @@ struct TotalBatchOriginalRewardPerEpisode <: AbstractHook
     reward::Vector{Float64}
 end
 
-function TotalBatchOriginalRewardPerEpisode(batch_size::Int)
-    TotalBatchOriginalRewardPerEpisode([Float64[] for _ in 1:batch_size], zeros(batch_size))
+function TotalBatchOriginalRewardPerEpisode(batchsize::Int)
+    TotalBatchOriginalRewardPerEpisode([Float64[] for _ in 1:batchsize], zeros(batchsize))
 end
 
 function (hook::TotalBatchOriginalRewardPerEpisode)(
@@ -222,7 +222,7 @@ function RLCore.Experiment(
                 update_freq = 4,
                 γ = 0.99f0,
                 update_horizon = 3,
-                batch_size = 32,
+                batchsize = 32,
                 stack_size = N_FRAMES,
                 min_replay_history = 20_000,
                 loss_func = (ŷ, y) -> logitcrossentropy(ŷ, y; agg = identity),

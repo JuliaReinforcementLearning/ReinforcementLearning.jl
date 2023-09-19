@@ -68,7 +68,7 @@ function RLCore.Experiment(
             γ=0.99f0,
             τ=0.005f0,
             α=0.2f0,
-            batch_size=64,
+            batchsize =64,
             start_steps=1000,
             start_policy=RandomPolicy(Space([-1.0 .. 1.0 for _ in 1:na]); rng=rng),
             update_after=1000,

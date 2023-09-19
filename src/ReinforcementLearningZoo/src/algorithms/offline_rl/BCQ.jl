@@ -19,7 +19,7 @@ mutable struct BCQLearner{
     τ::Float32
     λ::Float32
     p::Int
-    batch_size::Int
+    batchsize::Int
     start_step::Int
     update_freq::Int
     update_step::Int
@@ -47,7 +47,7 @@ can be implemented using a `VAE` in a `NeuralNetworkApproximator`.
 - `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
 - `λ::Float32 = 0.75f0`, used for Clipped Double Q-learning.
 - `p::Int = 10`, the number of state-action pairs used when calculating the Q value.
-- `batch_size::Int = 32`
+- `batchsize::Int = 32`
 - `start_step::Int = 1000`
 - `update_freq::Int = 50`, the frequency of updating the `approximator`.
 - `update_step::Int = 0`
@@ -65,7 +65,7 @@ function BCQLearner(;
     τ=0.005f0,
     λ=0.75f0,
     p=10,
-    batch_size=32,
+    batchsize =32,
     start_step=1000,
     update_freq=50,
     update_step=0,
@@ -86,7 +86,7 @@ function BCQLearner(;
         τ,
         λ,
         p,
-        batch_size,
+        batchsize,
         start_step,
         update_freq,
         update_step,
@@ -116,7 +116,7 @@ end
 function update_vae!(l::BCQLearner, batch::NamedTuple{SARTS})
     D = device(l.vae)
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
-    a = reshape(a, :, l.batch_size)
+    a = reshape(a, :, l.batchsize)
     vae_grad = gradient(Flux.params(l.vae)) do
         recon_loss, kl_loss = vae_loss(l.vae.model, s, a)
         0.5f0 * kl_loss + recon_loss
@@ -143,7 +143,7 @@ function update_learner!(l::BCQLearner, batch::NamedTuple{SARTS})
     y = r .+ γ .* (1 .- t) .* vec(q′)
 
     # Train Q Networks
-    a = reshape(a, :, l.batch_size)
+    a = reshape(a, :, l.batchsize)
     q_input = vcat(s, a)
 
     q_grad_1 = gradient(Flux.params(l.qnetwork1)) do

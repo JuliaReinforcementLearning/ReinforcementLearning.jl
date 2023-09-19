@@ -314,7 +314,7 @@ struct D4RLDataSet{T<:AbstractRNG} <: RLDataSet
     dataset::Dict{Symbol, Any}
     repo::String
     dataset_size::Integer
-    batch_size::Integer
+    batchsize::Integer
     style::Tuple
     rng::T
     meta::Dict
@@ -330,7 +330,7 @@ function dataset(dataset::String;
     repo = "d4rl",
     rng = StableRNG(123), 
     is_shuffle = true, 
-    batch_size=256
+    batchsize =256
 )
 ```
 
@@ -383,7 +383,7 @@ Multi threaded batching using a parallel loop where each thread loads the batche
 
 ```julia
 res = Channel{AtariRLTransition}(n_preallocations; taskref=taskref, spawn=true) do ch
-    Threads.@threads for i in 1:batch_size
+    Threads.@threads for i in 1:batchsize
         put!(ch, deepcopy(batch(buffer_template, popfirst!(transitions), i)))
     end
 end
@@ -472,7 +472,7 @@ end
 The datapoints are then put in a `RingBuffer` which is returned.
 ```julia
 res = RingBuffer(buffer;taskref=taskref, sz=n_preallocations) do buff
-    Threads.@threads for i in 1:batch_size
+    Threads.@threads for i in 1:batchsize
         batch!(buff, take!(transitions), i)
     end
 end
@@ -694,7 +694,7 @@ mutable struct FQE{
     target_q_network::C_T
     n_evals::Int
     γ::Float32
-    batch_size::Int
+    batchsize::Int
     update_freq::Int
     update_step::Int
     tar_update_freq::Int
@@ -714,7 +714,7 @@ function RLBase.update!(l::FQE, batch::NamedTuple{SARTS})
     D = device(Q)
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
     γ = l.γ
-    batch_size = l.batch_size
+    batchsize = l.batchsize
 
     loss_func = Flux.Losses.mse
 
@@ -723,7 +723,7 @@ function RLBase.update!(l::FQE, batch::NamedTuple{SARTS})
     target = r .+ γ .* (1 .- t) .* q′
 
     gs = gradient(params(Q)) do
-        q = Q(vcat(s, reshape(a, :, batch_size))) |> vec
+        q = Q(vcat(s, reshape(a, :, batchsize))) |> vec
         loss = loss_func(q, target)
         Zygote.ignore() do
             l.loss = loss

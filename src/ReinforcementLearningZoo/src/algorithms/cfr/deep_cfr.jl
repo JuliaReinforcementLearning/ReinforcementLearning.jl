@@ -26,8 +26,8 @@ Base.@kwdef mutable struct DeepCFR{TP,TV,TMP,TMV,I,R,P} <: AbstractCFRPolicy
     K::Int = 20
     t::Int = 1
     reinitialize_freq::Int = 1
-    batch_size_V::Int = 32
-    batch_size_Π::Int = 32
+    batchsize_V::Int = 32
+    batchsize_Π::Int = 32
     n_training_steps_V::Int = 1
     n_training_steps_Π::Int = 1
     rng::R = Random.default_rng()
@@ -80,7 +80,7 @@ function RLCore.update!(π::DeepCFR)
     end
 
     for i in 1:π.n_training_steps_Π
-        batch_inds = rand(π.rng, 1:length(MΠ), π.batch_size_Π)
+        batch_inds = rand(π.rng, 1:length(MΠ), π.batchsize_Π)
         I = send_to_device(D, Flux.batch([MΠ[:I][i] for i in batch_inds]))
         σ = send_to_device(D, Flux.batch([MΠ[:σ][i] for i in batch_inds]))
         t = send_to_device(D, Flux.batch([MΠ[:t][i] / π.t for i in batch_inds]))
@@ -114,9 +114,9 @@ function update_advantage_networks(π, p)
             x .= π.initializer(size(x)...)
         end
     end
-    if length(MV) >= π.batch_size_V
+    if length(MV) >= π.batchsize_V
         for i in 1:π.n_training_steps_V
-            batch_inds = rand(π.rng, 1:length(MV), π.batch_size_V)
+            batch_inds = rand(π.rng, 1:length(MV), π.batchsize_V)
             I = send_to_device(device(V), Flux.batch([MV[:I][i] for i in batch_inds]))
             r̃ = send_to_device(device(V), Flux.batch([MV[:r̃][i] for i in batch_inds]))
             t = send_to_device(device(V), Flux.batch([MV[:t][i] / π.t for i in batch_inds]))

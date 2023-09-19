@@ -1,18 +1,19 @@
-export retrace
+export retrace_operator
 #Note: the speed of this operator may be improved by batching states and actions 
 #to make single calls to Q, instead of one per batch sample. However this operator
 #is no backpropagated through and its computation will typically represent a minor
 #fraction of the runtime of a deep RL algorithm.
 
-function retrace_operator(qnetwork, policy, batch, γ, λ)
+function retrace_operator(qnetwork, policy::Approximator, batch, γ, λ)
     s = batch[:state] |> send_to_device(qnetwork)
     a = batch[:action] |> send_to_device(qnetwork)
     behavior_log_probs = batch[:action_log_prob] |> send_to_device(qnetwork)
     r = batch[:reward] |> send_to_device(qnetwork)
     t = last.(batch[:terminal]) |> send_to_device(qnetwork)
     ns = batch[:next_state] |> send_to_device(qnetwork)
+    
     na = map(ns) do ns
-        policy(ns, is_sampling = true, is_return_log_prob = false)
+        RLCore.forward(policy, ns, is_sampling = true, is_return_log_prob = false)
     end
     states = map(s,ns) do s, ns #concatenates all states, including the last state to compute deltas with the target Q
         cat(s,last(eachslice(ns, dims = ndims(ns))),dims=ndims(s))
@@ -22,13 +23,13 @@ function retrace_operator(qnetwork, policy, batch, γ, λ)
     end
 
     current_log_probs = map(s,a) do s, a
-        policy(s,a)
+        RLCore.forward(policy, s, a)
     end
    
     traces = map(current_log_probs, behavior_log_probs) do p,m
         @. λ*min(1, exp(p - m))
     end
-    is_ratios = cumprod.(traces) #batchsized vector [[c1,c2,...,ct],[c1,c2,...,ct],...]
+    is_ratios = @. cumprod(vec(traces)) #batchsized vector [[c1,c2,...,ct],[c1,c2,...,ct],...]
     
     Qp = target(qnetwork)
 

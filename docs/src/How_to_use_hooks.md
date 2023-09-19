@@ -138,7 +138,7 @@ policy = Agent(
                 ) |> cpu,
                 optimizer = Adam(),
             ),
-            batch_size = 32,
+            batchsize = 32,
             min_replay_history = 100,
             loss_func = huber_loss,
         ),

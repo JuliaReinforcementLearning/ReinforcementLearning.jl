@@ -8,9 +8,9 @@
 
 using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
 using ReinforcementLearningEnvironments
-using Flux, Random, StableRNGs
+using Flux, Random, StableRNGs, CircularArrayBuffers
 
-function RLCore.Experiment(
+#function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPOContinuous},
     ::Val{:CartPole},
@@ -21,6 +21,7 @@ function RLCore.Experiment(
     rng = StableRNG(seed)
     env = ActionTransformedEnv(CartPoleEnv(T=Float32, continuous = true), action_mapping = x->tanh(only(x)))
     seed!(env, seed)
+    buffer_capacity = 1000
     #continuous with diagonal covariance
     policy = MPOPolicy(
         actor = Approximator(GaussianNetwork(
@@ -38,10 +39,11 @@ function RLCore.Experiment(
     agent = Agent(
         policy = policy,
         trajectory = Trajectory(
-            CircularArraySARTSTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (1,)),
+            CircularArraySARTSTraces(capacity = buffer_capacity, state = Float32 => (4,), action = Float32 => (1,)) + 
+            Traces(action_log_prob = CircularArrayBuffer{Float32}(1, buffer_capacity)),
             MetaSampler(
-                actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
-                critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 2000)
+                actor = MultiBatchSampler(BatchSampler{(:state,)}(32, rng), 10),
+                critic = MultiBatchSampler(MultiStepSampler{(:state, :next_state, :action, :action_log_prob, :reward, :terminal)}(n = 200, batchsize = 32, rng = rng), 400)
             ),
             InsertSampleRatioController(ratio = 1/1000, threshold = 1000)
         )
@@ -49,10 +51,10 @@ function RLCore.Experiment(
 
     stop_condition = StopAfterStep(50_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
-    Experiment(agent, env, stop_condition, hook)
+    run(Experiment(agent, env, stop_condition, hook))
 end
 
-function RLCore.Experiment(
+#function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPODiscrete},
     ::Val{:CartPole},
@@ -63,6 +65,7 @@ function RLCore.Experiment(
     rng = StableRNG(seed)
     env = ActionTransformedEnv(CartPoleEnv(T=Float32, continuous = false), action_mapping = x -> argmax(x))
     seed!(env, seed)
+    buffer_capacity = 1000
     #continuous with diagonal covariance
     policy = MPOPolicy(
         actor = Approximator(
@@ -78,10 +81,11 @@ function RLCore.Experiment(
     agent = Agent(
         policy = policy,
         trajectory = Trajectory(
-            CircularArraySARTSTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (2,)),
+            CircularArraySARTSTraces(capacity = buffer_capacity, state = Float32 => (4,), action = Float32 => (2,))+ 
+            Traces(action_log_prob = CircularArrayBuffer{Float32}(1, buffer_capacity)),
             MetaSampler(
-                actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
-                critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 2000)
+                actor = MultiBatchSampler(BatchSampler{(:state,)}(32, rng), 10),
+                critic = MultiBatchSampler(MultiStepSampler{(:state, :next_state, :action, :action_log_prob, :reward, :terminal)}(n = 200, batchsize = 32, rng = rng), 100)
             ),
             InsertSampleRatioController(ratio = 1/1000, threshold = 1000)
         )
@@ -89,12 +93,12 @@ function RLCore.Experiment(
 
     stop_condition = StopAfterStep(50000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
-    Experiment(agent, env, stop_condition, hook)
+    run( Experiment(agent, env, stop_condition, hook))
 end
 
 
 
-function RLCore.Experiment(
+#function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:MPOCovariance},
     ::Val{:CartPole},
@@ -105,6 +109,7 @@ function RLCore.Experiment(
     rng = StableRNG(seed)
     env = ActionTransformedEnv(CartPoleEnv(T=Float32, continuous = true), action_mapping = x->tanh(only(x)))
     seed!(env, seed)
+    buffer_capacity = 1000
     #continuous with diagonal covariance
     policy = MPOPolicy(
         actor = Approximator(CovGaussianNetwork( #using a CovGaussianNetwork makes no sense here because there's one action space dimension. This is only to unit test.
@@ -122,10 +127,11 @@ function RLCore.Experiment(
     agent = Agent(
         policy = policy,
         trajectory = Trajectory(
-            CircularArraySARTSTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (1,)),
+            CircularArraySARTSTraces(capacity = buffer_capacity, state = Float32 => (4,), action = Float32 => (1,))+ 
+            Traces(action_log_prob = CircularArrayBuffer{Float32}(1, buffer_capacity)),
             MetaSampler(
-                actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
-                critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 2000)
+                actor = MultiBatchSampler(BatchSampler{(:state,)}(32, rng), 10),
+                critic = MultiBatchSampler(MultiStepSampler{(:state, :next_state, :action, :action_log_prob, :reward, :terminal)}(n = 50, batchsize = 32, rng = rng), 2000)
             ),
             InsertSampleRatioController(ratio = 1/1000, threshold = 1000)
         )
@@ -133,7 +139,7 @@ function RLCore.Experiment(
 
     stop_condition = StopAfterStep(50_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode()
-    Experiment(agent, env, stop_condition, hook)
+    run(Experiment(agent, env, stop_condition, hook)); lineplot(hook.rewards)
 end
 #+ tangle=false
 

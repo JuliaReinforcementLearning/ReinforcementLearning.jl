@@ -26,7 +26,7 @@ mutable struct FisherBRCLearner{
     α::Float32
     f_reg::Float32
     reward_bonus::Float32
-    batch_size::Int
+    batchsize::Int
     pretrain_step::Int
     update_freq::Int
     update_step::Int
@@ -56,7 +56,7 @@ See paper: [Offline reinforcement learning with fisher divergence critic regular
 - `α::Float32 = 0.0f0`, entropy term.
 - `f_reg::Float32 = 1.0f0`, the weight of gradient penalty regularizer.
 - `reward_bonus::Float32 = 5.0f0`, add extra value to the reward.
-- `batch_size::Int = 32`
+- `batchsize::Int = 32`
 - `pretrain_step::Int = 1000`, the number of pre-training rounds.
 - `update_freq::Int = 50`, the frequency of updating the `approximator`.
 - `lr_alpha::Float32 = 0.003f0`, learning rate of tuning entropy.
@@ -80,7 +80,7 @@ function FisherBRCLearner(;
     α=0.0f0,
     f_reg=1.0f0,
     reward_bonus=5.0f0,
-    batch_size=32,
+    batchsize =32,
     pretrain_step=1000,
     update_freq=50,
     lr_alpha=0.003f0,
@@ -105,7 +105,7 @@ function FisherBRCLearner(;
         α,
         f_reg,
         reward_bonus,
-        batch_size,
+        batchsize,
         pretrain_step,
         update_freq,
         update_step,
@@ -163,7 +163,7 @@ function update_learner!(l::FisherBRCLearner, batch::NamedTuple{SARTS})
     y = r .+ γ .* (1 .- t) .* vec(target_q′)
 
     # Train Q Networks
-    a = reshape(a, :, l.batch_size)
+    a = reshape(a, :, l.batchsize)
     q_input = vcat(s, a)
     log_μ = l.behavior_policy.policy.model(s, a) |> vec
     a_policy = l.policy(l.rng, s; is_sampling=true)
