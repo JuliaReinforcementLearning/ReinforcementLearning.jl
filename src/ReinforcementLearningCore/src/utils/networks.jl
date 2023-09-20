@@ -334,7 +334,9 @@ function sample_categorical(rng, logits::AbstractArray)
         log_probs = reshape(logsoftmax(logits, dims = 1), size(logits,1), :) # work in 2D
         gumbels = -log.(-log.(rand(rng, size(log_probs)...))) .+ log_probs # Gumbel-Max trick
         z = getindex.(argmax(gumbels, dims = 1), 1)
-        reshape(onehotbatch(z, 1:size(logits,1)), size(logits)...) # reshape back to original shape
+        sample_log_probs = reshape(log_probs[CartesianIndex.(vec(z), 1:size(log_probs, 2))], 1, size(logits)[2:end]...)
+        sample = reshape(onehotbatch(z, 1:size(logits,1)), size(logits)...) # reshape back to original shape
+        return sample, sample_log_probs
     end
 end
 
@@ -346,22 +348,24 @@ end
     (model::CategoricalNetwork)([rng::AbstractRNG,] state::AbstractArray{<:Any, 3}, [mask::AbstractArray{Bool},] action_samples::Int)
 
 Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batchsize)`. 
-Always returns the *logits* of each action along in a tensor with the same dimensions. The optional argument `mask` must be
+Always returns the logprobabilities of each action along in a tensor with the same dimensions. The optional argument `mask` must be
 an Array of `Bool` with the same size as `state` expect for the first dimension that must
 have the length of the action vector. Actions mapped to `false` by mask have a logit equal to 
 `-Inf` and/or a zero-probability of being sampled.
 """
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
     logits = model.model(state) #da x 1 x batchsize 
-    z = ignore_derivatives() do 
+    z, sample_log_probs = ignore_derivatives() do 
         batchsize = size(state, 3) #3
         da = size(logits, 1)
         log_probs = logsoftmax(logits, dims = 1)
         gumbels = -log.(-log.(rand(rng, da, action_samples, batchsize))) .+ log_probs # Gumbel-Max trick
         z = getindex.(argmax(gumbels, dims = 1), 1)
-        reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
+        inds = CartesianIndex.(vec(z), vec(CartesianIndices((1:action_samples,1:batchsize))))
+        sample_log_probs = reshape(reduce(hcat, Iterators.repeated(log_probs, action_samples))[inds], 1, size(gumbels)[2:end]...)
+        z, sample_log_probs
     end   
-    return z, reduce(hcat, Iterators.repeated(logits, action_samples))
+    return z, sample_log_probs
 end
 
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractVecOrMat, action_samples::Int)
@@ -374,9 +378,9 @@ function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray, mas
     logits = model.model(state) #may be 1-3 dimensional
     logits .+= ifelse.(mask, 0f0, typemin(eltype(logits)))
     if is_sampling
-        z = sample_categorical(rng,logits)
+        z, log_probs = sample_categorical(rng,logits)
         if is_return_log_prob
-            return z, logits
+            return z, log_probs
         else
             return z
         end
@@ -388,15 +392,17 @@ end
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, mask::AbstractArray{Bool, 3}, action_samples::Int)
     logits = model.model(state) #da x 1 x batchsize 
     logits .+= ifelse.(mask, 0f0, typemin(eltype(logits)))
-    z = ignore_derivatives() do 
+    z, sample_log_probs = ignore_derivatives() do 
         batchsize = size(state, 3) #3
         da = size(logits, 1)
         log_probs = logsoftmax(logits, dims = 1)
         gumbels = -log.(-log.(rand(rng, da, action_samples, batchsize))) .+ log_probs # Gumbel-Max trick
         z = getindex.(argmax(gumbels, dims = 1), 1)
-        reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
+        inds = CartesianIndex.(vec(z), vec(CartesianIndices((1:action_samples,1:batchsize))))
+        sample_log_probs = reshape(reduce(hcat, Iterators.repeated(log_probs, action_samples))[inds], 1, size(gumbels)[2:end]...)
+        z, sample_log_probs
     end   
-    return z, reduce(hcat, Iterators.repeated(logits, action_samples))
+    return z, sample_log_probs
 end
 
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray, mask::AbstractArray, action_samples::Int)
