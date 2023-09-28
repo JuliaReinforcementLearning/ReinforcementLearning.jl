@@ -21,7 +21,6 @@ Neural Fitted Q-iteration as implemented in [1]
 [1] Riedmiller, M. (2005). Neural Fitted Q Iteration – First Experiences with a Data Efficient Neural Reinforcement Learning Method. In: Gama, J., Camacho, R., Brazdil, P.B., Jorge, A.M., Torgo, L. (eds) Machine Learning: ECML 2005. ECML 2005. Lecture Notes in Computer Science(), vol 3720. Springer, Berlin, Heidelberg. https://doi.org/10.1007/11564096_32
 """
 Base.@kwdef struct NFQ{A, R, F} <: AbstractLearner
-    action_space::AbstractVector
     approximator::A
     num_iterations::Integer = 20
     epochs::Integer = 100
@@ -34,27 +33,30 @@ end
 
 RLCore.forward(L::NFQ, s::AbstractArray) = RLCore.forward(L.approximator, s)
 
-function RLCore.forward(learner::NFQ, env::AbstractEnv)
-    as = action_space(env)
-    return vcat(repeat(state(env), inner=(1, length(as))), transpose(as)) |> x -> send_to_device(device(learner.approximator), x) |> x->RLCore.forward(learner, x) |> send_to_host |> vec 
+function RLBase.optimise!(learner::NFQ, ::PostEpisodeStage, trajectory::Trajectory)
+    for batch in trajectory
+        optimise!(learner, batch)
+    end
 end
 
-function RLBase.optimise!(learner::NFQ, ::PostEpisodeStage, trajectory::Trajectory)
+function RLBase.optimise!(learner::NFQ, batch::NamedTuple)
     Q = learner.approximator
     γ = learner.γ
     loss_func = learner.loss_function
-    as = learner.action_space
-    las = length(as)
-    batch = ReinforcementLearningTrajectories.StatsBase.sample(trajectory)
     
-    (s, a, r, ss) = batch[[:state, :action, :reward, :next_state]]
-    a = Float32.(a)
-    s, a, r, ss = map(x->send_to_device(device(Q), x), (s, a, r, ss))
-    for i = 1:learner.num_iterations
+    (s, a, r, s′) = batch[[:state, :action, :reward, :next_state]]
+    a = CartesianIndex.(a, 1:length(a))
+    s, a, r, s′ = map(x->send_to_device(device(Q), x), (s, a, r, s′))
+    for _ = 1:learner.num_iterations
+        q′ = vec(maximum(RLCore.forward(Q, s′); dims=1))
+        G = r .+ γ .* q′
         # Make an input x samples x |action space| array -- Q --> samples x |action space| -- max --> samples
-        G = r .+ γ .* (cat(repeat(ss, inner=(1, 1, las)), reshape(repeat(as, outer=(1, size(ss, 2))), (1, size(ss, 2), las)), dims=1) |> x -> maximum(RLCore.forward(Q, x), dims=3) |> vec)
         for _ = 1:learner.epochs
-            Flux.train!((x, y) -> loss_func(RLCore.forward(Q, x), y), params(Q.model), [(vcat(s, a), transpose(G))], Q.optimiser)
+            gs = gradient(params(Q)) do
+                q = RLCore.forward(Q, s)[a]
+                loss_func(G, q)
+            end
+            RLBase.optimise!(Q, gs)
         end
     end
 end
