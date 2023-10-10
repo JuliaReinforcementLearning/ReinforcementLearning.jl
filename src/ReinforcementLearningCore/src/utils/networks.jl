@@ -137,7 +137,7 @@ SoftGaussianNetwork(pre, μ, σ, squash = tanh) = SoftGaussianNetwork(pre, μ, �
 
 @functor SoftGaussianNetwork
 
-logpdfcorrection(z, ::F) where F <: typeof(tanh) = -sum(log.(1 .- tanh.(z)^2))
+logpdfcorrection(z, ::F) where F <: typeof(tanh) = -sum(log.(1 .- tanh.(z).^2), dims = 1)
 logpdfcorrection(s, f) = 0
 
 """
@@ -152,15 +152,13 @@ function (model::SoftGaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=fal
     μ, raw_σ = model.μ(x), model.σ(x)
     σ = clamp.(raw_σ, model.min_σ, model.max_σ)
     if is_sampling
-        noise = ignore_derivatives() do
-            randn(rng, Float32, size(μ))
-        end
+        noise = randn(rng, Float32, size(μ))
         z = μ .+ σ .* noise
         if is_return_log_prob
-            logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1) + logpdfcorrection(z, model.squash)
-            return  model.squash(z), logp_π
+            logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1) #.+ logpdfcorrection(z, model.squash)
+            return  model.squash.(z), logp_π
         else
-            return model.squash(z)
+            return model.squash.(z)
         end
     else
         return μ, σ
@@ -173,15 +171,13 @@ end
 Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batch_size)`.
 `state` must be 3D tensor with dimensions `(state_size x 1 x batch_size)`. Always returns the logpdf of each action along.
 """
-function (model::GaussianNetwork)(rng::AbstractRNG, s::AbstractArray{<:Any, 3}, action_samples::Int)
+function (model::SoftGaussianNetwork)(rng::AbstractRNG, s::AbstractArray{<:Any, 3}, action_samples::Int)
     x = model.pre(s)
     μ, raw_σ = model.μ(x), model.σ(x)
     σ = clamp.(raw_σ, model.min_σ, model.max_σ)
-    noise = ignore_derivatives() do
-        randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
-    end
+    noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
     z = μ .+ σ .* noise
-    logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1) + logpdfcorrection(z, model.squash)
+    logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1) #+ logpdfcorrection(z, model.squash)
     return model.squash(z), logp_π
 end
 

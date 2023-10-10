@@ -1,9 +1,9 @@
 export SACPolicy
 
 mutable struct SACPolicy{
-    BA<:NeuralNetworkApproximator,
-    BC1<:NeuralNetworkApproximator,
-    BC2<:NeuralNetworkApproximator,
+    BA<:Approximator{<:SoftGaussianNetwork},
+    BC1<:Approximator,
+    BC2<:Approximator,
     P,
     R<:AbstractRNG,
     DR<:AbstractRNG,
@@ -16,11 +16,8 @@ mutable struct SACPolicy{
     γ::Float32
     τ::Float32
     α::Float32
-    batch_size::Int
     start_steps::Int
     start_policy::P
-    update_after::Int
-    update_freq::Int
     automatic_entropy_tuning::Bool
     lr_alpha::Float32
     target_entropy::Float32
@@ -46,10 +43,8 @@ end
 - `γ::Float32 = 0.99f0`, reward discount rate.
 - `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
 - `α::Float32 = 0.2f0`, entropy term.
-- `batch_size = 32`,
 - `start_steps = 10000`, number of steps where start_policy is used to sample actions
 - `update_after = 1000`, number of steps before starting to update policy
-- `update_freq = 50`, number of steps between each update
 - `automatic_entropy_tuning::Bool = true`, whether to automatically tune the entropy.
 - `lr_alpha::Float32 = 0.003f0`, learning rate of tuning entropy.
 - `action_dims = 0`, the dimensionality of the action. if `automatic_entropy_tuning = true`, must enter this parameter.
@@ -72,10 +67,7 @@ function SACPolicy(;
     γ=0.99f0,
     τ=0.005f0,
     α=0.2f0,
-    batch_size=32,
     start_steps=10000,
-    update_after=1000,
-    update_freq=50,
     automatic_entropy_tuning=true,
     lr_alpha=0.003f0,
     action_dims=0,
@@ -84,8 +76,8 @@ function SACPolicy(;
     rng=Random.default_rng(),
     device_rng=Random.default_rng()
 )
-    copyto!(qnetwork1, target_qnetwork1)  # force sync
-    copyto!(qnetwork2, target_qnetwork2)  # force sync
+    target_qnetwork1 = deepcopy(qnetwork1)  # force sync
+    target_qnetwork2 = deepcopy(qnetwork2)# force sync
     if automatic_entropy_tuning
         @assert action_dims != 0
     end
@@ -98,11 +90,8 @@ function SACPolicy(;
         γ,
         τ,
         α,
-        batch_size,
         start_steps,
         start_policy,
-        update_after,
-        update_freq,
         automatic_entropy_tuning,
         lr_alpha,
         Float32(-action_dims),
@@ -117,9 +106,8 @@ end
 # TODO: handle Training/Testing mode
 function RLBase.plan!(p::SACPolicy, env)
     p.update_step += 1
-
     if p.update_step <= p.start_steps
-        action = p.start_policy(env)
+        action = RLBase.plan!(p.start_policy, env)
         if(size(action[1]) != ())
             action = reduce(hcat, action)
         end
@@ -129,7 +117,7 @@ function RLBase.plan!(p::SACPolicy, env)
         s = send_to_device(D, state(env))
         s = Flux.unsqueeze(s, dims=ndims(s) + 1)
         # trainmode:
-        action = p.policy(p.device_rng, s; is_sampling=true)
+        action = RLCore.forward(p.policy, p.device_rng, s; is_sampling=true)
         action = dropdims(action, dims=ndims(action)) # Single action vec, drop second dim
         send_to_host(action)
 
@@ -140,26 +128,24 @@ function RLBase.plan!(p::SACPolicy, env)
     end
 end
 
-function RLCore.update!(
+function RLBase.optimise!(
     p::SACPolicy,
-    traj::CircularArraySARTTrajectory,
-    ::AbstractEnv,
-    ::PreActStage,
+    ::PostActStage,
+    traj::Trajectory
 )
-    length(traj) > p.update_after || return
-    p.update_step % p.update_freq == 0 || return
-    inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
-    update!(p, batch)
+    for batch in traj
+        update!(p, batch)
+    end
 end
 
-function RLCore.update!(p::SACPolicy, batch::NamedTuple{SARTS})
-    s, a, r, t, s′ = send_to_device(device(p.qnetwork1), batch)
+function update!(p::SACPolicy, batch::NamedTuple{SS′ART})
+    s, s′, a, r, t = send_to_device(device(p.qnetwork1), batch)
 
     γ, τ, α = p.γ, p.τ, p.α
 
-    a′, log_π = p.policy(p.device_rng, s′; is_sampling=true, is_return_log_prob=true)
+    a′, log_π = RLCore.forward(p.policy,p.device_rng, s′; is_sampling=true, is_return_log_prob=true)
     q′_input = vcat(s′, a′)
-    q′ = min.(p.target_qnetwork1(q′_input), p.target_qnetwork2(q′_input))
+    q′ = min.(RLCore.forward(p.target_qnetwork1,q′_input), RLCore.forward(p.target_qnetwork2,q′_input))
 
     y = r .+ γ .* (1 .- t) .* dropdims(q′ .- α .* log_π, dims=1)
 
@@ -167,21 +153,21 @@ function RLCore.update!(p::SACPolicy, batch::NamedTuple{SARTS})
     q_input = vcat(s, a)
 
     q_grad_1 = gradient(Flux.params(p.qnetwork1)) do
-        q1 = dropdims(p.qnetwork1(q_input), dims=1)
+        q1 = dropdims(RLCore.forward(p.qnetwork1,q_input), dims=1)
         mse(q1, y)
     end
-    update!(p.qnetwork1, q_grad_1)
+    RLBase.optimise!(p.qnetwork1, q_grad_1)
     q_grad_2 = gradient(Flux.params(p.qnetwork2)) do
-        q2 = dropdims(p.qnetwork2(q_input), dims=1)
+        q2 = dropdims(RLCore.forward(p.qnetwork2,q_input), dims=1)
         mse(q2, y)
     end
-    update!(p.qnetwork2, q_grad_2)
+    RLBase.optimise!(p.qnetwork2, q_grad_2)
 
     # Train Policy
     p_grad = gradient(Flux.params(p.policy)) do
-        a, log_π = p.policy(p.device_rng, s; is_sampling=true, is_return_log_prob=true)
+        a, log_π = RLCore.forward(p.policy, p.device_rng, s; is_sampling=true, is_return_log_prob=true)
         q_input = vcat(s, a)
-        q = min.(p.qnetwork1(q_input), p.qnetwork2(q_input))
+        q = min.(RLCore.forward(p.qnetwork1,q_input), RLCore.forward(p.qnetwork2,q_input))
         reward = mean(q)
         entropy = mean(log_π)
         ignore_derivatives() do
@@ -190,7 +176,7 @@ function RLCore.update!(p::SACPolicy, batch::NamedTuple{SARTS})
         end
         α * entropy - reward
     end
-    update!(p.policy, p_grad)
+    RLBase.optimise!(p.policy, p_grad)
 
     # Tune entropy automatically
     if p.automatic_entropy_tuning
