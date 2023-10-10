@@ -108,6 +108,93 @@ function (model::GaussianNetwork)(state, action)
 end
 
 #####
+# SoftGaussianNetwork
+#####
+
+export SoftGaussianNetwork
+
+"""
+    SoftGaussianNetwork(;pre=identity, μ, σ, min_σ=0f0, max_σ=Inf32)
+
+Returns `μ` and `σ` when called.  Create a distribution to sample from using
+`Normal.(μ, σ)`. `min_σ` and `max_σ` are used to clip the output from
+`σ`. `pre` is a shared body before the two heads of the NN. σ should be > 0. 
+You may enforce this using a `softplus` output activation. 
+"""
+Base.@kwdef struct SoftGaussianNetwork{P,U,S}
+    pre::P = identity
+    μ::U
+    σ::S
+    min_σ::Float32 = 0.0f0
+    max_σ::Float32 = Inf32
+end
+
+GaussianNetwork(pre, μ, σ) = GaussianNetwork(pre, μ, σ, 0.0f0, Inf32)
+
+@functor GaussianNetwork
+
+"""
+This function is compatible with a multidimensional action space.
+
+- `rng::AbstractRNG=Random.default_rng()`
+- `is_sampling::Bool=false`, whether to sample from the obtained normal distribution. 
+- `is_return_log_prob::Bool=false`, whether to calculate the conditional probability of getting actions in the given state.
+"""
+function (model::SoftGaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    x = model.pre(s)
+    μ, raw_σ = model.μ(x), model.σ(x)
+    σ = clamp.(raw_σ, model.min_σ, model.max_σ)
+    if is_sampling
+        noise = ignore_derivatives() do
+            randn(rng, Float32, size(μ))
+        end
+        μ .+ σ .* noise
+        if is_return_log_prob
+            logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
+            return z, logp_π
+        else
+            return z
+        end
+    else
+        return μ, σ
+    end
+end
+
+"""
+    (model::SoftGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
+
+Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batch_size)`.
+`state` must be 3D tensor with dimensions `(state_size x 1 x batch_size)`. Always returns the logpdf of each action along.
+"""
+function (model::GaussianNetwork)(rng::AbstractRNG, s::AbstractArray{<:Any, 3}, action_samples::Int)
+    x = model.pre(s)
+    μ, raw_σ = model.μ(x), model.σ(x)
+    σ = clamp.(raw_σ, model.min_σ, model.max_σ)
+    z = ignore_derivatives() do
+        noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
+        μ .+ σ .* noise
+    end
+    logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
+    return z, logp_π
+end
+
+function (model::SoftGaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    model(Random.default_rng(), state; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
+end
+
+function (model::SoftGaussianNetwork)(state, action_samples::Int)
+    model(Random.default_rng(), state, action_samples)
+end
+
+function (model::SoftGaussianNetwork)(state, action)
+    x = model.pre(state)
+    μ, raw_σ = model.μ(x), model.σ(x)
+    σ = clamp.(raw_σ, model.min_σ, model.max_σ)
+    logp_π = sum(normlogpdf(μ, σ, action) .- (2.0f0 .* (log(2.0f0) .- action .- softplus.(-2.0f0 .* action))), dims=1)
+    return logp_π
+end
+
+#####
 # CovGaussianNetwork
 #####
 
