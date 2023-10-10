@@ -112,7 +112,7 @@ function (model::GaussianNetwork)(state, action)
     x = model.pre(state)
     μ, raw_σ = model.μ(x), model.σ(x)
     σ = clamp.(raw_σ, model.min_σ, model.max_σ)
-    logp_π = diagnormlogpdf(μ, σ, inversesquash(model.squash).(action)) .+ logpdfcorrection(z, typeof(model.squash))
+    logp_π = diagnormlogpdf(μ, σ, inversesquash(model.squash).(action)) .+ logpdfcorrection(inversesquash(model.squash).(action), typeof(model.squash))
     return logp_π
 end
 
