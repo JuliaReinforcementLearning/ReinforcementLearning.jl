@@ -39,12 +39,12 @@ function RLCore.Experiment(
 
     create_policy_net() = Approximator(
         SoftGaussianNetwork(
-            pre=Chain(
+            Chain(
                 Dense(ns, 30, relu, init=init),
                 Dense(30, 30, relu, init=init),
             ),
-            μ=Chain(Dense(30, na, init=init)),
-            σ=Chain(Dense(30, na, softplus, init=init)),
+            Chain(Dense(30, na, init=init)),
+            Chain(Dense(30, na, softplus, init=init)),
         ),
         Adam(0.003),
     ) |> gpu

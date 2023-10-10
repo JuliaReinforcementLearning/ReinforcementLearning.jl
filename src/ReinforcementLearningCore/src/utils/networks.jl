@@ -32,17 +32,26 @@ export GaussianNetwork
 Returns `μ` and `σ` when called.  Create a distribution to sample from using
 `Normal.(μ, σ)`. `min_σ` and `max_σ` are used to clip the output from
 `σ`. `pre` is a shared body before the two heads of the NN. σ should be > 0. 
-You may enforce this using a `softplus` output activation. 
+You may enforce this using a `softplus` output activation. The `squash` function is
+applied elementwise to the action. If squash is `tanh`, a correction is applied to the
+logpdf. Other squashing functions are not supported except for identity.
 """
-Base.@kwdef struct GaussianNetwork{P,U,S}
+
+logpdfcorrection(z, ::F) where F <: typeof(tanh) = -sum(log.(1 .- tanh.(z).^2), dims = 1)
+logpdfcorrection(s, f) = 0
+inversesquash(::F) where F <: typeof(tanh) = atanh
+inversesquash(::F) where F <: typeof(identity) = identity
+
+Base.@kwdef struct GaussianNetwork{P,U,S,F}
     pre::P = identity
     μ::U
     σ::S
     min_σ::Float32 = 0.0f0
     max_σ::Float32 = Inf32
+    squash::F
 end
 
-GaussianNetwork(pre, μ, σ) = GaussianNetwork(pre, μ, σ, 0.0f0, Inf32)
+GaussianNetwork(pre, μ, σ; squash = identity) = GaussianNetwork(pre, μ, σ, 0.0f0, Inf32, squash)
 
 @functor GaussianNetwork
 
@@ -63,10 +72,10 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, 
             μ .+ σ .* noise
         end
         if is_return_log_prob
-            logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
-            return z, logp_π
+            logp_π = diagnormlogpdf(μ, σ, z) .+ logpdfcorrection(z, typeof(model.squash))
+            return model.squash.(z), logp_π
         else
-            return z
+            return model.squash.(z)
         end
     else
         return μ, σ
@@ -87,8 +96,8 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s::AbstractArray{<:Any, 3}, 
         noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
         μ .+ σ .* noise
     end
-    logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
-    return z, logp_π
+    logp_π = diagnormlogpdf(μ, σ, z) .+ logpdfcorrection(z, typeof(model.squash))
+    return model.squash.(z), logp_π
 end
 
 function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
@@ -103,7 +112,7 @@ function (model::GaussianNetwork)(state, action)
     x = model.pre(state)
     μ, raw_σ = model.μ(x), model.σ(x)
     σ = clamp.(raw_σ, model.min_σ, model.max_σ)
-    logp_π = sum(normlogpdf(μ, σ, action) .- (2.0f0 .* (log(2.0f0) .- action .- softplus.(-2.0f0 .* action))), dims=1)
+    logp_π = diagnormlogpdf(μ, σ, inversesquash(model.squash).(action)) .+ logpdfcorrection(z, typeof(model.squash))
     return logp_π
 end
 
@@ -120,25 +129,20 @@ Like `GaussianNetwork` but with a differentiable reparameterization trick. Mainl
 SAC. Returns `μ` and `σ` when called.  Create a distribution to sample from using
 `Normal.(μ, σ)`. `min_σ` and `max_σ` are used to clip the output from
 `σ`. `pre` is a shared body before the two heads of the NN. σ should be > 0. 
-You may enforce this using a `softplus` output activation. The `squash` function is
-applied elementwise to the action. If squash is `tanh`, a correction is applied to the
-logpdf.
+You may enforce this using a `softplus` output activation. Actions are squashed by a tanh
+and a correction is applied to the logpdf.
 """
-Base.@kwdef struct SoftGaussianNetwork{P,U,S,F}
+Base.@kwdef struct SoftGaussianNetwork{P,U,S}
     pre::P = identity
     μ::U
     σ::S
     min_σ::Float32 = 0.0f0
     max_σ::Float32 = Inf32
-    squash::F = tanh
 end
 
-SoftGaussianNetwork(pre, μ, σ, squash = tanh) = SoftGaussianNetwork(pre, μ, σ, 0.0f0, Inf32, squash)
+SoftGaussianNetwork(pre, μ, σ) = SoftGaussianNetwork(pre, μ, σ, 0.0f0, Inf32)
 
 @functor SoftGaussianNetwork
-
-logpdfcorrection(z, ::F) where F <: typeof(tanh) = -sum(log.(1 .- tanh.(z).^2), dims = 1)
-logpdfcorrection(s, f) = 0
 
 """
 This function is compatible with a multidimensional action space.
@@ -155,10 +159,10 @@ function (model::SoftGaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=fal
         noise = randn(rng, Float32, size(μ))
         z = μ .+ σ .* noise
         if is_return_log_prob
-            logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1) #.+ logpdfcorrection(z, model.squash)
-            return  model.squash.(z), logp_π
+            logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
+            return  tanh.(z), logp_π
         else
-            return model.squash.(z)
+            return tanh.(z)
         end
     else
         return μ, σ
@@ -177,8 +181,8 @@ function (model::SoftGaussianNetwork)(rng::AbstractRNG, s::AbstractArray{<:Any, 
     σ = clamp.(raw_σ, model.min_σ, model.max_σ)
     noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
     z = μ .+ σ .* noise
-    logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1) #+ logpdfcorrection(z, model.squash)
-    return model.squash(z), logp_π
+    logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
+    return tanh.(z), logp_π
 end
 
 function (model::SoftGaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
@@ -193,7 +197,7 @@ function (model::SoftGaussianNetwork)(state, action)
     x = model.pre(state)
     μ, raw_σ = model.μ(x), model.σ(x)
     σ = clamp.(raw_σ, model.min_σ, model.max_σ)
-    logp_π = sum(normlogpdf(μ, σ, action) .- (2.0f0 .* (log(2.0f0) .- action .- softplus.(-2.0f0 .* action))), dims=1) + logpdfcorrection(z, model.squash)
+    logp_π = sum(normlogpdf(μ, σ, atanh.(action)) .- (2.0f0 .* (log(2.0f0) .- atanh.(action) .- softplus.(-2.0f0 .* atanh.(action)))), dims=1)
     return logp_π
 end
 
