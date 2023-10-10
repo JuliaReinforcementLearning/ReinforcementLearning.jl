@@ -48,13 +48,15 @@ function RLCore.Experiment(
         Adam(0.003),
     )
 
-    create_q_net() = Approximator(
-        Chain(
-            Dense(ns + na, 30, relu; init=init),
-            Dense(30, 30, relu; init=init),
-            Dense(30, 1; init=init),
-        ),
-        Adam(0.003),
+    create_q_net() = TargetNetwork(
+        Approximator(
+            Chain(
+                Dense(ns + na, 30, relu; init=init),
+                Dense(30, 30, relu; init=init),
+                Dense(30, 1; init=init),
+            ),
+            Adam(0.003),),
+        ρ = 0.99f0
     )
 
     agent = Agent(
@@ -62,10 +64,7 @@ function RLCore.Experiment(
             policy=create_policy_net(),
             qnetwork1=create_q_net(),
             qnetwork2=create_q_net(),
-            target_qnetwork1=create_q_net(),
-            target_qnetwork2=create_q_net(),
             γ=0.99f0,
-            τ=0.005f0,
             α=0.2f0,
             start_steps=1000,
             start_policy=RandomPolicy([-1.0 .. 1.0 for _ in 1:na]; rng=rng),
