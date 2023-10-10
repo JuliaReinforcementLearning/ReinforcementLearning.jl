@@ -12,7 +12,6 @@ using StableRNGs
 using Flux
 using Flux.Losses
 using IntervalSets
-using CUDA
 
 function RLCore.Experiment(
     ::Val{:JuliaRL},
@@ -47,7 +46,7 @@ function RLCore.Experiment(
             Chain(Dense(30, na, softplus, init=init)),
         ),
         Adam(0.003),
-    ) |> gpu
+    )
 
     create_q_net() = Approximator(
         Chain(
@@ -56,7 +55,7 @@ function RLCore.Experiment(
             Dense(30, 1; init=init),
         ),
         Adam(0.003),
-    ) |> gpu
+    )
 
     agent = Agent(
         policy=SACPolicy(
@@ -74,7 +73,7 @@ function RLCore.Experiment(
             lr_alpha=0.003f0,
             action_dims=action_dims,
             rng=rng,
-            device_rng= CUDA.functional() ? CUDA.CURAND.RNG() : rng
+            device_rng= rng
         ),
         trajectory= Trajectory(
             CircularArraySARTSTraces(capacity = 10000, state = Float32 => (ns,), action = Float32 => (na,)),
