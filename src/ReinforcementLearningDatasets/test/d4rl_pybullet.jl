@@ -1,4 +1,4 @@
-using Base: batch_size_err_str
+using Base: batchsize_err_str
 @testset "d4rl_pybullet" begin
     ds = dataset(
         "hopper-bullet-mixed-v0";
@@ -6,7 +6,7 @@ using Base: batch_size_err_str
         style = style,
         rng = rng,
         is_shuffle = true,
-        batch_size = batch_size
+        batchsize = batchsize
     )
 
     n_s = 15
@@ -23,10 +23,10 @@ using Base: batch_size_err_str
 
     for sample in Iterators.take(ds, 3)
         @test typeof(sample) <: NamedTuple{SARTS}
-        @test size(sample[:state]) ==  (n_s, batch_size)
-        @test size(sample[:action]) ==  (n_a, batch_size)
-        @test size(sample[:reward]) ==  (1, batch_size) || size(sample[:reward]) == (batch_size,)
-        @test size(sample[:terminal]) ==  (1, batch_size) || size(sample[:terminal]) == (batch_size,)
+        @test size(sample[:state]) ==  (n_s, batchsize)
+        @test size(sample[:action]) ==  (n_a, batchsize)
+        @test size(sample[:reward]) ==  (1, batchsize) || size(sample[:reward]) == (batchsize,)
+        @test size(sample[:terminal]) ==  (1, batchsize) || size(sample[:terminal]) == (batchsize,)
     end
 
 end

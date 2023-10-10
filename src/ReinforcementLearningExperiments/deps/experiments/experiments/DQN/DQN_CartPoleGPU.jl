@@ -53,7 +53,7 @@ function RLCore.Experiment(
                                    sampler=NStepBatchSampler{SS′ART}(
                                        n=n,
                                        γ=0.99f0,
-                                       batch_size=32,
+                                       batchsize=32,
                                        rng=rng
                                    ),
                                    controller=InsertSampleRatioController(

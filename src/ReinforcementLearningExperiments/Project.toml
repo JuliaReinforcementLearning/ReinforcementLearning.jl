@@ -4,6 +4,7 @@ authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
 version = "0.4.0"
 
 [deps]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"

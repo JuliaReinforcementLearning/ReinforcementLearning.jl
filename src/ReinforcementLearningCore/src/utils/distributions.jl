@@ -54,10 +54,10 @@ end
     mvnormlogpdf(μ::A, LorU::A, x::A; ϵ = 1f-8) where A <: AbstractArray
 
 Batch version that takes 3D tensors as input where each slice along the 3rd
-dimension is a batch sample.  `μ` is a (action_size x 1 x batch_size) matrix,
-`L` is a (action_size x action_size x batch_size), x is a (action_size x
-action_samples x batch_size).  Return a 3D matrix of size (1 x action_samples x
-batch_size). 
+dimension is a batch sample.  `μ` is a (action_size x 1 x batchsize) matrix,
+`L` is a (action_size x action_size x batchsize), x is a (action_size x
+action_samples x batchsize).  Return a 3D matrix of size (1 x action_samples x
+batchsize). 
 """
 function mvnormlogpdf(μ::A, LorU::A, x::A; ϵ=1.0f-8) where {A<:AbstractArray}
     it = zip(eachslice(μ, dims = 3), eachslice(LorU, dims = 3), eachslice(x, dims = 3))

@@ -2,11 +2,11 @@ export rl_unplugged_dm_dataset
 
 using TFRecord
 
-function make_batch_array(type::Type, feature_dims::Int, size::Tuple, batch_size::Int)
-    Array{type, feature_dims+1}(undef, size..., batch_size)
+function make_batch_array(type::Type, feature_dims::Int, size::Tuple, batchsize::Int)
+    Array{type, feature_dims+1}(undef, size..., batchsize)
 end
 
-function dm_buffer_dict(feature_size::Dict{String, Tuple}, batch_size::Int)
+function dm_buffer_dict(feature_size::Dict{String, Tuple}, batchsize::Int)
     obs_buffer = Dict{Symbol, AbstractArray}()
 
     buffer_dict = Dict{Symbol, Any}()
@@ -16,18 +16,18 @@ function dm_buffer_dict(feature_size::Dict{String, Tuple}, batch_size::Int)
         if split(feature, "/")[1] == "observation"
             ob_key = Symbol(chop(feature, head=length("observation")+1, tail=0))
             if split(feature, "/")[end] == "egocentric_camera"
-                obs_buffer[ob_key] = make_batch_array(UInt8, feature_dims, feature_size[feature], batch_size)
+                obs_buffer[ob_key] = make_batch_array(UInt8, feature_dims, feature_size[feature], batchsize)
             else
-                obs_buffer[ob_key] = make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
+                obs_buffer[ob_key] = make_batch_array(Float32, feature_dims, feature_size[feature], batchsize)
             end
         elseif feature == "action"
-            buffer_dict[:action] = make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
-            buffer_dict[:next_action] = make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
+            buffer_dict[:action] = make_batch_array(Float32, feature_dims, feature_size[feature], batchsize)
+            buffer_dict[:next_action] = make_batch_array(Float32, feature_dims, feature_size[feature], batchsize)
         elseif feature == "step_type"
-            buffer_dict[:terminal] = make_batch_array(Bool, feature_dims, feature_size[feature], batch_size)
+            buffer_dict[:terminal] = make_batch_array(Bool, feature_dims, feature_size[feature], batchsize)
         else
             ob_key = Symbol(feature)
-            buffer_dict[ob_key] = make_batch_array(Float32, feature_dims, feature_size[feature], batch_size)
+            buffer_dict[ob_key] = make_batch_array(Float32, feature_dims, feature_size[feature], batchsize)
         end
     end
 
@@ -125,7 +125,7 @@ in the range: `0.0:0.1:0.5`.
 in `TFRecord.read`.
 - `tf_reader_sz::Int=10_000`: the size of the `Channel`, `channel_size` that is returned by 
 `TFRecord.read`.
-- `batch_size::Int=256`: The number of samples within the batches that are returned by the `Channel`.
+- `batchsize::Int=256`: The number of samples within the batches that are returned by the `Channel`.
 - `n_preallocations::Int=nthreads()*12`: the size of the buffer in the `Channel` that is returned.
 
 !!! note
@@ -141,7 +141,7 @@ function rl_unplugged_dm_dataset(
     shuffle_buffer_size=10_000,
     tf_reader_bufsize=10_000,
     tf_reader_sz=10_000,
-    batch_size=256,
+    batchsize=256,
     n_preallocations=nthreads()*12
 )   
     n = nthreads()
@@ -195,12 +195,12 @@ function rl_unplugged_dm_dataset(
     
     taskref = Ref{Task}()
     
-    buffer_dict = dm_buffer_dict(feature_size, batch_size)
+    buffer_dict = dm_buffer_dict(feature_size, batchsize)
 
     buffer = NamedTuple(buffer_dict)
 
     res = RingBuffer(buffer;taskref=taskref, sz=n_preallocations) do buff
-        Threads.@threads for i in 1:batch_size
+        Threads.@threads for i in 1:batchsize
             batch_named_tuple!(buff, take!(transitions), i)
         end
     end

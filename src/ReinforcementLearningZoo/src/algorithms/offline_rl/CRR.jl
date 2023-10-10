@@ -10,7 +10,7 @@ See paper: [Critic Regularized Regression](https://arxiv.org/abs/2006.15134).
 - `approximator`::[`ActorCritic`](@ref): used to get Q-values (Critic) and logits (Actor) of a state.
 - `target_approximator`::[`ActorCritic`](@ref): similar to `approximator`, but used to estimate the target.
 - `γ::Float32`, reward discount rate.
-- `batch_size::Int=32`
+- `batchsize::Int=32`
 - `policy_improvement_mode::Symbol=:exp`, type of the weight function f. Possible values: :binary/:exp.
 - `ratio_upper_bound::Float32`, when `policy_improvement_mode` is ":exp", the value of the exp function is upper-bounded by this parameter.
 - `β::Float32`,  when `policy_improvement_mode` is ":exp", this is the denominator of the exp function.
@@ -26,7 +26,7 @@ mutable struct CRRLearner{Aq<:ActorCritic,At<:ActorCritic,R<:AbstractRNG} <: Any
     approximator::Aq
     target_approximator::At
     γ::Float32
-    batch_size::Int
+    batchsize::Int
     policy_improvement_mode::Symbol
     ratio_upper_bound::Float32
     β::Float32
@@ -46,7 +46,7 @@ function CRRLearner(;
     approximator::Aq,
     target_approximator::At,
     γ::Float32=0.99f0,
-    batch_size::Int=32,
+    batchsize::Int=32,
     policy_improvement_mode::Symbol=:exp,
     ratio_upper_bound::Float32=20.0f0,
     β::Float32=1.0f0,
@@ -63,7 +63,7 @@ function CRRLearner(;
         approximator,
         target_approximator,
         γ,
-        batch_size,
+        batchsize,
         policy_improvement_mode,
         ratio_upper_bound,
         β,
@@ -110,16 +110,16 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
     target_AC = learner.target_approximator
     γ = learner.γ
     β = learner.β
-    batch_size = learner.batch_size
+    batchsize = learner.batchsize
     policy_improvement_mode = learner.policy_improvement_mode
     ratio_upper_bound = learner.ratio_upper_bound
     advantage_estimator = learner.advantage_estimator
     D = device(AC)
 
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
-    a = reshape(a, :, batch_size)
-    r = reshape(r, :, batch_size)
-    t = reshape(t, :, batch_size)
+    a = reshape(a, :, batchsize)
+    r = reshape(r, :, batchsize)
+    t = reshape(t, :, batchsize)
 
     target_a_t = target_AC.actor(s′; is_sampling=true)
     target_q_input = vcat(s′, target_a_t)
@@ -127,7 +127,7 @@ function continuous_update!(learner::CRRLearner, batch::NamedTuple)
 
     target = r .+ γ .* (1 .- t) .* expected_target_q
 
-    q_t = send_to_device(D, Matrix{Float32}(undef, learner.m, batch_size))
+    q_t = send_to_device(D, Matrix{Float32}(undef, learner.m, batchsize))
     for i in 1:learner.m
         a_sample = AC.actor(s; is_sampling=true)
         q_t[i, :] = AC.critic(vcat(s, a_sample))
@@ -176,16 +176,16 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
     target_AC = learner.target_approximator
     γ = learner.γ
     β = learner.β
-    batch_size = learner.batch_size
+    batchsize = learner.batchsize
     policy_improvement_mode = learner.policy_improvement_mode
     ratio_upper_bound = learner.ratio_upper_bound
     advantage_estimator = learner.advantage_estimator
     D = device(AC)
 
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
-    a = CartesianIndex.(a, 1:batch_size)
-    r = send_to_device(D, reshape(r, :, batch_size))
-    t = send_to_device(D, reshape(t, :, batch_size))
+    a = CartesianIndex.(a, 1:batchsize)
+    r = send_to_device(D, reshape(r, :, batchsize))
+    t = send_to_device(D, reshape(t, :, batchsize))
 
     target_a_t = softmax(target_AC.actor(s′))
     target_q_t = target_AC.critic(s′)
@@ -197,7 +197,7 @@ function discrete_update!(learner::CRRLearner, batch::NamedTuple)
     gs = gradient(ps) do
         # Critic loss
         q_t = AC.critic(s)
-        qa_t = reshape(q_t[a], :, batch_size)
+        qa_t = reshape(q_t[a], :, batchsize)
         critic_loss = Flux.Losses.mse(qa_t, target)
 
         # Actor loss

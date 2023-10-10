@@ -13,7 +13,7 @@ See paper: [Benchmarking Batch Deep Reinforcement Learning Algorithms](https://a
 - `τ::Float32 = 0.005f0`, the speed at which the target network is updated.
 - `θ::Float32 = 0.99f0`, regularization coefficient.
 - `threshold::Float32 = 0.3f0`, determine whether the action can be used to calculate the Q value.
-- `batch_size::Int=32`
+- `batchsize::Int=32`
 - `update_freq::Int`: the frequency of updating the `approximator`.
 - `update_step::Int = 0`
 - `rng = Random.default_rng()`
@@ -25,7 +25,7 @@ mutable struct BCQDLearner{Aq<:ActorCritic,At<:ActorCritic,R<:AbstractRNG} <: An
     τ::Float32
     θ::Float32
     threshold::Float32
-    batch_size::Int
+    batchsize::Int
     update_freq::Int
     update_step::Int
     rng::R
@@ -41,7 +41,7 @@ function BCQDLearner(;
     τ::Float32=0.005f0,
     θ::Float32=1.0f-2,
     threshold::Float32=0.3f0,
-    batch_size::Int=32,
+    batchsize::Int=32,
     update_freq::Int=10,
     update_step::Int=0,
     rng=Random.default_rng()
@@ -54,7 +54,7 @@ function BCQDLearner(;
         τ,
         θ,
         threshold,
-        batch_size,
+        batchsize,
         update_freq,
         update_step,
         rng,
@@ -85,11 +85,11 @@ function RLCore.update!(learner::BCQDLearner, batch::NamedTuple)
     AC = learner.approximator
     target_AC = learner.target_approximator
     γ, τ, θ = learner.γ, learner.τ, learner.θ
-    batch_size = learner.batch_size
+    batchsize = learner.batchsize
     D = device(AC)
 
     s, a, r, t, s′ = (send_to_device(D, batch[x]) for x in SARTS)
-    a = CartesianIndex.(a, 1:batch_size)
+    a = CartesianIndex.(a, 1:batchsize)
 
     prob = softmax(AC.actor(s′))
     mask = Float32.((prob ./ maximum(prob, dims=1)) .> learner.threshold)

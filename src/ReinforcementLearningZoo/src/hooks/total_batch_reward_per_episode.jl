@@ -13,23 +13,23 @@ end
 Base.getindex(h::TotalBatchRewardPerEpisode) = h.rewards
 
 """
-    TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit=true)
+    TotalBatchRewardPerEpisode(batchsize::Int; is_display_on_exit=true)
 
 Similar to [`TotalRewardPerEpisode`](@ref), but is specific to environments
 which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 If `is_display_on_exit` is set to `true`, a ribbon plot will be shown to reflect
 the mean and std of rewards.
 """
-function TotalBatchRewardPerEpisode{F}(batch_size::Int; is_display_on_exit::Bool = true) where {F<:Number}
+function TotalBatchRewardPerEpisode{F}(batchsize::Int; is_display_on_exit::Bool = true) where {F<:Number}
     TotalBatchRewardPerEpisode{is_display_on_exit, F}(
-        [[] for _ = 1:batch_size],
-        zeros(F, batch_size),
+        [[] for _ = 1:batchsize],
+        zeros(F, batchsize),
         is_display_on_exit,
     )
 end
 
-function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit::Bool = true)
-    TotalBatchRewardPerEpisode{Float64}(batch_size; is_display_on_exit = is_display_on_exit)
+function TotalBatchRewardPerEpisode(batchsize::Int; is_display_on_exit::Bool = true)
+    TotalBatchRewardPerEpisode{Float64}(batchsize; is_display_on_exit = is_display_on_exit)
 end
 
 

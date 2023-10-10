@@ -14,7 +14,7 @@ Base.@kwdef struct OfflinePolicy{L,T} <: AbstractPolicy
     learner::L
     dataset::T
     continuous::Bool
-    batch_size::Int
+    batchsize::Int
 end
 
 (π::OfflinePolicy)(env) = π(env, ActionStyle(env), action_space(env))
@@ -44,7 +44,7 @@ function Base.push!(p::OfflinePolicy, traj::Any, ::AbstractEnv, ::PreExperimentS
     if in(:pretrain_step, fieldnames(typeof(l)))
         println("Pretrain...")
         for _ in 1:l.pretrain_step
-            inds, batch = sample(l.rng, p.dataset, p.batch_size)
+            inds, batch = sample(l.rng, p.dataset, p.batchsize)
             update!(l, batch)
         end
     end
@@ -61,7 +61,7 @@ function Base.push!(p::OfflinePolicy, traj::Any, ::AbstractEnv, ::PreActStage)
 
     l.update_step % l.update_freq == 0 || return
 
-    inds, batch = sample(l.rng, p.dataset, p.batch_size)
+    inds, batch = sample(l.rng, p.dataset, p.batchsize)
 
     update!(l, batch)
 end
@@ -90,18 +90,18 @@ function gen_JuliaRL_dataset(
     dataset
 end
 
-function StatsBase.sample(rng::AbstractRNG, dataset::Vector{T}, batch_size::Int) where {T}
+function StatsBase.sample(rng::AbstractRNG, dataset::Vector{T}, batchsize::Int) where {T}
     valid_range = 1:length(dataset)
-    inds = rand(rng, valid_range, batch_size)
+    inds = rand(rng, valid_range, batchsize)
     batch_data = dataset[inds]
     s_length = size(batch_data[1].state)[1]
     a_type = typeof(batch_data[1].action)
 
-    s = Array{Float32}(undef, s_length, batch_size)
-    s′ = Array{Float32}(undef, s_length, batch_size)
-    a = Array{a_type}(undef, batch_size)
-    r = Array{Float32}(undef, batch_size)
-    t = Array{Float32}(undef, batch_size)
+    s = Array{Float32}(undef, s_length, batchsize)
+    s′ = Array{Float32}(undef, s_length, batchsize)
+    a = Array{a_type}(undef, batchsize)
+    r = Array{Float32}(undef, batchsize)
+    t = Array{Float32}(undef, batchsize)
     for (i, data) in enumerate(batch_data)
         s[:, i] = data.state
         a[i] = data.action

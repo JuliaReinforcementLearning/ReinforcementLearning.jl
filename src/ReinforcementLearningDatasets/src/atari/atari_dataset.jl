@@ -10,7 +10,7 @@ Represents an `Iterable` dataset with the following fields:
 - `epochs::Vector{Int}`: list of epochs loaded.
 - `repo::String`: the repository from which the dataset is taken.
 - `length::Int`: the length of the dataset.
-- `batch_size::Int`: the size of the batches returned by `iterate`.
+- `batchsize::Int`: the size of the batches returned by `iterate`.
 - `style::Tuple{Symbol}`: the style of the `Iterator` that is returned, check out: [`SARTS`](@ref), [`SART`](@ref) and [`SA`](@ref) for types supported out of the box.
 - `rng<:AbstractRNG`.
 - `meta::Dict`: the metadata provided along with the dataset.
@@ -21,7 +21,7 @@ struct AtariDataSet{T<:AbstractRNG} <:RLDataSet
     epochs::Vector{Int}
     repo::String
     length::Int
-    batch_size::Int
+    batchsize::Int
     style::Tuple
     rng::T
     meta::Dict
@@ -49,7 +49,7 @@ the dataset, refer to [google-research/batch_rl](https://github.com/google-resea
 - `repo::String="atari-replay-datasets"`: name of the repository of the dataset.
 - `rng::AbstractRNG=StableRNG(123)`.
 - `is_shuffle::Bool=true`: determines if the dataset is shuffled or not.
-- `batch_size::Int=256` batch_size that is yielded by the iterator.
+- `batchsize::Int=256` batchsize that is yielded by the iterator.
 
 !!! warning
 
@@ -65,7 +65,7 @@ function dataset(
     repo::String="atari-replay-datasets",
     rng::AbstractRNG=MersenneTwister(123), 
     is_shuffle::Bool=true, 
-    batch_size::Int=256
+    batchsize::Int=256
 )
     
     try 
@@ -139,22 +139,22 @@ function dataset(
         end
     end
 
-    return AtariDataSet(final_dataset, epochs, repo, N_samples, batch_size, style, rng, meta, is_shuffle)
+    return AtariDataSet(final_dataset, epochs, repo, N_samples, batchsize, style, rng, meta, is_shuffle)
 
 end
 
 function iterate(ds::AtariDataSet, state = 0)
     rng = ds.rng
-    batch_size = ds.batch_size
+    batchsize = ds.batchsize
     length = ds.length
     is_shuffle = ds.is_shuffle
     style = ds.style
 
     if is_shuffle
-        inds = rand(rng, 1:length-1, batch_size)
+        inds = rand(rng, 1:length-1, batchsize)
     else
-        if (state+1) * batch_size <= length
-            inds = state*batch_size+1:(state+1)*batch_size
+        if (state+1) * batchsize <= length
+            inds = state*batchsize+1:(state+1)*batchsize
         else
             return nothing
         end

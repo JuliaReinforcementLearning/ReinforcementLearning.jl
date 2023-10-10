@@ -18,7 +18,7 @@ function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:SAC},
     ::Val{:Pendulum},
-    ::Nothing;
+    dummy = nothing;
     save_dir=nothing,
     seed=123
 )
@@ -84,7 +84,7 @@ function RLCore.Experiment(
 
     stop_condition = StopAfterStep(30_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode() 
-    Experiment(agent, env, stop_condition, hook) |> run
+    Experiment(agent, env, stop_condition, hook)
 end
 
 #+ tangle=false

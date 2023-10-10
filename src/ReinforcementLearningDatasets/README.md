@@ -21,7 +21,7 @@ julia> samples = Iterators.take(ds)
 Base.Iterators.Take{D4RLDataSet{Random.MersenneTwister}}(D4RLDataSet{Random.MersenneTwister}(Dict{Symbol, Any}(:reward => Float32[0.9236555, 0.8713692, 0.92237693, 0.9839225, 0.91540813, 0.8331875, 0.8102179, 0.78385466, 0.7304337, 0.6942671  …  5.0350657, 5.005931, 4.998442, 4.986662, 4.9730926, 4.9638906, 4.9503803, 4.9326644, 4.8952913, 4.8448896], :state => Float32[1.2521756 1.2519351 … 
 ...
 ```
-`ds` is of the type `D4RLDataset` which consists of the entire dataset along with some other information about the dataset. `samples` are in the form of `SARTS` with batch_size 256.
+`ds` is of the type `D4RLDataset` which consists of the entire dataset along with some other information about the dataset. `samples` are in the form of `SARTS` with batchsize 256.
 
 ### RL Unplugged
 ```julia-repl
