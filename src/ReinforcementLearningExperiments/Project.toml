@@ -1,7 +1,7 @@
 name = "ReinforcementLearningExperiments"
 uuid = "6bd458e5-1694-412f-b601-3a888375c491"
 authors = ["Jun Tian <tianjun.cpp@gmail.com>"]
-version = "0.4.0"
+version = "0.4.1"
 
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
@@ -25,7 +25,7 @@ Reexport = "1"
 ReinforcementLearningBase = "0.12"
 ReinforcementLearningCore = "0.14, 0.13"
 ReinforcementLearningEnvironments = "0.8"
-ReinforcementLearningZoo = "0.9, 0.8"
+ReinforcementLearningZoo = "0.9.1"
 StableRNGs = "1"
 Weave = "0.10"
 cuDNN = "1"
