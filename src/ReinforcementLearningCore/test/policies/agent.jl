@@ -1,6 +1,5 @@
-using ReinforcementLearningBase, ReinforcementLearningEnvironments
-using ReinforcementLearningCore: SRT
-using ReinforcementLearningCore
+using ReinforcementLearningBase
+import ReinforcementLearningCore.SRT
 
 @testset "agent.jl" begin
     @testset "Agent Tests" begin
