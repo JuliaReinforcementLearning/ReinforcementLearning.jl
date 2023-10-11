@@ -24,7 +24,7 @@ RandomPolicy(s = nothing; rng = Random.default_rng()) = RandomPolicy(s, rng)
 
 RLBase.optimise!(::RandomPolicy, x::NamedTuple) = nothing
 
-RLBase.plan!(p::RandomPolicy{S,RNG}, env::AbstractEnv) where {S,RNG<:AbstractRNG} = rand.(p.rng, p.action_space)
+RLBase.plan!(p::RandomPolicy{S,RNG}, env::AbstractEnv) where {S,RNG<:AbstractRNG} = rand(p.rng, p.action_space)
 
 function RLBase.plan!(p::RandomPolicy{Nothing,RNG}, env::AbstractEnv) where {RNG<:AbstractRNG}
     legal_action_space_ = RLBase.legal_action_space(env)
@@ -33,7 +33,7 @@ end
 
 function RLBase.plan!(p::RandomPolicy{Nothing,RNG}, env::E, player::Symbol) where {E<:AbstractEnv, RNG<:AbstractRNG}
     legal_action_space_ = RLBase.legal_action_space(env, player)
-    return rand.(p.rng, legal_action_space_)
+    return rand(p.rng, legal_action_space_)
 end
 
 #####

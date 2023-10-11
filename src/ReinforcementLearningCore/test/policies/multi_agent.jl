@@ -1,7 +1,6 @@
 using Test
 using ReinforcementLearningEnvironments
 using ReinforcementLearningTrajectories
-using ReinforcementLearningCore
 using ReinforcementLearningBase
 using DomainSets
 

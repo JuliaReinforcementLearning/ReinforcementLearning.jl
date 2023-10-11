@@ -67,7 +67,7 @@ function RLCore.Experiment(
             γ=0.99f0,
             α=0.2f0,
             start_steps=1000,
-            start_policy=RandomPolicy([-1.0 .. 1.0 for _ in 1:na]; rng=rng),
+            start_policy=RandomPolicy(-1.0 .. 1.0; rng=rng),
             automatic_entropy_tuning=true,
             lr_alpha=0.003f0,
             action_dims=action_dims,

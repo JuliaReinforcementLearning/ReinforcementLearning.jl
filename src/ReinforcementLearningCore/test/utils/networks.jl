@@ -1,4 +1,4 @@
-using Test, Flux, CUDA, ChainRulesCore, LinearAlgebra, Distributions, ReinforcementLearningCore
+using Test, Flux, CUDA, ChainRulesCore, LinearAlgebra, Distributions
 using Flux: params, gradient, unsqueeze
 @testset "Approximators" begin
     #= These may need to be updated due to recent changes
