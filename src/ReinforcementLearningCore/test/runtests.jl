@@ -1,5 +1,5 @@
 using ReinforcementLearningBase
-#using ReinforcementLearningCore
+using ReinforcementLearningCore
 using ReinforcementLearningEnvironments
 using ReinforcementLearningTrajectories
 
