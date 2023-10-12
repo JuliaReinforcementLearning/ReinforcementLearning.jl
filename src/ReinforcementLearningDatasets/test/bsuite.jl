@@ -9,7 +9,7 @@
             shuffle_buffer_size = 10_000,
             tf_reader_bufsize = 10_000,
             tf_reader_sz = 10_000,
-            batch_size = 256,
+            batchsize = 256,
             n_preallocations = Threads.nthreads() * 12
         )
 
@@ -19,11 +19,11 @@
         
         data_1 = take!(ds)
 
-        @test size(data_1.state) == (s_size, batch_size)
-        @test size(data_1.next_state) == (s_size, batch_size)
-        @test size(data_1.action) == (batch_size,)
-        @test size(data_1.reward) == (batch_size,)
-        @test size(data_1.terminal) == (batch_size,)
+        @test size(data_1.state) == (s_size, batchsize)
+        @test size(data_1.next_state) == (s_size, batchsize)
+        @test size(data_1.action) == (batchsize,)
+        @test size(data_1.reward) == (batchsize,)
+        @test size(data_1.terminal) == (batchsize,)
 
         @test typeof(data_1.state) == Array{Float32, 2}
         @test typeof(data_1.next_state) == Array{Float32, 2}
@@ -43,7 +43,7 @@
             shuffle_buffer_size = 10_000,
             tf_reader_bufsize = 10_000,
             tf_reader_sz = 10_000,
-            batch_size = 256,
+            batchsize = 256,
             n_preallocations = Threads.nthreads() * 12
         )
 
@@ -53,11 +53,11 @@
         
         data_1 = take!(ds)
 
-        @test size(data_1.state) == (s_size, batch_size)
-        @test size(data_1.next_state) == (s_size, batch_size)
-        @test size(data_1.action) == (batch_size,)
-        @test size(data_1.reward) == (batch_size,)
-        @test size(data_1.terminal) == (batch_size,)
+        @test size(data_1.state) == (s_size, batchsize)
+        @test size(data_1.next_state) == (s_size, batchsize)
+        @test size(data_1.action) == (batchsize,)
+        @test size(data_1.reward) == (batchsize,)
+        @test size(data_1.terminal) == (batchsize,)
 
         @test typeof(data_1.state) == Array{Float32, 2}
         @test typeof(data_1.next_state) == Array{Float32, 2}
@@ -77,7 +77,7 @@
             shuffle_buffer_size = 10_000,
             tf_reader_bufsize = 10_000,
             tf_reader_sz = 10_000,
-            batch_size = 256,
+            batchsize = 256,
             n_preallocations = Threads.nthreads() * 12
         )
 
@@ -87,11 +87,11 @@
         
         data_1 = take!(ds)
 
-        @test size(data_1.state) == (s_size[1], s_size[2], batch_size)
-        @test size(data_1.next_state) == (s_size[1], s_size[2], batch_size)
-        @test size(data_1.action) == (batch_size,)
-        @test size(data_1.reward) == (batch_size,)
-        @test size(data_1.terminal) == (batch_size,)
+        @test size(data_1.state) == (s_size[1], s_size[2], batchsize)
+        @test size(data_1.next_state) == (s_size[1], s_size[2], batchsize)
+        @test size(data_1.action) == (batchsize,)
+        @test size(data_1.reward) == (batchsize,)
+        @test size(data_1.terminal) == (batchsize,)
 
         @test typeof(data_1.state) == Array{Float32, 3}
         @test typeof(data_1.next_state) == Array{Float32, 3}

@@ -217,13 +217,13 @@ end
 Base.getindex(h::BatchStepsPerEpisode) = h.steps
 
 """
-    BatchStepsPerEpisode(batch_size::Int; tag = "TRAINING")
+    BatchStepsPerEpisode(batchsize::Int; tag = "TRAINING")
 
 Similar to [`StepsPerEpisode`](@ref), but is specific to environments
 which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 """
-function BatchStepsPerEpisode(batch_size::Int)
-    BatchStepsPerEpisode([Int[] for _ = 1:batch_size], zeros(Int, batch_size))
+function BatchStepsPerEpisode(batchsize::Int)
+    BatchStepsPerEpisode([Int[] for _ = 1:batchsize], zeros(Int, batchsize))
 end
 
 function Base.push!(hook::BatchStepsPerEpisode, 

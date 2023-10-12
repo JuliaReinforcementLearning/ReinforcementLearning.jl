@@ -27,7 +27,7 @@ mutable struct BEARLearner{
     sample_num::Int
     kernel_type::Symbol
     mmd_σ::Float32
-    batch_size::Int
+    batchsize::Int
     update_freq::Int
     update_step::Int
     rng::R
@@ -62,7 +62,7 @@ can be implemented using a `VAE` in a `NeuralNetworkApproximator`.
 - `sample_num::Int = 10`, the number of sample action to calculate MMD loss.
 - `kernel_type::Symbol = :laplacian`, the method of calculating MMD loss. Possible values: :laplacian/:gaussian.
 - `mmd_σ::Float32 = 10.0f0`, the parameter used for calculating MMD loss.
-- `batch_size::Int = 32`
+- `batchsize::Int = 32`
 - `update_freq::Int = 50`, the frequency of updating the `approximator`.
 - `update_step::Int = 0`
 - `rng = Random.default_rng()`
@@ -86,7 +86,7 @@ function BEARLearner(;
     sample_num=10,
     kernel_type=:laplacian,
     mmd_σ=10.0f0,
-    batch_size=32,
+    batchsize=32,
     update_freq=50,
     update_step=0,
     rng=Random.default_rng()
@@ -113,7 +113,7 @@ function BEARLearner(;
         sample_num,
         kernel_type,
         mmd_σ,
-        batch_size,
+        batchsize,
         update_freq,
         update_step,
         rng,
@@ -154,7 +154,7 @@ function RLCore.update!(l::BEARLearner, batch::NamedTuple{SARTS})
     y = r .+ γ .* (1 .- t) .* vec(q′)
 
     # Train Q Networks
-    a = reshape(a, :, l.batch_size)
+    a = reshape(a, :, l.batchsize)
     q_input = vcat(s, a)
 
     q_grad_1 = gradient(Flux.params(l.qnetwork1)) do
@@ -191,9 +191,9 @@ function RLCore.update!(l::BEARLearner, batch::NamedTuple{SARTS})
             l.vae.model,
             repeat(s, outer=(1, 1, l.sample_num));
             is_normalize=false
-        )  # action_dim * batch_size * sample_num
+        )  # action_dim * batchsize * sample_num
         raw_actor_action =
-            l.policy(repeat(s, outer=(1, 1, l.sample_num)); is_sampling=true) # action_dim * batch_size * sample_num
+            l.policy(repeat(s, outer=(1, 1, l.sample_num)); is_sampling=true) # action_dim * batchsize * sample_num
 
         mmd_loss = maximum_mean_discrepancy_loss(
             raw_sample_action,
@@ -229,7 +229,7 @@ function RLCore.update!(l::BEARLearner, batch::NamedTuple{SARTS})
 end
 
 function update_vae!(l::BEARLearner, s, a)
-    a = reshape(a, :, l.batch_size)
+    a = reshape(a, :, l.batchsize)
     vae_grad = gradient(Flux.params(l.vae)) do
         recon_loss, kl_loss = vae_loss(l.vae.model, s, a)
         0.5f0 * kl_loss + recon_loss

@@ -28,7 +28,7 @@ function RLCore.Experiment(
     
     trajectory_num = 10000
     dataset_size = 10000
-    batch_size = 64
+    batchsize = 64
 
     init = glorot_uniform(rng)
 
@@ -52,7 +52,7 @@ function RLCore.Experiment(
                 approximator = create_actor_critic() |> cpu,
                 target_approximator = create_actor_critic() |> cpu,
                 γ = 0.99f0,
-                batch_size = batch_size,
+                batchsize = batchsize,
                 continuous = false,
                 policy_improvement_mode = :exp,
                 ratio_upper_bound = 20.0f0,
@@ -63,7 +63,7 @@ function RLCore.Experiment(
             ),
             dataset = gen_JuliaRL_dataset(:BasicDQN, :CartPole, type; dataset_size = dataset_size),
             continuous = false,
-            batch_size = batch_size,
+            batchsize = batchsize,
         ),
         trajectory = CircularArraySARTTrajectory(
             capacity = 1000,

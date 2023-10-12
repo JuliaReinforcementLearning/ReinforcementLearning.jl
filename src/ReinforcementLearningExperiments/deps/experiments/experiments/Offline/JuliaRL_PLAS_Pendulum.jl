@@ -31,7 +31,7 @@ function RLCore.Experiment(
     
     trajectory_num = 10000
     dataset_size = 10000
-    batch_size = 64
+    batchsize = 64
 
     env = ActionTransformedEnv(
         inner_env;
@@ -87,13 +87,13 @@ function RLCore.Experiment(
                 target_qnetwork1 = create_q_net() |> cpu,
                 target_qnetwork2 = create_q_net() |> cpu,
                 vae = create_vae_net() |> cpu,
-                batch_size = batch_size,
+                batchsize = batchsize,
                 pretrain_step = 1500,
                 update_freq = 1,
             ),
             dataset = gen_JuliaRL_dataset(:SAC, :Pendulum, type; dataset_size = dataset_size),
             continuous = true,
-            batch_size = batch_size,
+            batchsize = batchsize,
         ),
         trajectory = CircularArraySARTTrajectory(
             capacity = 1000,

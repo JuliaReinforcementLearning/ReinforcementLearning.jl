@@ -1,6 +1,6 @@
 name = "ReinforcementLearningCore"
 uuid = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
-version = "0.14.0"
+version = "0.15"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -30,7 +30,7 @@ cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 [compat]
 AbstractTrees = "0.3, 0.4"
 Adapt = "3"
-CUDA = "4"
+CUDA = "4, 5"
 ChainRulesCore = "1"
 CircularArrayBuffers = "0.1"
 Crayons = "4"

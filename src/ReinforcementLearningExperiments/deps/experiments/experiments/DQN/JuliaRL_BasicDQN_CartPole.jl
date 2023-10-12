@@ -51,7 +51,7 @@ function RLCore.Experiment(
                 state=Float32 => (ns,),
             ),
             sampler=BatchSampler{SS′ART}(
-                batch_size=32,
+                batchsize=32,
                 rng=rng
             ),
             controller=InsertSampleRatioController(

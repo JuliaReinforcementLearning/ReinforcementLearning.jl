@@ -1,4 +1,3 @@
-using ReinforcementLearningCore
 using ReinforcementLearningBase
 using TimerOutputs
 

@@ -30,7 +30,7 @@ function RLCore.Experiment(
 
     trajectory_num = 10000
     dataset_size = 10000
-    batch_size = 128
+    batchsize = 128
     
     dataset=gen_JuliaRL_dataset(:SAC, :Pendulum, type; dataset_size = dataset_size)
     
@@ -69,7 +69,7 @@ function RLCore.Experiment(
                     optimizer = Adam(3e-3),
                 ),
                 γ = 0.99f0,
-                batch_size = batch_size,
+                batchsize = batchsize,
                 policy_improvement_mode = :exp,
                 ratio_upper_bound = 20.0f0,
                 β = 1.0f0,
@@ -80,7 +80,7 @@ function RLCore.Experiment(
             ),
             dataset = dataset,
             continuous = true,
-            batch_size = batch_size,
+            batchsize = batchsize,
         ),
         trajectory = CircularArraySARTTrajectory(
             capacity = 1000,
@@ -112,7 +112,7 @@ function RLCore.Experiment(
                 target_q_network = create_fqe_q_net() |> cpu,
                 n_evals = 50,
                 γ = 0.99f0,
-                batch_size = batch_size,
+                batchsize = batchsize,
                 update_freq=1,
                 update_step=1,
                 tar_update_freq=50,
@@ -120,7 +120,7 @@ function RLCore.Experiment(
             ),
             dataset = dataset,
             continuous = true,
-            batch_size = batch_size,
+            batchsize = batchsize,
         ),
         trajectory = CircularArraySARTTrajectory(
             capacity = 10000,

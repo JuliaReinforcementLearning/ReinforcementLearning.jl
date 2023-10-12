@@ -9,7 +9,7 @@ using Base.Threads
             shuffle_buffer_size=10_000,
             tf_reader_bufsize=10_000,
             tf_reader_sz=10_000,
-            batch_size=256,
+            batchsize=256,
             n_preallocations=nthreads()*12
         )
 
@@ -17,7 +17,7 @@ using Base.Threads
 
         data = take!(ds)
         
-        batch_size = 256
+        batchsize = 256
         feature_size = ReinforcementLearningDatasets.DM_CONTROL_SUITE_SIZE["fish_swim"]
         
         @test typeof(data.state) <: NamedTuple
@@ -27,14 +27,14 @@ using Base.Threads
             if split(feature, "/")[1] != "observation"
                 if feature != "step_type"
                     ob_key = Symbol(feature)
-                    @test size(getfield(data, ob_key)) == (feature_size[feature]..., batch_size,)
+                    @test size(getfield(data, ob_key)) == (feature_size[feature]..., batchsize,)
                 end
             else
                 state = data.state
                 next_state = data.next_state
                 ob_key = Symbol(chop(feature, head=length("observation")+1, tail=0))
-                @test size(getfield(state, ob_key)) == (feature_size[feature]...,batch_size)
-                @test size(getfield(next_state, ob_key)) == (feature_size[feature]..., batch_size,)
+                @test size(getfield(state, ob_key)) == (feature_size[feature]...,batchsize)
+                @test size(getfield(next_state, ob_key)) == (feature_size[feature]..., batchsize,)
             end
         end
     end
@@ -48,7 +48,7 @@ using Base.Threads
             shuffle_buffer_size=10_000,
             tf_reader_bufsize=10_000,
             tf_reader_sz=10_000,
-            batch_size=256,
+            batchsize=256,
             n_preallocations=nthreads()*12
         )
 
@@ -56,7 +56,7 @@ using Base.Threads
 
         data = take!(ds)
         
-        batch_size = 256
+        batchsize = 256
         feature_size = ReinforcementLearningDatasets.DM_LOCOMOTION_HUMANOID_SIZE
         
         @test typeof(data.state) <: NamedTuple
@@ -66,14 +66,14 @@ using Base.Threads
             if split(feature, "/")[1] != "observation"
                 if feature != "step_type"
                     ob_key = Symbol(feature)
-                    @test size(getfield(data, ob_key)) == (feature_size[feature]..., batch_size,)
+                    @test size(getfield(data, ob_key)) == (feature_size[feature]..., batchsize,)
                 end
             else
                 state = data.state
                 next_state = data.next_state
                 ob_key = Symbol(chop(feature, head=length("observation")+1, tail=0))
-                @test size(getfield(state, ob_key)) == (feature_size[feature]..., batch_size,)
-                @test size(getfield(next_state, ob_key)) == (feature_size[feature]..., batch_size,)
+                @test size(getfield(state, ob_key)) == (feature_size[feature]..., batchsize,)
+                @test size(getfield(next_state, ob_key)) == (feature_size[feature]..., batchsize,)
             end
         end
     end
@@ -87,7 +87,7 @@ using Base.Threads
             shuffle_buffer_size=10_000,
             tf_reader_bufsize=10_000,
             tf_reader_sz=10_000,
-            batch_size=256,
+            batchsize=256,
             n_preallocations=nthreads()*12
         )
 
@@ -95,7 +95,7 @@ using Base.Threads
 
         data = take!(ds)
         
-        batch_size = 256
+        batchsize = 256
         feature_size = ReinforcementLearningDatasets.DM_LOCOMOTION_RODENT_SIZE
         
         @test typeof(data.state) <: NamedTuple
@@ -105,14 +105,14 @@ using Base.Threads
             if split(feature, "/")[1] != "observation"
                 if feature != "step_type"
                     ob_key = Symbol(feature)
-                    @test size(getfield(data, ob_key)) == (feature_size[feature]..., batch_size,)
+                    @test size(getfield(data, ob_key)) == (feature_size[feature]..., batchsize,)
                 end
             else
                 state = data.state
                 next_state = data.next_state
                 ob_key = Symbol(chop(feature, head=length("observation")+1, tail=0))
-                @test size(getfield(state, ob_key)) == (feature_size[feature]..., batch_size,)
-                @test size(getfield(next_state, ob_key)) == (feature_size[feature]..., batch_size,)
+                @test size(getfield(state, ob_key)) == (feature_size[feature]..., batchsize,)
+                @test size(getfield(next_state, ob_key)) == (feature_size[feature]..., batchsize,)
             end
         end
     end

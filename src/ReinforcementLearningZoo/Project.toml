@@ -1,6 +1,6 @@
 name = "ReinforcementLearningZoo"
 uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
-version = "0.9"
+version = "0.10"
 
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
@@ -20,7 +20,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [compat]
-CUDA = "4"
+CUDA = "4, 5"
 ChainRulesCore = "1"
 Distributions = "0.25"
 Flux = "0.13, 0.14"
@@ -29,7 +29,7 @@ LogExpFunctions = "0.3"
 NNlib = "0.8, 0.9"
 Optim = "1"
 ReinforcementLearningBase = "0.12"
-ReinforcementLearningCore = "0.14, 0.13"
+ReinforcementLearningCore = "0.15"
 StatsBase = "0.33, 0.34"
 Zygote = "0.6"
 cuDNN = "1"

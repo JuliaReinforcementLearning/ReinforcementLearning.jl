@@ -37,8 +37,8 @@ function RLBase.optimise!(
     n = learner.n
 
     s, s′, a, r, t = map(x -> batch[x], SS′ART)
-    batch_size = length(a)
-    a = CartesianIndex.(a, 1:batch_size)
+    batchsize = length(a)
+    a = CartesianIndex.(a, 1:batchsize)
     k, p = batch.key, batch.priority
     p′ = similar(p)
     s, s′, a, r, t = send_to_device(device(Q), (s, s′, a, r, t))
@@ -60,7 +60,7 @@ function RLBase.optimise!(
     gs = gradient(params(A)) do
         qₐ = Q(s)[a]
         batch_losses = loss_func(G, qₐ)
-        loss = dot(vec(w), vec(batch_losses)) * 1 // batch_size
+        loss = dot(vec(w), vec(batch_losses)) * 1 // batchsize
         ignore_derivatives() do
             p′ .= vec((batch_losses .+ 1.0f-10) .^ β)
             learner.loss = loss

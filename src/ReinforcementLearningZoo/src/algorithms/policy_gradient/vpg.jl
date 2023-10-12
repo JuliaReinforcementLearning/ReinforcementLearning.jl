@@ -18,7 +18,7 @@ Base.@kwdef struct VPG{A,B,D, R} <: AbstractPolicy
     dist::D
     "discount ratio"
     γ::Float32 = 0.99f0
-    batch_size::Int = 1024
+    batchsize::Int = 1024
     rng::R = Random.default_rng()
 end
 
@@ -40,7 +40,7 @@ function RLBase.optimise!(p::VPG, ::PostEpisodeStage, trajectory::Trajectory)
         actions = reduce(ep[:action] for ep in batch) do s, s2
             cat(s, s2, dims = ndims(first(batch[:action])))
         end
-        for inds in Iterators.partition(shuffle(p.rng, eachindex(gains)), p.batch_size)
+        for inds in Iterators.partition(shuffle(p.rng, eachindex(gains)), p.batchsize)
             RLBase.optimise!(p, (state=selectdim(states,ndims(states),inds), action=selectdim(actions,ndims(actions),inds), gain=gains[inds]))
         end
         has_optimized = true

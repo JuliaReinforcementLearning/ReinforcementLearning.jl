@@ -6,7 +6,7 @@
         shuffle_buffer_size = 10_000,
         tf_reader_bufsize = 1*1024*1024,
         tf_reader_sz = 10_000,
-        batch_size = 256,
+        batchsize = 256,
         n_preallocations = Threads.nthreads() * 12
     )
 
@@ -17,14 +17,14 @@
     frame_size = 84
     stack_size = 4
 
-    @test size(data_1.state) == (frame_size, frame_size, stack_size, batch_size)
-    @test size(data_1.next_state) == (frame_size, frame_size, stack_size, batch_size)
-    @test size(data_1.action) == (batch_size,)
-    @test size(data_1.next_action) == (batch_size,)
-    @test size(data_1.reward) == (batch_size,)
-    @test size(data_1.terminal) == (batch_size,)
-    @test size(data_1.episode_id) == (batch_size,)
-    @test size(data_1.episode_return) == (batch_size,)
+    @test size(data_1.state) == (frame_size, frame_size, stack_size, batchsize)
+    @test size(data_1.next_state) == (frame_size, frame_size, stack_size, batchsize)
+    @test size(data_1.action) == (batchsize,)
+    @test size(data_1.next_action) == (batchsize,)
+    @test size(data_1.reward) == (batchsize,)
+    @test size(data_1.terminal) == (batchsize,)
+    @test size(data_1.episode_id) == (batchsize,)
+    @test size(data_1.episode_return) == (batchsize,)
 
     @test typeof(data_1.state) == Array{UInt8, 4}
     @test typeof(data_1.next_state) == Array{UInt8, 4}

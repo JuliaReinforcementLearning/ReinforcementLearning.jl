@@ -22,7 +22,7 @@ mutable struct TD3Policy{
     target_critic::TC
     γ::Float32
     ρ::Float32
-    batch_size::Int
+    batchsize::Int
     start_steps::Int
     start_policy::P
     update_after::Int
@@ -52,7 +52,7 @@ end
 - `start_policy`,
 - `γ = 0.99f0`,
 - `ρ = 0.995f0`,
-- `batch_size = 32`,
+- `batchsize = 32`,
 - `start_steps = 10000`,
 - `update_after = 1000`,
 - `update_freq = 50`,
@@ -72,7 +72,7 @@ function TD3Policy(;
     start_policy,
     γ=0.99f0,
     ρ=0.995f0,
-    batch_size=64,
+    batchsize=64,
     start_steps=10000,
     update_after=1000,
     update_freq=50,
@@ -93,7 +93,7 @@ function TD3Policy(;
         target_critic,
         γ,
         ρ,
-        batch_size,
+        batchsize,
         start_steps,
         start_policy,
         update_after,
@@ -134,7 +134,7 @@ function RLCore.update!(
 )
     length(traj) > p.update_after || return
     p.update_step % p.update_freq == 0 || return
-    inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
+    inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batchsize))
     update!(p, batch)
 end
 
@@ -150,7 +150,7 @@ function RLCore.update!(p::TD3Policy, batch::NamedTuple{SARTS})
     # action is scalar
     target_noise =
         clamp.(
-            randn(p.rng, Float32, 1, p.batch_size) .* p.target_act_noise,
+            randn(p.rng, Float32, 1, p.batchsize) .* p.target_act_noise,
             -p.target_act_limit,
             p.target_act_limit,
         ) |> to_device

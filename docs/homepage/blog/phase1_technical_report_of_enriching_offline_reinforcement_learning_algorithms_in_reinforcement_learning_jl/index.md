@@ -57,10 +57,10 @@ Base.@kwdef struct OfflinePolicy{L,T} <: AbstractPolicy
     learner::L
     dataset::T
     continuous::Bool
-    batch_size::Int
+    batchsize::Int
 end
 ```
-This implementation of `OfflinePolicy` refers to [`QBasePolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.QBasedPolicy). It provides a parameter `continuous` to support different action space types, including continuous and discrete. `learner` is a specific algorithm for learning and providing policy. `dataset` and `batch_size` are used to sample data for learning.
+This implementation of `OfflinePolicy` refers to [`QBasePolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.QBasedPolicy). It provides a parameter `continuous` to support different action space types, including continuous and discrete. `learner` is a specific algorithm for learning and providing policy. `dataset` and `batchsize` are used to sample data for learning.
 
 Besides, we implement corresponding functions `π`, `update!` and `sample`. `π` is used to select the action, whose form is determined by the type of action space. `update!` can be used in two stages. In `PreExperiment` stage, we can call this function for pre-training algorithms with `pretrain_step` parameters. In `PreAct` stage, we call this function for training the `learner`. In function `update!`, we need to call function `sample` to sample a batch of data from the dataset. With the development of [ReinforcementLearningDataset.jl](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/tree/master/src/ReinforcementLearningDatasets), the `sample` function will be deprecated.
 
@@ -73,7 +73,7 @@ offline_dqn_policy = OfflinePolicy(
     ),
     dataset = dataset,
     continuous = false,
-    batch_size = 64,
+    batchsize = 64,
 )
 ```
 
@@ -266,7 +266,7 @@ function RLBase.update!(p::OfflinePolicy, traj::AbstractTrajectory, ::AbstractEn
     if in(:pretrain_step, fieldnames(typeof(l)))
         println("Pretrain...")
         for _ in 1:l.pretrain_step
-            inds, batch = sample(l.rng, p.dataset, p.batch_size)
+            inds, batch = sample(l.rng, p.dataset, p.batchsize)
             update!(l, batch)
         end
     end

@@ -81,7 +81,7 @@ function RLCore.Experiment(
             na = length(action_space(env, player)),
             start_steps = 0,
             start_policy = nothing,
-            update_after = 512 * env.max_steps, # batch_size * env.max_steps
+            update_after = 512 * env.max_steps, # batchsize * env.max_steps
             act_limit = 1.0,
             act_noise = 0.,
         )
@@ -99,7 +99,7 @@ function RLCore.Experiment(
             ) for player in (:Speaker, :Listener)
         ),
         SARTS, # trace's type
-        512, # batch_size
+        512, # batchsize
         100, # update_freq
         0, # initial update_step
         rng

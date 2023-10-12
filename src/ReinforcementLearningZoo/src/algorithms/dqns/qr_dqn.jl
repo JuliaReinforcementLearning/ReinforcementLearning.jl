@@ -51,17 +51,17 @@ function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
     loss_func = learner.loss_func
 
     s, s′, a, r, t = map(x -> batch[x], SS′ART)
-    batch_size = length(r)
-    a = CartesianIndex.(a, 1:batch_size)
+    batchsize = length(r)
+    a = CartesianIndex.(a, 1:batchsize)
 
-    target_quantiles = reshape(Qₜ(s′), N, :, batch_size)
+    target_quantiles = reshape(Qₜ(s′), N, :, batchsize)
     qₜ = dropdims(mean(target_quantiles; dims=1); dims=1)
     aₜ = dropdims(argmax(qₜ, dims=1); dims=1)
     @views target_quantile_aₜ = target_quantiles[:, aₜ]
-    y = reshape(r, 1, batch_size) .+ γ .* reshape(1 .- t, 1, batch_size) .* target_quantile_aₜ
+    y = reshape(r, 1, batchsize) .+ γ .* reshape(1 .- t, 1, batchsize) .* target_quantile_aₜ
 
     gs = gradient(params(A)) do
-        q = reshape(Q(s), N, :, batch_size)
+        q = reshape(Q(s), N, :, batchsize)
         @views ŷ = q[:, a]
 
         loss = loss_func(ŷ, y)

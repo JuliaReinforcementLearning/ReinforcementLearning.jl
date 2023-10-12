@@ -229,7 +229,7 @@ function _update!(p::PPOPolicy, t::Any)
 
     n_envs, n_rollout = size(t[:terminal])
     @assert n_envs * n_rollout % n_microbatches == 0 "size mismatch"
-    microbatch_size = n_envs * n_rollout ÷ n_microbatches
+    microbatchsize = n_envs * n_rollout ÷ n_microbatches
 
     n = length(t)
     states_plus = to_device(t[:state])
@@ -261,7 +261,7 @@ function _update!(p::PPOPolicy, t::Any)
     for epoch in 1:n_epochs
         rand_inds = shuffle!(rng, Vector(1:n_envs*n_rollout))
         for i in 1:n_microbatches
-            inds = rand_inds[(i-1)*microbatch_size+1:i*microbatch_size]
+            inds = rand_inds[(i-1)*microbatchsize+1:i*microbatchsize]
             if t isa MaskedPPOTrajectory
                 lam = select_last_dim(flatten_batch(select_last_dim(LAM, 2:n+1)), inds)
 

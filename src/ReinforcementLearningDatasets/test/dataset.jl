@@ -1,6 +1,6 @@
 n_s = 11
 n_a = 3
-batch_size = 256
+batchsize = 256
 style = SARTS
 rng = MersenneTwister(123)
 
@@ -12,7 +12,7 @@ rng = MersenneTwister(123)
         style = style,
         rng = rng,
         is_shuffle = true,
-        batch_size = batch_size
+        batchsize = batchsize
     )
 
     data_dict = ds.dataset
@@ -44,11 +44,11 @@ rng = MersenneTwister(123)
     end
 
     @test iter1 != iter2
-    @test size(iter1[:state]) == (n_s, batch_size)
-    @test size(iter1[:action]) == (n_a, batch_size)
-    @test size(iter1[:reward]) == (batch_size,)
-    @test size(iter1[:terminal]) == (batch_size,)
-    @test size(iter1[:next_state]) == (n_s, batch_size)
+    @test size(iter1[:state]) == (n_s, batchsize)
+    @test size(iter1[:action]) == (n_a, batchsize)
+    @test size(iter1[:reward]) == (batchsize,)
+    @test size(iter1[:terminal]) == (batchsize,)
+    @test size(iter1[:next_state]) == (n_s, batchsize)
 
 end
 
@@ -58,7 +58,7 @@ end
         style = style,
         rng = rng,
         is_shuffle = false,
-        batch_size = batch_size
+        batchsize = batchsize
     )
 
     data_dict = ds.dataset
@@ -91,21 +91,21 @@ end
 
     @test iter1 != iter2
 
-    @test size(iter1[:state]) == (n_s, batch_size)
-    @test size(iter1[:action]) == (n_a, batch_size)
-    @test size(iter1[:reward]) == (batch_size,)
-    @test size(iter1[:terminal]) == (batch_size,)
-    @test size(iter1[:next_state]) == (n_s, batch_size)
+    @test size(iter1[:state]) == (n_s, batchsize)
+    @test size(iter1[:action]) == (n_a, batchsize)
+    @test size(iter1[:reward]) == (batchsize,)
+    @test size(iter1[:terminal]) == (batchsize,)
+    @test size(iter1[:next_state]) == (n_s, batchsize)
 
-    @test data_dict[:state][:, 1:batch_size] == iter1[:state]
-    @test data_dict[:action][:, 1:batch_size] == iter1[:action]
-    @test data_dict[:reward][1:batch_size] == iter1[:reward]
-    @test data_dict[:terminal][1:batch_size] == iter1[:terminal]
-    @test data_dict[:state][:, 2:batch_size+1] == iter1[:next_state]
+    @test data_dict[:state][:, 1:batchsize] == iter1[:state]
+    @test data_dict[:action][:, 1:batchsize] == iter1[:action]
+    @test data_dict[:reward][1:batchsize] == iter1[:reward]
+    @test data_dict[:terminal][1:batchsize] == iter1[:terminal]
+    @test data_dict[:state][:, 2:batchsize+1] == iter1[:next_state]
 
-    @test data_dict[:state][:, batch_size+1:batch_size*2] == iter2[:state]
-    @test data_dict[:action][:, batch_size+1:batch_size*2] == iter2[:action]
-    @test data_dict[:reward][batch_size+1:batch_size*2] == iter2[:reward]
-    @test data_dict[:terminal][batch_size+1:batch_size*2] == iter2[:terminal]
-    @test data_dict[:state][:, batch_size+2:batch_size*2+1] == iter2[:next_state]
+    @test data_dict[:state][:, batchsize+1:batchsize*2] == iter2[:state]
+    @test data_dict[:action][:, batchsize+1:batchsize*2] == iter2[:action]
+    @test data_dict[:reward][batchsize+1:batchsize*2] == iter2[:reward]
+    @test data_dict[:terminal][batchsize+1:batchsize*2] == iter2[:terminal]
+    @test data_dict[:state][:, batchsize+2:batchsize*2+1] == iter2[:next_state]
 end

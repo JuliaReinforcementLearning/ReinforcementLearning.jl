@@ -1,4 +1,4 @@
-using Test, Flux, CUDA, ChainRulesCore, LinearAlgebra, Distributions, ReinforcementLearningCore
+using Test, Flux, CUDA, ChainRulesCore, LinearAlgebra, Distributions
 using Flux: params, gradient, unsqueeze
 @testset "Approximators" begin
     #= These may need to be updated due to recent changes
@@ -60,7 +60,7 @@ using Flux: params, gradient, unsqueeze
                 a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
                 @test size(a) == (10,3)
                 @test size(logp) == (1,3)
-                @test logp ≈ sum(normlogpdf(m, L, a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
+                @test logp ≈ diagnormlogpdf(m, L, a)
                 @test logp ≈ gn(state, a)
                 as, logps = gn(Flux.unsqueeze(state,dims = 2), 5) #sample 5 actions
                 @test size(as) == (10,5,3)
@@ -121,7 +121,7 @@ using Flux: params, gradient, unsqueeze
                     a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
                     @test size(a) == (10,3)
                     @test size(logp) == (1,3)
-                    @test logp ≈ sum(normlogpdf(m, L, a) .- (2.0f0 .* (log(2.0f0) .- a .- softplus.(-2.0f0 .* a))), dims = 1)
+                    @test logp ≈ diagnormlogpdf(m, L, a)
                     @test logp ≈ gn(state, a)
                     as, logps = gn(CUDA.CURAND.RNG(), Flux.unsqueeze(state,dims = 2), 5) #sample 5 actions
                     @test size(as) == (10,5,3)

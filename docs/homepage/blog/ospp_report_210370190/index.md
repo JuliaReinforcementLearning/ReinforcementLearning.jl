@@ -247,7 +247,7 @@ rl_agent = Agent(
             ),
             γ = 1.0f0,
             loss_func = huber_loss,
-            batch_size = 128,
+            batchsize = 128,
             update_freq = 128,
             min_replay_history = 1000,
             target_update_freq = 1000,
@@ -281,7 +281,7 @@ sl_agent = Agent(
             optimizer = Descent(0.01),
         ),
         explorer = WeightedSoftmaxExplorer(),
-        batch_size = 128,
+        batchsize = 128,
         min_reservoir_history = 1000,
         rng = rng,
     ),
@@ -351,7 +351,7 @@ Given that the [`DDPGPolicy`](https://juliareinforcementlearning.org/docs/rlzoo/
 mutable struct MADDPGManager <: AbstractPolicy
     agents::Dict{<:Any, <:Agent}
     traces
-    batch_size::Int
+    batchsize::Int
     update_freq::Int
     update_step::Int
     rng::AbstractRNG
@@ -454,7 +454,7 @@ agents = MADDPGManager(
         trajectory = deepcopy(trajectory),
     )) for player in players(env) if player != chance_player(env)),
     SARTS, # trace's type
-    512, # batch_size
+    512, # batchsize
     100, # update_freq
     0, # initial update_step
     rng
@@ -508,7 +508,7 @@ create_policy(player) = DDPGPolicy(
     na = length(action_space(env, player)),
     start_steps = 0,
     start_policy = nothing,
-    update_after = 512 * env.max_steps, # batch_size * env.max_steps
+    update_after = 512 * env.max_steps, # batchsize * env.max_steps
     act_limit = 1.0,
     act_noise = 0.,
     )
@@ -530,7 +530,7 @@ agents = MADDPGManager(
         ) for player in (:Speaker, :Listener)
     ),
     SARTS, # trace's type
-    512, # batch_size
+    512, # batchsize
     100, # update_freq
     0, # initial update_step
     rng

@@ -51,10 +51,10 @@ function RLBase.optimise!(learner::REMDQNLearner, batch::NamedTuple)
 
     s, s′, a, r, t = map(x -> batch[x], SS′ART)
     a = CartesianIndex.(a, 1:length(a))
-    batch_size = length(a)
+    batchsize = length(a)
 
     qₜ = Qₜ(s′)
-    qₜ = convex_polygon .* reshape(qₜ, :, ensemble_num, batch_size)
+    qₜ = convex_polygon .* reshape(qₜ, :, ensemble_num, batchsize)
     qₜ = dropdims(sum(qₜ, dims=2), dims=2)
 
     if haskey(batch, :next_legal_actions_mask)
@@ -66,7 +66,7 @@ function RLBase.optimise!(learner::REMDQNLearner, batch::NamedTuple)
 
     gs = gradient(params(A)) do
         q = Q(s)
-        q = convex_polygon .* reshape(q, :, ensemble_num, batch_size)
+        q = convex_polygon .* reshape(q, :, ensemble_num, batchsize)
         q = dropdims(sum(q, dims=2), dims=2)[a]
 
         loss = loss_func(G, q)
