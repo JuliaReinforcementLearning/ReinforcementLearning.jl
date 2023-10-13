@@ -120,34 +120,47 @@ function RLBase.optimise!(
     traj::Trajectory
 )
     for batch in traj
-        update!(p, batch)
+        update_critic!(p, batch)
+        update_actor!(p, batch)
     end
 end
 
-function update!(p::SACPolicy, batch::NamedTuple{SS′ART})
-    s, s′, a, r, t = send_to_device(device(p.qnetwork1), batch)
-
-    γ, α = p.γ, p.α
-
+function soft_q_learning_target(p::SACPolicy, r, t, s′, α, γ)
     a′, log_π = RLCore.forward(p.policy,p.device_rng, s′; is_sampling=true, is_return_log_prob=true)
     q′_input = vcat(s′, a′)
     q′ = min.(target(p.qnetwork1)(q′_input), target(p.qnetwork2)(q′_input))
 
-    y = r .+ γ .* (1 .- t) .* dropdims(q′ .- α .* log_π, dims=1)
+    r .+ γ .* (1 .- t) .* dropdims(q′ .- α .* log_π, dims=1)
+end
+
+function q_learning_loss(qnetwork, s, a, y)
+    q_input = vcat(s, a)
+    q = dropdims(model(qnetwork)(q_input), dims=1)
+    mse(q, y)
+end
+
+function update_critic!(p::SACPolicy, batch::NamedTuple{SS′ART})
+    s, s′, a, r, t = send_to_device(device(p.qnetwork1), batch)
+
+    γ, α = p.γ, p.α
+
+    y = soft_q_learning_target(p, r, t, s′, α, γ)
+
 
     # Train Q Networks
-    q_input = vcat(s, a)
-
     q_grad_1 = gradient(Flux.params(model(p.qnetwork1))) do
-        q1 = dropdims(model(p.qnetwork1)(q_input), dims=1)
-        mse(q1, y)
+        q_learning_loss(p.qnetwork1, s, a, y)
     end
     RLBase.optimise!(p.qnetwork1, q_grad_1)
+
     q_grad_2 = gradient(Flux.params(model(p.qnetwork2))) do
-        q2 = dropdims(model(p.qnetwork2)(q_input), dims=1)
-        mse(q2, y)
+        q_learning_loss(p.qnetwork2, s, a, y)
     end
     RLBase.optimise!(p.qnetwork2, q_grad_2)
+end
+
+function update_actor!(p::SACPolicy, batch::NamedTuple{SS′ART})
+    s, s′, a, r, t = send_to_device(device(p.qnetwork1), batch)
 
     # Train Policy
     p_grad = gradient(Flux.params(p.policy)) do
@@ -160,7 +173,7 @@ function update!(p::SACPolicy, batch::NamedTuple{SS′ART})
             p.reward_term = reward
             p.entropy_term = entropy
         end
-        α * entropy - reward
+        p.α * entropy - reward
     end
     RLBase.optimise!(p.policy, p_grad)
 
