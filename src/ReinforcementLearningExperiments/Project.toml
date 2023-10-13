@@ -19,6 +19,7 @@ Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [compat]
+CUDA = "5"
 Distributions = "0.25"
 Flux = "0.13, 0.14"
 Reexport = "1"
