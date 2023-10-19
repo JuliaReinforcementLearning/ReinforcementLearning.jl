@@ -29,11 +29,11 @@ end
 
 Agent(;policy, trajectory) = Agent(policy, trajectory)
 
-RLBase.optimise!(agent::Agent, stage::S) where {S<:AbstractStage} = RLBase.optimise!(TrajectoryStyle(agent.trajectory), agent, stage)
-RLBase.optimise!(::SyncTrajectoryStyle, agent::Agent, stage::S) where {S<:AbstractStage} = RLBase.optimise!(agent.policy, stage, agent.trajectory)
+RLBase.optimise!(agent::Union{Agent,OfflineAgent}, stage::S) where {S<:AbstractStage} = RLBase.optimise!(TrajectoryStyle(agent.trajectory), agent, stage)
+RLBase.optimise!(::SyncTrajectoryStyle, agent::Union{Agent,OfflineAgent}, stage::S) where {S<:AbstractStage} = RLBase.optimise!(agent.policy, stage, agent.trajectory)
 
 # already spawn a task to optimise inner policy when initializing the agent
-RLBase.optimise!(::AsyncTrajectoryStyle, agent::Agent, stage::S) where {S<:AbstractStage} = nothing
+RLBase.optimise!(::AsyncTrajectoryStyle, agent::Union{Agent,OfflineAgent}, stage::S) where {S<:AbstractStage} = nothing
 
 #by default, optimise does nothing at all stage
 function RLBase.optimise!(policy::AbstractPolicy, stage::AbstractStage, trajectory::Trajectory) end
@@ -47,7 +47,7 @@ end
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
-function RLBase.plan!(agent::Agent, env::AbstractEnv)
+function RLBase.plan!(agent::Union{Agent,OfflineAgent}, env::AbstractEnv)
     RLBase.plan!(agent.policy, env)
 end
 
@@ -62,3 +62,19 @@ function Base.push!(agent::Agent, ::PostEpisodeStage, env::AbstractEnv)
         push!(agent.trajectory, PartialNamedTuple((action = action, )))
     end
 end
+
+function OfflineAgent{P,T} <: AbstractPolicy
+    policy::P
+    trajectory::T
+    function OfflineAgent(policy::P, trajectory::T) where {P<:AbstractPolicy, T<:Trajectory}
+        agent = new{P,T}(policy, trajectory)
+
+        if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
+            bind(trajectory, @spawn(optimise!(policy, trajectory)))
+        end
+        agent
+    end
+end
+
+OfflineAgent(;policy, trajectory) = OfflineAgent(policy, trajectory)
+@functor OfflineAgent (policy,)
