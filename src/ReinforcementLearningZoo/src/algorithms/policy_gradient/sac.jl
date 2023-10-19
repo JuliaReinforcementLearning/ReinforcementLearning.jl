@@ -125,12 +125,12 @@ function RLBase.optimise!(
     end
 end
 
-function soft_q_learning_target(p::SACPolicy, r, t, s′, α, γ)
+function soft_q_learning_target(p::SACPolicy, r, t, s′)
     a′, log_π = RLCore.forward(p.policy,p.device_rng, s′; is_sampling=true, is_return_log_prob=true)
     q′_input = vcat(s′, a′)
     q′ = min.(target(p.qnetwork1)(q′_input), target(p.qnetwork2)(q′_input))
 
-    r .+ γ .* (1 .- t) .* dropdims(q′ .- α .* log_π, dims=1)
+    r .+ p.γ .* (1 .- t) .* dropdims(q′ .- p.α .* log_π, dims=1)
 end
 
 function q_learning_loss(qnetwork, s, a, y)
@@ -142,10 +142,7 @@ end
 function update_critic!(p::SACPolicy, batch::NamedTuple{SS′ART})
     s, s′, a, r, t = send_to_device(device(p.qnetwork1), batch)
 
-    γ, α = p.γ, p.α
-
-    y = soft_q_learning_target(p, r, t, s′, α, γ)
-
+    y = soft_q_learning_target(p, r, t, s′)
 
     # Train Q Networks
     q_grad_1 = gradient(Flux.params(model(p.qnetwork1))) do
@@ -160,7 +157,8 @@ function update_critic!(p::SACPolicy, batch::NamedTuple{SS′ART})
 end
 
 function update_actor!(p::SACPolicy, batch::NamedTuple{SS′ART})
-    s, s′, a, r, t = send_to_device(device(p.qnetwork1), batch)
+    s = send_to_device(device(p.qnetwork1), batch[:state])
+    a = send_to_device(device(p.qnetwork1), batch[:action])
 
     # Train Policy
     p_grad = gradient(Flux.params(p.policy)) do
