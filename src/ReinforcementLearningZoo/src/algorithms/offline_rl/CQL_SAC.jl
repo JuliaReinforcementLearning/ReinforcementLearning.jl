@@ -21,7 +21,7 @@ function RLBase.optimise!(p::CQLSACPolicy, ::PostActStage, traj::Trajectory)
     update_actor!(p.sac, batch) #uses the implemented SACPolicy actor update, as it is identical
 end
 
-function conservative_loss(p::CQLSACPolicy, t_qnetwork, q_policy_inputs, logps, s, a)
+function conservative_loss(p::CQLSACPolicy, t_qnetwork, q_policy_inputs, logps, s, a, y)
     qnetwork = model(t_qnetwork)
     q_policy = vec(LogExpFunctions.logsumexp(qnetwork(q_policy_inputs) .- logps, dims = 2)) #(1 x 1 x batchsize) -> (batchsize,) Note: some python public implementations use a temperature.
 
@@ -36,7 +36,9 @@ function conservative_loss(p::CQLSACPolicy, t_qnetwork, q_policy_inputs, logps, 
 
     conservative_loss = p.α_cql*diff 
 
-    return conservative_loss
+    q_learning_loss = mse(q_beta, y)
+
+    return conservative_loss + q_learning_loss
 end
 
 function update_critic!(p::CQLSACPolicy, batch::NamedTuple{SS′ART})
@@ -61,16 +63,12 @@ function update_critic!(p::CQLSACPolicy, batch::NamedTuple{SS′ART})
 
     # Train Q Networks
     q_grad_1 = gradient(Flux.params(model(p.sac.qnetwork1))) do
-        q_loss = q_learning_loss(p.sac.qnetwork1, s, a, y)
-        cons_loss = conservative_loss(p, p.sac.qnetwork1, q_policy_inputs, logps, s, a)
-        q_loss + cons_loss
+        conservative_loss(p, p.sac.qnetwork1, q_policy_inputs, logps, s, a, y)
     end
     RLBase.optimise!(p.sac.qnetwork1, q_grad_1)
 
     q_grad_2 = gradient(Flux.params(model(p.sac.qnetwork2))) do
-        q_loss = q_learning_loss(p.sac.qnetwork2, s, a, y)
-        cons_loss = conservative_loss(p, p.sac.qnetwork2, q_policy_inputs, logps, s, a)
-        q_loss + cons_loss
+        conservative_loss(p, p.sac.qnetwork2, q_policy_inputs, logps, s, a,y )
     end
     RLBase.optimise!(p.sac.qnetwork2, q_grad_2)
 end
