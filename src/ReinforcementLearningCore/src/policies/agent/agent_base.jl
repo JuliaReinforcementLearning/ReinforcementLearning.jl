@@ -1,4 +1,4 @@
-export Agent
+export Agent, OfflineAgent
 
 using Base.Threads: @spawn
 
@@ -20,6 +20,24 @@ mutable struct Agent{P,T} <: AbstractPolicy
     function Agent(policy::P, trajectory::T) where {P<:AbstractPolicy, T<:Trajectory}
         agent = new{P,T}(policy, trajectory)
 
+        if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
+            bind(trajectory, @spawn(optimise!(policy, trajectory)))
+        end
+        agent
+    end
+end
+
+mutable struct OfflineAgent{P,T,B,R} <: AbstractPolicy
+    policy::P
+    trajectory::T
+    behavior_agent::B #a behavior agent to fill the trajectory. Leave nothing if the trajectory is prefilled. Should share the same trajectory as the parent OfflineAgent
+    behavior_steps::Int #steps to fill the trajectory (defaults to capacity of )
+    behavior_reset_condition::R #the reset condition of the environment.
+    function OfflineAgent(policy::P, trajectory::T, behavior_agent = nothing, behavior_steps = ReinforcementLearningTrajectories.capacity(trajectory.container.traces), behavior_reset_condition = ResetAtTerminal()) where {P<:AbstractPolicy, T<:Trajectory}
+        if behavior_steps == Inf
+            @error "behavior_steps is infinite, please provide a finite integer."
+        end
+        agent = new{P,T, typeof(behavior_agent), typeof(behavior_reset_condition)}(policy, trajectory, behavior_agent, behavior_steps, behavior_reset_condition)
         if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
             bind(trajectory, @spawn(optimise!(policy, trajectory)))
         end
@@ -63,18 +81,31 @@ function Base.push!(agent::Agent, ::PostEpisodeStage, env::AbstractEnv)
     end
 end
 
-function OfflineAgent{P,T} <: AbstractPolicy
-    policy::P
-    trajectory::T
-    function OfflineAgent(policy::P, trajectory::T) where {P<:AbstractPolicy, T<:Trajectory}
-        agent = new{P,T}(policy, trajectory)
-
-        if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
-            bind(trajectory, @spawn(optimise!(policy, trajectory)))
-        end
-        agent
-    end
-end
-
-OfflineAgent(;policy, trajectory) = OfflineAgent(policy, trajectory)
+OfflineAgent(;policy, trajectory, behavior_agent=nothing, behavior_steps = ReinforcementLearningTrajectories.capacity(trajectory.container.traces), behavior_reset_condition = ResetAtTerminal()) = OfflineAgent(policy, trajectory, behavior_agent, behavior_steps, behavior_reset_condition)
 @functor OfflineAgent (policy,)
+
+Base.push!(::OfflineAgent{P,T,B}, ::PreExperimentStage, env) where {P,T,B <: Nothing} = nothing
+#fills the trajectory with interactions generated with the behavior_agent at the PreExperimentStage.
+function Base.push!(agent::OfflineAgent, ::PreExperimentStage, env::AbstractEnv)
+    is_stop = false
+    policy = agent.behavior_agent
+    steps = 0
+    while !is_stop
+        steps += 1
+        reset!(env)
+        push!(policy, PreEpisodeStage(), env)
+
+        while !agent.behavior_reset_condition(policy, env) # one episode
+            push!(policy, PreActStage(), env)
+            action = RLBase.plan!(policy, env)
+            act!(env, action)
+            push!(policy, PostActStage(), env, action)
+
+            if steps >= agent.behavior_steps
+                is_stop = true
+                break
+            end
+        end # end of an episode
+    push!(policy, PostEpisodeStage(), env)
+    end    
+end

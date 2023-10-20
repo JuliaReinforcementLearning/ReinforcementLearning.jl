@@ -170,13 +170,11 @@ function update_actor!(p::SACPolicy, batch::NamedTuple{SS′ART})
         ignore_derivatives() do
             p.reward_term = reward
             p.entropy_term = entropy
+            if p.automatic_entropy_tuning # Tune entropy automatically
+                p.α -= p.lr_alpha * mean(-log_π .- p.target_entropy)
+            end
         end
         p.α * entropy - reward
     end
     RLBase.optimise!(p.policy, p_grad)
-
-    # Tune entropy automatically
-    if p.automatic_entropy_tuning
-        p.α -= p.lr_alpha * mean(-log_π .- p.target_entropy)
-    end
 end
