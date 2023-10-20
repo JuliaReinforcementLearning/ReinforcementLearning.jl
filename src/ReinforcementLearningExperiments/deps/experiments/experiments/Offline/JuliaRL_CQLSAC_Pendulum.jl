@@ -86,7 +86,7 @@ function RLCore.Experiment(
 
     stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
     hook = TotalRewardPerEpisode() 
-    Experiment(agent, env, stop_condition, hook) |> run
+    Experiment(agent, env, stop_condition, hook)
 end
 
 #+ tangle=false
