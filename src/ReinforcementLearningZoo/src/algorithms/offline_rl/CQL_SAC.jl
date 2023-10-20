@@ -1,7 +1,7 @@
 import LogExpFunctions
 export CQLSACPolicy
 
-Base.@kwdef mutable struct CQLSACPolicy{P<:SACPolicy} <: AbstractPolicy
+Base.@kwdef mutable struct CQLSACPolicy{P<:SACPolicy, E<:Union{Experiment,Nothing}} <: AbstractPolicy
     sac::P
     action_sample_size::Int = 10
     α_cql::Float32 = 0f0
@@ -9,6 +9,7 @@ Base.@kwdef mutable struct CQLSACPolicy{P<:SACPolicy} <: AbstractPolicy
     τ_cql::Float32 = 5f0
     α_cql_autotune::Bool = true
     cons_weight::Float32 = 1f0 #multiplies the Q difference before substracting tau, used to scale with the rewards.
+    finetune_experiment::E = nothing #Provide an second experiment to run at PostExperimentStage to finetune the sac policy, typically with an agent that uses the sac policy. Leave nothing if no finetuning is desired.
 end
 
 function RLBase.plan!(p::CQLSACPolicy, env)
@@ -71,4 +72,13 @@ function update_critic!(p::CQLSACPolicy, batch::NamedTuple{SS′ART})
         conservative_loss(p, p.sac.qnetwork2, q_policy_inputs, logps, s, a,y )
     end
     RLBase.optimise!(p.sac.qnetwork2, q_grad_2)
+end
+
+RLBase.optimise!(::CQLSACPolicy{<:SACPolicy, Nothing}, ::PostExperimentStage, ::Trajectory) = nothing
+
+function RLBase.optimise!(p::CQLSACPolicy, ::PostExperimentStage, ::Trajectory) 
+    println("Finetuning...")
+    p.finetune_experiment.policy.trajectory.controller.n_inserted = 0
+    p.finetune_experiment.policy.trajectory.controller.n_sampled = 0
+    run(p.finetune_experiment)
 end
