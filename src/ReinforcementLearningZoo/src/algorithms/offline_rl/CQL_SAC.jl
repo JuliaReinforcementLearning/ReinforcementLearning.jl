@@ -13,7 +13,7 @@ export CQLSACPolicy
         finetune_experiment::E = nothing #Provide an second experiment to run at PostExperimentStage to finetune the sac policy, typically with an agent that uses the sac policy. Leave nothing if no finetuning is desired.
     )
 
-    Implements the Conservative Q-Learning algorithm [1] in its continuous variant on top of the SAC algorithm [2]. CQLSACPolicy wraps a classic SACPolicy whose networks will be trained normally, except for the additional conservative loss.
+    Implements the Conservative Q-Learning algorithm [1] in its continuous variant on top of the SAC algorithm [2]. `CQLSACPolicy` wraps a classic `SACPolicy` whose networks will be trained normally, except for the additional conservative loss.
     CQLSACPolicy contains the additional hyperparameters that are specific to this method. α_cql is the lagrange penalty for the conservative_loss, it will be automatically tuned if ` α_cql_autotune = true`. `cons_weight` is a scaling parameter 
     which may be necessary to decrease if the scale of the Q-values is large. `τ_cql` is the threshold of the lagrange conservative penalty.
     See SACPolicy for all the other hyperparameters related to SAC.
