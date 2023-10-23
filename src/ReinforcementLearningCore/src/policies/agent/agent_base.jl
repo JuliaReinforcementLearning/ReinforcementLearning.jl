@@ -35,7 +35,7 @@ mutable struct OfflineAgent{P,T,B,R} <: AbstractPolicy
     behavior_reset_condition::R #the reset condition of the environment.
     function OfflineAgent(policy::P, trajectory::T, behavior_agent = nothing, behavior_steps = ReinforcementLearningTrajectories.capacity(trajectory.container.traces), behavior_reset_condition = ResetAtTerminal()) where {P<:AbstractPolicy, T<:Trajectory}
         if behavior_steps == Inf
-            @error "behavior_steps is infinite, please provide a finite integer."
+            @error "`behavior_steps` is infinite, please provide a finite integer."
         end
         agent = new{P,T, typeof(behavior_agent), typeof(behavior_reset_condition)}(policy, trajectory, behavior_agent, behavior_steps, behavior_reset_condition)
         if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
