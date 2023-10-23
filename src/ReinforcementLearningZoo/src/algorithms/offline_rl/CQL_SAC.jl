@@ -14,11 +14,11 @@ export CQLSACPolicy
     )
 
     Implements the Conservative Q-Learning algorithm [1] in its continuous variant on top of the SAC algorithm [2]. `CQLSACPolicy` wraps a classic `SACPolicy` whose networks will be trained normally, except for the additional conservative loss.
-    CQLSACPolicy contains the additional hyperparameters that are specific to this method. α_cql is the lagrange penalty for the conservative_loss, it will be automatically tuned if ` α_cql_autotune = true`. `cons_weight` is a scaling parameter 
+    `CQLSACPolicy` contains the additional hyperparameters that are specific to this method. α_cql is the lagrange penalty for the conservative_loss, it will be automatically tuned if ` α_cql_autotune = true`. `cons_weight` is a scaling parameter 
     which may be necessary to decrease if the scale of the Q-values is large. `τ_cql` is the threshold of the lagrange conservative penalty.
     See SACPolicy for all the other hyperparameters related to SAC.
 
-    If desired, you can provide an `Experiment(agent, env, stop_condition, hook)` to finetune_experiment to finish the training with a finetuning run. `agent` should be a normal `Agent` with policy being `sac`, an environment to finetune on. 
+    If desired, you can provide an `Experiment(agent, env, stop_condition, hook)` to `finetune_experiment` to finish the training with a finetuning run. `agent` should be a normal `Agent` with policy being `sac`, an environment to finetune on. 
     See the example in ReinforcementLearningExperiments.jl for an example on the Pendulum task.
     
     As this is an offline algorithm, it must be wrapped in an `OfflineAgent` which will not update the trajectory as the training progresses. However, it _will_ interact with the supplied environment, which may be useful to record the progress.
