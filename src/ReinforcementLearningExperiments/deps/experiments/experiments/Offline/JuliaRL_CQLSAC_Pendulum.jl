@@ -83,7 +83,7 @@ function RLCore.Experiment(
             finetune_experiment = Experiment(Agent(sac, trajectory), env, StopAfterStep(2_000, is_show_progress=!haskey(ENV, "CI")), hook)         
         ),
         trajectory = trajectory,
-        behavior_agent = Agent(RandomPolicy(-1.0 .. 1.0; rng=rng), trajectory)
+        offline_behavior = OfflineBehavior(Agent(RandomPolicy(-1.0 .. 1.0; rng=rng), trajectory))
     )
 
     stop_condition = StopAfterStep(5_000, is_show_progress=!haskey(ENV, "CI"))
