@@ -10,7 +10,7 @@ See the paper https://arxiv.org/abs/1706.02275 for more details.
   trajectory to update its own network. **Note that** here the policy of the `Agent` should be `DDPGPolicy` wrapped by `NamedPolicy`, see the relative 
   experiment([`MADDPG_KuhnPoker`](https://juliareinforcementlearning.org/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_KuhnPoker/#JuliaRL\\_MADDPG\\_KuhnPoker) or [`MADDPG_SpeakerListener`](https://juliareinforcementlearning.org/docs/experiments/experiments/Policy%20Gradient/JuliaRL_MADDPG_SpeakerListener/#JuliaRL\\_MADDPG\\_SpeakerListener)) for references.
 - `traces`, set to `SARTS` if you are apply to an environment of `MINIMAL_ACTION_SET`, or `SLARTSL` if you are to apply to an environment of `FULL_ACTION_SET`.
-- `batch_size::Int`
+- `batchsize::Int`
 - `update_freq::Int`
 - `update_step::Int`, count the step.
 - `rng::AbstractRNG`.
@@ -18,7 +18,7 @@ See the paper https://arxiv.org/abs/1706.02275 for more details.
 mutable struct MADDPGManager <: AbstractPolicy
     agents::Dict{<:Any,<:Agent}
     traces
-    batch_size::Int
+    batchsize::Int
     update_freq::Int
     update_step::Int
     rng::AbstractRNG
@@ -68,14 +68,14 @@ function RLCore.update!(π::MADDPGManager, env::AbstractEnv)
 
     for (_, agent) in π.agents
         length(agent.trajectory) > agent.policy.policy.update_after || return
-        length(agent.trajectory) > π.batch_size || return
+        length(agent.trajectory) > π.batchsize || return
     end
 
     # get training data
     temp_player = collect(keys(π.agents))[1]
     t = π.agents[temp_player].trajectory
-    inds = rand(π.rng, 1:length(t), π.batch_size)
-    batches = Dict((player, RLCore.fetch!(BatchSampler{π.traces}(π.batch_size), agent.trajectory, inds))
+    inds = rand(π.rng, 1:length(t), π.batchsize)
+    batches = Dict((player, RLCore.fetch!(BatchSampler{π.traces}(π.batchsize), agent.trajectory, inds))
                    for (player, agent) in π.agents)
 
     # get s, a, s′ for critic
@@ -125,7 +125,7 @@ function RLCore.update!(π::MADDPGManager, env::AbstractEnv)
                 begin
                     actions = env.action_mapping(mu_actions[:, i])
                     mask[actions[player]]
-                end for i = 1:π.batch_size
+                end for i = 1:π.batchsize
             )
             )
             new_l′ = Flux.batch(
@@ -133,7 +133,7 @@ function RLCore.update!(π::MADDPGManager, env::AbstractEnv)
                 begin
                     actions = env.action_mapping(new_actions[:, i])
                     mask[actions[player]]
-                end for i = 1:π.batch_size
+                end for i = 1:π.batchsize
             )
             )
         end

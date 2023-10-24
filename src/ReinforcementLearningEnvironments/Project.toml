@@ -1,6 +1,6 @@
 name = "ReinforcementLearningEnvironments"
 uuid = "25e41dd2-4622-11e9-1641-f1adca772921"
-version = "0.8.1"
+version = "0.8.5"
 
 [deps]
 CommonRLInterface = "d842c3ba-07a1-494f-bbec-f5741b0a3e98"
@@ -18,18 +18,19 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
-CommonRLInterface = "0.3"
+CommonRLInterface = "^0.3.2"
 DelimitedFiles = "1"
 IntervalSets = "0.7"
 MacroTools = "0.5"
 ReinforcementLearningBase = "0.12"
-ReinforcementLearningCore = "0.10, 0.11"
+ReinforcementLearningCore = "0.12, 0.13, 0.14, 0.15"
 Requires = "1.0"
 StatsBase = "0.32, 0.33, 0.34"
 julia = "1.3"
 
 [extras]
 ArcadeLearningEnvironment = "b7f77d8d-088d-5e02-8ac0-89aab2acc977"
+Conda = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 DomainSets = "5b8099bc-c8ec-5219-889f-1d9e522a28bf"
 OpenSpiel = "ceb70bd2-fe3f-44f0-b81f-41608acaf2f2"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
@@ -41,4 +42,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TimerOutputs = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
 
 [targets]
-test = ["ArcadeLearningEnvironment", "DomainSets", "OpenSpiel", "OrdinaryDiffEq", "PyCall", "ReinforcementLearningCore", "StableRNGs", "Statistics", "Test", "TimerOutputs"]
+test = ["ArcadeLearningEnvironment", "Conda", "DomainSets", "OpenSpiel", "OrdinaryDiffEq", "PyCall", "ReinforcementLearningCore", "StableRNGs", "Statistics", "Test", "TimerOutputs"]

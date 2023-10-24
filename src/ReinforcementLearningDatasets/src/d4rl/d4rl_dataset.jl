@@ -14,7 +14,7 @@ Represents an `Iterable` dataset with the following fields:
 - `dataset::Dict{Symbol, Any}`: representation of the dataset as a Dictionary with style as `style`.
 - `repo::String`: the repository from which the dataset is taken.
 - `dataset_size::Int`, the number of samples in the dataset.
-- `batch_size::Int`: the size of the batches returned by `iterate`.
+- `batchsize::Int`: the size of the batches returned by `iterate`.
 - `style::Tuple{Symbol}`: the style of the `Iterator` that is returned, check out: [`SARTS`](@ref), [`SART`](@ref) and [`SA`](@ref) for types supported out of the box.
 - `rng<:AbstractRNG`.
 - `meta::Dict`: the metadata provided along with the dataset.
@@ -24,7 +24,7 @@ struct D4RLDataSet{T<:AbstractRNG} <: RLDataSet
     dataset::Dict{Symbol, Any}
     repo::String
     dataset_size::Integer
-    batch_size::Integer
+    batchsize::Integer
     style::Tuple
     rng::T
     meta::Dict
@@ -49,7 +49,7 @@ the dataset, refer to [D4RL](https://github.com/rail-berkeley/d4rl). Check out d
 - `style::Tuple{Symbol}=SARTS`: the style of the `Iterator` that is returned. can be [`SARTS`](@ref), [`SART`](@ref) or [`SA`](@ref).
 - `rng<:AbstractRNG=StableRNG(123)`.
 - `is_shuffle::Bool=true`: determines if the dataset is shuffled or not.
-- `batch_size::Int=256`: batch_size that is yielded by the iterator.
+- `batchsize::Int=256`: batchsize that is yielded by the iterator.
 
 !!! note
 
@@ -62,7 +62,7 @@ function dataset(
     style::NTuple=SARTS,
     rng::AbstractRNG=MersenneTwister(123), 
     is_shuffle::Bool=true, 
-    batch_size::Int=256
+    batchsize::Int=256
 )
     
     try 
@@ -100,22 +100,22 @@ function dataset(
         end
     end
 
-    return D4RLDataSet(dataset, repo, N_samples, batch_size, style, rng, meta, is_shuffle)
+    return D4RLDataSet(dataset, repo, N_samples, batchsize, style, rng, meta, is_shuffle)
 
 end
 
 function iterate(ds::D4RLDataSet, state = 0)
     rng = ds.rng
-    batch_size = ds.batch_size
+    batchsize = ds.batchsize
     size = ds.dataset_size
     is_shuffle = ds.is_shuffle
     style = ds.style
 
     if is_shuffle
-        inds = rand(rng, 1:size-1, batch_size)
+        inds = rand(rng, 1:size-1, batchsize)
     else
-        if (state+1) * batch_size <= size
-            inds = state*batch_size+1:(state+1)*batch_size
+        if (state+1) * batchsize <= size
+            inds = state*batchsize+1:(state+1)*batchsize
         else
             return nothing
         end

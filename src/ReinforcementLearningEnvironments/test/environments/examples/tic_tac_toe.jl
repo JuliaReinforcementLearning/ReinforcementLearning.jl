@@ -3,13 +3,13 @@
     using ReinforcementLearningEnvironments, ReinforcementLearningBase, ReinforcementLearningCore
 
     trajectory_1 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1),
+        CircularArraySARTSTraces(; capacity = 1),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
 
     trajectory_2 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1),
+        CircularArraySARTSTraces(; capacity = 1),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )

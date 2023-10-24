@@ -1,4 +1,4 @@
-using ReinforcementLearningCore: check_stop
+import ReinforcementLearningCore.check_stop
 
 @testset "StopAfterStep" begin
     stop_condition = StopAfterStep(10)

@@ -102,7 +102,7 @@ function RLCore.Experiment(
             trajectory = deepcopy(trajectory),
         )) for player in players(env) if player != chance_player(env)),
         SARTS, # trace's type
-        512, # batch_size
+        512, # batchsize
         100, # update_freq
         0, # initial update_step
         rng

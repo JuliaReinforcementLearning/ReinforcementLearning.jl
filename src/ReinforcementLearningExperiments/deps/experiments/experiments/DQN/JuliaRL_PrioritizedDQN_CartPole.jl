@@ -19,8 +19,7 @@ function RLCore.Experiment(
     ::Val{:CartPole},
     ; seed=123,
     n=1,
-    γ=0.99f0,
-    is_enable_double_DQN=true
+    γ=0.99f0
 )
     rng = StableRNG(seed)
 
@@ -30,21 +29,20 @@ function RLCore.Experiment(
     agent = Agent(
         policy=QBasedPolicy(
             learner=PrioritizedDQNLearner(
-                approximator=Approximator(
-                    model=TwinNetwork(
-                        Chain(
-                            Dense(ns, 128, relu; init=glorot_uniform(rng)),
-                            Dense(128, 128, relu; init=glorot_uniform(rng)),
-                            Dense(128, na; init=glorot_uniform(rng)),
+                approximator=TargetNetwork(
+                    Approximator(
+                        model = Chain(
+                            Dense(ns, 128, relu; init=Flux.glorot_uniform(rng)),
+                            Dense(128, 128, relu; init=Flux.glorot_uniform(rng)),
+                            Dense(128, na; init=Flux.glorot_uniform(rng)),
                         );
-                        sync_freq=100
-                    ),
-                    optimiser=Adam(),
+                        optimiser=Adam(),
+                        ),
+                    sync_freq=100
                 ),
                 n=n,
                 γ=γ,
                 β_priority=0.5f0,
-                is_enable_double_DQN=is_enable_double_DQN,
                 loss_func=(ŷ, y) -> huber_loss(ŷ, y; agg=identity),
                 rng=rng,
             ),
@@ -57,7 +55,7 @@ function RLCore.Experiment(
         ),
         trajectory=Trajectory(
             container=CircularPrioritizedTraces(
-                CircularArraySARTTraces(
+                CircularArraySARTSTraces(
                     capacity=1000,
                     state=Float32 => (ns,),
                 );
@@ -66,7 +64,7 @@ function RLCore.Experiment(
             sampler=NStepBatchSampler{SS′ART}(
                 n=n,
                 γ=γ,
-                batch_size=32,
+                batchsize=32,
                 rng=rng
             ),
             controller=InsertSampleRatioController(

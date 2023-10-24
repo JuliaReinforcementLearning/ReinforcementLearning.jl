@@ -31,7 +31,7 @@ function RLCore.Experiment(
     
     trajectory_num = 10000
     dataset_size = 10000
-    batch_size = 64
+    batchsize = 64
 
     env = ActionTransformedEnv(
         inner_env;
@@ -105,12 +105,12 @@ function RLCore.Experiment(
                 sample_num = 10,
                 kernel_type = :laplacian,
                 mmd_σ = 10.0f0,
-                batch_size = batch_size,
+                batchsize = batchsize,
                 update_freq = 2,
             ),
             dataset = gen_JuliaRL_dataset(:SAC, :Pendulum, type; dataset_size = dataset_size),
             continuous = true,
-            batch_size = batch_size,
+            batchsize = batchsize,
         ),
         trajectory = CircularArraySARTTrajectory(
             capacity = 1000,

@@ -31,17 +31,17 @@ function RLCore.Experiment(
     agent = Agent(
         policy=QBasedPolicy(
             learner=REMDQNLearner(
-                approximator=Approximator(
-                    model=TwinNetwork(
-                        Chain(
+                approximator=TargetNetwork(
+                    Approximator(
+                        model = Chain(
                             ## Multi-head method, please refer to "https://github.com/google-research/batch_rl/tree/b55ba35ebd2381199125dd77bfac9e9c59a64d74/batch_rl/multi_head".
                             Dense(ns, 128, relu; init=glorot_uniform(rng)),
                             Dense(128, 128, relu; init=glorot_uniform(rng)),
                             Dense(128, na * ensemble_num; init=glorot_uniform(rng)),
                         ),
-                        sync_freq=100
-                    ),
-                    optimiser=Adam(),
+                        optimiser=Adam(),
+                        ),
+                    sync_freq=100
                 ),
                 n=n,
                 γ=γ,
@@ -58,14 +58,14 @@ function RLCore.Experiment(
             ),
         ),
         trajectory=Trajectory(
-            container=CircularArraySARTTraces(
+            container=CircularArraySARTSTraces(
                 capacity=1000,
                 state=Float32 => (ns,),
             ),
             sampler=NStepBatchSampler{SS′ART}(
                 n=n,
                 γ=γ,
-                batch_size=32,
+                batchsize=32,
                 rng=rng
             ),
             controller=InsertSampleRatioController(

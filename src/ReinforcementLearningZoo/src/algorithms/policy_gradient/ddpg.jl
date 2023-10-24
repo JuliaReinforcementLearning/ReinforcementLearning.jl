@@ -16,7 +16,7 @@ mutable struct DDPGPolicy{
     γ::Float32
     ρ::Float32
     na::Int
-    batch_size::Int
+    batchsize::Int
     start_steps::Int
     start_policy::P
     update_after::Int
@@ -56,7 +56,7 @@ end
 - `start_policy`,
 - `γ = 0.99f0`,
 - `ρ = 0.995f0`,
-- `batch_size = 32`,
+- `batchsize = 32`,
 - `start_steps = 10000`,
 - `update_after = 1000`,
 - `update_freq = 50`,
@@ -74,7 +74,7 @@ function DDPGPolicy(;
     γ=0.99f0,
     ρ=0.995f0,
     na=1,
-    batch_size=32,
+    batchsize=32,
     start_steps=10000,
     update_after=1000,
     update_freq=50,
@@ -93,7 +93,7 @@ function DDPGPolicy(;
         γ,
         ρ,
         na,
-        batch_size,
+        batchsize,
         start_steps,
         start_policy,
         update_after,
@@ -137,7 +137,7 @@ function RLCore.update!(
 )
     length(traj) > p.update_after || return
     p.update_step % p.update_freq == 0 || return
-    inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batch_size))
+    inds, batch = sample(p.rng, traj, BatchSampler{SARTS}(p.batchsize))
     update!(p, batch)
 end
 

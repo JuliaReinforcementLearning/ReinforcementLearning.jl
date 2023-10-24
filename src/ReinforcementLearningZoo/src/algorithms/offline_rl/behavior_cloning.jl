@@ -17,18 +17,18 @@ end
 
 - `approximator`: calculate the logits of possible actions directly
 - `explorer=GreedyExplorer()` 
-- `batch_size::Int = 32`
+- `batchsize::Int = 32`
 - `min_reservoir_history::Int = 100`, number of transitions that should be experienced before updating the `approximator`. 
 - `rng = Random.default_rng()`
 """
 function BehaviorCloningPolicy(;
     approximator::A,
     explorer::AbstractExplorer=GreedyExplorer(),
-    batch_size::Int=32,
+    batchsize::Int=32,
     min_reservoir_history::Int=100,
     rng=Random.default_rng()
 ) where {A}
-    sampler = BatchSampler{(:state, :action)}(batch_size; rng=rng)
+    sampler = BatchSampler{(:state, :action)}(batchsize; rng=rng)
     BehaviorCloningPolicy(approximator, explorer, sampler, min_reservoir_history)
 end
 
@@ -54,7 +54,7 @@ function RLCore.update!(p::BehaviorCloningPolicy, batch::NamedTuple{(:state, :ac
 end
 
 function RLCore.update!(p::BehaviorCloningPolicy, t::Any)
-    (length(t) <= p.min_reservoir_history || length(t) <= p.sampler.batch_size) && return
+    (length(t) <= p.min_reservoir_history || length(t) <= p.sampler.batchsize) && return
 
     _, batch = p.sampler(t)
     update!(p, batch)

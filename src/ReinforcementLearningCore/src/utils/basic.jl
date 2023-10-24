@@ -10,6 +10,7 @@ export global_norm,
     orthogonal
 
 using FillArrays: Trues
+using GPUArrays
 
 #####
 # Zygote
@@ -87,7 +88,20 @@ flatten_batch(x::AbstractArray) = reshape(x, size(x)[1:end-2]..., :)
 # RLUtils
 #####
 
-function find_all_max(x)
+function find_all_max(x::A) where {A <: AbstractArray}
+    v = maximum(x)
+    indices = Vector{Int}(undef, count(==(v), x))
+    j = 1
+    for i in eachindex(x)
+        if x[i] == v
+            indices[j] = i
+            j += 1
+        end
+    end
+    v, indices
+end
+
+function find_all_max(x::A) where {A <: AbstractGPUArray}
     v = maximum(x)
     v, findall(==(v), x)
 end

@@ -14,11 +14,11 @@ function Base.convert(::Type{CRL.AbstractEnv}, env::AbstractEnv)
     CommonRLEnv(env)
 end
 
-CRL.@provide CRL.reset!(env::CommonRLEnv) = reset!(env.env)
-CRL.@provide CRL.actions(env::CommonRLEnv) = action_space(env.env)
-CRL.@provide CRL.terminated(env::CommonRLEnv) = is_terminated(env.env)
+CRL.reset!(env::CommonRLEnv) = reset!(env.env)
+CRL.actions(env::CommonRLEnv) = action_space(env.env)
+CRL.terminated(env::CommonRLEnv) = is_terminated(env.env)
 
-CRL.@provide function CRL.act!(env::CommonRLEnv, a)
+function CRL.act!(env::CommonRLEnv, a)
     act!(env.env, a)
     reward(env.env)
 end
@@ -39,14 +39,14 @@ function find_state_style(ss::Tuple, s)
 end
 
 # !!! may need to be extended by user
-CRL.@provide CRL.observe(env::CommonRLEnv) = state(env.env)
+CRL.observe(env::CommonRLEnv) = state(env.env)
 
 CRL.provided(::typeof(CRL.state), env::CommonRLEnv) = !isnothing(find_state_style(env.env, InternalState))
 CRL.state(env::CommonRLEnv) = state(env.env, find_state_style(env.env, InternalState))
 
-CRL.@provide CRL.clone(env::CommonRLEnv) = CommonRLEnv(copy(env.env))
-CRL.@provide CRL.render(env::CommonRLEnv) = @error "unsupported yet..."
-CRL.@provide CRL.player(env::CommonRLEnv) = current_player(env.env)
+CRL.clone(env::CommonRLEnv) = CommonRLEnv(copy(env.env))
+CRL.render(env::CommonRLEnv) = @error "unsupported yet..."
+CRL.player(env::CommonRLEnv) = current_player(env.env)
 
 CRL.valid_actions(x::CommonRLEnv) = legal_action_space(x.env)
 CRL.provided(::typeof(CRL.valid_actions), env::CommonRLEnv) =
@@ -56,7 +56,7 @@ CRL.valid_action_mask(x::CommonRLEnv) = legal_action_space_mask(x.env)
 CRL.provided(::typeof(CRL.valid_action_mask), env::CommonRLEnv) =
     ActionStyle(env.env) === FullActionSet()
 
-CRL.@provide CRL.observations(env::CommonRLEnv) = state_space(env.env)
+CRL.observations(env::CommonRLEnv) = state_space(env.env)
 
 #####
 # RLBaseEnv

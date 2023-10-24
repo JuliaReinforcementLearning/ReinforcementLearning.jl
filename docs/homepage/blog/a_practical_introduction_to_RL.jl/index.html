@@ -14804,7 +14804,7 @@ M1987.51 198.898 L2280.57 198.898 L2280.57 95.2176 L1987.51 95.2176  Z
 <div class="prompt input_prompt">In&nbsp;[28]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">Trajectories</span><span class="o">.</span><span class="n">CircularArraySARTTraces</span><span class="p">(;</span><span class="n">capacity</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<div class=" highlight hl-julia"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">Trajectories</span><span class="o">.</span><span class="n">CircularArraySARTSTraces</span><span class="p">(;</span><span class="n">capacity</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -15129,7 +15129,7 @@ M1048.31 1426.48 L1048.31 1366.51 L1499.66 1366.51 L1499.66 1426.48 L1048.31 142
                 <span class="p">)</span> <span class="o">|&gt;</span> <span class="n">cpu</span><span class="p">,</span>
                 <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(),</span>
             <span class="p">),</span>
-            <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+            <span class="n">batchsize</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
             <span class="n">min_replay_history</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
             <span class="n">loss_func</span> <span class="o">=</span> <span class="n">huber_loss</span><span class="p">,</span>
             <span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span><span class="p">,</span>

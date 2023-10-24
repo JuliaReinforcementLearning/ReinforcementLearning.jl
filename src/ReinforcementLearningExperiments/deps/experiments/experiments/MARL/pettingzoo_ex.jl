@@ -22,20 +22,19 @@ function RLCore.Experiment(
     agent = Agent(
         policy=QBasedPolicy(
             learner=DQNLearner(
-                approximator=Approximator(
-                    model=TwinNetwork(
+                approximator=TargetNetwork(
+                    Approximator(
                         Chain(
                             Dense(ns, 128, relu; init=glorot_uniform(rng)),
                             Dense(128, 128, relu; init=glorot_uniform(rng)),
                             Dense(128, na; init=glorot_uniform(rng)),
-                        );
-                        sync_freq=100
-                    ),
-                    optimiser=Adam(),
+                            ),
+                        optimiser=Adam()
+                        ),
+                    sync_freq=100
                 ),
                 n=n,
                 γ=γ,
-                is_enable_double_DQN=is_enable_double_DQN,
                 loss_func=huber_loss,
                 rng=rng,
             ),
@@ -47,14 +46,14 @@ function RLCore.Experiment(
             ),
         ),
         trajectory=Trajectory(
-            container=CircularArraySARTTraces(
+            container=CircularArraySARTSTraces(
                 capacity=1000,
                 state=Float32 => (ns,),
             ),
             sampler=NStepBatchSampler{SS′ART}(
                 n=n,
                 γ=γ,
-                batch_size=32,
+                batchsize=32,
                 rng=rng
             ),
             controller=InsertSampleRatioController(

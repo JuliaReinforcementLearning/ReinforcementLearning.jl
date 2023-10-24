@@ -4,7 +4,6 @@ export AbstractHook,
     StepsPerEpisode,
     RewardsPerEpisode,
     TotalRewardPerEpisode,
-    TotalBatchRewardPerEpisode,
     BatchStepsPerEpisode,
     TimePerStep,
     DoEveryNEpisode,
@@ -108,24 +107,26 @@ Store each reward of each step in every episode in the field of `rewards`.
 """
 struct RewardsPerEpisode{T} <: AbstractHook where {T<:Number}
     rewards::Vector{Vector{T}}
-    empty_vect::Vector{T}
 
     function RewardsPerEpisode{T}() where {T<:Number}
-        new{T}(Vector{Vector{T}}(), Vector{T}())
+        new{T}(Vector{Vector{T}}())
     end
 
     function RewardsPerEpisode()
-        new{Float64}(Vector{Vector{Float64}}(), Vector{Float64}())
+        RewardsPerEpisode{Float64}()
     end
 end
 
 Base.getindex(h::RewardsPerEpisode) = h.rewards
 
-Base.push!(h::RewardsPerEpisode, ::PreEpisodeStage, agent, env) = push!(h.rewards, h.empty_vect)
-Base.push!(h::RewardsPerEpisode, ::PreEpisodeStage, agent, env, ::Symbol) = push!(h, PreEpisodeStage(), agent, env)
+function Base.push!(h::RewardsPerEpisode{T}, ::PreEpisodeStage, agent, env) where {T<:Number}
+    push!(h.rewards, T[])
+end
 
-Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.rewards[end], reward(env))
-Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(h.rewards[end], reward(env, player))
+Base.push!(h::RewardsPerEpisode, s::PreEpisodeStage, agent, env, ::Symbol) = push!(h, s, agent, env)
+
+Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(last(h.rewards), reward(env))
+Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(last(h.rewards), reward(env, player))
 
 #####
 # TotalRewardPerEpisode
@@ -205,104 +206,6 @@ function Base.push!(hook::TotalRewardPerEpisode,
 end
 
 #####
-# TotalBatchRewardPerEpisode
-#####
-struct TotalBatchRewardPerEpisode{T,F} <: AbstractHook where {T<:Union{Val{true},Val{false}}, F<:Number}
-    rewards::Vector{Vector{F}}
-    reward::Vector{F}
-    is_display_on_exit::Bool
-end
-
-Base.getindex(h::TotalBatchRewardPerEpisode) = h.rewards
-
-"""
-    TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit=true)
-
-Similar to [`TotalRewardPerEpisode`](@ref), but is specific to environments
-which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
-If `is_display_on_exit` is set to `true`, a ribbon plot will be shown to reflect
-the mean and std of rewards.
-"""
-function TotalBatchRewardPerEpisode{F}(batch_size::Int; is_display_on_exit::Bool = true) where {F<:Number}
-    TotalBatchRewardPerEpisode{is_display_on_exit, F}(
-        [[] for _ = 1:batch_size],
-        zeros(F, batch_size),
-        is_display_on_exit,
-    )
-end
-
-function TotalBatchRewardPerEpisode(batch_size::Int; is_display_on_exit::Bool = true)
-    TotalBatchRewardPerEpisode{Float64}(batch_size; is_display_on_exit = is_display_on_exit)
-end
-
-
-function Base.push!(hook::TotalBatchRewardPerEpisode, 
-    ::PostActStage,
-    agent,
-    env,
-)
-    hook.reward .+= reward(env)
-    return
-end
-
-function Base.push!(hook::TotalBatchRewardPerEpisode, 
-    ::PostActStage,
-    agent::P,
-    env::E,
-    player::Symbol,
-) where {P <: AbstractPolicy, E <: AbstractEnv}
-    hook.reward .+= reward(env, player)
-    return
-end
-
-function Base.push!(hook::TotalBatchRewardPerEpisode, ::PostEpisodeStage, agent, env)
-    push!.(hook.rewards, hook.reward)
-    hook.reward .= 0
-    return
-end
-
-function Base.show(io::IO, hook::TotalBatchRewardPerEpisode{true, F}) where {F<:Number}
-    if sum(length(i) for i in hook.rewards) > 0
-        n = minimum(map(length, hook.rewards))
-        m = mean([@view(x[1:n]) for x in hook.rewards])
-        s = std([@view(x[1:n]) for x in hook.rewards])
-        p = lineplot(
-            m,
-            title = "Avg total reward per episode",
-            xlabel = "Episode",
-            ylabel = "Score",
-        )
-        lineplot!(p, m .- s)
-        lineplot!(p, m .+ s)
-        println(io, p)
-    else
-        println(io, typeof(hook))
-    end
-end
-
-function Base.push!(hook::TotalBatchRewardPerEpisode{true, F}, 
-    ::PostExperimentStage,
-    agent,
-    env,
-) where {F<:Number}
-    display(hook)
-end
-
-# Pass through as no need for multiplayer customization
-function Base.push!(hook::TotalBatchRewardPerEpisode, 
-    stage::Union{PostEpisodeStage, PostExperimentStage},
-    agent,
-    env,
-    player::Symbol
-)
-    push!(hook,
-        stage,
-        agent,
-        env,
-    )
-end
-
-#####
 # BatchStepsPerEpisode
 #####
 
@@ -314,13 +217,13 @@ end
 Base.getindex(h::BatchStepsPerEpisode) = h.steps
 
 """
-    BatchStepsPerEpisode(batch_size::Int; tag = "TRAINING")
+    BatchStepsPerEpisode(batchsize::Int; tag = "TRAINING")
 
 Similar to [`StepsPerEpisode`](@ref), but is specific to environments
 which return a `Vector` of rewards (a typical case with `MultiThreadEnv`).
 """
-function BatchStepsPerEpisode(batch_size::Int)
-    BatchStepsPerEpisode([Int[] for _ = 1:batch_size], zeros(Int, batch_size))
+function BatchStepsPerEpisode(batchsize::Int)
+    BatchStepsPerEpisode([Int[] for _ = 1:batchsize], zeros(Int, batchsize))
 end
 
 function Base.push!(hook::BatchStepsPerEpisode, 

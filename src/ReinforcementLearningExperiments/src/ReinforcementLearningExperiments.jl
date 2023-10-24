@@ -12,7 +12,6 @@ const EXPERIMENTS_DIR = joinpath(@__DIR__, "experiments")
 #     include(joinpath(EXPERIMENTS_DIR, f))
 # end
 
-
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_NFQ_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_BasicDQN_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_DQN_CartPole.jl"))
@@ -25,8 +24,8 @@ include(joinpath(EXPERIMENTS_DIR, "JuliaRL_VPG_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_TRPO_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "JuliaRL_MPO_CartPole.jl"))
 include(joinpath(EXPERIMENTS_DIR, "IDQN_TicTacToe.jl"))
-
-
+include(joinpath(EXPERIMENTS_DIR, "DQN_CartPoleGPU.jl"))
+include(joinpath(EXPERIMENTS_DIR, "JuliaRL_SAC_Pendulum.jl"))
 
 # dynamic loading environments
 function __init__()

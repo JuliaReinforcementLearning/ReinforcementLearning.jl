@@ -1,19 +1,17 @@
 using Test
-using ReinforcementLearningEnvironments
 using ReinforcementLearningTrajectories
-using ReinforcementLearningCore
 using ReinforcementLearningBase
 using DomainSets
 
 @testset "MultiAgentPolicy" begin
     trajectory_1 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1),
+        CircularArraySARTSTraces(; capacity = 1),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
 
     trajectory_2 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1),
+        CircularArraySARTSTraces(; capacity = 1),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
@@ -32,7 +30,6 @@ end
         BatchStepsPerEpisode(10),
         RewardsPerEpisode(),
         StepsPerEpisode(),
-        TotalBatchRewardPerEpisode(10),
         TotalRewardPerEpisode(),
         TimePerStep()
     )
@@ -56,13 +53,13 @@ end
 
 @testset "Basic TicTacToeEnv (Sequential) env checks" begin
     trajectory_1 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1),
+        CircularArraySARTSTraces(; capacity = 1),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
 
     trajectory_2 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1),
+        CircularArraySARTSTraces(; capacity = 1),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
@@ -86,8 +83,8 @@ end
     @test multiagent_hook.hooks[:Cross].steps[1] > 0
 
     @test RLBase.is_terminated(env)
-    @test RLEnvs.is_win(env, :Cross) isa Bool
-    @test RLEnvs.is_win(env, :Nought) isa Bool
+    @test is_win(env, :Cross) isa Bool
+    @test is_win(env, :Nought) isa Bool
     @test RLBase.reward(env, :Cross) == (RLBase.reward(env, :Nought) * -1)
     @test RLBase.legal_action_space_mask(env, :Cross) == falses(9)
     @test RLBase.legal_action_space(env) == []
@@ -106,13 +103,13 @@ end
 
 @testset "Basic RockPaperScissors (simultaneous) env checks" begin
     trajectory_1 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1, action = Any => (1,), state = Any => (1,), reward = Any => (2,)),
+        CircularArraySARTSTraces(; capacity = 1, action = Any => (1,), state = Any => (1,), reward = Any => (2,)),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
 
     trajectory_2 = Trajectory(
-        CircularArraySARTTraces(; capacity = 1, action = Any => (1,), state = Any => (1,), reward = Any => (2,)),
+        CircularArraySARTSTraces(; capacity = 1, action = Any => (1,), state = Any => (1,), reward = Any => (2,)),
         BatchSampler(1),
         InsertSampleRatioController(n_inserted = -1),
     )
@@ -138,7 +135,6 @@ end
         BatchStepsPerEpisode(10),
         RewardsPerEpisode(),
         StepsPerEpisode(),
-        TotalBatchRewardPerEpisode(10),
         TotalRewardPerEpisode(),
         TimePerStep()
     )
@@ -161,10 +157,9 @@ end
 
     @test multiagent_hook[Symbol(1)][1].steps[1][1] == 1
     @test -1 <= multiagent_hook[Symbol(1)][2].rewards[1][1] <= 1
-    @test multiagent_hook[Symbol(1)][3].steps[1] == 1
+    @test multiagent_hook[Symbol(1)][3].steps[1] == 1    
     @test -1 <= multiagent_hook[Symbol(1)][4].rewards[1][1] <= 1
-    @test -1 <= multiagent_hook[Symbol(1)][5].rewards[1][1] <= 1
-    @test 0 <= multiagent_hook[Symbol(1)][6].times[1] <= 5
+    @test 0 <= multiagent_hook[Symbol(1)][5].times[1] <= 5
 
     # Add more hook tests here...
 

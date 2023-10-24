@@ -7,18 +7,17 @@
 # ---
 
 #+ tangle=true
-using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo, ReinforcementLearningEnvironments
 using StableRNGs
 using Flux
 using Flux.Losses
 using IntervalSets
-using CUDA
 
 function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:SAC},
     ::Val{:Pendulum},
-    ::Nothing;
+    dummy = nothing;
     save_dir=nothing,
     seed=123
 )
@@ -35,60 +34,55 @@ function RLCore.Experiment(
         inner_env;
         action_mapping=x -> low + (x[1] + 1) * 0.5 * (high - low)
     )
-    init = glorot_uniform(rng)
+    init = Flux.glorot_uniform(rng)
 
-    create_policy_net() = NeuralNetworkApproximator(
-        model=GaussianNetwork(
-            pre=Chain(
+    create_policy_net() = Approximator(
+        SoftGaussianNetwork(
+            Chain(
                 Dense(ns, 30, relu, init=init),
                 Dense(30, 30, relu, init=init),
             ),
-            μ=Chain(Dense(30, na, init=init)),
-            σ=Chain(Dense(30, na, softplus, x -> clamp(x, typeof(x)(-10), typeof(x)(2)), init=init)),
+            Chain(Dense(30, na, init=init)),
+            Chain(Dense(30, na, softplus, init=init)),
         ),
-        optimizer=Adam(0.003),
-    ) |> gpu
+        Adam(0.003),
+    )
 
-    create_q_net() = NeuralNetworkApproximator(
-        model=Chain(
-            Dense(ns + na, 30, relu; init=init),
-            Dense(30, 30, relu; init=init),
-            Dense(30, 1; init=init),
-        ),
-        optimizer=Adam(0.003),
-    ) |> gpu
+    create_q_net() = TargetNetwork(
+        Approximator(
+            Chain(
+                Dense(ns + na, 30, relu; init=init),
+                Dense(30, 30, relu; init=init),
+                Dense(30, 1; init=init),
+            ),
+            Adam(0.003),),
+        ρ = 0.99f0
+    )
 
     agent = Agent(
         policy=SACPolicy(
             policy=create_policy_net(),
             qnetwork1=create_q_net(),
             qnetwork2=create_q_net(),
-            target_qnetwork1=create_q_net(),
-            target_qnetwork2=create_q_net(),
             γ=0.99f0,
-            τ=0.005f0,
             α=0.2f0,
-            batch_size=64,
             start_steps=1000,
-            start_policy=RandomPolicy(Space([-1.0 .. 1.0 for _ in 1:na]); rng=rng),
-            update_after=1000,
-            update_freq=1,
+            start_policy=RandomPolicy(-1.0 .. 1.0; rng=rng),
             automatic_entropy_tuning=true,
             lr_alpha=0.003f0,
             action_dims=action_dims,
             rng=rng,
-            device_rng=CUDA.functional() ? CUDA.CURAND.RNG() : rng
+            device_rng= rng
         ),
-        trajectory=CircularArraySARTTrajectory(
-            capacity=10000,
-            state=Vector{Float32} => (ns,),
-            action=Vector{Float32} => (na,),
-        ),
+        trajectory= Trajectory(
+            CircularArraySARTSTraces(capacity = 10000, state = Float32 => (ns,), action = Float32 => (na,)),
+            BatchSampler{SS′ART}(128),
+            InsertSampleRatioController(ratio = 1/1, threshold = 1000))
     )
 
-    stop_condition = StopAfterStep(10_000, is_show_progress=!haskey(ENV, "CI"))
-    hook = TotalRewardPerEpisode()
-    Experiment(agent, env, stop_condition, hook, "# Play Pendulum with SAC")
+    stop_condition = StopAfterStep(30_000, is_show_progress=!haskey(ENV, "CI"))
+    hook = TotalRewardPerEpisode() 
+    Experiment(agent, env, stop_condition, hook)
 end
 
 #+ tangle=false

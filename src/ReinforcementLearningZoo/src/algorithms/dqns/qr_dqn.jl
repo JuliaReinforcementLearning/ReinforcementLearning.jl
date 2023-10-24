@@ -22,7 +22,7 @@ function quantile_huber_loss(ŷ, y; κ=1.0f0)
     mean(sum(loss; dims=1))
 end
 
-Base.@kwdef mutable struct QRDQNLearner{A<:Approximator{<:TwinNetwork}, F, R} <: AbstractLearner
+Base.@kwdef mutable struct QRDQNLearner{A<:Union{Approximator,TargetNetwork}, F, R} <: AbstractLearner
     approximator::A
     n_quantile::Int
     loss_func::F = quantile_huber_loss
@@ -44,24 +44,24 @@ end
 
 function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
     A = learner.approximator
-    Q = A.model.source
-    Qₜ = A.model.target
+    Q = model(A)
+    Qₜ = RLCore.target(A)
     γ = learner.γ
     N = learner.n_quantile
     loss_func = learner.loss_func
 
     s, s′, a, r, t = map(x -> batch[x], SS′ART)
-    batch_size = length(r)
-    a = CartesianIndex.(a, 1:batch_size)
+    batchsize = length(r)
+    a = CartesianIndex.(a, 1:batchsize)
 
-    target_quantiles = reshape(Qₜ(s′), N, :, batch_size)
+    target_quantiles = reshape(Qₜ(s′), N, :, batchsize)
     qₜ = dropdims(mean(target_quantiles; dims=1); dims=1)
     aₜ = dropdims(argmax(qₜ, dims=1); dims=1)
     @views target_quantile_aₜ = target_quantiles[:, aₜ]
-    y = reshape(r, 1, batch_size) .+ γ .* reshape(1 .- t, 1, batch_size) .* target_quantile_aₜ
+    y = reshape(r, 1, batchsize) .+ γ .* reshape(1 .- t, 1, batchsize) .* target_quantile_aₜ
 
     gs = gradient(params(A)) do
-        q = reshape(Q(s), N, :, batch_size)
+        q = reshape(Q(s), N, :, batchsize)
         @views ŷ = q[:, a]
 
         loss = loss_func(ŷ, y)

@@ -44,7 +44,7 @@ function RLCore.Experiment(
                 ),
                 loss_func = huber_loss,
                 stack_size = nothing,
-                batch_size = 32,
+                batchsize = 32,
                 update_horizon = 1,
                 min_replay_history = 100,
                 update_freq = 1,

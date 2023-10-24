@@ -27,8 +27,8 @@ function RLCore.Experiment(
             Chain(Dense(4, 64, tanh), Dense(64,64,tanh)),
             Dense(64, 1),
             Dense(64, 1, softplus, init = Flux.glorot_uniform(gain = 0.1))), Adam(3f-4)),
-        qnetwork1 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
-        qnetwork2 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
+        qnetwork1 = TargetNetwork(Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)), ρ=0.99f0),
+        qnetwork2 = TargetNetwork(Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)), ρ=0.99f0),
         action_sample_size = 32,
         rng = rng,
         ϵμ = 0.01f0,
@@ -38,7 +38,7 @@ function RLCore.Experiment(
     agent = Agent(
         policy = policy,
         trajectory = Trajectory(
-            CircularArraySARTTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (1,)),
+            CircularArraySARTSTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (1,)),
             MetaSampler(
                 actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
                 critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 2000)
@@ -68,8 +68,8 @@ function RLCore.Experiment(
         actor = Approximator(
             CategoricalNetwork(Chain(Dense(4, 64, tanh), Dense(64,64,tanh), Dense(64,2))),
             Adam(3f-4)),
-        qnetwork1 = Approximator(Chain(Dense(6, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
-        qnetwork2 = Approximator(Chain(Dense(6, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
+        qnetwork1 = TargetNetwork(Approximator(Chain(Dense(6, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)), ρ=0.99f0),
+        qnetwork2 = TargetNetwork(Approximator(Chain(Dense(6, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)), ρ=0.99f0),
         action_sample_size = 32,
         rng = rng,
         ϵμ = 1f-2,
@@ -78,7 +78,7 @@ function RLCore.Experiment(
     agent = Agent(
         policy = policy,
         trajectory = Trajectory(
-            CircularArraySARTTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (2,)),
+            CircularArraySARTSTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (2,)),
             MetaSampler(
                 actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
                 critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 2000)
@@ -111,8 +111,8 @@ function RLCore.Experiment(
             pre = Chain(Dense(4, 64, tanh), Dense(64,64,tanh)),
             μ = Dense(64, 1),
             Σ = Dense(64, 1)), Adam(3f-4)),
-        qnetwork1 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
-        qnetwork2 = Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)),
+        qnetwork1 = TargetNetwork(Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)), ρ=0.99f0),
+        qnetwork2 = TargetNetwork(Approximator(Chain(Dense(5, 64, gelu), Dense(64,64,gelu), Dense(64,1)), Adam(3f-4)), ρ=0.99f0),
         action_sample_size = 32,
         rng = rng,
         ϵμ = 0.01f0,
@@ -122,7 +122,7 @@ function RLCore.Experiment(
     agent = Agent(
         policy = policy,
         trajectory = Trajectory(
-            CircularArraySARTTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (1,)),
+            CircularArraySARTSTraces(capacity = 1000, state = Float32 => (4,), action = Float32 => (1,)),
             MetaSampler(
                 actor = MultiBatchSampler(BatchSampler{(:state,)}(32), 10),
                 critic = MultiBatchSampler(BatchSampler{SS′ART}(32), 2000)

@@ -43,7 +43,7 @@ in the range: `0.0:0.1:0.5`.
 in `TFRecord.read`.
 - `tf_reader_sz::Int=10_000`: the size of the `Channel`, `channel_size` that is returned by 
 `TFRecord.read`.
-- `batch_size::Int=256`: The number of samples within the batches that are returned by the `Channel`.
+- `batchsize::Int=256`: The number of samples within the batches that are returned by the `Channel`.
 - `n_preallocations::Int=nthreads()*12`: the size of the buffer in the `Channel` that is returned.
 
 !!! note
@@ -60,7 +60,7 @@ function rl_unplugged_bsuite_dataset(
     shuffle_buffer_size::Int=10_000,
     tf_reader_bufsize::Int=10_000,
     tf_reader_sz::Int=10_000,
-    batch_size::Int=256,
+    batchsize::Int=256,
     n_preallocations::Int=nthreads()*12
 )   
     n = nthreads()
@@ -115,21 +115,21 @@ function rl_unplugged_bsuite_dataset(
     ob_size = game=="mountain_car" ? 3 : 6 
 
     if game == "catch"
-        obs_template = Array{Float32, 3}(undef, 10, 5, batch_size)
+        obs_template = Array{Float32, 3}(undef, 10, 5, batchsize)
     else
-        obs_template = Array{Float32, 2}(undef, ob_size, batch_size)
+        obs_template = Array{Float32, 2}(undef, ob_size, batchsize)
     end
 
     buffer = BSuiteRLTransition(
         copy(obs_template),
-        Array{Int, 1}(undef, batch_size),
-        Array{Float32, 1}(undef, batch_size),
-        Array{Bool, 1}(undef, batch_size),
+        Array{Int, 1}(undef, batchsize),
+        Array{Float32, 1}(undef, batchsize),
+        Array{Bool, 1}(undef, batchsize),
         copy(obs_template),
     )
 
     res = RingBuffer(buffer;taskref=taskref, sz=n_preallocations) do buff
-        Threads.@threads for i in 1:batch_size
+        Threads.@threads for i in 1:batchsize
             batch!(buff, take!(transitions), i)
         end
     end

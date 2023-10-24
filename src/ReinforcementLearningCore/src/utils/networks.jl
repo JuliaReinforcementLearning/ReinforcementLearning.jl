@@ -32,17 +32,26 @@ export GaussianNetwork
 Returns `μ` and `σ` when called.  Create a distribution to sample from using
 `Normal.(μ, σ)`. `min_σ` and `max_σ` are used to clip the output from
 `σ`. `pre` is a shared body before the two heads of the NN. σ should be > 0. 
-You may enforce this using a `softplus` output activation. 
+You may enforce this using a `softplus` output activation. The `squash` function is
+applied elementwise to the action. If squash is `tanh`, a correction is applied to the
+logpdf. Other squashing functions are not supported except for identity.
 """
-Base.@kwdef struct GaussianNetwork{P,U,S}
+
+logpdfcorrection(z, ::F) where F <: typeof(tanh) = -sum(log.(1 .- tanh.(z).^2), dims = 1)
+logpdfcorrection(s, f) = 0
+inversesquash(::F) where F <: typeof(tanh) = atanh
+inversesquash(::F) where F <: typeof(identity) = identity
+
+Base.@kwdef struct GaussianNetwork{P,U,S,F}
     pre::P = identity
     μ::U
     σ::S
     min_σ::Float32 = 0.0f0
     max_σ::Float32 = Inf32
+    squash::F
 end
 
-GaussianNetwork(pre, μ, σ) = GaussianNetwork(pre, μ, σ, 0.0f0, Inf32)
+GaussianNetwork(pre, μ, σ; squash = identity) = GaussianNetwork(pre, μ, σ, 0.0f0, Inf32, squash)
 
 @functor GaussianNetwork
 
@@ -63,10 +72,10 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, 
             μ .+ σ .* noise
         end
         if is_return_log_prob
-            logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
-            return z, logp_π
+            logp_π = diagnormlogpdf(μ, σ, z) .+ logpdfcorrection(z, typeof(model.squash))
+            return model.squash.(z), logp_π
         else
-            return z
+            return model.squash.(z)
         end
     else
         return μ, σ
@@ -76,8 +85,8 @@ end
 """
     (model::GaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
 
-Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batch_size)`.
-`state` must be 3D tensor with dimensions `(state_size x 1 x batch_size)`. Always returns the logpdf of each action along.
+Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batchsize)`.
+`state` must be 3D tensor with dimensions `(state_size x 1 x batchsize)`. Always returns the logpdf of each action along.
 """
 function (model::GaussianNetwork)(rng::AbstractRNG, s::AbstractArray{<:Any, 3}, action_samples::Int)
     x = model.pre(s)
@@ -87,8 +96,8 @@ function (model::GaussianNetwork)(rng::AbstractRNG, s::AbstractArray{<:Any, 3}, 
         noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
         μ .+ σ .* noise
     end
-    logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
-    return z, logp_π
+    logp_π = diagnormlogpdf(μ, σ, z) .+ logpdfcorrection(z, typeof(model.squash))
+    return model.squash.(z), logp_π
 end
 
 function (model::GaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
@@ -103,7 +112,92 @@ function (model::GaussianNetwork)(state, action)
     x = model.pre(state)
     μ, raw_σ = model.μ(x), model.σ(x)
     σ = clamp.(raw_σ, model.min_σ, model.max_σ)
-    logp_π = sum(normlogpdf(μ, σ, action) .- (2.0f0 .* (log(2.0f0) .- action .- softplus.(-2.0f0 .* action))), dims=1)
+    logp_π = diagnormlogpdf(μ, σ, inversesquash(model.squash).(action)) .+ logpdfcorrection(inversesquash(model.squash).(action), typeof(model.squash))
+    return logp_π
+end
+
+#####
+# SoftGaussianNetwork
+#####
+
+export SoftGaussianNetwork
+
+"""
+    SoftGaussianNetwork(;pre=identity, μ, σ, min_σ=0f0, max_σ=Inf32, squash = tanh)
+
+Like `GaussianNetwork` but with a differentiable reparameterization trick. Mainly used for
+SAC. Returns `μ` and `σ` when called.  Create a distribution to sample from using
+`Normal.(μ, σ)`. `min_σ` and `max_σ` are used to clip the output from
+`σ`. `pre` is a shared body before the two heads of the NN. σ should be > 0. 
+You may enforce this using a `softplus` output activation. Actions are squashed by a tanh
+and a correction is applied to the logpdf.
+"""
+Base.@kwdef struct SoftGaussianNetwork{P,U,S}
+    pre::P = identity
+    μ::U
+    σ::S
+    min_σ::Float32 = 0.0f0
+    max_σ::Float32 = Inf32
+end
+
+SoftGaussianNetwork(pre, μ, σ) = SoftGaussianNetwork(pre, μ, σ, 0.0f0, Inf32)
+
+@functor SoftGaussianNetwork
+
+"""
+This function is compatible with a multidimensional action space.
+
+- `rng::AbstractRNG=Random.default_rng()`
+- `is_sampling::Bool=false`, whether to sample from the obtained normal distribution. 
+- `is_return_log_prob::Bool=false`, whether to calculate the conditional probability of getting actions in the given state.
+"""
+function (model::SoftGaussianNetwork)(rng::AbstractRNG, s; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    x = model.pre(s)
+    μ, raw_σ = model.μ(x), model.σ(x)
+    σ = clamp.(raw_σ, model.min_σ, model.max_σ)
+    if is_sampling
+        noise = randn(rng, Float32, size(μ))
+        z = μ .+ σ .* noise
+        if is_return_log_prob
+            logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
+            return  tanh.(z), logp_π
+        else
+            return tanh.(z)
+        end
+    else
+        return μ, σ
+    end
+end
+
+"""
+    (model::SoftGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
+
+Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batchsize)`.
+`state` must be 3D tensor with dimensions `(state_size x 1 x batchsize)`. Always returns the logpdf of each action along.
+"""
+function (model::SoftGaussianNetwork)(rng::AbstractRNG, s::AbstractArray{<:Any, 3}, action_samples::Int)
+    x = model.pre(s)
+    μ, raw_σ = model.μ(x), model.σ(x)
+    σ = clamp.(raw_σ, model.min_σ, model.max_σ)
+    noise = randn(rng, Float32, (size(μ, 1), action_samples, size(μ, 3))...)
+    z = μ .+ σ .* noise
+    logp_π = sum(normlogpdf(μ, σ, z) .- (2.0f0 .* (log(2.0f0) .- z .- softplus.(-2.0f0 .* z))), dims=1)
+    return tanh.(z), logp_π
+end
+
+function (model::SoftGaussianNetwork)(state; is_sampling::Bool=false, is_return_log_prob::Bool=false)
+    model(Random.default_rng(), state; is_sampling=is_sampling, is_return_log_prob=is_return_log_prob)
+end
+
+function (model::SoftGaussianNetwork)(state, action_samples::Int)
+    model(Random.default_rng(), state, action_samples)
+end
+
+function (model::SoftGaussianNetwork)(state, action)
+    x = model.pre(state)
+    μ, raw_σ = model.μ(x), model.σ(x)
+    σ = clamp.(raw_σ, model.min_σ, model.max_σ)
+    logp_π = sum(normlogpdf(μ, σ, atanh.(action)) .- (2.0f0 .* (log(2.0f0) .- atanh.(action) .- softplus.(-2.0f0 .* atanh.(action)))), dims=1)
     return logp_π
 end
 
@@ -118,8 +212,8 @@ export CovGaussianNetwork
 
 Returns `μ` and `Σ` when called where μ is the mean and Σ is a covariance
 matrix. Unlike GaussianNetwork, the output is 3-dimensional.  μ has dimensions
-`(action_size x 1 x batch_size)` and Σ has dimensions `(action_size x action_size x
-batch_size)`.  The Σ head of the `CovGaussianNetwork` should not directly return
+`(action_size x 1 x batchsize)` and Σ has dimensions `(action_size x action_size x
+batchsize)`.  The Σ head of the `CovGaussianNetwork` should not directly return
 a square matrix but a vector of length `action_size x (action_size + 1) ÷ 2`.
 This vector will contain elements of the uppertriangular cholesky decomposition
 of the covariance matrix, which is then reconstructed from it.  Sample from
@@ -138,11 +232,11 @@ end
 
 This function is compatible with a multidimensional action space. To work with covariance matrices, the outputs are 3D tensors.  If
 sampling, return an actions tensor with dimensions `(action_size x action_samples
-x batch_size)` and a `logp_π` tensor with dimensions `(1 x action_samples x batch_size)`. 
+x batchsize)` and a `logp_π` tensor with dimensions `(1 x action_samples x batchsize)`. 
 If not sampling, returns `μ`
-with dimensions `(action_size x 1 x batch_size)` and `L`, the lower triangular of
+with dimensions `(action_size x 1 x batchsize)` and `L`, the lower triangular of
 the cholesky decomposition of the covariance matrix, with dimensions
-`(action_size x action_size x batch_size)` The covariance matrices can be
+`(action_size x action_size x batchsize)` The covariance matrices can be
 retrieved with `Σ = stack(map(l -> l*l', eachslice(L, dims=3)); dims=3)`
 
 - `rng::AbstractRNG=Random.default_rng()`
@@ -152,7 +246,7 @@ retrieved with `Σ = stack(map(l -> l*l', eachslice(L, dims=3)); dims=3)`
   probability of getting actions in the given state.
 """
 function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}; is_sampling::Bool=false, is_return_log_prob::Bool=false)
-    batch_size = size(state, 3)
+    batchsize = size(state, 3)
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
     da = size(μ, 1)
@@ -160,7 +254,7 @@ function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:An
 
     if is_sampling
         z = ignore_derivatives() do
-            noise = randn(rng, eltype(μ), da, 1, batch_size)
+            noise = randn(rng, eltype(μ), da, 1, batchsize)
             z = copy(μ)
             for (m, l, n) in zip(eachslice(z, dims = 3), eachslice(L, dims=3), eachslice(noise, dims = 3))
                 m .+= l * n
@@ -201,17 +295,17 @@ end
 Sample `action_samples` actions per state in `state` and return the `actions,
 logpdf(actions)`.  This function is compatible with a multidimensional action
 space.  The outputs are 3D tensors with dimensions
-`(action_size x action_samples x batch_size)` and `(1 x action_samples x
-batch_size)` for `actions` and `logdpf` respectively.
+`(action_size x action_samples x batchsize)` and `(1 x action_samples x
+batchsize)` for `actions` and `logdpf` respectively.
 """
 function (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
-    batch_size = size(state, 3) #3
+    batchsize = size(state, 3) #3
     x = model.pre(state)
     μ, cholesky_vec = model.μ(x), model.Σ(x)
     da = size(μ, 1)
     L = vec_to_tril(cholesky_vec, da)
     z = ignore_derivatives() do
-        noise = randn(rng, eltype(μ), da, action_samples, batch_size)
+        noise = randn(rng, eltype(μ), da, action_samples, batchsize)
         stack(map(.+, eachslice(μ, dims=3), eachslice(L, dims=3) .* eachslice(noise, dims=3)); dims=3)
     end
     logp_π = mvnormlogpdf(μ, L, z)
@@ -226,10 +320,10 @@ end
     (model::CovGaussianNetwork)(state::AbstractArray, action::AbstractArray)
     
 Return the logpdf of the model sampling `action` when in `state`.  State must be
-a 3D tensor with dimensions `(state_size x 1 x batch_size)`.  Multiple actions may
+a 3D tensor with dimensions `(state_size x 1 x batchsize)`.  Multiple actions may
 be taken per state, `action` must have dimensions `(action_size x
-action_samples_per_state x batch_size)`. Returns a 3D tensor with dimensions `(1 x
-action_samples_per_state x batch_size)`.
+action_samples_per_state x batchsize)`. Returns a 3D tensor with dimensions `(1 x
+action_samples_per_state x batchsize)`.
 """
 function (model::CovGaussianNetwork)(state::AbstractArray{<:Any, 3}, action::AbstractArray{<:Any, 3})
     da = size(action, 1)
@@ -266,13 +360,13 @@ and `cholesky_matrix_to_vector_index(3, 2) == 5`
 cholesky_matrix_to_vector_index(i, j, da) = ((2da - j) * (j - 1)) ÷ 2 + i
 softplusbeta(x, beta = 10f0) = log(exp(x/beta) +1)*beta #a softer softplus to avoid vanishing values
 
-function cholesky_columns(cholesky_vec, j, batch_size, da) #return a slice (da x 1 x batchsize) containing the jth columns of the lower triangular cholesky decomposition of the covariance
+function cholesky_columns(cholesky_vec, j, batchsize, da) #return a slice (da x 1 x batchsize) containing the jth columns of the lower triangular cholesky decomposition of the covariance
     diag_idx = cholesky_matrix_to_vector_index(j, j, da)
     tc_diag = softplusbeta.(cholesky_vec[diag_idx:diag_idx, :, :]) .+ 1f-5
     other_idxs = cholesky_matrix_to_vector_index(j, j, da)+1:cholesky_matrix_to_vector_index(j + 1, j + 1, da)-1 #indices of elements between two diagonal elements
     tc_other = cholesky_vec[other_idxs, :, :]
     zs = ignore_derivatives() do
-        zs = similar(cholesky_vec, da - size(tc_other, 1) - 1, 1, batch_size)
+        zs = similar(cholesky_vec, da - size(tc_other, 1) - 1, 1, batchsize)
         zs .= zero(eltype(cholesky_vec))
         return zs
     end
@@ -283,8 +377,8 @@ end
 Transform a vector containing the non-zero elements of a lower triangular da x da matrix into that matrix.
 """
 function vec_to_tril(cholesky_vec, da)
-    batch_size = size(cholesky_vec, 3)    
-    return mapreduce(j->cholesky_columns(cholesky_vec, j, batch_size, da), hcat, 1:da)
+    batchsize = size(cholesky_vec, 3)    
+    return mapreduce(j->cholesky_columns(cholesky_vec, j, batchsize, da), hcat, 1:da)
 end
 
 #####
@@ -345,19 +439,19 @@ end
 """
     (model::CategoricalNetwork)([rng::AbstractRNG,] state::AbstractArray{<:Any, 3}, [mask::AbstractArray{Bool},] action_samples::Int)
 
-Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batch_size)`. 
+Sample `action_samples` actions from each state. Returns a 3D tensor with dimensions `(action_size x action_samples x batchsize)`. 
 Always returns the *logits* of each action along in a tensor with the same dimensions. The optional argument `mask` must be
 an Array of `Bool` with the same size as `state` expect for the first dimension that must
 have the length of the action vector. Actions mapped to `false` by mask have a logit equal to 
 `-Inf` and/or a zero-probability of being sampled.
 """
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, action_samples::Int)
-    logits = model.model(state) #da x 1 x batch_size 
+    logits = model.model(state) #da x 1 x batchsize 
     z = ignore_derivatives() do 
-        batch_size = size(state, 3) #3
+        batchsize = size(state, 3) #3
         da = size(logits, 1)
         log_probs = logsoftmax(logits, dims = 1)
-        gumbels = -log.(-log.(rand(rng, da, action_samples, batch_size))) .+ log_probs # Gumbel-Max trick
+        gumbels = -log.(-log.(rand(rng, da, action_samples, batchsize))) .+ log_probs # Gumbel-Max trick
         z = getindex.(argmax(gumbels, dims = 1), 1)
         reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
     end   
@@ -386,13 +480,13 @@ function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray, mas
 end
 
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}, mask::AbstractArray{Bool, 3}, action_samples::Int)
-    logits = model.model(state) #da x 1 x batch_size 
+    logits = model.model(state) #da x 1 x batchsize 
     logits .+= ifelse.(mask, 0f0, typemin(eltype(logits)))
     z = ignore_derivatives() do 
-        batch_size = size(state, 3) #3
+        batchsize = size(state, 3) #3
         da = size(logits, 1)
         log_probs = logsoftmax(logits, dims = 1)
-        gumbels = -log.(-log.(rand(rng, da, action_samples, batch_size))) .+ log_probs # Gumbel-Max trick
+        gumbels = -log.(-log.(rand(rng, da, action_samples, batchsize))) .+ log_probs # Gumbel-Max trick
         z = getindex.(argmax(gumbels, dims = 1), 1)
         reshape(onehotbatch(z, 1:size(logits,1)), size(gumbels)...) # reshape to 3D due to onehotbatch behavior
     end   
@@ -509,39 +603,4 @@ function vae_loss(model::VAE, state, action)
     recon_loss = Flux.Losses.mse(u, action)
     kl_loss = -0.5f0 * mean(1.0f0 .+ log.(σ .^ 2) .- μ .^ 2 .- σ .^ 2)
     return recon_loss, kl_loss
-end
-
-#####
-# TwinNetwork
-#####
-
-export TwinNetwork
-
-Base.@kwdef mutable struct TwinNetwork{S,T}
-    source::S
-    target::T
-    sync_freq::Int = 1
-    ρ::Float32 = 0.0f0
-    n_optimise::Int = 0
-end
-
-TwinNetwork(x; kw...) = TwinNetwork(; source=x, target=deepcopy(x), kw...)
-
-@functor TwinNetwork (source, target)
-
-Flux.trainable(model::TwinNetwork) = (model.source,)
-
-(model::TwinNetwork)(args...) = model.source(args...)
-
-function RLBase.optimise!(A::Approximator{<:TwinNetwork}, gs)
-    Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
-    M = A.model
-    M.n_optimise += 1
-
-    if M.n_optimise % M.sync_freq == 0
-        # polyak averaging
-        for (dest, src) in zip(Flux.params(M.target), Flux.params(M.source))
-            dest .= M.ρ .* dest .+ (1 - M.ρ) .* src
-        end
-    end
 end
