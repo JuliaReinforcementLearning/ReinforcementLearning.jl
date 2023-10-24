@@ -61,26 +61,23 @@ function RLCore.Experiment(
     trajectory= Trajectory(
             CircularArraySARTSTraces(capacity = 10000, state = Float32 => (ns,), action = Float32 => (na,)),
             BatchSampler{SS′ART}(64),
-            InsertSampleRatioController(ratio = 1/1, threshold = 0)) # There are no insertions in Offline RL, the controller is not used. It is used for the online finetuning however.
-    sac = SACPolicy(
-        policy=create_policy_net(),
-        qnetwork1=create_q_net(),
-        qnetwork2=create_q_net(),
-        γ=0.99f0,
-        α=0.2f0,
-        start_steps=0,
-        automatic_entropy_tuning=true,
-        lr_alpha=0.003f0,
-        action_dims=action_dims,
-        rng=rng,
-        device_rng= rng
-    )
+            InsertSampleRatioController(ratio = 1/1, threshold = 0)) # There are no insertions in Offline RL, the controller is not used.
     hook = TotalRewardPerEpisode() 
 
     agent = OfflineAgent(
         policy = CQLSACPolicy(
-            sac = sac,
-            finetune_experiment = Experiment(Agent(sac, trajectory), env, StopAfterStep(2_000, is_show_progress=!haskey(ENV, "CI")), hook)         
+                sac = SACPolicy(
+                policy=create_policy_net(),
+                qnetwork1=create_q_net(),
+                qnetwork2=create_q_net(),
+                γ=0.99f0,
+                α=0.2f0,
+                start_steps=0,
+                automatic_entropy_tuning=true,
+                lr_alpha=0.003f0,
+                action_dims=action_dims,
+                rng=rng,
+                device_rng= rng)
         ),
         trajectory = trajectory,
         offline_behavior = OfflineBehavior(Agent(RandomPolicy(-1.0 .. 1.0; rng=rng), trajectory))

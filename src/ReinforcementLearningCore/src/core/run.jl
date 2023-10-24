@@ -118,7 +118,6 @@ function _run(policy::AbstractPolicy,
 
     end
     push!(policy, PostExperimentStage(), env)
-    optimise!(policy, PostExperimentStage())
     push!(hook, PostExperimentStage(), policy, env)
     hook
 end
