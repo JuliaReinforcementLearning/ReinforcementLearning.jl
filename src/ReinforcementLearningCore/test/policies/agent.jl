@@ -39,4 +39,42 @@ import ReinforcementLearningCore.SRT
             end
         end
     end
+    @testset "OfflineAgent" begin
+        env = RandomWalk1D()
+        a_1 = OfflineAgent(
+            policy = RandomPolicy(),
+            trajectory = Trajectory(
+                CircularArraySARTSTraces(; capacity = 1_000),
+                DummySampler(),
+            ),
+        )
+        @test a_1.offline_behavior.agent === nothing
+        push!(a_1, PreExperimentStage(), env)
+        @test isempty(a_1.trajectory.container)
+
+        trajectory = Trajectory(
+                CircularArraySARTSTraces(; capacity = 1_000),
+                DummySampler(),
+            )
+        
+        a_2 = OfflineAgent(
+            policy = RandomPolicy(),
+            trajectory = trajectory,
+            offline_behavior = OfflineBehavior(
+                Agent(RandomPolicy(), trajectory),
+                steps = 5,
+            )
+        )
+        push!(a_2, PreExperimentStage(), env)
+        @test length(a_2.trajectory.container) == 5
+
+        for agent in [a_1, a_2]
+            action = RLBase.plan!(agent, env)
+            @test action in (1,2)
+            for stage in [PreEpisodeStage(), PreActStage(), PostActStage(), PostEpisodeStage()]
+                push!(agent, stage, env)
+                @test length(agent.trajectory.container) in (0,5)
+            end
+        end
+    end
 end

@@ -4,6 +4,9 @@ using Base.Threads: @spawn
 
 using Functors: @functor
 import Base.push!
+
+abstract type AbstractAgent <: AbstractPolicy end
+
 """
     Agent(;policy, trajectory) <: AbstractPolicy
 
@@ -13,7 +16,7 @@ is a Callable and its call method accepts varargs and keyword arguments to be
 passed to the policy. 
 
 """
-mutable struct Agent{P,T} <: AbstractPolicy
+mutable struct Agent{P,T} <: AbstractAgent
     policy::P
     trajectory::T
 
@@ -29,11 +32,11 @@ end
 
 Agent(;policy, trajectory) = Agent(policy, trajectory)
 
-RLBase.optimise!(agent::Agent, stage::S) where {S<:AbstractStage} = RLBase.optimise!(TrajectoryStyle(agent.trajectory), agent, stage)
-RLBase.optimise!(::SyncTrajectoryStyle, agent::Agent, stage::S) where {S<:AbstractStage} = RLBase.optimise!(agent.policy, stage, agent.trajectory)
+RLBase.optimise!(agent::AbstractAgent, stage::S) where {S<:AbstractStage} = RLBase.optimise!(TrajectoryStyle(agent.trajectory), agent, stage)
+RLBase.optimise!(::SyncTrajectoryStyle, agent::AbstractAgent, stage::S) where {S<:AbstractStage} = RLBase.optimise!(agent.policy, stage, agent.trajectory)
 
 # already spawn a task to optimise inner policy when initializing the agent
-RLBase.optimise!(::AsyncTrajectoryStyle, agent::Agent, stage::S) where {S<:AbstractStage} = nothing
+RLBase.optimise!(::AsyncTrajectoryStyle, agent::AbstractAgent, stage::S) where {S<:AbstractStage} = nothing
 
 #by default, optimise does nothing at all stage
 function RLBase.optimise!(policy::AbstractPolicy, stage::AbstractStage, trajectory::Trajectory) end
@@ -47,7 +50,7 @@ end
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
-function RLBase.plan!(agent::Agent, env::AbstractEnv)
+function RLBase.plan!(agent::AbstractAgent, env::AbstractEnv)
     RLBase.plan!(agent.policy, env)
 end
 
