@@ -50,7 +50,7 @@ jobs:
             ${{ runner.os }}-
       - name: Get changed files
         id: RLBase-changed
-        uses: tj-actions/changed-files@v35
+        uses: tj-actions/changed-files@v41
         with:
           files: |
             src/ReinforcementLearningBase/**
@@ -98,7 +98,7 @@ jobs:
             ${{ runner.os }}-
       - name: Get changed files
         id: RLCore-changed
-        uses: tj-actions/changed-files@v35
+        uses: tj-actions/changed-files@v41
         with:
           files: |
             src/ReinforcementLearningCore/**
@@ -149,7 +149,7 @@ jobs:
             ${{ runner.os }}-
       - name: Get changed files
         id: RLZoo-changed
-        uses: tj-actions/changed-files@v35
+        uses: tj-actions/changed-files@v41
         with:
           files: |
             src/ReinforcementLearningZoo/**
@@ -202,7 +202,7 @@ jobs:
             ${{ runner.os }}-
       - name: Get changed files
         id: RLEnvironments-changed
-        uses: tj-actions/changed-files@v35
+        uses: tj-actions/changed-files@v41
         with:
           files: |
             src/ReinforcementLearningEnvironments/**
@@ -258,7 +258,7 @@ jobs:
 
       - name: Get changed files
         id: RLExperiments-changed
-        uses: tj-actions/changed-files@v35
+        uses: tj-actions/changed-files@v41
         with:
           files: |
             src/ReinforcementLearningExperiments/**
@@ -288,7 +288,7 @@ jobs:
           fetch-depth: 0
       - name: Get changed files
         id: documentation-changed
-        uses: tj-actions/changed-files@v35
+        uses: tj-actions/changed-files@v41
         with:
           files: |
             docs/**
