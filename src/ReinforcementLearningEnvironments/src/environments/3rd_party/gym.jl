@@ -82,21 +82,12 @@ end
 
 function RLBase.is_terminated(env::GymEnv{T}) where {T}
     if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type) && length(env.state) == 5
-        _, _, isterminated, = convert(Tuple{T,Float64,Bool,Bool,PyDict}, env.state)
-        isterminated
+        _, _, isterminated, istruncated, = convert(Tuple{T,Float64,Bool,Bool,PyDict}, env.state)
+        isterminated || istruncated
     elseif pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type) && length(env.state) == 4
         @warn "Gym version outdated. Update gym to obtain termination and truncation info instead of done signal."
         _, _, isdone, = convert(Tuple{T,Float64,Bool,PyDict}, env.state)
         isdone
-    else
-        false
-    end
-end
-
-function is_truncated(env::GymEnv{T}) where {T}
-    if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type) && length(env.state) == 5
-        _, _, _, istruncated, = convert(Tuple{T,Float64,Bool,Bool,PyDict}, env.state)
-        istruncated
     else
         false
     end
