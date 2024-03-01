@@ -1,6 +1,6 @@
 name = "ReinforcementLearningEnvironments"
 uuid = "25e41dd2-4622-11e9-1641-f1adca772921"
-version = "0.8.5"
+version = "0.8.6"
 
 [deps]
 CommonRLInterface = "d842c3ba-07a1-494f-bbec-f5741b0a3e98"
@@ -22,6 +22,7 @@ CommonRLInterface = "^0.3.2"
 DelimitedFiles = "1"
 IntervalSets = "0.7"
 MacroTools = "0.5"
+OpenSpiel = "0.2.1"
 ReinforcementLearningBase = "0.12"
 ReinforcementLearningCore = "0.12, 0.13, 0.14, 0.15"
 Requires = "1.0"
@@ -42,4 +43,16 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TimerOutputs = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
 
 [targets]
-test = ["ArcadeLearningEnvironment", "Conda", "DomainSets", "OpenSpiel", "OrdinaryDiffEq", "PyCall", "ReinforcementLearningCore", "StableRNGs", "Statistics", "Test", "TimerOutputs"]
+test = [
+    "ArcadeLearningEnvironment",
+    "Conda",
+    "DomainSets",
+    "OpenSpiel",
+    "OrdinaryDiffEq",
+    "PyCall",
+    "ReinforcementLearningCore",
+    "StableRNGs",
+    "Statistics",
+    "Test",
+    "TimerOutputs",
+]
