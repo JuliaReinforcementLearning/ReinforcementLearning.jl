@@ -158,6 +158,8 @@ end
 
 function RLBase.prob(p::PPOPolicy{<:ActorCritic,Categorical}, state::AbstractArray, mask)
     logits = p.approximator.actor(send_to_device(device(p.approximator), state))
+    mask = send_to_device(device(p.approximator), mask)
+
     if !isnothing(mask)
         logits .+= ifelse.(mask, 0.0f0, typemin(Float32))
     end
