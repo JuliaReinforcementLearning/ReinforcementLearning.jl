@@ -1,13 +1,5 @@
-# ---
-# title: JuliaRL\_DQN\_MPESimple
-# cover:
-# description: DQN applied to MPE simple
-# date: 2023-02-01
-# author: "[Panajiotis Keßler](mailto:panajiotis@christoforidis.net)"
-# ---
-
 using PyCall
-using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo, ReinforcementLearningEnvironments
 using Flux
 using Flux: glorot_uniform
 
@@ -17,14 +9,14 @@ using Flux.Losses: huber_loss
 function RLCore.Experiment(
     ::Val{:JuliaRL},
     ::Val{:DQN},
-    ::Val{:MPESimple};
+    ::Val{:MPESimple},
     seed=123,
     n=1,
     γ=0.99f0,
     is_enable_double_DQN=true
 )
     rng = StableRNG(seed)
-    env = discrete2standard_discrete(PettingzooEnv("mpe.simple_v2"; seed=seed))
+    env = discrete2standard_discrete(PettingZooEnv("mpe.simple_v2"; seed=seed))
     ns, na = length(state(env)), length(action_space(env))
 
     agent = Agent(
@@ -75,10 +67,3 @@ function RLCore.Experiment(
     hook = TotalRewardPerEpisode()
     Experiment(agent, env, stop_condition, hook)
 end
-
-using Plots
-ex = E`JuliaRL_DQN_MPESimple`
-run(ex)
-plot(ex.hook.rewards)
-savefig("JuliaRL_DQN_MPESimple.png")
-
