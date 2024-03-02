@@ -31,14 +31,14 @@ jobs:
           - x64
           # - arm64
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 100
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         env:
           cache-name: cache-artifacts
         with:
@@ -50,7 +50,7 @@ jobs:
             ${{ runner.os }}-
       - name: Get changed files
         id: RLBase-changed
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v42
         with:
           files: |
             src/ReinforcementLearningBase/**
@@ -79,14 +79,14 @@ jobs:
           - x64
           # - arm64
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 100
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         env:
           cache-name: cache-artifacts
         with:
@@ -98,7 +98,7 @@ jobs:
             ${{ runner.os }}-
       - name: Get changed files
         id: RLCore-changed
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v42
         with:
           files: |
             src/ReinforcementLearningCore/**
@@ -130,14 +130,14 @@ jobs:
           - x64
           # - arm64
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 100
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         env:
           cache-name: cache-artifacts
         with:
@@ -149,7 +149,7 @@ jobs:
             ${{ runner.os }}-
       - name: Get changed files
         id: RLZoo-changed
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v42
         with:
           files: |
             src/ReinforcementLearningZoo/**
@@ -183,14 +183,14 @@ jobs:
           - x64
           # - arm64
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 100
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         env:
           cache-name: cache-artifacts
         with:
@@ -202,7 +202,7 @@ jobs:
             ${{ runner.os }}-
       - name: Get changed files
         id: RLEnvironments-changed
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v42
         with:
           files: |
             src/ReinforcementLearningEnvironments/**
@@ -238,14 +238,14 @@ jobs:
           - x64
           # - arm64
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 100
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         env:
           cache-name: cache-artifacts
         with:
@@ -258,7 +258,7 @@ jobs:
 
       - name: Get changed files
         id: RLExperiments-changed
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v42
         with:
           files: |
             src/ReinforcementLearningExperiments/**
@@ -283,12 +283,12 @@ jobs:
     name: Documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Get changed files
         id: documentation-changed
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v42
         with:
           files: |
             docs/**

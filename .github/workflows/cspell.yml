@@ -12,11 +12,11 @@ jobs:
   spellchecking:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         name: Check out the code
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         name: Run spell check
         with:
-          node-version: "14"
+          node-version: "21"
       - run: npm install -g cspell
       - run: cspell --config ./.cspell/cspell.json "**/*.jl" "**/*.md"
