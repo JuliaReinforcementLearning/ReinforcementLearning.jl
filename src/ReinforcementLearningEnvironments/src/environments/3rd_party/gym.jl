@@ -33,7 +33,7 @@ function GymEnv(name::String; seed::Union{Int,Nothing}=nothing)
     elseif obs_space isa Space{<:Dict}
         PyDict
     else
-        error("don't know how to get the observation type from observation space of $obs_space")
+        error("Don't know how to get the observation type from observation space of $obs_space")
     end
     env = GymEnv{obs_type,typeof(act_space),typeof(obs_space),typeof(pyenv)}(
         pyenv,
