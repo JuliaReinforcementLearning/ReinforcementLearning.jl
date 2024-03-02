@@ -102,7 +102,12 @@ function test_interfaces!(env)
 
         while !is_terminated(Y)
             A, A′ = legal_action_space(X), legal_action_space(Y)
-            @test A == A′
+            if A isa WrappedDomain
+                # Temporary accommodation for DomainSets.jl lack of == for non-fixed length Arrays / Vectors
+                @test typeof(A) == typeof(A′) 
+            else
+                @test A == A′
+            end
             a = rand(rng, A)
             act!(Y, a)
             act!(X, a)

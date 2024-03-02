@@ -167,7 +167,7 @@ function Base.show(io::IO, m::MIME"image/png", env::AtariEnv)
     show(io, m, p)
 end
 
-Base.show(io::IO, t::MIME"text/plain", env::AbstractEnv) = show(
+Base.show(io::IO, t::MIME"text/plain", env::AtariEnv) = show(
     IOContext(io, :is_show_state => false, :is_show_state_space => false),
     MIME"text/markdown"(),
     env,
