@@ -1,3 +1,5 @@
+import DomainSets
+
 #####
 # printing
 #####
@@ -102,7 +104,7 @@ function test_interfaces!(env)
 
         while !is_terminated(Y)
             A, A′ = legal_action_space(X), legal_action_space(Y)
-            if A isa WrappedDomain
+            if A isa DomainSets.WrappedDomain
                 # Temporary accommodation for DomainSets.jl lack of == for non-fixed length Arrays / Vectors
                 @test typeof(A) == typeof(A′) 
             else
