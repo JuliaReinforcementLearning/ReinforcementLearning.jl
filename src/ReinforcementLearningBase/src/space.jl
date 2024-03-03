@@ -38,7 +38,7 @@ function ==(a1::ArrayProductDomain, a2::ArrayProductDomain)
     try
         return isequaldomain(a1, a2)
     catch e
-        @warn "Use StaticArrays (e.g. SVector, SMatrix, or SArray when constructing `ArrayProductDomain` objects."
+        @warn "Use StaticArrays (e.g. SVector, SMatrix, or SArray when constructing `ArrayProductDomain` objects." maxlog=1
         return typeof(a1) == typeof(a2)
     end
 end
