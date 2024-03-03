@@ -20,7 +20,6 @@ cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [compat]
 CUDA = "4.0"
-cuDNN = "1"
 Distributions = "0.25"
 Flux = "0.13, 0.14"
 IntervalSets = "0.7"
