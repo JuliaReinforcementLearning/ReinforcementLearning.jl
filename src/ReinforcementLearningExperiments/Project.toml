@@ -19,10 +19,12 @@ Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [compat]
-CUDA = "5"
+CUDA = "4.0"
+cuDNN = "1"
 Distributions = "0.25"
 Flux = "0.13, 0.14"
 IntervalSets = "0.7"
+Metal = "1.0"
 Reexport = "1"
 ReinforcementLearningBase = "0.12"
 ReinforcementLearningCore = "0.13.1"
@@ -35,7 +37,11 @@ julia = "1.9"
 
 [extras]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
+Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
+Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [targets]
-test = ["CUDA", "Test"]
+test = ["CUDA", "cuDNN", "Metal", "Preferences", "Test", "UUIDs"]
