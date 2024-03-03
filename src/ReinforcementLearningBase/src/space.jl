@@ -62,7 +62,7 @@ function ==(a1::NamedTupleProductDomain, a2::NamedTupleProductDomain)
     try
         return isequaldomain(a1, a2)
     catch e
-        @warn "Use StaticArrays (e.g. SVector, SMatrix, or SArray when constructing `NamedTupleProductDomain` objects."
+        @warn "Use StaticArrays (e.g. SVector, SMatrix, or SArray when constructing `NamedTupleProductDomain` objects." maxlog=1
         return typeof(a1) == typeof(a2)
     end
 end
