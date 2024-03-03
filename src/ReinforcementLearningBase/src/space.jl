@@ -1,6 +1,8 @@
 export ArrayProductDomain
 
 import DomainSets
+import Base.==
+
 @reexport using DomainSets: ×, (..), fullspace, TupleProductDomain
 
 struct ArrayProductDomain{A<:AbstractArray,DD<:AbstractArray} <: DomainSets.ProductDomain{A}
@@ -31,6 +33,16 @@ DomainSets.toexternalpoint(d::ArrayProductDomain, y) =
 
 DomainSets.promote_pair(x::AbstractArray, d::DomainSets.Domain{<:AbstractArray}) = x, d
 
+# NOTE: This is a patch to maintain current behavior while using DomainSets >=0.7
+function ==(a1::ArrayProductDomain, a2::ArrayProductDomain)
+    try
+        return isequaldomain(a1, a2)
+    catch e
+        @warn "Use StaticArrays (e.g. SVector, SMatrix, or SArray when constructing `ArrayProductDomain` objects." maxlog=1
+        return typeof(a1) == typeof(a2)
+    end
+end
+
 #####
 export NamedTupleProductDomain
 
@@ -43,6 +55,16 @@ function NamedTupleProductDomain(; kv...)
     t = TupleProductDomain(values(kv)...)
     name2ind = NamedTuple(k => i for (i, k) in enumerate(keys(kv)))
     NamedTupleProductDomain(t, name2ind)
+end
+
+# NOTE: This is a patch to maintain current behavior while using DomainSets >=0.7
+function ==(a1::NamedTupleProductDomain, a2::NamedTupleProductDomain)
+    try
+        return isequaldomain(a1, a2)
+    catch e
+        @warn "Use StaticArrays (e.g. SVector, SMatrix, or SArray when constructing `NamedTupleProductDomain` objects." maxlog=1
+        return typeof(a1) == typeof(a2)
+    end
 end
 
 DomainSets.components(d::NamedTupleProductDomain) = components(d.tuple_product_domain)

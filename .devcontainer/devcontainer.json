@@ -1,0 +1,14 @@
+{
+  "customizations": {
+      "vscode": {
+          "extensions": [
+              "julialang.language-julia"
+          ]
+      }
+  },
+  "runArgs": [
+      "--privileged"
+  ],
+  "dockerFile": "Dockerfile",
+  "updateContentCommand": "julia -e 'using Pkg; Pkg.develop(path=\"src/ReinforcementLearningBase\"); Pkg.develop(path=\"src/ReinforcementLearningEnvironments\"); Pkg.develop(path=\"src/ReinforcementLearningCore\"); Pkg.develop(path=\"src/ReinforcementLearningZoo\");'"
+}
