@@ -1,5 +1,7 @@
-using Test, Flux, CUDA, ChainRulesCore, LinearAlgebra, Distributions
-using Flux: params, gradient, unsqueeze
+using Test, Flux, ChainRulesCore, LinearAlgebra, Distributions, ReinforcementLearningCore
+using Flux: params, gradient, unsqueeze, InvDecay, gpu, cpu
+import ReinforcementLearningBase: RLBase
+
 @testset "Approximators" begin
     #= These may need to be updated due to recent changes
     @testset "TabularApproximator" begin
