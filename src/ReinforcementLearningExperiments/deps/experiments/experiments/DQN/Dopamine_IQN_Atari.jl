@@ -182,7 +182,7 @@ function RLCore.Experiment(
 )
     rng = Random.default_rng()
     Random.seed!(rng, seed)
-    device_rng = CUDA.functional() ? CUDA.CURAND.RNG() : rng
+    device_rng = ((@isdefined CUDA) && CUDA.functional()) ? CUDA.CURAND.RNG() : rng
     Random.seed!(device_rng, isnothing(seed) ? nothing : hash(seed + 1))
 
     if isnothing(save_dir)

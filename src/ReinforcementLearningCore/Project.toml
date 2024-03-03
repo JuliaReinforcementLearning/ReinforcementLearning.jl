@@ -39,6 +39,7 @@ FillArrays = "0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 1"
 Flux = "0.13, 0.14"
 Functors = "0.1, 0.2, 0.3, 0.4"
 GPUArrays = "8, 9, 10"
+Metal = "1.0"
 Parsers = "2"
 ProgressMeter = "1"
 Reexport = "1"
@@ -54,8 +55,11 @@ julia = "1.9"
 [extras]
 CommonRLInterface = "d842c3ba-07a1-494f-bbec-f5741b0a3e98"
 DomainSets = "5b8099bc-c8ec-5219-889f-1d9e522a28bf"
+Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
+Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [targets]
-test = ["CommonRLInterface", "DomainSets", "Test", "Random"]
+test = ["CommonRLInterface", "DomainSets", "Metal", "Preferences", "Test", "UUIDs"]

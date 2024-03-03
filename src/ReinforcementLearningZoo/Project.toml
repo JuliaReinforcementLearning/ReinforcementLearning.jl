@@ -18,7 +18,6 @@ ReinforcementLearningBase = "e575027e-6cd6-5018-9292-cdc6200d2b44"
 ReinforcementLearningCore = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
-cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [compat]
 CUDA = "4, 5"
@@ -27,6 +26,7 @@ Distributions = "0.25"
 Flux = "0.13, 0.14"
 Functors = "0.2, 0.3, 0.4"
 LogExpFunctions = "0.3"
+
 MLUtils = "0.4"
 NNlib = "0.8, 0.9"
 Optim = "1"
@@ -38,7 +38,11 @@ cuDNN = "1"
 julia = "1.9"
 
 [extras]
+Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
+Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
+cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [targets]
-test = ["Test"]
+test = ["Metal", "Preferences", "Test", "UUIDs", "cuDNN"]

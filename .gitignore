@@ -33,6 +33,7 @@ docs/experiments
 # environment.
 Manifest.toml
 **/Manifest.toml
+LocalPreferences.toml
 
 .vscode/*
 
@@ -59,3 +60,5 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+
+
