@@ -18,6 +18,8 @@ using ReinforcementLearningTrajectories
 using CircularArrayBuffers
 using Flux
 
+@info "Flux.GPU_BACKEND = $(Flux.GPU_BACKEND)")
+
 include("environments/randomwalk1D.jl")
 include("environments/tictactoe.jl")
 include("environments/rockpaperscissors.jl")
