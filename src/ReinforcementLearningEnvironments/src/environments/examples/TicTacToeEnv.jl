@@ -1,7 +1,6 @@
 export TicTacToeEnv
 
 import ReinforcementLearningBase: RLBase
-import ReinforcementLearningCore: RLCore
 import CommonRLInterface
 
 mutable struct TicTacToeEnv <: AbstractEnv
