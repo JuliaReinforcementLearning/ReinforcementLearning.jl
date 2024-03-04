@@ -4,6 +4,7 @@ version = "0.10.1"
 
 [deps]
 Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+CircularArrayBuffers = "9de3a189-e0c0-4e15-ba3b-b14b9fb0aec1"
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -22,8 +23,9 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 Adapt = "3, 4"
-CUDA = "4, 5"
 ChainRulesCore = "1"
+CircularArrayBuffers = "0.1.12"
+CUDA = "4, 5"
 Distributions = "0.25"
 Flux = "0.14"
 Functors = "0.2, 0.3, 0.4"
