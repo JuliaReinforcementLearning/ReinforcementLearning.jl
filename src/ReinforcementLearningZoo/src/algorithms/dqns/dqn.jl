@@ -31,8 +31,18 @@ function generate_q_function(n::Int64)
     return q_function
 end
 
-function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
+function RLBase.optimise!(learner::DQNLearner{TargetNetwork}, batch::NamedTuple)
+    optimiser_state = gpu(learner.approximator.network.optimiser_state)
+    _optimise!(learner, batch, optimiser_state)
+end
+
+function RLBase.optimise!(learner::DQNLearner{Approximator}, batch::NamedTuple)
     optimiser_state = gpu(learner.approximator.optimiser_state)
+    _optimise!(learner, batch, optimiser_state)
+end
+
+
+function _optimise!(learner::DQNLearner, batch::NamedTuple, optimiser_state::NamedTuple)
     A = learner.approximator
     Q = A.model.source
     Qₜ = A.model.target
