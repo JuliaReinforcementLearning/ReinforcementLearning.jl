@@ -338,7 +338,7 @@ end
 Send all neural nets of the actor to a specified device.
 `rng` can be used to specificy a particular rng if desired, make sure this rng generates numbers on `device`. 
 =#
-function RLCore.send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ? CUDA.CURAND.RNG() : GLOBAL_RNG)
+function send_to_device(device, p::MPOPolicy; rng = device isa CuDevice ? CUDA.CURAND.RNG() : GLOBAL_RNG)
     sd(x) = send_to_device(device, x) 
     MPOPolicy(
         p.actor |> sd, 
@@ -367,7 +367,7 @@ end
 Send all neural nets of the actor to the cpu.
 `rng` can be used to specificy a particular rng if desired. 
 =#
-function RLCore.send_to_host(p::MPOPolicy; rng = GLOBAL_RNG)
+function send_to_host(p::MPOPolicy; rng = GLOBAL_RNG)
     send_to_device(Val{:cpu}, p, rng = rng)
 end
 
