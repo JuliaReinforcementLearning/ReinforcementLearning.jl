@@ -11,9 +11,11 @@ else
     CUDA.allowscalar(false)
 end
 
+using Flux
+using ReinforcementLearningExperiments
+
 @info "Flux.GPU_BACKEND = $(Flux.GPU_BACKEND)"
 
-using ReinforcementLearningExperiments
 
 run(E`JuliaRL_BasicDQN_CartPole`)
 run(E`JuliaRL_DQN_CartPole`)
