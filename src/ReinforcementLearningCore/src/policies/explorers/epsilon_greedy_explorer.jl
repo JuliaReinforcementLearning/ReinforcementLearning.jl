@@ -126,7 +126,7 @@ RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, x::Vector{I}, mask::Trues) w
 function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values::Vector{I}, mask::M) where {I<:Real, M<:Union{BitVector, Vector{Bool}}}
     ϵ = get_ϵ(s)
     s.step += 1
-    rand(s.rng) >= ϵ ? findmax(values, mask)[2] : rand(s.rng, findall(mask))
+    rand(s.rng) >= ϵ ? findmax_masked(values, mask)[2] : rand(s.rng, findall(mask))
 end
 
 #####
@@ -188,7 +188,7 @@ function RLBase.prob(s::EpsilonGreedyExplorer{<:Any,false}, values, mask)
     ϵ, n = get_ϵ(s), length(values)
     probs = zeros(n)
     probs[mask] .= ϵ / sum(mask)
-    probs[findmax(values, mask)[2]] += 1 - ϵ
+    probs[findmax_masked(values, mask)[2]] += 1 - ϵ
     Categorical(probs; check_args=false)
 end
 
@@ -201,7 +201,7 @@ struct GreedyExplorer <: AbstractExplorer end
 RLBase.plan!(s::GreedyExplorer, x, mask::Trues) = s(x)
 
 RLBase.plan!(s::GreedyExplorer, values) = findmax(values)[2]
-RLBase.plan!(s::GreedyExplorer, values, mask) = findmax(values, mask)[2]
+RLBase.plan!(s::GreedyExplorer, values, mask) = findmax_masked(values, mask)[2]
 
 RLBase.prob(s::GreedyExplorer, values) =
     Categorical(onehot(findmax(values)[2], 1:length(values)); check_args=false)
@@ -210,4 +210,4 @@ RLBase.prob(s::GreedyExplorer, values, action::Integer) =
     findmax(values)[2] == action ? 1.0 : 0.0
 
 RLBase.prob(s::GreedyExplorer, values, mask) =
-    Categorical(onehot(findmax(values, mask)[2], length(values)); check_args=false)
+    Categorical(onehot(findmax_masked(values, mask)[2], length(values)); check_args=false)
