@@ -1,4 +1,3 @@
-
 @testset "approximators.jl" begin
     @testset "TargetNetwork" begin 
         m = Chain(Dense(4,1))
@@ -8,20 +7,24 @@
         p1 = Flux.destructure(model(tn))[1]
         pt1 = Flux.destructure(target(tn))[1]
         @test p1 == pt1
-        gs = Flux.Zygote.gradient(Flux.params(tn)) do 
-            sum(RLCore.forward(tn, ones(Float32, 4)))
+        input = gpu(ones(Float32, 4))
+        grad = Flux.Zygote.gradient(tn.network) do model
+            sum(RLCore.forward(model, input))
         end
-        RLCore.optimise!(tn, gs)
+
+        grad_model = grad[1].model
+        
+        RLCore.optimise!(tn, grad_model)
         @test p1 != Flux.destructure(model(tn))[1]
         @test p1 == Flux.destructure(target(tn))[1]
-        RLCore.optimise!(tn, gs)
+        RLCore.optimise!(tn, grad_model)
         @test p1 != Flux.destructure(model(tn))[1]
         @test p1 == Flux.destructure(target(tn))[1]
-        RLCore.optimise!(tn, gs)
+        RLCore.optimise!(tn, grad_model)
         @test Flux.destructure(target(tn))[1] == Flux.destructure(model(tn))[1]
         @test p1 != Flux.destructure(target(tn))[1]
         p2 = Flux.destructure(model(tn))[1]
-        RLCore.optimise!(tn, gs)
+        RLCore.optimise!(tn, grad_model)
         @test p2 != Flux.destructure(model(tn))[1]
         @test p2 == Flux.destructure(target(tn))[1]
     end
