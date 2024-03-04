@@ -45,8 +45,6 @@ function RLBase.plan!(explorer::AbstractExplorer, learner::AbstractLearner, env:
     return RLBase.plan!(explorer, forward(learner, env), legal_action_space_)
 end
 
-function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::Trajectory) end
-
 forward(A::Approximator, args...; kwargs...) = A.model(args...; kwargs...)
 
 RLBase.optimise!(A::Approximator, grad) =
