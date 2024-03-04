@@ -164,6 +164,9 @@ jobs:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v1
+      - name: "Manually add Conda.jl folder due to bug in its build step"
+        run: |
+          mkdir -p "/home/runner/.julia/conda/3/x86_64"      
       - name: Get changed files
         id: RLEnvironments-changed
         uses: tj-actions/changed-files@v42
