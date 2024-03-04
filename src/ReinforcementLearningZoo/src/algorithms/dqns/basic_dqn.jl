@@ -51,7 +51,7 @@ function RLCore.optimise!(
     batch::NamedTuple
 )
     approx = learner.approximator
-    optimiser_state = learner.approximator.optimiser_state
+    optimiser_state = gpu(learner.approximator.optimiser_state)
 
     γ = learner.γ
     loss_func = learner.loss_func
@@ -75,5 +75,5 @@ function RLCore.optimise!(
     end |> Flux.cpu
 
     # Optimization step
-    Flux.update!(optimiser_state, Flux.cpu(Q), grads[1])
+    Flux.update!(cpu(optimiser_state), Flux.cpu(Q), grads[1])
 end
