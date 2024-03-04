@@ -35,6 +35,18 @@ Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(An
 
 @functor Approximator (model,)
 
+function RLBase.plan!(explorer::AbstractExplorer, learner::AbstractLearner, env::AbstractEnv)
+    legal_action_space_ = RLBase.legal_action_space_mask(env)
+    RLBase.plan!(explorer, forward(learner, env), legal_action_space_)
+end
+
+function RLBase.plan!(explorer::AbstractExplorer, learner::AbstractLearner, env::AbstractEnv, player::Symbol)
+    legal_action_space_ = RLBase.legal_action_space_mask(env, player)
+    return RLBase.plan!(explorer, forward(learner, env), legal_action_space_)
+end
+
+function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::Trajectory) end
+
 forward(A::Approximator, args...; kwargs...) = A.model(args...; kwargs...)
 
 RLBase.optimise!(A::Approximator, grad) =
