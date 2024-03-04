@@ -3,25 +3,6 @@ export Approximator, TargetNetwork, target, model
 using Flux
 
 
-"""
-    Approximator(model, optimiser)
-
-Wraps a Flux trainable model and implements the `RLBase.optimise!(::Approximator, ::Gradient)` 
-interface. See the RLCore documentation for more information on proper usage.
-"""
-Base.@kwdef mutable struct Approximator{M,O}
-    model::M
-    optimiser::O
-end
-
-Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(AnnotatedStructTree, A))
-
-@functor Approximator (model,)
-
-forward(A::Approximator, args...; kwargs...) = A.model(args...; kwargs...)
-
-RLBase.optimise!(A::Approximator, gs) = Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
-
 target(ap::Approximator) = ap.model #see TargetNetwork
 model(ap::Approximator) = ap.model #see TargetNetwork
 
@@ -68,7 +49,7 @@ target(tn::TargetNetwork) = tn.target
 
 function RLBase.optimise!(tn::TargetNetwork, gs)
     A = tn.network
-    Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
+    Flux.Optimise.update!(A.optimiser_state, Flux.params(A), gs)
     tn.n_optimise += 1
 
     if tn.n_optimise % tn.sync_freq == 0
