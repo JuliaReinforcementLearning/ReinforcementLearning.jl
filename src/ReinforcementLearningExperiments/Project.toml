@@ -28,7 +28,7 @@ Reexport = "1"
 ReinforcementLearningBase = "0.12"
 ReinforcementLearningCore = "0.13.1"
 ReinforcementLearningEnvironments = "0.8"
-ReinforcementLearningZoo = "0.10.1"
+ReinforcementLearningZoo = "0.10.1, 0.8"
 StableRNGs = "1"
 Weave = "0.10"
 cuDNN = "1"
@@ -36,11 +36,11 @@ julia = "1.9"
 
 [extras]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
-cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
 Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
+cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [targets]
 test = ["Metal", "Preferences", "Test", "UUIDs"]
