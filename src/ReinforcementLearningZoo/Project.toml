@@ -3,6 +3,7 @@ uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
 version = "0.10.1"
 
 [deps]
+Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -20,13 +21,13 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
+Adapt = "3, 4"
 CUDA = "4, 5"
 ChainRulesCore = "1"
 Distributions = "0.25"
 Flux = "0.14"
 Functors = "0.2, 0.3, 0.4"
 LogExpFunctions = "0.3"
-
 MLUtils = "0.4"
 NNlib = "0.8, 0.9"
 Optim = "1"
