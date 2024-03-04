@@ -13,6 +13,7 @@ using OrdinaryDiffEq
 using TimerOutputs
 using Conda
 
+Conda.add("python")
 Conda.add("gym")
 Conda.add("numpy")
 
