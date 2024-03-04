@@ -113,16 +113,11 @@ function find_all_max(x, mask::AbstractVector{Bool})
     v, [k for (m, k) in zip(mask, keys(x)) if m && x[k] == v]
 end
 
-# !!! watch https://github.com/JuliaLang/julia/pull/35316#issuecomment-622629895
-# Base.findmax(f, domain) = mapfoldl(x -> (f(x), x), _rf_findmax, domain)
-# _rf_findmax((fm, m), (fx, x)) = isless(fm, fx) ? (fx, x) : (fm, m)
 
-# !!! type piracy
-Base.findmax(A::AbstractVector{T}, mask::AbstractVector{Bool}) where {T} =
+findmax_masked(A::AbstractVector{T}, mask::AbstractVector{Bool}) where {T} =
     findmax(ifelse.(mask, A, typemin(T)))
 
-Base.findmax(A::AbstractVector, mask::Trues) = findmax(A)
-
+findmax_masked(A::AbstractVector, mask::Trues) = findmax(A)
 
 const VectorOrMatrix = Union{AbstractMatrix,AbstractVector}
 
