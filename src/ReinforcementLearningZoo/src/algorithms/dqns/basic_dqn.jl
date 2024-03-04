@@ -1,7 +1,7 @@
 export BasicDQNLearner
 
 using Flux
-using Flux: gradient, params
+using Flux: gradient
 using Functors: @functor
 using ChainRulesCore: ignore_derivatives
 
@@ -23,17 +23,17 @@ own customized algorithm.
 - `loss_func=huber_loss`: the loss function to use.
 - `γ::Float32=0.99f0`: discount rate.
 """
-Base.@kwdef mutable struct BasicDQNLearner{Q, F} <: AbstractLearner
+Base.@kwdef struct BasicDQNLearner{Q, F} <: AbstractLearner
     approximator::Q
     loss_func::F = huber_loss
     γ::Float32 = 0.99f0
     # for debugging
-    loss::Float32 = 0.0f0
+    loss::Vector{Float32} = Float32[0.0f0] # Vector so it's mutable
 end
 
 @functor BasicDQNLearner (approximator,)
 
-RLCore.forward(L::BasicDQNLearner, s::AbstractArray) = RLCore.forward(L.approximator, s)
+RLCore.forward(L::BasicDQNLearner, s::A) where {A<:AbstractArray} = RLCore.forward(L.approximator, s)
 
 function RLCore.optimise!(learner::BasicDQNLearner, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory
@@ -41,28 +41,39 @@ function RLCore.optimise!(learner::BasicDQNLearner, ::PostActStage, trajectory::
     end
 end
 
+# Handle broadcast-related type instability
+function _q_metric(r, γ, t, q′)
+    r + γ * (1f0 - t) * q′
+end
+
 function RLCore.optimise!(
     learner::BasicDQNLearner,
     batch::NamedTuple
 )
+    approx = learner.approximator
+    optimiser_state = learner.approximator.optimiser_state
 
-    Q = learner.approximator
     γ = learner.γ
     loss_func = learner.loss_func
-    
-    s, s′, a, r, t = send_to_device(device(Q), batch)
+
+    s, s′, a, r, t = Flux.gpu(batch)
     a = CartesianIndex.(a, 1:length(a))
 
-    gs = gradient(params(Q)) do
-        q = RLCore.forward(Q, s)[a]
-        q′ = vec(maximum(RLCore.forward(Q, s′); dims=1))
-        G = @. r + γ * (1 - t) * q′
-        loss = loss_func(G, q)
-        ignore_derivatives() do
-            learner.loss = loss
-        end
-        loss
-    end
+    Q = approx.model
 
-    RLBase.optimise!(Q, gs)
+    q′ = maximum(Q(s′); dims=1) |> vec
+    G =  _q_metric.(r, γ, t, q′)
+
+    grads = Flux.gradient(Q) do Q
+        # Evaluate model and loss inside gradient context:
+        q = Q(s)[a]
+        loss_ = loss_func(G, q)
+        Flux.ignore_derivatives() do
+            learner.loss[1] = loss_
+        end
+        loss_
+    end |> Flux.cpu
+
+    # Optimization step
+    Flux.update!(optimiser_state, Flux.cpu(Q), grads[1])
 end
