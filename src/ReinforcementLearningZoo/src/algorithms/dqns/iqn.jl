@@ -29,8 +29,8 @@ end
 @functor ImplicitQuantileNet
 
 function (net::ImplicitQuantileNet)(s, emb)
-    features = net.ψ(s)  # (n_feature, batchsize)
-    emb_aligned = net.ϕ(emb)  # (n_feature, N * batchsize)
+    features = net.ψ(gpu(s))  # (n_feature, batchsize)
+    emb_aligned = net.ϕ(gpu(emb))  # (n_feature, N * batchsize)
     merged = unsqueeze(features, dims=2) .* reshape(emb_aligned, size(features, 1), :, size(features, 2))  # (n_feature, N, batchsize)
     quantiles = net.header(reshape(merged, size(merged)[1:end-2]..., :)) # flattern last two dimension first
     reshape(quantiles, :, size(merged, 2), size(merged, 3))  # (n_action, N, batchsize)
@@ -58,15 +58,15 @@ embed(x, Nₑₘ) = cos.(Float32(π) .* (1:Nₑₘ) .* reshape(x, 1, :))
 function RLCore.forward(learner::IQNLearner, s::A) where {A<:AbstractArray}
     batchsize = size(s)[end]
     τ = rand(learner.device_rng, Float32, learner.K, batchsize)
-    τₑₘ = embed(τ, learner.Nₑₘ)
+    τₑₘ = gpu(embed(τ, learner.Nₑₘ))
     quantiles = RLCore.forward(learner.approximator, s, τₑₘ)
     dropdims(mean(quantiles; dims=2); dims=2)
 end
 
 function RLCore.forward(L::IQNLearner, env::E) where {E<:AbstractEnv}
-    s = state(env) |> send_to_device(L.approximator)
+    s = env |> state |> gpu
 
-    q =  RLCore.forward(L, unsqueeze(s, dims=ndims(s) + 1)) |> vec
+    q =  RLCore.forward(L, unsqueeze(s, dims=ndims(s) + 1)) |> cpu |> vec
     q
 end
 
@@ -102,28 +102,27 @@ function RLBase.optimise!(learner::IQNLearner, batch::NamedTuple)
     aₜ = argmax(avg_Zt, dims=1)
     aₜ = aₜ .+ typeof(aₜ)(CartesianIndices((0:0, 0:N′-1, 0:0)))
     qₜ = reshape(Zt[aₜ], :, batchsize)
-    target = reshape(r, 1, batchsize) .+ learner.γ * reshape(1 .- t, 1, batchsize) .* qₜ  # reshape to allow broadcast
+    target = reshape(r, 1, batchsize) .+ learner.γ * reshape(1 .- t, 1, batchsize) .* cpu(qₜ)  # reshape to allow broadcast
 
     τ = rand(learner.device_rng, Float32, N, batchsize)
     τₑₘ = embed(τ, Nₑₘ)
     a = CartesianIndex.(repeat(a, inner=N), 1:(N*batchsize))
 
-    gs = gradient(params(Z)) do
+    gs = gradient(Z) do Z
         z_raw = Z(s, τₑₘ)
         z = reshape(z_raw, size(z_raw)[1:end-2]..., :)
         q = z[a]
 
-        TD_error = reshape(target, N′, 1, batchsize) .- reshape(q, 1, N, batchsize)
+        TD_error = gpu(reshape(target, N′, 1, batchsize)) .- reshape(q, 1, N, batchsize)
         # can't apply huber_loss in RLCore directly here
         abs_error = abs.(TD_error)
         quadratic = min.(abs_error, κ)
         linear = abs_error .- quadratic
         huber_loss = 0.5f0 .* quadratic .* quadratic .+ κ .* linear
 
-        # dropgrad
+        # dropgrad        
         raw_loss =
-            abs.(reshape(τ, 1, N, batchsize) .- ignore_derivatives(TD_error .< 0)) .*
-            huber_loss ./ κ
+            abs.(gpu(reshape(τ, 1, N, batchsize)) .- ignore_derivatives(TD_error .< 0)) .* huber_loss ./ κ
         loss_per_quantile = reshape(sum(raw_loss; dims=1), N, batchsize)
         loss_per_element = mean(loss_per_quantile; dims=1)  # use as priorities
         loss = mean(loss_per_element)
@@ -133,5 +132,5 @@ function RLBase.optimise!(learner::IQNLearner, batch::NamedTuple)
         loss
     end
 
-    RLBase.optimise!(A, gs)
+    # RLBase.optimise!(A, gs)
 end
