@@ -132,5 +132,5 @@ function RLBase.optimise!(learner::IQNLearner, batch::NamedTuple)
         loss
     end
 
-    # RLBase.optimise!(A, gs)
+    RLBase.optimise!(A, gs[1])
 end
