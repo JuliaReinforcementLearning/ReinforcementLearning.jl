@@ -13,10 +13,9 @@ Base.@kwdef mutable struct DQNLearner{A<:Union{Approximator,TargetNetwork}, F, R
     loss::Float32 = 0.0f0
 end
 
+RLCore.forward(L::DQNLearner, s::A) where {A<:AbstractArray}  = RLCore.forward(L.approximator, s)
 
 @functor DQNLearner (approximator,)
-
-RLCore.forward(L::DQNLearner, s::A) where {A<:AbstractArray}  = RLCore.forward(L.approximator, s)
 
 function RLCore.optimise!(learner::DQNLearner, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory
@@ -24,56 +23,38 @@ function RLCore.optimise!(learner::DQNLearner, ::PostActStage, trajectory::Traje
     end
 end
 
-function generate_q_function(n::Int64)
-    @eval function q_function(r::Float32, γ::Float32, t::Bool, q_next_action::Float32)
-        return r + γ ^ $n * (1f0 - t) * q_next_action
-    end
-    return q_function
-end
-
-function RLBase.optimise!(learner::DQNLearner{TargetNetwork}, batch::NamedTuple)
-    optimiser_state = gpu(learner.approximator.network.optimiser_state)
-    _optimise!(learner, batch, optimiser_state)
-end
-
-function RLBase.optimise!(learner::DQNLearner{Approximator}, batch::NamedTuple)
-    optimiser_state = gpu(learner.approximator.optimiser_state)
-    _optimise!(learner, batch, optimiser_state)
-end
-
-
-function _optimise!(learner::DQNLearner, batch::NamedTuple, optimiser_state::NamedTuple)
+function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
     A = learner.approximator
-    Q = A.model.source
-    Qₜ = A.model.target
-
+    Q = model(A)
+    Qt = RLCore.target(A)
+    
     γ = learner.γ
     loss_func = learner.loss_func
     n = learner.n
 
-    s, s_next, a, r, t = map(x -> batch[x], SS′ART) |> Flux.gpu
+    s, s_next, a, r, t = map(x -> batch[x], SS′ART)
     a = CartesianIndex.(a, 1:length(a))
+    s, s_next, a, r, t = gpu((s, s_next, a, r, t))
 
-    q_next = learner.is_enable_double_DQN ? Q(s_next) : Qₜ(s_next)
+    q_next = Qt(s_next)
 
     if haskey(batch, :next_legal_actions_mask)
         q_next .+= ifelse.(batch[:next_legal_actions_mask], 0.0f0, typemin(Float32))
     end
 
-    q_next_action = learner.is_enable_double_DQN ? Qₜ(s_next)[dropdims(argmax(q_next, dims=1), dims=1)] : dropdims(maximum(q_next; dims=1), dims=1)
+    q_next_action =  dropdims(maximum(q_next; dims=1), dims=1)
 
-    q_function_ = generate_q_function(n)
-    R = q_function_.(r, (γ,), t, q_next_action)
+    R = r .+ γ^n .* (1 .- t) .* q_next_action
 
-    grads = gradient(Q) do Q
+    gs = gradient(Q) do Q
         qₐ = Q(s)[a]
         loss = loss_func(R, qₐ)
         ignore_derivatives() do
-            learner.loss[1] = loss
+            learner.loss = loss
         end
         loss
-    end |> Flux.cpu
+    end
 
     # Optimization step
-    Flux.update!(cpu(optimiser_state), Flux.cpu(Q), grads[1])
+    RLBase.optimise!(A, gpu(gs[1]))
 end
