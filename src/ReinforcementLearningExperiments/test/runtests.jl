@@ -13,36 +13,46 @@ end
 
 using Flux
 using ReinforcementLearningExperiments
+using Test
 
 @info "Flux.GPU_BACKEND = $(Flux.GPU_BACKEND)"
 
+experiments = [
+    "JuliaRL_BasicDQN_CartPole",
+    "JuliaRL_DQN_CartPole",
+    "JuliaRL_DQNCartPole_GPU",
+    "JuliaRL_IQN_CartPole",
+    "JuliaRL_NFQ_CartPole",
+    "JuliaRL_PrioritizedDQN_CartPole",
+    "JuliaRL_QRDQN_CartPole",
+    "JuliaRL_REMDQN_CartPole",
+    "JuliaRL_Rainbow_CartPole"
+]
 
-run(E`JuliaRL_BasicDQN_CartPole`)
-run(E`JuliaRL_DQN_CartPole`)
-run(E`JuliaRL_DQNCartPole_GPU`)
-run(E`JuliaRL_IQN_CartPole`)
-run(E`JuliaRL_NFQ_CartPole`)
-run(E`JuliaRL_PrioritizedDQN_CartPole`)
-run(E`JuliaRL_QRDQN_CartPole`)
-run(E`JuliaRL_REMDQN_CartPole`)
-run(E`JuliaRL_Rainbow_CartPole`)
-#run(E`JuliaRL_VPG_CartPole`)
-#run(E`JuliaRL_TRPO_CartPole`)
-# run(E`JuliaRL_SAC_Pendulum`)
-# run(E`JuliaRL_CQLSAC_Pendulum`)
-# run(E`JuliaRL_MPODiscrete_CartPole`)
-# run(E`JuliaRL_MPOContinuous_CartPole`)
-# run(E`JuliaRL_MPOCovariance_CartPole`)
-# run(E`JuliaRL_BC_CartPole`)
-# run(E`JuliaRL_VMPO_CartPole`)
-# run(E`JuliaRL_BasicDQN_MountainCar`)
-# run(E`JuliaRL_DQN_MountainCar`)
-# run(E`JuliaRL_A2C_CartPole`)
-# run(E`JuliaRL_A2CGAE_CartPole`)
-# run(E`JuliaRL_PPO_CartPole`)
-# run(E`JuliaRL_MAC_CartPole`)
-# run(E`JuliaRL_DDPG_Pendulum`)
-# run(E`JuliaRL_TD3_Pendulum`)
-# run(E`JuliaRL_PPO_Pendulum`)
+for experiment_name in experiments
+    @testset "$experiment_name" begin
+        run(Experiment(experiment_name))
+    end
+end
 
-# run(E`JuliaRL_BasicDQN_SingleRoomUndirected`)
+deactivated_experiments = [
+    "JuliaRL_VPG_CartPole",
+    "JuliaRL_TRPO_CartPole",
+    "JuliaRL_SAC_Pendulum",
+    "JuliaRL_CQLSAC_Pendulum",
+    "JuliaRL_MPODiscrete_CartPole",
+    "JuliaRL_MPOContinuous_CartPole",
+    "JuliaRL_MPOCovariance_CartPole",
+    "JuliaRL_BC_CartPole",
+    "JuliaRL_VMPO_CartPole",
+    "JuliaRL_BasicDQN_MountainCar",
+    "JuliaRL_DQN_MountainCar",
+    "JuliaRL_A2C_CartPole",
+    "JuliaRL_A2CGAE_CartPole",
+    "JuliaRL_PPO_CartPole",
+    "JuliaRL_MAC_CartPole",
+    "JuliaRL_DDPG_Pendulum",
+    "JuliaRL_TD3_Pendulum",
+    "JuliaRL_PPO_Pendulum",
+    "JuliaRL_BasicDQN_SingleRoomUndirected"
+]
