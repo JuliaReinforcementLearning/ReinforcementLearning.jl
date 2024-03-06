@@ -27,14 +27,14 @@ end
 
 function RLCore.forward(L::RainbowLearner, s::A) where {A<:AbstractArray}
     logits = RLCore.forward(L.approximator, s)
-    q = L.support .* softmax(reshape(logits, :, L.n_actions))
+    q = gpu(collect(L.support)) .* softmax(reshape(logits, :, L.n_actions))
     sum(q, dims=1) |> vec
 end
 
 function RLBase.plan!(learner::RainbowLearner, env::AbstractEnv)
-    _s = send_to_device(device(learner.approximator), state(env))
+    _s = gpu(state(env))
     s = unsqueeze(_s, dims=ndims(s) + 1)
-    RLCore.forward(learner, s) |> vec |> send_to_host
+    RLCore.forward(learner, s) |> vec |> cpu
 end
 
 function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
@@ -46,30 +46,31 @@ function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
     loss_func = learner.loss_func
     n_atoms = learner.n_atoms
     n_actions = learner.n_actions
-    support = learner.support
+    support = gpu(collect(learner.support))
     delta_z = learner.delta_z
     update_horizon = learner.update_horizon
 
-    D = device(Q)
-    states = send_to_device(D, batch.state)
-    rewards = send_to_device(D, batch.reward)
-    terminals = send_to_device(D, batch.terminal)
-    next_states = send_to_device(D, batch.next_state)
+    states = gpu(batch.state)
+    rewards = gpu(batch.reward)
+    terminals = gpu(batch.terminal)
+    next_states = gpu(batch.next_state)
 
     batchsize = length(terminals)
-    actions = CartesianIndex.(batch.action, 1:batchsize)
+    actions = gpu(CartesianIndex.(batch.action, 1:batchsize))
+    batchsize = gpu(batchsize)
 
     target_support =
         reshape(rewards, 1, :) .+
         (reshape(support, :, 1) * reshape((γ^update_horizon) .* (1 .- terminals), 1, :))
 
-    next_logits = Qₜ(next_states)
+    next_logits = gpu(Qₜ(next_states))
+
     next_probs = reshape(softmax(reshape(next_logits, n_atoms, :)), n_atoms, n_actions, :)
 
     next_q = reshape(sum(support .* next_probs, dims=1), n_actions, :)
 
     if haskey(batch, :next_legal_actions_mask)
-        l′ = send_to_device(D, batch[:next_legal_actions_mask])
+        l′ = gpu(batch[:next_legal_actions_mask])
         next_q .+= ifelse.(l′, 0.0f0, typemin(Float32))
     end
 
@@ -90,26 +91,27 @@ function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
         updated_priorities = Vector{Float32}(undef, batchsize)
         weights = 1.0f0 ./ ((batch.priority .+ 1.0f-10) .^ β)
         weights ./= maximum(weights)
-        weights = send_to_device(D, weights)
         # TODO: init on device directly
     end
 
-    gs = gradient(params(A)) do
+    gs = gradient(A) do A
         logits = reshape(Q(states), n_atoms, n_actions, :)
         select_logits = logits[:, actions]
         # The original paper normalized logits, but using normalization and Flux.Losses.crossentropy is not as stable as using Flux.Losses.logitcrossentropy.
-        batch_losses = loss_func(select_logits, target_distribution)
+        batch_losses = loss_func(cpu(select_logits), cpu(target_distribution))
+
         loss = is_use_PER ? dot(vec(weights), vec(batch_losses)) * 1 // batchsize : mean(batch_losses)
+
         ignore_derivatives() do
             if is_use_PER
-                updated_priorities .= send_to_host(vec((batch_losses .+ 1.0f-10) .^ β))
+                updated_priorities .= vec((batch_losses .+ 1.0f-10) .^ β)
             end
             learner.loss = loss
         end
         loss
     end
 
-    RLBase.optimise!(A, gs)
+    RLBase.optimise!(A, gs[1])
 
     is_use_PER ? batch.key => updated_priorities : nothing
 end
@@ -141,7 +143,7 @@ end
 
 function RLBase.optimise!(learner::RainbowLearner, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory
-        res = RLBase.optimise!(learner, batch) |> send_to_host
+        res = RLBase.optimise!(learner, batch) |> cpu
         if !isnothing(res)
             k, p = res
             trajectory[:priority, k] = p
