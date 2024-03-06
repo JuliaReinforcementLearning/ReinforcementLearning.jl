@@ -40,7 +40,7 @@ The two common usages of TargetNetwork are
 Implements the `RLBase.optimise!(::TargetNetwork, ::Gradient)` interface to update the model with the gradient
 and the target with weights replacement or Polyak averaging.
 
-Note to developpers: `model(::TargetNetwork)` will return the trainable Flux model 
+Note to developers: `model(::TargetNetwork)` will return the trainable Flux model 
 and `target(::TargetNetwork)` returns the target model and `target(::Approximator)`
 returns the non-trainable Flux model. See the RLCore documentation.
 """
@@ -52,7 +52,7 @@ mutable struct TargetNetwork{M}
     n_optimise::Int
 end
 
-function TargetNetwork(x; sync_freq = 1, ρ = 0f0)
+function TargetNetwork(x; sync_freq=1, ρ=0.0f0)
     @assert 0 <= ρ <= 1 "ρ must in [0,1]"
     TargetNetwork(x, deepcopy(x.model), sync_freq, ρ, 0)
 end

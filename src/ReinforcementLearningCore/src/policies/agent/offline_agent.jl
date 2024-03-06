@@ -6,12 +6,12 @@ export OfflineAgent, OfflineBehavior
 Used to provide an OfflineAgent with a "behavior agent" that will generate the training data
 at the `PreExperimentStage`. If `agent` is `nothing` (by default), does nothing. The `trajectory` of agent should 
 be the same as that of the parent `OfflineAgent`.
-`steps` is the number of data elements to generate, defautls to the capacity of the trajectory.
+`steps` is the number of data elements to generate, defaults to the capacity of the trajectory.
 `reset_condition` is the episode reset condition for the data generation (defaults to `ResetAtTerminal()`).
 
 The behavior agent will interact with the main environment of the experiment to generate the data.
 """
-struct OfflineBehavior{A <: Union{<:Agent, Nothing}, R}
+struct OfflineBehavior{A<:Union{<:Agent,Nothing},R}
     agent::A
     steps::Int
     reset_condition::R
@@ -19,7 +19,7 @@ end
 
 OfflineBehavior() = OfflineBehavior(nothing, 0, ResetAtTerminal())
 
-function OfflineBehavior(agent; steps = ReinforcementLearningTrajectories.capacity(agent.trajectory.container.traces), reset_condition = ResetAtTerminal())
+function OfflineBehavior(agent; steps=ReinforcementLearningTrajectories.capacity(agent.trajectory.container.traces), reset_condition=ResetAtTerminal())
     if steps == Inf
         @error "`steps` is infinite, please provide a finite integer."
     end
@@ -32,15 +32,15 @@ end
 `OfflineAgent` is an `AbstractAgent` that, unlike the usual online `Agent`, does not interact with the environment
 during training in order to collect data. Just like `Agent`, it contains an `AbstractPolicy` to be trained an a `Trajectory`
 that contains the training data. The difference being that the trajectory is filled prior to training and is not updated.
-An `OfflineBehavior` can optionaly be provided to provide an second "behavior agent" that will
+An `OfflineBehavior` can optionally be provided to provide an second "behavior agent" that will
 generate the training data at the `PreExperimentStage`. Does nothing by default. 
 """
 struct OfflineAgent{P<:AbstractPolicy,T<:Trajectory,B<:OfflineBehavior} <: AbstractAgent
     policy::P
     trajectory::T
     offline_behavior::B
-    function OfflineAgent(policy::P, trajectory::T, offline_behavior = OfflineBehavior()) where {P<:AbstractPolicy, T<:Trajectory}
-        agent = new{P,T, typeof(offline_behavior)}(policy, trajectory, offline_behavior)
+    function OfflineAgent(policy::P, trajectory::T, offline_behavior=OfflineBehavior()) where {P<:AbstractPolicy,T<:Trajectory}
+        agent = new{P,T,typeof(offline_behavior)}(policy, trajectory, offline_behavior)
         if TrajectoryStyle(trajectory) === AsyncTrajectoryStyle()
             bind(trajectory, @spawn(optimise!(policy, trajectory)))
         end
@@ -48,12 +48,12 @@ struct OfflineAgent{P<:AbstractPolicy,T<:Trajectory,B<:OfflineBehavior} <: Abstr
     end
 end
 
-OfflineAgent(;policy, trajectory, offline_behavior = OfflineBehavior()) = OfflineAgent(policy, trajectory, offline_behavior)
+OfflineAgent(; policy, trajectory, offline_behavior=OfflineBehavior()) = OfflineAgent(policy, trajectory, offline_behavior)
 @functor OfflineAgent (policy,)
 
-Base.push!(::OfflineAgent{P,T, <: OfflineBehavior{Nothing}}, ::PreExperimentStage, env::AbstractEnv) where {P,T} = nothing
+Base.push!(::OfflineAgent{P,T,<:OfflineBehavior{Nothing}}, ::PreExperimentStage, env::AbstractEnv) where {P,T} = nothing
 #fills the trajectory with interactions generated with the behavior_agent at the PreExperimentStage.
-function Base.push!(agent::OfflineAgent{P,T, <: OfflineBehavior{<:Agent}}, ::PreExperimentStage, env::AbstractEnv) where {P,T}
+function Base.push!(agent::OfflineAgent{P,T,<:OfflineBehavior{<:Agent}}, ::PreExperimentStage, env::AbstractEnv) where {P,T}
     is_stop = false
     policy = agent.offline_behavior.agent
     steps = 0
@@ -71,6 +71,6 @@ function Base.push!(agent::OfflineAgent{P,T, <: OfflineBehavior{<:Agent}}, ::Pre
                 break
             end
         end # end of an episode
-    push!(policy, PostEpisodeStage(), env)
-    end    
+        push!(policy, PostEpisodeStage(), env)
+    end
 end
