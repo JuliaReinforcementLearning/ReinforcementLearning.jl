@@ -40,7 +40,7 @@ function RLBase.optimise!(learner::NFQ, ::PostEpisodeStage, trajectory::Trajecto
 end
 
 function RLBase.optimise!(learner::NFQ, batch::NamedTuple)
-    Q = model(learner.approximator)
+    Q = learner.approximator
     γ = learner.γ
     loss_func = learner.loss_function
     
@@ -56,7 +56,7 @@ function RLBase.optimise!(learner::NFQ, batch::NamedTuple)
                 q = RLCore.forward(Q, s)[a]
                 loss_func(G, q)
             end
-            RLBase.optimise!(Q, gs[1])
+            RLBase.optimise!(Q, gs[1].model)
         end
     end
 end
