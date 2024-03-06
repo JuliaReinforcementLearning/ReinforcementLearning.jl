@@ -16,8 +16,9 @@ function quantile_huber_loss(ŷ, y; κ=1.0f0)
     huber_loss = 0.5f0 .* quadratic .* quadratic .+ κ .* linear
 
     cum_prob = ignore_derivatives() do
-        send_to_device(device(y), range(0.5f0 / N; length=N, step=1.0f0 / N))
+        gpu(StepRangeLen(0.5f0 / N, 1.0f0 / N, N))
     end
+    
     loss = ignore_derivatives(abs.(cum_prob .- (Δ .< 0))) .* huber_loss
     mean(sum(loss; dims=1))
 end
@@ -50,7 +51,7 @@ function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
     N = learner.n_quantile
     loss_func = learner.loss_func
 
-    s, s′, a, r, t = map(x -> batch[x], SS′ART)
+    s, s′, a, r, t = gpu(map(x -> batch[x], SS′ART))
     batchsize = length(r)
     a = CartesianIndex.(a, 1:batchsize)
 
@@ -60,9 +61,9 @@ function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
     @views target_quantile_aₜ = target_quantiles[:, aₜ]
     y = reshape(r, 1, batchsize) .+ γ .* reshape(1 .- t, 1, batchsize) .* target_quantile_aₜ
 
-    gs = gradient(params(A)) do
+    gs = gradient(A) do A
         q = reshape(Q(s), N, :, batchsize)
-        @views ŷ = q[:, a]
+        ŷ = q[:, a]
 
         loss = loss_func(ŷ, y)
 
@@ -72,5 +73,5 @@ function RLBase.optimise!(learner::QRDQNLearner, batch::NamedTuple)
         loss
     end
 
-    RLBase.optimise!(A, gs)
+    RLBase.optimise!(A, gs[1])
 end
