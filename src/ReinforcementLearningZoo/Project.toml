@@ -1,9 +1,10 @@
 name = "ReinforcementLearningZoo"
 uuid = "d607f57d-ee1e-4ba7-bcf2-7734c1e31854"
-version = "0.10.1"
+version = "0.11.0"
 
 [deps]
-CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+CircularArrayBuffers = "9de3a189-e0c0-4e15-ba3b-b14b9fb0aec1"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
@@ -20,24 +21,26 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
-CUDA = "4, 5"
+Adapt = "3, 4"
 ChainRulesCore = "1"
+CircularArrayBuffers = "0.1.12"
+CUDA = "4, 5"
 Distributions = "0.25"
-Flux = "0.13, 0.14"
+Flux = "0.14"
 Functors = "0.2, 0.3, 0.4"
 LogExpFunctions = "0.3"
-
 MLUtils = "0.4"
 NNlib = "0.8, 0.9"
 Optim = "1"
 ReinforcementLearningBase = "0.12"
-ReinforcementLearningCore = "0.13.1"
+ReinforcementLearningCore = "0.14"
 StatsBase = "0.33, 0.34"
 Zygote = "0.6"
 cuDNN = "1"
 julia = "1.9"
 
 [extras]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
 Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
@@ -45,4 +48,4 @@ UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [targets]
-test = ["Metal", "Preferences", "Test", "UUIDs", "cuDNN"]
+test = ["CUDA", "Metal", "Preferences", "Test", "UUIDs", "cuDNN"]

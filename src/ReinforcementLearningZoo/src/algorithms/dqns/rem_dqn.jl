@@ -46,10 +46,12 @@ function RLBase.optimise!(learner::REMDQNLearner, batch::NamedTuple)
     else
         convex_polygon = ones(Float32, (1, ensemble_num))
     end
+    
+    convex_polygon = gpu(convex_polygon)
 
     convex_polygon ./= sum(convex_polygon)
-
-    s, s′, a, r, t = map(x -> batch[x], SS′ART)
+    
+    s, s′, a, r, t = gpu(map(x -> batch[x], SS′ART))
     a = CartesianIndex.(a, 1:length(a))
     batchsize = length(a)
 
@@ -64,7 +66,7 @@ function RLBase.optimise!(learner::REMDQNLearner, batch::NamedTuple)
     q′ = dropdims(maximum(qₜ; dims=1), dims=1)
     G = r .+ γ^n .* (1 .- t) .* q′
 
-    gs = gradient(params(A)) do
+    gs = gradient(A) do A
         q = Q(s)
         q = convex_polygon .* reshape(q, :, ensemble_num, batchsize)
         q = dropdims(sum(q, dims=2), dims=2)[a]
@@ -76,6 +78,6 @@ function RLBase.optimise!(learner::REMDQNLearner, batch::NamedTuple)
         loss
     end
 
-    RLBase.optimise!(A, gs)
+    RLBase.optimise!(A, gs[1])
 end
 

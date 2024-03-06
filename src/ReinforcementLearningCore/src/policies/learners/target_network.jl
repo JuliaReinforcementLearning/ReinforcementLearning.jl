@@ -3,25 +3,6 @@ export Approximator, TargetNetwork, target, model
 using Flux
 
 
-"""
-    Approximator(model, optimiser)
-
-Wraps a Flux trainable model and implements the `RLBase.optimise!(::Approximator, ::Gradient)` 
-interface. See the RLCore documentation for more information on proper usage.
-"""
-Base.@kwdef mutable struct Approximator{M,O}
-    model::M
-    optimiser::O
-end
-
-Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(AnnotatedStructTree, A))
-
-@functor Approximator (model,)
-
-forward(A::Approximator, args...; kwargs...) = A.model(args...; kwargs...)
-
-RLBase.optimise!(A::Approximator, gs) = Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
-
 target(ap::Approximator) = ap.model #see TargetNetwork
 model(ap::Approximator) = ap.model #see TargetNetwork
 
@@ -52,9 +33,11 @@ mutable struct TargetNetwork{M}
     n_optimise::Int
 end
 
-function TargetNetwork(x; sync_freq=1, ρ=0.0f0)
+function TargetNetwork(network; sync_freq = 1, ρ = 0f0)
     @assert 0 <= ρ <= 1 "ρ must in [0,1]"
-    TargetNetwork(x, deepcopy(x.model), sync_freq, ρ, 0)
+    # NOTE: model is pushed to gpu in Approximator, need to transfer to cpu before deepcopy, then push target model to gpu
+    target = gpu(deepcopy(cpu(network.model)))
+    TargetNetwork(network, target, sync_freq, ρ, 0)
 end
 
 @functor TargetNetwork (network, target)
@@ -66,9 +49,10 @@ forward(tn::TargetNetwork, args...) = forward(tn.network, args...)
 model(tn::TargetNetwork) = model(tn.network)
 target(tn::TargetNetwork) = tn.target
 
-function RLBase.optimise!(tn::TargetNetwork, gs)
+function RLBase.optimise!(tn::TargetNetwork, grad)
     A = tn.network
-    Flux.Optimise.update!(A.optimiser, Flux.params(A), gs)
+    optimise!(A, grad)
+
     tn.n_optimise += 1
 
     if tn.n_optimise % tn.sync_freq == 0

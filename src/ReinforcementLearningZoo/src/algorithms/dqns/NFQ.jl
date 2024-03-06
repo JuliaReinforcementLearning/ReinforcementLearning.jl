@@ -46,17 +46,17 @@ function RLBase.optimise!(learner::NFQ, batch::NamedTuple)
     
     (s, a, r, s′) = batch[[:state, :action, :reward, :next_state]]
     a = CartesianIndex.(a, 1:length(a))
-    s, a, r, s′ = map(x->send_to_device(device(Q), x), (s, a, r, s′))
+    s, a, r, s′ = gpu((s, a, r, s′))
     for _ = 1:learner.num_iterations
         q′ = vec(maximum(RLCore.forward(Q, s′); dims=1))
         G = r .+ γ .* q′
         # Make an input x samples x |action space| array -- Q --> samples x |action space| -- max --> samples
         for _ = 1:learner.epochs
-            gs = gradient(params(Q)) do
+            gs = gradient(Q) do Q
                 q = RLCore.forward(Q, s)[a]
                 loss_func(G, q)
             end
-            RLBase.optimise!(Q, gs)
+            RLBase.optimise!(Q, gs[1].model)
         end
     end
 end

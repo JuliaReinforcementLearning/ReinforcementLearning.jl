@@ -41,13 +41,13 @@ function RLBase.optimise!(
     a = CartesianIndex.(a, 1:batchsize)
     k, p = batch.key, batch.priority
     p′ = similar(p)
-    s, s′, a, r, t = send_to_device(device(Q), (s, s′, a, r, t))
-    k, p, p′ = send_to_device(device(Q), (k, p, p′))
+    s, s′, a, r, t = gpu((s, s′, a, r, t))
+    k, p, p′ = gpu((k, p, p′))
 
     w = 1.0f0 ./ ((p .+ 1.0f-10) .^ β)
     w ./= maximum(w)
 
-    q′ =Qₜ(s′)
+    q′ = Qₜ(s′)
 
     if haskey(batch, :next_legal_actions_mask)
         q′ .+= ifelse.(batch[:next_legal_actions_mask], 0.0f0, typemin(Float32))
@@ -57,7 +57,7 @@ function RLBase.optimise!(
 
     G = r .+ γ^n .* (1 .- t) .* q′ₐ
 
-    gs = gradient(params(A)) do
+    gs = gradient(A) do A
         qₐ = Q(s)[a]
         batch_losses = loss_func(G, qₐ)
         loss = dot(vec(w), vec(batch_losses)) * 1 // batchsize
@@ -74,7 +74,7 @@ end
 
 function RLBase.optimise!(learner::PrioritizedDQNLearner, ::PostActStage, trajectory::Trajectory)
     for batch in trajectory
-        k, p = RLBase.optimise!(learner, batch) |> send_to_host
+        k, p = RLBase.optimise!(learner, batch) |> cpu
         trajectory[:priority, k] = p
     end
 end

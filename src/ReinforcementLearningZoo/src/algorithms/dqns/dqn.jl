@@ -34,7 +34,7 @@ function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
 
     s, s_next, a, r, t = map(x -> batch[x], SS′ART)
     a = CartesianIndex.(a, 1:length(a))
-    s, s_next, a, r, t = send_to_device(device(Q), (s, s_next, a, r, t))
+    s, s_next, a, r, t = gpu((s, s_next, a, r, t))
 
     q_next = Qt(s_next)
 
@@ -46,7 +46,7 @@ function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
 
     R = r .+ γ^n .* (1 .- t) .* q_next_action
 
-    gs = gradient(params(Q)) do
+    gs = gradient(Q) do Q
         qₐ = Q(s)[a]
         loss = loss_func(R, qₐ)
         ignore_derivatives() do
@@ -55,5 +55,6 @@ function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
         loss
     end
 
-    RLBase.optimise!(A, gs)
+    # Optimization step
+    RLBase.optimise!(A, gpu(gs[1]))
 end
