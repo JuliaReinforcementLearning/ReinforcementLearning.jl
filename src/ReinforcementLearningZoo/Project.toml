@@ -5,7 +5,6 @@ version = "0.10.1"
 [deps]
 Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
 CircularArrayBuffers = "9de3a189-e0c0-4e15-ba3b-b14b9fb0aec1"
-CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
@@ -41,6 +40,7 @@ cuDNN = "1"
 julia = "1.9"
 
 [extras]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
 Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
