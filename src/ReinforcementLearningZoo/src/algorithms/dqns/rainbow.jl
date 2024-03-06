@@ -65,20 +65,20 @@ function RLBase.optimise!(learner::RainbowLearner, batch::NamedTuple)
 
     next_logits = gpu(Qₜ(next_states))
 
-    next_probs = reshape(softmax(reshape(next_logits, n_atoms, :)), n_atoms, n_actions, :)
+    next_probs = reshape(softmax(cpu(reshape(next_logits, n_atoms, :))), n_atoms, n_actions, :)
 
-    next_q = reshape(sum(support .* next_probs, dims=1), n_actions, :)
+    next_q = reshape(sum(support .* gpu(next_probs), dims=1), n_actions, :)
 
     if haskey(batch, :next_legal_actions_mask)
         l′ = gpu(batch[:next_legal_actions_mask])
         next_q .+= ifelse.(l′, 0.0f0, typemin(Float32))
     end
 
-    next_prob_select = select_best_probs(next_probs, next_q)
+    next_prob_select = select_best_probs(next_probs, cpu(next_q))
 
     target_distribution = project_distribution(
         target_support,
-        next_prob_select,
+        gpu(next_prob_select),
         support,
         delta_z,
         learner.Vₘᵢₙ,
