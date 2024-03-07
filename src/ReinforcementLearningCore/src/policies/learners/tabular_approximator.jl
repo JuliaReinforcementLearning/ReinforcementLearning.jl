@@ -37,17 +37,17 @@ function forward(L::Approximator{A, Any}, env::E) where {A <:AbstractArray, E <:
 end
 
 RLCore.forward(
-    app::TabularApproximator{R,O},
+    app::Approximator{R,O},
     s::I,
 ) where {R<:AbstractVector,O,I<:Integer} = @views app.table[s]
 
 RLCore.forward(
-    app::TabularApproximator{R,O},
+    app::Approximator{R,O},
     s::I,
 ) where {R<:AbstractArray,O,I<:Integer} = @views app.table[:, s]
 
 RLCore.forward(
-    app::TabularApproximator{R,O},
+    app::Approximator{R,O},
     s::I1,
     a::I2,
 ) where {R<:AbstractArray,O,I1<:Integer,I2<:Integer} = @views app.table[a, s]
