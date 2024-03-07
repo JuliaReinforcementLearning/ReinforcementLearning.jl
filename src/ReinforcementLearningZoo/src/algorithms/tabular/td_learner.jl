@@ -36,12 +36,12 @@ RLCore.forward(L::TDLearner, s, a) = RLCore.forward(L.approximator, s, a)
 function _optimise!(
     n::I1,
     γ::F,
-    app::Approximator{<:AbstractArray},
+    app::Approximator{Ar},
     s::I2,
     s_next::I2,
     a::I3,
     r::F,
-) where {I1<:Number,I2<:Number,I3<:Number,Ar<:AbstractArray,F<:AbstractFloat,O}
+) where {I1<:Number,I2<:Number,I3<:Number,Ar<:AbstractArray,F<:AbstractFloat}
     α = app.optimizer.eta
     Q!(app, s, s_next, a, α, r, γ)
 end
