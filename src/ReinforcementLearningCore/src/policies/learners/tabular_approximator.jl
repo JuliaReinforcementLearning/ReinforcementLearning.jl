@@ -12,13 +12,6 @@ For `table` of 2-d, it will serve as a state-action value approximator.
 !!! warning
     For `table` of 2-d, the first dimension is action and the second dimension is state.
 """
-# TODO: add back missing AbstractApproximator
-struct TabularApproximator{N,A,O} <: AbstractLearner
-    table::A
-    optimizer::O
-
-end
-
 function TabularApproximator(table::A, opt::O) where {A<:AbstractArray,O}
     n = ndims(table)
     n <= 2 || throw(ArgumentError("the dimension of table must be <= 2"))
