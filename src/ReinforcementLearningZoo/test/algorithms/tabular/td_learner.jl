@@ -1,16 +1,14 @@
 using Test
 using Flux
-import ReinforcementLearningBase: RLBase
 using ReinforcementLearningCore
-using ReinforcementLearningEnvironments
 using ReinforcementLearningZoo
 using Test
 
 
 @testset "Test TDLearner creation" begin
     approximator = TabularVApproximator(n_state=5)
-    TDLearner(approximator, :SARS, γ=0.95, n=0)
+    @test TDLearner(approximator, :SARS, γ=0.95, n=0) isa TDLearner
 
     approximator = TabularQApproximator(n_state=5, n_action=3)
-    TDLearner(approximator, :SARS, γ=0.95, n=0)
+    @test TDLearner(approximator, :SARS, γ=0.95, n=0) isa TDLearner
 end
