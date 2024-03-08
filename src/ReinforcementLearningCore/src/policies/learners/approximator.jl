@@ -9,9 +9,13 @@ struct Approximator{M,O} <: AbstractLearner
     optimiser_state::O
 end
 
-function Approximator(; model, optimiser)
+function Approximator(; model, optimiser, gpu=false)
     optimiser_state = Flux.setup(optimiser, model)
-    Approximator(gpu(model), gpu(optimiser_state)) # Pass model to GPU (if available) upon creation
+    if gpu
+        return Approximator(gpu(model), gpu(optimiser_state))
+    else
+        Approximator(model, optimiser_state)
+    end
 end
 
 Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(AnnotatedStructTree, A))
