@@ -65,7 +65,7 @@ function _optimise!(
     a::I3,
     r::F,
 ) where {I1<:Number,I2<:Number,I3<:Number,Ar<:AbstractArray,F<:AbstractFloat}
-    α = app.optimizer.eta
+    α = app.optimiser_state.eta
     Q!(app, s, s_next, a, α, r, γ)
 end
 
@@ -75,18 +75,4 @@ function RLBase.optimise!(
 ) where {I1<:Number,I2<:Number,F2<:AbstractFloat}
     _optimise!(L.n, L.γ, L.approximator, t.state, t.next_state, t.action, t.reward)
 end
-
-function RLBase.priority(L::TDLearner{:SARS}, transition)
-    s, a, r, d, s′ = transition
-    γ, Q = L.γ, L.approximator
-    if d
-        Δ = (r - RLCore.forward(Q, s, a))
-    else
-        Δ = (r + γ * RLCore.forward(Q, s′) - RLCore.forward(Q, s, a))
-    end
-    Δ = [Δ]  # must be broadcastable in Flux.Optimise
-    Flux.Optimise.apply!(Q.optimizer, (s, a), Δ)
-    abs(Δ[])
-end
-
 

@@ -2,6 +2,7 @@ using Test
 using Flux
 using ReinforcementLearningCore
 using ReinforcementLearningZoo
+using ReinforcementLearningBase
 using Test
 
 
@@ -32,7 +33,7 @@ end
     π_ = 0.5
     γ = 0.9
     RLZoo.Q!(approximator, s, s_plus_one, a, α, π_, γ)
-    @test RLZoo.Q(approximator, s, a) ≈ α * (π_ + γ * maximum(Q(approximator, s_plus_one)) - Q(approximator, s, a))
+    @test RLZoo.Q(approximator, s, a) ≈ α * (π_ + γ * maximum(RLZoo.Q(approximator, s_plus_one)) - RLZoo.Q(approximator, s, a))
 end
 
 # Test optimise! function
@@ -41,14 +42,5 @@ end
     learner = TDLearner(approximator, :SARS)
     t = (state=1, next_state=2, action=3, reward=0.5, terminal=false)
     optimise!(learner, t)
-    @test true  # Add your own assertion here
-end
-
-# Test priority function
-@testset "priority function" begin
-    approximator = TabularQApproximator(n_state=5, n_action=3)
-    learner = TDLearner(approximator, :SARS)
-    transition = (1, 2, 0.5, false, 3)
-    priority(learner, transition)
     @test true  # Add your own assertion here
 end
