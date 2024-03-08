@@ -1,7 +1,10 @@
 export TabularApproximator, TabularVApproximator, TabularQApproximator
 
 using Flux: gpu
-import Base.show
+
+const TabularApproximator = Approximator{A,O} where {A<:AbstractArray,O}
+const TabularQApproximator = Approximator{A,O} where {A<:AbstractArray,O}
+const TabularVApproximator = Approximator{A,O} where {A<:AbstractVector,O}
 
 """
     TabularApproximator(table<:AbstractArray, opt)
@@ -15,7 +18,7 @@ For `table` of 2-d, it will serve as a state-action value approximator.
 function TabularApproximator(table::A, opt::O) where {A<:AbstractArray,O}
     n = ndims(table)
     n <= 2 || throw(ArgumentError("the dimension of table must be <= 2"))
-    Approximator{A,O}(table, opt)
+    TabularApproximator{A,O}(table, opt)
 end
 
 TabularVApproximator(; n_state, init = 0.0, opt = InvDecay(1.0)) =
