@@ -52,7 +52,7 @@ function Q!(
 ) where {I1<:Integer,I2<:Integer,I3<:Integer,F1<:AbstractFloat,F2<:AbstractFloat}
     # Q-learning formula according to https://github.com/JuliaPOMDP/TabularTDLearning.jl/blob/25c4d3888e178c51ed1ff448f36b0fcaf7c1d8e8/src/q_learn.jl#LL63C26-L63C95
     q_value_updated = α * (π_ + γ * maximum(Q(app, s_plus_one)) - Q(app, s, a))
-    app.table[a, s] += q_value_updated
+    app.model[a, s] += q_value_updated
     return Q(app, s, a)
 end
 
