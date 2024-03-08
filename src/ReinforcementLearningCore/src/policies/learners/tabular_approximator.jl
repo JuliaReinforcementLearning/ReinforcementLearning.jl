@@ -35,15 +35,15 @@ end
 RLCore.forward(
     app::Approximator{R,O},
     s::I,
-) where {R<:AbstractVector,O,I<:Integer} = @views app.table[s]
+) where {R<:AbstractVector,O,I<:Integer} = @views app.model[s]
 
 RLCore.forward(
     app::Approximator{R,O},
     s::I,
-) where {R<:AbstractArray,O,I<:Integer} = @views app.table[:, s]
+) where {R<:AbstractArray,O,I<:Integer} = @views app.model[:, s]
 
 RLCore.forward(
     app::Approximator{R,O},
     s::I1,
     a::I2,
-) where {R<:AbstractArray,O,I1<:Integer,I2<:Integer} = @views app.table[a, s]
+) where {R<:AbstractArray,O,I1<:Integer,I2<:Integer} = @views app.model[a, s]
