@@ -1,6 +1,11 @@
+using Test
+using Flux
+import ReinforcementLearningBase: RLBase
 using ReinforcementLearningCore
+using ReinforcementLearningEnvironments
 using ReinforcementLearningZoo
 using Test
+
 
 @testset "Test TDLearner creation" begin
     approximator = TabularVApproximator(n_state=5)
