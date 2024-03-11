@@ -4,7 +4,8 @@ using Flux
 @testset "TargetNetwork Tests" begin
     @testset "Creation" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
-        target_network = TargetNetwork(model=model, use_gpu=true)
+        optimiser = Adam()
+        target_network = TargetNetwork(Approximator(model, optimiser), use_gpu=true)
     
         @test typeof(target_network) == TargetNetwork
         @test target_network.network == model
@@ -16,7 +17,7 @@ using Flux
 
     @testset "Forward" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
-        target_network = TargetNetwork(model=model)
+        target_network = TargetNetwork(Approximator(model, Adam()))
     
         input = rand(10)
         output = forward(target_network, input)
@@ -26,8 +27,9 @@ using Flux
     end
 
     @testset "Optimise" begin
+        optimiser = Adam()
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
-        target_network = TargetNetwork(model=model)
+        target_network = TargetNetwork(Approximator(model, optimiser))
     
         grad = rand(2)
         optimise!(target_network, grad)
@@ -36,8 +38,9 @@ using Flux
     end
 
     @testset "Sync" begin
-        model = Chain(Dense(10, 5, relu), Dense(5, 2))
-        target_network = TargetNetwork(model=model, sync_freq=2, ρ=0.5)
+        optimiser = Adam()
+        model = Approximator(Chain(Dense(10, 5, relu), Dense(5, 2)), optimiser)
+        target_network = TargetNetwork(model, sync_freq=2, ρ=0.5)
     
         grad = rand(2)
         target_network.optimise!(grad)

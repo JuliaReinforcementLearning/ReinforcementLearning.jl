@@ -4,7 +4,7 @@ using Flux
 @testset "Approximator Tests" begin
     @testset "Creation, with use_gpu = true toggle" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
-        optimiser = ADAM()
+        optimiser = Adam()
         approximator = Approximator(model=model, optimiser=optimiser, use_gpu=true)
     
         @test typeof(approximator) == Approximator
@@ -14,7 +14,7 @@ using Flux
 
     @testset "Forward" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
-        optimiser = ADAM()
+        optimiser = Adam()
         approximator = Approximator(model=model, optimiser=optimiser, use_gpu=false)
     
         input = rand(10)
@@ -26,7 +26,7 @@ using Flux
 
     @testset "Optimise" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
-        optimiser = ADAM()
+        optimiser = Adam()
         approximator = Approximator(model=model, optimiser=optimiser)
     
         grad = rand(2)

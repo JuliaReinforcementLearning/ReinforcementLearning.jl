@@ -47,14 +47,16 @@ Constructs a target network for reinforcement learning.
 # Returns
 A `TargetNetwork` object.
 """
-function TargetNetwork(network; sync_freq = 1, ρ = 0f0, use_gpu = false)
+function TargetNetwork(network::Approximator; sync_freq = 1, ρ = 0f0, use_gpu = false)
     @assert 0 <= ρ <= 1 "ρ must in [0,1]"
     
     if use_gpu
         # NOTE: model is pushed to gpu in Approximator, need to transfer to cpu before deepcopy, then push target model to gpu
         target = gpu(deepcopy(cpu(network.model)))
+    else
+        target = deepcopy(network.model)
     end
-    TargetNetwork(network, target, sync_freq, ρ, 0)
+    return TargetNetwork(network, target, sync_freq, ρ, 0)
 end
 
 @functor TargetNetwork (network, target)

@@ -5,7 +5,7 @@ include("/Users/jpslewis/git/ReinforcementLearning.jl/src/ReinforcementLearningC
 
 function test_approximator_creation()
     model = Chain(Dense(10, 5, relu), Dense(5, 2))
-    optimiser = ADAM()
+    optimiser = Adam()
     approximator = Approximator(model=model, optimiser=optimiser)
 
     @test typeof(approximator) == Approximator
@@ -15,7 +15,7 @@ end
 
 function test_approximator_forward()
     model = Chain(Dense(10, 5, relu), Dense(5, 2))
-    optimiser = ADAM()
+    optimiser = Adam()
     approximator = Approximator(model=model, optimiser=optimiser)
 
     input = rand(10)
@@ -27,7 +27,7 @@ end
 
 function test_approximator_optimise()
     model = Chain(Dense(10, 5, relu), Dense(5, 2))
-    optimiser = ADAM()
+    optimiser = Adam()
     approximator = Approximator(model=model, optimiser=optimiser)
 
     grad = rand(2)
