@@ -52,7 +52,7 @@ function TargetNetwork(network::Approximator; sync_freq = 1, ρ = 0f0, use_gpu =
     ρ = Float32(ρ)
     
     if use_gpu
-        @assert typeof(gpu(network.model)) == typeof(network.model) "Model is not on GPU. Please set `use_gpu=false`` or ensure model is on GPU, by setting `use_gpu=true` when constructing `Approximator`."
+        @assert typeof(gpu(network.model)) == typeof(network.model) "`Approximator` model is not on GPU. Please set `use_gpu=false`` or ensure model is on GPU, by setting `use_gpu=true` when constructing `Approximator`."
         # NOTE: model is pushed to gpu in Approximator, need to transfer to cpu before deepcopy, then push target model to gpu
         target = gpu(deepcopy(cpu(network.model)))
     else

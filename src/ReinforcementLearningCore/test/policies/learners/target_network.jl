@@ -5,8 +5,9 @@ using ReinforcementLearningCore
     @testset "Creation" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
         optimiser = Adam()
-        @test_throws "AssertionError: Model is not on GPU." TargetNetwork(Approximator(model, optimiser), use_gpu=true)
-    
+        if ((@isdefined CUDA) && CUDA.functional()) || ((@isdefined Metal) && Metal.functional())
+            @test_throws "AssertionError: `Approximator` model is not on GPU." TargetNetwork(Approximator(model, optimiser), use_gpu=true)
+        end
         @test TargetNetwork(Approximator(model=model, optimiser=optimiser, use_gpu=true), use_gpu=true) isa TargetNetwork
         @test TargetNetwork(Approximator(model, optimiser, use_gpu=true), use_gpu=true) isa TargetNetwork
 
