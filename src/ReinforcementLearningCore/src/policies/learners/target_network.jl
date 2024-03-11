@@ -1,6 +1,6 @@
 export Approximator, TargetNetwork, target, model
 
-using Flux
+using Flux: gpu
 
 
 target(ap::Approximator) = ap.model #see TargetNetwork
@@ -33,10 +33,27 @@ mutable struct TargetNetwork{M}
     n_optimise::Int
 end
 
-function TargetNetwork(network; sync_freq = 1, ρ = 0f0)
+"""
+    TargetNetwork(network; sync_freq = 1, ρ = 0f0, use_gpu = false)
+
+Constructs a target network for reinforcement learning.
+
+# Arguments
+- `network`: The main network used for training.
+- `sync_freq`: The frequency (in number of calls to `optimise!`) at which the target network is synchronized with the main network. Default is 1.
+- `ρ`: The interpolation factor used for updating the target network. Must be in the range [0, 1]. Default is 0.
+- `use_gpu`: Specifies whether to use GPU for the target network. Default is `false`.
+
+# Returns
+A `TargetNetwork` object.
+"""
+function TargetNetwork(network; sync_freq = 1, ρ = 0f0, use_gpu = false)
     @assert 0 <= ρ <= 1 "ρ must in [0,1]"
-    # NOTE: model is pushed to gpu in Approximator, need to transfer to cpu before deepcopy, then push target model to gpu
-    target = gpu(deepcopy(cpu(network.model)))
+    
+    if use_gpu
+        # NOTE: model is pushed to gpu in Approximator, need to transfer to cpu before deepcopy, then push target model to gpu
+        target = gpu(deepcopy(cpu(network.model)))
+    end
     TargetNetwork(network, target, sync_freq, ρ, 0)
 end
 

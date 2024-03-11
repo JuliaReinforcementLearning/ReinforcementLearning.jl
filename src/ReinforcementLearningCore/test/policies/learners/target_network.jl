@@ -1,7 +1,7 @@
 @testset "TargetNetwork" begin 
     m = Chain(Dense(4,1))
-    app = Approximator(model = m, optimiser = Flux.Adam())
-    tn = TargetNetwork(app, sync_freq = 3)
+    app = Approximator(model = m, optimiser = Flux.Adam(), use_gpu=true)
+    tn = TargetNetwork(app, sync_freq = 3, use_gpu=true)
     @test typeof(model(tn)) == typeof(target(tn))
     p1 = Flux.destructure(model(tn))[1]
     pt1 = Flux.destructure(target(tn))[1]
