@@ -1,5 +1,6 @@
 using Test
 using Flux
+using ReinforcementLearningEnvironments
 
 @testset "Approximator Tests" begin
     @testset "Creation, with use_gpu = true toggle" begin
