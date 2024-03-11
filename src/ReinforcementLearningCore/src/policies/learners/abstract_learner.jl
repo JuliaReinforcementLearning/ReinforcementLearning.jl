@@ -9,7 +9,7 @@ Base.show(io::IO, m::MIME"text/plain", L::AbstractLearner) = show(io, m, convert
 
 # Take Learner and Environment, get state, send to RLCore.forward(Learner, State)
 function forward(L::Le, env::E) where {Le <: AbstractLearner, E <: AbstractEnv}
-    env |> state |> Flux.gpu |> (x -> forward(L, x)) |> Flux.cpu
+    env |> state |> (x -> forward(L, x))
 end
 
 function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::Trajectory) end
