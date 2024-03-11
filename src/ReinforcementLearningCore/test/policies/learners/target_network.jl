@@ -42,10 +42,12 @@ using ReinforcementLearningCore
         grad = Flux.Zygote.gradient(target_network) do model
             sum(RLCore.forward(model, input))
         end
-
-        optimise!(target_network.network, grad[1])
     
-        @test target_network.n_optimise == 1    
+        @test target_network.network.model.layers[2].bias == [0, 0]
+        RLCore.optimise!(target_network, grad[1])
+
+        @test target_network.network.model.layers[2].bias != [0, 0]
+
     end
 
     @testset "Sync" begin
@@ -53,18 +55,17 @@ using ReinforcementLearningCore
         model = Approximator(Chain(Dense(10, 5, relu), Dense(5, 2)), optimiser)
         target_network = TargetNetwork(model, sync_freq=2, ρ=0.5)
     
-        grad = rand(2)
-        target_network.optimise!(grad)
+        input = rand(Float32, 10)
+        grad = Flux.Zygote.gradient(target_network) do model
+            sum(RLCore.forward(model, input))
+        end
+
+        optimise!(target_network, grad[1])
         @test target_network.n_optimise == 1
     
-        grad = rand(2)
-        target_network.optimise!(grad)
+        optimise!(target_network, grad[1])
         @test target_network.n_optimise == 0
     
-        @test target_network.target[1].weight == 0.5 * target_network.target[1].weight + 0.5 * target_network.network[1].weight
-        @test target_network.target[1].bias == 0.5 * target_network.target[1].bias + 0.5 * target_network.network[1].bias
-        @test target_network.target[2].weight == 0.5 * target_network.target[2].weight + 0.5 * target_network.network[2].weight
-        @test target_network.target[2].bias == 0.5 * target_network.target[2].bias + 0.5 * target_network.network[2].bias    
     end
 end
 

@@ -42,5 +42,5 @@ Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(An
 
 forward(A::Approximator, args...; kwargs...) = A.model(args...; kwargs...)
 
-RLBase.optimise!(A::Approximator, grad) =
+RLBase.optimise!(A::Approximator, grad::NamedTuple) =
     Flux.Optimise.update!(A.optimiser_state, A.model, grad.model)

@@ -70,7 +70,7 @@ forward(tn::TargetNetwork, args...) = forward(tn.network, args...)
 model(tn::TargetNetwork) = model(tn.network)
 target(tn::TargetNetwork) = tn.target
 
-function RLBase.optimise!(tn::TargetNetwork, grad)
+function RLBase.optimise!(tn::TargetNetwork, grad::NamedTuple)
     A = tn.network
     optimise!(A, grad.network)
 
@@ -83,4 +83,6 @@ function RLBase.optimise!(tn::TargetNetwork, grad)
         end
         tn.n_optimise = 0
     end
+
+    return
 end
