@@ -1,6 +1,7 @@
 
 using Test
 using ReinforcementLearningCore
+using ReinforcementLearningEnvironments
 using Flux
 
 @testset "Constructors" begin
@@ -15,7 +16,11 @@ end
     v_approx = TabularVApproximator(n_state = 10)
     @test RLCore.forward(v_approx, 1) == 0.0
 
+    env = RockPaperScissorsEnv()
+    @test RLCore.forward(v_approx, env) == 0.0
+
     q_approx = TabularQApproximator(n_state = 5, n_action = 10)
     @test RLCore.forward(q_approx, 1) == zeros(Float64, 10)
     @test RLCore.forward(q_approx, 1, 5) == 0.0
+    @test RLCore.forward(q_approx, env) == zeros(10)
 end
