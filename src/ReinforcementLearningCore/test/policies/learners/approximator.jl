@@ -24,6 +24,17 @@ using Flux
         @test length(output) == 2
     end
 
+    @testset "Forward to environment" begin
+        model = Chain(Dense(4, 5, relu), Dense(5, 2))
+        optimiser = Adam()
+        approximator = Approximator(model=model, optimiser=optimiser, use_gpu=false)
+
+        env = CartPoleEnv()
+        output = RLCore.forward(approximator, env)
+        @test typeof(output) == Array{Float32,1}
+        @test length(output) == 2
+    end
+
     @testset "Optimise" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
         optimiser = Adam()

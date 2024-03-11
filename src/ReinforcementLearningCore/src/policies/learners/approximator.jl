@@ -41,6 +41,7 @@ Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(An
 @functor Approximator (model,)
 
 forward(A::Approximator, args...; kwargs...) = A.model(args...; kwargs...)
+forward(A::Approximator, env::E) where {E <: AbstractEnv} = env |> state |> (x -> forward(A, x))
 
 RLBase.optimise!(A::Approximator, grad::NamedTuple) =
     Flux.Optimise.update!(A.optimiser_state, A.model, grad.model)
