@@ -25,7 +25,7 @@ Constructs an `Approximator` object for reinforcement learning.
 # Returns
 An `Approximator` object.
 """
-function Approximator(; model, optimiser, use_gpu=false)
+function Approximator(; model, optimiser::Flux.Optimise.AbstractOptimiser, use_gpu=false)
     optimiser_state = Flux.setup(optimiser, model)
     if use_gpu  # Pass model to GPU (if available) upon creation
         return Approximator(gpu(model), gpu(optimiser_state))
@@ -34,6 +34,8 @@ function Approximator(; model, optimiser, use_gpu=false)
     end
 end
 
+Approximator(model, optimiser::Flux.Optimise.AbstractOptimiser; use_gpu=false) = Approximator(model=model, optimiser=optimiser, use_gpu=use_gpu)
+
 Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(AnnotatedStructTree, A))
 
 @functor Approximator (model,)
@@ -41,4 +43,4 @@ Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(An
 forward(A::Approximator, args...; kwargs...) = A.model(args...; kwargs...)
 
 RLBase.optimise!(A::Approximator, grad) =
-    Flux.Optimise.update!(A.optimiser_state, A.model, grad)
+    Flux.Optimise.update!(A.optimiser_state, A.model, grad.model)

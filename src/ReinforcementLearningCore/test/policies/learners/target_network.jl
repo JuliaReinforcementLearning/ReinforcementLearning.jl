@@ -1,14 +1,21 @@
 using Test
 using Flux
-
+using ReinforcementLearningCore
 @testset "TargetNetwork Tests" begin
     @testset "Creation" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
         optimiser = Adam()
-        target_network = TargetNetwork(Approximator(model, optimiser), use_gpu=true)
+        @test_throws "AssertionError: Model is not on GPU." TargetNetwork(Approximator(model, optimiser), use_gpu=true)
     
-        @test typeof(target_network) == TargetNetwork
-        @test target_network.network == model
+        @test TargetNetwork(Approximator(model=model, optimiser=optimiser, use_gpu=true), use_gpu=true) isa TargetNetwork
+        @test TargetNetwork(Approximator(model, optimiser, use_gpu=true), use_gpu=true) isa TargetNetwork
+
+        approx = Approximator(model, optimiser, use_gpu=false)
+        target_network = TargetNetwork(approx, use_gpu=false)
+
+        
+        @test target_network isa TargetNetwork
+        @test typeof(target_network.network) == typeof(approx)
         @test target_network.target isa Flux.Chain
         @test target_network.sync_freq == 1
         @test target_network.ρ == 0.0
@@ -19,8 +26,8 @@ using Flux
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
         target_network = TargetNetwork(Approximator(model, Adam()))
     
-        input = rand(10)
-        output = forward(target_network, input)
+        input = rand(Float32, 10)
+        output = RLCore.forward(target_network, input)
     
         @test typeof(output) == Array{Float32,1}
         @test length(output) == 2    
@@ -29,10 +36,14 @@ using Flux
     @testset "Optimise" begin
         optimiser = Adam()
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
-        target_network = TargetNetwork(Approximator(model, optimiser))
-    
-        grad = rand(2)
-        optimise!(target_network, grad)
+        approximator = Approximator(model, optimiser)
+        target_network = TargetNetwork(approximator)
+        input = rand(Float32, 10)    
+        grad = Flux.Zygote.gradient(target_network) do model
+            sum(RLCore.forward(model, input))
+        end
+
+        optimise!(target_network.network, grad[1])
     
         @test target_network.n_optimise == 1    
     end

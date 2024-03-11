@@ -37,7 +37,7 @@ using Flux
         end
     
         @test approximator.model.layers[2].bias == [0, 0]
-        RLCore.optimise!(approximator, grad[1].model)
+        RLCore.optimise!(approximator, grad[1])
 
         @test approximator.model.layers[2].bias != [0, 0]
     end
