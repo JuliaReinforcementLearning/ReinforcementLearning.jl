@@ -6,33 +6,39 @@ using Flux
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
         optimiser = Adam()
         approximator = Approximator(model=model, optimiser=optimiser, use_gpu=true)
-    
-        @test typeof(approximator) == Approximator
-        @test approximator.model == model
-        @test approximator.optimiser_state isa Flux.Optimise.OptimiserState    
+
+        @test approximator isa Approximator
+        @test typeof(approximator.model) == typeof(gpu(model))
+        @test approximator.optimiser_state isa NamedTuple
     end
 
     @testset "Forward" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
         optimiser = Adam()
         approximator = Approximator(model=model, optimiser=optimiser, use_gpu=false)
-    
-        input = rand(10)
-        output = forward(approximator, input)
-    
+
+        input = rand(Float32, 10)
+        output = RLCore.forward(approximator, input)
+
         @test typeof(output) == Array{Float32,1}
-        @test length(output) == 2    
+        @test length(output) == 2
     end
 
     @testset "Optimise" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
         optimiser = Adam()
         approximator = Approximator(model=model, optimiser=optimiser)
+
+        input = rand(Float32, 10)
+        
+
+        grad = Flux.Zygote.gradient(approximator) do model
+            sum(RLCore.forward(model, input))
+        end
     
-        grad = rand(2)
-        optimise!(approximator, grad)
-    
-        @test approximator.optimiser_state isa Flux.Optimise.OptimiserState
-    
+        @test approximator.model.layers[2].bias == [0, 0]
+        RLCore.optimise!(approximator, grad[1].model)
+
+        @test approximator.model.layers[2].bias != [0, 0]
     end
 end

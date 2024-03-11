@@ -49,10 +49,12 @@ A `TargetNetwork` object.
 """
 function TargetNetwork(network::Approximator; sync_freq = 1, ρ = 0f0, use_gpu = false)
     @assert 0 <= ρ <= 1 "ρ must in [0,1]"
+    ρ = Float32(ρ)
     
     if use_gpu
         # NOTE: model is pushed to gpu in Approximator, need to transfer to cpu before deepcopy, then push target model to gpu
         target = gpu(deepcopy(cpu(network.model)))
+
     else
         target = deepcopy(network.model)
     end
