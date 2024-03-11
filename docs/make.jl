@@ -1,6 +1,4 @@
-# using ReinforcementLearning
-# using ReinforcementLearningDatasets
-using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningZoo, ReinforcementLearningEnvironments
+using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningEnvironments
 using Documenter
 using Markdown
 using DemoCards
@@ -14,22 +12,6 @@ open(joinpath(@__DIR__, "..", "README.md"), "r") do f_src
     end
 end
 
-exp_src_dir = joinpath(@__DIR__, "..", "src", "ReinforcementLearningExperiments", "deps", "experiments")
-exp_dest_dir = joinpath(@__DIR__, "experiments")
-cp(exp_src_dir, exp_dest_dir; force=true)
-
-# TODO: remove this as experiments are updated to run using latest RLCore
-# NOTE: config.json needs to be updated as well
-rm(joinpath(exp_dest_dir, "experiments", "CFR"), force=true, recursive=true)
-rm(joinpath(exp_dest_dir, "experiments", "DQN"), force=true, recursive=true)
-rm(joinpath(exp_dest_dir, "experiments", "ED"), force=true, recursive=true)
-rm(joinpath(exp_dest_dir, "experiments", "NFSP"), force=true, recursive=true)
-rm(joinpath(exp_dest_dir, "experiments", "Offline"), force=true, recursive=true)
-rm(joinpath(exp_dest_dir, "experiments", "Policy Gradient"), force=true, recursive=true)
-# rm(joinpath(exp_dest_dir, "experiments", "Search"), force=true, recursive=true)
-
-experiments, postprocess_cb, experiments_assets = makedemos("experiments")
-
 assets = [
     "assets/favicon.ico",
     "assets/custom.css",
@@ -38,16 +20,13 @@ assets = [
 
 makedocs(
     modules = [
-        # ReinforcementLearning,
+        ReinforcementLearning,
         ReinforcementLearningBase,
         ReinforcementLearningCore,
         ReinforcementLearningEnvironments,
-        ReinforcementLearningZoo,
-        # ReinforcementLearningDatasets,
     ],
     format = Documenter.HTML(
         prettyurls = true,
-        analytics = "UA-149861753-1",
         assets = assets,
     ),
     sitename = "ReinforcementLearning.jl",
@@ -62,18 +41,12 @@ makedocs(
             "Which algorithm should I use?" => "Which_algorithm_should_I_use.md",
             "Episodic vs. Non-episodic environments" => "non_episodic.md",
         ],
-        "Zoo Algorithms" => [
-            "MPO" => "Zoo_Algorithms/MPO.md"
-        ],
         "FAQ" => "FAQ.md",
-        experiments,
         "Tips for Developers" => "tips.md",
         "Manual" => [
             "RLBase" => "rlbase.md",
             "RLCore" => "rlcore.md",
             "RLEnvs" => "rlenvs.md",
-            "RLZoo" => "rlzoo.md",
-            "RLDatasets" => "rldatasets.md",
         ],
     ]
 )
