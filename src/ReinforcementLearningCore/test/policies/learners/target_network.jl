@@ -78,11 +78,11 @@ end
     pt1 = Flux.destructure(target(tn))[1]
     @test p1 == pt1
     input = gpu(ones(Float32, 4))
-    grad = Flux.Zygote.gradient(tn.network) do model
+    grad = Flux.Zygote.gradient(tn) do model
         sum(RLCore.forward(model, input))
     end
 
-    grad_model = grad[1].model
+    grad_model = grad[1]
     
     RLCore.optimise!(tn, grad_model)
     @test p1 != Flux.destructure(model(tn))[1]
