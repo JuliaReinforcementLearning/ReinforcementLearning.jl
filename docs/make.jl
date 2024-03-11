@@ -15,7 +15,6 @@ end
 assets = [
     "assets/favicon.ico",
     "assets/custom.css",
-    experiments_assets
 ]
 
 makedocs(
