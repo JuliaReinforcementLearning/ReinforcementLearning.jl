@@ -46,7 +46,8 @@ function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
 
     R = r .+ γ^n .* (1 .- t) .* q_next_action
 
-    gs = gradient(Q) do Q
+    gs = gradient(A) do A
+        Q = model(A)
         qₐ = Q(s)[a]
         loss = loss_func(R, qₐ)
         ignore_derivatives() do
