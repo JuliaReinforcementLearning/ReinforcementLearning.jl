@@ -24,6 +24,7 @@ steps:
             - src/ReinforcementLearningFarm/src
       - JuliaCI/julia-test#v1:
           run_tests: false
+    command: |
       julia -e '
         using Pkg
 
