@@ -7,35 +7,53 @@ steps:
       - JuliaCI/julia#v1:
           version: "1"
       - JuliaCI/julia-test#v1:
-          project: ./src/ReinforcementLearningCore
-      - JuliaCI/julia-coverage#v1:
-          codecov: true
+          run_tests: false
+    command: |
+      julia -e '
+        using Pkg
+
+        println("--- :julia: Instantiating project")
+        using Pkg
+        Pkg.develop(path="src/ReinforcementLearningBase")
+        Pkg.develop(path="src/ReinforcementLearningEnvironments")
+        Pkg.develop(path="src/ReinforcementLearningCore")
+
+        println("+++ :julia: Running tests")
+        Pkg.test("ReinforcementLearningCore", coverage=true)
+      '
     agents:
       queue: "juliagpu"
       cuda: "*"
     if: build.message !~ /\[skip tests\]/
     timeout_in_minutes: 60
-  - label: "Julia v1 RLZoo"
+  - label: "Julia v1 RLFarm"
     plugins:
       - JuliaCI/julia#v1:
           version: "1"
-      - JuliaCI/julia-test#v1:
-          project: ./src/ReinforcementLearningZoo
       - JuliaCI/julia-coverage#v1:
-          codecov: true
+          dirs:
+            - src/ReinforcementLearningFarm/src
+      - JuliaCI/julia-test#v1:
+          run_tests: false
+    command: |
+      julia -e '
+        using Pkg
+
+        println("--- :julia: Instantiating project")
+        using Pkg
+        Pkg.develop(path="src/ReinforcementLearningBase")
+        Pkg.develop(path="src/ReinforcementLearningEnvironments")
+        Pkg.develop(path="src/ReinforcementLearningCore")
+        Pkg.develop(path="src/ReinforcementLearningFarm")
+
+        println("+++ :julia: Running tests")
+        Pkg.test("ReinforcementLearningFarm", coverage=true)
+      '
     agents:
       queue: "juliagpu"
       cuda: "*"
     if: build.message !~ /\[skip tests\]/
     timeout_in_minutes: 60
-  - label: "Julia v1 RLExperiments"
-    plugins:
-      - JuliaCI/julia#v1:
-          version: "1"
-      - JuliaCI/julia-test#v1:
-          project: ./src/ReinforcementLearningZoo
-      - JuliaCI/julia-coverage#v1:
-          codecov: true
     agents:
       queue: "juliagpu"
       cuda: "*"
