@@ -56,5 +56,5 @@ function RLBase.optimise!(learner::DQNLearner, batch::NamedTuple)
     end
 
     # Optimization step
-    RLBase.optimise!(A, gpu(gs[1]))
+    RLBase.optimise!(Q, gpu(gs[1]))
 end
