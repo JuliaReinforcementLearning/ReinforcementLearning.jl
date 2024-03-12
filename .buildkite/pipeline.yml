@@ -16,8 +16,14 @@ steps:
     if: build.message !~ /\[skip tests\]/
     timeout_in_minutes: 60
   - label: "Julia v1 RLFarm"
-    matrix:
-    commands: |
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "1"
+      - JuliaCI/julia-coverage#v1:
+          dirs:
+            - src/ReinforcementLearningFarm/src
+      - JuliaCI/julia-test#v1:
+          run_tests: false
       julia -e '
         using Pkg
 
