@@ -7,9 +7,20 @@ steps:
       - JuliaCI/julia#v1:
           version: "1"
       - JuliaCI/julia-test#v1:
-          project: ./src/ReinforcementLearningCore
-      - JuliaCI/julia-coverage#v1:
-          codecov: true
+          run_tests: false
+    command: |
+      julia -e '
+        using Pkg
+
+        println("--- :julia: Instantiating project")
+        using Pkg
+        Pkg.develop(path="src/ReinforcementLearningBase")
+        Pkg.develop(path="src/ReinforcementLearningEnvironments")
+        Pkg.develop(path="src/ReinforcementLearningCore")
+
+        println("+++ :julia: Running tests")
+        Pkg.test("ReinforcementLearningCore", coverage=true)
+      '
     agents:
       queue: "juliagpu"
       cuda: "*"
