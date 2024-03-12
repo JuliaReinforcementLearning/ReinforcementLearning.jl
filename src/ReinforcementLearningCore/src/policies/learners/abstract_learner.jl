@@ -5,11 +5,11 @@ using Functors: @functor
 
 abstract type AbstractLearner end
 
-Base.show(io::IO, m::MIME"text/plain", L::AbstractLearner) = show(io, m, convert(AnnotatedStructTree, L))
+Base.show(io::IO, m::MIME"text/plain", learner::AbstractLearner) = show(io, m, convert(AnnotatedStructTree, learner))
 
 # Take Learner and Environment, get state, send to RLCore.forward(Learner, State)
-function forward(L::Le, env::E) where {Le <: AbstractLearner, E <: AbstractEnv}
-    env |> state |> (x -> forward(L, x))
+function forward(learner::L, env::E) where {L <: AbstractLearner, E <: AbstractEnv}
+    env |> state |> (x -> forward(learner, x))
 end
 
 function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::Trajectory) end
