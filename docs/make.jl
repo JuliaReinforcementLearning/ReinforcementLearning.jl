@@ -50,4 +50,3 @@ makedocs(
     ]
 )
 
-postprocess_cb()
