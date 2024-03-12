@@ -1,4 +1,4 @@
-using ReinforcementLearningCore, ReinforcementLearningBase, ReinforcementLearningEnvironments
+using ReinforcementLearning
 using Documenter
 using Markdown
 using DemoCards
