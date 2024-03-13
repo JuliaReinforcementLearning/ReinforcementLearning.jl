@@ -72,7 +72,7 @@ function Base.run(
     env::E,
     stop_condition::AbstractStopCondition,
     hook::MultiAgentHook,
-    reset_condition::AbstractResetCondition=ResetAtTerminal()
+    reset_condition::AbstractResetCondition=ResetIfEnvTerminated()
 ) where {E<:AbstractEnv}
     keys(multiagent_policy) == keys(hook) || throw(ArgumentError("MultiAgentPolicy and MultiAgentHook must have the same keys"))
     Base.run(
@@ -102,7 +102,7 @@ function Base.run(
     ::Sequential,
     stop_condition::AbstractStopCondition,
     multiagent_hook::MultiAgentHook,
-    reset_condition::AbstractResetCondition=ResetAtTerminal(),
+    reset_condition::AbstractResetCondition=ResetIfEnvTerminated(),
 ) where {E<:AbstractEnv}
     push!(multiagent_hook, PreExperimentStage(), multiagent_policy, env)
     push!(multiagent_policy, PreExperimentStage(), env)
@@ -167,7 +167,7 @@ function Base.run(
     ::Simultaneous,
     stop_condition::AbstractStopCondition,
     hook::MultiAgentHook,
-    reset_condition::AbstractResetCondition=ResetAtTerminal(),
+    reset_condition::AbstractResetCondition=ResetIfEnvTerminated(),
 ) where {E<:AbstractEnv}
     RLCore._run(
         multiagent_policy,

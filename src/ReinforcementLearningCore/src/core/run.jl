@@ -19,7 +19,7 @@ function Base.run(
     env::AbstractEnv,
     stop_condition::AbstractStopCondition=StopAfterEpisode(1),
     hook::AbstractHook=EmptyHook(),
-    reset_condition::AbstractResetCondition=ResetAtTerminal()
+    reset_condition::AbstractResetCondition=ResetIfEnvTerminated()
 )
     policy, env = check(policy, env)
     _run(policy, env, stop_condition, hook, reset_condition)

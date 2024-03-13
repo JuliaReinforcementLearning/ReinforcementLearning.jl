@@ -1,26 +1,21 @@
 using Test
 using ReinforcementLearningCore
+@testset "Reset Conditions Tests" begin
 
-# Test ResetAtTerminal
-function test_reset_at_terminal()
-    policy = nothing
-    env = nothing
-    reset_condition = ResetAtTerminal()
-    @test reset_condition(policy, env) == is_terminated(env)
-end
-
-# Test ResetAfterNSteps
-function test_reset_after_n_steps()
-    policy = nothing
-    env = nothing
-    reset_condition = ResetAfterNSteps(5)
-    for i in 1:10
-        @test reset_condition(policy, env) == (i % 5 == 0)
+    @testset "Test ResetIfEnvTerminated" begin
+        policy = RandomPolicy()
+        env = RandomWalk1D()
+        reset_condition = ResetIfEnvTerminated()
+        is_terminated(env) = true
+        @test check!(reset_condition, policy, env) == true
     end
-end
 
-# Run tests
-@testset "Reset Conditions" begin
-    test_reset_at_terminal()
-    test_reset_after_n_steps()
-end
+    @testset "Test ResetAfterNSteps" begin
+        policy = RandomPolicy()
+        env = RandomWalk1D()
+        reset_condition = ResetAfterNSteps(3)
+        @test check!(reset_condition, policy, env) == false
+        @test check!(reset_condition, policy, env) == false
+        @test check!(reset_condition, policy, env) == true
+        @test check!(reset_condition, policy, env) == false
+    end
