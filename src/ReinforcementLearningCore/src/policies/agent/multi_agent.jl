@@ -114,7 +114,7 @@ function Base.run(
         @timeit_debug timer "optimise! PreEpisodeStage"          optimise!(multiagent_policy, PreEpisodeStage())
         @timeit_debug timer "push!(hook) PreEpisodeStage"        push!(multiagent_hook, PreEpisodeStage(), multiagent_policy, env)
 
-        while !check!(reset_condition, multiagent_policy, env) || is_stop) # one episode
+        while !check!(reset_condition, multiagent_policy, env) || is_stop # one episode
             for player in CurrentPlayerIterator(env)
                 policy = multiagent_policy[player] # Select appropriate policy
                 hook = multiagent_hook[player] # Select appropriate hook
