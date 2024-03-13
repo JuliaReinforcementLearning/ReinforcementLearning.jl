@@ -134,7 +134,7 @@ function Base.run(
                     break
                 end
 
-                if reset_condition(multiagent_policy, env)
+                if check!(reset_condition, multiagent_policy, env)
                     break
                 end
             end
