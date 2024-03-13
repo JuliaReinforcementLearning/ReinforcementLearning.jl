@@ -1,3 +1,5 @@
+using Flux
+
 """
     Approximator(model, optimiser)
 
@@ -9,20 +11,37 @@ struct Approximator{M,O} <: AbstractLearner
     optimiser_state::O
 end
 
-function Approximator(; model, optimiser, gpu=false)
+
+"""
+    Approximator(; model, optimiser, usegpu=false)
+
+Constructs an `Approximator` object for reinforcement learning.
+
+# Arguments
+- `model`: The model used for approximation.
+- `optimiser`: The optimizer used for updating the model.
+- `usegpu`: A boolean indicating whether to use GPU for computation. Default is `false`.
+
+# Returns
+An `Approximator` object.
+"""
+function Approximator(; model, optimiser::Flux.Optimise.AbstractOptimiser, use_gpu=false)
     optimiser_state = Flux.setup(optimiser, model)
-    if gpu  # Pass model to GPU (if available) upon creation
+    if use_gpu  # Pass model to GPU (if available) upon creation
         return Approximator(gpu(model), gpu(optimiser_state))
     else
         return Approximator(model, optimiser_state)
     end
 end
 
+Approximator(model, optimiser::Flux.Optimise.AbstractOptimiser; use_gpu=false) = Approximator(model=model, optimiser=optimiser, use_gpu=use_gpu)
+
 Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(AnnotatedStructTree, A))
 
 @functor Approximator (model,)
 
 forward(A::Approximator, args...; kwargs...) = A.model(args...; kwargs...)
+forward(A::Approximator, env::E) where {E <: AbstractEnv} = env |> state |> (x -> forward(A, x))
 
-RLBase.optimise!(A::Approximator, grad) =
-    Flux.Optimise.update!(A.optimiser_state, A.model, grad)
+RLBase.optimise!(A::Approximator, grad::NamedTuple) =
+    Flux.Optimise.update!(A.optimiser_state, A.model, grad.model)
