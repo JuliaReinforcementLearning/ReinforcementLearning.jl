@@ -83,8 +83,8 @@ end
     @test multiagent_hook.hooks[:Cross].steps[1] > 0
 
     @test RLBase.is_terminated(env)
-    @test is_win(env, :Cross) isa Bool
-    @test is_win(env, :Nought) isa Bool
+    @test RLEnv.is_win(env, :Cross) isa Bool
+    @test RLEnv.is_win(env, :Nought) isa Bool
     @test RLBase.reward(env, :Cross) == (RLBase.reward(env, :Nought) * -1)
     @test RLBase.legal_action_space_mask(env, :Cross) == falses(9)
     @test RLBase.legal_action_space(env) == []
