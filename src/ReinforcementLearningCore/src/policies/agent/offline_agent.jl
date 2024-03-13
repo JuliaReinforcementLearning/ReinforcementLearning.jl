@@ -60,7 +60,7 @@ function Base.push!(agent::OfflineAgent{P,T,<:OfflineBehavior{<:Agent}}, ::PreEx
     while !is_stop
         reset!(env)
         push!(policy, PreEpisodeStage(), env)
-        while !agent.offline_behavior.reset_condition(policy, env) # one episode
+        while !check!(agent.offline_behavior.reset_condition, policy, env) # one episode
             steps += 1
             push!(policy, PreActStage(), env)
             action = RLBase.plan!(policy, env)
