@@ -129,7 +129,7 @@ function Base.run(
                 @timeit_debug timer "optimise! PostActStage"         optimise!(policy, PostActStage())
                 @timeit_debug timer "push!(hook) PostActStage"       push!(hook, PostActStage(), policy, env)
 
-                if check_stop(stop_condition, policy, env)
+                if check!(stop_condition, policy, env)
                     is_stop = true
                     break
                 end

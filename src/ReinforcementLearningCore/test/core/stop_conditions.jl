@@ -1,11 +1,11 @@
-import ReinforcementLearningCore.check_stop
+import ReinforcementLearningCore.check!
 
 @testset "StopAfterStep" begin
     stop_condition = StopAfterStep(10)
-    @test sum([check_stop(stop_condition) for i in 1:20]) == 11
+    @test sum([check!(stop_condition) for i in 1:20]) == 11
 
     stop_condition = StopAfterStep(10; is_show_progress=false)
-    @test sum([check_stop(stop_condition) for i in 1:20]) == 11
+    @test sum([check!(stop_condition) for i in 1:20]) == 11
 end
 
 @testset "ComposedStopCondition" begin
@@ -13,7 +13,7 @@ end
     stop_3 = StopAfterStep(3)
 
     composed_stop = ComposedStopCondition(stop_10, stop_3)
-    @test sum([check_stop(composed_stop) for i in 1:20]) == 18
+    @test sum([check!(composed_stop) for i in 1:20]) == 18
 end
 
 @testset "StopAfterEpisode" begin
@@ -24,10 +24,10 @@ end
     for stop_condition in (stop_1, stop_2)
         env = RandomWalk1D()
         policy = RandomPolicy(legal_action_space(env))
-        @test check_stop(stop_condition, policy, env) == false
+        @test check!(stop_condition, policy, env) == false
         env.pos = 7
-        @test check_stop(stop_condition, policy, env) == false
-        @test check_stop(stop_condition, policy, env) == true
+        @test check!(stop_condition, policy, env) == false
+        @test check!(stop_condition, policy, env) == true
     end
 end
 
@@ -40,9 +40,9 @@ end
         env = RandomWalk1D()
         policy = RandomPolicy(legal_action_space(env))
 
-        @test sum([check_stop(stop_condition, policy, env) for i in 1:11]) == 0
+        @test sum([check!(stop_condition, policy, env) for i in 1:11]) == 0
         env.pos = 7
-        @test sum([check_stop(stop_condition, policy, env) for i in 1:11]) == 1
+        @test sum([check!(stop_condition, policy, env) for i in 1:11]) == 1
     end
 
     a_4 = 0.0f0
@@ -59,8 +59,8 @@ end
         env = RandomWalk1D()
         policy = RandomPolicy(legal_action_space(env))
 
-        @test sum([check_stop(stop_condition, policy, env) for i in 1:11]) == 0
+        @test sum([check!(stop_condition, policy, env) for i in 1:11]) == 0
         env.pos = 7
-        @test sum([check_stop(stop_condition, policy, env) for i in 1:11]) == 1
+        @test sum([check!(stop_condition, policy, env) for i in 1:11]) == 1
     end
 end

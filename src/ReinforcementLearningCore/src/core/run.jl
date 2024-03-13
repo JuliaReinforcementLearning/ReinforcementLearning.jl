@@ -44,7 +44,7 @@ function _run(policy::AbstractPolicy,
         @timeit_debug timer "push!(hook) PreEpisodeStage"       push!(hook, PreEpisodeStage(), policy, env)
 
 
-        while !reset_condition(policy, env) # one episode
+        while !check!(reset_condition, policy, env) # one episode
             @timeit_debug timer "push!(policy) PreActStage"     push!(policy, PreActStage(), env)
             @timeit_debug timer "optimise! PreActStage"         optimise!(policy, PreActStage())
             @timeit_debug timer "push!(hook) PreActStage"       push!(hook, PreActStage(), policy, env)
@@ -56,7 +56,7 @@ function _run(policy::AbstractPolicy,
             @timeit_debug timer "optimise! PostActStage"        optimise!(policy, PostActStage())
             @timeit_debug timer "push!(hook) PostActStage"      push!(hook, PostActStage(), policy, env)
 
-            if check_stop(stop_condition, policy, env)
+            if check!(stop_condition, policy, env)
                 is_stop = true
                 break
             end

@@ -1,15 +1,15 @@
-export AbstractResetCondition, ResetAtTerminal, ResetAfterNSteps
+export AbstractResetCondition, ResetIfEnvTerminated, ResetAfterNSteps
   
 abstract type AbstractResetCondition end
 
 """
-    ResetAtTerminal()
+ResetIfEnvTerminated()
 
 A reset condition that resets the environment if is_terminated(env) is true.
 """
-struct ResetAtTerminal <: AbstractResetCondition end
+struct ResetIfEnvTerminated <: AbstractResetCondition end
 
-(::ResetAtTerminal)(policy, env) = is_terminated(env)
+check!(::ResetIfEnvTerminated, policy::AbstractPolicy, env::AbstractEnv) = is_terminated(env)
 
 """
     ResetAfterNSteps(n)
@@ -23,7 +23,7 @@ end
 
 ResetAfterNSteps(n::Int) = ResetAfterNSteps(0, n)
 
-function (r::ResetAfterNSteps)(policy, env) 
+function check!(r::ResetAfterNSteps, policy::AbstractPolicy, env::AbstractEnv)
     stop = r.t >= r.n
     r.t += 1
     if stop
