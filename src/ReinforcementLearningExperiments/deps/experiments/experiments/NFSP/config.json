@@ -1,7 +1,0 @@
-{
-    "description": "Neural Fictitious Self-play(NFSP) related experiments.",
-    "order": [
-      "JuliaRL_NFSP_KuhnPoker.jl",
-      "JuliaRL_NFSP_OpenSpiel.jl"
-    ]
-  }
