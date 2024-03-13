@@ -14,15 +14,11 @@ end
 using ReinforcementLearningBase
 using ReinforcementLearningCore
 using ReinforcementLearningTrajectories
-
+using ReinforcementLearningEnvironments
 using CircularArrayBuffers
 using Flux
 
 @info "Flux.GPU_BACKEND = $(Flux.GPU_BACKEND)"
-
-include("environments/randomwalk1D.jl")
-include("environments/tictactoe.jl")
-include("environments/rockpaperscissors.jl")
 
 @testset "ReinforcementLearningCore.jl" begin
     include("core/core.jl")

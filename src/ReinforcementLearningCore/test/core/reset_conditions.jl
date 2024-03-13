@@ -19,3 +19,4 @@ using ReinforcementLearningCore
         @test check!(reset_condition, policy, env) == true
         @test check!(reset_condition, policy, env) == false
     end
+end
