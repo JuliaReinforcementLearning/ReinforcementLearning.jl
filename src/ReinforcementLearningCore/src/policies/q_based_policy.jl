@@ -17,7 +17,7 @@ Base.@kwdef mutable struct QBasedPolicy{L,E} <: AbstractPolicy
     explorer::E
 end
 
-Flux.@layer QBasedPolicy (learner,)
+Flux.@layer QBasedPolicy trainable=(learner,)
 
 function RLBase.plan!(p::QBasedPolicy{L,Ex}, env::E) where {Ex<:AbstractExplorer,L<:AbstractLearner,E<:AbstractEnv}
     RLBase.plan!(p.explorer, p.learner, env)
