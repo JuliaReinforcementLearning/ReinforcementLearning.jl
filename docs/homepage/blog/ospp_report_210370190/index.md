@@ -656,7 +656,7 @@ Besides, I implement the [`EDManager`](https://juliareinforcementlearning.org/do
 function Base.run(
     π::EDManager,
     env::AbstractEnv,
-    stop_condition = StopAfterEpisode(1),
+    stop_condition = StopAfterNEpisodes(1),
     hook::AbstractHook = EmptyHook(),
 )
     @assert NumAgentStyle(env) == MultiAgent(2) "ED algorithm only support 2-players games."
@@ -757,7 +757,7 @@ EDmanager = EDManager(
     )
 )
 # initialize the `stop_condition` and `hook`.
-stop_condition = StopAfterEpisode(100_000, is_show_progress=!haskey(ENV, "CI"))
+stop_condition = StopAfterNEpisodes(100_000, is_show_progress=!haskey(ENV, "CI"))
 hook = KuhnOpenNewEDHook(0, 100, [], [])
 ```
 

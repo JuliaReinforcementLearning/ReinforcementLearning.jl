@@ -13872,7 +13872,7 @@ run(policy::<b>AbstractPolicy</b>, env::<b>AbstractEnv</b>) in ReinforcementLear
 <div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span></span><span class="n">run</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">StopAfterEpisode</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<div class=" highlight hl-julia"><pre><span></span><span class="n">run</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">StopAfterNEpisodes</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
 </pre></div>
 
     </div>
@@ -13906,8 +13906,8 @@ run(policy::<b>AbstractPolicy</b>, env::<b>AbstractEnv</b>) in ReinforcementLear
 <h3 id="Q2.b:-What-if-we-want-to-stop-until-arbitrary-condition-meets?"><strong>Q2.b: What if we want to stop until arbitrary condition meets?</strong><a class="anchor-link" href="#Q2.b:-What-if-we-want-to-stop-until-arbitrary-condition-meets?">&#182;</a></h3><p>Well, in that case, you need to implement your customized <em>stop condition</em> here.
 In RL.jl, several common ones are already provided, like:</p>
 <ul>
-<li><code>StopAfterStep</code></li>
-<li><code>StopAfterEpisode</code></li>
+<li><code>StopAfterNSteps</code></li>
+<li><code>StopAfterNEpisodes</code></li>
 <li><code>StopAfterNSeconds</code></li>
 <li>...</li>
 </ul>
@@ -13936,7 +13936,7 @@ In RL.jl, several common ones are already provided, like:</p>
 <div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span></span><span class="n">run</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">StopAfterEpisode</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">TotalRewardPerEpisode</span><span class="p">())</span>
+<div class=" highlight hl-julia"><pre><span></span><span class="n">run</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">StopAfterNEpisodes</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">TotalRewardPerEpisode</span><span class="p">())</span>
 </pre></div>
 
     </div>
@@ -14144,7 +14144,7 @@ In RL.jl, several common ones are already provided, like:</p>
 <div class=" highlight hl-julia"><pre><span></span><span class="n">run</span><span class="p">(</span>
    <span class="n">policy</span><span class="p">,</span>
    <span class="n">RandomWalk1D</span><span class="p">(),</span>
-   <span class="n">StopAfterEpisode</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+   <span class="n">StopAfterNEpisodes</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
    <span class="n">TotalRewardPerEpisode</span><span class="p">()</span>
 <span class="p">)</span>
 </pre></div>
@@ -14311,7 +14311,7 @@ In RL.jl, several common ones are already provided, like:</p>
 <div class="prompt input_prompt">In&nbsp;[22]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span></span><span class="n">run</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">StopAfterEpisode</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">TotalRewardPerEpisode</span><span class="p">())</span>
+<div class=" highlight hl-julia"><pre><span></span><span class="n">run</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">StopAfterNEpisodes</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">TotalRewardPerEpisode</span><span class="p">())</span>
 </pre></div>
 
     </div>
@@ -14383,7 +14383,7 @@ In RL.jl, several common ones are already provided, like:</p>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-julia"><pre><span></span><span class="n">hook</span> <span class="o">=</span> <span class="n">StepsPerEpisode</span><span class="p">()</span>
-<span class="n">run</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">StopAfterEpisode</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">hook</span><span class="p">)</span>
+<span class="n">run</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">StopAfterNEpisodes</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">hook</span><span class="p">)</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">hook</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="k">end</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 </pre></div>
 
@@ -14593,7 +14593,7 @@ M1983.15 198.898 L2279.56 198.898 L2279.56 95.2176 L1983.15 95.2176  Z
         <span class="n">explorer</span><span class="o">=</span><span class="n">GreedyExplorer</span><span class="p">()</span>
     <span class="p">),</span>
     <span class="n">env</span><span class="p">,</span>
-    <span class="n">StopAfterEpisode</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+    <span class="n">StopAfterNEpisodes</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
     <span class="n">hook</span>
 <span class="p">)</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">hook</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="k">end</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -15158,7 +15158,7 @@ M1048.31 1426.48 L1048.31 1366.51 L1499.66 1366.51 L1499.66 1426.48 L1048.31 142
 <div class="prompt input_prompt">In&nbsp;[35]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span></span><span class="n">stop_condition</span> <span class="o">=</span> <span class="n">StopAfterStep</span><span class="p">(</span><span class="mi">10_000</span><span class="p">)</span>
+<div class=" highlight hl-julia"><pre><span></span><span class="n">stop_condition</span> <span class="o">=</span> <span class="n">StopAfterNSteps</span><span class="p">(</span><span class="mi">10_000</span><span class="p">)</span>
 <span class="n">hook</span> <span class="o">=</span> <span class="n">TotalRewardPerEpisode</span><span class="p">()</span>
 <span class="n">run</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">stop_condition</span><span class="p">,</span> <span class="n">hook</span><span class="p">)</span>
 </pre></div>
@@ -15306,7 +15306,7 @@ M1048.31 1426.48 L1048.31 1366.51 L1499.66 1366.51 L1499.66 1426.48 L1048.31 142
 <div class="prompt input_prompt">In&nbsp;[38]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span></span><span class="n">stop_condition</span> <span class="o">=</span> <span class="n">StopAfterStep</span><span class="p">(</span><span class="mi">10_000</span><span class="p">)</span>
+<div class=" highlight hl-julia"><pre><span></span><span class="n">stop_condition</span> <span class="o">=</span> <span class="n">StopAfterNSteps</span><span class="p">(</span><span class="mi">10_000</span><span class="p">)</span>
 <span class="n">hook</span> <span class="o">=</span> <span class="n">TotalBatchRewardPerEpisode</span><span class="p">(</span><span class="n">N_ENV</span><span class="p">)</span>
 <span class="n">run</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">stop_condition</span><span class="p">,</span> <span class="n">hook</span><span class="p">)</span>
 </pre></div>

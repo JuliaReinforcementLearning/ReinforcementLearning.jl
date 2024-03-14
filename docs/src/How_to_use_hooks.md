@@ -68,7 +68,7 @@ end
 (h::TimeCostPerEpisode)(::PreEpisodeStage, policy, env) = h.t = time_ns()
 (h::TimeCostPerEpisode)(::PostEpisodeStage, policy, env) = push!(h.time_costs, time_ns()-h.t)
 h = TimeCostPerEpisode()
-run(RandomPolicy(), CartPoleEnv(), StopAfterEpisode(10), h)
+run(RandomPolicy(), CartPoleEnv(), StopAfterNEpisodes(10), h)
 h.time_costs
 ```
 
@@ -97,7 +97,7 @@ policy = RandomPolicy()
 run(
     policy,
     CartPoleEnv(),
-    StopAfterEpisode(100),
+    StopAfterNEpisodes(100),
     DoEveryNEpisode(;n=10) do t, policy, env
         # In real world cases, the policy is usually wrapped in an Agent,
         # we need to extract the inner policy to run it in the *actor* mode.
@@ -107,7 +107,7 @@ run(
         # polluting the original env.
 
         hook = TotalRewardPerEpisode(;is_display_on_exit=false)
-        run(policy, CartPoleEnv(), StopAfterEpisode(10), hook)
+        run(policy, CartPoleEnv(), StopAfterNEpisodes(10), hook)
 
         # now you can report the result of the hook.
         println("avg reward at episode $t is: $(mean(hook.rewards))")
@@ -159,7 +159,7 @@ parameters_dir = mktempdir()
 run(
     policy,
     env,
-    StopAfterStep(10_000),
+    StopAfterNSteps(10_000),
     DoEveryNStep(n=1_000) do t, p, e
         ps = params(p)
         f = joinpath(parameters_dir, "parameters_at_step_$t.bson")
@@ -192,7 +192,7 @@ hook = ComposedHook(
         end
     end
 )
-run(RandomPolicy(), CartPoleEnv(), StopAfterEpisode(50), hook)
+run(RandomPolicy(), CartPoleEnv(), StopAfterNEpisodes(50), hook)
 readdir(tf_log_dir)
 ```
 

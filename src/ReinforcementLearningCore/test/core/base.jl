@@ -3,7 +3,7 @@ using TimerOutputs
 
 @testset "core" begin
     @testset "simple workflow" begin
-        @testset "StopAfterStep" begin
+        @testset "StopAfterNSteps" begin
             agent = Agent(
                 RandomPolicy(),
                 Trajectory(
@@ -13,14 +13,14 @@ using TimerOutputs
                 ),
             )
             env = RandomWalk1D()
-            stop_condition = StopAfterStep(123)
+            stop_condition = StopAfterNSteps(123)
             hook = StepsPerEpisode()
             run(agent, env, stop_condition, hook)
 
             @test sum(hook[]) + length(hook[]) - 1 == length(agent.trajectory.container)
         end
 
-        @testset "StopAfterEpisode" begin
+        @testset "StopAfterNEpisodes" begin
             agent = Agent(
                 RandomPolicy(),
                 Trajectory(
@@ -30,7 +30,7 @@ using TimerOutputs
                 ),
             )
             env = RandomWalk1D()
-            stop_condition = StopAfterEpisode(10)
+            stop_condition = StopAfterNEpisodes(10)
             hook = StepsPerEpisode()
             run(agent, env, stop_condition, hook)
 
@@ -50,7 +50,7 @@ using TimerOutputs
                 InsertSampleRatioController(n_inserted = -1),
             )
         )            
-        stop_condition = StopAfterStep(123; is_show_progress=false)
+        stop_condition = StopAfterNSteps(123; is_show_progress=false)
         hook = StepsPerEpisode()
         run(agent, env, stop_condition, hook)
         @test RLCore.timer isa TimerOutputs.TimerOutput
@@ -67,7 +67,7 @@ using TimerOutputs
             ),
         )
         env = RandomWalk1D()
-        stop_condition = StopAfterEpisode(10)
+        stop_condition = StopAfterNEpisodes(10)
         hook = StepsPerEpisode()
 
         exp = Experiment(policy, env, stop_condition, hook)

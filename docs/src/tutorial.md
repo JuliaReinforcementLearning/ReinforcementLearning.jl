@@ -43,7 +43,7 @@ a descriptive pattern.
 run(
     RandomPolicy(),
     RandomWalk1D(),
-    StopAfterEpisode(10),
+    StopAfterNEpisodes(10),
     TotalRewardPerEpisode()
 )
 ```
@@ -58,7 +58,7 @@ policy = TabularPolicy(;table=Dict(zip(1:NS, fill(2, NS))))
 run(
     policy,
     RandomWalk1D(),
-    StopAfterEpisode(10),
+    StopAfterNEpisodes(10),
     TotalRewardPerEpisode()
 )
 ```
@@ -91,7 +91,7 @@ this policy to the `env` to estimate its performance.
 run(
     policy,
     RandomWalk1D(),
-    StopAfterEpisode(10),
+    StopAfterNEpisodes(10),
     TotalRewardPerEpisode()
 )
 ```
@@ -109,7 +109,7 @@ agent = Agent(
     policy = policy,
     trajectory = VectorSARTTrajectory()
 )
-run(agent, env, StopAfterEpisode(10), TotalRewardPerEpisode())
+run(agent, env, StopAfterNEpisodes(10), TotalRewardPerEpisode())
 ```
 
 Here the [`VectorSARTTrajectory`](@ref) is used to store the **S**tate,

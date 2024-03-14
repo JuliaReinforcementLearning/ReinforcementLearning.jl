@@ -114,7 +114,7 @@ end
 
 (h::ShortestPathCount)(::PreEpisodeStage, policy, env) = push!(h.shortest_paths, M[env.goal, env.pos])
 
-h = run(policy, env, StopAfterEpisode(1_000), ComposedHook(StepsPerEpisode(), ShortestPathCount()))
+h = run(policy, env, StopAfterNEpisodes(1_000), ComposedHook(StepsPerEpisode(), ShortestPathCount()))
 
 using UnicodePlots
 

@@ -1,7 +1,6 @@
 
 using Test
 using ReinforcementLearningCore
-using ReinforcementLearningEnvironments
 using Flux
 
 @testset "Constructors" begin

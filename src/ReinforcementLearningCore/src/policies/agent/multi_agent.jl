@@ -72,7 +72,7 @@ function Base.run(
     env::E,
     stop_condition::AbstractStopCondition,
     hook::MultiAgentHook,
-    reset_condition::AbstractResetCondition=ResetAtTerminal()
+    reset_condition::AbstractResetCondition=ResetIfEnvTerminated()
 ) where {E<:AbstractEnv}
     keys(multiagent_policy) == keys(hook) || throw(ArgumentError("MultiAgentPolicy and MultiAgentHook must have the same keys"))
     Base.run(
@@ -102,7 +102,7 @@ function Base.run(
     ::Sequential,
     stop_condition::AbstractStopCondition,
     multiagent_hook::MultiAgentHook,
-    reset_condition::AbstractResetCondition=ResetAtTerminal(),
+    reset_condition::AbstractResetCondition=ResetIfEnvTerminated(),
 ) where {E<:AbstractEnv}
     push!(multiagent_hook, PreExperimentStage(), multiagent_policy, env)
     push!(multiagent_policy, PreExperimentStage(), env)
@@ -114,7 +114,7 @@ function Base.run(
         @timeit_debug timer "optimise! PreEpisodeStage"          optimise!(multiagent_policy, PreEpisodeStage())
         @timeit_debug timer "push!(hook) PreEpisodeStage"        push!(multiagent_hook, PreEpisodeStage(), multiagent_policy, env)
 
-        while !(reset_condition(multiagent_policy, env) || is_stop) # one episode
+        while !check!(reset_condition, multiagent_policy, env) && !is_stop # one episode
             for player in CurrentPlayerIterator(env)
                 policy = multiagent_policy[player] # Select appropriate policy
                 hook = multiagent_hook[player] # Select appropriate hook
@@ -129,12 +129,12 @@ function Base.run(
                 @timeit_debug timer "optimise! PostActStage"         optimise!(policy, PostActStage())
                 @timeit_debug timer "push!(hook) PostActStage"       push!(hook, PostActStage(), policy, env)
 
-                if check_stop(stop_condition, policy, env)
+                if check!(stop_condition, policy, env)
                     is_stop = true
                     break
                 end
 
-                if reset_condition(multiagent_policy, env)
+                if check!(reset_condition, multiagent_policy, env)
                     break
                 end
             end
@@ -167,7 +167,7 @@ function Base.run(
     ::Simultaneous,
     stop_condition::AbstractStopCondition,
     hook::MultiAgentHook,
-    reset_condition::AbstractResetCondition=ResetAtTerminal(),
+    reset_condition::AbstractResetCondition=ResetIfEnvTerminated(),
 ) where {E<:AbstractEnv}
     RLCore._run(
         multiagent_policy,

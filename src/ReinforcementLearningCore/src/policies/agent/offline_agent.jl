@@ -7,7 +7,7 @@ Used to provide an OfflineAgent with a "behavior agent" that will generate the t
 at the `PreExperimentStage`. If `agent` is `nothing` (by default), does nothing. The `trajectory` of agent should 
 be the same as that of the parent `OfflineAgent`.
 `steps` is the number of data elements to generate, defaults to the capacity of the trajectory.
-`reset_condition` is the episode reset condition for the data generation (defaults to `ResetAtTerminal()`).
+`reset_condition` is the episode reset condition for the data generation (defaults to `ResetIfEnvTerminated()`).
 
 The behavior agent will interact with the main environment of the experiment to generate the data.
 """
@@ -17,9 +17,9 @@ struct OfflineBehavior{A<:Union{<:Agent,Nothing},R}
     reset_condition::R
 end
 
-OfflineBehavior() = OfflineBehavior(nothing, 0, ResetAtTerminal())
+OfflineBehavior() = OfflineBehavior(nothing, 0, ResetIfEnvTerminated())
 
-function OfflineBehavior(agent; steps=ReinforcementLearningTrajectories.capacity(agent.trajectory.container.traces), reset_condition=ResetAtTerminal())
+function OfflineBehavior(agent; steps=ReinforcementLearningTrajectories.capacity(agent.trajectory.container.traces), reset_condition=ResetIfEnvTerminated())
     if steps == Inf
         @error "`steps` is infinite, please provide a finite integer."
     end
@@ -60,7 +60,7 @@ function Base.push!(agent::OfflineAgent{P,T,<:OfflineBehavior{<:Agent}}, ::PreEx
     while !is_stop
         reset!(env)
         push!(policy, PreEpisodeStage(), env)
-        while !agent.offline_behavior.reset_condition(policy, env) # one episode
+        while !check!(agent.offline_behavior.reset_condition, policy, env) # one episode
             steps += 1
             push!(policy, PreActStage(), env)
             action = RLBase.plan!(policy, env)

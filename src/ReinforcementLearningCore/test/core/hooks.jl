@@ -32,7 +32,7 @@ end
 
 function test_run!(hook::AbstractHook)
     hook_ = deepcopy(hook)
-    run(RandomPolicy(), RandomWalk1D(), StopAfterEpisode(10), hook_)
+    run(RandomPolicy(), RandomWalk1D(), StopAfterNEpisodes(10), hook_)
     return hook_
 end
 

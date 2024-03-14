@@ -72,7 +72,7 @@ end
     multiagent_hook = MultiAgentHook((; :Cross => StepsPerEpisode(), :Nought => StepsPerEpisode()))
 
     env = TicTacToeEnv()
-    stop_condition = StopWhenDone()
+    stop_condition = StopIfEnvTerminated()
     hook = StepsPerEpisode()
 
     @test RLBase.reward(env, :Cross) == 0
@@ -83,8 +83,8 @@ end
     @test multiagent_hook.hooks[:Cross].steps[1] > 0
 
     @test RLBase.is_terminated(env)
-    @test is_win(env, :Cross) isa Bool
-    @test is_win(env, :Nought) isa Bool
+    @test RLEnvs.is_win(env, :Cross) isa Bool
+    @test RLEnvs.is_win(env, :Nought) isa Bool
     @test RLBase.reward(env, :Cross) == (RLBase.reward(env, :Nought) * -1)
     @test RLBase.legal_action_space_mask(env, :Cross) == falses(9)
     @test RLBase.legal_action_space(env) == []
@@ -130,7 +130,7 @@ end
     ))
 
     env = RockPaperScissorsEnv()
-    stop_condition = StopWhenDone()
+    stop_condition = StopIfEnvTerminated()
     composed_hook = ComposedHook(
         BatchStepsPerEpisode(10),
         RewardsPerEpisode(),
@@ -183,7 +183,7 @@ end
 
     let err = nothing
         try
-            x = run(m, e, StopAfterEpisode(10), hooks)
+            x = run(m, e, StopAfterNEpisodes(10), hooks)
         catch err
         end
         @test !(err isa Exception)

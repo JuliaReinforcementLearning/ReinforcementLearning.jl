@@ -1,5 +1,5 @@
-export AbstractStopCondition, StopAfterStep,
-    StopAfterEpisode, StopWhenDone, StopSignal, StopAfterNoImprovement, StopAfterNSeconds, ComposedStopCondition
+export AbstractStopCondition, StopAfterNSteps,
+    StopAfterNEpisodes, StopIfEnvTerminated, StopSignal, StopAfterNoImprovement, StopAfterNSeconds, ComposedStopCondition
 
 import ProgressMeter
 
@@ -23,75 +23,75 @@ struct ComposedStopCondition{S,T} <: AbstractStopCondition
     end
 end
 
-function check_stop(s::ComposedStopCondition, args...)
-    s.reducer(check_stop(sc, args...) for sc in s.stop_conditions)
+function check!(s::ComposedStopCondition, args...)
+    s.reducer(check!(sc, args...) for sc in s.stop_conditions)
 end
 
 #####
-# StopAfterStep
+# StopAfterNSteps
 #####
 """
-    StopAfterStep(step; cur = 1, is_show_progress = true)
+    StopAfterNSteps(step; cur = 1, is_show_progress = true)
 
 Return `true` after being called `step` times.
 """
-mutable struct StopAfterStep{Tl} <: AbstractStopCondition
+mutable struct StopAfterNSteps{Tl} <: AbstractStopCondition
     step::Int
     cur::Int
     "IGNORE"
     progress::Tl
 end
 
-function StopAfterStep(step; cur = 1, is_show_progress = true)
+function StopAfterNSteps(step; cur = 1, is_show_progress = true)
     if is_show_progress
         progress = ProgressMeter.Progress(step, dt = 1)
         ProgressMeter.update!(progress, cur)
     else
         progress = nothing
     end
-    StopAfterStep(step, cur, progress)
+    StopAfterNSteps(step, cur, progress)
 end
 
-function _stop_after_step(s::StopAfterStep)
+function _stop_after_step(s::StopAfterNSteps)
     res = s.cur >= s.step
     s.cur += 1
     res
 end
 
-function check_stop(s::StopAfterStep, args...)
+function check!(s::StopAfterNSteps, args...)
     ProgressMeter.next!(s.progress)
     _stop_after_step(s)
 end
 
-check_stop(s::StopAfterStep{Nothing}, args...) = _stop_after_step(s)
+check!(s::StopAfterNSteps{Nothing}, args...) = _stop_after_step(s)
 
 #####
-# StopAfterEpisode
+# StopAfterNEpisodes
 #####
 
 """
-    StopAfterEpisode(episode; cur = 0, is_show_progress = true)
+    StopAfterNEpisodes(episode; cur = 0, is_show_progress = true)
 
 Return `true` after being called `episode`. If `is_show_progress` is `true`, the `ProgressMeter` will be used to show progress.
 """
-mutable struct StopAfterEpisode{Tl} <: AbstractStopCondition
+mutable struct StopAfterNEpisodes{Tl} <: AbstractStopCondition
     episode::Int
     cur::Int
     "IGNORE"
     progress::Tl
 end
 
-function StopAfterEpisode(episode; cur = 0, is_show_progress = true)
+function StopAfterNEpisodes(episode; cur = 0, is_show_progress = true)
     if is_show_progress
         progress = ProgressMeter.Progress(episode, dt = 1)
         ProgressMeter.update!(progress, cur)
     else
         progress = nothing
     end
-    StopAfterEpisode(episode, cur, progress)
+    StopAfterNEpisodes(episode, cur, progress)
 end
 
-function check_stop(s::StopAfterEpisode{Nothing}, agent, env)
+function check!(s::StopAfterNEpisodes{Nothing}, agent, env)
     if is_terminated(env)
         s.cur += 1
     end
@@ -99,7 +99,7 @@ function check_stop(s::StopAfterEpisode{Nothing}, agent, env)
     s.cur >= s.episode
 end
 
-function check_stop(s::StopAfterEpisode, agent, env)
+function check!(s::StopAfterNEpisodes, agent, env)
     if is_terminated(env)
         s.cur += 1
         ProgressMeter.next!(s.progress)
@@ -151,23 +151,23 @@ function _stop_after_no_improvement(s::StopAfterNoImprovement{T,F}) where {T<:Nu
     return false
 end
 
-function check_stop(s::StopAfterNoImprovement, agent, env)
+function check!(s::StopAfterNoImprovement, agent, env)
     is_terminated(env) || return false # post episode stage
     return _stop_after_no_improvement(s)
 end
 
 #####
-# StopWhenDone
+# StopIfEnvTerminated
 #####
 
 """
-    StopWhenDone()
+    StopIfEnvTerminated()
 
 Return `true` if the environment is terminated.
 """
-struct StopWhenDone <: AbstractStopCondition end
+struct StopIfEnvTerminated <: AbstractStopCondition end
 
-check_stop(s::StopWhenDone, agent, env) = is_terminated(env)
+check!(s::StopIfEnvTerminated, agent, env) = is_terminated(env)
 
 #####
 # StopSignal
@@ -187,7 +187,7 @@ end
 Base.getindex(s::StopSignal) = s.is_stop[]
 Base.setindex!(s::StopSignal, v::Bool) = s.is_stop[] = v
 
-check_stop(s::StopSignal, agent, env) = s[]
+check!(s::StopSignal, agent, env) = s[]
 
 """
 StopAfterNSeconds
@@ -211,4 +211,4 @@ function StopAfterNSeconds(budget::Float64)
     RLBase.reset!(s)
 end
 
-check_stop(s::StopAfterNSeconds, _...) = time() > s.deadline
+check!(s::StopAfterNSeconds, _...) = time() > s.deadline
