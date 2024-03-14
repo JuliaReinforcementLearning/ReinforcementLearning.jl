@@ -117,7 +117,7 @@ ReinforcementLearning.jl also work. Similar to the test above, let's try the
 [`RandomPolicy`](@ref) first:
 
 ```@repl customized_env
-run(RandomPolicy(action_space(env)), env, StopAfterEpisode(1_000)) 
+run(RandomPolicy(action_space(env)), env, StopAfterNEpisodes(1_000)) 
 ```
 
 If no error shows up, then it means our environment at least works with
@@ -126,7 +126,7 @@ episode to see the performance of the `RandomPolicy`.
 
 ```@repl customized_env
 hook = TotalRewardPerEpisode()
-run(RandomPolicy(action_space(env)), env, StopAfterEpisode(1_000), hook)
+run(RandomPolicy(action_space(env)), env, StopAfterNEpisodes(1_000), hook)
 using Plots
 pyplot() #hide
 plot(hook.rewards)
@@ -198,7 +198,7 @@ Nice job! Now we are ready to run the experiment:
 
 ```@repl customized_env
 h = TotalRewardPerEpisode()
-run(p, wrapped_env, StopAfterEpisode(1_000), h)
+run(p, wrapped_env, StopAfterNEpisodes(1_000), h)
 plot(h.rewards)
 savefig("custom_env_random_policy_reward_wrapped_env.svg"); nothing # hide
 ```

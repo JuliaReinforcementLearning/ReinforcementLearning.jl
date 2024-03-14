@@ -16,10 +16,10 @@ end
     @test sum([check!(composed_stop) for i in 1:20]) == 18
 end
 
-@testset "StopAfterEpisode" begin
-    stop_1 = StopAfterEpisode(2)
-    stop_2 = StopAfterEpisode(2; is_show_progress=false)
-    stop_3 = StopAfterEpisode(2; is_show_progress=true)
+@testset "StopAfterNEpisodes" begin
+    stop_1 = StopAfterNEpisodes(2)
+    stop_2 = StopAfterNEpisodes(2; is_show_progress=false)
+    stop_3 = StopAfterNEpisodes(2; is_show_progress=true)
 
     for stop_condition in (stop_1, stop_2)
         env = RandomWalk1D()

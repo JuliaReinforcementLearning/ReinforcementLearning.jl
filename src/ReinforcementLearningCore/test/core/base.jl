@@ -20,7 +20,7 @@ using TimerOutputs
             @test sum(hook[]) + length(hook[]) - 1 == length(agent.trajectory.container)
         end
 
-        @testset "StopAfterEpisode" begin
+        @testset "StopAfterNEpisodes" begin
             agent = Agent(
                 RandomPolicy(),
                 Trajectory(
@@ -30,7 +30,7 @@ using TimerOutputs
                 ),
             )
             env = RandomWalk1D()
-            stop_condition = StopAfterEpisode(10)
+            stop_condition = StopAfterNEpisodes(10)
             hook = StepsPerEpisode()
             run(agent, env, stop_condition, hook)
 
@@ -67,7 +67,7 @@ using TimerOutputs
             ),
         )
         env = RandomWalk1D()
-        stop_condition = StopAfterEpisode(10)
+        stop_condition = StopAfterNEpisodes(10)
         hook = StepsPerEpisode()
 
         exp = Experiment(policy, env, stop_condition, hook)

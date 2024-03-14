@@ -22,7 +22,7 @@
     multiagent_hook = MultiAgentHook((; :Cross => StepsPerEpisode(), :Nought => StepsPerEpisode()))
 
     env = TicTacToeEnv()
-    stop_condition = StopWhenDone()
+    stop_condition = StopIfEnvTerminated()
 
     RLBase.test_interfaces!(env)
     RLBase.test_runnable!(env)

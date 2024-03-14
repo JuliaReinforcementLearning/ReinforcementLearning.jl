@@ -1,5 +1,5 @@
 export AbstractStopCondition, StopAfterStep,
-    StopAfterEpisode, StopWhenDone, StopSignal, StopAfterNoImprovement, StopAfterNSeconds, ComposedStopCondition
+    StopAfterNEpisodes, StopIfEnvTerminated, StopSignal, StopAfterNoImprovement, StopAfterNSeconds, ComposedStopCondition
 
 import ProgressMeter
 
@@ -66,32 +66,32 @@ end
 check!(s::StopAfterStep{Nothing}, args...) = _stop_after_step(s)
 
 #####
-# StopAfterEpisode
+# StopAfterNEpisodes
 #####
 
 """
-    StopAfterEpisode(episode; cur = 0, is_show_progress = true)
+    StopAfterNEpisodes(episode; cur = 0, is_show_progress = true)
 
 Return `true` after being called `episode`. If `is_show_progress` is `true`, the `ProgressMeter` will be used to show progress.
 """
-mutable struct StopAfterEpisode{Tl} <: AbstractStopCondition
+mutable struct StopAfterNEpisodes{Tl} <: AbstractStopCondition
     episode::Int
     cur::Int
     "IGNORE"
     progress::Tl
 end
 
-function StopAfterEpisode(episode; cur = 0, is_show_progress = true)
+function StopAfterNEpisodes(episode; cur = 0, is_show_progress = true)
     if is_show_progress
         progress = ProgressMeter.Progress(episode, dt = 1)
         ProgressMeter.update!(progress, cur)
     else
         progress = nothing
     end
-    StopAfterEpisode(episode, cur, progress)
+    StopAfterNEpisodes(episode, cur, progress)
 end
 
-function check!(s::StopAfterEpisode{Nothing}, agent, env)
+function check!(s::StopAfterNEpisodes{Nothing}, agent, env)
     if is_terminated(env)
         s.cur += 1
     end
@@ -99,7 +99,7 @@ function check!(s::StopAfterEpisode{Nothing}, agent, env)
     s.cur >= s.episode
 end
 
-function check!(s::StopAfterEpisode, agent, env)
+function check!(s::StopAfterNEpisodes, agent, env)
     if is_terminated(env)
         s.cur += 1
         ProgressMeter.next!(s.progress)
@@ -157,17 +157,17 @@ function check!(s::StopAfterNoImprovement, agent, env)
 end
 
 #####
-# StopWhenDone
+# StopIfEnvTerminated
 #####
 
 """
-    StopWhenDone()
+    StopIfEnvTerminated()
 
 Return `true` if the environment is terminated.
 """
-struct StopWhenDone <: AbstractStopCondition end
+struct StopIfEnvTerminated <: AbstractStopCondition end
 
-check!(s::StopWhenDone, agent, env) = is_terminated(env)
+check!(s::StopIfEnvTerminated, agent, env) = is_terminated(env)
 
 #####
 # StopSignal

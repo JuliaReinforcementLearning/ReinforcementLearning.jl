@@ -17,7 +17,7 @@ end
 function Base.run(
     policy::AbstractPolicy,
     env::AbstractEnv,
-    stop_condition::AbstractStopCondition=StopAfterEpisode(1),
+    stop_condition::AbstractStopCondition=StopAfterNEpisodes(1),
     hook::AbstractHook=EmptyHook(),
     reset_condition::AbstractResetCondition=ResetIfEnvTerminated()
 )
