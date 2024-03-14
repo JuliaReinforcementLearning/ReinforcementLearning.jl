@@ -57,9 +57,9 @@ end
     end
 end
 
-@testset "DoEveryNStep" begin
-    h_1 = DoEveryNStep((hook, agent, env) -> (env.pos += 1); n=2)
-    h_2 = DoEveryNStep((hook, agent, env) -> (env.pos += 1); n=1)
+@testset "DoEveryNSteps" begin
+    h_1 = DoEveryNSteps((hook, agent, env) -> (env.pos += 1); n=2)
+    h_2 = DoEveryNSteps((hook, agent, env) -> (env.pos += 1); n=1)
 
     for h in (h_1, h_2)
         env = RandomWalk1D()

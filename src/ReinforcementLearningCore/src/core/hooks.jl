@@ -7,7 +7,7 @@ export AbstractHook,
     BatchStepsPerEpisode,
     TimePerStep,
     DoEveryNEpisode,
-    DoEveryNStep,
+    DoEveryNSteps,
     DoOnExit
 
 using UnicodePlots: lineplot, lineplot!
@@ -286,26 +286,26 @@ function Base.push!(hook::TimePerStep, ::PostActStage, agent, env)
 end
 
 """
-    DoEveryNStep(f; n=1, t=0)
+    DoEveryNSteps(f; n=1, t=0)
 
 Execute `f(t, agent, env)` every `n` step.
 `t` is a counter of steps.
 """
-mutable struct DoEveryNStep{F,T} <: AbstractHook where {F,T<:Integer}
+mutable struct DoEveryNSteps{F,T} <: AbstractHook where {F,T<:Integer}
     f::F
     n::T
     t::T
 
-    function DoEveryNStep(f; n=1, t=0)
+    function DoEveryNSteps(f; n=1, t=0)
         new{typeof(f),Int64}(f, n, t)
     end
 
-    function DoEveryNStep{T}(f; n=1, t=0) where {T<:Integer}
+    function DoEveryNSteps{T}(f; n=1, t=0) where {T<:Integer}
         new{typeof(f),T}(f, n, t)
     end
 end
 
-function Base.push!(hook::DoEveryNStep, ::PostActStage, agent, env)
+function Base.push!(hook::DoEveryNSteps, ::PostActStage, agent, env)
     hook.t += 1
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)

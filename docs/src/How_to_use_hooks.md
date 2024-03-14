@@ -85,7 +85,7 @@ Sometimes, we'd like to periodically run some functions. Two handy hooks are
 provided for this kind of tasks:
 
 - [`DoEveryNEpisode`](@ref)
-- [`DoEveryNStep`](@ref)
+- [`DoEveryNSteps`](@ref)
 
 Following are some typical usages.
 
@@ -160,7 +160,7 @@ run(
     policy,
     env,
     StopAfterNSteps(10_000),
-    DoEveryNStep(n=1_000) do t, p, e
+    DoEveryNSteps(n=1_000) do t, p, e
         ps = params(p)
         f = joinpath(parameters_dir, "parameters_at_step_$t.bson")
         BSON.@save f ps
