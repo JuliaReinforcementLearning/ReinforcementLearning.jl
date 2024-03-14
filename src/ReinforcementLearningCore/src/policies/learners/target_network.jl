@@ -1,7 +1,6 @@
 export Approximator, TargetNetwork, target, model
 
-using Flux: gpu
-
+using Flux
 
 target(ap::Approximator) = ap.model #see TargetNetwork
 model(ap::Approximator) = ap.model #see TargetNetwork

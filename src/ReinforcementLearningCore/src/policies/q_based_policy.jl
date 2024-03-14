@@ -1,5 +1,7 @@
 export QBasedPolicy
 
+using Flux
+
 """
     QBasedPolicy(;learner, explorer)
 

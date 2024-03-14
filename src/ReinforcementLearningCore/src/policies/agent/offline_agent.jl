@@ -1,5 +1,7 @@
 export OfflineAgent, OfflineBehavior
 
+using Flux
+
 """
     OfflineBehavior(; agent:: Union{<:Agent, Nothing}, steps::Int, reset_condition)
 

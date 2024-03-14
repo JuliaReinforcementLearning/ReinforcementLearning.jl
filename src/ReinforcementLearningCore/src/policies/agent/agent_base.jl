@@ -1,7 +1,7 @@
 export Agent
 
 using Base.Threads: @spawn
-
+using Flux
 import Base.push!
 
 abstract type AbstractAgent <: AbstractPolicy end
