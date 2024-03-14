@@ -1,63 +1,13 @@
-export @E_cmd, Experiment
+export Experiment
 
-
-import Parsers
-
-macro E_cmd(s)
-    Experiment(s)
+struct Experiment
+    policy::AbstractPolicy
+    env::AbstractEnv
+    stop_condition::AbstractStopCondition
+    hook::AbstractHook
 end
 
-function try_parse(s, TS=(Bool, Int, Float32, Float64))
-    if s == "nothing"
-        nothing
-    else
-        for T in TS
-            res = Parsers.tryparse(T, s)
-            if !isnothing(res)
-                return res
-            end
-        end
-        s
-    end
-end
-
-function try_parse_kw(s)
-    kw = []
-    # !!! obviously, it's not correct when a value is string and contains ","
-    for part in split(s, ",")
-        kv = split(part, "=")
-        @assert length(kv) == 2
-        k, v = kv
-        push!(kw, Symbol(strip(k)) => try_parse(strip(v)))
-    end
-    NamedTuple(kw)
-end
-
-struct Experiment{S}
-    policy::Any
-    env::Any
-    stop_condition::Any
-    hook::Any
-end
-
-Experiment(args...) = Experiment{Symbol()}(args...)
-
-function Experiment(s::String)
-    m = match(r"(?<source>\w+)_(?<method>\w+)_(?<env>\w+)(\((?<game>.*)\))?", s)
-    isnothing(m) && throw(
-        ArgumentError(
-            "invalid format, got $s, expected format is JuliaRL_DQN_Atari(game=\"pong\")`",
-        ),
-    )
-    source = m[:source]
-    method = m[:method]
-    env = m[:env]
-    kw_args = isnothing(m[:game]) ? (;) : try_parse_kw(m[:game])
-    ex = Experiment(Val(Symbol(source)), Val(Symbol(method)), Val(Symbol(env)); kw_args...)
-    Experiment{Symbol(s)}(ex.policy, ex.env, ex.stop_condition, ex.hook)
-end
-
-Base.show(io::IO, m::MIME"text/plain", t::Experiment{S}) where {S} = show(io, m, convert(AnnotatedStructTree, t; description=string(S)))
+Base.show(io::IO, m::MIME"text/plain", t::Experiment) = show(io, m, convert(AnnotatedStructTree, t))
 
 function Base.run(ex::Experiment)
     run(ex.policy, ex.env, ex.stop_condition, ex.hook)
