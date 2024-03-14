@@ -115,7 +115,7 @@ end
 
     for h in (h_1, h_2, h_3)
         h_ = test_run!(h)
-        @test length(h_.rewards) == 10
+        @test length(h_.rewards) == 100
         @test sum(abs.(sum.(h_.rewards))) == 100
         @test length(unique(length.(h_.rewards))) > 1
         test_noop!(h, stages=[PreActStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
