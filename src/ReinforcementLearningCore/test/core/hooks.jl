@@ -32,7 +32,7 @@ end
 
 function test_run!(hook::AbstractHook)
     hook_ = deepcopy(hook)
-    run(RandomPolicy(), RandomWalk1D(), StopAfterNEpisodes(10), hook_)
+    run(RandomPolicy(), RandomWalk1D(), StopAfterNEpisodes(100), hook_)
     return hook_
 end
 
@@ -77,7 +77,7 @@ end
     h_1 = TimePerStep()
     h_2 = TimePerStep{Float32}()
 
-    sleep_vect = [0.01, 0.02, 0.03]
+    sleep_vect = [0.05, 0.05, 0.05]
     for h in (h_1, h_2)
         push!(h, PostActStage(), 1, 1)
         [(sleep(i); push!(h, PostActStage(), 1, 1)) for i in sleep_vect]
