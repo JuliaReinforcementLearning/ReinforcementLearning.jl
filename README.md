@@ -45,7 +45,7 @@ julia> using ReinforcementLearning
 julia> run(
            RandomPolicy(),
            CartPoleEnv(),
-           StopAfterStep(1_000),
+           StopAfterNSteps(1_000),
            TotalRewardPerEpisode()
        )
 ```
@@ -66,7 +66,7 @@ reinforcement learning experiment:
   to test reinforcement learning algorithms.
 
 - **Stop Condition**. The
-  [`StopAfterStep(1_000)`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.StopAfterStep)
+  [`StopAfterNSteps(1_000)`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.StopAfterNSteps)
   is to inform that our experiment should stop after
   `1_000` steps.
 

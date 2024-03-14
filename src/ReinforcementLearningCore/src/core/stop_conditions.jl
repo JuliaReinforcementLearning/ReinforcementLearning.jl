@@ -1,4 +1,4 @@
-export AbstractStopCondition, StopAfterStep,
+export AbstractStopCondition, StopAfterNSteps,
     StopAfterNEpisodes, StopIfEnvTerminated, StopSignal, StopAfterNoImprovement, StopAfterNSeconds, ComposedStopCondition
 
 import ProgressMeter
@@ -28,42 +28,42 @@ function check!(s::ComposedStopCondition, args...)
 end
 
 #####
-# StopAfterStep
+# StopAfterNSteps
 #####
 """
-    StopAfterStep(step; cur = 1, is_show_progress = true)
+    StopAfterNSteps(step; cur = 1, is_show_progress = true)
 
 Return `true` after being called `step` times.
 """
-mutable struct StopAfterStep{Tl} <: AbstractStopCondition
+mutable struct StopAfterNSteps{Tl} <: AbstractStopCondition
     step::Int
     cur::Int
     "IGNORE"
     progress::Tl
 end
 
-function StopAfterStep(step; cur = 1, is_show_progress = true)
+function StopAfterNSteps(step; cur = 1, is_show_progress = true)
     if is_show_progress
         progress = ProgressMeter.Progress(step, dt = 1)
         ProgressMeter.update!(progress, cur)
     else
         progress = nothing
     end
-    StopAfterStep(step, cur, progress)
+    StopAfterNSteps(step, cur, progress)
 end
 
-function _stop_after_step(s::StopAfterStep)
+function _stop_after_step(s::StopAfterNSteps)
     res = s.cur >= s.step
     s.cur += 1
     res
 end
 
-function check!(s::StopAfterStep, args...)
+function check!(s::StopAfterNSteps, args...)
     ProgressMeter.next!(s.progress)
     _stop_after_step(s)
 end
 
-check!(s::StopAfterStep{Nothing}, args...) = _stop_after_step(s)
+check!(s::StopAfterNSteps{Nothing}, args...) = _stop_after_step(s)
 
 #####
 # StopAfterNEpisodes

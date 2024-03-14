@@ -159,7 +159,7 @@ parameters_dir = mktempdir()
 run(
     policy,
     env,
-    StopAfterStep(10_000),
+    StopAfterNSteps(10_000),
     DoEveryNStep(n=1_000) do t, p, e
         ps = params(p)
         f = joinpath(parameters_dir, "parameters_at_step_$t.bson")
