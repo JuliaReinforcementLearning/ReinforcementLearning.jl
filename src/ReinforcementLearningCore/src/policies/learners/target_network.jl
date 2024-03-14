@@ -60,7 +60,7 @@ function TargetNetwork(network::Approximator; sync_freq = 1, ρ = 0f0, use_gpu =
     return TargetNetwork(network, target, sync_freq, ρ, 0)
 end
 
-Flux.@layer TargetNetwork (network, target)
+Flux.@layer TargetNetwork trainable=(network, target)
 
 Flux.trainable(model::TargetNetwork) = (model.network,)
 

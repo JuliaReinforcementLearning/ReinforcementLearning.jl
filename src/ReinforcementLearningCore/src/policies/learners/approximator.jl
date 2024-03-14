@@ -38,7 +38,7 @@ Approximator(model, optimiser::Flux.Optimise.AbstractOptimiser; use_gpu=false) =
 
 Base.show(io::IO, m::MIME"text/plain", A::Approximator) = show(io, m, convert(AnnotatedStructTree, A))
 
-Flux.@layer Approximator (model,)
+Flux.@layer Approximator trainable=(model,)
 
 forward(A::Approximator, args...; kwargs...) = A.model(args...; kwargs...)
 forward(A::Approximator, env::E) where {E <: AbstractEnv} = env |> state |> (x -> forward(A, x))
