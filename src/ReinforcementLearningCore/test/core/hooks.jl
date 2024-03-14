@@ -49,7 +49,7 @@ end
 
     for h in (h_1, h_2, h_3, h_4, h_5)
         h_ = test_run!(h)
-        @test length(h_.rewards) == 10
+        @test length(h_.rewards) == 100
         @test sum(h_.rewards .== 1) > 0
         @test sum(h_.rewards .== -1) > 0        
 
