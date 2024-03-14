@@ -49,7 +49,7 @@ struct OfflineAgent{P<:AbstractPolicy,T<:Trajectory,B<:OfflineBehavior} <: Abstr
 end
 
 OfflineAgent(; policy, trajectory, offline_behavior=OfflineBehavior()) = OfflineAgent(policy, trajectory, offline_behavior)
-@functor OfflineAgent (policy,)
+Flux.@layer OfflineAgent (policy,)
 
 Base.push!(::OfflineAgent{P,T,<:OfflineBehavior{Nothing}}, ::PreExperimentStage, env::AbstractEnv) where {P,T} = nothing
 #fills the trajectory with interactions generated with the behavior_agent at the PreExperimentStage.

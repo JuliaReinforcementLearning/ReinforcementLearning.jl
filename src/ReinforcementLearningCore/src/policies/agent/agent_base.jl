@@ -2,7 +2,6 @@ export Agent
 
 using Base.Threads: @spawn
 
-using Functors: @functor
 import Base.push!
 
 abstract type AbstractAgent <: AbstractPolicy end
@@ -41,7 +40,7 @@ RLBase.optimise!(::AsyncTrajectoryStyle, agent::AbstractAgent, stage::S) where {
 #by default, optimise does nothing at all stage
 function RLBase.optimise!(policy::AbstractPolicy, stage::AbstractStage, trajectory::Trajectory) end
 
-@functor Agent (policy,)
+Flux.@layer Agent (policy,)
 
 function Base.push!(agent::Agent, ::PreEpisodeStage, env::AbstractEnv)
     push!(agent.trajectory, (state = state(env),))
