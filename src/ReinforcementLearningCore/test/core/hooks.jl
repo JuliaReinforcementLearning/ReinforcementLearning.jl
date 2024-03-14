@@ -30,6 +30,62 @@ function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), P
     end
 end
 
+using Test
+
+@testset "AbstractHook + AbstractHook" begin
+    @test (+)(AbstractHook(), AbstractHook()) == ComposedHook((AbstractHook(), AbstractHook()))
+end
+
+@testset "ComposedHook + AbstractHook" begin
+    @test (+)(ComposedHook((AbstractHook(),)), AbstractHook()) == ComposedHook((AbstractHook(), AbstractHook()))
+end
+
+@testset "AbstractHook + ComposedHook" begin
+    @test (+)(AbstractHook(), ComposedHook((AbstractHook(),))) == ComposedHook((AbstractHook(), AbstractHook()))
+end
+
+@testset "ComposedHook + ComposedHook" begin
+    @test (+)(ComposedHook((AbstractHook(),)), ComposedHook((AbstractHook(),))) == ComposedHook((AbstractHook(), AbstractHook(), AbstractHook()))
+end
+
+@testset "_push! function with a single hook" begin
+    stage = AbstractStage()
+    policy = AbstractPolicy()
+    env = AbstractEnv()
+    hook = AbstractHook()
+    _push!(stage, policy, env, hook)
+    @test stage.hooks == (hook,)
+end
+
+@testset "_push! function with multiple hooks" begin
+    stage = AbstractStage()
+    policy = AbstractPolicy()
+    env = AbstractEnv()
+    hook1 = AbstractHook()
+    hook2 = AbstractHook()
+    hook3 = AbstractHook()
+    _push!(stage, policy, env, hook1, hook2, hook3)
+    @test stage.hooks == (hook1, hook2, hook3)
+end
+
+@testset "push! function for ComposedHook" begin
+    stage = AbstractStage()
+    policy = AbstractPolicy()
+    env = AbstractEnv()
+    composed_hook = ComposedHook((AbstractHook(), AbstractHook()))
+    push!(composed_hook, stage, policy, env)
+    @test stage.hooks == (AbstractHook(), AbstractHook())
+end
+
+@testset "push! function for ComposedHook with multiple hooks" begin
+    stage = AbstractStage()
+    policy = AbstractPolicy()
+    env = AbstractEnv()
+    composed_hook = ComposedHook((AbstractHook(), AbstractHook()))
+    push!(composed_hook, stage, policy, env)
+    @test stage.hooks == (AbstractHook(), AbstractHook(), AbstractHook())
+end
+
 function test_run!(hook::AbstractHook)
     hook_ = deepcopy(hook)
     run(RandomPolicy(), RandomWalk1D(), StopAfterNEpisodes(100), hook_)
