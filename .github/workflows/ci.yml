@@ -53,6 +53,8 @@ jobs:
             Pkg.develop(path="src/ReinforcementLearningBase")
             Pkg.test("ReinforcementLearningBase", coverage=true)'
       - uses: julia-actions/julia-processcoverage@v1
+        with:
+          directories: src/ReinforcementLearningBase/src      
       - uses: codecov/codecov-action@v3
   test-RLCore:
     name: RLCore - Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
@@ -95,6 +97,8 @@ jobs:
             Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.test("ReinforcementLearningCore", coverage=true)'
       - uses: julia-actions/julia-processcoverage@v1
+        with:
+          directories: src/ReinforcementLearningCore/src      
       - uses: codecov/codecov-action@v3
   test-RLFarm:
     name: RLFarm - Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
@@ -139,6 +143,8 @@ jobs:
             Pkg.develop(path="src/ReinforcementLearningFarm")
             Pkg.test("ReinforcementLearningFarm", coverage=true)'
       - uses: julia-actions/julia-processcoverage@v1
+        with:
+          directories: src/ReinforcementLearningFarm/src
       - uses: codecov/codecov-action@v3
   test-RLEnvs:
     name: RLEnvs - Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
@@ -185,6 +191,8 @@ jobs:
             Pkg.develop(path="src/ReinforcementLearningEnvironments")
             Pkg.test("ReinforcementLearningEnvironments", coverage=true)'
       - uses: julia-actions/julia-processcoverage@v1
+        with:
+          directories: src/ReinforcementLearningEnvironments/src
       - uses: codecov/codecov-action@v3
   docs:
     name: Documentation
