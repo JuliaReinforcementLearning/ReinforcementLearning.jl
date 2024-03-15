@@ -5,7 +5,7 @@ using Flux
     approximator = TabularVApproximator(n_state=5, opt = InvDecay(0.7))
     @test TDLearner(approximator, :SARS, γ=0.95, n=0) isa TDLearner
 
-    approximator = TabularQApproximator(n_state=5, n_action=3)
+    approximator = TabularQApproximator(n_state=5, n_action=3, opt = InvDecay(0.7))
     @test TDLearner(approximator, :SARS, γ=0.95, n=0) isa TDLearner
 end
 
