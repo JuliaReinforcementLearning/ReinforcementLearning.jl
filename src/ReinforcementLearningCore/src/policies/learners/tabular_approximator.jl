@@ -19,10 +19,10 @@ function TabularApproximator(table::A, opt::O) where {A<:AbstractArray,O}
     TabularApproximator{A,O}(table, opt)
 end
 
-TabularVApproximator(; n_state, init = 0.0, opt = InvDecay(1.0)) =
+TabularVApproximator(; n_state, opt, init = 0.0) =
     TabularApproximator(fill(init, n_state), opt)
 
-TabularQApproximator(; n_state, n_action, init = 0.0, opt = InvDecay(1.0)) =
+TabularQApproximator(; n_state, n_action, opt, init = 0.0) =
     TabularApproximator(fill(init, n_action, n_state), opt)
 
 # Take Learner and Environment, get state, send to RLCore.forward(Learner, State)
