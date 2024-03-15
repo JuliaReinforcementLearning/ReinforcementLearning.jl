@@ -296,7 +296,7 @@ mutable struct DoEveryNSteps{F} <: AbstractHook where {F}
     n::Int
     t::Int
     
-    function new(f; n=1, t=0)
+    function DoEveryNSteps(f; n=1, t=0)
         new{F}(f, n, t)
     end
 end
