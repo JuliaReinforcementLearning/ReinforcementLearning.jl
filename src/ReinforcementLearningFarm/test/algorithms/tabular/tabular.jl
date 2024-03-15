@@ -1,1 +1,5 @@
-include("td_learner.jl")
+@testset "TDLearner" begin
+    include("td_learner.jl")
+end
+
+
