@@ -1,7 +1,6 @@
 export Approximator, TargetNetwork, target, model
 
-using Flux: gpu
-
+using Flux
 
 target(ap::Approximator) = ap.model #see TargetNetwork
 model(ap::Approximator) = ap.model #see TargetNetwork
@@ -61,9 +60,7 @@ function TargetNetwork(network::Approximator; sync_freq = 1, ρ = 0f0, use_gpu =
     return TargetNetwork(network, target, sync_freq, ρ, 0)
 end
 
-@functor TargetNetwork (network, target)
-
-Flux.trainable(model::TargetNetwork) = (model.network,)
+Flux.@layer TargetNetwork trainable=(network,)
 
 forward(tn::TargetNetwork, args...) = forward(tn.network, args...)
 

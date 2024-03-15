@@ -1,4 +1,3 @@
-using Functors: @functor
 import Flux
 import Flux.onehotbatch
 using ChainRulesCore: ignore_derivatives
@@ -18,7 +17,7 @@ Base.@kwdef struct ActorCritic{A,C,O}
     critic::C
 end
 
-@functor ActorCritic
+Flux.@layer ActorCritic
 
 #####
 # GaussianNetwork
@@ -53,7 +52,7 @@ end
 
 GaussianNetwork(pre, μ, σ; squash = identity) = GaussianNetwork(pre, μ, σ, 0.0f0, Inf32, squash)
 
-@functor GaussianNetwork
+Flux.@layer GaussianNetwork
 
 """
 This function is compatible with a multidimensional action space.
@@ -142,7 +141,7 @@ end
 
 SoftGaussianNetwork(pre, μ, σ) = SoftGaussianNetwork(pre, μ, σ, 0.0f0, Inf32)
 
-@functor SoftGaussianNetwork
+Flux.@layer SoftGaussianNetwork
 
 """
 This function is compatible with a multidimensional action space.
@@ -225,7 +224,7 @@ Base.@kwdef mutable struct CovGaussianNetwork{P,U,S}
     Σ::S
 end
 
-@functor CovGaussianNetwork
+Flux.@layer CovGaussianNetwork
 
 """
     (model::CovGaussianNetwork)(rng::AbstractRNG, state::AbstractArray{<:Any, 3}; is_sampling::Bool=false, is_return_log_prob::Bool=false)
@@ -407,7 +406,7 @@ mutable struct CategoricalNetwork{P}
     model::P
 end
 
-@functor CategoricalNetwork
+Flux.@layer CategoricalNetwork
 
 function (model::CategoricalNetwork)(rng::AbstractRNG, state::AbstractArray; is_sampling::Bool=false, is_return_log_prob::Bool = false)
     logits = model.model(state) #may be 1-3 dimensional
@@ -514,7 +513,7 @@ Base.@kwdef struct DuelingNetwork{B,V,A}
     adv::A
 end
 
-Flux.@functor DuelingNetwork
+Flux.@layer DuelingNetwork
 
 function (m::DuelingNetwork)(state)
     x = m.base(state)
@@ -544,7 +543,7 @@ Base.@kwdef struct PerturbationNetwork{N}
     ϕ::Float32 = 0.05f0
 end
 
-Flux.@functor PerturbationNetwork
+Flux.@layer PerturbationNetwork
 
 """
 This function accepts `state` and `action`, and then outputs actions after disturbance.
@@ -570,7 +569,7 @@ Base.@kwdef struct VAE{E,D}
     latent_dims::Int
 end
 
-Flux.@functor VAE
+Flux.@layer VAE
 
 function (model::VAE)(rng::AbstractRNG, state, action)
     μ, σ = model.encoder(vcat(state, action))

@@ -32,7 +32,7 @@ end
 
 function test_run!(hook::AbstractHook)
     hook_ = deepcopy(hook)
-    run(RandomPolicy(), RandomWalk1D(), StopAfterNEpisodes(10), hook_)
+    run(RandomPolicy(), RandomWalk1D(), StopAfterNEpisodes(100), hook_)
     return hook_
 end
 
@@ -49,7 +49,7 @@ end
 
     for h in (h_1, h_2, h_3, h_4, h_5)
         h_ = test_run!(h)
-        @test length(h_.rewards) == 10
+        @test length(h_.rewards) == 100
         @test sum(h_.rewards .== 1) > 0
         @test sum(h_.rewards .== -1) > 0        
 
@@ -77,11 +77,11 @@ end
     h_1 = TimePerStep()
     h_2 = TimePerStep{Float32}()
 
-    sleep_vect = [0.01, 0.02, 0.03]
+    sleep_vect = [0.05, 0.05, 0.05]
     for h in (h_1, h_2)
         push!(h, PostActStage(), 1, 1)
         [(sleep(i); push!(h, PostActStage(), 1, 1)) for i in sleep_vect]
-        @test all(0.1 .> h.times[2:end] .> 0)
+        @test all(0.2 .> h.times[2:end] .> 0)
         test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end
 end
@@ -115,8 +115,8 @@ end
 
     for h in (h_1, h_2, h_3)
         h_ = test_run!(h)
-        @test length(h_.rewards) == 10
-        @test sum(abs.(sum.(h_.rewards))) == 10
+        @test length(h_.rewards) == 100
+        @test sum(abs.(sum.(h_.rewards))) == 100
         @test length(unique(length.(h_.rewards))) > 1
         test_noop!(h, stages=[PreActStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end

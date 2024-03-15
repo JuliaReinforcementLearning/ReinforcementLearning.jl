@@ -1,5 +1,7 @@
 export OfflineAgent, OfflineBehavior
 
+using Flux
+
 """
     OfflineBehavior(; agent:: Union{<:Agent, Nothing}, steps::Int, reset_condition)
 
@@ -49,7 +51,7 @@ struct OfflineAgent{P<:AbstractPolicy,T<:Trajectory,B<:OfflineBehavior} <: Abstr
 end
 
 OfflineAgent(; policy, trajectory, offline_behavior=OfflineBehavior()) = OfflineAgent(policy, trajectory, offline_behavior)
-@functor OfflineAgent (policy,)
+Flux.@layer OfflineAgent trainable=(policy,)
 
 Base.push!(::OfflineAgent{P,T,<:OfflineBehavior{Nothing}}, ::PreExperimentStage, env::AbstractEnv) where {P,T} = nothing
 #fills the trajectory with interactions generated with the behavior_agent at the PreExperimentStage.

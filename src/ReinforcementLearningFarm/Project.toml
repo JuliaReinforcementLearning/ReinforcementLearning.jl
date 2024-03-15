@@ -1,6 +1,6 @@
 name = "ReinforcementLearningFarm"
 uuid = "14eff660-7080-4cec-bba2-cfb12cd77ac3"
-version = "0.1.0"
+version = "0.0.1"
 
 [deps]
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"

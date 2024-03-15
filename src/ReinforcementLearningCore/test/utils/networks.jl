@@ -19,11 +19,11 @@ import ReinforcementLearningBase: RLBase
     @testset "NeuralNetworkApproximator" begin
         NN = NeuralNetworkApproximator(; model = Dense(2, 3), optimizer = Descent())
 
-        q_values = NN(rand(2))
+        q_values = NN(rand(Float32, 2))
         @test size(q_values) == (3,)
 
         gs = gradient(params(NN)) do
-            sum(NN(rand(2, 5)))
+            sum(NN(rand(Float32, 2, 5)))
         end
 
         old_params = deepcopy(collect(params(NN).params))
@@ -47,7 +47,7 @@ import ReinforcementLearningBase: RLBase
         D = ac.actor.model |> gpu |> device
         @test D === device(ac) === device(ac.actor) == device(ac.critic)
 
-        A = send_to_device(D, rand(3))
+        A = send_to_device(D, rand(Float32, 3))
         ac.actor(A)
         ac.critic(A)
     end=#
@@ -55,7 +55,7 @@ import ReinforcementLearningBase: RLBase
     @testset "GaussianNetwork" begin
         @testset "On CPU" begin
             gn = GaussianNetwork(Dense(20,15), Dense(15,10), Dense(15,10, softplus))
-            state = rand(Float32,20,3) #batch of 3 states
+            state = rand(Float32, 20, 3) #batch of 3 states
             @testset "Correctness of outputs" begin
                 m, L = gn(state)
                 @test size(m) == size(L) == (10,3)
@@ -115,7 +115,7 @@ import ReinforcementLearningBase: RLBase
             if (@isdefined CUDA) && CUDA.functional()
                 CUDA.allowscalar(false)
                 gn = GaussianNetwork(Dense(20,15), Dense(15,10), Dense(15,10, softplus)) |> gpu
-                state = rand(20,3)  |> gpu #batch of 3 states
+                state = rand(Float32, 20,3)  |> gpu #batch of 3 states
                 @testset "Forward pass compatibility" begin
                     @test Flux.params(gn) == Flux.Params([gn.pre.weight, gn.pre.bias, gn.μ.weight, gn.μ.bias, gn.σ.weight, gn.σ.bias])
                     m, L = gn(state)

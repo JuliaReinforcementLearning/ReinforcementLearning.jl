@@ -1,7 +1,6 @@
 export AbstractLearner, Approximator
 
 using Flux
-using Functors: @functor
 
 abstract type AbstractLearner end
 
