@@ -25,7 +25,7 @@ Constructs an `Approximator` object for reinforcement learning.
 # Returns
 An `Approximator` object.
 """
-function Approximator(; model, optimiser::Flux.Optimise.AbstractOptimiser, use_gpu=false)
+function Approximator(; model, optimiser, use_gpu=false)
     optimiser_state = Flux.setup(optimiser, model)
     if use_gpu  # Pass model to GPU (if available) upon creation
         return Approximator(gpu(model), gpu(optimiser_state))

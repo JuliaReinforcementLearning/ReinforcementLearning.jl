@@ -1,7 +1,7 @@
 @testset "QBasedPolicy" begin
 
     @testset "constructor" begin
-        q_approx = TabularQApproximator(n_state = 5, n_action = 10)
+        q_approx = TabularQApproximator(n_state = 5, n_action = 10, opt = InvDecay(0.5))
         explorer = EpsilonGreedyExplorer(0.1)
         p = QBasedPolicy(q_approx, explorer)
         @test p.learner == q_approx
@@ -11,7 +11,7 @@
     @testset "plan!" begin
         @testset "plan! without player argument" begin
             env = TicTacToeEnv()
-            q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)))
+            q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
             explorer = EpsilonGreedyExplorer(0.1)
             policy = QBasedPolicy(q_approx, explorer)
             @test 1 <= RLBase.plan!(policy, env) <= 9
@@ -19,7 +19,7 @@
 
         @testset "plan! with player argument" begin
             env = TicTacToeEnv()
-            q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)))
+            q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
             explorer = EpsilonGreedyExplorer(0.1)
             policy = QBasedPolicy(q_approx, explorer)
             player = :player1
@@ -30,7 +30,7 @@
     # Test prob function
     @testset "prob" begin
         env = TicTacToeEnv()
-        q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)))
+        q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
         explorer = EpsilonGreedyExplorer(0.1)
         policy = QBasedPolicy(q_approx, explorer)
         # prob = RLBase.prob(p, env)
@@ -40,7 +40,7 @@
     # Test optimise! function
     @testset "optimise!" begin
         env = TicTacToeEnv()
-        q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)))
+        q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
         explorer = EpsilonGreedyExplorer(0.1)
         policy = QBasedPolicy(q_approx, explorer)
         s = PreActStage()
