@@ -38,10 +38,10 @@ struct ComposedHook{T<:Tuple} <: AbstractHook
     ComposedHook(hooks...) = new{typeof(hooks)}(hooks)
 end
 
-Base.:(+)(h1::AbstractHook, h2::AbstractHook) = ComposedHook((h1, h2))
-Base.:(+)(h1::ComposedHook, h2::AbstractHook) = ComposedHook((h1.hooks..., h2))
-Base.:(+)(h1::AbstractHook, h2::ComposedHook) = ComposedHook((h1, h2.hooks...))
-Base.:(+)(h1::ComposedHook, h2::ComposedHook) = ComposedHook((h1.hooks..., h2.hooks...))
+Base.:(+)(h1::AbstractHook, h2::AbstractHook) = ComposedHook(h1, h2)
+Base.:(+)(h1::ComposedHook, h2::AbstractHook) = ComposedHook(h1.hooks..., h2)
+Base.:(+)(h1::AbstractHook, h2::ComposedHook) = ComposedHook(h1, h2.hooks...)
+Base.:(+)(h1::ComposedHook, h2::ComposedHook) = ComposedHook(h1.hooks..., h2.hooks...)
 
 @inline function _push!(stage::AbstractStage, policy::P, env::E, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
     Base.push!(hook, stage, policy, env)

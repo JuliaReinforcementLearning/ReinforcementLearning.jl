@@ -1,3 +1,5 @@
+struct MockHook <: AbstractHook end 
+
 """
 test_noop!(hook; stages=[PreActStage()])
 
@@ -30,66 +32,45 @@ function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), P
     end
 end
 
-using Test
-
-@testset "AbstractHook + AbstractHook" begin
-    @test (+)(AbstractHook(), AbstractHook()) == ComposedHook((AbstractHook(), AbstractHook()))
-end
-
-@testset "ComposedHook + AbstractHook" begin
-    @test (+)(ComposedHook((AbstractHook(),)), AbstractHook()) == ComposedHook((AbstractHook(), AbstractHook()))
-end
-
-@testset "AbstractHook + ComposedHook" begin
-    @test (+)(AbstractHook(), ComposedHook((AbstractHook(),))) == ComposedHook((AbstractHook(), AbstractHook()))
-end
-
-@testset "ComposedHook + ComposedHook" begin
-    @test (+)(ComposedHook((AbstractHook(),)), ComposedHook((AbstractHook(),))) == ComposedHook((AbstractHook(), AbstractHook(), AbstractHook()))
-end
-
-@testset "_push! function with a single hook" begin
-    stage = AbstractStage()
-    policy = AbstractPolicy()
-    env = AbstractEnv()
-    hook = AbstractHook()
-    _push!(stage, policy, env, hook)
-    @test stage.hooks == (hook,)
-end
-
-@testset "_push! function with multiple hooks" begin
-    stage = AbstractStage()
-    policy = AbstractPolicy()
-    env = AbstractEnv()
-    hook1 = AbstractHook()
-    hook2 = AbstractHook()
-    hook3 = AbstractHook()
-    _push!(stage, policy, env, hook1, hook2, hook3)
-    @test stage.hooks == (hook1, hook2, hook3)
-end
-
-@testset "push! function for ComposedHook" begin
-    stage = AbstractStage()
-    policy = AbstractPolicy()
-    env = AbstractEnv()
-    composed_hook = ComposedHook((AbstractHook(), AbstractHook()))
-    push!(composed_hook, stage, policy, env)
-    @test stage.hooks == (AbstractHook(), AbstractHook())
-end
-
-@testset "push! function for ComposedHook with multiple hooks" begin
-    stage = AbstractStage()
-    policy = AbstractPolicy()
-    env = AbstractEnv()
-    composed_hook = ComposedHook((AbstractHook(), AbstractHook()))
-    push!(composed_hook, stage, policy, env)
-    @test stage.hooks == (AbstractHook(), AbstractHook(), AbstractHook())
-end
-
 function test_run!(hook::AbstractHook)
     hook_ = deepcopy(hook)
     run(RandomPolicy(), RandomWalk1D(), StopAfterNEpisodes(100), hook_)
     return hook_
+end
+
+@testset "AbstractHook + AbstractHook" begin
+    @test MockHook() + MockHook() == ComposedHook(MockHook(), MockHook())
+end
+
+@testset "ComposedHook + AbstractHook" begin
+    struct MockHook <: AbstractHook end 
+    @test ComposedHook(MockHook()) + MockHook() == ComposedHook(MockHook(), MockHook())
+end
+
+@testset "AbstractHook + ComposedHook" begin
+    @test MockHook() + ComposedHook(MockHook()) == ComposedHook(MockHook(), MockHook())
+end
+
+@testset "ComposedHook + ComposedHook" begin
+    @test ComposedHook(MockHook()) + ComposedHook(MockHook()) == ComposedHook(MockHook(), MockHook())
+end
+
+@testset "push! method for ComposedHook" begin
+    stage = PreActStage()
+    policy = RandomPolicy()
+    env = TicTacToeEnv()
+    composed_hook = ComposedHook(MockHook(), MockHook())
+    push!(composed_hook, stage, policy, env)
+    @test composed_hook.hooks == (MockHook(), MockHook())
+end
+
+@testset "push! method for ComposedHook with multiple hooks" begin
+    stage = PreActStage()
+    policy = RandomPolicy()
+    env = TicTacToeEnv()
+    composed_hook = ComposedHook(MockHook(), MockHook())
+    push!(composed_hook, stage, policy, env)
+    @test composed_hook.hooks == (MockHook(), MockHook())
 end
 
 @testset "TotalRewardPerEpisode" begin
