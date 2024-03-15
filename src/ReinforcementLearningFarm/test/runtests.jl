@@ -12,6 +12,11 @@ else
 end
 
 using Test
-@testset "ReinforcementLearningZoo.jl" begin
+using ReinforcementLearningBase
+using ReinforcementLearningCore
+using ReinforcementLearningEnvironments
+using ReinforcementLearningFarm
 
+@testset "ReinforcementLearningFarm.jl" begin
+    include("algorithms/algorithms.jl")
 end

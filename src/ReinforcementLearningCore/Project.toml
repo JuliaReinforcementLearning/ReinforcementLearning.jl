@@ -37,6 +37,7 @@ Metal = "1.0"
 ProgressMeter = "1"
 Reexport = "1"
 ReinforcementLearningBase = "0.12"
+ReinforcementLearningFarm = "0.0.1"
 ReinforcementLearningTrajectories = "0.3.7"
 Statistics = "1"
 StatsBase = "0.32, 0.33, 0.34"
@@ -52,9 +53,10 @@ Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
 Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
+ReinforcementLearningFarm = "14eff660-7080-4cec-bba2-cfb12cd77ac3"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [targets]
-test = ["CommonRLInterface", "CUDA", "cuDNN", "DomainSets", "Metal", "Preferences", "ReinforcementLearningEnvironments", "Test", "UUIDs"]
+test = ["CommonRLInterface", "CUDA", "cuDNN", "DomainSets", "Metal", "Preferences", "ReinforcementLearningEnvironments", "ReinforcementLearningFarm", "Test", "UUIDs"]
