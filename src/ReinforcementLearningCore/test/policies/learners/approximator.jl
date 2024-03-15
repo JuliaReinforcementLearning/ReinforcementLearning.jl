@@ -29,7 +29,7 @@ using Flux
         optimiser = Adam()
         approximator = Approximator(model=model, optimiser=optimiser, use_gpu=false)
 
-        env = CartPoleEnv()
+        env = CartPoleEnv(T=Float32)
         output = RLCore.forward(approximator, env)
         @test typeof(output) == Array{Float32,1}
         @test length(output) == 2
