@@ -99,13 +99,13 @@ get_ϵ(s::EpsilonGreedyExplorer) = get_ϵ(s, s.step)
     `NaN` will be filtered unless all the values are `NaN`.
     In that case, a random one will be returned.
 """
-function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values::Vector{I}) where {I<:Real}
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values::A) where {I<:Real, A<:Union{Vector{I}, SubArray{I}}}
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values)[2]) : rand(s.rng, 1:length(values))
 end
 
-function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values::Vector{I}) where {I<:Real}
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values::A) where {I<:Real, A<:Union{Vector{I}, SubArray{I}}}
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? findmax(values)[2] : rand(s.rng, 1:length(values))
@@ -113,17 +113,18 @@ end
 
 #####
 
-RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, x, mask::Trues) = RLBase.plan!(s, x)
+RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, x::A, mask::Trues) where {I<:Real, A<:Union{Vector{I}, SubArray{I}}} = RLBase.plan!(s, x)
 
-function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values::Vector{I}, mask::M) where {I<:Real, M<:Union{BitVector, Vector{Bool}}}
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,true}, values::A, mask::M) where {I<:Real, A<:Union{Vector{I}, SubArray{I}}, M<:Union{BitVector, Vector{Bool}}}
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? rand(s.rng, find_all_max(values, mask)[2]) :
     rand(s.rng, findall(mask))
 end
 
-RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, x::Vector{I}, mask::Trues) where{I<:Real} = RLBase.plan!(s, x)
-function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values::Vector{I}, mask::M) where {I<:Real, M<:Union{BitVector, Vector{Bool}}}
+RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, x::A, mask::Trues) where{I<:Real, A<:Union{Vector{I}, SubArray{I}}} = RLBase.plan!(s, x)
+
+function RLBase.plan!(s::EpsilonGreedyExplorer{<:Any,false}, values::A, mask::M) where {I<:Real, A<:Union{Vector{I}, SubArray{I}}, M<:Union{BitVector, Vector{Bool}}}
     ϵ = get_ϵ(s)
     s.step += 1
     rand(s.rng) >= ϵ ? findmax_masked(values, mask)[2] : rand(s.rng, findall(mask))
@@ -137,7 +138,7 @@ end
 
 Return the probability of selecting each action given the estimated `values` of each action.
 """
-function RLBase.prob(s::EpsilonGreedyExplorer{<:Any,true}, values)
+function RLBase.prob(s::EpsilonGreedyExplorer{<:Any,true}, values::A) where {I<:Real, A<:Union{Vector{I}, SubArray{I}}}
     ϵ, n = get_ϵ(s), length(values)
     probs = fill(ϵ / n, n)
     max_val_inds = find_all_max(values)[2]
