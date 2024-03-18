@@ -7,7 +7,7 @@ export AbstractHook,
     BatchStepsPerEpisode,
     TimePerStep,
     DoEveryNEpisode,
-    DoEveryNStep,
+    DoEveryNSteps,
     DoOnExit
 
 using UnicodePlots: lineplot, lineplot!
@@ -38,10 +38,10 @@ struct ComposedHook{T<:Tuple} <: AbstractHook
     ComposedHook(hooks...) = new{typeof(hooks)}(hooks)
 end
 
-Base.:(+)(h1::AbstractHook, h2::AbstractHook) = ComposedHook((h1, h2))
-Base.:(+)(h1::ComposedHook, h2::AbstractHook) = ComposedHook((h1.hooks..., h2))
-Base.:(+)(h1::AbstractHook, h2::ComposedHook) = ComposedHook((h1, h2.hooks...))
-Base.:(+)(h1::ComposedHook, h2::ComposedHook) = ComposedHook((h1.hooks..., h2.hooks...))
+Base.:(+)(h1::AbstractHook, h2::AbstractHook) = ComposedHook(h1, h2)
+Base.:(+)(h1::ComposedHook, h2::AbstractHook) = ComposedHook(h1.hooks..., h2)
+Base.:(+)(h1::AbstractHook, h2::ComposedHook) = ComposedHook(h1, h2.hooks...)
+Base.:(+)(h1::ComposedHook, h2::ComposedHook) = ComposedHook(h1.hooks..., h2.hooks...)
 
 @inline function _push!(stage::AbstractStage, policy::P, env::E, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
     Base.push!(hook, stage, policy, env)
@@ -286,26 +286,22 @@ function Base.push!(hook::TimePerStep, ::PostActStage, agent, env)
 end
 
 """
-    DoEveryNStep(f; n=1, t=0)
+    DoEveryNSteps(f; n=1, t=0)
 
 Execute `f(t, agent, env)` every `n` step.
 `t` is a counter of steps.
 """
-mutable struct DoEveryNStep{F,T} <: AbstractHook where {F,T<:Integer}
+mutable struct DoEveryNSteps{F} <: AbstractHook where {F}
     f::F
-    n::T
-    t::T
-
-    function DoEveryNStep(f; n=1, t=0)
-        new{typeof(f),Int64}(f, n, t)
-    end
-
-    function DoEveryNStep{T}(f; n=1, t=0) where {T<:Integer}
-        new{typeof(f),T}(f, n, t)
+    n::Int
+    t::Int
+    
+    function DoEveryNSteps(f::F; n=1, t=0) where {F}
+        new{F}(f, n, t)
     end
 end
 
-function Base.push!(hook::DoEveryNStep, ::PostActStage, agent, env)
+function Base.push!(hook::DoEveryNSteps, ::PostActStage, agent, env)
     hook.t += 1
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)

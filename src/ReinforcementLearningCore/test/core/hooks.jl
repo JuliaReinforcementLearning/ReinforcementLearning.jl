@@ -1,3 +1,5 @@
+struct MockHook <: AbstractHook end 
+
 """
 test_noop!(hook; stages=[PreActStage()])
 
@@ -36,6 +38,41 @@ function test_run!(hook::AbstractHook)
     return hook_
 end
 
+@testset "AbstractHook + AbstractHook" begin
+    @test MockHook() + MockHook() == ComposedHook(MockHook(), MockHook())
+end
+
+@testset "ComposedHook + AbstractHook" begin
+    struct MockHook <: AbstractHook end 
+    @test ComposedHook(MockHook()) + MockHook() == ComposedHook(MockHook(), MockHook())
+end
+
+@testset "AbstractHook + ComposedHook" begin
+    @test MockHook() + ComposedHook(MockHook()) == ComposedHook(MockHook(), MockHook())
+end
+
+@testset "ComposedHook + ComposedHook" begin
+    @test ComposedHook(MockHook()) + ComposedHook(MockHook()) == ComposedHook(MockHook(), MockHook())
+end
+
+@testset "push! method for ComposedHook" begin
+    stage = PreActStage()
+    policy = RandomPolicy()
+    env = TicTacToeEnv()
+    composed_hook = ComposedHook(MockHook(), MockHook())
+    push!(composed_hook, stage, policy, env)
+    @test composed_hook.hooks == (MockHook(), MockHook())
+end
+
+@testset "push! method for ComposedHook with multiple hooks" begin
+    stage = PreActStage()
+    policy = RandomPolicy()
+    env = TicTacToeEnv()
+    composed_hook = ComposedHook(MockHook(), MockHook())
+    push!(composed_hook, stage, policy, env)
+    @test composed_hook.hooks == (MockHook(), MockHook())
+end
+
 @testset "TotalRewardPerEpisode" begin
     h_1 = TotalRewardPerEpisode(; is_display_on_exit=true)
     h_2 = TotalRewardPerEpisode(; is_display_on_exit=false)
@@ -57,9 +94,9 @@ end
     end
 end
 
-@testset "DoEveryNStep" begin
-    h_1 = DoEveryNStep((hook, agent, env) -> (env.pos += 1); n=2)
-    h_2 = DoEveryNStep((hook, agent, env) -> (env.pos += 1); n=1)
+@testset "DoEveryNSteps" begin
+    h_1 = DoEveryNSteps((hook, agent, env) -> (env.pos += 1); n=2)
+    h_2 = DoEveryNSteps((hook, agent, env) -> (env.pos += 1); n=1)
 
     for h in (h_1, h_2)
         env = RandomWalk1D()

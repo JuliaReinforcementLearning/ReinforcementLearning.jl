@@ -84,7 +84,7 @@ Usually a closure or a functional object will be used to store some intermediate
 
 In most cases, you don't need to write a customized hook. Some generic hooks are provided so that you can inject logic at the appropriate time:
 
-- [`DoEveryNStep`](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/rl_core/#ReinforcementLearningCore.DoEveryNStep)
+- [`DoEveryNSteps`](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/rl_core/#ReinforcementLearningCore.DoEveryNSteps)
 - [`DoEveryNEpisode`](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/rl_core/#ReinforcementLearningCore.DoEveryNEpisode)
 
 However, if you do need to write a customized hook, the following methods must be provided:
@@ -98,10 +98,10 @@ If your hook is a subtype of `AbstractHook`, then all the above methods will hav
 
 ## How to use TensorBoard?
 
-This package adopts a non-invasive way for logging. So you can log everything you like with a hook. For example, to log the loss of each step. You can use the [`DoEveryNStep`](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/rl_core/#ReinforcementLearningCore.DoEveryNStep).
+This package adopts a non-invasive way for logging. So you can log everything you like with a hook. For example, to log the loss of each step. You can use the [`DoEveryNSteps`](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/rl_core/#ReinforcementLearningCore.DoEveryNSteps).
 
 ```julia
-DoEveryNStep() do t, agent, env
+DoEveryNSteps() do t, agent, env
     with_logger(lg) do
         @info "training" loss = agent.policy.learner.loss
     end
@@ -117,7 +117,7 @@ run(
     agent,
     env,
     stop_condition,
-    DoEveryNStep(EVALUATION_FREQ) do t, agent, env
+    DoEveryNSteps(EVALUATION_FREQ) do t, agent, env
         run(agent, env, eval_stop_condition, eval_hook)
     end
 )
