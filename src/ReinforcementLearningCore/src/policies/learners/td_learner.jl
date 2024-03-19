@@ -88,6 +88,6 @@ function RLBase.optimise!(learner::TDLearner, stage::AbstractStage, trajectory::
     end
 end
 
-# TDLearner{:SARS} optimises at the PostActStage
+# TDLearner{:SARS} is optimized at the PostActStage
 RLBase.optimise!(learner::TDLearner{:SARS}, stage::PostActStage, trace::NamedTuple) = RLBase.optimise!(learner, trace)
 
