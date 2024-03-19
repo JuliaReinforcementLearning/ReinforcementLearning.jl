@@ -1,32 +1,30 @@
 using Test
 using Flux
+using ReinforcementLearningCore, ReinforcementLearningBase
+
+# Mock explorer, environment, and learner
+struct MockExplorer <: AbstractExplorer end
+struct MockEnv <: AbstractEnv end
+struct MockLearner <: AbstractLearner end
 
 @testset "AbstractLearner Tests" begin
     @testset "Forward" begin
-        # Mock environment and learner
-        struct MockEnv <: AbstractEnv end
-        struct MockLearner <: AbstractLearner end
 
-        function RLCore.forward(::MockLearner, ::AbstractState)
-            return rand(2)
+        function RLCore.forward(::MockLearner, state::Int)
+            return [1.0, 2.0]
         end
+
+        RLBase.state(::MockEnv, ::Observation{Any}, ::DefaultPlayer) = 1
 
         env = MockEnv()
         learner = MockLearner()
 
-        output = forward(learner, env)
-
-        @test typeof(output) == Array{Float64,1}
-        @test length(output) == 2
+        output = RLCore.forward(learner, env)
+        @test output == Float64[1.0, 2.0]
     end
 
     @testset "Plan" begin
-        # Mock explorer, environment, and learner
-        struct MockExplorer <: AbstractExplorer end
-        struct MockEnv <: AbstractEnv end
-        struct MockLearner <: AbstractLearner end
-
-        function RLBase.plan!(::MockExplorer, ::AbstractState, ::AbstractActionSpace)
+        function RLBase.plan!(::MockExplorer, learner::MockLearner, env::MockEnv)
             return rand(2)
         end
 
@@ -42,11 +40,11 @@ using Flux
 
     @testset "Plan with Player" begin
         # Mock explorer, environment, and learner
-        struct MockExplorer <: AbstractExplorer end
-        struct MockEnv <: AbstractEnv end
-        struct MockLearner <: AbstractLearner end
+        function RLBase.action_space(::MockEnv, ::Symbol)
+            return [1, 2]
+        end
 
-        function RLBase.plan!(::MockExplorer, ::AbstractState, ::AbstractActionSpace)
+        function RLBase.plan!(::MockExplorer, learner::MockLearner, env::MockEnv, p::Symbol)
             return rand(2)
         end
 
@@ -62,12 +60,11 @@ using Flux
     end
 
     @testset "optimise!" begin
-        struct MockLearner <: AbstractLearner end
         tr = Trajectory(
                     CircularArraySARTSTraces(; capacity = 1_000),
                     BatchSampler(1),
                     InsertSampleRatioController(n_inserted = -1),
                 )
-        @test optimise!(MockLearner(), PreActStage(), tr) is nothing
+        @test optimise!(MockLearner(), PreActStage(), tr) == nothing
     end
 end

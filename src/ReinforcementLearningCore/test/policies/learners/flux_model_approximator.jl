@@ -1,13 +1,13 @@
 using Test
 using Flux
 
-@testset "Approximator Tests" begin
+@testset "FluxModelApproximator Tests" begin
     @testset "Creation, with use_gpu = true toggle" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
         optimiser = Adam()
-        approximator = Approximator(model=model, optimiser=optimiser, use_gpu=true)
+        approximator = FluxModelApproximator(model=model, optimiser=optimiser, use_gpu=true)
 
-        @test approximator isa Approximator
+        @test approximator isa FluxModelApproximator
         @test typeof(approximator.model) == typeof(gpu(model))
         @test approximator.optimiser_state isa NamedTuple
     end
@@ -15,7 +15,7 @@ using Flux
     @testset "Forward" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
         optimiser = Adam()
-        approximator = Approximator(model=model, optimiser=optimiser, use_gpu=false)
+        approximator = FluxModelApproximator(model=model, optimiser=optimiser, use_gpu=false)
 
         input = rand(Float32, 10)
         output = RLCore.forward(approximator, input)
@@ -27,7 +27,7 @@ using Flux
     @testset "Forward to environment" begin
         model = Chain(Dense(4, 5, relu), Dense(5, 2))
         optimiser = Adam()
-        approximator = Approximator(model=model, optimiser=optimiser, use_gpu=false)
+        approximator = FluxModelApproximator(model=model, optimiser=optimiser, use_gpu=false)
 
         env = CartPoleEnv(T=Float32)
         output = RLCore.forward(approximator, env)
@@ -38,7 +38,7 @@ using Flux
     @testset "Optimise" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
         optimiser = Adam()
-        approximator = Approximator(model=model, optimiser=optimiser)
+        approximator = FluxModelApproximator(model=model, optimiser=optimiser)
 
         input = rand(Float32, 10)
         

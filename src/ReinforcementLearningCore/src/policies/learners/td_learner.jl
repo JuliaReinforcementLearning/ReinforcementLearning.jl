@@ -8,7 +8,7 @@ using ReinforcementLearningCore: AbstractLearner, TabularApproximator
 using Flux
 
 """
-    TDLearner(;approximator, γ=1.0, method, n=0)
+    TDLearner(;approximator, method, γ=1.0, α=0.01, n=0)
 
 Use temporal-difference method to estimate state value or state-action value.
 
@@ -20,14 +20,15 @@ Use temporal-difference method to estimate state value or state-action value.
 """
 Base.@kwdef mutable struct TDLearner{M,A} <: AbstractLearner where {A<:TabularApproximator,M<:Symbol}
     approximator::A
-    γ::Float64 = 1.0
+    γ::Float64 = 1.0 # discount factor
+    α::Float64 = 0.01 # learning rate
     n::Int = 0
 
-    function TDLearner(approximator::A, method::Symbol; γ=1.0, n=0) where {A<:TabularApproximator}
+    function TDLearner(approximator::A, method::Symbol; γ=1.0, α=0.01, n=0) where {A<:TabularApproximator}
         if method ∉ [:SARS]
             @error "Method $method is not supported"
         else
-            new{method, A}(approximator, γ, n)
+            new{method, A}(approximator, γ, α, n)
         end
     end
 end
@@ -50,34 +51,35 @@ function bellman_update!(
     action::I3,
     reward::F1,
     γ::Float64, # discount factor
+    α::Float64, # learning rate
 ) where {I1<:Integer,I2<:Integer,I3<:Integer,F1<:AbstractFloat}
     # Q-learning formula following https://github.com/JuliaPOMDP/TabularTDLearning.jl/blob/25c4d3888e178c51ed1ff448f36b0fcaf7c1d8e8/src/q_learn.jl#LL63C26-L63C95
     # Terminology following https://en.wikipedia.org/wiki/Q-learning
     estimate_optimal_future_value = maximum(Q(approx, next_state))
     current_value = Q(approx, state, action)
     raw_q_value = (reward + γ * estimate_optimal_future_value - current_value) # Discount factor γ is applied here
-    q_value_updated = Flux.Optimise.update!(approx.optimiser_state, :learning, [raw_q_value])[] # adust according to optimiser learning rate
-    approx.model[action, state] += q_value_updated
+    approx.model[action, state] += α * raw_q_value
     return Q(approx, state, action)
 end
 
 function _optimise!(
     n::I1,
-    γ::F,
-    approx::Approximator{Ar},
+    γ::F, # discount factor
+    α::F, # learning rate
+    approx::TabularApproximator{Ar},
     state::I2,
     next_state::I2,
     action::I3,
     reward::F,
 ) where {I1<:Number,I2<:Number,I3<:Number,Ar<:AbstractArray,F<:AbstractFloat}
-    bellman_update!(approx, state, next_state, action, reward, γ)
+    bellman_update!(approx, state, next_state, action, reward, γ, α)
 end
 
 function RLBase.optimise!(
     L::TDLearner,
     t::@NamedTuple{state::I1, next_state::I1, action::I2, reward::F2, terminal::Bool},
 ) where {I1<:Number,I2<:Number,F2<:AbstractFloat}
-    _optimise!(L.n, L.γ, L.approximator, t.state, t.next_state, t.action, t.reward)
+    _optimise!(L.n, L.γ, L.α, L.approximator, t.state, t.next_state, t.action, t.reward)
 end
 
 function RLBase.optimise!(learner::TDLearner, stage::AbstractStage, trajectory::Trajectory)

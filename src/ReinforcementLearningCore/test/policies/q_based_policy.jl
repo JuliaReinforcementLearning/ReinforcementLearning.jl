@@ -1,7 +1,7 @@
 @testset "QBasedPolicy" begin
 
     @testset "constructor" begin
-        q_approx = TabularQApproximator(n_state = 5, n_action = 10, opt = InvDecay(0.5))
+        q_approx = TabularQApproximator(n_state = 5, n_action = 10)
         explorer = EpsilonGreedyExplorer(0.1)
         learner = TDLearner(q_approx, :SARS)
         p = QBasedPolicy(learner, explorer)
@@ -12,7 +12,7 @@
     @testset "plan!" begin
         @testset "plan! without player argument" begin
             env = TicTacToeEnv()
-            q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
+            q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)))
             learner = TDLearner(q_approx, :SARS)
             explorer = EpsilonGreedyExplorer(0.1)
             policy = QBasedPolicy(learner, explorer)
@@ -21,7 +21,7 @@
 
         @testset "plan! with player argument" begin
             env = TicTacToeEnv()
-            q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
+            q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)))
             learner = TDLearner(q_approx, :SARS)
             explorer = EpsilonGreedyExplorer(0.1)
             policy = QBasedPolicy(learner, explorer)
@@ -33,7 +33,7 @@
     # Test prob function
     @testset "prob" begin
         env = TicTacToeEnv()
-        q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
+        q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)))
         learner = TDLearner(q_approx, :SARS)
         explorer = EpsilonGreedyExplorer(0.1)
         policy = QBasedPolicy(learner, explorer)
@@ -50,7 +50,8 @@
         )
         t = (state=2, action=3)
         push!(trajectory, t)
-        t = (next_state=3, reward=5.0, terminal=false)
+        next_state = 4
+        t = (action=3, state=next_state, reward=5.0, terminal=false)
         push!(trajectory, t)
         optimise!(policy, PostActStage(), trajectory)
         prob = RLBase.prob(policy, env)
@@ -60,7 +61,7 @@
     # Test optimise! function
     @testset "optimise!" begin
         env = TicTacToeEnv()
-        q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
+        q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)))
         explorer = EpsilonGreedyExplorer(0.1)
         learner = TDLearner(q_approx, :SARS)
         policy = QBasedPolicy(learner, explorer)
