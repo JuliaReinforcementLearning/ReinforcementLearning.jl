@@ -16,7 +16,8 @@ For `table` of 2-d, it will serve as a state-action value approximator.
 function TabularApproximator(table::A, opt::O) where {A<:AbstractArray,O}
     n = ndims(table)
     n <= 2 || throw(ArgumentError("the dimension of table must be <= 2"))
-    TabularApproximator{A,O}(table, opt)
+    optimiser_state = Flux.setup(optimiser, table)
+    TabularApproximator{A,O}(table, optimiser_state)
 end
 
 TabularVApproximator(; n_state, opt, init = 0.0) =

@@ -77,8 +77,10 @@
         )
         t = (state=2, action=3)
         push!(trajectory, t)
-        t = (next_state=3, reward=5.0, terminal=false)
+        next_state = 4
+        t = (action=3, state=next_state, reward=5.0, terminal=false)
         push!(trajectory, t)
+        trajectory.container[1]
         RLBase.optimise!(policy, PostActStage(), trajectory)
         # Add assertions here
     end
