@@ -31,9 +31,26 @@
     @testset "prob" begin
         env = TicTacToeEnv()
         q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
+        learner = TDLearner(q_approx, :SARS)
         explorer = EpsilonGreedyExplorer(0.1)
         policy = QBasedPolicy(q_approx, explorer)
-        # prob = RLBase.prob(p, env)
+        trajectory = Trajectory(
+            CircularArraySARTSTraces(;
+                capacity = 1,
+                state = Int64 => (),
+                action = Int8 => (),
+                reward = Float64 => (),
+                terminal = Bool => (),
+            ),
+            DummySampler(),
+            InsertSampleRatioController(),
+        )
+        t = (state=2, action=3)
+        push!(trajectory, t)
+        t = (next_state=3, reward=5.0, terminal=false)
+        push!(trajectory, t)
+        optimise!(policy, PostActStage(), trajectory)
+        prob = RLBase.prob(policy, env)
         # Add assertions here
     end
 

@@ -41,7 +41,7 @@ end
 @testset "optimise! function" begin
     approximator = TabularQApproximator(n_state=5, n_action=3, opt = InvDecay(0.7))
     learner = TDLearner(approximator, :SARS)
-    
+
     t = (state=1, next_state=2, action=3, reward=5.0, terminal=false)
     optimise!(learner, t)
     @test approximator.model[t.action, t.state] ≈ 2.9411764705882355
