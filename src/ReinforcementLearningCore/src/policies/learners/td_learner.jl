@@ -79,3 +79,5 @@ function RLBase.optimise!(
 ) where {I1<:Number,I2<:Number,F2<:AbstractFloat}
     _optimise!(L.n, L.γ, L.approximator, t.state, t.next_state, t.action, t.reward)
 end
+
+RLBase.optimise!(L::TDLearner{:SARS}, stage::PostActStage, trace::NamedTuple) = RLBase.optimise!(L, trace)

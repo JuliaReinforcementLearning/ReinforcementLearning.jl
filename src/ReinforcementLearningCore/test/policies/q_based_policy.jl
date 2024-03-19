@@ -33,7 +33,7 @@
         q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
         learner = TDLearner(q_approx, :SARS)
         explorer = EpsilonGreedyExplorer(0.1)
-        policy = QBasedPolicy(q_approx, explorer)
+        policy = QBasedPolicy(learner, explorer)
         trajectory = Trajectory(
             CircularArraySARTSTraces(;
                 capacity = 1,
@@ -59,14 +59,24 @@
         env = TicTacToeEnv()
         q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
         explorer = EpsilonGreedyExplorer(0.1)
-        policy = QBasedPolicy(q_approx, explorer)
-        s = PreActStage()
+        learner = TDLearner(q_approx, :SARS)
+        policy = QBasedPolicy(learner, explorer)
         trajectory = Trajectory(
-            CircularArraySARTSTraces(; capacity = 1),
-            BatchSampler(1),
-            InsertSampleRatioController(n_inserted = -1),
+            CircularArraySARTSTraces(;
+                capacity = 1,
+                state = Int64 => (),
+                action = Int8 => (),
+                reward = Float64 => (),
+                terminal = Bool => (),
+            ),
+            DummySampler(),
+            InsertSampleRatioController(),
         )
-        RLBase.optimise!(policy, s, trajectory)
+        t = (state=2, action=3)
+        push!(trajectory, t)
+        t = (next_state=3, reward=5.0, terminal=false)
+        push!(trajectory, t)
+        RLBase.optimise!(policy, PostActStage(), trajectory)
         # Add assertions here
     end
 end
