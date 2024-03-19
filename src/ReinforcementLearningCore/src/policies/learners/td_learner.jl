@@ -32,11 +32,11 @@ Base.@kwdef mutable struct TDLearner{M,A} <: AbstractLearner where {A<:TabularAp
     end
 end
 
-RLCore.forward(L::TDLearner, s) = RLCore.forward(L.approximator, s)
-RLCore.forward(L::TDLearner, s, a) = RLCore.forward(L.approximator, s, a)
+RLCore.forward(L::TDLearner, s::Int) = RLCore.forward(L.approximator, s)
+RLCore.forward(L::TDLearner, s::Int, a::Int) = RLCore.forward(L.approximator, s, a)
 
-Q(app::TabularApproximator, s, a) = RLCore.forward(app, s, a)
-Q(app::TabularApproximator, s) = RLCore.forward(app, s)
+Q(app::TabularApproximator, s::Int, a::Int) = RLCore.forward(app, s, a)
+Q(app::TabularApproximator, s::Int) = RLCore.forward(app, s)
 
 """
     bellman_update!(app::TabularApproximator, s::Int, s_plus_one::Int, a::Int, α::Float64, π_::Float64, γ::Float64)
@@ -80,4 +80,12 @@ function RLBase.optimise!(
     _optimise!(L.n, L.γ, L.approximator, t.state, t.next_state, t.action, t.reward)
 end
 
+function RLBase.optimise!(learner::TDLearner, stage, trajectory::Trajectory)
+    for batch in trajectory.container
+        optimise!(learner, stage, batch)
+    end
+end
+
+# TDLearner{:SARS} optimises at the PostActStage
 RLBase.optimise!(L::TDLearner{:SARS}, stage::PostActStage, trace::NamedTuple) = RLBase.optimise!(L, trace)
+

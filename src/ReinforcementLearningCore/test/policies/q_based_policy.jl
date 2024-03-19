@@ -3,8 +3,9 @@
     @testset "constructor" begin
         q_approx = TabularQApproximator(n_state = 5, n_action = 10, opt = InvDecay(0.5))
         explorer = EpsilonGreedyExplorer(0.1)
-        p = QBasedPolicy(q_approx, explorer)
-        @test p.learner == q_approx
+        learner = TDLearner(q_approx, :SARS)
+        p = QBasedPolicy(learner, explorer)
+        @test p.learner == learner
         @test p.explorer == explorer
     end
 
@@ -12,16 +13,18 @@
         @testset "plan! without player argument" begin
             env = TicTacToeEnv()
             q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
+            learner = TDLearner(q_approx, :SARS)
             explorer = EpsilonGreedyExplorer(0.1)
-            policy = QBasedPolicy(q_approx, explorer)
+            policy = QBasedPolicy(learner, explorer)
             @test 1 <= RLBase.plan!(policy, env) <= 9
         end
 
         @testset "plan! with player argument" begin
             env = TicTacToeEnv()
             q_approx = TabularQApproximator(n_state = 5, n_action = length(action_space(env)), opt = InvDecay(0.5))
+            learner = TDLearner(q_approx, :SARS)
             explorer = EpsilonGreedyExplorer(0.1)
-            policy = QBasedPolicy(q_approx, explorer)
+            policy = QBasedPolicy(learner, explorer)
             player = :player1
             @test 1 <= RLBase.plan!(policy, env) <= 9
         end
@@ -38,7 +41,7 @@
             CircularArraySARTSTraces(;
                 capacity = 1,
                 state = Int64 => (),
-                action = Int8 => (),
+                action = Int64 => (),
                 reward = Float64 => (),
                 terminal = Bool => (),
             ),
@@ -65,7 +68,7 @@
             CircularArraySARTSTraces(;
                 capacity = 1,
                 state = Int64 => (),
-                action = Int8 => (),
+                action = Int64 => (),
                 reward = Float64 => (),
                 terminal = Bool => (),
             ),

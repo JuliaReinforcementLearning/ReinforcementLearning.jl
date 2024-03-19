@@ -32,9 +32,3 @@ RLBase.prob(policy::QBasedPolicy{L,Ex}, env::AbstractEnv) where {L<:TDLearner,Ex
 
 #the internal learner defines the optimization stage.
 RLBase.optimise!(policy::QBasedPolicy, stage::AbstractStage, trajectory::Trajectory) = RLBase.optimise!(policy.learner, stage, trajectory)
-
-function RLBase.optimise!(policy::QBasedPolicy, stage::AbstractStage, trajectory::Trajectory)
-    for batch in trajectory.container
-        optimise!(policy.learner, stage, batch)
-    end
-end
