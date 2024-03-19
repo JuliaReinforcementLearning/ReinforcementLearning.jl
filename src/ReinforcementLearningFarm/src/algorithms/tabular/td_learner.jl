@@ -39,24 +39,24 @@ Q(app::TabularApproximator, s, a) = RLCore.forward(app, s, a)
 Q(app::TabularApproximator, s) = RLCore.forward(app, s)
 
 """
-    Q!(app::TabularApproximator, s::Int, s_plus_one::Int, a::Int, α::Float64, π_::Float64, γ::Float64)
+    bellman_update!(app::TabularApproximator, s::Int, s_plus_one::Int, a::Int, α::Float64, π_::Float64, γ::Float64)
 
 Update the Q-value of the given state-action pair.
 """
-function Q!(
+function bellman_update!(
     approx::TabularApproximator,
     s::I1,
     s_plus_one::I2,
     a::I3,
-    π_::F1,
+    r::F1, # reward
     γ::Float64, # discount factor
 ) where {I1<:Integer,I2<:Integer,I3<:Integer,F1<:AbstractFloat}
     # Q-learning formula following https://github.com/JuliaPOMDP/TabularTDLearning.jl/blob/25c4d3888e178c51ed1ff448f36b0fcaf7c1d8e8/src/q_learn.jl#LL63C26-L63C95
     # Terminology following https://en.wikipedia.org/wiki/Q-learning
     estimate_optimal_future_value = maximum(Q(approx, s_plus_one))
     current_value = Q(approx, s, a)
-    raw_q_value = (π_ + γ * estimate_optimal_future_value - current_value) # Discount factor γ is applied here
-    q_value_updated = Flux.Optimise.apply!(approx.optimiser_state, :learning, [raw_q_value])[] # adust according to optimiser learning rate
+    raw_q_value = (r + γ * estimate_optimal_future_value - current_value) # Discount factor γ is applied here
+    q_value_updated = Flux.Optimise.update!(approx.optimiser_state, :learning, [raw_q_value])[] # adust according to optimiser learning rate
     approx.model[a, s] += q_value_updated
     return Q(approx, s, a)
 end
@@ -70,7 +70,7 @@ function _optimise!(
     a::I3,
     r::F,
 ) where {I1<:Number,I2<:Number,I3<:Number,Ar<:AbstractArray,F<:AbstractFloat}
-    Q!(approx, s, s_next, a, r, γ)
+    bellman_update!(approx, s, s_next, a, r, γ)
 end
 
 function RLBase.optimise!(
