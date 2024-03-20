@@ -4,9 +4,13 @@ import Base.push!
 import Base.getindex
 using DataStructures: CircularBuffer
 
+"""
+    TotalRewardPerEpisodeLastN{F}(; max_steps = 100)
+
+A hook that keeps track of the total reward per episode for the last `max_steps` episodes.
+"""
 struct TotalRewardPerEpisodeLastN{F} <: AbstractHook where {F<:AbstractFloat}
     rewards::CircularBuffer{F}
-    is_display_on_exit::Bool
 
     function TotalRewardPerEpisodeLastN(; max_steps = 100)
         new{Float64}(CircularBuffer{Float64}(max_steps))
