@@ -6,6 +6,7 @@ import ReinforcementLearningBase: RLBase
 using FillArrays: Trues
 using Random
 using Distributions: Categorical
+using Base
 
 # Epsilon Greedy Explorer for AIAPC Zoo
 # Note: get_ϵ function in RLCore takes: 600.045 ns (6 allocations: 192 bytes)
@@ -16,7 +17,7 @@ using Distributions: Categorical
 struct EpsilonSpeedyExplorer{R} <: AbstractExplorer
     β::Float64
     β_neg::Float64
-    step::Ref{Int}
+    step::Base.RefValue{Int}
     rng::R
 end
 
