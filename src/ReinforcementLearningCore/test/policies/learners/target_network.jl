@@ -7,12 +7,12 @@ using ReinforcementLearningCore
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
         optimiser = Adam()
         if ((@isdefined CUDA) && CUDA.functional()) || ((@isdefined Metal) && Metal.functional())
-            @test_throws "AssertionError: `FluxModelApproximator` model is not on GPU." TargetNetwork(FluxModelApproximator(model, optimiser), use_gpu=true)
+            @test_throws "AssertionError: `FluxApproximator` model is not on GPU." TargetNetwork(FluxApproximator(model, optimiser), use_gpu=true)
         end
-        @test TargetNetwork(FluxModelApproximator(model=model, optimiser=optimiser, use_gpu=true), use_gpu=true) isa TargetNetwork
-        @test TargetNetwork(FluxModelApproximator(model, optimiser, use_gpu=true), use_gpu=true) isa TargetNetwork
+        @test TargetNetwork(FluxApproximator(model=model, optimiser=optimiser, use_gpu=true), use_gpu=true) isa TargetNetwork
+        @test TargetNetwork(FluxApproximator(model, optimiser, use_gpu=true), use_gpu=true) isa TargetNetwork
 
-        approx = FluxModelApproximator(model, optimiser, use_gpu=false)
+        approx = FluxApproximator(model, optimiser, use_gpu=false)
         target_network = TargetNetwork(approx, use_gpu=false)
 
         
@@ -26,7 +26,7 @@ using ReinforcementLearningCore
 
     @testset "Forward" begin
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
-        target_network = TargetNetwork(FluxModelApproximator(model, Adam()))
+        target_network = TargetNetwork(FluxApproximator(model, Adam()))
     
         input = rand(Float32, 10)
         output = RLCore.forward(target_network, input)
@@ -38,7 +38,7 @@ using ReinforcementLearningCore
     @testset "Optimise" begin
         optimiser = Adam()
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
-        approximator = FluxModelApproximator(model, optimiser)
+        approximator = FluxApproximator(model, optimiser)
         target_network = TargetNetwork(approximator)
         input = rand(Float32, 10)    
         grad = Flux.Zygote.gradient(target_network) do model
@@ -54,7 +54,7 @@ using ReinforcementLearningCore
 
     @testset "Sync" begin
         optimiser = Adam()
-        model = FluxModelApproximator(Chain(Dense(10, 5, relu), Dense(5, 2)), optimiser)
+        model = FluxApproximator(Chain(Dense(10, 5, relu), Dense(5, 2)), optimiser)
         target_network = TargetNetwork(model, sync_freq=2, ρ=0.5)
     
         input = rand(Float32, 10)
@@ -73,7 +73,7 @@ end
 
 @testset "TargetNetwork" begin 
     m = Chain(Dense(4,1))
-    app = FluxModelApproximator(model = m, optimiser = Flux.Adam(), use_gpu=true)
+    app = FluxApproximator(model = m, optimiser = Flux.Adam(), use_gpu=true)
     tn = TargetNetwork(app, sync_freq = 3, use_gpu=true)
     @test typeof(model(tn)) == typeof(target(tn))
     p1 = Flux.destructure(model(tn))[1]

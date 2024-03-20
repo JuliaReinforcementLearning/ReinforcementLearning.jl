@@ -1,5 +1,5 @@
 include("abstract_learner.jl")
-include("flux_model_approximator.jl")
+include("flux_approximator.jl")
 include("tabular_approximator.jl")
 include("td_learner.jl")
 include("target_network.jl")
