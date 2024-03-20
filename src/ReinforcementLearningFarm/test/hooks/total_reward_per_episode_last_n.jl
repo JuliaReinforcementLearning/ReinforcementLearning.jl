@@ -1,3 +1,5 @@
+using ReinforcementLearningFarm: TotalRewardPerEpisodeLastN
+
 @testset "TotalRewardPerEpisodeLastN" begin
     @testset "Single Agent" begin
         hook = TotalRewardPerEpisodeLastN(max_steps = 10)
