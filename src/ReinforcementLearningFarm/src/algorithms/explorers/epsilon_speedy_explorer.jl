@@ -8,12 +8,12 @@ using Random
 using Distributions: Categorical
 using Base
 
-# Epsilon Greedy Explorer for AIAPC Zoo
-# Note: get_ϵ function in RLCore takes: 600.045 ns (6 allocations: 192 bytes)
-# This one has: 59.003 ns (1 allocation: 16 bytes)
-# Well worth looking into optimizations for RLCore
-# TODO evaluate performance cost of checking all values for max, perhaps only do this in the beginning?
+"""
+    EpsilonSpeedyExplorer(β::Float64)
 
+EpsilonSpeedyExplorer is an explorer that selects the action with the maximum value with probability `1 - ϵ` and selects a random action with probability `ϵ`.
+The probability of selecting a random action is given by `exp(β * -t)`, where `t` is the number of times `plan!` has been called.
+"""
 struct EpsilonSpeedyExplorer{R} <: AbstractExplorer
     β::Float64
     β_neg::Float64
