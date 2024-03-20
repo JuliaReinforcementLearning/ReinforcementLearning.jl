@@ -49,18 +49,18 @@ using Random
     
             @testset "without mask" begin
                 prob_dist = RLBase.prob(explorer, values)
-                @test length(prob_dist.p) == length(values)
+                @test prob_dist.p ≈  [0.1809674836071919, 0.1809674836071919, 0.1809674836071919, 0.1809674836071919, 0.2761300655712324]
             end
     
             @testset "with mask" begin
                 prob_dist = RLBase.prob(explorer, values, mask)
-                @test length(prob_dist.p) == length(values)
+                @test prob_dist.p ≈ [0.30161247267865315, 0.0, 0.30161247267865315, 0.0, 0.39677505464269364]
             end
     
             @testset "with true mask" begin
                 true_mask = [true, true, true, true, true]
                 prob_dist = RLBase.prob(explorer, values, true_mask)
-                @test length(prob_dist.p) == length(values)
+                @test prob_dist.p ≈ [0.1809674836071919, 0.1809674836071919, 0.1809674836071919, 0.1809674836071919, 0.2761300655712324]
             end
         end
     end
