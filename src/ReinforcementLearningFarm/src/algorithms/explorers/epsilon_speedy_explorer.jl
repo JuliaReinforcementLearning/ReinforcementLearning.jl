@@ -11,8 +11,10 @@ using Base
 """
     EpsilonSpeedyExplorer(β::Float64)
 
-EpsilonSpeedyExplorer is an explorer that selects the action with the maximum value with probability `1 - ϵ` and selects a random action with probability `ϵ`.
+`EpsilonSpeedyExplorer` is an explorer that selects the action with the maximum value with probability `1 - ϵ` and selects a random action with probability `ϵ`.
 The probability of selecting a random action is given by `exp(β * -t)`, where `t` is the number of times `plan!` has been called.
+`EpsilonSpeedyExplorer` differs from `EpsilonGreedyExplorer` in that it uses the `exp` function to calculate the probability of selecting a random action over the full range of `t` and only accepts one argument, `β`.
+
 """
 struct EpsilonSpeedyExplorer{R} <: AbstractExplorer
     β::Float64
