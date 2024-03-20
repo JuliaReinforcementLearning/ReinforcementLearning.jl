@@ -2,13 +2,13 @@ export TargetNetwork, target, model
 
 using Flux
 
-target(ap::FluxModelApproximator) = ap.model #see TargetNetwork
-model(ap::FluxModelApproximator) = ap.model #see TargetNetwork
+target(ap::FluxApproximator) = ap.model #see TargetNetwork
+model(ap::FluxApproximator) = ap.model #see TargetNetwork
 
 """
-    TargetNetwork(network::FluxModelApproximator; sync_freq::Int = 1, ρ::Float32 = 0f0)
+    TargetNetwork(network::FluxApproximator; sync_freq::Int = 1, ρ::Float32 = 0f0)
 
-Wraps an FluxModelApproximator to hold a target network that is updated towards the model of the 
+Wraps an FluxApproximator to hold a target network that is updated towards the model of the 
 approximator. 
 - `sync_freq` is the number of updates of `network` between each update of the `target`. 
 - ρ (\rho) is "how much of the target is kept when updating it". 
@@ -21,11 +21,11 @@ Implements the `RLBase.optimise!(::TargetNetwork, ::Gradient)` interface to upda
 and the target with weights replacement or Polyak averaging.
 
 Note to developers: `model(::TargetNetwork)` will return the trainable Flux model 
-and `target(::TargetNetwork)` returns the target model and `target(::FluxModelApproximator)`
+and `target(::TargetNetwork)` returns the target model and `target(::FluxApproximator)`
 returns the non-trainable Flux model. See the RLCore documentation.
 """
 mutable struct TargetNetwork{M}
-    network::FluxModelApproximator{M}
+    network::FluxApproximator{M}
     target::M
     sync_freq::Int
     ρ::Float32
@@ -46,13 +46,13 @@ Constructs a target network for reinforcement learning.
 # Returns
 A `TargetNetwork` object.
 """
-function TargetNetwork(network::FluxModelApproximator; sync_freq = 1, ρ = 0f0, use_gpu = false)
+function TargetNetwork(network::FluxApproximator; sync_freq = 1, ρ = 0f0, use_gpu = false)
     @assert 0 <= ρ <= 1 "ρ must in [0,1]"
     ρ = Float32(ρ)
     
     if use_gpu
-        @assert typeof(gpu(network.model)) == typeof(network.model) "`FluxModelApproximator` model is not on GPU. Please set `use_gpu=false`` or ensure model is on GPU, by setting `use_gpu=true` when constructing `FluxModelApproximator`."
-        # NOTE: model is pushed to gpu in FluxModelApproximator, need to transfer to cpu before deepcopy, then push target model to gpu
+        @assert typeof(gpu(network.model)) == typeof(network.model) "`FluxApproximator` model is not on GPU. Please set `use_gpu=false`` or ensure model is on GPU, by setting `use_gpu=true` when constructing `FluxApproximator`."
+        # NOTE: model is pushed to gpu in FluxApproximator, need to transfer to cpu before deepcopy, then push target model to gpu
         target = gpu(deepcopy(cpu(network.model)))
     else
         target = deepcopy(network.model)
