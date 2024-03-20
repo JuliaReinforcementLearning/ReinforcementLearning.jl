@@ -5,7 +5,7 @@ import ReinforcementLearningBase: RLBase
 @testset "Approximators" begin
     #= These may need to be updated due to recent changes
     @testset "TabularApproximator" begin
-        A = TabularVApproximator(; n_state = 2, opt = InvDecay(1.0))
+        A = TabularVApproximator(; n_state = 2)
 
         @test A(1) == 0.0
         @test A(2) == 0.0

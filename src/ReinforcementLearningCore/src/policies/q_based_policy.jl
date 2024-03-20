@@ -10,7 +10,7 @@ action of an environment at its current state. It is typically a table or a neur
 QBasedPolicy can be queried for an action with `RLBase.plan!`, the explorer will affect the action selection
 accordingly.
 """
-Base.@kwdef mutable struct QBasedPolicy{L,E} <: AbstractPolicy
+Base.@kwdef mutable struct QBasedPolicy{L<:TDLearner,E<:AbstractExplorer} <: AbstractPolicy
     "estimate the Q value"
     learner::L
     "select the action based on Q values calculated by the learner"
@@ -19,16 +19,16 @@ end
 
 Flux.@layer QBasedPolicy trainable=(learner,)
 
-function RLBase.plan!(p::QBasedPolicy{L,Ex}, env::E) where {Ex<:AbstractExplorer,L<:AbstractLearner,E<:AbstractEnv}
-    RLBase.plan!(p.explorer, p.learner, env)
+function RLBase.plan!(policy::QBasedPolicy{L,Ex}, env::E) where {Ex<:AbstractExplorer,L<:TDLearner,E<:AbstractEnv}
+    RLBase.plan!(policy.explorer, policy.learner, env)
 end
 
-function RLBase.plan!(p::QBasedPolicy{L,Ex}, env::E, player::Symbol) where {Ex<:AbstractExplorer,L<:AbstractLearner,E<:AbstractEnv}
-    RLBase.plan!(p.explorer, p.learner, env, player)
+function RLBase.plan!(policy::QBasedPolicy{L,Ex}, env::E, player::Symbol) where {Ex<:AbstractExplorer,L<:TDLearner,E<:AbstractEnv}
+    RLBase.plan!(policy.explorer, policy.learner, env, player)
 end
 
-RLBase.prob(p::QBasedPolicy{L,Ex}, env::AbstractEnv) where {L<:AbstractLearner,Ex<:AbstractExplorer} =
-    prob(p.explorer, forward(p.learner, env), legal_action_space_mask(env))
+RLBase.prob(policy::QBasedPolicy{L,Ex}, env::AbstractEnv) where {L<:TDLearner,Ex<:AbstractExplorer} =
+    prob(policy.explorer, forward(policy.learner, env), legal_action_space_mask(env))
 
 #the internal learner defines the optimization stage.
-RLBase.optimise!(p::QBasedPolicy, s::AbstractStage, trajectory::Trajectory) = RLBase.optimise!(p.learner, s, trajectory)
+RLBase.optimise!(policy::QBasedPolicy, stage::AbstractStage, trajectory::Trajectory) = RLBase.optimise!(policy.learner, stage, trajectory)

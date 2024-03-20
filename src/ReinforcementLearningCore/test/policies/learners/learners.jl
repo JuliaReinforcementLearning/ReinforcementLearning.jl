@@ -1,5 +1,7 @@
 @testset "approximators.jl" begin
-    include("approximator.jl")
+    include("abstract_learner.jl")
+    include("flux_model_approximator.jl")
     include("tabular_approximator.jl")
     include("target_network.jl")
+    include("td_learner.jl")
 end

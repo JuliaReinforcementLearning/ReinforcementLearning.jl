@@ -37,7 +37,7 @@ RLBase.optimise!(::SyncTrajectoryStyle, agent::AbstractAgent, stage::S) where {S
 # already spawn a task to optimise inner policy when initializing the agent
 RLBase.optimise!(::AsyncTrajectoryStyle, agent::AbstractAgent, stage::S) where {S<:AbstractStage} = nothing
 
-#by default, optimise does nothing at all stage
+#by default, optimise does nothing at all stages
 function RLBase.optimise!(policy::AbstractPolicy, stage::AbstractStage, trajectory::Trajectory) end
 
 Flux.@layer Agent trainable=(policy,)
