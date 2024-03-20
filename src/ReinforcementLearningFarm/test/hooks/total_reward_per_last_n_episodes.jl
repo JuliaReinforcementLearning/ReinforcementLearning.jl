@@ -2,7 +2,7 @@ using ReinforcementLearningFarm: TotalRewardPerLastNEpisodes
 
 @testset "TotalRewardPerLastNEpisodes" begin
     @testset "Single Agent" begin
-        hook = TotalRewardPerLastNEpisodes(max_steps = 10)
+        hook = TotalRewardPerLastNEpisodes(max_episodes = 10)
         env = TicTacToeEnv()
         agent = RandomPolicy()
 
@@ -15,7 +15,7 @@ using ReinforcementLearningFarm: TotalRewardPerLastNEpisodes
     end
 
     @testset "MultiAgent" begin
-        hook = TotalRewardPerLastNEpisodes(max_steps = 10)
+        hook = TotalRewardPerLastNEpisodes(max_episodes = 10)
         env = TicTacToeEnv()
         agent = RandomPolicy()
 
