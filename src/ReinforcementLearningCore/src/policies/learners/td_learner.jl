@@ -90,7 +90,3 @@ end
 
 # TDLearner{:SARS} is optimized at the PostActStage
 RLBase.optimise!(learner::TDLearner{:SARS}, stage::PostActStage, trace::NamedTuple) = RLBase.optimise!(learner, trace)
-
-RLBase.optimise!(agent::MultiAgentPolicy, stage::PreActStage) = nothing
-RLBase.optimise!(agent::MultiAgentPolicy, stage::PostEpisodeStage) = nothing
-RLBase.optimise!(agent::MultiAgentPolicy, stage::PreEpisodeStage) = nothing
