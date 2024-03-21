@@ -19,4 +19,5 @@ using ReinforcementLearningFarm
 
 @testset "ReinforcementLearningFarm.jl" begin
     include("algorithms/algorithms.jl")
+    include("hooks/hooks.jl")
 end
