@@ -23,7 +23,7 @@ struct ComposedStopCondition{S,T} <: AbstractStopCondition
     end
 end
 
-function check!(s::ComposedStopCondition, args...)
+function check!(s::ComposedStopCondition{S,T}, args...) where {S,T}
     s.reducer(check!(sc, args...) for sc in s.stop_conditions)
 end
 
