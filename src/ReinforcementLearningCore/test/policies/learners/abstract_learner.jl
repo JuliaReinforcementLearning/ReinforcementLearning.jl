@@ -21,6 +21,9 @@ struct MockLearner <: AbstractLearner end
 
         output = RLCore.forward(learner, env)
         @test output == Float64[1.0, 2.0]
+
+        output = RLCore.forward(learner, env, Symbol(1))
+        @test output == Float64[1.0, 2.0]
     end
 
     @testset "Plan" begin
