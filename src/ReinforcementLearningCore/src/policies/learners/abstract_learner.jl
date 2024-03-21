@@ -18,6 +18,8 @@ end
 
 function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::Trajectory) end
 
+function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::NamedTuple) end
+
 function RLBase.plan!(explorer::AbstractExplorer, learner::AbstractLearner, env::AbstractEnv)
     legal_action_space_ = RLBase.legal_action_space_mask(env)
     RLBase.plan!(explorer, forward(learner, env), legal_action_space_)
