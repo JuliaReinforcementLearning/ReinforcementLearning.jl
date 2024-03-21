@@ -18,7 +18,7 @@ The result of `stop_conditions` is reduced by `reducer`. The default `reducer` i
 struct ComposedStopCondition{S,T} <: AbstractStopCondition
     stop_conditions::S
     reducer::T
-    function ComposedStopCondition(stop_conditions...; reducer::T = any)
+    function ComposedStopCondition(stop_conditions...; reducer::T = any) where {T}
         new{typeof(stop_conditions),T}(stop_conditions, reducer)
     end
 end

@@ -16,7 +16,11 @@ struct QBasedPolicy{L<:TDLearner,E<:AbstractExplorer} <: AbstractPolicy
     "select the action based on Q values calculated by the learner"
     explorer::E
 
-    function QBasedPolicy(;learner::L, explorer::E) where {L<:TDLearner,E<:AbstractExplorer}
+    function QBasedPolicy(; learner::L, explorer::E) where {L<:TDLearner, E<:AbstractExplorer}
+        new{L,E}(learner, explorer)
+    end
+
+    function QBasedPolicy(learner::L, explorer::E) where {L<:TDLearner, E<:AbstractExplorer}
         new{L,E}(learner, explorer)
     end
 end
