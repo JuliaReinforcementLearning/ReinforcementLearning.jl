@@ -15,6 +15,7 @@ struct MockLearner <: AbstractLearner end
         end
 
         RLBase.state(::MockEnv, ::Observation{Any}, ::DefaultPlayer) = 1
+        RLBase.state(::MockEnv, ::Observation{Any}, ::Symbol) = 1
 
         env = MockEnv()
         learner = MockLearner()
