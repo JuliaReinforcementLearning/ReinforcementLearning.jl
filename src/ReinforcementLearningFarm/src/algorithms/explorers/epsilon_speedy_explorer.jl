@@ -1,7 +1,6 @@
 
-using ReinforcementLearningCore
-using ReinforcementLearningBase
-import ReinforcementLearningBase: RLBase
+using ReinforcementLearning
+import ReinforcementLearning: RLBase
 
 using FillArrays: Trues
 using Random

@@ -12,9 +12,7 @@ else
 end
 
 using Test
-using ReinforcementLearningBase
-using ReinforcementLearningCore
-using ReinforcementLearningEnvironments
+using ReinforcementLearning
 using ReinforcementLearningFarm
 
 @testset "ReinforcementLearningFarm.jl" begin

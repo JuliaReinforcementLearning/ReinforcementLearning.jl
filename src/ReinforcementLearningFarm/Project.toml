@@ -16,9 +16,7 @@ ReinforcementLearningCore = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
 FillArrays = "1"
 CircularArrayBuffers = "0.1.12"
 Distributions = "0.25"
-ReinforcementLearningBase = "0.12"
-ReinforcementLearningCore = "0.14"
-ReinforcementLearningEnvironments = "0.8"
+ReinforcementLearning = "0.11"
 julia = "1.9"
 
 [extras]
@@ -31,4 +29,4 @@ UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [targets]
-test = ["CUDA", "Metal", "Preferences", "ReinforcementLearningEnvironments", "Test", "UUIDs", "cuDNN"]
+test = ["CUDA", "Metal", "Preferences", "Test", "UUIDs", "cuDNN"]
