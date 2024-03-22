@@ -6,7 +6,7 @@ export AbstractHook,
     TotalRewardPerEpisode,
     BatchStepsPerEpisode,
     TimePerStep,
-    DoEveryNEpisode,
+    DoEveryNEpisodes,
     DoEveryNSteps,
     DoOnExit
 
@@ -310,21 +310,21 @@ function Base.push!(hook::DoEveryNSteps, ::PostActStage, agent, env)
 end
 
 """
-    DoEveryNEpisode(f; n=1, t=0)
+    DoEveryNEpisodes(f; n=1, t=0)
 
 Execute `f(t, agent, env)` every `n` episode.
 `t` is a counter of episodes.
 """
-mutable struct DoEveryNEpisode{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <: AbstractHook
+mutable struct DoEveryNEpisodes{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <: AbstractHook
     f::F
     n::Int
     t::Int
 end
 
-DoEveryNEpisode(f::F; n=1, t=0, stage::S=PostEpisodeStage()) where {S,F} =
-    DoEveryNEpisode{S,F}(f, n, t)
+DoEveryNEpisodes(f::F; n=1, t=0, stage::S=PostEpisodeStage()) where {S,F} =
+    DoEveryNEpisodes{S,F}(f, n, t)
 
-function Base.push!(hook::DoEveryNEpisode{S}, ::S, agent, env) where {S}
+function Base.push!(hook::DoEveryNEpisodes{S}, ::S, agent, env) where {S}
     hook.t += 1
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)

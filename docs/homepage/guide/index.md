@@ -85,7 +85,7 @@ Usually a closure or a functional object will be used to store some intermediate
 In most cases, you don't need to write a customized hook. Some generic hooks are provided so that you can inject logic at the appropriate time:
 
 - [`DoEveryNSteps`](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/rl_core/#ReinforcementLearningCore.DoEveryNSteps)
-- [`DoEveryNEpisode`](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/rl_core/#ReinforcementLearningCore.DoEveryNEpisode)
+- [`DoEveryNEpisodes`](https://juliareinforcementlearning.org/ReinforcementLearning.jl/latest/rl_core/#ReinforcementLearningCore.DoEveryNEpisodes)
 
 However, if you do need to write a customized hook, the following methods must be provided:
 

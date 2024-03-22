@@ -8,10 +8,12 @@ programming. We write the code in a loop and execute them step by step.
 
 ```julia
 while true
-    env |> policy |> env
+    action = plan!(policy, env)
+    act!(env, action)
+
     # write your own logic here
     # like saving parameters, recording loss function, evaluating policy, etc.
-    stop_condition(env, policy) && break
+    check!(stop_condition, env, policy) && break
     is_terminated(env) && reset!(env)
 end
 ```
@@ -30,18 +32,19 @@ execution pipeline. However, we believe this is not necessary in Julia. With the
 declarative programming approach, we gain much more flexibilities.
 
 Now the question is how to design the hook. A natural choice is to wrap the
-comments part in the above pseudocode into a function:
+comments part in the above pseudo-code into a function:
 
 ```julia
 while true
-    env |> policy |> env
-    hook(policy, env)
-    stop_condition(env, policy) && break
+    action = plan!(policy, env)
+    act!(env, action)
+    push!(hook, policy, env)
+    check!(stop_condition, env, policy) && break
     is_terminated(env) && reset!(env)
 end
 ```
 
-But sometimes, we'd like to have a more fingrained control. So we split the calling
+But sometimes, we'd like to have a more fine-grained control. So we split the calling
 of hooks into several different stages:
 
 - [`PreExperimentStage`](@ref)
@@ -54,20 +57,22 @@ of hooks into several different stages:
 ## How to define a customized hook?
 
 By default, an instance of [`AbstractHook`](@ref) will do nothing when called
-with `(hook::AbstractHook)(::AbstractStage, policy, env)`. So when writing a
+with `push!(hook::AbstractHook, ::AbstractStage, policy, env)`. So when writing a
 customized hook, you only need to implement the necessary runtime logic.
 
 For example, assume we want to record the wall time of each episode.
 
 ```@repl how_to_use_hooks
 using ReinforcementLearning
+import Base.push!
 Base.@kwdef mutable struct TimeCostPerEpisode <: AbstractHook
     t::UInt64 = time_ns()
     time_costs::Vector{UInt64} = []
 end
-(h::TimeCostPerEpisode)(::PreEpisodeStage, policy, env) = h.t = time_ns()
-(h::TimeCostPerEpisode)(::PostEpisodeStage, policy, env) = push!(h.time_costs, time_ns()-h.t)
+Base.push!(h::TimeCostPerEpisode, ::PreEpisodeStage, policy, env) = h.t = time_ns()
+Base.push!(h::TimeCostPerEpisode, ::PostEpisodeStage, policy, env) = push!(h.time_costs, time_ns()-h.t)
 h = TimeCostPerEpisode()
+
 run(RandomPolicy(), CartPoleEnv(), StopAfterNEpisodes(10), h)
 h.time_costs
 ```
@@ -77,14 +82,13 @@ h.time_costs
 - [`StepsPerEpisode`](@ref)
 - [`RewardsPerEpisode`](@ref)
 - [`TotalRewardPerEpisode`](@ref)
-- [`TotalBatchRewardPerEpisode`](@ref)
 
 ## Periodic jobs
 
 Sometimes, we'd like to periodically run some functions. Two handy hooks are
 provided for this kind of tasks:
 
-- [`DoEveryNEpisode`](@ref)
+- [`DoEveryNEpisodes`](@ref)
 - [`DoEveryNSteps`](@ref)
 
 Following are some typical usages.
@@ -98,7 +102,7 @@ run(
     policy,
     CartPoleEnv(),
     StopAfterNEpisodes(100),
-    DoEveryNEpisode(;n=10) do t, policy, env
+    DoEveryNEpisodes(;n=10) do t, policy, env
         # In real world cases, the policy is usually wrapped in an Agent,
         # we need to extract the inner policy to run it in the *actor* mode.
         # Here for illustration only, we simply use the original policy.
@@ -120,6 +124,7 @@ run(
 [BSON.jl](https://github.com/JuliaIO/BSON.jl) is recommended to save the parameters of a policy.
 
 ```@repl how_to_use_hooks
+using ReinforcementLearning
 using Flux
 using Flux.Losses: huber_loss
 using BSON
@@ -186,7 +191,7 @@ lg = TBLogger(tf_log_dir, min_level = Logging.Info)
 total_reward_per_episode = TotalRewardPerEpisode()
 hook = ComposedHook(
     total_reward_per_episode,
-    DoEveryNEpisode() do t, agent, env
+    DoEveryNEpisodes() do t, agent, env
         with_logger(lg) do
             @info "training"  reward = total_reward_per_episode.rewards[end]
         end

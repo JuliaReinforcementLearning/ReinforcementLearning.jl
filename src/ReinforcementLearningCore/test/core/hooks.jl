@@ -168,10 +168,10 @@ end
     @test env.pos == 2
 end
 
-@testset "DoEveryNEpisode" begin
-    h_1 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2, stage=PreEpisodeStage())
-    h_2 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2, stage=PostEpisodeStage())
-    h_3 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=1)
+@testset "DoEveryNEpisodes" begin
+    h_1 = DoEveryNEpisodes((hook, agent, env) -> (env.pos += 1); n=2, stage=PreEpisodeStage())
+    h_2 = DoEveryNEpisodes((hook, agent, env) -> (env.pos += 1); n=2, stage=PostEpisodeStage())
+    h_3 = DoEveryNEpisodes((hook, agent, env) -> (env.pos += 1); n=1)
     h_list = (h_1, h_2, h_3)
     stage_list = (PreEpisodeStage(), PostEpisodeStage(), PostEpisodeStage())
 
