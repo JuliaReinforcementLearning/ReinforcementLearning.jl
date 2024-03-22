@@ -17,6 +17,7 @@ steps:
         Pkg.develop(path="src/ReinforcementLearningBase")
         Pkg.develop(path="src/ReinforcementLearningEnvironments")
         Pkg.develop(path="src/ReinforcementLearningCore")
+        Pkg.develop(path=".")
         Pkg.develop(path="src/ReinforcementLearningFarm")
 
         println("+++ :julia: Running tests")
