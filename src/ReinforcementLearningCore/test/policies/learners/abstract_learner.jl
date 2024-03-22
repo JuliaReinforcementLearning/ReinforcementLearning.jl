@@ -15,11 +15,15 @@ struct MockLearner <: AbstractLearner end
         end
 
         RLBase.state(::MockEnv, ::Observation{Any}, ::DefaultPlayer) = 1
+        RLBase.state(::MockEnv, ::Observation{Any}, ::Symbol) = 1
 
         env = MockEnv()
         learner = MockLearner()
 
         output = RLCore.forward(learner, env)
+        @test output == Float64[1.0, 2.0]
+
+        output = RLCore.forward(learner, env, Symbol(1))
         @test output == Float64[1.0, 2.0]
     end
 

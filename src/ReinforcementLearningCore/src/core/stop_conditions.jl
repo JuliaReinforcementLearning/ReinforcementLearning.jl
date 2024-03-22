@@ -15,16 +15,16 @@ abstract type AbstractStopCondition end
 
 The result of `stop_conditions` is reduced by `reducer`. The default `reducer` is the `any` function, which means that the condition is true when any one of the `stop_conditions...` is true. Can be replaced by any function returning a boolean. For example `reducer = x->sum(x) >= 2` will require at least two of the conditions to be true.
 """
-struct ComposedStopCondition{S,T} <: AbstractStopCondition
+struct ComposedStopCondition{S,reducer} <: AbstractStopCondition
     stop_conditions::S
-    reducer::T
+    reducer
     function ComposedStopCondition(stop_conditions...; reducer = any)
-        new{typeof(stop_conditions),typeof(reducer)}(stop_conditions, reducer)
+        new{typeof(stop_conditions),reducer}(stop_conditions, reducer)
     end
 end
 
-function check!(s::ComposedStopCondition, args...)
-    s.reducer(check!(sc, args...) for sc in s.stop_conditions)
+function check!(s::ComposedStopCondition{S,R}, policy::P, env::E) where {S,R,P<:AbstractPolicy,E<:AbstractEnv}
+    s.reducer(check!(sc, policy, env) for sc in s.stop_conditions)
 end
 
 #####
@@ -58,12 +58,12 @@ function _stop_after_step(s::StopAfterNSteps)
     res
 end
 
-function check!(s::StopAfterNSteps, args...)
+function check!(s::StopAfterNSteps, agent, env)
     ProgressMeter.next!(s.progress)
     _stop_after_step(s)
 end
 
-check!(s::StopAfterNSteps{Nothing}, args...) = _stop_after_step(s)
+check!(s::StopAfterNSteps{Nothing}, agent, env) = _stop_after_step(s)
 
 #####
 # StopAfterNEpisodes

@@ -10,11 +10,19 @@ action of an environment at its current state. It is typically a table or a neur
 QBasedPolicy can be queried for an action with `RLBase.plan!`, the explorer will affect the action selection
 accordingly.
 """
-Base.@kwdef mutable struct QBasedPolicy{L<:TDLearner,E<:AbstractExplorer} <: AbstractPolicy
+struct QBasedPolicy{L<:TDLearner,E<:AbstractExplorer} <: AbstractPolicy
     "estimate the Q value"
     learner::L
     "select the action based on Q values calculated by the learner"
     explorer::E
+
+    function QBasedPolicy(; learner::L, explorer::E) where {L<:TDLearner, E<:AbstractExplorer}
+        new{L,E}(learner, explorer)
+    end
+
+    function QBasedPolicy(learner::L, explorer::E) where {L<:TDLearner, E<:AbstractExplorer}
+        new{L,E}(learner, explorer)
+    end
 end
 
 Flux.@layer QBasedPolicy trainable=(learner,)

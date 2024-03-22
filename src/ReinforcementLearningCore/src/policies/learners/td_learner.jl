@@ -90,4 +90,3 @@ end
 
 # TDLearner{:SARS} is optimized at the PostActStage
 RLBase.optimise!(learner::TDLearner{:SARS}, stage::PostActStage, trace::NamedTuple) = RLBase.optimise!(learner, trace)
-
