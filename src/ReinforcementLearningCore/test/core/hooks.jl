@@ -1,4 +1,5 @@
 struct MockHook <: AbstractHook end 
+struct TestPlayer <: AbstractPlayer end
 
 """
 test_noop!(hook; stages=[PreActStage()])
@@ -10,7 +11,6 @@ function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), P
         env = RandomWalk1D()
         env.pos = 7
         policy = RandomPolicy(legal_action_space(env))
-        struct TestPlayer <: AbstractPlayer end
         player = TestPlayer()
         hook_fieldnames = fieldnames(typeof(hook))
         for mode in [:MultiAgent, :SingleAgent]
