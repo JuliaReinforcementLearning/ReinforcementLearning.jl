@@ -450,6 +450,7 @@ Get all available actions from environment. See also:
 [`legal_action_space`](@ref)
 """
 @multi_agent_env_api action_space(env::AbstractEnv, player=current_player(env))
+action_space(env::AbstractEnv, ::DefaultPlayer) = action_space(env)
 
 """
     legal_action_space(env, player=current_player(env))

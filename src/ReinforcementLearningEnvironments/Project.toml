@@ -30,6 +30,7 @@ julia = "1.6"
 
 [extras]
 ArcadeLearningEnvironment = "b7f77d8d-088d-5e02-8ac0-89aab2acc977"
+BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 Conda = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 DomainSets = "5b8099bc-c8ec-5219-889f-1d9e522a28bf"
 OpenSpiel = "ceb70bd2-fe3f-44f0-b81f-41608acaf2f2"
@@ -44,6 +45,7 @@ TimerOutputs = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
 [targets]
 test = [
     "ArcadeLearningEnvironment",
+    "BSON",
     "Conda",
     "DomainSets",
     "OpenSpiel",

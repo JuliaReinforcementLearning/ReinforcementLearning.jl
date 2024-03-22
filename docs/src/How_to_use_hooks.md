@@ -125,37 +125,29 @@ run(
 
 ```@repl how_to_use_hooks
 using ReinforcementLearning
-using Flux
-using Flux.Losses: huber_loss
 using BSON
 
-env = CartPoleEnv(; T = Float32)
-ns, na = length(state(env)), length(action_space(env))
+env = RandomWalk1D()
+ns, na = length(state_space(env)), length(action_space(env))
 
 policy = Agent(
-    policy = QBasedPolicy(
-        learner = BasicDQNLearner(
-            approximator = NeuralNetworkApproximator(
-                model = Chain(
-                    Dense(ns, 128, relu; init = glorot_uniform),
-                    Dense(128, 128, relu; init = glorot_uniform),
-                    Dense(128, na; init = glorot_uniform),
-                ) |> cpu,
-                optimizer = Adam(),
-            ),
-            batchsize = 32,
-            min_replay_history = 100,
-            loss_func = huber_loss,
+    QBasedPolicy(;
+        learner = TDLearner(
+            TabularQApproximator(n_state = ns, n_action = na),
+            :SARS;
         ),
-        explorer = EpsilonGreedyExplorer(
-            kind = :exp,
-            ϵ_stable = 0.01,
-            decay_steps = 500,
-        ),
+        explorer = EpsilonGreedyExplorer(ϵ_stable=0.01),
     ),
-    trajectory = CircularArraySARTTrajectory(
-        capacity = 1000,
-        state = Vector{Float32} => (ns,),
+    Trajectory(
+        CircularArraySARTSTraces(;
+            capacity = 1,
+            state = Int64 => (),
+            action = Int64 => (),
+            reward = Float64 => (),
+            terminal = Bool => (),
+        ),
+        DummySampler(),
+        InsertSampleRatioController(),
     ),
 )
 
@@ -166,7 +158,7 @@ run(
     env,
     StopAfterNSteps(10_000),
     DoEveryNSteps(n=1_000) do t, p, e
-        ps = params(p)
+        ps = policy.policy.learner.approximator
         f = joinpath(parameters_dir, "parameters_at_step_$t.bson")
         BSON.@save f ps
         println("parameters at step $t saved to $f")

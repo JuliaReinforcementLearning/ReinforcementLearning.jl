@@ -74,3 +74,45 @@ end
     @test reward(env) == 0
     @test (@allocated reward(env)) == 0
 end
+
+@testset "Full run" begin
+    using BSON
+
+    env = RandomWalk1D()
+    ns, na = length(state_space(env)), length(action_space(env))
+
+    policy = Agent(
+        QBasedPolicy(;
+            learner = TDLearner(
+                TabularQApproximator(n_state = ns, n_action = na),
+                :SARS;
+            ),
+            explorer = EpsilonGreedyExplorer(ϵ_stable=0.01),
+        ),
+        Trajectory(
+            CircularArraySARTSTraces(;
+                capacity = 1,
+                state = Int64 => (),
+                action = Int64 => (),
+                reward = Float64 => (),
+                terminal = Bool => (),
+            ),
+            DummySampler(),
+            InsertSampleRatioController(),
+        ),
+    )
+
+    parameters_dir = mktempdir()
+
+    run(
+        policy,
+        env,
+        StopAfterNSteps(10_000),
+        DoEveryNSteps(n=1_000) do t, p, e
+            ps = policy.policy.learner.approximator
+            f = joinpath(parameters_dir, "parameters_at_step_$t.bson")
+            BSON.@save f ps
+            println("parameters at step $t saved to $f")
+        end
+    )
+end
