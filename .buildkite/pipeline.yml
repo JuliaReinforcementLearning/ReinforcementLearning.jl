@@ -15,8 +15,8 @@ steps:
         println("--- :julia: Instantiating project")
         using Pkg
         Pkg.develop(path="src/ReinforcementLearningBase")
-        Pkg.develop(path="src/ReinforcementLearningEnvironments")
         Pkg.develop(path="src/ReinforcementLearningCore")
+        Pkg.develop(path="src/ReinforcementLearningEnvironments")
         Pkg.develop(path=".")
         Pkg.develop(path="src/ReinforcementLearningFarm")
 
@@ -44,8 +44,8 @@ steps:
         println("--- :julia: Instantiating project")
         using Pkg
         Pkg.develop(path="src/ReinforcementLearningBase")
-        Pkg.develop(path="src/ReinforcementLearningEnvironments")
         Pkg.develop(path="src/ReinforcementLearningCore")
+        Pkg.develop(path="src/ReinforcementLearningEnvironments")
         Pkg.develop(path=".")        
         Pkg.develop(path="src/ReinforcementLearningFarm")
 
