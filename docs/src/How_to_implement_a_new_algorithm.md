@@ -10,25 +10,29 @@ function _run(policy::AbstractPolicy,
         stop_condition::AbstractStopCondition,
         hook::AbstractHook,
         reset_condition::AbstractResetCondition)
-
+    push!(hook, PreExperimentStage(), policy, env)
     push!(policy, PreExperimentStage(), env)
     is_stop = false
     while !is_stop
         reset!(env)
         push!(policy, PreEpisodeStage(), env)
         optimise!(policy, PreEpisodeStage())
+        push!(hook, PreEpisodeStage(), policy, env)
 
-        while !reset_condition(policy, env) # one episode
+
+        while !check!(reset_condition, policy, env) # one episode
             push!(policy, PreActStage(), env)
             optimise!(policy, PreActStage())
+            push!(hook, PreActStage(), policy, env)
 
-            RLBase.plan!(policy, env)
+            action = RLBase.plan!(policy, env)
             act!(env, action)
 
             push!(policy, PostActStage(), env, action)
             optimise!(policy, PostActStage())
+            push!(hook, PostActStage(), policy, env)
 
-            if check_stop(stop_condition, policy, env)
+            if check!(stop_condition, policy, env)
                 is_stop = true
                 break
             end
@@ -36,11 +40,13 @@ function _run(policy::AbstractPolicy,
 
         push!(policy, PostEpisodeStage(), env)
         optimise!(policy, PostEpisodeStage())
+        push!(hook, PostEpisodeStage(), policy, env)
+
     end
     push!(policy, PostExperimentStage(), env)
+    push!(hook, PostExperimentStage(), policy, env)
     hook
 end
-
 ```
 
 Implementing a new algorithm mainly consists of creating your own `AbstractPolicy` (or `AbstractLearner`, see [this section](#using-resources-from-rlcore)) subtype, its action sampling method (by overloading `Base.push!(policy::YourPolicyType, env)`) and implementing its behavior at each stage. However, ReinforcemementLearning.jl provides plenty of pre-implemented utilities that you should use to 1) have less code to write 2) lower the chances of bugs and 3) make your code more understandable and maintainable (if you intend to contribute your algorithm). 
