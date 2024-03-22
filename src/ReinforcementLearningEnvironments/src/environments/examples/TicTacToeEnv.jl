@@ -12,13 +12,13 @@ function TicTacToeEnv()
     board = BitArray{3}(undef, 3, 3, 3)
     fill!(board, false)
     board[:, :, 1] .= true
-    TicTacToeEnv(board, :Cross)
+    TicTacToeEnv(board, Player(:Cross))
 end
 
 function RLBase.reset!(env::TicTacToeEnv)
     fill!(env.board, false)
     env.board[:, :, 1] .= true
-    env.player = :Cross
+    env.player = Player(:Cross)
 end
 
 struct TicTacToeInfo
@@ -37,14 +37,14 @@ const TIC_TAC_TOE_STATE_INFO = Dict{
 Base.hash(env::TicTacToeEnv, h::UInt) = hash(env.board, h)
 Base.isequal(a::TicTacToeEnv, b::TicTacToeEnv) = isequal(a.board, b.board)
 
-Base.to_index(::TicTacToeEnv, player) = player == :Cross ? 2 : 3
+Base.to_index(::TicTacToeEnv, player) = player == Player(:Cross) ? 2 : 3
 
 RLBase.action_space(::TicTacToeEnv, player) = Base.OneTo(9)
 
 RLBase.legal_action_space(env::TicTacToeEnv, p) = findall(legal_action_space_mask(env))
 
 function RLBase.legal_action_space_mask(env::TicTacToeEnv, p)
-    if is_win(env, :Cross) || is_win(env, :Nought)
+    if is_win(env, Player(:Cross)) || is_win(env, Player(:Nought))
         falses(9)
     else
         vec(env.board[:, :, 1])
@@ -59,10 +59,10 @@ function RLBase.act!(env::TicTacToeEnv, action::CartesianIndex{2})
 end
 
 function RLBase.next_player!(env::TicTacToeEnv)
-    env.player = env.player == :Cross ? :Nought : :Cross
+    env.player = env.player == Player(:Cross) ? Player(:Nought) : Player(:Cross)
 end
 
-RLBase.players(::TicTacToeEnv) = (:Cross, :Nought)
+RLBase.players(::TicTacToeEnv) = (Player(:Cross), Player(:Nought))
 
 RLBase.state(env::TicTacToeEnv) = state(env, Observation{Int}(), 1)
 RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = env.board
@@ -139,10 +139,10 @@ function get_tic_tac_toe_state_info()
                 if !haskey(TIC_TAC_TOE_STATE_INFO, env)
                     n += 1
                     has_empty_pos = any(view(env.board, :, :, 1))
-                    w = if is_win(env, :Cross)
-                        :Cross
-                    elseif is_win(env, :Nought)
-                        :Nought
+                    w = if is_win(env, Player(:Cross))
+                        Player(:Cross)
+                    elseif is_win(env, Player(:Nought))
+                        Player(:Nought)
                     else
                         nothing
                     end
