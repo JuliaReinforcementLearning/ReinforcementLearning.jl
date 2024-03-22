@@ -165,33 +165,3 @@ run(
     end
 )
 ```
-
-### Logging data
-
-Below we demonstrate how to use
-[TensorBoardLogger.jl](https://github.com/PhilipVinc/TensorBoardLogger.jl) to
-log runtime metrics. But users could also other tools like
-[wandb](https://wandb.ai/site) through
-[PyCall.jl](https://github.com/JuliaPy/PyCall.jl).
-
-
-```@repl how_to_use_hooks
-using TensorBoardLogger
-using Logging
-tf_log_dir = "logs"
-lg = TBLogger(tf_log_dir, min_level = Logging.Info)
-total_reward_per_episode = TotalRewardPerEpisode()
-hook = ComposedHook(
-    total_reward_per_episode,
-    DoEveryNEpisodes() do t, agent, env
-        with_logger(lg) do
-            @info "training"  reward = total_reward_per_episode.rewards[end]
-        end
-    end
-)
-run(RandomPolicy(), CartPoleEnv(), StopAfterNEpisodes(50), hook)
-readdir(tf_log_dir)
-```
-
-Then run `tensorboard --logdir logs` and open the link on the screen in your
-browser. (Obviously you need to install tensorboard first.)

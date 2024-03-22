@@ -206,6 +206,7 @@ function test_runnable!(env, n=1000; rng=Random.default_rng())
             A = legal_action_space(env)
             a = rand(rng, A)
             @test a in A
+            @warn a isa Symbol "`Symbol` types are used for players, please wrap `Symbol`s in a `struct` or use other types for actions."
 
             if ActionStyle(env) === EXPLICIT_STOCHASTIC &&
                current_player(env) == chance_player(env)

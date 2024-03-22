@@ -71,18 +71,17 @@ which action to take based on the result of the state-action values.
 ```@repl randomwalk1d
 using Flux: InvDecay
 policy = QBasedPolicy(
-    learner = MonteCarloLearner(;
+    learner = TDLearner(;
             approximator=TabularQApproximator(
                 ;n_state = NS,
                 n_action = NA,
-                opt = InvDecay(1.0)
             )
         ),
     explorer = EpsilonGreedyExplorer(0.1)
 )
 ```
 
-Here we choose the [`MonteCarloLearner`](@ref) and the
+Here we choose the [`TDLearner`](@ref) and the
 [`EpsilonGreedyExplorer`](@ref). But you can also replace them with some other Q
 value learners or value explorers. Similar to what we did before, we can apply
 this policy to the `env` to estimate its performance.
