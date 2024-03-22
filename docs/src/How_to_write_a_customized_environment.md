@@ -390,7 +390,8 @@ environments must take a collection of actions from different players as input.
 ```@repl customized_env
 rps = RockPaperScissorsEnv();
 action_space(rps)
-rps(rand(action_space(rps)))
+action = plan!(RandomPolicy(), rps)
+act!(rps, action)
 ```
 
 ### [`ChanceStyle`](@ref)
