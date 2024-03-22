@@ -6,8 +6,6 @@ steps:
     plugins:
       - JuliaCI/julia#v1:
           version: "1"
-      - JuliaCI/julia-test#v1:
-          run_tests: false
     command: |
       julia -e '
         using Pkg
@@ -35,8 +33,6 @@ steps:
       - JuliaCI/julia-coverage#v1:
           dirs:
             - src/ReinforcementLearningFarm/src
-      - JuliaCI/julia-test#v1:
-          run_tests: false
     command: |
       julia -e '
         using Pkg
