@@ -52,7 +52,7 @@ end
 Implementing a new algorithm mainly consists of creating your own `AbstractPolicy` (or `AbstractLearner`, see [this section](#using-resources-from-rlcore)) subtype, its action sampling method (by overloading `Base.push!(policy::YourPolicyType, env)`) and implementing its behavior at each stage. However, ReinforcemementLearning.jl provides plenty of pre-implemented utilities that you should use to 1) have less code to write 2) lower the chances of bugs and 3) make your code more understandable and maintainable (if you intend to contribute your algorithm). 
 
 ## Using Agents
-The recommended way is to use the policy wrapper `Agent`. An agent is itself an `AbstractPolicy` that wraps a policy and a trajectory (also called Experience Replay Buffer in RL literature). Agent comes with default implementations of `push!(agent, stage, env)` and `plan!(agent, env)` that will probably fit what you need at most stages so that you don't have to write them again. Looking at the [source code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/main/src/ReinforcementLearningCore/src/policies/agent.jl/), we can see that the default Agent calls are  
+The recommended way is to use the policy wrapper `Agent`. An agent is itself an `AbstractPolicy` that wraps a policy and a trajectory (also called Experience Replay Buffer in reinforcement learning literature). Agent comes with default implementations of `push!(agent, stage, env)` and `plan!(agent, env)` that will probably fit what you need at most stages so that you don't have to write them again. Looking at the [source code](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/main/src/ReinforcementLearningCore/src/policies/agent.jl/), we can see that the default Agent calls are  
 
 ```julia
 function Base.push!(agent::Agent, ::PreEpisodeStage, env::AbstractEnv)
@@ -67,21 +67,21 @@ end
 
  The function `RLBase.plan!(agent::Agent, env::AbstractEnv)`, is called at the `action = RLBase.plan!(policy, env)` line. It simply gets an action from the policy of the agent by calling `RLBase.plan!(your_new_policy, env)` function. At the `PreEpisodeStage()`, the agent pushes the initial state to the trajectory. At the `PostActStage()`, the agent pushes the transition to the trajectory.
 
-If you need a different behavior at some stages, then you can overload the `Base.push!(Agent{<:YourPolicyType}, [stage,] env)` or `Base.push!(Agent{<:Any, <: YourTrajectoryType}, [stage,] env)`, or `Base.plan!`, depending on whether you have a custom policy or just a custom trajectory. For example, many algorithms (such as PPO) need to store an additional trace of the logpdf of the sampled actions and thus overload the function at the `PreActStage()`.
+If you need a different behavior at some stages, then you can overload the `Base.push!(Agent{<:YourPolicyType}, [stage,] env)` or `Base.push!(Agent{<:Any, <: YourTrajectoryType}, [stage,] env)`, or `Base.plan!`, depending on whether you have a custom policy or just a custom trajectory. For example, many algorithms (such as PPO) need to store an additional trace of the `logpdf` of the sampled actions and thus overload the function at the `PreActStage()`.
 
 ## Updating the policy
 
 Finally, you need to implement the learning function by implementing `RLBase.optimise!(::YourPolicyType, ::Stage, ::Trajectory)`. By default this does nothing at all stages. Overload it on the stage where you wish to optimise (most often, at `PostActStage()` or `PostEpisodeStage()`). This function should loop the trajectory to sample batches. Inside the loop, put whatever is required. For example:
 
 ```julia
-function RLBase.optimise!(p::YourPolicyType, ::PostEpisodeStage, traj::Trajectory)
-    for batch in traj
-        optimise!(p, batch)
+function RLBase.optimise!(policy::YourPolicyType, ::PostEpisodeStage, trajectory::Trajectory)
+    for batch in trajectory
+        optimise!(policy, batch)
     end
 end
 
 ```
-where `optimise!(p, batch)` is a function that will typically compute the gradient and update a neural network, or update a tabular policy. What is inside the loop is free to be whatever you need but it's a good idea to implement a `optimise!(p::YourPolicyType, batch::NamedTuple)` function for clarity instead of coding everything in the loop. This is further discussed in the next section on `Trajectory`s. An example of where this could be different is when you want to update priorities, see [the PER learner](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/blob/main/src/ReinforcementLearningZoo/src/algorithms/dqns/prioritized_dqn.jl) for an example.
+where `optimise!(policy, batch)` is a function that will typically compute the gradient and update a neural network, or update a tabular policy. What is inside the loop is free to be whatever you need but it's a good idea to implement a `optimise!(policy::YourPolicyType, batch::NamedTuple)` function for clarity instead of coding everything in the loop. This is further discussed in the next section on `Trajectory`s.
 
 ## ReinforcementLearningTrajectories
 
@@ -118,13 +118,13 @@ ReinforcementLearningTrajectories' design aims to eventually support distributed
 
 The sampler is the object that will fetch data in your trajectory to create the `batch` in the optimise for loop. The simplest one is the `BatchSampler{names}(batchsize, rng)`.`batchsize` is the number of elements to sample and `rng` is an optional argument that you may set to a custom rng for reproducibility. `names` is the set of traces the sampler must query. For example a `BatchSampler{(:state, :action, :next_state)}(32)` will sample a named tuple `(state = [32 states], action=[32 actions], next_state=[32 states that are one-off with respect that in state])`.
 
-## Using resources from RLCore
+## Using resources from ReinforcementLearningCore
 
-RL algorithms typically only differ partially  but broadly use the same mechanisms. The subpackage RLCore contains some modules that you can reuse to implement your algorithm. 
-These will take care of many aspects of training for you. See the [RLCore manual](./rlcore.md)
+RL algorithms typically only differ partially  but broadly use the same mechanisms. The subpackage ReinforcementLearningCore contains some modules that you can reuse to implement your algorithm. 
+These will take care of many aspects of training for you. See the [ReinforcementLearningCore manual](./rlcore.md)
 
 ### Utils
-In utils/distributions.jl you will find implementations of gaussian log probabilities functions that are both GPU compatible and differentiable and that do not require the overhead of using Distributions.jl structs.
+In `utils/distributions.jl` you will find implementations of gaussian log probabilities functions that are both GPU compatible and differentiable and that do not require the overhead of using `Distributions.jl` structs.
 
 ## Conventions
 Finally, there are a few "conventions" and good practices that you should follow, especially if you intend to contribute to this package (don't worry we'll be happy to help if needed).
@@ -133,9 +133,9 @@ Finally, there are a few "conventions" and good practices that you should follow
 ReinforcementLearning.jl aims to provide a framework for reproducible experiments. To do so, make sure that your policy type has a `rng` field and that all random operations (e.g. action sampling) use `rand(your_policy.rng, args...)`. For trajectory sampling, you can set the sampler's rng to that of the policy when creating and agent or simply instantiate its own rng.
 
 ### GPU compatibility
-Deep RL algorithms are often much faster when the neural nets are updated on a GPU. For now, we only support CUDA.jl as a backend. This means that you will have to think about the transfer of data between the CPU (where the trajectory is) and the GPU memory (where the neural nets are). To do so you will find in utils/device.jl some functions that do most of the work for you. The ones that you need to know are `send_to_device(device, data)` that sends data to the specified device, `send_to_host(data)` which sends data to the CPU memory (it fallbacks to `send_to_device(Val{:cpu}, data)`) and `device(x)` that returns the device on which `x` is. 
+Deep RL algorithms are often much faster when the neural nets are updated on a GPU. This means that you will have to think about the transfer of data between the CPU (where the trajectory is) and the GPU memory (where the neural nets are). `Flux.jl` offers `gpu` and `cpu` functions to make it easier to send data back and forth.
 Normally, you should be able to write a single implementation of your algorithm that works on CPU and GPUs thanks to the multiple dispatch offered by Julia.
 
-GPU friendlyness will also require that your code does not use _scalar indexing_ (see the CUDA.jl documentation for more information), make sure to test your algorithm on the GPU after disallowing scalar indexing by using `CUDA.allowscalar(false)`.
+GPU friendliness will also require that your code does not use _scalar indexing_ (see the `CUDA.jl` or `Metal.jl` documentation for more information); when using `CUDA.jl` make sure to test your algorithm on the GPU after disallowing scalar indexing by using `CUDA.allowscalar(false)`.
 
 Finally, it is a good idea to implement the `Flux.gpu(yourpolicy)` and `cpu(yourpolicy)` functions, for user convenience. Be careful that sampling on the GPU requires a specific type of rng, you can generate one with `CUDA.default_rng()`
