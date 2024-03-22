@@ -55,7 +55,7 @@ struct MockLearner <: AbstractLearner end
         env = MockEnv()
         learner = MockLearner()
         explorer = MockExplorer()
-        player = :player1
+        player = Player(:player1)
 
         output = RLBase.plan!(explorer, learner, env, player)
 

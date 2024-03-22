@@ -31,7 +31,7 @@ function RLBase.plan!(p::RandomPolicy{Nothing,RNG}, env::AbstractEnv) where {RNG
     return rand(p.rng, legal_action_space_)
 end
 
-function RLBase.plan!(p::RandomPolicy{Nothing,RNG}, env::E, player::Symbol) where {E<:AbstractEnv, RNG<:AbstractRNG}
+function RLBase.plan!(p::RandomPolicy{Nothing,RNG}, env::E, player::Player) where {E<:AbstractEnv, RNG<:AbstractRNG, Player <: AbstractPlayer}
     legal_action_space_ = RLBase.legal_action_space(env, player)
     return rand(p.rng, legal_action_space_)
 end

@@ -126,7 +126,7 @@ end
 Base.push!(h::RewardsPerEpisode, s::PreEpisodeStage, agent, env, ::Symbol) = push!(h, s, agent, env)
 
 Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(last(h.rewards), reward(env))
-Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(last(h.rewards), reward(env, player))
+Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E, player::Player) where {P <: AbstractPolicy, E <: AbstractEnv, Player <: AbstractPlayer} = push!(last(h.rewards), reward(env, player))
 
 #####
 # TotalRewardPerEpisode
@@ -155,7 +155,7 @@ end
 Base.getindex(h::TotalRewardPerEpisode) = h.rewards
 
 Base.push!(h::TotalRewardPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = h.reward += reward(env)
-Base.push!(h::TotalRewardPerEpisode, ::PostActStage, agent::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = h.reward += reward(env, player)
+Base.push!(h::TotalRewardPerEpisode, ::PostActStage, agent::P, env::E, player::Player) where {P <: AbstractPolicy, E <: AbstractEnv, Player <: AbstractPlayer} = h.reward += reward(env, player)
 
 function Base.push!(hook::TotalRewardPerEpisode,
     ::PostEpisodeStage,
@@ -195,8 +195,8 @@ function Base.push!(hook::TotalRewardPerEpisode,
     stage::Union{PostEpisodeStage, PostExperimentStage},
     agent,
     env,
-    player::Symbol
-)
+    player::Player
+) where {Player <: AbstractPlayer}
     push!(hook,
         stage,
         agent,
@@ -245,8 +245,8 @@ function Base.push!(hook::BatchStepsPerEpisode,
     stage::PostActStage,
     agent,
     env,
-    player::Symbol
-)
+    player::Player
+) where {Player <: AbstractPlayer}
     push!(hook,
         stage,
         agent,

@@ -1,5 +1,4 @@
-export MultiAgentPolicy
-export MultiAgentHook
+export MultiAgentPolicy, MultiAgentHook, Player
 
 using Random # for RandomPolicy
 
@@ -7,15 +6,19 @@ import Base.getindex
 import Base.iterate
 import Base.push!
 
+struct Player{N} <: AbstractPlayer
+    env::N
+end
+
 """
     MultiAgentPolicy(agents::NT) where {NT<: NamedTuple}
 MultiAgentPolicy is a policy struct that contains `<:AbstractPolicy` structs indexed by the player's symbol.
 """
-struct MultiAgentPolicy{names,T} <: AbstractPolicy
-    agents::NamedTuple{names,T}
+struct MultiAgentPolicy{players,T} <: AbstractPolicy
+    agents::NamedTuple{players,T}
 
-    function MultiAgentPolicy(agents::NamedTuple{names,T}) where {names,T}
-        new{names,T}(agents)
+    function MultiAgentPolicy(agents::NamedTuple{players,T}) where {players,T}
+        new{players,T}(agents)
     end
 end
 
@@ -23,11 +26,11 @@ end
     MultiAgentHook(hooks::NT) where {NT<: NamedTuple}
 MultiAgentHook is a hook struct that contains `<:AbstractHook` structs indexed by the player's symbol.
 """
-struct MultiAgentHook{names,T} <: AbstractHook
-    hooks::NamedTuple{names,T}
+struct MultiAgentHook{players,T} <: AbstractHook
+    hooks::NamedTuple{players,T}
 
-    function MultiAgentHook(hooks::NamedTuple{names,T}) where {names,T}
-        new{names,T}(hooks)
+    function MultiAgentHook(hooks::NamedTuple{players,T}) where {players,T}
+        new{players,T}(hooks)
     end
 end
 

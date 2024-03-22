@@ -48,7 +48,7 @@ end
         RLBase.act!(env, 1)
         i == 2 && break
     end
-    @test player_log == [:Cross, :Nought]
+    @test player_log == Player.([:Cross, :Nought])
 end
 
 @testset "Basic TicTacToeEnv (Sequential) env checks" begin

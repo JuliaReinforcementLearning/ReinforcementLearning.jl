@@ -31,7 +31,7 @@ function RLBase.plan!(policy::QBasedPolicy{L,Ex}, env::E) where {Ex<:AbstractExp
     RLBase.plan!(policy.explorer, policy.learner, env)
 end
 
-function RLBase.plan!(policy::QBasedPolicy{L,Ex}, env::E, player::Symbol) where {Ex<:AbstractExplorer,L<:TDLearner,E<:AbstractEnv}
+function RLBase.plan!(policy::QBasedPolicy{L,Ex}, env::E, player::Player) where {Ex<:AbstractExplorer,L<:TDLearner,E<:AbstractEnv, Player<:AbstractPlayer}
     RLBase.plan!(policy.explorer, policy.learner, env, player)
 end
 

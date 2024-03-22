@@ -394,19 +394,20 @@ abstract type AbstractEpisodeStyle end
 # General
 #####
 
-@api struct DefaultPlayer end
+@api abstract type AbstractPlayer end
+@api struct DefaultPlayer <: AbstractPlayer end
 @api const DEFAULT_PLAYER = DefaultPlayer()
 
-@api struct ChancePlayer end
+@api struct ChancePlayer <: AbstractPlayer end
 @api const CHANCE_PLAYER = ChancePlayer()
 
-@api struct SimultaneousPlayer end
+@api struct SimultaneousPlayer <: AbstractPlayer end
 @api const SIMULTANEOUS_PLAYER = SimultaneousPlayer()
 
 @api struct Spector end
 @api const SPECTOR = Spector()
 
-@api act!(env::AbstractEnv, action, player=current_player(env))
+@api act!(env::AbstractEnv, action, player::AbstractPlayer=current_player(env))
 
 """
 Make an independent copy of `env`, 

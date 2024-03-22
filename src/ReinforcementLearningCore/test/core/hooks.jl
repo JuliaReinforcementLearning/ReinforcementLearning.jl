@@ -10,7 +10,8 @@ function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), P
         env = RandomWalk1D()
         env.pos = 7
         policy = RandomPolicy(legal_action_space(env))
-
+        struct TestPlayer <: AbstractPlayer end
+        player = TestPlayer()
         hook_fieldnames = fieldnames(typeof(hook))
         for mode in [:MultiAgent, :SingleAgent]
             for stage in stages
@@ -18,7 +19,7 @@ function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), P
                 if mode == :SingleAgent
                     push!(hook_copy, stage, policy, env)
                 elseif mode == :MultiAgent
-                    push!(hook_copy, stage, policy, env, :player_i)
+                    push!(hook_copy, stage, policy, env, player)
                 end
                 for field_ in hook_fieldnames
                     if getfield(hook, field_) isa Ref
