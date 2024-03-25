@@ -442,7 +442,7 @@ Get the action distribution of chance player.
     Only valid for environments of [`EXPLICIT_STOCHASTIC`](@ref) style. The
     current player of `env` must be the chance player.
 """
-@env_api prob(env::AbstractEnv, player=chance_player(env))
+@env_api prob(env::AbstractEnv, player::AbstractPlayer=chance_player(env))
 
 """
     action_space(env, player=current_player(env))
@@ -450,7 +450,7 @@ Get the action distribution of chance player.
 Get all available actions from environment. See also:
 [`legal_action_space`](@ref)
 """
-@multi_agent_env_api action_space(env::AbstractEnv, player=current_player(env))
+@multi_agent_env_api action_space(env::AbstractEnv, player::AbstractPlayer=current_player(env))
 action_space(env::AbstractEnv, ::DefaultPlayer) = action_space(env)
 
 """
@@ -459,10 +459,10 @@ action_space(env::AbstractEnv, ::DefaultPlayer) = action_space(env)
 For environments of [`MINIMAL_ACTION_SET`](@ref), the result is the same with
 [`action_space`](@ref).
 """
-@multi_agent_env_api legal_action_space(env::AbstractEnv, player=current_player(env)) =
+@multi_agent_env_api legal_action_space(env::AbstractEnv, player::AbstractPlayer=current_player(env)) =
     legal_action_space(ActionStyle(env), env, player)
 
-legal_action_space(::MinimalActionSet, env, player) = action_space(env)
+legal_action_space(::MinimalActionSet, env, player::AbstractPlayer) = action_space(env)
 
 """
     legal_action_space_mask(env, player=current_player(env)) -> AbstractArray{Bool}
@@ -471,7 +471,7 @@ Required for environments of [`FULL_ACTION_SET`](@ref). As a default implementat
      [`legal_action_space_mask`](@ref) creates a mask of [`action_space`](@ref) with
      the subset [`legal_action_space`](@ref).
 """
-@multi_agent_env_api legal_action_space_mask(env::AbstractEnv, player=current_player(env)) =
+@multi_agent_env_api legal_action_space_mask(env::AbstractEnv, player::AbstractPlayer=current_player(env)) =
     map(action_space(env, player)) do action
         action in legal_action_space(env, player)
     end
@@ -490,7 +490,7 @@ to declare which kind of state they want.
 """
 @multi_agent_env_api state(env::AbstractEnv) = state(env, DefaultStateStyle(env))
 state(env::AbstractEnv, ss::AbstractStateStyle) = state(env, ss, current_player(env))
-state(env::AbstractEnv, player) = state(env, DefaultStateStyle(env), player)
+state(env::AbstractEnv, player::AbstractPlayer) = state(env, DefaultStateStyle(env), player)
 
 """
     state_space(env, style=[DefaultStateStyle(env)], player=[current_player(env)])
@@ -501,7 +501,7 @@ Describe all possible states.
     state_space(env, DefaultStateStyle(env))
 state_space(env::AbstractEnv, ss::AbstractStateStyle) =
     state_space(env, ss, current_player(env))
-state_space(env::AbstractEnv, player) = state_space(env, DefaultStateStyle(env), player)
+state_space(env::AbstractEnv, player::AbstractPlayer) = state_space(env, DefaultStateStyle(env), player)
 
 """
     current_player(env)
@@ -551,7 +551,7 @@ Used in imperfect multi-agent environments.
 """
     reward(env, player=current_player(env))
 """
-@multi_agent_env_api reward(env::AbstractEnv, player=current_player(env))
+@multi_agent_env_api reward(env::AbstractEnv, player::AbstractPlayer=current_player(env))
 
 """
     child(env::AbstractEnv, action)
