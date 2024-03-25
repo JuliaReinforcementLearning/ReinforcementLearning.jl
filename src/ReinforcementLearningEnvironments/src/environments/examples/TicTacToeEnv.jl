@@ -31,7 +31,7 @@ const TIC_TAC_TOE_STATE_INFO = Dict{
     TicTacToeEnv,
     NamedTuple{
         (:index, :is_terminated, :winner),
-        Tuple{Int,Bool,Union{Nothing,Symbol}},
+        Tuple{Int,Bool,Union{Nothing,Player}},
     },
 }()
 

@@ -5,11 +5,16 @@ using DomainSets
 
 
 @testset "Basic PlayerNamedTuple tests" begin
-    nt = PlayerNamedTuple(Player(1) => 3, Player(2) => 4)
-    @test nt.data == (; Symbol(1) => 3, Symbol(2) => 4)
+    nt = PlayerNamedTuple(Player(1) => "test1", Player(2) => "test2")
+    @test nt.data == (; Symbol(1) => "test1", Symbol(2) => "test2")
     @test typeof(nt).parameters == typeof(nt.data).parameters
-    @test nt[Player(1)] == 3
+    @test nt[Player(1)] == "test1"
     @test PlayerNamedTuple(Player(i) => i for i in 1:2) == PlayerNamedTuple(Player(1) => 1, Player(2) => 2)
+
+    @test iterate(nt) == ("test1", 2)
+    @test iterate(nt, 1) == ("test1", 2)
+    collect(iterate(nt))
+
 end
 
 @testset "MultiAgentPolicy" begin
@@ -45,7 +50,7 @@ end
         TimePerStep()
     )
 
-    multiagent_hook = MultiAgentHook(PlayerNamedTuple(:Cross => composed_hook, :Nought => EmptyHook()))
+    multiagent_hook = MultiAgentHook(PlayerNamedTuple(Player(:Cross) => composed_hook, Player(:Nought) => EmptyHook()))
     @test multiagent_hook.hooks[:Cross][3] isa StepsPerEpisode
 end
 
@@ -177,7 +182,7 @@ end
     # TODO: Split up TicTacToeEnv and MultiAgent tests
     @test RLBase.is_terminated(env)
     @test RLBase.legal_action_space(env) == ()
-    @test RLBase.action_space(env, Symbol(1)) == ('💎', '📃', '✂')
+    @test RLBase.action_space(env, Player(1)) == ('💎', '📃', '✂')
     env = RockPaperScissorsEnv()
     push!(multiagent_policy, PreActStage(), env)
     a = RLBase.plan!(multiagent_policy, env)

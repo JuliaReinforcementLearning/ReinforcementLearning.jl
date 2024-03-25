@@ -13,7 +13,7 @@ Base.@kwdef mutable struct RockPaperScissorsEnv <: AbstractEnv
     is_done::Bool = false
 end
 
-RLBase.players(::RockPaperScissorsEnv) = (Symbol(1), Symbol(2))
+RLBase.players(::RockPaperScissorsEnv) = (Player(1), Player(2))
 
 """
 Note that although this is a two player game. The current player is always a
@@ -21,7 +21,7 @@ dummy simultaneous player.
 """
 RLBase.current_player(::RockPaperScissorsEnv) = SIMULTANEOUS_PLAYER
 
-RLBase.action_space(::RockPaperScissorsEnv, ::Symbol) = ('💎', '📃', '✂')
+RLBase.action_space(::RockPaperScissorsEnv, ::Player) = ('💎', '📃', '✂')
 
 RLBase.action_space(::RockPaperScissorsEnv, ::SimultaneousPlayer) =
     Tuple((i, j) for i in ('💎', '📃', '✂') for j in ('💎', '📃', '✂'))
@@ -32,7 +32,7 @@ RLBase.legal_action_space(env::RockPaperScissorsEnv, player::Player) =
     is_terminated(env) ? () : action_space(env, p)
 
 "Since it's a one-shot game, the state space doesn't have much meaning."
-RLBase.state_space(::RockPaperScissorsEnv, ::Observation, player::Player) = Base.OneTo(1)
+RLBase.state_space(::RockPaperScissorsEnv, ::Observation, ::SimultaneousPlayer) = Base.OneTo(1)
 
 """
 For multi-agent environments, we usually implement the most detailed one.

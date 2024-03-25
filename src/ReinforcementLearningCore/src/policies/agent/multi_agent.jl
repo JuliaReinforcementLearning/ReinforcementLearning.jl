@@ -34,6 +34,8 @@ end
 
 Base.getindex(nt::PlayerNamedTuple, player::Player) = nt.data[player.name]
 Base.keys(nt::PlayerNamedTuple) = Player.(keys(nt.data))
+Base.iterate(nt::PlayerNamedTuple) = iterate(nt.data)
+Base.iterate(nt::PlayerNamedTuple, state) = iterate(nt.data, state)
 
 """
     MultiAgentPolicy(agents::NT) where {NT<: NamedTuple}
@@ -76,10 +78,10 @@ function Base.iterate(current_player_iterator::CurrentPlayerIterator, state)
 end
 
 Base.iterate(p::MultiAgentPolicy) = iterate(p.agents)
-Base.iterate(p::MultiAgentPolicy, s) = iterate(p.agents, s)
+Base.iterate(p::MultiAgentPolicy, state) = iterate(p.agents, state)
 
-Base.getindex(p::MultiAgentPolicy, player::Player) = p.agents[s]
-Base.getindex(h::MultiAgentHook, player::Player) = h.hooks[s]
+Base.getindex(p::MultiAgentPolicy, player::Player) = p.agents[player]
+Base.getindex(h::MultiAgentHook, player::Player) = h.hooks[player]
 
 Base.keys(p::MultiAgentPolicy) = keys(p.agents)
 Base.keys(p::MultiAgentHook) = keys(p.hooks)
@@ -242,7 +244,7 @@ function Base.push!(multiagent::MultiAgentPolicy, ::PostActStage, env::E, action
     end
 end
 
-function Base.push!(agent::Agent, ::PostEpisodeStage, env::AbstractEnv, p::Symbol)
+function Base.push!(agent::Agent, ::PostEpisodeStage, env::AbstractEnv, player::Player)
     if haskey(agent.trajectory, :next_action) 
         action = RLBase.plan!(agent.policy, env, p)
         push!(agent.trajectory, PartialNamedTuple((action = action, )))

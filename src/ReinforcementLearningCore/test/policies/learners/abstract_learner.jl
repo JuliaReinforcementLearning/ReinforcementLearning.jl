@@ -48,7 +48,7 @@ struct MockLearner <: AbstractLearner end
             return [1, 2]
         end
 
-        function RLBase.plan!(::MockExplorer, learner::MockLearner, env::MockEnv, p::Symbol)
+        function RLBase.plan!(::MockExplorer, learner::MockLearner, env::MockEnv, p::Player)
             return rand(2)
         end
 
