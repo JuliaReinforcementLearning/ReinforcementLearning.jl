@@ -150,27 +150,27 @@ end
         TimePerStep()
     )
 
-    multiagent_hook = MultiAgentHook(PlayerNamedTuple(Symbol(1) => composed_hook, Symbol(2) => EmptyHook()))
+    multiagent_hook = MultiAgentHook(PlayerNamedTuple(Player(1) => composed_hook, Player(2) => EmptyHook()))
 
     @test Base.iterate(RLCore.CurrentPlayerIterator(env))[1] == SimultaneousPlayer()
     @test Base.iterate(RLCore.CurrentPlayerIterator(env), env)[1] == SimultaneousPlayer()
     @test Base.iterate(multiagent_policy)[1] isa Agent
     @test Base.iterate(multiagent_policy, 1)[1] isa Agent
 
-    @test Base.getindex(multiagent_policy, Symbol(1)) isa Agent
-    @test Base.getindex(multiagent_hook, Symbol(1))[3] isa StepsPerEpisode
+    @test Base.getindex(multiagent_policy, Player(1)) isa Agent
+    @test Base.getindex(multiagent_hook, Player(1))[3] isa StepsPerEpisode
 
-    @test Base.keys(multiagent_policy) == (Symbol(1), Symbol(2))
-    @test Base.keys(multiagent_hook) == (Symbol(1), Symbol(2))
+    @test Base.keys(multiagent_policy) == (Player(1), Player(2))
+    @test Base.keys(multiagent_hook) == (Player(1), Player(2))
 
     @test length(RLBase.legal_action_space(env)) == 9
     Base.run(multiagent_policy, env, stop_condition, multiagent_hook)
 
-    @test multiagent_hook[Symbol(1)][1].steps[1][1] == 1
-    @test -1 <= multiagent_hook[Symbol(1)][2].rewards[1][1] <= 1
-    @test multiagent_hook[Symbol(1)][3].steps[1] == 1    
-    @test -1 <= multiagent_hook[Symbol(1)][4].rewards[1][1] <= 1
-    @test 0 <= multiagent_hook[Symbol(1)][5].times[1] <= 5
+    @test multiagent_hook[Player(1)][1].steps[1][1] == 1
+    @test -1 <= multiagent_hook[Player(1)][2].rewards[1][1] <= 1
+    @test multiagent_hook[Player(1)][3].steps[1] == 1    
+    @test -1 <= multiagent_hook[Player(1)][4].rewards[1][1] <= 1
+    @test 0 <= multiagent_hook[Player(1)][5].times[1] <= 5
 
     # Add more hook tests here...
 
