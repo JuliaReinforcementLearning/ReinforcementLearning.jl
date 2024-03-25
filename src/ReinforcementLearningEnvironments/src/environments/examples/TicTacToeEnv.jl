@@ -6,7 +6,7 @@ import CommonRLInterface
 
 mutable struct TicTacToeEnv <: AbstractEnv
     board::BitArray{3}
-    player::Symbol
+    player::Player
 end
 
 function TicTacToeEnv()
@@ -98,7 +98,7 @@ end
 
 RLBase.is_terminated(env::TicTacToeEnv) = get_tic_tac_toe_state_info()[env].is_terminated
 
-function RLBase.reward(env::TicTacToeEnv, player::Symbol)
+function RLBase.reward(env::TicTacToeEnv, player::Player)
     if is_terminated(env)
         winner = get_tic_tac_toe_state_info()[env].winner
         if isnothing(winner)
@@ -113,7 +113,7 @@ function RLBase.reward(env::TicTacToeEnv, player::Symbol)
     end
 end
 
-function is_win(env::TicTacToeEnv, player::Symbol)
+function is_win(env::TicTacToeEnv, player::Player)
     b = env.board
     p = Base.to_index(env, player)
     @inbounds begin

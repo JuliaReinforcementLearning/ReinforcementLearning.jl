@@ -189,7 +189,7 @@ function Base.push!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:Ab
 end
 
 # Like in the single-agent case, push! at the PostActStage() calls push! on each player.
-function Base.push!(agent::Agent, ::PreEpisodeStage, env::AbstractEnv, player::Symbol)
+function Base.push!(agent::Agent, ::PreEpisodeStage, env::AbstractEnv, player::Player)
     push!(agent.trajectory, (state = state(env, player),))
 end
 
@@ -199,7 +199,7 @@ function Base.push!(multiagent::MultiAgentPolicy, s::PreEpisodeStage, env::E) wh
     end
 end
 
-function RLBase.plan!(agent::Agent, env::AbstractEnv, player::Symbol)
+function RLBase.plan!(agent::Agent, env::AbstractEnv, player::Player)
     RLBase.plan!(agent.policy, env, player)
 end
 
@@ -230,18 +230,18 @@ function Base.push!(hook::MultiAgentHook, stage::S, multiagent::MultiAgentPolicy
     end
 end
 
-@inline function _push!(stage::AbstractStage, policy::P, env::E, player::Symbol, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
+@inline function _push!(stage::AbstractStage, policy::P, env::E, player::Player, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
     push!(hook, stage, policy, env, player)
     _push!(stage, policy, env, player, hook_tuple...)
 end
 
-_push!(stage::AbstractStage, policy::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = nothing
+_push!(stage::AbstractStage, policy::P, env::E, player::Player) where {P <: AbstractPolicy, E <: AbstractEnv} = nothing
 
 function Base.push!(composed_hook::ComposedHook{T},
                             stage::AbstractStage,
                             policy::P,
                             env::E,
-                            player::Symbol
+                            player::Player
                             ) where {T <: Tuple, P <: AbstractPolicy, E <: AbstractEnv}
     _push!(stage, policy, env, player, composed_hook.hooks...)
 end

@@ -62,7 +62,7 @@ end
 RLBase.state_space(env::PettingZooEnv, ::Observation{Any}, players) = Space(Dict(player => state_space(env, player) for player in players))
 
     # partial observability
-RLBase.state_space(env::PettingZooEnv, ::Observation{Any}, player::Symbol) = space_transform(env.pyenv.observation_space(String(player)))
+RLBase.state_space(env::PettingZooEnv, ::Observation{Any}, player::Player) = space_transform(env.pyenv.observation_space(String(player)))
 
 # for full observability. Be careful: action_space has also to be adjusted
 # RLBase.state_space(env::PettingZooEnv, ::Observation{Any}, player::String) = space_transform(env.pyenv.state_space)
@@ -73,7 +73,7 @@ RLBase.state_space(env::PettingZooEnv, ::Observation{Any}, player::Symbol) = spa
 RLBase.action_space(env::PettingZooEnv, players::Tuple{Symbol}) =
          Space(Dict(p => action_space(env, p) for p in players))
 
-RLBase.action_space(env::PettingZooEnv, player::Symbol) = space_transform(env.pyenv.action_space(String(player)))
+RLBase.action_space(env::PettingZooEnv, player::Player) = space_transform(env.pyenv.action_space(String(player)))
 
 RLBase.action_space(env::PettingZooEnv, player::Integer) = space_transform(env.pyenv.action_space(env.pyenv.agents[player]))
 
@@ -119,7 +119,7 @@ function RLBase.act!(env::PettingZooEnv, action)
 end
 
 # reward of player ======================================================================================================================
-function RLBase.reward(env::PettingZooEnv, player::Symbol)
+function RLBase.reward(env::PettingZooEnv, player::Player)
     env.pyenv.rewards[String(player)]
 end
 
