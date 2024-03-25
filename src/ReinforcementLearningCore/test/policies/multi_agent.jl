@@ -101,7 +101,7 @@ end
     @test RLBase.is_terminated(env)
     @test RLEnvs.is_win(env, Player(:Cross)) isa Bool
     @test RLEnvs.is_win(env, Player(:Nought)) isa Bool
-    @test RLBase.reward(env, Player(:Cross)) == (RLBase.reward(env, :Nought) * -1)
+    @test RLBase.reward(env, Player(:Cross)) == (RLBase.reward(env, Player(:Nought)) * -1)
     @test RLBase.legal_action_space_mask(env, Player(:Cross)) == falses(9)
     @test RLBase.legal_action_space(env) == []
 

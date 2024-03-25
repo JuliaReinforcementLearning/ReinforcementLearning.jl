@@ -76,7 +76,7 @@ RLBase.state_space(env::TicTacToeEnv, ::Observation{Int}, player::Player) =
     Base.OneTo(length(get_tic_tac_toe_state_info()))
 RLBase.state_space(env::TicTacToeEnv, ::Observation{String}, player::Player) = fullspace(String)
 
-RLBase.state(env::TicTacToeEnv, ::Observation{String}) = state(env::TicTacToeEnv, Observation{String}(), 1)
+RLBase.state(env::TicTacToeEnv, ::Observation{String}) = state(env::TicTacToeEnv, Observation{String}(), Player(1))
 
 function RLBase.state(env::TicTacToeEnv, ::Observation{String}, player::Player)
     buff = IOBuffer()
