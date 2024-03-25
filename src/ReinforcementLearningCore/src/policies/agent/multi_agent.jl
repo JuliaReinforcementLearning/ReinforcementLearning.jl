@@ -8,6 +8,10 @@ import Base.push!
 
 struct Player <: AbstractPlayer
     name::Symbol
+
+    function Player(name)
+        new(Symbol(name))
+    end
 end
 
 """
@@ -22,6 +26,10 @@ struct PlayerNamedTuple{N,T}
         nt = NamedTuple(first(item).name => last(item) for item in data)
         new{typeof(nt).parameters...}(nt)
     end
+
+    function PlayerNamedTuple(data::Base.Generator)
+        PlayerNamedTuple(collect(data)...)
+    end    
 end
 
 Base.getindex(nt::PlayerNamedTuple, player::Player) = nt.data[player.name]

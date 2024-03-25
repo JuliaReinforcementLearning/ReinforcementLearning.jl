@@ -5,12 +5,12 @@ using DomainSets
 
 
 @testset "Basic PlayerNamedTuple tests" begin
-    nt = PlayerNamedTuple(Player(Symbol(1)) => 3, Player(Symbol(2)) => 4)
+    nt = PlayerNamedTuple(Player(1) => 3, Player(2) => 4)
     @test nt.data == (; Symbol(1) => 3, Symbol(2) => 4)
     @test typeof(nt).parameters == typeof(nt.data).parameters
-    @test nt[Player(Symbol(1))] == 3
+    @test nt[Player(1)] == 3
+    @test PlayerNamedTuple(Player(i) => i for i in 1:2) == PlayerNamedTuple(Player(1) => 1, Player(2) => 2)
 end
-
 
 @testset "MultiAgentPolicy" begin
     trajectory_1 = Trajectory(
@@ -126,18 +126,18 @@ end
     )
 
     @test MultiAgentPolicy(PlayerNamedTuple(
-        Symbol(1) => Agent(RandomPolicy(), trajectory_1),
-        Symbol(2) => Agent(RandomPolicy(), trajectory_2),
+        Player(1) => Agent(RandomPolicy(), trajectory_1),
+        Player(2) => Agent(RandomPolicy(), trajectory_2),
     )) isa MultiAgentPolicy
 
     @test MultiAgentPolicy(PlayerNamedTuple(
-        Symbol(1) => Agent(RandomPolicy(), trajectory_1),
-        Symbol(2) => Agent(RandomPolicy(), trajectory_2),
+        Player(1) => Agent(RandomPolicy(), trajectory_1),
+        Player(2) => Agent(RandomPolicy(), trajectory_2),
     )) isa MultiAgentPolicy
 
     multiagent_policy = MultiAgentPolicy(PlayerNamedTuple(
-        Symbol(1) => Agent(RandomPolicy(), trajectory_1),
-        Symbol(2) => Agent(RandomPolicy(), trajectory_2),
+        Player(1) => Agent(RandomPolicy(), trajectory_1),
+        Player(2) => Agent(RandomPolicy(), trajectory_2),
     ))
 
     env = RockPaperScissorsEnv()
@@ -189,8 +189,8 @@ end
 @testset "Sequential Environments correctly ended by termination signal" begin
     #rng = StableRNGs.StableRNG(123)
     e = TicTacToeEnv();
-    m = MultiAgentPolicy(NamedTuple((player => RandomPolicy() for player in players(e))))
-    hooks = MultiAgentHook(NamedTuple((p => EmptyHook() for p ∈ players(e))))
+    m = MultiAgentPolicy(PlayerNamedTuple(player => RandomPolicy() for player in players(e)))
+    hooks = MultiAgentHook(PlayerNamedTuple(p => EmptyHook() for p ∈ players(e)))
 
     let err = nothing
         try

@@ -9,7 +9,7 @@ import CommonRLInterface
 simultaneous, zero sum game.
 """
 Base.@kwdef mutable struct RockPaperScissorsEnv <: AbstractEnv
-    reward::PlayerNamedTuple{(Symbol(1), Symbol(2)), Tuple{Int64, Int64}} = PlayerNamedTuple(Player(Symbol(1)) => 0, Player(Symbol(2)) => 0)
+    reward::PlayerNamedTuple{(Symbol(1), Symbol(2)), Tuple{Int64, Int64}} = PlayerNamedTuple(Player(1) => 0, Player(2) => 0)
     is_done::Bool = false
 end
 
@@ -39,7 +39,7 @@ For multi-agent environments, we usually implement the most detailed one.
 """
 RLBase.state(::RockPaperScissorsEnv, ::Observation, ::SimultaneousPlayer) = 1
 
-RLBase.reward(env::RockPaperScissorsEnv) = env.is_done ? env.reward : PlayerNamedTuple(Player(Symbol(1)) => 0, Player(Symbol(2)) => 0)
+RLBase.reward(env::RockPaperScissorsEnv) = env.is_done ? env.reward : PlayerNamedTuple(Player(1) => 0, Player(2) => 0)
 RLBase.reward(env::RockPaperScissorsEnv, player::Player) = reward(env)[player]
 
 RLBase.is_terminated(env::RockPaperScissorsEnv) = env.is_done
@@ -48,11 +48,11 @@ RLBase.reset!(env::RockPaperScissorsEnv) = env.is_done = false
 # TODO: Consider using CRL.all_act! and adjusting run function accordingly
 function RLBase.act!(env::RockPaperScissorsEnv, (x, y))
     if x == y
-        env.reward = PlayerNamedTuple(Player(Symbol(1)) => 0, Player(Symbol(2)) => 0)
+        env.reward = PlayerNamedTuple(Player(1) => 0, Player(2) => 0)
     elseif x == '💎' && y == '✂' || x == '✂' && y == '📃' || x == '📃' && y == '💎'
-        env.reward = PlayerNamedTuple(Player(Symbol(1)) => 1, Player(Symbol(2)) => -1)
+        env.reward = PlayerNamedTuple(Player(1) => 1, Player(2) => -1)
     else
-        env.reward = PlayerNamedTuple(Player(Symbol(1)) => -1, Player(Symbol(2)) => 1)
+        env.reward = PlayerNamedTuple(Player(1) => -1, Player(2) => 1)
     end
     env.is_done = true
 end

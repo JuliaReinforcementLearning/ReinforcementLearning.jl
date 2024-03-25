@@ -23,7 +23,7 @@ struct MockLearner <: AbstractLearner end
         output = RLCore.forward(learner, env)
         @test output == Float64[1.0, 2.0]
 
-        output = RLCore.forward(learner, env, Player(Symbol(1)))
+        output = RLCore.forward(learner, env, Player(1))
         @test output == Float64[1.0, 2.0]
     end
 
@@ -44,7 +44,7 @@ struct MockLearner <: AbstractLearner end
 
     @testset "Plan with Player" begin
         # Mock explorer, environment, and learner
-        function RLBase.action_space(::MockEnv, ::Symbol)
+        function RLBase.action_space(::MockEnv, ::Player)
             return [1, 2]
         end
 
