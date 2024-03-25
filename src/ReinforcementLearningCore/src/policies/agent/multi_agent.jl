@@ -1,4 +1,4 @@
-export MultiAgentPolicy, MultiAgentHook, Player, PlayerNamedTuple
+export MultiAgentPolicy, MultiAgentHook, Player, PlayerTuple
 
 using Random # for RandomPolicy
 
@@ -7,36 +7,36 @@ import Base.iterate
 import Base.push!
 
 """
-    PlayerNamedTuple
+    PlayerTuple
 
 A NamedTuple that maps players to their respective values.
 """
-struct PlayerNamedTuple{N,T}
+struct PlayerTuple{N,T}
     data::NamedTuple{N,T}
 
-    function PlayerNamedTuple(data::Pair...)
+    function PlayerTuple(data::Pair...)
         nt = NamedTuple(first(item).name => last(item) for item in data)
         new{typeof(nt).parameters...}(nt)
     end
 
-    function PlayerNamedTuple(data::Base.Generator)
-        PlayerNamedTuple(collect(data)...)
+    function PlayerTuple(data::Base.Generator)
+        PlayerTuple(collect(data)...)
     end    
 end
 
-Base.getindex(nt::PlayerNamedTuple, player::Player) = nt.data[player.name]
-Base.keys(nt::PlayerNamedTuple) = Player.(keys(nt.data))
-Base.iterate(nt::PlayerNamedTuple) = iterate(nt.data)
-Base.iterate(nt::PlayerNamedTuple, state) = iterate(nt.data, state)
+Base.getindex(nt::PlayerTuple, player::Player) = nt.data[player.name]
+Base.keys(nt::PlayerTuple) = Player.(keys(nt.data))
+Base.iterate(nt::PlayerTuple) = iterate(nt.data)
+Base.iterate(nt::PlayerTuple, state) = iterate(nt.data, state)
 
 """
     MultiAgentPolicy(agents::NT) where {NT<: NamedTuple}
 MultiAgentPolicy is a policy struct that contains `<:AbstractPolicy` structs indexed by the player's symbol.
 """
 struct MultiAgentPolicy{players,T} <: AbstractPolicy
-    agents::PlayerNamedTuple{players, T}
+    agents::PlayerTuple{players, T}
 
-    function MultiAgentPolicy(agents::PlayerNamedTuple{players,T}) where {players,T}
+    function MultiAgentPolicy(agents::PlayerTuple{players,T}) where {players,T}
         new{players, T}(agents)
     end
 end
@@ -46,9 +46,9 @@ end
 MultiAgentHook is a hook struct that contains `<:AbstractHook` structs indexed by the player's symbol.
 """
 struct MultiAgentHook{players,T} <: AbstractHook
-    hooks::PlayerNamedTuple{players,T}
+    hooks::PlayerTuple{players,T}
 
-    function MultiAgentHook(hooks::PlayerNamedTuple{players,T}) where {players, T}
+    function MultiAgentHook(hooks::PlayerTuple{players,T}) where {players, T}
         new{players,T}(hooks)
     end
 end

@@ -4,12 +4,12 @@ using ReinforcementLearningBase
 using DomainSets
 
 
-@testset "Basic PlayerNamedTuple tests" begin
-    nt = PlayerNamedTuple(Player(1) => "test1", Player(2) => "test2")
+@testset "Basic PlayerTuple tests" begin
+    nt = PlayerTuple(Player(1) => "test1", Player(2) => "test2")
     @test nt.data == (; Symbol(1) => "test1", Symbol(2) => "test2")
     @test typeof(nt).parameters == typeof(nt.data).parameters
     @test nt[Player(1)] == "test1"
-    @test PlayerNamedTuple(Player(i) => i for i in 1:2) == PlayerNamedTuple(Player(1) => 1, Player(2) => 2)
+    @test PlayerTuple(Player(i) => i for i in 1:2) == PlayerTuple(Player(1) => 1, Player(2) => 2)
 
     @test iterate(nt) == ("test1", 2)
     @test iterate(nt, 1) == ("test1", 2)
@@ -31,7 +31,7 @@ end
     )
 
     multiagent_policy = MultiAgentPolicy(
-        PlayerNamedTuple(
+        PlayerTuple(
             Player(:Cross) => Agent(RandomPolicy(), trajectory_1),
             Player(:Nought) => Agent(RandomPolicy(), trajectory_2),
         )
@@ -50,7 +50,7 @@ end
         TimePerStep()
     )
 
-    multiagent_hook = MultiAgentHook(PlayerNamedTuple(Player(:Cross) => composed_hook, Player(:Nought) => EmptyHook()))
+    multiagent_hook = MultiAgentHook(PlayerTuple(Player(:Cross) => composed_hook, Player(:Nought) => EmptyHook()))
     @test multiagent_hook.hooks[Player(:Cross)][3] isa StepsPerEpisode
 end
 
@@ -80,12 +80,12 @@ end
         InsertSampleRatioController(n_inserted = -1),
     )
 
-    multiagent_policy = MultiAgentPolicy(PlayerNamedTuple(
+    multiagent_policy = MultiAgentPolicy(PlayerTuple(
         Player(:Cross) => Agent(RandomPolicy(), trajectory_1),
         Player(:Nought) => Agent(RandomPolicy(), trajectory_2),
     ))
 
-    multiagent_hook = MultiAgentHook(PlayerNamedTuple(Player(:Cross) => StepsPerEpisode(), Player(:Nought) => StepsPerEpisode()))
+    multiagent_hook = MultiAgentHook(PlayerTuple(Player(:Cross) => StepsPerEpisode(), Player(:Nought) => StepsPerEpisode()))
 
     env = TicTacToeEnv()
     stop_condition = StopIfEnvTerminated()
@@ -130,17 +130,17 @@ end
         InsertSampleRatioController(n_inserted = -1),
     )
 
-    @test MultiAgentPolicy(PlayerNamedTuple(
+    @test MultiAgentPolicy(PlayerTuple(
         Player(1) => Agent(RandomPolicy(), trajectory_1),
         Player(2) => Agent(RandomPolicy(), trajectory_2),
     )) isa MultiAgentPolicy
 
-    @test MultiAgentPolicy(PlayerNamedTuple(
+    @test MultiAgentPolicy(PlayerTuple(
         Player(1) => Agent(RandomPolicy(), trajectory_1),
         Player(2) => Agent(RandomPolicy(), trajectory_2),
     )) isa MultiAgentPolicy
 
-    multiagent_policy = MultiAgentPolicy(PlayerNamedTuple(
+    multiagent_policy = MultiAgentPolicy(PlayerTuple(
         Player(1) => Agent(RandomPolicy(), trajectory_1),
         Player(2) => Agent(RandomPolicy(), trajectory_2),
     ))
@@ -155,7 +155,7 @@ end
         TimePerStep()
     )
 
-    multiagent_hook = MultiAgentHook(PlayerNamedTuple(Player(1) => composed_hook, Player(2) => EmptyHook()))
+    multiagent_hook = MultiAgentHook(PlayerTuple(Player(1) => composed_hook, Player(2) => EmptyHook()))
 
     @test Base.iterate(RLCore.CurrentPlayerIterator(env))[1] == SimultaneousPlayer()
     @test Base.iterate(RLCore.CurrentPlayerIterator(env), env)[1] == SimultaneousPlayer()
@@ -195,8 +195,8 @@ end
 @testset "Sequential Environments correctly ended by termination signal" begin
     #rng = StableRNGs.StableRNG(123)
     e = TicTacToeEnv();
-    m = MultiAgentPolicy(PlayerNamedTuple(player => RandomPolicy() for player in players(e)))
-    hooks = MultiAgentHook(PlayerNamedTuple(p => EmptyHook() for p ∈ players(e)))
+    m = MultiAgentPolicy(PlayerTuple(player => RandomPolicy() for player in players(e)))
+    hooks = MultiAgentHook(PlayerTuple(p => EmptyHook() for p ∈ players(e)))
 
     let err = nothing
         try

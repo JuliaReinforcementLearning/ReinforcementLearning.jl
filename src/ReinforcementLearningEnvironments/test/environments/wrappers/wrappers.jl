@@ -130,7 +130,7 @@
 
         reset!(env)
 
-        @test reward(env) == PlayerNamedTuple(Player(1) => 0, Player(2) => 0)
+        @test reward(env) == PlayerTuple(Player(1) => 0, Player(2) => 0)
         @test is_terminated(env) == false
 
         RLBase.act!(env, ['💎', '📃'])
@@ -140,7 +140,7 @@
         @test is_terminated(env) == true
 
         reset!(env)
-        @test reward(env) == PlayerNamedTuple(Player(1) => 0, Player(2) => 0)
+        @test reward(env) == PlayerTuple(Player(1) => 0, Player(2) => 0)
         @test reward(env, Player(1)) == 0
         @test reward(env, Player(2)) == 0
         @test is_terminated(env) == false

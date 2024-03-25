@@ -19,7 +19,7 @@
         Player(:Nought) => Agent(RandomPolicy(), trajectory_2),
     ))
 
-    multiagent_hook = MultiAgentHook((PlayerNamedTuple(Player(:Cross) => StepsPerEpisode(), :Nought => StepsPerEpisode())))
+    multiagent_hook = MultiAgentHook((PlayerTuple(Player(:Cross) => StepsPerEpisode(), :Nought => StepsPerEpisode())))
 
     env = TicTacToeEnv()
     stop_condition = StopIfEnvTerminated()
