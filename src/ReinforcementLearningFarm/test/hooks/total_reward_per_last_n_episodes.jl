@@ -20,10 +20,10 @@ using ReinforcementLearningFarm: TotalRewardPerLastNEpisodes
         agent = RandomPolicy()
 
         for i = 1:15
-            push!(hook, PreEpisodeStage(), agent, env, :Cross)
-            push!(hook, PostActStage(), agent, env, :Cross)
+            push!(hook, PreEpisodeStage(), agent, env, Player(:Cross))
+            push!(hook, PostActStage(), agent, env, Player(:Cross))
             @test length(hook.rewards) == min(i, 10)
-            @test hook.rewards[min(i, 10)] == reward(env, :Cross)
+            @test hook.rewards[min(i, 10)] == reward(env, Player(:Cross))
         end
     end
 end

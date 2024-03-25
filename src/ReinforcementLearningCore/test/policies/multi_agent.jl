@@ -17,11 +17,11 @@ using DomainSets
     )
 
     multiagent_policy = MultiAgentPolicy((;
-        :Cross => Agent(RandomPolicy(), trajectory_1),
-        :Nought => Agent(RandomPolicy(), trajectory_2),
+        Player(:Cross) => Agent(RandomPolicy(), trajectory_1),
+        Player(:Nought) => Agent(RandomPolicy(), trajectory_2),
     ))
 
-    @test multiagent_policy.agents[:Cross].policy isa RandomPolicy
+    @test multiagent_policy.agents[Player(:Cross)].policy isa RandomPolicy
 end
 
 @testset "MultiAgentHook" begin
@@ -65,34 +65,34 @@ end
     )
 
     multiagent_policy = MultiAgentPolicy((;
-        :Cross => Agent(RandomPolicy(), trajectory_1),
-        :Nought => Agent(RandomPolicy(), trajectory_2),
+        Player(:Cross) => Agent(RandomPolicy(), trajectory_1),
+        Player(:Nought) => Agent(RandomPolicy(), trajectory_2),
     ))
 
-    multiagent_hook = MultiAgentHook((; :Cross => StepsPerEpisode(), :Nought => StepsPerEpisode()))
+    multiagent_hook = MultiAgentHook((; Player(:Cross) => StepsPerEpisode(), Player(:Nought) => StepsPerEpisode()))
 
     env = TicTacToeEnv()
     stop_condition = StopIfEnvTerminated()
     hook = StepsPerEpisode()
 
-    @test RLBase.reward(env, :Cross) == 0
+    @test RLBase.reward(env, Player(:Cross)) == 0
     @test length(RLBase.legal_action_space(env)) == 9
     Base.run(multiagent_policy, env, Sequential(), stop_condition, multiagent_hook)
 
-    @test multiagent_hook.hooks[:Nought].steps[1] > 0
-    @test multiagent_hook.hooks[:Cross].steps[1] > 0
+    @test multiagent_hook.hooks[Player(:Nought)].steps[1] > 0
+    @test multiagent_hook.hooks[Player(:Cross)].steps[1] > 0
 
     @test RLBase.is_terminated(env)
-    @test RLEnvs.is_win(env, :Cross) isa Bool
-    @test RLEnvs.is_win(env, :Nought) isa Bool
-    @test RLBase.reward(env, :Cross) == (RLBase.reward(env, :Nought) * -1)
-    @test RLBase.legal_action_space_mask(env, :Cross) == falses(9)
+    @test RLEnvs.is_win(env, Player(:Cross)) isa Bool
+    @test RLEnvs.is_win(env, Player(:Nought)) isa Bool
+    @test RLBase.reward(env, Player(:Cross)) == (RLBase.reward(env, :Nought) * -1)
+    @test RLBase.legal_action_space_mask(env, Player(:Cross)) == falses(9)
     @test RLBase.legal_action_space(env) == []
 
-    @test RLBase.state(env, Observation{BitArray{3}}(), :Cross) isa BitArray{3}
-    @test RLBase.state_space(env, Observation{BitArray{3}}(), :Cross) isa ArrayProductDomain
-    @test RLBase.state_space(env, Observation{String}(), :Cross) isa DomainSets.FullSpace{String}
-    @test RLBase.state(env, Observation{String}(), :Cross) isa String
+    @test RLBase.state(env, Observation{BitArray{3}}(), Player(:Cross)) isa BitArray{3}
+    @test RLBase.state_space(env, Observation{BitArray{3}}(), Player(:Cross)) isa ArrayProductDomain
+    @test RLBase.state_space(env, Observation{String}(), Player(:Cross)) isa DomainSets.FullSpace{String}
+    @test RLBase.state(env, Observation{String}(), Player(:Cross)) isa String
     @test RLBase.state(env, Observation{String}()) isa String
 end
 
