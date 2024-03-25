@@ -6,8 +6,6 @@ steps:
     plugins:
       - JuliaCI/julia#v1:
           version: "1"
-      - JuliaCI/julia-test#v1:
-          run_tests: false
     command: |
       julia -e '
         using Pkg
@@ -15,8 +13,9 @@ steps:
         println("--- :julia: Instantiating project")
         using Pkg
         Pkg.develop(path="src/ReinforcementLearningBase")
-        Pkg.develop(path="src/ReinforcementLearningEnvironments")
         Pkg.develop(path="src/ReinforcementLearningCore")
+        Pkg.develop(path="src/ReinforcementLearningEnvironments")
+        Pkg.develop(path=".") # ReinforcementLearning meta-package
         Pkg.develop(path="src/ReinforcementLearningFarm")
 
         println("+++ :julia: Running tests")
@@ -34,8 +33,6 @@ steps:
       - JuliaCI/julia-coverage#v1:
           dirs:
             - src/ReinforcementLearningFarm/src
-      - JuliaCI/julia-test#v1:
-          run_tests: false
     command: |
       julia -e '
         using Pkg
@@ -43,8 +40,9 @@ steps:
         println("--- :julia: Instantiating project")
         using Pkg
         Pkg.develop(path="src/ReinforcementLearningBase")
-        Pkg.develop(path="src/ReinforcementLearningEnvironments")
         Pkg.develop(path="src/ReinforcementLearningCore")
+        Pkg.develop(path="src/ReinforcementLearningEnvironments")
+        Pkg.develop(path=".") # ReinforcementLearning meta-package
         Pkg.develop(path="src/ReinforcementLearningFarm")
 
         println("+++ :julia: Running tests")

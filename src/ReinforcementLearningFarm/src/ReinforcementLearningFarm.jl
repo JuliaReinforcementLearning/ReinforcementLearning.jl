@@ -1,7 +1,6 @@
 module ReinforcementLearningFarm
 
-using ReinforcementLearningBase
-using ReinforcementLearningCore
+using ReinforcementLearning
 const RLFarm = ReinforcementLearningFarm
 export RLFarm
 

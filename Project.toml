@@ -13,7 +13,7 @@ ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
 [compat]
 Reexport = "0.2, 1"
 ReinforcementLearningBase = "0.12"
-ReinforcementLearningCore = "0.14"
+ReinforcementLearningCore = "0.15"
 ReinforcementLearningEnvironments = "0.8"
 julia = "1.6"
 

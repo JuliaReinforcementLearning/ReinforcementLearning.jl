@@ -1,5 +1,4 @@
-using ReinforcementLearningCore
-using ReinforcementLearningBase
+using ReinforcementLearning
 import Base.push!
 import Base.getindex
 using CircularArrayBuffers: CircularVectorBuffer, CircularArrayBuffer

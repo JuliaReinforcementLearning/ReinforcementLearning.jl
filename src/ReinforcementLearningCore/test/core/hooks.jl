@@ -43,7 +43,6 @@ end
 end
 
 @testset "ComposedHook + AbstractHook" begin
-    struct MockHook <: AbstractHook end 
     @test ComposedHook(MockHook()) + MockHook() == ComposedHook(MockHook(), MockHook())
 end
 

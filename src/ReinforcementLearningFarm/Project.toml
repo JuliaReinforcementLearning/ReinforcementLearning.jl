@@ -9,26 +9,22 @@ FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-ReinforcementLearningBase = "e575027e-6cd6-5018-9292-cdc6200d2b44"
-ReinforcementLearningCore = "de1b191a-4ae0-4afa-a27b-92d07f46b2d6"
+ReinforcementLearning = "158674fc-8238-5cab-b5ba-03dfc80d1318"
 
 [compat]
 FillArrays = "1"
 CircularArrayBuffers = "0.1.12"
 Distributions = "0.25"
-ReinforcementLearningBase = "0.12"
-ReinforcementLearningCore = "0.14"
-ReinforcementLearningEnvironments = "0.8"
+ReinforcementLearning = "0.11"
 julia = "1.9"
 
 [extras]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
 Preferences = "21216c6a-2e73-6563-6e65-726566657250"
-ReinforcementLearningEnvironments = "25e41dd2-4622-11e9-1641-f1adca772921"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
 [targets]
-test = ["CUDA", "Metal", "Preferences", "ReinforcementLearningEnvironments", "Test", "UUIDs", "cuDNN"]
+test = ["CUDA", "Metal", "Preferences", "Test", "UUIDs", "cuDNN"]
