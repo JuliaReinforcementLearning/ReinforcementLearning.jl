@@ -87,10 +87,10 @@ end
 RLBase.is_terminated(env::KuhnPokerEnv) =
     length(env.actions) == 2 && (env.actions[1] == :bet || env.actions[2] == :pass) ||
     length(env.actions) == 3
-RLBase.players(env::KuhnPokerEnv) = (1, 2, CHANCE_PLAYER)
+RLBase.players(env::KuhnPokerEnv) = (Player(1), Player(2), CHANCE_PLAYER)
 
 function RLBase.state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, player::Player)
-    if length(env.cards) >= p
+    if length(env.cards) >= player
         (env.cards[player], env.actions...)
     else
         ()

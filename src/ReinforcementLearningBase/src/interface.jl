@@ -450,7 +450,7 @@ Get the action distribution of chance player.
 Get all available actions from environment. See also:
 [`legal_action_space`](@ref)
 """
-@multi_agent_env_api action_space(env::AbstractEnv, player::AbstractPlayer=current_player(env))
+@multi_agent_env_api action_space(env::AbstractEnv, player=current_player(env))
 action_space(env::AbstractEnv, ::DefaultPlayer) = action_space(env)
 
 """
@@ -459,7 +459,7 @@ action_space(env::AbstractEnv, ::DefaultPlayer) = action_space(env)
 For environments of [`MINIMAL_ACTION_SET`](@ref), the result is the same with
 [`action_space`](@ref).
 """
-@multi_agent_env_api legal_action_space(env::AbstractEnv, player::AbstractPlayer=current_player(env)) =
+@multi_agent_env_api legal_action_space(env::AbstractEnv, player=current_player(env)) =
     legal_action_space(ActionStyle(env), env, player)
 
 legal_action_space(::MinimalActionSet, env, player::AbstractPlayer) = action_space(env)
@@ -471,7 +471,7 @@ Required for environments of [`FULL_ACTION_SET`](@ref). As a default implementat
      [`legal_action_space_mask`](@ref) creates a mask of [`action_space`](@ref) with
      the subset [`legal_action_space`](@ref).
 """
-@multi_agent_env_api legal_action_space_mask(env::AbstractEnv, player::AbstractPlayer=current_player(env)) =
+@multi_agent_env_api legal_action_space_mask(env::AbstractEnv, player=current_player(env)) =
     map(action_space(env, player)) do action
         action in legal_action_space(env, player)
     end
@@ -551,7 +551,7 @@ Used in imperfect multi-agent environments.
 """
     reward(env, player=current_player(env))
 """
-@multi_agent_env_api reward(env::AbstractEnv, player::AbstractPlayer=current_player(env))
+@multi_agent_env_api reward(env::AbstractEnv, player=current_player(env))
 
 """
     child(env::AbstractEnv, action)

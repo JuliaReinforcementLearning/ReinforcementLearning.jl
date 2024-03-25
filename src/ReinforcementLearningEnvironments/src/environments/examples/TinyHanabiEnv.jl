@@ -49,9 +49,9 @@ RLBase.current_player(env::TinyHanabiEnv) =
     if length(env.cards) < 2
         CHANCE_PLAYER
     elseif length(env.actions) == 0
-        1
+        Player(1)
     else
-        2
+        Player(2)
     end
 
 RLBase.act!(env::TinyHanabiEnv, action, ::ChancePlayer) = push!(env.cards, action)
@@ -80,16 +80,17 @@ RLBase.state_space(env::TinyHanabiEnv, ::InformationSet, ::ChancePlayer) =
     ((0,), (0, 1), (0, 2), (0, 1, 2), (0, 2, 1)) # (chance_player_id(0), chance_player's actions...)
 RLBase.state(env::TinyHanabiEnv, ::InformationSet, ::ChancePlayer) = (0, env.cards...)
 
-function RLBase.state_space(env::TinyHanabiEnv, ::InformationSet, p::Int)
+function RLBase.state_space(env::TinyHanabiEnv, ::InformationSet, p::Player)
     Tuple(
         (p, c..., a...) for p in 1:2 for c in ((), 1, 2) for
         a in ((), 1:3..., ((i, j) for i in 1:3 for j in 1:3)...)
     )
 end
 
-function RLBase.state(env::TinyHanabiEnv, ::InformationSet, p::Int)
-    card = length(env.cards) >= p ? env.cards[p] : ()
-    (p, card..., env.actions...)
+function RLBase.state(env::TinyHanabiEnv, ::InformationSet, player::Player)
+    player_int = parse(Int, string(player.name))
+    card = length(env.cards) >= player_int ? env.cards[player_int] : ()
+    (player, card..., env.actions...)
 end
 
 RLBase.is_terminated(env::TinyHanabiEnv) = length(env.actions) == 2

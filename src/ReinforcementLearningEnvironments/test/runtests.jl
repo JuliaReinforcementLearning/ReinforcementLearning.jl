@@ -12,6 +12,7 @@ using Statistics
 using OrdinaryDiffEq
 using TimerOutputs
 using Conda
+using BSON
 
 Conda.add("gym")
 Conda.add("numpy")
