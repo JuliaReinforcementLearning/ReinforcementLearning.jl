@@ -29,7 +29,7 @@ RLBase.action_space(::RockPaperScissorsEnv, ::SimultaneousPlayer) =
 RLBase.action_space(env::RockPaperScissorsEnv) = action_space(env, SIMULTANEOUS_PLAYER)
 
 RLBase.legal_action_space(env::RockPaperScissorsEnv, player::Player) =
-    is_terminated(env) ? () : action_space(env, p)
+    is_terminated(env) ? () : action_space(env, player)
 
 "Since it's a one-shot game, the state space doesn't have much meaning."
 RLBase.state_space(::RockPaperScissorsEnv, ::Observation, ::SimultaneousPlayer) = Base.OneTo(1)
