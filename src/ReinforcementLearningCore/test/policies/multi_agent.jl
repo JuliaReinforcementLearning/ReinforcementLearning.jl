@@ -51,7 +51,7 @@ end
     )
 
     multiagent_hook = MultiAgentHook(PlayerNamedTuple(Player(:Cross) => composed_hook, Player(:Nought) => EmptyHook()))
-    @test multiagent_hook.hooks[:Cross][3] isa StepsPerEpisode
+    @test multiagent_hook.hooks[Player(:Cross)][3] isa StepsPerEpisode
 end
 
 @testset "CurrentPlayerIterator" begin
@@ -80,12 +80,12 @@ end
         InsertSampleRatioController(n_inserted = -1),
     )
 
-    multiagent_policy = MultiAgentPolicy((;
+    multiagent_policy = MultiAgentPolicy(PlayerNamedTuple(
         Player(:Cross) => Agent(RandomPolicy(), trajectory_1),
         Player(:Nought) => Agent(RandomPolicy(), trajectory_2),
     ))
 
-    multiagent_hook = MultiAgentHook((; Player(:Cross) => StepsPerEpisode(), Player(:Nought) => StepsPerEpisode()))
+    multiagent_hook = MultiAgentHook(PlayerNamedTuple(Player(:Cross) => StepsPerEpisode(), Player(:Nought) => StepsPerEpisode()))
 
     env = TicTacToeEnv()
     stop_condition = StopIfEnvTerminated()
@@ -114,7 +114,7 @@ end
 
 @testset "next_player!" begin
     env = TicTacToeEnv()
-    @test RLBase.next_player!(env) == :Nought
+    @test RLBase.next_player!(env) == Player(:Nought)
 end
 
 @testset "Basic RockPaperScissors (simultaneous) env checks" begin

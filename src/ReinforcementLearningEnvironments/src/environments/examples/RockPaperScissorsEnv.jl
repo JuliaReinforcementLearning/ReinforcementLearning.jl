@@ -37,7 +37,7 @@ RLBase.state_space(::RockPaperScissorsEnv, ::Observation, ::SimultaneousPlayer) 
 """
 For multi-agent environments, we usually implement the most detailed one.
 """
-RLBase.state(::RockPaperScissorsEnv, ::Observation, ::SimultaneousPlayer) = 1
+RLBase.state(::RockPaperScissorsEnv, ::Observation, ::AbstractPlayer) = 1
 
 RLBase.reward(env::RockPaperScissorsEnv) = env.is_done ? env.reward : PlayerNamedTuple(Player(1) => 0, Player(2) => 0)
 RLBase.reward(env::RockPaperScissorsEnv, player::Player) = reward(env)[player]
