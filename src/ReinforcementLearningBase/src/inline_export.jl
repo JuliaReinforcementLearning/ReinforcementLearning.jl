@@ -44,7 +44,6 @@ handle(ex) = extract_name(ex), is_body_missing(ex)
 
 extract_name(::Any) = nothing
 extract_name(x::Symbol) = x
-extract_name(x::Player) = x.name
 extract_name(x::QuoteNode) = x.value
 extract_name(ex::Expr) = extract_name(Val(ex.head), ex)
 extract_name(::Val{:abstract}, ex) = extract_name(ex.args[1])
