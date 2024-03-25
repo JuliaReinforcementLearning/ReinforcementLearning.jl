@@ -6,8 +6,8 @@ import Base.getindex
 import Base.iterate
 import Base.push!
 
-struct Player{N} <: AbstractPlayer
-    env::N
+struct Player <: AbstractPlayer
+    name::Symbol
 end
 
 """
@@ -15,10 +15,10 @@ end
 MultiAgentPolicy is a policy struct that contains `<:AbstractPolicy` structs indexed by the player's symbol.
 """
 struct MultiAgentPolicy{players,T} <: AbstractPolicy
-    agents::NamedTuple{players,T}
+    agents::PlayerNamedTuple{players, T}
 
-    function MultiAgentPolicy(agents::NamedTuple{players,T}) where {players,T}
-        new{players,T}(agents)
+    function MultiAgentPolicy(agents::PlayerNamedTuple{players,T}) where {players,T}
+        new{players, T}(agents)
     end
 end
 
@@ -27,9 +27,9 @@ end
 MultiAgentHook is a hook struct that contains `<:AbstractHook` structs indexed by the player's symbol.
 """
 struct MultiAgentHook{players,T} <: AbstractHook
-    hooks::NamedTuple{players,T}
+    hooks::PlayerNamedTuple{players,T}
 
-    function MultiAgentHook(hooks::NamedTuple{players,T}) where {players,T}
+    function MultiAgentHook(hooks::PlayerNamedTuple{players,T}) where {players, T}
         new{players,T}(hooks)
     end
 end
@@ -53,8 +53,8 @@ end
 Base.iterate(p::MultiAgentPolicy) = iterate(p.agents)
 Base.iterate(p::MultiAgentPolicy, s) = iterate(p.agents, s)
 
-Base.getindex(p::MultiAgentPolicy, s::Symbol) = p.agents[s]
-Base.getindex(h::MultiAgentHook, s::Symbol) = h.hooks[s]
+Base.getindex(p::MultiAgentPolicy, player::Player) = p.agents[s]
+Base.getindex(h::MultiAgentHook, player::Player) = h.hooks[s]
 
 Base.keys(p::MultiAgentPolicy) = keys(p.agents)
 Base.keys(p::MultiAgentHook) = keys(p.hooks)

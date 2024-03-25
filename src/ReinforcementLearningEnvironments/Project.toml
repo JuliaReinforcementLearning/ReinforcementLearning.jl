@@ -51,7 +51,6 @@ test = [
     "OpenSpiel",
     "OrdinaryDiffEq",
     "PyCall",
-    "ReinforcementLearningCore",
     "StableRNGs",
     "Statistics",
     "Test",

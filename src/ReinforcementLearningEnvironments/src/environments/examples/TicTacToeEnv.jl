@@ -38,13 +38,13 @@ const TIC_TAC_TOE_STATE_INFO = Dict{
 Base.hash(env::TicTacToeEnv, h::UInt) = hash(env.board, h)
 Base.isequal(a::TicTacToeEnv, b::TicTacToeEnv) = isequal(a.board, b.board)
 
-Base.to_index(::TicTacToeEnv, player) = player == Player(:Cross) ? 2 : 3
+Base.to_index(::TicTacToeEnv, player::Player) = player == Player(:Cross) ? 2 : 3
 
-RLBase.action_space(::TicTacToeEnv, player) = Base.OneTo(9)
+RLBase.action_space(::TicTacToeEnv, player::Player) = Base.OneTo(9)
 
-RLBase.legal_action_space(env::TicTacToeEnv, p) = findall(legal_action_space_mask(env))
+RLBase.legal_action_space(env::TicTacToeEnv, player::Player) = findall(legal_action_space_mask(env))
 
-function RLBase.legal_action_space_mask(env::TicTacToeEnv, p)
+function RLBase.legal_action_space_mask(env::TicTacToeEnv, player::Player)
     if is_win(env, Player(:Cross)) || is_win(env, Player(:Nought))
         falses(9)
     else
@@ -65,20 +65,20 @@ end
 
 RLBase.players(::TicTacToeEnv) = (Player(:Cross), Player(:Nought))
 
-RLBase.state(env::TicTacToeEnv) = state(env, Observation{Int}(), 1)
+RLBase.state(env::TicTacToeEnv) = state(env, Observation{Int}(), Player(:Any))
 RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = env.board
 RLBase.state(env::TicTacToeEnv, ::RLBase.AbstractStateStyle) = state(env::TicTacToeEnv, Observation{Int}(), 1)
-RLBase.state(env::TicTacToeEnv, ::Observation{Int}, p) =
+RLBase.state(env::TicTacToeEnv, ::Observation{Int}, player::Player) =
     get_tic_tac_toe_state_info()[env].index
 
-RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = ArrayProductDomain(fill(false:true, 3, 3, 3))
-RLBase.state_space(env::TicTacToeEnv, ::Observation{Int}, p) =
+RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, player::Player) = ArrayProductDomain(fill(false:true, 3, 3, 3))
+RLBase.state_space(env::TicTacToeEnv, ::Observation{Int}, player::Player) =
     Base.OneTo(length(get_tic_tac_toe_state_info()))
-RLBase.state_space(env::TicTacToeEnv, ::Observation{String}, p) = fullspace(String)
+RLBase.state_space(env::TicTacToeEnv, ::Observation{String}, player::Player) = fullspace(String)
 
 RLBase.state(env::TicTacToeEnv, ::Observation{String}) = state(env::TicTacToeEnv, Observation{String}(), 1)
 
-function RLBase.state(env::TicTacToeEnv, ::Observation{String}, p)
+function RLBase.state(env::TicTacToeEnv, ::Observation{String}, player::Player)
     buff = IOBuffer()
     for i in 1:3
         for j in 1:3

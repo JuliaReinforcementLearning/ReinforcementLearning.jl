@@ -9,7 +9,7 @@ import CommonRLInterface
 simultaneous, zero sum game.
 """
 Base.@kwdef mutable struct RockPaperScissorsEnv <: AbstractEnv
-    reward::NamedTuple{(Symbol(1), Symbol(2)), Tuple{Int64, Int64}} = (; Symbol(1) => 0, Symbol(2) => 0)
+    reward::PlayerNamedTuple{(Symbol(1), Symbol(2)), Tuple{Int64, Int64}} = PlayerNamedTuple(Player(Symbol(1)) => 0, Player(Symbol(2)) => 0)
     is_done::Bool = false
 end
 
@@ -28,19 +28,19 @@ RLBase.action_space(::RockPaperScissorsEnv, ::SimultaneousPlayer) =
 
 RLBase.action_space(env::RockPaperScissorsEnv) = action_space(env, SIMULTANEOUS_PLAYER)
 
-RLBase.legal_action_space(env::RockPaperScissorsEnv, p) =
+RLBase.legal_action_space(env::RockPaperScissorsEnv, player::Player) =
     is_terminated(env) ? () : action_space(env, p)
 
 "Since it's a one-shot game, the state space doesn't have much meaning."
-RLBase.state_space(::RockPaperScissorsEnv, ::Observation, p) = Base.OneTo(1)
+RLBase.state_space(::RockPaperScissorsEnv, ::Observation, player::Player) = Base.OneTo(1)
 
 """
 For multi-agent environments, we usually implement the most detailed one.
 """
-RLBase.state(::RockPaperScissorsEnv, ::Observation, p) = 1
+RLBase.state(::RockPaperScissorsEnv, ::Observation, ::SimultaneousPlayer) = 1
 
-RLBase.reward(env::RockPaperScissorsEnv) = env.is_done ? env.reward : (; Symbol(1) => 0, Symbol(2) => 0)
-RLBase.reward(env::RockPaperScissorsEnv, p::Symbol) = reward(env)[p]
+RLBase.reward(env::RockPaperScissorsEnv) = env.is_done ? env.reward : PlayerNamedTuple(Player(Symbol(1)) => 0, Player(Symbol(2)) => 0)
+RLBase.reward(env::RockPaperScissorsEnv, player::Player) = reward(env)[player]
 
 RLBase.is_terminated(env::RockPaperScissorsEnv) = env.is_done
 RLBase.reset!(env::RockPaperScissorsEnv) = env.is_done = false
@@ -48,11 +48,11 @@ RLBase.reset!(env::RockPaperScissorsEnv) = env.is_done = false
 # TODO: Consider using CRL.all_act! and adjusting run function accordingly
 function RLBase.act!(env::RockPaperScissorsEnv, (x, y))
     if x == y
-        env.reward = (; Symbol(1) => 0, Symbol(2) => 0)
+        env.reward = PlayerNamedTuple(Player(Symbol(1)) => 0, Player(Symbol(2)) => 0)
     elseif x == '💎' && y == '✂' || x == '✂' && y == '📃' || x == '📃' && y == '💎'
-        env.reward = (; Symbol(1) => 1, Symbol(2) => -1)
+        env.reward = PlayerNamedTuple(Player(Symbol(1)) => 1, Player(Symbol(2)) => -1)
     else
-        env.reward = (; Symbol(1) => -1, Symbol(2) => 1)
+        env.reward = PlayerNamedTuple(Player(Symbol(1)) => -1, Player(Symbol(2)) => 1)
     end
     env.is_done = true
 end

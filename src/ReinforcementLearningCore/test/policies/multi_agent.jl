@@ -16,10 +16,12 @@ using DomainSets
         InsertSampleRatioController(n_inserted = -1),
     )
 
-    multiagent_policy = MultiAgentPolicy((;
-        Player(:Cross) => Agent(RandomPolicy(), trajectory_1),
-        Player(:Nought) => Agent(RandomPolicy(), trajectory_2),
-    ))
+    multiagent_policy = MultiAgentPolicy(
+        PlayerNamedTuple(
+            Player(:Cross) => Agent(RandomPolicy(), trajectory_1),
+            Player(:Nought) => Agent(RandomPolicy(), trajectory_2),
+        )
+    )
 
     @test multiagent_policy.agents[Player(:Cross)].policy isa RandomPolicy
 end
@@ -34,7 +36,7 @@ end
         TimePerStep()
     )
 
-    multiagent_hook = MultiAgentHook((; :Cross => composed_hook, :Nought => EmptyHook()))
+    multiagent_hook = MultiAgentHook(PlayerNamedTuple(:Cross => composed_hook, :Nought => EmptyHook()))
     @test multiagent_hook.hooks[:Cross][3] isa StepsPerEpisode
 end
 
@@ -114,17 +116,17 @@ end
         InsertSampleRatioController(n_inserted = -1),
     )
 
-    @test MultiAgentPolicy((;
+    @test MultiAgentPolicy(PlayerNamedTuple(
         Symbol(1) => Agent(RandomPolicy(), trajectory_1),
         Symbol(2) => Agent(RandomPolicy(), trajectory_2),
     )) isa MultiAgentPolicy
 
-    @test MultiAgentPolicy((;
+    @test MultiAgentPolicy(PlayerNamedTuple(
         Symbol(1) => Agent(RandomPolicy(), trajectory_1),
         Symbol(2) => Agent(RandomPolicy(), trajectory_2),
     )) isa MultiAgentPolicy
 
-    multiagent_policy = MultiAgentPolicy((;
+    multiagent_policy = MultiAgentPolicy(PlayerNamedTuple(
         Symbol(1) => Agent(RandomPolicy(), trajectory_1),
         Symbol(2) => Agent(RandomPolicy(), trajectory_2),
     ))
@@ -139,7 +141,7 @@ end
         TimePerStep()
     )
 
-    multiagent_hook = MultiAgentHook((; Symbol(1) => composed_hook, Symbol(2) => EmptyHook()))
+    multiagent_hook = MultiAgentHook(PlayerNamedTuple(Symbol(1) => composed_hook, Symbol(2) => EmptyHook()))
 
     @test Base.iterate(RLCore.CurrentPlayerIterator(env))[1] == SimultaneousPlayer()
     @test Base.iterate(RLCore.CurrentPlayerIterator(env), env)[1] == SimultaneousPlayer()
