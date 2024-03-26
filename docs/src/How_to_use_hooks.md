@@ -121,11 +121,11 @@ run(
 
 ### Save parameters
 
-[BSON.jl](https://github.com/JuliaIO/BSON.jl) is recommended to save the parameters of a policy.
+[JLD2.jl](https://github.com/JuliaIO/JLD2.jl) is recommended to save the parameters of a policy.
 
 ```@repl how_to_use_hooks
 using ReinforcementLearning
-using BSON
+using JLD2
 
 env = RandomWalk1D()
 ns, na = length(state_space(env)), length(action_space(env))
@@ -159,8 +159,8 @@ run(
     StopAfterNSteps(10_000),
     DoEveryNSteps(n=1_000) do t, p, e
         ps = policy.policy.learner.approximator
-        f = joinpath(parameters_dir, "parameters_at_step_$t.bson")
-        BSON.@save f ps
+        f = joinpath(parameters_dir, "parameters_at_step_$t.jld2")
+        JLD2.@save f ps
         println("parameters at step $t saved to $f")
     end
 )

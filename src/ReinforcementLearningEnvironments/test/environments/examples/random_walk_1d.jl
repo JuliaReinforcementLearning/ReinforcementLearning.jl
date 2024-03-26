@@ -76,7 +76,7 @@ end
 end
 
 @testset "Full run" begin
-    using BSON
+    using JLD2
 
     env = RandomWalk1D()
     ns, na = length(state_space(env)), length(action_space(env))
@@ -110,8 +110,8 @@ end
         StopAfterNSteps(10_000),
         DoEveryNSteps(n=1_000) do t, p, e
             ps = policy.policy.learner.approximator
-            f = joinpath(parameters_dir, "parameters_at_step_$t.bson")
-            BSON.@save f ps
+            f = joinpath(parameters_dir, "parameters_at_step_$t.jld2")
+            JLD2.@save f ps
             println("parameters at step $t saved to $f")
         end
     )
