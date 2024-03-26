@@ -1,5 +1,5 @@
 export AbstractStopCondition, StopAfterNSteps,
-    StopAfterNEpisodes, StopIfEnvTerminated, StopSignal, StopAfterNoImprovement, StopAfterNSeconds, ComposedStopCondition
+    StopAfterNEpisodes, StopIfEnvTerminated, StopSignal, StopAfterNoImprovement, StopAfterNSeconds, StopIfAll, StopIfAny
 
 import ProgressMeter
 
@@ -7,24 +7,34 @@ import ProgressMeter
 abstract type AbstractStopCondition end
 
 #####
-# ComposedStopCondition
+# AnyStopCondition
 #####
 
 """
-    ComposedStopCondition(stop_conditions...; reducer = any)
+    AnyStopCondition(stop_conditions...)
 
-The result of `stop_conditions` is reduced by `reducer`. The default `reducer` is the `any` function, which means that the condition is true when any one of the `stop_conditions...` is true. Can be replaced by any function returning a boolean. For example `reducer = x->sum(x) >= 2` will require at least two of the conditions to be true.
+The result of `stop_conditions` is reduced by `any`.
 """
-struct ComposedStopCondition{S,reducer} <: AbstractStopCondition
+struct StopIfAny{S<:Tuple} <: AbstractStopCondition
     stop_conditions::S
-    reducer
-    function ComposedStopCondition(stop_conditions...; reducer = any)
-        new{typeof(stop_conditions),reducer}(stop_conditions, reducer)
+    function StopIfAny(stop_conditions...)
+        new{typeof(stop_conditions)}(stop_conditions)
     end
 end
 
-function check!(s::ComposedStopCondition{S,R}, policy::P, env::E) where {S,R,P<:AbstractPolicy,E<:AbstractEnv}
-    s.reducer(check!(sc, policy, env) for sc in s.stop_conditions)
+function check!(s::StopIfAny{S}, policy::P, env::E) where {S<:Tuple, P<:AbstractPolicy, E<:AbstractEnv}
+    any(check!.(s.stop_conditions, (policy,), (env,)))
+end
+
+struct StopIfAll{S<:Tuple} <: AbstractStopCondition
+    stop_conditions::S
+    function StopIfAll(stop_conditions...)
+        new{typeof(stop_conditions)}(stop_conditions)
+    end
+end
+
+function check!(s::StopIfAll{S}, policy::P, env::E) where {S<:Tuple, P<:AbstractPolicy, E<:AbstractEnv}
+    all(check!.(s.stop_conditions, (policy,), (env,)))
 end
 
 #####
