@@ -407,7 +407,7 @@ abstract type AbstractEpisodeStyle end
 @api struct Spector end
 @api const SPECTOR = Spector()
 
-@api act!(env::AbstractEnv, action, player::AbstractPlayer=current_player(env))
+@api act!(env::AbstractEnv, action, player=current_player(env))
 
 """
 Make an independent copy of `env`, 
@@ -442,7 +442,7 @@ Get the action distribution of chance player.
     Only valid for environments of [`EXPLICIT_STOCHASTIC`](@ref) style. The
     current player of `env` must be the chance player.
 """
-@env_api prob(env::AbstractEnv, player::AbstractPlayer=chance_player(env))
+@env_api prob(env::AbstractEnv, player=chance_player(env))
 
 """
     action_space(env, player=current_player(env))
@@ -490,7 +490,7 @@ to declare which kind of state they want.
 """
 @multi_agent_env_api state(env::AbstractEnv) = state(env, DefaultStateStyle(env))
 state(env::AbstractEnv, ss::AbstractStateStyle) = state(env, ss, current_player(env))
-state(env::AbstractEnv, player::AbstractPlayer) = state(env, DefaultStateStyle(env), player)
+state(env::AbstractEnv, player) = state(env, DefaultStateStyle(env), player)
 
 """
     state_space(env, style=[DefaultStateStyle(env)], player=[current_player(env)])
@@ -501,7 +501,7 @@ Describe all possible states.
     state_space(env, DefaultStateStyle(env))
 state_space(env::AbstractEnv, ss::AbstractStateStyle) =
     state_space(env, ss, current_player(env))
-state_space(env::AbstractEnv, player::AbstractPlayer) = state_space(env, DefaultStateStyle(env), player)
+state_space(env::AbstractEnv, player) = state_space(env, DefaultStateStyle(env), player)
 
 """
     current_player(env)
