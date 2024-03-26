@@ -14,7 +14,7 @@ using TimerOutputs
 using Conda
 using JLD2
 
-Conda.add("gym")
+Conda.add("gymnasium")
 Conda.add("numpy")
 
 @testset "ReinforcementLearningEnvironments" begin
