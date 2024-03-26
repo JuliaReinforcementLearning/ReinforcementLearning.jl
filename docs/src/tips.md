@@ -15,7 +15,7 @@ Pkg.develop(path="src/ReinforcementLearningFarm") # optional
 Sometimes, you may need to add some
 extra dependencies. Remember to switch the environment before adding new
 packages. For example, if you want to add
-`Statistics` in `ReinforcementLearningBase`, first run `]activate
+`Statistics` to `ReinforcementLearningBase`, first run `]activate
 src/ReinforcementLearningBase`, then `]add Statistics`.
 
 ## How to enable debug timings for experiment runs?
