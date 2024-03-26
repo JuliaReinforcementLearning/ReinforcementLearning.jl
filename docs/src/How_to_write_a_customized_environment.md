@@ -114,7 +114,8 @@ n_episode = 10
 for _ in 1:n_episode
     reset!(env)
     while !is_terminated(env)
-        env |> action_space |> rand |> (x -> act!(env, x))
+        action = rand(action_space(env)) 
+        act!(env, action)
     end
 end
 ```
