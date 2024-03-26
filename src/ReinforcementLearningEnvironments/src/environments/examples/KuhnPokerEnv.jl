@@ -1,5 +1,6 @@
 export KuhnPokerEnv
 
+const KUHN_POKER_PLAYER_INDEX = Dict(Player(1) => 1, Player(2) => 2, CHANCE_PLAYER => 0)
 const KUHN_POKER_CARDS = (:J, :Q, :K)
 const KUHN_POKER_CARD_COMBINATIONS =
     ((:J, :Q), (:J, :K), (:Q, :J), (:Q, :K), (:K, :J), (:K, :Q))
@@ -90,8 +91,8 @@ RLBase.is_terminated(env::KuhnPokerEnv) =
 RLBase.players(env::KuhnPokerEnv) = (Player(1), Player(2), CHANCE_PLAYER)
 
 function RLBase.state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, player::Player)
-    if length(env.cards) >= player
-        (env.cards[player], env.actions...)
+    if length(env.cards) >= KUHN_POKER_PLAYER_INDEX[player]
+        (env.cards[KUHN_POKER_PLAYER_INDEX[player]], env.actions...)
     else
         ()
     end
@@ -99,7 +100,7 @@ end
 
 RLBase.state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, ::ChancePlayer) =
     Tuple(env.cards)
-RLBase.state_space(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, p::Player) = KUHN_POKER_STATES
+RLBase.state_space(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, player::AbstractPlayer) = KUHN_POKER_STATES
 
 RLBase.action_space(env::KuhnPokerEnv, ::Player) = Base.OneTo(length(KUHN_POKER_ACTIONS))
 RLBase.action_space(env::KuhnPokerEnv, ::ChancePlayer) = Base.OneTo(length(KUHN_POKER_CARDS))
