@@ -1,4 +1,5 @@
 struct MockHook <: AbstractHook end 
+struct TestPlayer <: AbstractPlayer end
 
 """
 test_noop!(hook; stages=[PreActStage()])
@@ -10,7 +11,7 @@ function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), P
         env = RandomWalk1D()
         env.pos = 7
         policy = RandomPolicy(legal_action_space(env))
-
+        player = TestPlayer()
         hook_fieldnames = fieldnames(typeof(hook))
         for mode in [:MultiAgent, :SingleAgent]
             for stage in stages
@@ -18,7 +19,7 @@ function test_noop!(hook::AbstractHook; stages=[PreActStage(), PostActStage(), P
                 if mode == :SingleAgent
                     push!(hook_copy, stage, policy, env)
                 elseif mode == :MultiAgent
-                    push!(hook_copy, stage, policy, env, :player_i)
+                    push!(hook_copy, stage, policy, env, player)
                 end
                 for field_ in hook_fieldnames
                     if getfield(hook, field_) isa Ref
@@ -168,10 +169,10 @@ end
     @test env.pos == 2
 end
 
-@testset "DoEveryNEpisode" begin
-    h_1 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2, stage=PreEpisodeStage())
-    h_2 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=2, stage=PostEpisodeStage())
-    h_3 = DoEveryNEpisode((hook, agent, env) -> (env.pos += 1); n=1)
+@testset "DoEveryNEpisodes" begin
+    h_1 = DoEveryNEpisodes((hook, agent, env) -> (env.pos += 1); n=2, stage=PreEpisodeStage())
+    h_2 = DoEveryNEpisodes((hook, agent, env) -> (env.pos += 1); n=2, stage=PostEpisodeStage())
+    h_3 = DoEveryNEpisodes((hook, agent, env) -> (env.pos += 1); n=1)
     h_list = (h_1, h_2, h_3)
     stage_list = (PreEpisodeStage(), PostEpisodeStage(), PostEpisodeStage())
 

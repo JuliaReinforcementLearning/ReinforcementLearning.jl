@@ -394,13 +394,14 @@ abstract type AbstractEpisodeStyle end
 # General
 #####
 
-@api struct DefaultPlayer end
+@api abstract type AbstractPlayer end
+@api struct DefaultPlayer <: AbstractPlayer end
 @api const DEFAULT_PLAYER = DefaultPlayer()
 
-@api struct ChancePlayer end
+@api struct ChancePlayer <: AbstractPlayer end
 @api const CHANCE_PLAYER = ChancePlayer()
 
-@api struct SimultaneousPlayer end
+@api struct SimultaneousPlayer <: AbstractPlayer end
 @api const SIMULTANEOUS_PLAYER = SimultaneousPlayer()
 
 @api struct Spector end
@@ -450,6 +451,7 @@ Get all available actions from environment. See also:
 [`legal_action_space`](@ref)
 """
 @multi_agent_env_api action_space(env::AbstractEnv, player=current_player(env))
+action_space(env::AbstractEnv, ::DefaultPlayer) = action_space(env)
 
 """
     legal_action_space(env, player=current_player(env))
@@ -460,7 +462,7 @@ For environments of [`MINIMAL_ACTION_SET`](@ref), the result is the same with
 @multi_agent_env_api legal_action_space(env::AbstractEnv, player=current_player(env)) =
     legal_action_space(ActionStyle(env), env, player)
 
-legal_action_space(::MinimalActionSet, env, player) = action_space(env)
+legal_action_space(::MinimalActionSet, env, player::AbstractPlayer) = action_space(env)
 
 """
     legal_action_space_mask(env, player=current_player(env)) -> AbstractArray{Bool}

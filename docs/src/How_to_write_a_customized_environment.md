@@ -7,7 +7,7 @@ write many different kinds of environments based on interfaces defined in
 
 The most commonly used interfaces to describe reinforcement learning tasks is
 [OpenAI/Gym](https://gym.openai.com/). Inspired by it, we expand those
-interfaces a little to utilize the multiple-dispatch in Julia and to cover
+interfaces a little to utilize multiple-dispatch in Julia and to cover
 multi-agent environments.
 
 ## The Minimal Interfaces to Implement
@@ -24,7 +24,7 @@ state_space(env::YourEnv)
 reward(env::YourEnv)
 is_terminated(env::YourEnv)
 reset!(env::YourEnv)
-(env::YourEnv)(action)
+act!(env::YourEnv, action)
 ```
 
 ## An Example: The LotteryEnv
@@ -55,7 +55,13 @@ The `LotteryEnv` has only one field named `reward`, by default it is
 initialized with `nothing`. Now let's implement the necessary interfaces:
 
 ```@repl customized_env
-RLBase.action_space(env::LotteryEnv) = (:PowerRich, :MegaHaul, nothing)
+struct LotteryAction{a}
+    function LotteryAction(a)
+        new{a}()
+    end
+end
+
+RLBase.action_space(env::LotteryEnv) = LotteryAction.([:PowerRich, :MegaHaul, nothing])
 ```
 
 Here `RLBase` is just an alias for `ReinforcementLearningBase`.
@@ -78,12 +84,13 @@ in the initial state again.
 The only left one is to implement the game logic:
 
 ```@repl customized_env
-function (x::LotteryEnv)(action)
-    if action == :PowerRich
+function RLBase.act!(x::LotteryEnv, action)
+    if action == LotteryAction(:PowerRich)
         x.reward = rand() < 0.01 ? 100_000_000 : -10
-    elseif action == :MegaHaul
+    elseif action == LotteryAction(:MegaHaul)
         x.reward = rand() < 0.05 ? 1_000_000 : -10
-    elseif isnothing(action) x.reward = 0
+    elseif action == LotteryAction(nothing)
+        x.reward = 0
     else
         @error "unknown action of $action"
     end
@@ -102,12 +109,13 @@ RLBase.test_runnable!(env)
 
 It is a simple smell test which works like this:
 
-```
+```julia
 n_episode = 10
 for _ in 1:n_episode
     reset!(env)
     while !is_terminated(env)
-        env |> action_space |> rand |> env
+        action = rand(action_space(env)) 
+        act!(env, action)
     end
 end
 ```
@@ -117,7 +125,7 @@ ReinforcementLearning.jl also work. Similar to the test above, let's try the
 [`RandomPolicy`](@ref) first:
 
 ```@repl customized_env
-run(RandomPolicy(action_space(env)), env, StopAfterNEpisodes(1_000)) 
+run(RandomPolicy(action_space(env)), env, StopAfterNEpisodes(1_000))
 ```
 
 If no error shows up, then it means our environment at least works with
@@ -141,21 +149,19 @@ Now suppose we'd like to use a tabular based monte carlo method to estimate the
 state-action value.
 
 ```@repl customized_env
-using Flux: InvDecay
 p = QBasedPolicy(
-    learner = MonteCarloLearner(;
-        approximator=TabularQApproximator(
-            ;n_state = length(state_space(env)),
+    learner = TDLearner(
+        TabularQApproximator(
+            n_state = length(state_space(env)),
             n_action = length(action_space(env)),
-            opt = InvDecay(1.0)
-        )
+        ), :SARS
     ),
     explorer = EpsilonGreedyExplorer(0.1)
 )
-p(env)
+plan!(p, env)
 ```
 
-Oops, we get an error here. So what does it mean? 
+Oops, we get an error here. So what does it mean?
 
 Before answering this question, let's spend some time on understanding the
 policy we defined above. A [`QBasedPolicy`](@ref)
@@ -168,9 +174,9 @@ by the `learner`. Inside of the [`MonteCarloLearner`](@ref), a
 That's the problem! A [`TabularQApproximator`](@ref) only accepts states of type `Int`.
 
 ```@repl customized_env
-p.learner.approximator(1, 1)  # Q(s, a)
-p.learner.approximator(1)     # [Q(s, a) for a in action_space(env)]
-p.learner.approximator(false)
+RLCore.forward(p.learner.approximator, 1, 1)  # Q(s, a)
+RLCore.forward(p.learner.approximator, 1)     # [Q(s, a) for a in action_space(env)]
+RLCore.forward(p.learner.approximator, false)
 ```
 
 OK, now we know where the problem is. But how to fix it?
@@ -191,7 +197,7 @@ wrapped_env = ActionTransformedEnv(
     action_mapping = i -> action_space(env)[i],
     action_space_mapping = _ -> Base.OneTo(3),
 )
-p(wrapped_env)
+plan!(p, wrapped_env)
 ```
 
 Nice job! Now we are ready to run the experiment:
@@ -385,7 +391,8 @@ environments must take a collection of actions from different players as input.
 ```@repl customized_env
 rps = RockPaperScissorsEnv();
 action_space(rps)
-rps(rand(action_space(rps)))
+action = plan!(RandomPolicy(), rps)
+act!(rps, action)
 ```
 
 ### [`ChanceStyle`](@ref)

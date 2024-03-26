@@ -1,6 +1,6 @@
 [deps]
 ArcadeLearningEnvironment = "b7f77d8d-088d-5e02-8ac0-89aab2acc977"
-BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DemoCards = "311a05b2-6137-4a5a-b473-18580a3d38b5"

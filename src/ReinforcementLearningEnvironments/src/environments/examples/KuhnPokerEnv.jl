@@ -1,5 +1,6 @@
 export KuhnPokerEnv
 
+const KUHN_POKER_PLAYER_INDEX = Dict(Player(1) => 1, Player(2) => 2, CHANCE_PLAYER => 0)
 const KUHN_POKER_CARDS = (:J, :Q, :K)
 const KUHN_POKER_CARD_COMBINATIONS =
     ((:J, :Q), (:J, :K), (:Q, :J), (:Q, :K), (:K, :J), (:K, :Q))
@@ -87,11 +88,11 @@ end
 RLBase.is_terminated(env::KuhnPokerEnv) =
     length(env.actions) == 2 && (env.actions[1] == :bet || env.actions[2] == :pass) ||
     length(env.actions) == 3
-RLBase.players(env::KuhnPokerEnv) = (1, 2, CHANCE_PLAYER)
+RLBase.players(env::KuhnPokerEnv) = (Player(1), Player(2), CHANCE_PLAYER)
 
-function RLBase.state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, p::Int)
-    if length(env.cards) >= p
-        (env.cards[p], env.actions...)
+function RLBase.state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, player::Player)
+    if length(env.cards) >= KUHN_POKER_PLAYER_INDEX[player]
+        (env.cards[KUHN_POKER_PLAYER_INDEX[player]], env.actions...)
     else
         ()
     end
@@ -99,9 +100,9 @@ end
 
 RLBase.state(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, ::ChancePlayer) =
     Tuple(env.cards)
-RLBase.state_space(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, p) = KUHN_POKER_STATES
+RLBase.state_space(env::KuhnPokerEnv, ::InformationSet{Tuple{Vararg{Symbol}}}, player::AbstractPlayer) = KUHN_POKER_STATES
 
-RLBase.action_space(env::KuhnPokerEnv, ::Int) = Base.OneTo(length(KUHN_POKER_ACTIONS))
+RLBase.action_space(env::KuhnPokerEnv, ::Player) = Base.OneTo(length(KUHN_POKER_ACTIONS))
 RLBase.action_space(env::KuhnPokerEnv, ::ChancePlayer) = Base.OneTo(length(KUHN_POKER_CARDS))
 
 RLBase.legal_action_space(env::KuhnPokerEnv, p::ChancePlayer) = Tuple(x for x in action_space(env, p) if KUHN_POKER_CARDS[x] ∉ env.cards)
@@ -125,17 +126,17 @@ function RLBase.prob(env::KuhnPokerEnv, ::ChancePlayer)
     end
 end
 
-RLBase.act!(env::KuhnPokerEnv, action::Int, p::Int) = RLBase.act!(env, KUHN_POKER_ACTIONS[action], p)
+RLBase.act!(env::KuhnPokerEnv, action::Int, p::Player) = RLBase.act!(env, KUHN_POKER_ACTIONS[action], p)
 RLBase.act!(env::KuhnPokerEnv, action::Int, p::ChancePlayer) = RLBase.act!(env, KUHN_POKER_CARDS[action], p)
 RLBase.act!(env::KuhnPokerEnv, action::Symbol, ::ChancePlayer) = push!(env.cards, action)
-RLBase.act!(env::KuhnPokerEnv, action::Symbol, ::Int) = push!(env.actions, action)
+RLBase.act!(env::KuhnPokerEnv, action::Symbol, ::Player) = push!(env.actions, action)
 
 RLBase.reward(::KuhnPokerEnv, ::ChancePlayer) = 0
 
-function RLBase.reward(env::KuhnPokerEnv, p)
+function RLBase.reward(env::KuhnPokerEnv, p::Player)
     if is_terminated(env)
         v = KUHN_POKER_REWARD_TABLE[(env.cards..., env.actions...)]
-        p == 1 ? v : -v
+        p == Player(1) ? v : -v
     else
         0
     end
@@ -145,13 +146,13 @@ RLBase.current_player(env::KuhnPokerEnv) =
     if length(env.cards) < 2
         CHANCE_PLAYER
     elseif length(env.actions) == 0
-        1
+        Player(1)
     elseif length(env.actions) == 1
-        2
+        Player(2)
     elseif length(env.actions) == 2
-        1
+        Player(1)
     else
-        2  # actually the game is over now
+        Player(2)  # actually the game is over now
     end
 
 RLBase.NumAgentStyle(::KuhnPokerEnv) = MultiAgent(2)

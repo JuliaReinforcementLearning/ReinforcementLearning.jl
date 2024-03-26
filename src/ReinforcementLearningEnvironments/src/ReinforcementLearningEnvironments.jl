@@ -1,6 +1,7 @@
 module ReinforcementLearningEnvironments
 
 using ReinforcementLearningBase
+using ReinforcementLearningCore
 using Requires
 using Random
 

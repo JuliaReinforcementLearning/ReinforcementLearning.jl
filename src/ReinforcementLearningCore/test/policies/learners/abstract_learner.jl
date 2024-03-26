@@ -15,7 +15,7 @@ struct MockLearner <: AbstractLearner end
         end
 
         RLBase.state(::MockEnv, ::Observation{Any}, ::DefaultPlayer) = 1
-        RLBase.state(::MockEnv, ::Observation{Any}, ::Symbol) = 1
+        RLBase.state(::MockEnv, ::Observation{Any}, ::Player) = 1
 
         env = MockEnv()
         learner = MockLearner()
@@ -23,7 +23,7 @@ struct MockLearner <: AbstractLearner end
         output = RLCore.forward(learner, env)
         @test output == Float64[1.0, 2.0]
 
-        output = RLCore.forward(learner, env, Symbol(1))
+        output = RLCore.forward(learner, env, Player(1))
         @test output == Float64[1.0, 2.0]
     end
 
@@ -44,18 +44,18 @@ struct MockLearner <: AbstractLearner end
 
     @testset "Plan with Player" begin
         # Mock explorer, environment, and learner
-        function RLBase.action_space(::MockEnv, ::Symbol)
+        function RLBase.action_space(::MockEnv, ::Player)
             return [1, 2]
         end
 
-        function RLBase.plan!(::MockExplorer, learner::MockLearner, env::MockEnv, p::Symbol)
+        function RLBase.plan!(::MockExplorer, learner::MockLearner, env::MockEnv, p::Player)
             return rand(2)
         end
 
         env = MockEnv()
         learner = MockLearner()
         explorer = MockExplorer()
-        player = :player1
+        player = Player(:player1)
 
         output = RLBase.plan!(explorer, learner, env, player)
 

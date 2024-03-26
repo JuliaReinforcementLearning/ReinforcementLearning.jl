@@ -1,4 +1,5 @@
 include("base.jl")
+include("player.jl")
 include("hooks.jl")
 include("reset_conditions.jl")
 include("stop_conditions.jl")

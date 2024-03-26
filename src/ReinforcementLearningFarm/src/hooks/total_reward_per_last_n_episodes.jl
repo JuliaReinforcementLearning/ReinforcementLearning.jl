@@ -25,7 +25,7 @@ Base.push!(
     ::PostActStage,
     agent::P,
     env::E,
-    player::Symbol,
+    player::Player,
 ) where {P<:AbstractPolicy,E<:AbstractEnv,B<:CircularArrayBuffer} =
     h.rewards[end] += reward(env, player)
 
@@ -41,5 +41,5 @@ Base.push!(
     stage::Union{PreEpisodeStage,PostEpisodeStage,PostExperimentStage},
     agent,
     env,
-    player::Symbol,
+    player::Player,
 ) where {B<:CircularArrayBuffer} = Base.push!(hook, stage, agent, env)

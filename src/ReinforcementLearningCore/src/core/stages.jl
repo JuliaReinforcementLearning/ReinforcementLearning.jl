@@ -18,8 +18,8 @@ struct PostActStage <: AbstractStage end
 
 Base.push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv) = nothing
 Base.push!(p::AbstractPolicy, ::PostActStage, ::AbstractEnv, action) = nothing
-Base.push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv, ::Symbol) = nothing
-Base.push!(p::AbstractPolicy, ::PostActStage, ::AbstractEnv, action, ::Symbol) = nothing
+Base.push!(p::AbstractPolicy, ::AbstractStage, ::AbstractEnv, ::Player) = nothing
+Base.push!(p::AbstractPolicy, ::PostActStage, ::AbstractEnv, action, ::Player) = nothing
 
 RLBase.optimise!(policy::P, ::S) where {P<:AbstractPolicy,S<:AbstractStage} = nothing
 

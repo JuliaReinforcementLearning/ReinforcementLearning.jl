@@ -13,34 +13,35 @@ To manage this, we provide the `ResetAfterNSteps(n)` condition as an argument to
 
 ## Custom reset conditions
 
-You can specify a custom `reset_condition` instead of using the built-in's. Your condition must be callable with the method `my_condition(policy, env)`. For example, here is how to implement a custom condition that checks for a terminal state but will also reset if the episode is too long:
+You can specify a custom `reset_condition` instead of using the built-in's. Your condition must be callable with the method `RLCore.check!(my_condition, policy, env)`. For example, here is how to implement a custom condition that checks for a terminal state but will also reset if the episode is too long:
 
 ```julia
+using ReinforcementLearning
+import ReinforcementLearning: RLCore
 reset_n_steps = ResetAfterNSteps(10000)
 
-function my_condition(policy, env)
+struct MyCondition <: AbstractResetCondition end
+
+function RLCore.check!(my_condition::MyCondition, policy, env)
     terminal = is_terminated(env)
-    too_long = reset_n_steps(policy, env)
+    too_long = RLCore.check!(reset_n_steps, policy, env)
     return terminal || too_long
 end
-
-run(agent, env, stop_condition, hook, my_condition)
+env = RandomWalk1D()
+agent = RandomPolicy()
+stop_condition = StopIfEnvTerminated()
+hook = EmptyHook()
+run(agent, env, stop_condition, hook, MyCondition())
 ```
 
 We can instead make a callable struct instead of a function to avoid the global `reset_n_step`. 
 
 ```julia
-mutable struct MyCondition
-reset_after
+mutable struct MyCondition1 <: AbstractResetCondition
+    reset_after
 end
 
-(c::MyCondition)(policy, env) = is_terminated(env) || c.reset_after(policy, env)
+RLCore.check!(c::MyCondition1, policy, env) = is_terminated(env) || RLCore.check!(c.reset_after, policy, env)
 
-run(agent, env, stop_condition, hook, MyCondition(ResetAfterNSteps(10000)))
-```
-
-A last possibility is to use an anonymous function. This approach cannot be used to implement stateful conditions (such as `ResetAfterNSteps`). For example here is alternative way to implement `ResetIfEnvTerminated`:
-
-```julia
-run(agent, env, stop_condition, hook, (p,e) -> is_terminated(e))
+run(agent, env, stop_condition, hook, MyCondition1(ResetAfterNSteps(10000)))
 ```

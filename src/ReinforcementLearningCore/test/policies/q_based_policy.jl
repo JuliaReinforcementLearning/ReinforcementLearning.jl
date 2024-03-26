@@ -25,7 +25,7 @@
             learner = TDLearner(q_approx, :SARS)
             explorer = EpsilonGreedyExplorer(0.1)
             policy = QBasedPolicy(learner, explorer)
-            player = :player1
+            player = Player(:player1)
             @test 1 <= RLBase.plan!(policy, env) <= 9
         end
     end

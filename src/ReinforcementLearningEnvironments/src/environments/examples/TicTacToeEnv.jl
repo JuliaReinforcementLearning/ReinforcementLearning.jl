@@ -1,24 +1,25 @@
 export TicTacToeEnv
 
 import ReinforcementLearningBase: RLBase
+import ReinforcementLearningCore: Player
 import CommonRLInterface
 
 mutable struct TicTacToeEnv <: AbstractEnv
     board::BitArray{3}
-    player::Symbol
+    player::Player
 end
 
 function TicTacToeEnv()
     board = BitArray{3}(undef, 3, 3, 3)
     fill!(board, false)
     board[:, :, 1] .= true
-    TicTacToeEnv(board, :Cross)
+    TicTacToeEnv(board, Player(:Cross))
 end
 
 function RLBase.reset!(env::TicTacToeEnv)
     fill!(env.board, false)
     env.board[:, :, 1] .= true
-    env.player = :Cross
+    env.player = Player(:Cross)
 end
 
 struct TicTacToeInfo
@@ -30,21 +31,21 @@ const TIC_TAC_TOE_STATE_INFO = Dict{
     TicTacToeEnv,
     NamedTuple{
         (:index, :is_terminated, :winner),
-        Tuple{Int,Bool,Union{Nothing,Symbol}},
+        Tuple{Int,Bool,Union{Nothing,Player}},
     },
 }()
 
 Base.hash(env::TicTacToeEnv, h::UInt) = hash(env.board, h)
 Base.isequal(a::TicTacToeEnv, b::TicTacToeEnv) = isequal(a.board, b.board)
 
-Base.to_index(::TicTacToeEnv, player) = player == :Cross ? 2 : 3
+Base.to_index(::TicTacToeEnv, player::Player) = player == Player(:Cross) ? 2 : 3
 
-RLBase.action_space(::TicTacToeEnv, player) = Base.OneTo(9)
+RLBase.action_space(::TicTacToeEnv, player::Player) = Base.OneTo(9)
 
-RLBase.legal_action_space(env::TicTacToeEnv, p) = findall(legal_action_space_mask(env))
+RLBase.legal_action_space(env::TicTacToeEnv, player::Player) = findall(legal_action_space_mask(env))
 
-function RLBase.legal_action_space_mask(env::TicTacToeEnv, p)
-    if is_win(env, :Cross) || is_win(env, :Nought)
+function RLBase.legal_action_space_mask(env::TicTacToeEnv, player::Player)
+    if is_win(env, Player(:Cross)) || is_win(env, Player(:Nought))
         falses(9)
     else
         vec(env.board[:, :, 1])
@@ -59,25 +60,25 @@ function RLBase.act!(env::TicTacToeEnv, action::CartesianIndex{2})
 end
 
 function RLBase.next_player!(env::TicTacToeEnv)
-    env.player = env.player == :Cross ? :Nought : :Cross
+    env.player = env.player == Player(:Cross) ? Player(:Nought) : Player(:Cross)
 end
 
-RLBase.players(::TicTacToeEnv) = (:Cross, :Nought)
+RLBase.players(::TicTacToeEnv) = (Player(:Cross), Player(:Nought))
 
-RLBase.state(env::TicTacToeEnv) = state(env, Observation{Int}(), 1)
-RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = env.board
-RLBase.state(env::TicTacToeEnv, ::RLBase.AbstractStateStyle) = state(env::TicTacToeEnv, Observation{Int}(), 1)
-RLBase.state(env::TicTacToeEnv, ::Observation{Int}, p) =
+RLBase.state(env::TicTacToeEnv) = state(env, Observation{Int}(), Player(:Any))
+RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}, player) = env.board
+RLBase.state(env::TicTacToeEnv, ::RLBase.AbstractStateStyle) = state(env::TicTacToeEnv, Observation{Int}(), Player(1))
+RLBase.state(env::TicTacToeEnv, ::Observation{Int}, player::Player) =
     get_tic_tac_toe_state_info()[env].index
 
-RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, p) = ArrayProductDomain(fill(false:true, 3, 3, 3))
-RLBase.state_space(env::TicTacToeEnv, ::Observation{Int}, p) =
+RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, player::Player) = ArrayProductDomain(fill(false:true, 3, 3, 3))
+RLBase.state_space(env::TicTacToeEnv, ::Observation{Int}, player::Player) =
     Base.OneTo(length(get_tic_tac_toe_state_info()))
-RLBase.state_space(env::TicTacToeEnv, ::Observation{String}, p) = fullspace(String)
+RLBase.state_space(env::TicTacToeEnv, ::Observation{String}, player::Player) = fullspace(String)
 
-RLBase.state(env::TicTacToeEnv, ::Observation{String}) = state(env::TicTacToeEnv, Observation{String}(), 1)
+RLBase.state(env::TicTacToeEnv, ::Observation{String}) = state(env::TicTacToeEnv, Observation{String}(), Player(1))
 
-function RLBase.state(env::TicTacToeEnv, ::Observation{String}, p)
+function RLBase.state(env::TicTacToeEnv, ::Observation{String}, player::Player)
     buff = IOBuffer()
     for i in 1:3
         for j in 1:3
@@ -97,7 +98,7 @@ end
 
 RLBase.is_terminated(env::TicTacToeEnv) = get_tic_tac_toe_state_info()[env].is_terminated
 
-function RLBase.reward(env::TicTacToeEnv, player::Symbol)
+function RLBase.reward(env::TicTacToeEnv, player::Player)
     if is_terminated(env)
         winner = get_tic_tac_toe_state_info()[env].winner
         if isnothing(winner)
@@ -112,7 +113,7 @@ function RLBase.reward(env::TicTacToeEnv, player::Symbol)
     end
 end
 
-function is_win(env::TicTacToeEnv, player::Symbol)
+function is_win(env::TicTacToeEnv, player::Player)
     b = env.board
     p = Base.to_index(env, player)
     @inbounds begin
@@ -139,10 +140,10 @@ function get_tic_tac_toe_state_info()
                 if !haskey(TIC_TAC_TOE_STATE_INFO, env)
                     n += 1
                     has_empty_pos = any(view(env.board, :, :, 1))
-                    w = if is_win(env, :Cross)
-                        :Cross
-                    elseif is_win(env, :Nought)
-                        :Nought
+                    w = if is_win(env, Player(:Cross))
+                        Player(:Cross)
+                    elseif is_win(env, Player(:Nought))
+                        Player(:Nought)
                     else
                         nothing
                     end

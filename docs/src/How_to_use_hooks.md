@@ -8,10 +8,12 @@ programming. We write the code in a loop and execute them step by step.
 
 ```julia
 while true
-    env |> policy |> env
+    action = plan!(policy, env)
+    act!(env, action)
+
     # write your own logic here
     # like saving parameters, recording loss function, evaluating policy, etc.
-    stop_condition(env, policy) && break
+    check!(stop_condition, env, policy) && break
     is_terminated(env) && reset!(env)
 end
 ```
@@ -30,18 +32,19 @@ execution pipeline. However, we believe this is not necessary in Julia. With the
 declarative programming approach, we gain much more flexibilities.
 
 Now the question is how to design the hook. A natural choice is to wrap the
-comments part in the above pseudocode into a function:
+comments part in the above pseudo-code into a function:
 
 ```julia
 while true
-    env |> policy |> env
-    hook(policy, env)
-    stop_condition(env, policy) && break
+    action = plan!(policy, env)
+    act!(env, action)
+    push!(hook, policy, env)
+    check!(stop_condition, env, policy) && break
     is_terminated(env) && reset!(env)
 end
 ```
 
-But sometimes, we'd like to have a more fingrained control. So we split the calling
+But sometimes, we'd like to have a more fine-grained control. So we split the calling
 of hooks into several different stages:
 
 - [`PreExperimentStage`](@ref)
@@ -54,20 +57,22 @@ of hooks into several different stages:
 ## How to define a customized hook?
 
 By default, an instance of [`AbstractHook`](@ref) will do nothing when called
-with `(hook::AbstractHook)(::AbstractStage, policy, env)`. So when writing a
+with `push!(hook::AbstractHook, ::AbstractStage, policy, env)`. So when writing a
 customized hook, you only need to implement the necessary runtime logic.
 
 For example, assume we want to record the wall time of each episode.
 
 ```@repl how_to_use_hooks
 using ReinforcementLearning
+import Base.push!
 Base.@kwdef mutable struct TimeCostPerEpisode <: AbstractHook
     t::UInt64 = time_ns()
     time_costs::Vector{UInt64} = []
 end
-(h::TimeCostPerEpisode)(::PreEpisodeStage, policy, env) = h.t = time_ns()
-(h::TimeCostPerEpisode)(::PostEpisodeStage, policy, env) = push!(h.time_costs, time_ns()-h.t)
+Base.push!(h::TimeCostPerEpisode, ::PreEpisodeStage, policy, env) = h.t = time_ns()
+Base.push!(h::TimeCostPerEpisode, ::PostEpisodeStage, policy, env) = push!(h.time_costs, time_ns()-h.t)
 h = TimeCostPerEpisode()
+
 run(RandomPolicy(), CartPoleEnv(), StopAfterNEpisodes(10), h)
 h.time_costs
 ```
@@ -77,14 +82,13 @@ h.time_costs
 - [`StepsPerEpisode`](@ref)
 - [`RewardsPerEpisode`](@ref)
 - [`TotalRewardPerEpisode`](@ref)
-- [`TotalBatchRewardPerEpisode`](@ref)
 
 ## Periodic jobs
 
 Sometimes, we'd like to periodically run some functions. Two handy hooks are
 provided for this kind of tasks:
 
-- [`DoEveryNEpisode`](@ref)
+- [`DoEveryNEpisodes`](@ref)
 - [`DoEveryNSteps`](@ref)
 
 Following are some typical usages.
@@ -98,7 +102,7 @@ run(
     policy,
     CartPoleEnv(),
     StopAfterNEpisodes(100),
-    DoEveryNEpisode(;n=10) do t, policy, env
+    DoEveryNEpisodes(;n=10) do t, policy, env
         # In real world cases, the policy is usually wrapped in an Agent,
         # we need to extract the inner policy to run it in the *actor* mode.
         # Here for illustration only, we simply use the original policy.
@@ -117,40 +121,33 @@ run(
 
 ### Save parameters
 
-[BSON.jl](https://github.com/JuliaIO/BSON.jl) is recommended to save the parameters of a policy.
+[JLD2.jl](https://github.com/JuliaIO/JLD2.jl) is recommended to save the parameters of a policy.
 
 ```@repl how_to_use_hooks
-using Flux
-using Flux.Losses: huber_loss
-using BSON
+using ReinforcementLearning
+using JLD2
 
-env = CartPoleEnv(; T = Float32)
-ns, na = length(state(env)), length(action_space(env))
+env = RandomWalk1D()
+ns, na = length(state_space(env)), length(action_space(env))
 
 policy = Agent(
-    policy = QBasedPolicy(
-        learner = BasicDQNLearner(
-            approximator = NeuralNetworkApproximator(
-                model = Chain(
-                    Dense(ns, 128, relu; init = glorot_uniform),
-                    Dense(128, 128, relu; init = glorot_uniform),
-                    Dense(128, na; init = glorot_uniform),
-                ) |> cpu,
-                optimizer = Adam(),
-            ),
-            batchsize = 32,
-            min_replay_history = 100,
-            loss_func = huber_loss,
+    QBasedPolicy(;
+        learner = TDLearner(
+            TabularQApproximator(n_state = ns, n_action = na),
+            :SARS;
         ),
-        explorer = EpsilonGreedyExplorer(
-            kind = :exp,
-            ϵ_stable = 0.01,
-            decay_steps = 500,
-        ),
+        explorer = EpsilonGreedyExplorer(ϵ_stable=0.01),
     ),
-    trajectory = CircularArraySARTTrajectory(
-        capacity = 1000,
-        state = Vector{Float32} => (ns,),
+    Trajectory(
+        CircularArraySARTSTraces(;
+            capacity = 1,
+            state = Int64 => (),
+            action = Int64 => (),
+            reward = Float64 => (),
+            terminal = Bool => (),
+        ),
+        DummySampler(),
+        InsertSampleRatioController(),
     ),
 )
 
@@ -161,40 +158,10 @@ run(
     env,
     StopAfterNSteps(10_000),
     DoEveryNSteps(n=1_000) do t, p, e
-        ps = params(p)
-        f = joinpath(parameters_dir, "parameters_at_step_$t.bson")
-        BSON.@save f ps
+        ps = policy.policy.learner.approximator
+        f = joinpath(parameters_dir, "parameters_at_step_$t.jld2")
+        JLD2.@save f ps
         println("parameters at step $t saved to $f")
     end
 )
 ```
-
-### Logging data
-
-Below we demonstrate how to use
-[TensorBoardLogger.jl](https://github.com/PhilipVinc/TensorBoardLogger.jl) to
-log runtime metrics. But users could also other tools like
-[wandb](https://wandb.ai/site) through
-[PyCall.jl](https://github.com/JuliaPy/PyCall.jl).
-
-
-```@repl how_to_use_hooks
-using TensorBoardLogger
-using Logging
-tf_log_dir = "logs"
-lg = TBLogger(tf_log_dir, min_level = Logging.Info)
-total_reward_per_episode = TotalRewardPerEpisode()
-hook = ComposedHook(
-    total_reward_per_episode,
-    DoEveryNEpisode() do t, agent, env
-        with_logger(lg) do
-            @info "training"  reward = total_reward_per_episode.rewards[end]
-        end
-    end
-)
-run(RandomPolicy(), CartPoleEnv(), StopAfterNEpisodes(50), hook)
-readdir(tf_log_dir)
-```
-
-Then run `tensorboard --logdir logs` and open the link on the screen in your
-browser. (Obviously you need to install tensorboard first.)

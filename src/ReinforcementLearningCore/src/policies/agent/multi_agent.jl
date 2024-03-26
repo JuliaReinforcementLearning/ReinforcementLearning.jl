@@ -1,5 +1,4 @@
-export MultiAgentPolicy
-export MultiAgentHook
+export MultiAgentPolicy, MultiAgentHook, Player, PlayerTuple
 
 using Random # for RandomPolicy
 
@@ -8,14 +7,37 @@ import Base.iterate
 import Base.push!
 
 """
+    PlayerTuple
+
+A NamedTuple that maps players to their respective values.
+"""
+struct PlayerTuple{N,T}
+    data::NamedTuple{N,T}
+
+    function PlayerTuple(data::Pair...)
+        nt = NamedTuple(first(item).name => last(item) for item in data)
+        new{typeof(nt).parameters...}(nt)
+    end
+
+    function PlayerTuple(data::Base.Generator)
+        PlayerTuple(collect(data)...)
+    end    
+end
+
+Base.getindex(nt::PlayerTuple, player::Player) = nt.data[player.name]
+Base.keys(nt::PlayerTuple) = Player.(keys(nt.data))
+Base.iterate(nt::PlayerTuple) = iterate(nt.data)
+Base.iterate(nt::PlayerTuple, state) = iterate(nt.data, state)
+
+"""
     MultiAgentPolicy(agents::NT) where {NT<: NamedTuple}
 MultiAgentPolicy is a policy struct that contains `<:AbstractPolicy` structs indexed by the player's symbol.
 """
-struct MultiAgentPolicy{names,T} <: AbstractPolicy
-    agents::NamedTuple{names,T}
+struct MultiAgentPolicy{players,T} <: AbstractPolicy
+    agents::PlayerTuple{players, T}
 
-    function MultiAgentPolicy(agents::NamedTuple{names,T}) where {names,T}
-        new{names,T}(agents)
+    function MultiAgentPolicy(agents::PlayerTuple{players,T}) where {players,T}
+        new{players, T}(agents)
     end
 end
 
@@ -23,11 +45,11 @@ end
     MultiAgentHook(hooks::NT) where {NT<: NamedTuple}
 MultiAgentHook is a hook struct that contains `<:AbstractHook` structs indexed by the player's symbol.
 """
-struct MultiAgentHook{names,T} <: AbstractHook
-    hooks::NamedTuple{names,T}
+struct MultiAgentHook{players,T} <: AbstractHook
+    hooks::PlayerTuple{players,T}
 
-    function MultiAgentHook(hooks::NamedTuple{names,T}) where {names,T}
-        new{names,T}(hooks)
+    function MultiAgentHook(hooks::PlayerTuple{players,T}) where {players, T}
+        new{players,T}(hooks)
     end
 end
 
@@ -48,10 +70,10 @@ function Base.iterate(current_player_iterator::CurrentPlayerIterator, state)
 end
 
 Base.iterate(p::MultiAgentPolicy) = iterate(p.agents)
-Base.iterate(p::MultiAgentPolicy, s) = iterate(p.agents, s)
+Base.iterate(p::MultiAgentPolicy, state) = iterate(p.agents, state)
 
-Base.getindex(p::MultiAgentPolicy, s::Symbol) = p.agents[s]
-Base.getindex(h::MultiAgentHook, s::Symbol) = h.hooks[s]
+Base.getindex(p::MultiAgentPolicy, player::Player) = p.agents[player]
+Base.getindex(h::MultiAgentHook, player::Player) = h.hooks[player]
 
 Base.keys(p::MultiAgentPolicy) = keys(p.agents)
 Base.keys(p::MultiAgentHook) = keys(p.hooks)
@@ -186,7 +208,7 @@ function Base.push!(multiagent::MultiAgentPolicy, stage::S, env::E) where {S<:Ab
 end
 
 # Like in the single-agent case, push! at the PostActStage() calls push! on each player.
-function Base.push!(agent::Agent, ::PreEpisodeStage, env::AbstractEnv, player::Symbol)
+function Base.push!(agent::Agent, ::PreEpisodeStage, env::AbstractEnv, player::Player)
     push!(agent.trajectory, (state = state(env, player),))
 end
 
@@ -196,7 +218,7 @@ function Base.push!(multiagent::MultiAgentPolicy, s::PreEpisodeStage, env::E) wh
     end
 end
 
-function RLBase.plan!(agent::Agent, env::AbstractEnv, player::Symbol)
+function RLBase.plan!(agent::Agent, env::AbstractEnv, player::Player)
     RLBase.plan!(agent.policy, env, player)
 end
 
@@ -214,7 +236,7 @@ function Base.push!(multiagent::MultiAgentPolicy, ::PostActStage, env::E, action
     end
 end
 
-function Base.push!(agent::Agent, ::PostEpisodeStage, env::AbstractEnv, p::Symbol)
+function Base.push!(agent::Agent, ::PostEpisodeStage, env::AbstractEnv, player::Player)
     if haskey(agent.trajectory, :next_action) 
         action = RLBase.plan!(agent.policy, env, p)
         push!(agent.trajectory, PartialNamedTuple((action = action, )))
@@ -227,18 +249,18 @@ function Base.push!(hook::MultiAgentHook, stage::S, multiagent::MultiAgentPolicy
     end
 end
 
-@inline function _push!(stage::AbstractStage, policy::P, env::E, player::Symbol, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
+@inline function _push!(stage::AbstractStage, policy::P, env::E, player::Player, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
     push!(hook, stage, policy, env, player)
     _push!(stage, policy, env, player, hook_tuple...)
 end
 
-_push!(stage::AbstractStage, policy::P, env::E, player::Symbol) where {P <: AbstractPolicy, E <: AbstractEnv} = nothing
+_push!(stage::AbstractStage, policy::P, env::E, player::Player) where {P <: AbstractPolicy, E <: AbstractEnv} = nothing
 
 function Base.push!(composed_hook::ComposedHook{T},
                             stage::AbstractStage,
                             policy::P,
                             env::E,
-                            player::Symbol
+                            player::Player
                             ) where {T <: Tuple, P <: AbstractPolicy, E <: AbstractEnv}
     _push!(stage, policy, env, player, composed_hook.hooks...)
 end

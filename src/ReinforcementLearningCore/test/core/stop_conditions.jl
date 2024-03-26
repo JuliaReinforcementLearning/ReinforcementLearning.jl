@@ -11,15 +11,26 @@ import ReinforcementLearningCore.check!
     @test sum([check!(stop_condition, policy, env) for i in 1:20]) == 11
 end
 
-@testset "ComposedStopCondition" begin
+@testset "StopIfAny" begin
     stop_10 = StopAfterNSteps(10)
     stop_3 = StopAfterNSteps(3)
 
     env = RandomWalk1D()
     policy = RandomPolicy(legal_action_space(env))
 
-    composed_stop = ComposedStopCondition(stop_10, stop_3)
-    @test sum([check!(composed_stop, policy, env) for i in 1:20]) == 18
+    composed_stop = StopIfAny(stop_10, stop_3)
+    @test sum([RLCore.check!(composed_stop, policy, env) for i in 1:20]) == 18
+end
+
+@testset "StopIfAll" begin
+    stop_10 = StopAfterNSteps(10)
+    stop_3 = StopAfterNSteps(3)
+
+    env = RandomWalk1D()
+    policy = RandomPolicy(legal_action_space(env))
+
+    composed_stop = StopIfAll(stop_10, stop_3)
+    @test sum([RLCore.check!(composed_stop, policy, env) for i in 1:20]) == 11
 end
 
 @testset "StopAfterNEpisodes" begin
