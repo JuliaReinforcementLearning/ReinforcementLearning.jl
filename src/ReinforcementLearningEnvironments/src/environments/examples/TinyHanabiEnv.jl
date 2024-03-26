@@ -43,7 +43,7 @@ function RLBase.reset!(env::TinyHanabiEnv)
     empty!(env.actions)
 end
 
-RLBase.players(env::TinyHanabiEnv) = 1:2
+RLBase.players(env::TinyHanabiEnv) = Player.(1:2)
 
 RLBase.current_player(env::TinyHanabiEnv) =
     if length(env.cards) < 2
@@ -55,9 +55,9 @@ RLBase.current_player(env::TinyHanabiEnv) =
     end
 
 RLBase.act!(env::TinyHanabiEnv, action, ::ChancePlayer) = push!(env.cards, action)
-RLBase.act!(env::TinyHanabiEnv, action, ::Int) = push!(env.actions, action)
+RLBase.act!(env::TinyHanabiEnv, action, ::Player) = push!(env.actions, action)
 
-RLBase.action_space(env::TinyHanabiEnv, ::Int) = Base.OneTo(3)
+RLBase.action_space(env::TinyHanabiEnv, ::Player) = Base.OneTo(3)
 RLBase.action_space(env::TinyHanabiEnv, ::ChancePlayer) = Base.OneTo(2)
 
 RLBase.legal_action_space(env::TinyHanabiEnv, ::ChancePlayer) = findall(!in(env.cards), 1:2)
@@ -90,15 +90,15 @@ end
 function RLBase.state(env::TinyHanabiEnv, ::InformationSet, player::Player)
     player_int = parse(Int, string(player.name))
     card = length(env.cards) >= player_int ? env.cards[player_int] : ()
-    (player, card..., env.actions...)
+    (player_int, card..., env.actions...)
 end
 
 RLBase.is_terminated(env::TinyHanabiEnv) = length(env.actions) == 2
-RLBase.reward(env::TinyHanabiEnv, player) =
+RLBase.reward(env::TinyHanabiEnv, player::AbstractPlayer) =
     is_terminated(env) ? env.reward_table[env.actions..., env.cards...] : 0
 
 RLBase.act!(env::TinyHanabiEnv, action::Int, ::ChancePlayer) = push!(env.cards, action)
-RLBase.act!(env::TinyHanabiEnv, action::Int, ::Int) = push!(env.actions, action)
+RLBase.act!(env::TinyHanabiEnv, action::Int, ::Player) = push!(env.actions, action)
 
 RLBase.NumAgentStyle(::TinyHanabiEnv) = MultiAgent(2)
 RLBase.DynamicStyle(::TinyHanabiEnv) = SEQUENTIAL
