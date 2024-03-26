@@ -14,12 +14,12 @@
         InsertSampleRatioController(n_inserted = -1),
     )
 
-    multiagent_policy = MultiAgentPolicy((;
+    multiagent_policy = MultiAgentPolicy(PlayerTuple(
         Player(:Cross) => Agent(RandomPolicy(), trajectory_1),
         Player(:Nought) => Agent(RandomPolicy(), trajectory_2),
     ))
 
-    multiagent_hook = MultiAgentHook((PlayerTuple(Player(:Cross) => StepsPerEpisode(), :Nought => StepsPerEpisode())))
+    multiagent_hook = MultiAgentHook(PlayerTuple(Player(:Cross) => StepsPerEpisode(), Player(:Nought) => StepsPerEpisode()))
 
     env = TicTacToeEnv()
     stop_condition = StopIfEnvTerminated()
