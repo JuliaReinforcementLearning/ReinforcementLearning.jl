@@ -149,6 +149,10 @@
 end
 
 @testset "Wrapped Env run" begin
+    Base.@kwdef mutable struct LotteryEnv <: AbstractEnv
+        reward::Union{Nothing, Int} = nothing
+    end
+    
     struct LotteryAction{a}
         function LotteryAction(a)
             new{a}()
