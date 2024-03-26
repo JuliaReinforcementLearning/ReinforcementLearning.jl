@@ -10,27 +10,22 @@ function _run(policy::AbstractPolicy,
         stop_condition::AbstractStopCondition,
         hook::AbstractHook,
         reset_condition::AbstractResetCondition)
-    push!(hook, PreExperimentStage(), policy, env)
     push!(policy, PreExperimentStage(), env)
     is_stop = false
     while !is_stop
         reset!(env)
         push!(policy, PreEpisodeStage(), env)
         optimise!(policy, PreEpisodeStage())
-        push!(hook, PreEpisodeStage(), policy, env)
-
 
         while !check!(reset_condition, policy, env) # one episode
             push!(policy, PreActStage(), env)
             optimise!(policy, PreActStage())
-            push!(hook, PreActStage(), policy, env)
 
             action = RLBase.plan!(policy, env)
             act!(env, action)
 
             push!(policy, PostActStage(), env, action)
             optimise!(policy, PostActStage())
-            push!(hook, PostActStage(), policy, env)
 
             if check!(stop_condition, policy, env)
                 is_stop = true
@@ -40,11 +35,9 @@ function _run(policy::AbstractPolicy,
 
         push!(policy, PostEpisodeStage(), env)
         optimise!(policy, PostEpisodeStage())
-        push!(hook, PostEpisodeStage(), policy, env)
 
     end
     push!(policy, PostExperimentStage(), env)
-    push!(hook, PostExperimentStage(), policy, env)
     hook
 end
 ```
