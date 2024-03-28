@@ -94,6 +94,12 @@ ActionStyle(env::RLBaseEnv) =
     CRL.provided(CRL.valid_actions, env.env) ? FullActionSet() : MinimalActionSet()
 
 current_player(env::RLBaseEnv) = CRL.player(env.env)
+
+"""
+    players(env::RLBaseEnv)
+
+Players in the game. This is a no-op for single-player games. `MultiAgent` games should implement this method.
+"""
 players(env::RLBaseEnv) = CRL.players(env.env)
 
 # 

@@ -183,6 +183,12 @@ abstract type AbstractChanceStyle <: AbstractEnvStyle end
 abstract type AbstractStochasticChanceStyle <: AbstractChanceStyle end
 
 @api struct Deterministic <: AbstractChanceStyle end
+
+"""
+    Stochastic()
+
+Default [`ChanceStyle`](@ref).
+"""
 @api struct Stochastic <: AbstractStochasticChanceStyle end
 @api struct ExplicitStochastic <: AbstractStochasticChanceStyle end
 @api struct SampledStochastic <: AbstractStochasticChanceStyle end
@@ -211,7 +217,7 @@ a dummy action is allowed in this case.
 
 !!! note
     The chance player ([`chance_player`](@ref)`(env)`) must appears in the result of
-    [`players`](@ref)`(env)`.
+    [`RLBase.players`](@ref)`(env)`.
     The result of `action_space(env, chance_player)` should only contains one
     dummy action.
 """
@@ -404,8 +410,8 @@ abstract type AbstractEpisodeStyle end
 @api struct SimultaneousPlayer <: AbstractPlayer end
 @api const SIMULTANEOUS_PLAYER = SimultaneousPlayer()
 
-@api struct Spector end
-@api const SPECTOR = Spector()
+@api struct Spectator end
+@api const SPECTATOR = Spectator()
 
 @api act!(env::AbstractEnv, action, player=current_player(env))
 
