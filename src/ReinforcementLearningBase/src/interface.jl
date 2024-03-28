@@ -251,12 +251,13 @@ ChanceStyle(::Type{<:AbstractEnv}) = STOCHASTIC
 
 abstract type AbstractRewardStyle <: AbstractEnvStyle end
 
+"We can get reward after each step"
 @api struct StepReward <: AbstractRewardStyle end
 
 "Only get reward at the end of environment"
 @api struct TerminalReward <: AbstractRewardStyle end
 
-"We can get reward after each step"
+"Alias for `StepReward()`"
 @api const STEP_REWARD = StepReward()
 
 "Only get reward at the end of environment"
@@ -325,18 +326,21 @@ UtilityStyle(::Type{<:AbstractEnv}) = GENERAL_SUM
 
 abstract type AbstractActionStyle <: AbstractEnvStyle end
 abstract type AbstractDiscreteActionStyle <: AbstractActionStyle end
-@api struct FullActionSet <: AbstractDiscreteActionStyle end
 
 """
 The action space of the environment may contains illegal actions. For
 environments of `FULL_ACTION_SET`, [`legal_action_space`](@ref) and
 [`legal_action_space_mask`](@ref) must also be defined.
 """
+@api struct FullActionSet <: AbstractDiscreteActionStyle end
+
+"Alias for `FullActionSet()`"
 @api const FULL_ACTION_SET = FullActionSet()
 
+"All actions in the action space of the environment are legal"
 @api struct MinimalActionSet <: AbstractDiscreteActionStyle end
 
-"All actions in the action space of the environment are legal"
+"Alias for `MinimalActionSet()`"
 @api const MINIMAL_ACTION_SET = MinimalActionSet()
 
 """
