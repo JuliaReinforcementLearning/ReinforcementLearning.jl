@@ -112,5 +112,5 @@ agent = Agent(
 run(agent, env, StopAfterNEpisodes(10), TotalRewardPerEpisode())
 ```
 
-Here the [`Trajectory`](@ref) is used to store the **S**tate,
+Here the `Trajectory` is used to store the **S**tate,
 **A**ction, **R**eward, is_**T**erminated info during interactions with the environment.

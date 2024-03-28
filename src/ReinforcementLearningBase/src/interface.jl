@@ -90,7 +90,9 @@ abstract type AbstractEnvStyle end
 
 abstract type AbstractNumAgentStyle <: AbstractEnvStyle end
 
+"AbstractNumAgentStyle for environments with a single agent"
 @api struct SingleAgent <: AbstractNumAgentStyle end
+
 @api const SINGLE_AGENT = SingleAgent()
 
 @api struct MultiAgent{N} <: AbstractNumAgentStyle end
@@ -129,7 +131,10 @@ NumAgentStyle(env::Type{<:AbstractEnv}) = SINGLE_AGENT
 
 abstract type AbstractDynamicStyle <: AbstractEnvStyle end
 
+"`Player`s act one after the other."
 @api struct Sequential <: AbstractDynamicStyle end
+
+"`Player`s act at the same time."
 @api struct Simultaneous <: AbstractDynamicStyle end
 
 "Environment with the [`DynamicStyle`](@ref) of `SEQUENTIAL` must takes actions from different players one-by-one."
@@ -157,7 +162,10 @@ DynamicStyle(::Type{<:AbstractEnv}) = SEQUENTIAL
 
 abstract type AbstractInformationStyle <: AbstractEnvStyle end
 
+"All `Player`s actions are visible to other `Player`s."
 @api struct PerfectInformation <: AbstractInformationStyle end
+
+"Other `Player`s actions are not known by other `Player`s."
 @api struct ImperfectInformation <: AbstractInformationStyle end
 
 "All players observe the same state"
@@ -182,6 +190,7 @@ InformationStyle(::Type{<:AbstractEnv}) = IMPERFECT_INFORMATION
 abstract type AbstractChanceStyle <: AbstractEnvStyle end
 abstract type AbstractStochasticChanceStyle <: AbstractChanceStyle end
 
+"`AbstractChanceStyle` for fully deterministic games without a `ChancePlayer`. "
 @api struct Deterministic <: AbstractChanceStyle end
 
 """
@@ -193,7 +202,7 @@ Default [`ChanceStyle`](@ref).
 @api struct ExplicitStochastic <: AbstractStochasticChanceStyle end
 @api struct SampledStochastic <: AbstractStochasticChanceStyle end
 
-"No chance player in the environment. And the game is fully deterministic."
+"No `ChancePlayer` in the environment. And the game is fully deterministic."
 @api const DETERMINISTIC = Deterministic()
 
 """
@@ -243,6 +252,8 @@ ChanceStyle(::Type{<:AbstractEnv}) = STOCHASTIC
 abstract type AbstractRewardStyle <: AbstractEnvStyle end
 
 @api struct StepReward <: AbstractRewardStyle end
+
+"Only get reward at the end of environment"
 @api struct TerminalReward <: AbstractRewardStyle end
 
 "We can get reward after each step"
@@ -271,9 +282,16 @@ RewardStyle(::Type{<:AbstractEnv}) = STEP_REWARD
 
 abstract type AbstractUtilityStyle <: AbstractEnvStyle end
 
+"`AbstractUtilityStyle` for environments where the sum of all players' rewards is equal to zero."
 @api struct ZeroSum <: AbstractUtilityStyle end
+
+"`AbstractUtilityStyle` for environments where the sum of all players' rewards is constant."
 @api struct ConstantSum <: AbstractUtilityStyle end
+
+"`AbstractUtilityStyle` for environments where the sum of all players' rewards is not constant."
 @api struct GeneralSum <: AbstractUtilityStyle end
+
+"`AbstractUtilityStyle` for environments where all players get the same reward."
 @api struct IdenticalUtility <: AbstractUtilityStyle end
 
 "Rewards of all players sum to 0. A special case of [`CONSTANT_SUM`]."
@@ -405,12 +423,20 @@ abstract type AbstractEpisodeStyle end
 @api const DEFAULT_PLAYER = DefaultPlayer()
 
 @api struct ChancePlayer <: AbstractPlayer end
+
+"Basic player type for a random step in game."
 @api const CHANCE_PLAYER = ChancePlayer()
 
 @api struct SimultaneousPlayer <: AbstractPlayer end
 @api const SIMULTANEOUS_PLAYER = SimultaneousPlayer()
 
 @api struct Spectator end
+
+"""
+    SPECTATOR
+
+Spectator is a special player who doesn't take any action.
+"""
 @api const SPECTATOR = Spectator()
 
 @api act!(env::AbstractEnv, action, player=current_player(env))

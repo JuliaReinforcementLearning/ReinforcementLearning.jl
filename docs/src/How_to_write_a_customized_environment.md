@@ -168,7 +168,7 @@ policy we defined above. A [`QBasedPolicy`](@ref)
 contains two parts: a `learner` and an `explorer`. The `learner` *learn* the
 state-action value function (aka *Q* function) during interactions with the
 `env`. The `explorer` is used to select an action based on the Q value returned
-by the `learner`. Inside of the [`MonteCarloLearner`](@ref), a
+by the `learner`. Inside of the [`TDLearner`](@ref), a
 [`TabularQApproximator`](@ref) is used to estimate the Q value.
 
 That's the problem! A [`TabularQApproximator`](@ref) only accepts states of type `Int`.
@@ -370,7 +370,7 @@ to the perspective from the `current_player(env)`.
 
 In multi-agent environments, sometimes the sum of rewards from all players are
 always `0`. We call the [`UtilityStyle`](@ref) of these environments [`ZeroSum`](@ref).
-`ZeroSum` is a special case of [`ConstantSum`](@ref). In cooperational games, the reward
+`ZeroSum` is a special case of [`ConstantSum`](@ref). In cooperative games, the reward
 of each player are the same. In this case, they are called [`IdenticalUtility`](@ref).
 Other cases fall back to [`GeneralSum`](@ref).
 

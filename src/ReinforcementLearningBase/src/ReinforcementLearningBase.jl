@@ -1,7 +1,9 @@
 module ReinforcementLearningBase
 
-const RLBase = ReinforcementLearningBase
 export RLBase
+
+"Abbreviated namespace for `ReinforcementLearningBase`."
+const RLBase = ReinforcementLearningBase
 
 using Random
 using Reexport
