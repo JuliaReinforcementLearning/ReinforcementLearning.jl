@@ -1,5 +1,5 @@
 @doc """
-[ReinforcementLearningBase.jl](https://juliareinforcementlearning.org/docs/rlbase/)
+[ReinforcementLearningBase.jl](@ref)
 (**RLBase**) provides some common constants, traits, abstractions and interfaces
 in developing reinforcement learning algorithms in Julia. 
 
@@ -81,7 +81,7 @@ abstract type AbstractEnvStyle end
 
 #####
 ## Traits for Environment
-## mostly borrowed from https://github.com/deepmind/open_spiel/blob/master/open_spiel/spiel.h
+## mostly borrowed from https://github.com/google-deepmind/open_spiel/blob/master/open_spiel/spiel.h
 #####
 
 #####
@@ -360,7 +360,7 @@ Define the possible styles of `state(env)`. Possible values are:
 
 - [`Observation{T}`](@ref). This is the default return.
 - [`InternalState{T}`](@ref)
-- [`Information{T}`](@ref)
+- [`InformationSet{T}`](@ref)
 - You can also define your customized state style when necessary.
 
 Or a tuple contains several of the above ones.

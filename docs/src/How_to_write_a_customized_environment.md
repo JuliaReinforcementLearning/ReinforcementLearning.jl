@@ -6,7 +6,7 @@ write many different kinds of environments based on interfaces defined in
 [ReinforcementLearningBase.jl](@ref).
 
 The most commonly used interfaces to describe reinforcement learning tasks is
-[OpenAI/Gym](https://gym.openai.com/). Inspired by it, we expand those
+[OpenAI/Gym](https://gymnasium.farama.org). Inspired by it, we expand those
 interfaces a little to utilize multiple-dispatch in Julia and to cover
 multi-agent environments.
 
@@ -30,7 +30,7 @@ act!(env::YourEnv, action)
 ## An Example: The LotteryEnv
 
 Here we use an example introduced in [Monte Carlo Tree Search: A
-Tutorial](https://www.informs-sim.org/wsc18papers/includes/files/021.pdf) to
+Tutorial](https://ieeexplore.ieee.org/document/8632344) to
 demonstrate how to write a simple environment.
 
 The game is defined like this: assume you have \$10 in your pocket, and you are
@@ -403,7 +403,7 @@ each action, then we call the [`ChanceStyle`](@ref) of these environments are of
 default return value. One special case is that,
 in [Extensive Form Games](https://en.wikipedia.org/wiki/Extensive-form_game), a
 chance node is involved. And the action probability of this special player is
-determined. We define the `ChanceStyle` of these environments as [`EXPLICIT_STOCHASTIC`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.EXPLICIT_STOCHASTIC).
+determined. We define the `ChanceStyle` of these environments as [`EXPLICIT_STOCHASTIC`](@ref).
 For these environments, we need to have the following methods defined:
 
 ```@repl customized_env
