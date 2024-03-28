@@ -234,7 +234,6 @@ jobs:
             echo "Franklin did not report a warning"
           fi
       - name: Build docs
-        if: (steps.documentation-changed.outputs.any_changed == 'true')
         run: |
           cd docs
           julia --project --color=yes -e '
