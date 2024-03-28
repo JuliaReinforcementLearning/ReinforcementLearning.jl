@@ -229,11 +229,11 @@ jobs:
           cd docs
           julia --project --color=yes -e '
             using Pkg; Pkg.instantiate()
-            Pkg.develop(path="src/ReinforcementLearningBase")
-            Pkg.develop(path="src/ReinforcementLearningCore")
-            Pkg.develop(path="src/ReinforcementLearningEnvironments")
-            Pkg.develop(path=".") # ReinforcementLearning meta-package
-            Pkg.develop(path="src/ReinforcementLearningFarm")
+            Pkg.develop(path="../src/ReinforcementLearningBase")
+            Pkg.develop(path="../src/ReinforcementLearningCore")
+            Pkg.develop(path="../src/ReinforcementLearningEnvironments")
+            Pkg.develop(path="../") # ReinforcementLearning meta-package
+            Pkg.develop(path="../src/ReinforcementLearningFarm")
             include("make.jl")' skiplinks # Temporarily skip broken link checks
           mv build homepage/__site/docs
       - name: Deploy to the main repo
