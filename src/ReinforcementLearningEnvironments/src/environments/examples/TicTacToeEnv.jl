@@ -9,6 +9,11 @@ mutable struct TicTacToeEnv <: AbstractEnv
     player::Player
 end
 
+"""
+    TicTacToeEnv()
+
+Create a new instance of the TicTacToe environment.
+"""
 function TicTacToeEnv()
     board = BitArray{3}(undef, 3, 3, 3)
     fill!(board, false)

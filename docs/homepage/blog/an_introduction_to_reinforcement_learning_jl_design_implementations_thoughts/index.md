@@ -62,7 +62,7 @@ Although most existing reinforcement learning related packages are written in Py
 Many existing packages inspired the development of ReinforcementLearning.jl a lot. Following are some important ones.
 
 - [Dopamine](https://google.github.io/dopamine/)\dcite{dayan2009dopamine} provides a clear implementation of the **Rainbow**\dcite{hessel2018rainbow} algorithm. The [gin](https://github.com/google/gin-config) config file template and the concise workflow is the origin of the `Experiment` in ReinforcementLearning.jl.
-- [OpenSpiel](https://github.com/deepmind/open_spiel)\dcite{LanctotEtAl2019OpenSpiel} provides a lot of useful functions to describe many different kinds of games. They are turned into traits in our package.
+- [OpenSpiel](https://github.com/google-deepmind/open_spiel)\dcite{LanctotEtAl2019OpenSpiel} provides a lot of useful functions to describe many different kinds of games. They are turned into traits in our package.
 - [Ray/rllib](https://docs.ray.io/en/master/rllib.html)\dcite{liang2017ray} has many nice abstraction layers in the policy part. We also borrowed the definition of environments here. This is explained with details in section 2.
 - [rlpyt](https://github.com/astooke/rlpyt)\dcite{stooke2019rlpyt} has a nice code structure and we borrowed some implementations of policy gradient algorithms from it.
 - [Acme](https://github.com/deepmind/acme)\dcite{hoffman2020acme} offers a framework for distributed reinforcement learning.

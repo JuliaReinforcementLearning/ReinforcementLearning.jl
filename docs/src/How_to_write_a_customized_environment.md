@@ -6,7 +6,7 @@ write many different kinds of environments based on interfaces defined in
 [ReinforcementLearningBase.jl](@ref).
 
 The most commonly used interfaces to describe reinforcement learning tasks is
-[OpenAI/Gym](https://gym.openai.com/). Inspired by it, we expand those
+[OpenAI/Gym](https://gymnasium.farama.org). Inspired by it, we expand those
 interfaces a little to utilize multiple-dispatch in Julia and to cover
 multi-agent environments.
 
@@ -30,7 +30,7 @@ act!(env::YourEnv, action)
 ## An Example: The LotteryEnv
 
 Here we use an example introduced in [Monte Carlo Tree Search: A
-Tutorial](https://www.informs-sim.org/wsc18papers/includes/files/021.pdf) to
+Tutorial](https://ieeexplore.ieee.org/document/8632344) to
 demonstrate how to write a simple environment.
 
 The game is defined like this: assume you have \$10 in your pocket, and you are
@@ -168,7 +168,7 @@ policy we defined above. A [`QBasedPolicy`](@ref)
 contains two parts: a `learner` and an `explorer`. The `learner` *learn* the
 state-action value function (aka *Q* function) during interactions with the
 `env`. The `explorer` is used to select an action based on the Q value returned
-by the `learner`. Inside of the [`MonteCarloLearner`](@ref), a
+by the `learner`. Inside of the [`TDLearner`](@ref), a
 [`TabularQApproximator`](@ref) is used to estimate the Q value.
 
 That's the problem! A [`TabularQApproximator`](@ref) only accepts states of type `Int`.
@@ -304,11 +304,7 @@ legal_action_space_mask(ttt)
 ```
 
 For some simple environments, we can simply use a `Tuple` or a `Vector` to
-describe the action space. A special space type [`Space`](@ref) is also provided
-as a meta space to hold the composition of different kinds of sub-spaces. For
-example, we can use `Space(((1:3),(true,false)))` to describe the environment
-with two kinds of actions, an integer between `1` and `3`, and a boolean.
-Sometimes, the action space is not easy to be described by some built in data
+describe the action space. Sometimes, the action space is not easy to be described by some built in data
 structures. In that case, you can defined a customized one with the following
 interfaces implemented:
 
@@ -370,7 +366,7 @@ to the perspective from the `current_player(env)`.
 
 In multi-agent environments, sometimes the sum of rewards from all players are
 always `0`. We call the [`UtilityStyle`](@ref) of these environments [`ZeroSum`](@ref).
-`ZeroSum` is a special case of [`ConstantSum`](@ref). In cooperational games, the reward
+`ZeroSum` is a special case of [`ConstantSum`](@ref). In cooperative games, the reward
 of each player are the same. In this case, they are called [`IdenticalUtility`](@ref).
 Other cases fall back to [`GeneralSum`](@ref).
 
@@ -403,7 +399,7 @@ each action, then we call the [`ChanceStyle`](@ref) of these environments are of
 default return value. One special case is that,
 in [Extensive Form Games](https://en.wikipedia.org/wiki/Extensive-form_game), a
 chance node is involved. And the action probability of this special player is
-determined. We define the `ChanceStyle` of these environments as [`EXPLICIT_STOCHASTIC`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.EXPLICIT_STOCHASTIC).
+determined. We define the `ChanceStyle` of these environments as [`EXPLICIT_STOCHASTIC`](@ref).
 For these environments, we need to have the following methods defined:
 
 ```@repl customized_env

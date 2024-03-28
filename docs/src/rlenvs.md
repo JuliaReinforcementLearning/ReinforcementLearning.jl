@@ -43,7 +43,7 @@
 </ol>
 ```
 
-**Note**: Many traits are *borrowed* from [OpenSpiel](https://github.com/deepmind/open_spiel).
+**Note**: Many traits are *borrowed* from [OpenSpiel](https://github.com/google-deepmind/open_spiel).
 
 ## 3-rd Party Environments
 

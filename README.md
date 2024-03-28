@@ -54,9 +54,9 @@ The above simple example demonstrates four core components in a general
 reinforcement learning experiment:
 
 - **Policy**. The
-  [`RandomPolicy`](https://juliareinforcementlearning.org/docs/rlcore/#ReinforcementLearningCore.RandomPolicy)
+  [`RandomPolicy`](https://juliareinforcementlearning.github.io/docs/rlcore/#ReinforcementLearningCore.RandomPolicy)
   is the simplest instance of
-  [`AbstractPolicy`](https://juliareinforcementlearning.org/docs/rlbase/#ReinforcementLearningBase.AbstractPolicy).
+  [`AbstractPolicy`](https://juliareinforcementlearning.github.io/docs/rlbase/#ReinforcementLearningBase.AbstractPolicy).
   It generates a random action at each step.
 
 - **Environment**. The

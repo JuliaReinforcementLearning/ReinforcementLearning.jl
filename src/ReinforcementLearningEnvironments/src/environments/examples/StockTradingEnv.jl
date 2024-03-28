@@ -42,7 +42,7 @@ _total_asset(env::StockTradingEnv) = env.state[1] + dot(_prices(env), _holds(env
 """
     StockTradingEnv(;kw...)
 
-This environment is originally provided in [Deep Reinforcement Learning for Automated Stock Trading: An Ensemble Strategy](https://github.com/AI4Finance-LLC/Deep-Reinforcement-Learning-for-Automated-Stock-Trading-Ensemble-Strategy-ICAIF-2020)
+This environment is originally provided in [Deep Reinforcement Learning for Automated Stock Trading: An Ensemble Strategy](https://github.com/AI4Finance-Foundation/FinRL-Trading)
 
 # Keyword Arguments
 

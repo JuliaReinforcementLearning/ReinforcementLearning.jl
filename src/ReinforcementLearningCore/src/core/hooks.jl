@@ -17,7 +17,7 @@ import ReinforcementLearningBase: RLBase
 import Base.push!
 
 """
-A hook is called at different stage duiring a [`run`](@ref) to allow users to inject customized runtime logic.
+A hook is called at different stage during a [`run`](@ref) to allow users to inject customized runtime logic.
 By default, an `AbstractHook` will do nothing. One can customize the behavior by implementing the following methods:
 
 - `Base.push!(hook::YourHook, ::PreActStage, agent, env)`
@@ -335,7 +335,7 @@ end
 """
     DoOnExit(f)
 
-Call the lambda function `f` at the end of an [`Experiment`](@ref).
+Call the lambda function `f` at the end of an `Experiment`.
 """
 struct DoOnExit{F} <: AbstractHook
     f::F

@@ -8,8 +8,8 @@ In addition to containing the [run loop](./How_to_implement_a_new_algorithm.md),
 
 ## QBasedPolicy
 
-`QBasedPolicy` is an `AbstractPolicy` that wraps a Q-Value _learner_ (tabular or approximated) and an _explorer_. Use this wrapper to implement a policy that directly uses a Q-value function to 
-decide its next action. In that case, instead of creating an `AbstractPolicy` subtype for your algorithm, define an `AbstractLearner` subtype and specialize `RLBase.optimise!(::YourLearnerType, ::Stage, ::Trajectory)`. This way you will not have to code the interaction between your policy and the explorer yourself. 
+[`QBasedPolicy`](@ref) is an [`AbstractPolicy`](@ref) that wraps a Q-Value _learner_ (tabular or approximated) and an _explorer_. Use this wrapper to implement a policy that directly uses a Q-value function to 
+decide its next action. In that case, instead of creating an [`AbstractPolicy`](@ref) subtype for your algorithm, define an [`AbstractLearner`](@ref) subtype and specialize `RLBase.optimise!(::YourLearnerType, ::Stage, ::Trajectory)`. This way you will not have to code the interaction between your policy and the explorer yourself. 
 RLCore provides the most common explorers (such as epsilon-greedy, UCB, etc.). You can find many examples of QBasedPolicies in the DQNs section of RLZoo.
 
 ## Parametric approximators 

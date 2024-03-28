@@ -2,6 +2,11 @@ export AbstractLearner, Approximator
 
 using Flux
 
+"""
+    AbstractLearner
+
+Abstract type for a learner.
+"""
 abstract type AbstractLearner end
 
 Base.show(io::IO, m::MIME"text/plain", learner::AbstractLearner) = show(io, m, convert(AnnotatedStructTree, learner))
