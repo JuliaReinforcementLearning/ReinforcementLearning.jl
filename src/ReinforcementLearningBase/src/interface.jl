@@ -117,8 +117,8 @@ end
 
 Number of agents involved in the `env`. Possible returns are:
 
-- [`SINGLE_AGENT`](@ref). This is the default return.
-- [`MultiAgent`][@ref].
+- [`SingleAgent`](@ref). This is the default return.
+- [`MultiAgent`](@ref).
 """
 @env_api NumAgentStyle(env::T) where {T<:AbstractEnv} = NumAgentStyle(T)
 NumAgentStyle(env::Type{<:AbstractEnv}) = SINGLE_AGENT
