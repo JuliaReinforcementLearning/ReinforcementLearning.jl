@@ -22,7 +22,7 @@ makedocs(
         ReinforcementLearning,
         ReinforcementLearningBase,
         ReinforcementLearningCore,
-        ReinforcementLearningEnvironments,
+        ReinforcementLearningEnvironments
     ],
     format = Documenter.HTML(
         prettyurls = true,

@@ -77,7 +77,7 @@
 
 - Add `StockTradingEnv` from the paper [Deep Reinforcement Learning for
   Automated Stock Trading: An Ensemble
-  Strategy](https://github.com/AI4Finance-LLC/Deep-Reinforcement-Learning-for-Automated-Stock-Trading-Ensemble-Strategy-ICAIF-2020).
+  Strategy](https://github.com/AI4Finance-Foundation/FinRL-Trading).
   This environment is a good testbed for multi-continuous action space
   algorithms. [#428](https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/pull/428)
 

@@ -1,14 +1,3 @@
-@doc """
-[ReinforcementLearningBase.jl](https://juliareinforcementlearning.org/docs/rlbase/)
-(**RLBase**) provides some common constants, traits, abstractions and interfaces
-in developing reinforcement learning algorithms in Julia. 
-
-Basically, we defined the following two main concepts in reinforcement learning:
-
-- [`AbstractPolicy`](@ref)
-- [`AbstractEnv`](@ref)
-""" RLBase
-
 import Base: copy, copyto!, nameof
 import Random: seed!, rand, AbstractRNG
 import AbstractTrees: children
@@ -81,7 +70,7 @@ abstract type AbstractEnvStyle end
 
 #####
 ## Traits for Environment
-## mostly borrowed from https://github.com/deepmind/open_spiel/blob/master/open_spiel/spiel.h
+## mostly borrowed from https://github.com/google-deepmind/open_spiel/blob/master/open_spiel/spiel.h
 #####
 
 #####
@@ -90,7 +79,9 @@ abstract type AbstractEnvStyle end
 
 abstract type AbstractNumAgentStyle <: AbstractEnvStyle end
 
+"AbstractNumAgentStyle for environments with a single agent"
 @api struct SingleAgent <: AbstractNumAgentStyle end
+
 @api const SINGLE_AGENT = SingleAgent()
 
 @api struct MultiAgent{N} <: AbstractNumAgentStyle end
@@ -117,8 +108,8 @@ end
 
 Number of agents involved in the `env`. Possible returns are:
 
-- [`SINGLE_AGENT`](@ref). This is the default return.
-- [`MultiAgent`][@ref].
+- [`SingleAgent`](@ref). This is the default return.
+- [`MultiAgent`](@ref).
 """
 @env_api NumAgentStyle(env::T) where {T<:AbstractEnv} = NumAgentStyle(T)
 NumAgentStyle(env::Type{<:AbstractEnv}) = SINGLE_AGENT
@@ -129,7 +120,10 @@ NumAgentStyle(env::Type{<:AbstractEnv}) = SINGLE_AGENT
 
 abstract type AbstractDynamicStyle <: AbstractEnvStyle end
 
+"`Player`s act one after the other."
 @api struct Sequential <: AbstractDynamicStyle end
+
+"`Player`s act at the same time."
 @api struct Simultaneous <: AbstractDynamicStyle end
 
 "Environment with the [`DynamicStyle`](@ref) of `SEQUENTIAL` must takes actions from different players one-by-one."
@@ -157,7 +151,10 @@ DynamicStyle(::Type{<:AbstractEnv}) = SEQUENTIAL
 
 abstract type AbstractInformationStyle <: AbstractEnvStyle end
 
+"All `Player`s actions are visible to other `Player`s."
 @api struct PerfectInformation <: AbstractInformationStyle end
+
+"Other `Player`s actions are not known by other `Player`s."
 @api struct ImperfectInformation <: AbstractInformationStyle end
 
 "All players observe the same state"
@@ -182,12 +179,19 @@ InformationStyle(::Type{<:AbstractEnv}) = IMPERFECT_INFORMATION
 abstract type AbstractChanceStyle <: AbstractEnvStyle end
 abstract type AbstractStochasticChanceStyle <: AbstractChanceStyle end
 
+"`AbstractChanceStyle` for fully deterministic games without a `ChancePlayer`. "
 @api struct Deterministic <: AbstractChanceStyle end
+
+"""
+    Stochastic()
+
+Default [`ChanceStyle`](@ref).
+"""
 @api struct Stochastic <: AbstractStochasticChanceStyle end
 @api struct ExplicitStochastic <: AbstractStochasticChanceStyle end
 @api struct SampledStochastic <: AbstractStochasticChanceStyle end
 
-"No chance player in the environment. And the game is fully deterministic."
+"No `ChancePlayer` in the environment. And the game is fully deterministic."
 @api const DETERMINISTIC = Deterministic()
 
 """
@@ -211,7 +215,7 @@ a dummy action is allowed in this case.
 
 !!! note
     The chance player ([`chance_player`](@ref)`(env)`) must appears in the result of
-    [`players`](@ref)`(env)`.
+    [`RLBase.players`](@ref)`(env)`.
     The result of `action_space(env, chance_player)` should only contains one
     dummy action.
 """
@@ -236,10 +240,13 @@ ChanceStyle(::Type{<:AbstractEnv}) = STOCHASTIC
 
 abstract type AbstractRewardStyle <: AbstractEnvStyle end
 
+"We can get reward after each step"
 @api struct StepReward <: AbstractRewardStyle end
+
+"Only get reward at the end of environment"
 @api struct TerminalReward <: AbstractRewardStyle end
 
-"We can get reward after each step"
+"Alias for `StepReward()`"
 @api const STEP_REWARD = StepReward()
 
 "Only get reward at the end of environment"
@@ -265,9 +272,16 @@ RewardStyle(::Type{<:AbstractEnv}) = STEP_REWARD
 
 abstract type AbstractUtilityStyle <: AbstractEnvStyle end
 
+"`AbstractUtilityStyle` for environments where the sum of all players' rewards is equal to zero."
 @api struct ZeroSum <: AbstractUtilityStyle end
+
+"`AbstractUtilityStyle` for environments where the sum of all players' rewards is constant."
 @api struct ConstantSum <: AbstractUtilityStyle end
+
+"`AbstractUtilityStyle` for environments where the sum of all players' rewards is not constant."
 @api struct GeneralSum <: AbstractUtilityStyle end
+
+"`AbstractUtilityStyle` for environments where all players get the same reward."
 @api struct IdenticalUtility <: AbstractUtilityStyle end
 
 "Rewards of all players sum to 0. A special case of [`CONSTANT_SUM`]."
@@ -301,18 +315,21 @@ UtilityStyle(::Type{<:AbstractEnv}) = GENERAL_SUM
 
 abstract type AbstractActionStyle <: AbstractEnvStyle end
 abstract type AbstractDiscreteActionStyle <: AbstractActionStyle end
-@api struct FullActionSet <: AbstractDiscreteActionStyle end
 
 """
 The action space of the environment may contains illegal actions. For
 environments of `FULL_ACTION_SET`, [`legal_action_space`](@ref) and
 [`legal_action_space_mask`](@ref) must also be defined.
 """
+@api struct FullActionSet <: AbstractDiscreteActionStyle end
+
+"Alias for `FullActionSet()`"
 @api const FULL_ACTION_SET = FullActionSet()
 
+"All actions in the action space of the environment are legal"
 @api struct MinimalActionSet <: AbstractDiscreteActionStyle end
 
-"All actions in the action space of the environment are legal"
+"Alias for `MinimalActionSet()`"
 @api const MINIMAL_ACTION_SET = MinimalActionSet()
 
 """
@@ -360,7 +377,7 @@ Define the possible styles of `state(env)`. Possible values are:
 
 - [`Observation{T}`](@ref). This is the default return.
 - [`InternalState{T}`](@ref)
-- [`Information{T}`](@ref)
+- [`InformationSet{T}`](@ref)
 - You can also define your customized state style when necessary.
 
 Or a tuple contains several of the above ones.
@@ -399,13 +416,21 @@ abstract type AbstractEpisodeStyle end
 @api const DEFAULT_PLAYER = DefaultPlayer()
 
 @api struct ChancePlayer <: AbstractPlayer end
+
+"Basic player type for a random step in game."
 @api const CHANCE_PLAYER = ChancePlayer()
 
 @api struct SimultaneousPlayer <: AbstractPlayer end
 @api const SIMULTANEOUS_PLAYER = SimultaneousPlayer()
 
-@api struct Spector end
-@api const SPECTOR = Spector()
+@api struct Spectator end
+
+"""
+    SPECTATOR
+
+Spectator is a special player who doesn't take any action.
+"""
+@api const SPECTATOR = Spectator()
 
 @api act!(env::AbstractEnv, action, player=current_player(env))
 
