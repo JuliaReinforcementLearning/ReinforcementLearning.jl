@@ -67,7 +67,7 @@ end
 
 Random.seed!(env::PendulumEnv, seed) = Random.seed!(env.rng, seed)
 
-pendulum_observation(s) = [cos(s[1]), sin(s[1]), s[2]]
+pendulum_observation(s) = [sin(s[1]), cos(s[1]), s[2]]
 angle_normalize(x) = Base.mod((x + Base.π), (2 * Base.π)) - Base.π
 
 RLBase.action_space(env::PendulumEnv{true}) = -2.0 .. 2.0
