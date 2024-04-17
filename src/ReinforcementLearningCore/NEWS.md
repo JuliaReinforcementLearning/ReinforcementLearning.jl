@@ -1,3 +1,11 @@
+#### v0.15.1
+
+- Fix MultiPlayer hook bugs
+
+#### v0.15.0
+
+- First version released with ReinforcementLearning v0.11
+
 #### v0.10.1
 
 - Fix hook issue with 'extra' call; always run `push!` at end of episode, regardless of whether stopped or terminated
