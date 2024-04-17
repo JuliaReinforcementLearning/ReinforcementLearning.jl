@@ -58,6 +58,8 @@ estimate the estimated value of each state-action pair and an explorer to select
 which action to take based on the result of the state-action values.
 
 ```@repl randomwalk1d
+NS = length(S)
+NA = length(A)
 policy = QBasedPolicy(
     learner = TDLearner(
             TabularQApproximator(
