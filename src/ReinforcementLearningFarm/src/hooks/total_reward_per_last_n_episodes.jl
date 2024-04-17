@@ -32,14 +32,14 @@ Base.push!(
 Base.push!(
     hook::TotalRewardPerLastNEpisodes{B},
     ::PreEpisodeStage,
-    agent,
-    env,
+    agent::AbstractPolicy,
+    env::AbstractEnv,
 ) where {B<:CircularArrayBuffer} = push!(hook.rewards, 0.0)
 
 Base.push!(
     hook::TotalRewardPerLastNEpisodes{B},
     stage::Union{PreEpisodeStage,PostEpisodeStage,PostExperimentStage},
-    agent,
-    env,
-    player::Player,
+    agent::AbstractPolicy,
+    env::AbstractEnv,
+    ::AbstractPlayer,
 ) where {B<:CircularArrayBuffer} = push!(hook, stage, agent, env)
