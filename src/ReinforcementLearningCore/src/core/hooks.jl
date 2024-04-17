@@ -164,8 +164,8 @@ Base.push!(h::TotalRewardPerEpisode, ::PostActStage, agent::P, env::E, player::P
 
 function Base.push!(hook::TotalRewardPerEpisode,
     ::PostEpisodeStage,
-    agent,
-    env,
+    agent::AbstractPolicy,
+    env::AbstractEnv,
 )
     push!(hook.rewards, hook.reward)
     hook.reward = 0
@@ -277,7 +277,7 @@ mutable struct DoEveryNSteps{F} <: AbstractHook where {F}
     end
 end
 
-function Base.push!(hook::DoEveryNSteps, ::PostActStage, agent, env)
+function Base.push!(hook::DoEveryNSteps, ::PostActStage, agent::AbstractPolicy, env::AbstractEnv)
     hook.t += 1
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
