@@ -128,7 +128,7 @@ end
     agent = RandomPolicy()
     h = StepsPerEpisode()
 
-    [push!(h, PostActStage()) for i in 1:100]
+    [push!(h, agent, env, PostActStage()) for i in 1:100]
 
     @test h.count == 100
 

@@ -31,7 +31,8 @@ Users can compose different `AbstractHook`s with `+`.
 """
 abstract type AbstractHook end
 
-Base.push!(hook::AbstractHook, args...) = nothing
+# Pushing to hooks is a noop unless `push!` for the stage has been specified
+Base.push!(::AbstractHook, ::AbstractStage, ::AbstractPolicy, ::AbstractEnv) = nothing
 
 struct ComposedHook{T<:Tuple} <: AbstractHook
     hooks::T

@@ -1,6 +1,7 @@
 #### v0.15.1
 
 - Fix MultiPlayer hook bugs
+- Clarify that the correct `push!` syntax is `push!(hook, stage, policy, env)` or `push!(hook, stage, policy, env, player)`; `push!(hook)` or other permutations now error as not implemented.
 
 #### v0.15.0
 
