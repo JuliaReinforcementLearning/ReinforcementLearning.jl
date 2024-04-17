@@ -111,13 +111,16 @@ end
 end
 
 @testset "TimePerStep" begin
+    policy = RandomPolicy()
+    env = TicTacToeEnv()
+
     h_1 = TimePerStep()
     h_2 = TimePerStep{Float32}()
 
     sleep_vect = [0.05, 0.05, 0.05]
     for h in (h_1, h_2)
         push!(h, PostActStage(), 1, 1)
-        [(sleep(i); push!(h, PostActStage(), 1, 1)) for i in sleep_vect]
+        [(sleep(i); push!(h, PostActStage(), policy, env)) for i in sleep_vect]
         @test all(0.2 .> h.times[2:end] .> 0)
         test_noop!(h, stages=[PreActStage(), PreEpisodeStage(), PostEpisodeStage(), PreExperimentStage(), PostExperimentStage()])
     end
