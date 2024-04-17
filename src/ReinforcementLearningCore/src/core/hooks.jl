@@ -71,6 +71,12 @@ struct EmptyHook <: AbstractHook end
 
 const EMPTY_HOOK = EmptyHook()
 
+
+#####
+# MultiPlayer default behavior
+#####
+Base.push!(hook::AbstractHook, stage::AbstractStage, agent::AbstractPolicy, env::AbstractEnv, ::AbstractPlayer) = Base.push!(hook, stage, agent, env)
+
 #####
 # StepsPerEpisode
 #####
@@ -122,8 +128,6 @@ Base.getindex(h::RewardsPerEpisode) = h.rewards
 function Base.push!(h::RewardsPerEpisode{T}, ::PreEpisodeStage, agent, env) where {T<:Number}
     push!(h.rewards, T[])
 end
-
-Base.push!(h::RewardsPerEpisode, s::PreEpisodeStage, agent, env, ::Player) = push!(h, s, agent, env)
 
 Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(last(h.rewards), reward(env))
 Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::Policy, env::E, player::Player) where {Policy <: AbstractPolicy, E <: AbstractEnv, Player <: AbstractPlayer} = push!(last(h.rewards), reward(env, player))
@@ -190,21 +194,6 @@ function Base.push!(hook::TotalRewardPerEpisode{true, F},
     return
 end
 
-# Pass through as no need for multiplayer customization
-function Base.push!(hook::TotalRewardPerEpisode, 
-    stage::Union{PostEpisodeStage, PostExperimentStage},
-    agent,
-    env,
-    player::Player
-) where {Player <: AbstractPlayer}
-    push!(hook,
-        stage,
-        agent,
-        env,
-    )
-    return
-end
-
 #####
 # BatchStepsPerEpisode
 #####
@@ -238,20 +227,6 @@ function Base.push!(hook::BatchStepsPerEpisode,
             hook.step[i] = 0
         end
     end
-end
-
-# Pass through as no need for multiplayer customization
-function Base.push!(hook::BatchStepsPerEpisode, 
-    stage::PostActStage,
-    agent,
-    env,
-    player::Player
-) where {Player <: AbstractPlayer}
-    push!(hook,
-        stage,
-        agent,
-        env,
-    )
 end
 
 #####
