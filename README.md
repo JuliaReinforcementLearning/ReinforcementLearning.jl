@@ -82,17 +82,7 @@ write [blog](https://juliareinforcementlearning.org/blog/) occasionally to
 explain the implementation details of some algorithms. Among them, the most
 recommended one is [*An Introduction to
 ReinforcementLearning.jl*](https://juliareinforcementlearning.org/blog/an_introduction_to_reinforcement_learning_jl_design_implementations_thoughts/),
-which explains the design idea of this package. Besides, a collection of
-[experiments](https://juliareinforcementlearning.org/docs/experiments/) are also provided to help you understand how to train
-or evaluate policies, tune parameters, log intermediate data, load or save
-parameters, plot results and record videos. For example:
-
-<!-- ```@raw html -->
-<img
-src="https://github.com/JuliaReinforcementLearning/ReinforcementLearning.jl/raw/main/docs/src/assets/JuliaRL_BasicDQN_CartPole.gif?sanitize=true"
-width="600px">
-
-<!--
+which explains the design idea of this package.
 
 ## 🙋 Why ReinforcementLearning.jl?
 
