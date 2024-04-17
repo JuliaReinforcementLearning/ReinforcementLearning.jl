@@ -188,8 +188,8 @@ end
 
 function Base.push!(hook::TotalRewardPerEpisode{true, F}, 
     ::PostExperimentStage,
-    agent,
-    env,
+    agent::AbstractPolicy,
+    env::AbstractEnv,
 ) where {F<:Number}
     display(hook)
     return
@@ -218,8 +218,8 @@ end
 
 function Base.push!(hook::BatchStepsPerEpisode, 
     ::PostActStage,
-    agent,
-    env,
+    agent::AbstractPolicy,
+    env::AbstractEnv,
 )
     for (i, t) in enumerate(is_terminated(env))
         hook.step[i] += 1
@@ -255,7 +255,7 @@ end
 
 Base.getindex(h::TimePerStep) = h.times
 
-function Base.push!(hook::TimePerStep, ::PostActStage, agent, env)
+function Base.push!(hook::TimePerStep, ::PostActStage, agent::AbstractPolicy, env::AbstractEnv)
     push!(hook.times, (time() - hook.t[1]))
     hook.t[1] = time()
     return
@@ -297,10 +297,10 @@ mutable struct DoEveryNEpisodes{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <:
     t::Int
 end
 
-DoEveryNEpisodes(f::F; n=1, t=0, stage::S=PostEpisodeStage()) where {S,F} =
+DoEveryNEpisodes(f::F; n=1, t=0, stage::S=PostEpisodeStage()) where {S<:AbstractStage,F} =
     DoEveryNEpisodes{S,F}(f, n, t)
 
-function Base.push!(hook::DoEveryNEpisodes{S}, ::S, agent, env) where {S}
+function Base.push!(hook::DoEveryNEpisodes{S}, ::S, agent::AbstractPolicy, env::AbstractEnv) where {S<:AbstractStage}
     hook.t += 1
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
@@ -317,6 +317,6 @@ struct DoOnExit{F} <: AbstractHook
     f::F
 end
 
-function Base.push!(h::DoOnExit, ::PostExperimentStage, agent, env)
+function Base.push!(h::DoOnExit, ::PostExperimentStage, agent::AbstractPolicy, env::AbstractEnv)
     h.f(agent, env)
 end
