@@ -1,6 +1,6 @@
 name = "ReinforcementLearningFarm"
 uuid = "14eff660-7080-4cec-bba2-cfb12cd77ac3"
-version = "0.0.1"
+version = "0.0.2"
 
 [deps]
 CircularArrayBuffers = "9de3a189-e0c0-4e15-ba3b-b14b9fb0aec1"
