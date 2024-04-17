@@ -34,7 +34,7 @@ Base.push!(
     ::PreEpisodeStage,
     agent,
     env,
-) where {B<:CircularArrayBuffer} = Base.push!(hook.rewards, 0.0)
+) where {B<:CircularArrayBuffer} = push!(hook.rewards, 0.0)
 
 Base.push!(
     hook::TotalRewardPerLastNEpisodes{B},
@@ -42,4 +42,4 @@ Base.push!(
     agent,
     env,
     player::Player,
-) where {B<:CircularArrayBuffer} = Base.push!(hook, stage, agent, env)
+) where {B<:CircularArrayBuffer} = push!(hook, stage, agent, env)

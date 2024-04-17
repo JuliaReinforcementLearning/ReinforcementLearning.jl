@@ -75,7 +75,7 @@ const EMPTY_HOOK = EmptyHook()
 #####
 # MultiPlayer default behavior
 #####
-Base.push!(hook::AbstractHook, stage::AbstractStage, agent::AbstractPolicy, env::AbstractEnv, ::AbstractPlayer) = Base.push!(hook, stage, agent, env)
+Base.push!(hook::AbstractHook, stage::AbstractStage, agent::AbstractPolicy, env::AbstractEnv, ::AbstractPlayer) = push!(hook, stage, agent, env)
 
 #####
 # StepsPerEpisode
@@ -95,7 +95,7 @@ Base.getindex(h::StepsPerEpisode) = h.steps
 
 Base.push!(hook::StepsPerEpisode, ::PostActStage, agent::AbstractPolicy, env::AbstractEnv) = hook.count += 1
 
-Base.push!(hook::StepsPerEpisode, stage::PostEpisodeStage, agent::AbstractPolicy, env::AbstractEnv, ::Player) = Base.push!(hook, stage, agent, env)
+Base.push!(hook::StepsPerEpisode, stage::PostEpisodeStage, agent::AbstractPolicy, env::AbstractEnv, ::Player) = push!(hook, stage, agent, env)
 
 function Base.push!(hook::StepsPerEpisode, ::PostEpisodeStage, agent::AbstractPolicy, env::AbstractEnv)
     Base.push!(hook.steps, hook.count)
