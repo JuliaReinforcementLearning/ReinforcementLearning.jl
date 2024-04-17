@@ -45,7 +45,7 @@ Base.:(+)(h1::AbstractHook, h2::ComposedHook) = ComposedHook(h1, h2.hooks...)
 Base.:(+)(h1::ComposedHook, h2::ComposedHook) = ComposedHook(h1.hooks..., h2.hooks...)
 
 @inline function _push!(stage::AbstractStage, policy::P, env::E, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
-    Base.push!(hook, stage, policy, env)
+    push!(hook, stage, policy, env)
     _push!(stage, policy, env, hook_tuple...)
 end
 
@@ -99,7 +99,7 @@ Base.push!(hook::StepsPerEpisode, ::PostActStage, agent::AbstractPolicy, env::Ab
 Base.push!(hook::StepsPerEpisode, stage::PostEpisodeStage, agent::AbstractPolicy, env::AbstractEnv, ::Player) = push!(hook, stage, agent, env)
 
 function Base.push!(hook::StepsPerEpisode, ::PostEpisodeStage, agent::AbstractPolicy, env::AbstractEnv)
-    Base.push!(hook.steps, hook.count)
+    push!(hook.steps, hook.count)
     hook.count = 0
 end
 
