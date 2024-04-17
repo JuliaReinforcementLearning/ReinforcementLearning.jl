@@ -2,7 +2,7 @@
 
 #### v0.11.0
 
-- Complete major refactor, API concsistency improvements and incorporate ReinforcementLearningTrajectories.jl
+- Complete major refactor, API consistency improvements and incorporate ReinforcementLearningTrajectories.jl
 
 #### v0.10.2
 
