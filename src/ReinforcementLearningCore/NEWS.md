@@ -1,3 +1,9 @@
+# ReinforcementLearningCore.jl Release Notes
+
+#### v0.15.2
+
+- Make QBasedPolicy general for AbstractLearner s (#1069)
+
 #### v0.15.1
 
 - Fix MultiPlayer hook bugs
