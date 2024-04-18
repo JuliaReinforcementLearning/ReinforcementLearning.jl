@@ -234,7 +234,7 @@ jobs:
             Pkg.develop(path="../src/ReinforcementLearningEnvironments")
             Pkg.develop(path="../") # ReinforcementLearning meta-package
             Pkg.develop(path="../src/ReinforcementLearningFarm")
-            include("make.jl")' skiplinks # Temporarily skip broken link checks
+            include("make.jl")' # Temporarily skip broken link checks
           mv build homepage/__site/docs
       - name: Deploy to the main repo
         uses: peaceiris/actions-gh-pages@v3
