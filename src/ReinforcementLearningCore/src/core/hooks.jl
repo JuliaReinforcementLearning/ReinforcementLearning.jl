@@ -31,7 +31,8 @@ Users can compose different `AbstractHook`s with `+`.
 """
 abstract type AbstractHook end
 
-Base.push!(hook::AbstractHook, args...) = nothing
+# Pushing to hooks is a noop unless `push!` for the stage has been specified
+Base.push!(::AbstractHook, ::AbstractStage, ::AbstractPolicy, ::AbstractEnv) = nothing
 
 struct ComposedHook{T<:Tuple} <: AbstractHook
     hooks::T
@@ -44,7 +45,7 @@ Base.:(+)(h1::AbstractHook, h2::ComposedHook) = ComposedHook(h1, h2.hooks...)
 Base.:(+)(h1::ComposedHook, h2::ComposedHook) = ComposedHook(h1.hooks..., h2.hooks...)
 
 @inline function _push!(stage::AbstractStage, policy::P, env::E, hook::H, hook_tuple...) where {P <: AbstractPolicy, E <: AbstractEnv, H <: AbstractHook}
-    Base.push!(hook, stage, policy, env)
+    push!(hook, stage, policy, env)
     _push!(stage, policy, env, hook_tuple...)
 end
 
@@ -71,6 +72,12 @@ struct EmptyHook <: AbstractHook end
 
 const EMPTY_HOOK = EmptyHook()
 
+
+#####
+# MultiPlayer default behavior
+#####
+Base.push!(hook::AbstractHook, stage::AbstractStage, agent::AbstractPolicy, env::AbstractEnv, ::AbstractPlayer) = push!(hook, stage, agent, env)
+
 #####
 # StepsPerEpisode
 #####
@@ -87,12 +94,12 @@ end
 
 Base.getindex(h::StepsPerEpisode) = h.steps
 
-Base.push!(hook::StepsPerEpisode, ::PostActStage, args...) = hook.count += 1
+Base.push!(hook::StepsPerEpisode, ::PostActStage, agent::AbstractPolicy, env::AbstractEnv) = hook.count += 1
 
-Base.push!(hook::StepsPerEpisode, stage::PostEpisodeStage, agent, env, ::Player) = Base.push!(hook, stage, agent, env)
+Base.push!(hook::StepsPerEpisode, stage::PostEpisodeStage, agent::AbstractPolicy, env::AbstractEnv, ::Player) = push!(hook, stage, agent, env)
 
-function Base.push!(hook::StepsPerEpisode, ::PostEpisodeStage, agent, env)
-    Base.push!(hook.steps, hook.count)
+function Base.push!(hook::StepsPerEpisode, ::PostEpisodeStage, agent::AbstractPolicy, env::AbstractEnv)
+    push!(hook.steps, hook.count)
     hook.count = 0
 end
 
@@ -119,11 +126,9 @@ end
 
 Base.getindex(h::RewardsPerEpisode) = h.rewards
 
-function Base.push!(h::RewardsPerEpisode{T}, ::PreEpisodeStage, agent, env) where {T<:Number}
+function Base.push!(h::RewardsPerEpisode{T}, ::PreEpisodeStage, agent::AbstractPolicy, env::AbstractEnv) where {T<:Number}
     push!(h.rewards, T[])
 end
-
-Base.push!(h::RewardsPerEpisode, s::PreEpisodeStage, agent, env, ::Player) = push!(h, s, agent, env)
 
 Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::P, env::E) where {P <: AbstractPolicy, E <: AbstractEnv} = push!(last(h.rewards), reward(env))
 Base.push!(h::RewardsPerEpisode, ::PostActStage, agent::Policy, env::E, player::Player) where {Policy <: AbstractPolicy, E <: AbstractEnv, Player <: AbstractPlayer} = push!(last(h.rewards), reward(env, player))
@@ -159,8 +164,8 @@ Base.push!(h::TotalRewardPerEpisode, ::PostActStage, agent::P, env::E, player::P
 
 function Base.push!(hook::TotalRewardPerEpisode,
     ::PostEpisodeStage,
-    agent,
-    env,
+    agent::AbstractPolicy,
+    env::AbstractEnv,
 )
     push!(hook.rewards, hook.reward)
     hook.reward = 0
@@ -183,25 +188,10 @@ end
 
 function Base.push!(hook::TotalRewardPerEpisode{true, F}, 
     ::PostExperimentStage,
-    agent,
-    env,
+    agent::AbstractPolicy,
+    env::AbstractEnv,
 ) where {F<:Number}
     display(hook)
-    return
-end
-
-# Pass through as no need for multiplayer customization
-function Base.push!(hook::TotalRewardPerEpisode, 
-    stage::Union{PostEpisodeStage, PostExperimentStage},
-    agent,
-    env,
-    player::Player
-) where {Player <: AbstractPlayer}
-    push!(hook,
-        stage,
-        agent,
-        env,
-    )
     return
 end
 
@@ -228,8 +218,8 @@ end
 
 function Base.push!(hook::BatchStepsPerEpisode, 
     ::PostActStage,
-    agent,
-    env,
+    agent::AbstractPolicy,
+    env::AbstractEnv,
 )
     for (i, t) in enumerate(is_terminated(env))
         hook.step[i] += 1
@@ -238,20 +228,6 @@ function Base.push!(hook::BatchStepsPerEpisode,
             hook.step[i] = 0
         end
     end
-end
-
-# Pass through as no need for multiplayer customization
-function Base.push!(hook::BatchStepsPerEpisode, 
-    stage::PostActStage,
-    agent,
-    env,
-    player::Player
-) where {Player <: AbstractPlayer}
-    push!(hook,
-        stage,
-        agent,
-        env,
-    )
 end
 
 #####
@@ -279,7 +255,7 @@ end
 
 Base.getindex(h::TimePerStep) = h.times
 
-function Base.push!(hook::TimePerStep, ::PostActStage, agent, env)
+function Base.push!(hook::TimePerStep, ::PostActStage, agent::AbstractPolicy, env::AbstractEnv)
     push!(hook.times, (time() - hook.t[1]))
     hook.t[1] = time()
     return
@@ -301,7 +277,7 @@ mutable struct DoEveryNSteps{F} <: AbstractHook where {F}
     end
 end
 
-function Base.push!(hook::DoEveryNSteps, ::PostActStage, agent, env)
+function Base.push!(hook::DoEveryNSteps, ::PostActStage, agent::AbstractPolicy, env::AbstractEnv)
     hook.t += 1
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
@@ -321,10 +297,10 @@ mutable struct DoEveryNEpisodes{S<:Union{PreEpisodeStage,PostEpisodeStage},F} <:
     t::Int
 end
 
-DoEveryNEpisodes(f::F; n=1, t=0, stage::S=PostEpisodeStage()) where {S,F} =
+DoEveryNEpisodes(f::F; n=1, t=0, stage::S=PostEpisodeStage()) where {S<:AbstractStage,F} =
     DoEveryNEpisodes{S,F}(f, n, t)
 
-function Base.push!(hook::DoEveryNEpisodes{S}, ::S, agent, env) where {S}
+function Base.push!(hook::DoEveryNEpisodes{S}, ::S, agent::AbstractPolicy, env::AbstractEnv) where {S<:AbstractStage}
     hook.t += 1
     if hook.t % hook.n == 0
         hook.f(hook.t, agent, env)
@@ -341,6 +317,6 @@ struct DoOnExit{F} <: AbstractHook
     f::F
 end
 
-function Base.push!(h::DoOnExit, ::PostExperimentStage, agent, env)
+function Base.push!(h::DoOnExit, ::PostExperimentStage, agent::AbstractPolicy, env::AbstractEnv)
     h.f(agent, env)
 end
