@@ -1,4 +1,4 @@
-### ReinforcementLearningEnvironments.jl Release Notes
+### ReinforcementLearningFarm.jl Release Notes
 
 #### v0.0.2
 
