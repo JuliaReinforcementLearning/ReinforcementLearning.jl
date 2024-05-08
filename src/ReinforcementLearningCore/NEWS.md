@@ -1,5 +1,9 @@
 # ReinforcementLearningCore.jl Release Notes
 
+#### v0.15.3
+
+- Make `FluxApproximator` work with `QBasedPolicy`
+
 #### v0.15.2
 
 - Make QBasedPolicy general for AbstractLearner s (#1069)
