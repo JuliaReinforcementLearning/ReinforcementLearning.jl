@@ -38,7 +38,7 @@ function RLBase.act!(env::RandomWalk1D, action::Int)
     return
 end
 
-RLBase.state(env::RandomWalk1D) = env.pos
+RLBase.state(env::RandomWalk1D, ::Observation, ::DefaultPlayer) = env.pos
 RLBase.state_space(env::RandomWalk1D) = env.state_space
 RLBase.is_terminated(env::RandomWalk1D) = env.pos == 1 || env.pos == env.N
 RLBase.reset!(env::RandomWalk1D) = env.pos = env.start_pos

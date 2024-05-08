@@ -58,7 +58,7 @@ function RLBase.legal_action_space_mask(env::MontyHallEnv)
     mask
 end
 
-function RLBase.state(env::MontyHallEnv)
+function RLBase.state(env::MontyHallEnv, ::Observation, ::DefaultPlayer)
     if isnothing(env.host_action)
         1
     else

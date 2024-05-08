@@ -181,7 +181,7 @@ RLCore.forward(p.learner.approximator, false)
 
 OK, now we know where the problem is. But how to fix it?
 
-An initial idea is to rewrite the `RLBase.state(env::LotteryEnv)` function to
+An initial idea is to rewrite the `RLBase.state(env::LotteryEnv, ::Observation, ::DefaultPlayer)` function to
 force it return an `Int`. That's workable. But in some cases, we may be using
 environments written by others and it's not very easy to modify the code
 directly. Fortunatelly, some environment wrappers are provided to help us

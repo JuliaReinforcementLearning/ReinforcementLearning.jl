@@ -15415,7 +15415,7 @@ terminated(env) # returns true or false indicating whether the environment has f
 <div class="text_cell_render border-box-sizing rendered_html">
 
 <pre><code>RLBase.action_space(env::MultiArmBanditsEnv) = Base.OneTo(length(env.true_values))
-RLBase.state(env::MultiArmBanditsEnv) = 1
+RLBase.state(env::MultiArmBanditsEnv, ::Observation, ::DefaultPlayer) = 1
 RLBase.state_space(env::MultiArmBanditsEnv) = Base.OneTo(1)
 RLBase.is_terminated(env::MultiArmBanditsEnv) = env.is_terminated
 RLBase.reward(env::MultiArmBanditsEnv) = env.reward
