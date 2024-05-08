@@ -2,7 +2,7 @@
 
 #### v0.13.1
 
-- Add missing generic `legal_action_space_mask` methods
+- Don't call `legal_action_space_mask` methods when `ActionStyle` is `MinimalActionSet`
 
 #### v0.13.0
 
