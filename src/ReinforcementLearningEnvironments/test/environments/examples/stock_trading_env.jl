@@ -8,6 +8,6 @@ end
 
 @test "StockTradingEnv legal_action_space_mask" begin
     env = StockTradingEnv()
-    @test legal_action_space_mask(env) == ones(30)
+    # For MINIMAL_ACTION_SET, this is not and should not be defined
+    @test_throws MethodError legal_action_space_mask(env) 
 end
-
