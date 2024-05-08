@@ -130,7 +130,7 @@ end
 
 RLBase.reward(env::StockTradingEnv) = env.daily_reward * env.REWARD_SCALING
 RLBase.is_terminated(env::StockTradingEnv) = env.day >= env.last_day
-RLBase.state(env::StockTradingEnv) = env.state
+RLBase.state(env::StockTradingEnv, ::Observation, ::AbstractPlayer) = env.state
 
 function RLBase.reset!(env::StockTradingEnv)
     env.day = env.first_day

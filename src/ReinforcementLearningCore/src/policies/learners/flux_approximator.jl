@@ -41,7 +41,7 @@ FluxApproximator(model, optimiser::Flux.Optimise.AbstractOptimiser; use_gpu=fals
 Flux.@layer FluxApproximator trainable=(model,)
 
 forward(A::FluxApproximator, args...; kwargs...) = A.model(args...; kwargs...)
-forward(A::FluxApproximator, env::E) where {E <: AbstractEnv} = env |> state |> (x -> forward(A, x))
+forward(A::FluxApproximator, env::E, player::AbstractPlayer=current_player(env)) where {E <: AbstractEnv} = env |> (x -> state(x, player)) |> (x -> forward(A, x))
 
 RLBase.optimise!(A::FluxApproximator, grad::NamedTuple) =
     Flux.Optimise.update!(A.optimiser_state, A.model, grad.model)

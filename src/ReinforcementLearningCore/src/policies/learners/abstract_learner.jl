@@ -26,7 +26,7 @@ function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::Trajectory) end
 function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::NamedTuple) end
 
 function RLBase.plan!(explorer::AbstractExplorer, learner::AbstractLearner, env::AbstractEnv, player=current_player(env))
-    return RLBase.plan!(ActionStyle(env), explorer, learner, env)
+    return RLBase.plan!(ActionStyle(env), explorer, learner, env, player)
 end
 
 function RLBase.plan!(::FullActionSet, explorer::AbstractExplorer, learner::AbstractLearner, env::AbstractEnv, player=current_player(env))

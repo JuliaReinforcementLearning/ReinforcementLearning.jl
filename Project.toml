@@ -4,6 +4,7 @@ authors = ["Johanni Brea <jbrea@users.noreply.github.com>", "Jun Tian <tianjun.c
 version = "0.11.0"
 
 [deps]
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 ReinforcementLearningBase = "e575027e-6cd6-5018-9292-cdc6200d2b44"
