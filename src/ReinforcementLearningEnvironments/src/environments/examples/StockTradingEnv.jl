@@ -173,5 +173,5 @@ function RLBase.act!(w::StockTradingEnvWithTurbulence, actions)
     if w.turbulences[w.env.day] >= w.turbulence_threshold
         actions = ifelse.(actions .< 0, -Inf32, 0)
     end
-    RLBase.act(w.env, actions)
+    RLBase.act!(w.env, actions)
 end
