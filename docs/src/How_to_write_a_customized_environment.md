@@ -68,7 +68,7 @@ Here `RLBase` is just an alias for `ReinforcementLearningBase`.
 
 ```@repl customized_env
 RLBase.reward(env::LotteryEnv) = env.reward
-RLBase.state(env::LotteryEnv, ::Observation{Any}, ::DefaultPlayer) = !isnothing(env.reward)
+RLBase.state(env::LotteryEnv, ::Observation, ::DefaultPlayer) = !isnothing(env.reward)
 RLBase.state_space(env::LotteryEnv) = [false, true]
 RLBase.is_terminated(env::LotteryEnv) = !isnothing(env.reward)
 RLBase.reset!(env::LotteryEnv) = env.reward = nothing

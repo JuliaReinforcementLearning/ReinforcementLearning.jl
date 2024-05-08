@@ -4,7 +4,7 @@ struct TestEnv <: RLBase.AbstractEnv
     state::Int
 end
 
-function RLBase.state(env::TestEnv, ::Observation{Any}, ::DefaultPlayer)
+function RLBase.state(env::TestEnv, ::Observation, ::DefaultPlayer)
     return env.state
 end
 
