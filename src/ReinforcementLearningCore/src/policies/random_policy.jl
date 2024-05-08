@@ -24,7 +24,7 @@ RandomPolicy(s = nothing; rng = Random.default_rng()) = RandomPolicy(s, rng)
 
 RLBase.optimise!(::RandomPolicy, x::NamedTuple) = nothing
 
-RLBase.plan!(p::RandomPolicy{S,RNG}, env::AbstractEnv) where {S,RNG<:AbstractRNG} = rand(p.rng, p.action_space)
+RLBase.plan!(p::RandomPolicy{S,RNG}, ::AbstractEnv) where {S,RNG<:AbstractRNG} = rand(p.rng, p.action_space)
 
 function RLBase.plan!(p::RandomPolicy{Nothing,RNG}, env::AbstractEnv) where {RNG<:AbstractRNG}
     legal_action_space_ = RLBase.legal_action_space(env)
@@ -45,7 +45,7 @@ function RLBase.prob(p::RandomPolicy{S,RNG}, s) where {S,RNG<:AbstractRNG}
     Categorical(Fill(1 / n, n); check_args = false)
 end
 
-RLBase.prob(p::RandomPolicy{Nothing,RNG}, x) where {RNG<:AbstractRNG} =
+RLBase.prob(::RandomPolicy{Nothing,RNG}, x) where {RNG<:AbstractRNG} =
     @error "no I really don't know how to calculate the prob from nothing"
 
 #####
@@ -54,7 +54,7 @@ RLBase.prob(p::RandomPolicy{Nothing,RNG}, env::AbstractEnv) where {RNG<:Abstract
     prob(p, env, ChanceStyle(env))
 
 function RLBase.prob(
-    p::RandomPolicy{Nothing,RNG},
+    ::RandomPolicy{Nothing,RNG},
     env::AbstractEnv,
     ::RLBase.AbstractChanceStyle,
 ) where {RNG<:AbstractRNG}

@@ -36,7 +36,14 @@ function RLBase.plan!(policy::QBasedPolicy{L,Ex}, env::E, player::Player) where 
 end
 
 RLBase.prob(policy::QBasedPolicy{L,Ex}, env::AbstractEnv) where {L<:AbstractLearner,Ex<:AbstractExplorer} =
+    prob(ActionStyle(env), policy, env)
+
+RLBase.prob(::MinimalActionSet, policy::QBasedPolicy{L,Ex}, env::AbstractEnv) where {L<:AbstractLearner,Ex<:AbstractExplorer} =
+    prob(policy.explorer, forward(policy.learner, env))
+
+RLBase.prob(::FullActionSet, policy::QBasedPolicy{L,Ex}, env::AbstractEnv) where {L<:AbstractLearner,Ex<:AbstractExplorer} =
     prob(policy.explorer, forward(policy.learner, env), legal_action_space_mask(env))
+
 
 #the internal learner defines the optimization stage.
 RLBase.optimise!(policy::QBasedPolicy, stage::AbstractStage, trajectory::Trajectory) = RLBase.optimise!(policy.learner, stage, trajectory)

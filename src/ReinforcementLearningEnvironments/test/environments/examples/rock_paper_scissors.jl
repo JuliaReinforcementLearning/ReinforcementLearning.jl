@@ -21,3 +21,8 @@
     @test all(rewards[1] .+ rewards[2] .== 0)
 
 end
+
+@testset "legal_action_space_mask" begin
+    env = RockPaperScissorsEnv()
+    legal_action_space(env, Player(1))
+end

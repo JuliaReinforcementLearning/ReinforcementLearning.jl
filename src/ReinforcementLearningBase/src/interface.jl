@@ -504,9 +504,6 @@ legal_action_space_mask(::FullActionSet, env::AbstractEnv, player=current_player
         action in legal_action_space(env, player)
     end
 
-legal_action_space_mask(::MinimalActionSet, env::AbstractEnv, player::AbstractPlayer) = trues(size(action_space(env)))
-
-
 """
     state(env, style=[DefaultStateStyle(env)], player=[current_player(env)])
 

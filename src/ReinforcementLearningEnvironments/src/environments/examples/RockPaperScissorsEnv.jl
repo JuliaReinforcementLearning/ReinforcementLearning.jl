@@ -16,7 +16,7 @@ end
 RLBase.players(::RockPaperScissorsEnv) = (Player(1), Player(2))
 
 """
-Note that although this is a two player game. The current player is always a
+Note that although this is a two player game, the current player is always a
 dummy simultaneous player.
 """
 RLBase.current_player(::RockPaperScissorsEnv) = SIMULTANEOUS_PLAYER
@@ -30,6 +30,7 @@ RLBase.action_space(env::RockPaperScissorsEnv) = action_space(env, SIMULTANEOUS_
 
 RLBase.legal_action_space(env::RockPaperScissorsEnv, player::Player) =
     is_terminated(env) ? () : action_space(env, player)
+RLBase.legal_action_space_mask(::RockPaperScissorsEnv, ::Player) = [true, true, true]
 
 "Since it's a one-shot game, the state space doesn't have much meaning."
 RLBase.state_space(::RockPaperScissorsEnv, ::Observation, ::AbstractPlayer) = Base.OneTo(1)
