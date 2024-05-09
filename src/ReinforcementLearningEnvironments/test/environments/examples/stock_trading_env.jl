@@ -12,9 +12,6 @@ end
     @test_throws MethodError legal_action_space_mask(env) 
 end
 
-using ReinforcementLearning
-using Flux
-
 @testset "StockTradingEnv and Flux / QBasedPolicy" begin
     env = StockTradingEnv()
 
