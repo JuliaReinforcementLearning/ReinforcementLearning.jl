@@ -1,5 +1,13 @@
 ### ReinforcementLearningEnvironments.jl Release Notes
 
+#### v0.9.1
+
+- Update `state` calls to use full signature (so compatible with more algorithms)
+
+#### v0.9.0
+
+- Compatible with RL.jl v0.11
+
 #### v0.8
 
 - Transition to `RLCore.forward`, `RLBase.act!`, `RLBase.plan!` and `Base.push!` syntax instead of functional objects for hooks, policies and environments
