@@ -1,3 +1,5 @@
+using Flux
+
 @testset "StockTradingEnv" begin
 
     env = StockTradingEnvWithTurbulence()
