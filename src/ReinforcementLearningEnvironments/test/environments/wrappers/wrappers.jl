@@ -162,7 +162,7 @@ end
     RLBase.action_space(env::LotteryEnv) = LotteryAction.([:PowerRich, :MegaHaul, nothing])
 
     RLBase.reward(env::LotteryEnv) = env.reward
-    RLBase.state(env::LotteryEnv) = !isnothing(env.reward)
+    RLBase.state(env::LotteryEnv, ::Observation, ::DefaultPlayer) = !isnothing(env.reward)
     RLBase.state_space(env::LotteryEnv) = [false, true]
     RLBase.is_terminated(env::LotteryEnv) = !isnothing(env.reward)
     RLBase.reset!(env::LotteryEnv) = env.reward = nothing

@@ -94,7 +94,7 @@ RLBase.action_space(::MountainCarEnv{<:AbstractFloat,<:AbstractFloat}) = -1.0 ..
 
 RLBase.reward(env::MountainCarEnv{T}) where {T} = env.done ? zero(T) : -one(T)
 RLBase.is_terminated(env::MountainCarEnv) = env.done
-RLBase.state(env::MountainCarEnv) = env.state
+RLBase.state(env::MountainCarEnv, ::Observation, ::DefaultPlayer) = env.state
 
 function RLBase.reset!(env::MountainCarEnv{T}) where {T}
     env.state[1] = 0.2 * rand(env.rng, T) - 0.6

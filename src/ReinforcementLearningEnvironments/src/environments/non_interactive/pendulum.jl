@@ -68,7 +68,7 @@ Random.seed!(env::PendulumNonInteractiveEnv, seed) = Random.seed!(env.rng, seed)
 
 RLBase.reward(env::PendulumNonInteractiveEnv) = 0
 RLBase.is_terminated(env::PendulumNonInteractiveEnv) = env.done
-RLBase.state(env::PendulumNonInteractiveEnv) = env.state
+RLBase.state(env::PendulumNonInteractiveEnv, ::Observation, ::DefaultPlayer) = env.state
 RLBase.state_space(env::PendulumNonInteractiveEnv{T}) where {T} = ArrayProductDomain([typemin(T)..typemax(T), typemin(T)..typemax(T)])
 
 function RLBase.reset!(env::PendulumNonInteractiveEnv{Fl}) where {Fl}

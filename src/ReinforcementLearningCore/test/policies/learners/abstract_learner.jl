@@ -14,7 +14,7 @@ struct MockLearner <: AbstractLearner end
             return [1.0, 2.0]
         end
 
-        RLBase.state(::MockEnv, ::Observation{Any}, ::DefaultPlayer) = 1
+        RLBase.state(::MockEnv, ::Observation, ::DefaultPlayer) = 1
         RLBase.state(::MockEnv, ::Observation{Any}, ::Player) = 1
 
         env = MockEnv()

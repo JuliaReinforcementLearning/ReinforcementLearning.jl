@@ -85,7 +85,7 @@ RLBase.state_space(env::AcrobotEnv) = ArrayProductDomain(
 )
 
 RLBase.is_terminated(env::AcrobotEnv) = env.done
-RLBase.state(env::AcrobotEnv) = acrobot_observation(env.state)
+RLBase.state(env::AcrobotEnv, ::Observation, ::DefaultPlayer) = acrobot_observation(env.state)
 RLBase.reward(env::AcrobotEnv) = env.reward
 
 function RLBase.reset!(env::AcrobotEnv{T}) where {T<:Number}

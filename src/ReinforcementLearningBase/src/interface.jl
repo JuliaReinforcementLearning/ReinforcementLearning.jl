@@ -487,7 +487,7 @@ For environments of [`MINIMAL_ACTION_SET`](@ref), the result is the same with
 @multi_agent_env_api legal_action_space(env::AbstractEnv, player=current_player(env)) =
     legal_action_space(ActionStyle(env), env, player)
 
-legal_action_space(::MinimalActionSet, env, player::AbstractPlayer) = action_space(env)
+legal_action_space(::MinimalActionSet, env::AbstractEnv, player::AbstractPlayer) = action_space(env)
 
 """
     legal_action_space_mask(env, player=current_player(env)) -> AbstractArray{Bool}
@@ -497,6 +497,9 @@ Required for environments of [`FULL_ACTION_SET`](@ref). As a default implementat
      the subset [`legal_action_space`](@ref).
 """
 @multi_agent_env_api legal_action_space_mask(env::AbstractEnv, player=current_player(env)) =
+    legal_action_space_mask(ActionStyle(env), env, player)
+
+legal_action_space_mask(::FullActionSet, env::AbstractEnv, player=current_player(env)) =
     map(action_space(env, player)) do action
         action in legal_action_space(env, player)
     end

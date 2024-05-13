@@ -54,7 +54,7 @@ function RLBase.act!(env::GraphShortestPathEnv, action)
     env.reward = env.pos == env.goal ? 0 : -1
 end
 
-RLBase.state(env::GraphShortestPathEnv) = env.pos
+RLBase.state(env::GraphShortestPathEnv, ::Observation, ::DefaultPlayer) = env.pos
 RLBase.state_space(env::GraphShortestPathEnv) = axes(env.graph, 2)
 RLBase.action_space(env::GraphShortestPathEnv) = axes(env.graph, 2)
 RLBase.legal_action_space(env::GraphShortestPathEnv) = (env.graph[:, env.pos]).nzind

@@ -16,7 +16,7 @@ end
 RLBase.players(::RockPaperScissorsEnv) = (Player(1), Player(2))
 
 """
-Note that although this is a two player game. The current player is always a
+Note that although this is a two player game, the current player is always a
 dummy simultaneous player.
 """
 RLBase.current_player(::RockPaperScissorsEnv) = SIMULTANEOUS_PLAYER

@@ -83,7 +83,7 @@ CartPoleEnv{T}(; kwargs...) where {T} = CartPoleEnv(T=T, kwargs...)
 Random.seed!(env::CartPoleEnv, seed) = Random.seed!(env.rng, seed)
 RLBase.reward(env::CartPoleEnv{T}) where {T} = env.done ? zero(T) : one(T)
 RLBase.is_terminated(env::CartPoleEnv) = env.done
-RLBase.state(env::CartPoleEnv) = env.state
+RLBase.state(env::CartPoleEnv, ::Observation, ::DefaultPlayer) = env.state
 
 function RLBase.state_space(env::CartPoleEnv{T}) where {T}
     ((-2 * env.params.xthreshold) .. (2 * env.params.xthreshold)) ×

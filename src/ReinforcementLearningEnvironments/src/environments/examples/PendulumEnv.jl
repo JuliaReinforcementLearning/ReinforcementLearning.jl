@@ -79,7 +79,7 @@ function RLBase.state_space(env::PendulumEnv)
 end
 RLBase.reward(env::PendulumEnv) = env.reward
 RLBase.is_terminated(env::PendulumEnv) = env.done
-RLBase.state(env::PendulumEnv) = pendulum_observation(env.state)
+RLBase.state(env::PendulumEnv, ::Observation, ::DefaultPlayer) = pendulum_observation(env.state)
 
 function RLBase.reset!(env::PendulumEnv{A,T}) where {A,T}
     env.state[1] = 2 * π * (rand(env.rng, T) .- 1)

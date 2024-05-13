@@ -121,7 +121,7 @@ RLBase.nameof(env::AtariEnv) = "AtariEnv($(env.name))"
 RLBase.action_space(env::AtariEnv) = env.action_space
 RLBase.reward(env::AtariEnv) = env.reward
 RLBase.is_terminated(env::AtariEnv) = is_terminal(env)
-RLBase.state(env::AtariEnv) = env.screens[1]
+RLBase.state(env::AtariEnv, ::Observation, ::DefaultPlayer) = env.screens[1]
 RLBase.state_space(env::AtariEnv) = env.observation_space
 
 function Random.seed!(env::AtariEnv, s)

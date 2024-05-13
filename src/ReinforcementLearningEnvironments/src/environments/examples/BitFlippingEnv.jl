@@ -37,7 +37,7 @@ function RLBase.act!(env::BitFlippingEnv, action::Int)
     end
 end
 
-RLBase.state(env::BitFlippingEnv) = state(env::BitFlippingEnv, Observation{BitArray{1}}())
+RLBase.state(env::BitFlippingEnv, ::Observation, ::DefaultPlayer) = state(env::BitFlippingEnv, Observation{BitArray{1}}())
 RLBase.state(env::BitFlippingEnv, ::Observation) = env.state
 RLBase.state(env::BitFlippingEnv, ::GoalState) = env.goal_state
 RLBase.state_space(env::BitFlippingEnv, ::Observation) = ArrayProductDomain(fill(false:true, env.N))

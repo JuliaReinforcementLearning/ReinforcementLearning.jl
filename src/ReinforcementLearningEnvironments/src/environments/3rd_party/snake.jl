@@ -42,7 +42,7 @@ RLBase.act!(env::SnakeGameEnv, action::Int) = env([SNAKE_GAME_ACTIONS[action]])
 RLBase.act!(env::SnakeGameEnv, actions::Vector{Int}) = env(map(a -> SNAKE_GAME_ACTIONS[a], actions))
 
 RLBase.action_space(env::SnakeGameEnv) = Base.OneTo(4)
-RLBase.state(env::SnakeGameEnv) = env.game.board
+RLBase.state(env::SnakeGameEnv, ::Observation, ::DefaultPlayer) = env.game.board
 RLBase.state_space(env::SnakeGameEnv) = ArrayProductDomain(fill(false:true, size(env.game.board)))
 RLBase.reward(env::SnakeGameEnv{<:Any,SINGLE_AGENT}) =
     length(env.game.snakes[]) - env.latest_snakes_length[]

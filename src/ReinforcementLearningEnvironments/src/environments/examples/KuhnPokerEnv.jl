@@ -107,7 +107,7 @@ RLBase.action_space(env::KuhnPokerEnv, ::ChancePlayer) = Base.OneTo(length(KUHN_
 
 RLBase.legal_action_space(env::KuhnPokerEnv, p::ChancePlayer) = Tuple(x for x in action_space(env, p) if KUHN_POKER_CARDS[x] ∉ env.cards)
 
-function RLBase.legal_action_space_mask(env::KuhnPokerEnv, p::ChancePlayer)
+function RLBase.legal_action_space_mask(env::KuhnPokerEnv, ::ChancePlayer)
     m = fill(true, 3)
     m[env.cards] .= false
     m

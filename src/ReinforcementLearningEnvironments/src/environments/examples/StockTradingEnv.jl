@@ -130,7 +130,7 @@ end
 
 RLBase.reward(env::StockTradingEnv) = env.daily_reward * env.REWARD_SCALING
 RLBase.is_terminated(env::StockTradingEnv) = env.day >= env.last_day
-RLBase.state(env::StockTradingEnv) = env.state
+RLBase.state(env::StockTradingEnv, ::Observation, ::DefaultPlayer) = env.state
 
 function RLBase.reset!(env::StockTradingEnv)
     env.day = env.first_day
@@ -145,6 +145,7 @@ RLBase.state_space(env::StockTradingEnv) = ArrayProductDomain(fill(-Inf .. Inf, 
 RLBase.action_space(env::StockTradingEnv) = ArrayProductDomain(fill(-1.0f0 .. 1.0f0, length(_holds(env))))
 
 RLBase.ChanceStyle(::StockTradingEnv) = DETERMINISTIC
+RLBase.ActionStyle(::StockTradingEnv) = MINIMAL_ACTION_SET
 
 # wrapper
 
@@ -168,9 +169,9 @@ function StockTradingEnvWithTurbulence(;
     )
 end
 
-function (w::StockTradingEnvWithTurbulence)(actions)
+function RLBase.act!(w::StockTradingEnvWithTurbulence, actions)
     if w.turbulences[w.env.day] >= w.turbulence_threshold
         actions = ifelse.(actions .< 0, -Inf32, 0)
     end
-    w.env(actions)
+    RLBase.act!(w.env, actions)
 end

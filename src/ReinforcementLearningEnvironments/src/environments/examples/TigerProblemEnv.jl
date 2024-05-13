@@ -47,9 +47,7 @@ The main difference compared to other environments is that, now we have two
 kinds of *states*. The **observation** and the **internal state**. By default we
 return the **observation**.
 """
-RLBase.state(env::TigerProblemEnv) = state(env, Observation{Int}())
-
-function RLBase.state(env::TigerProblemEnv, ::Observation)
+function RLBase.state(env::TigerProblemEnv, ::Observation{Int}, ::DefaultPlayer)
     if isnothing(env.action)
         # game not started yet
         1
@@ -64,11 +62,10 @@ function RLBase.state(env::TigerProblemEnv, ::Observation)
     end
 end
 
-RLBase.state(env::TigerProblemEnv, ::InternalState) = env.tiger_pos
+RLBase.state(env::TigerProblemEnv, ::InternalState, ::DefaultPlayer) = env.tiger_pos
 
-RLBase.state_space(env::TigerProblemEnv) = state_space(env, Observation{Int}())
-RLBase.state_space(env::TigerProblemEnv, ::Observation) = Base.OneTo(4)
-RLBase.state_space(env::TigerProblemEnv, ::InternalState) = Base.OneTo(2)
+RLBase.state_space(::TigerProblemEnv, ::Observation{Int}) = Base.OneTo(4)
+RLBase.state_space(::TigerProblemEnv, ::InternalState) = Base.OneTo(2)
 
 RLBase.NumAgentStyle(::TigerProblemEnv) = SINGLE_AGENT
 RLBase.DynamicStyle(::TigerProblemEnv) = SEQUENTIAL

@@ -68,7 +68,7 @@ RLBase.reward(env::MultiArmBanditsEnv) = env.reward
 Since `MultiArmBanditsEnv` is just a one-shot game, it doesn't matter what the
 state is after each action. So here we can simply set it to a constant `1`.
 """
-RLBase.state(env::MultiArmBanditsEnv) = 1
+RLBase.state(env::MultiArmBanditsEnv, ::Observation, ::DefaultPlayer) = 1
 
 RLBase.state_space(env::MultiArmBanditsEnv) = Base.OneTo(1)
 

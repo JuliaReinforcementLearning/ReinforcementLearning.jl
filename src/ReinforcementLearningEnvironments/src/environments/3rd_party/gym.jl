@@ -86,7 +86,7 @@ function RLBase.is_terminated(env::GymEnv{T}) where {T}
     end
 end
 
-function RLBase.state(env::GymEnv{T}) where {T}
+function RLBase.state(env::GymEnv{T}, ::Observation, ::DefaultPlayer) where {T}
     if pyisinstance(env.state, PyCall.@pyglobalobj :PyTuple_Type) && length(env.state) == 4
         obs, reward, isdone, info = convert(Tuple{T,Float64,Bool,PyDict}, env.state)
         obs

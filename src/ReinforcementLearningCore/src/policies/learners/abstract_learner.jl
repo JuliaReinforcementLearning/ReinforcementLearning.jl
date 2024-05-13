@@ -25,12 +25,15 @@ function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::Trajectory) end
 
 function RLBase.optimise!(::AbstractLearner, ::AbstractStage, ::NamedTuple) end
 
-function RLBase.plan!(explorer::AbstractExplorer, learner::AbstractLearner, env::AbstractEnv)
-    legal_action_space_ = RLBase.legal_action_space_mask(env)
-    RLBase.plan!(explorer, forward(learner, env), legal_action_space_)
+function RLBase.plan!(explorer::AbstractExplorer, learner::AbstractLearner, env::AbstractEnv, player=current_player(env))
+    return RLBase.plan!(ActionStyle(env), explorer, learner, env, player)
 end
 
-function RLBase.plan!(explorer::AbstractExplorer, learner::AbstractLearner, env::AbstractEnv, player::AbstractPlayer)
+function RLBase.plan!(::FullActionSet, explorer::AbstractExplorer, learner::AbstractLearner, env::AbstractEnv, player=current_player(env))
     legal_action_space_ = RLBase.legal_action_space_mask(env, player)
     return RLBase.plan!(explorer, forward(learner, env, player), legal_action_space_)
+end
+
+function RLBase.plan!(::MinimalActionSet, explorer::AbstractExplorer, learner::AbstractLearner, env::AbstractEnv, player=current_player(env))
+    return RLBase.plan!(explorer, forward(learner, env, player))
 end

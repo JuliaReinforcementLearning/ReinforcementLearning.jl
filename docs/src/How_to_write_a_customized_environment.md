@@ -68,7 +68,7 @@ Here `RLBase` is just an alias for `ReinforcementLearningBase`.
 
 ```@repl customized_env
 RLBase.reward(env::LotteryEnv) = env.reward
-RLBase.state(env::LotteryEnv) = !isnothing(env.reward)
+RLBase.state(env::LotteryEnv, ::Observation, ::DefaultPlayer) = !isnothing(env.reward)
 RLBase.state_space(env::LotteryEnv) = [false, true]
 RLBase.is_terminated(env::LotteryEnv) = !isnothing(env.reward)
 RLBase.reset!(env::LotteryEnv) = env.reward = nothing
@@ -181,7 +181,7 @@ RLCore.forward(p.learner.approximator, false)
 
 OK, now we know where the problem is. But how to fix it?
 
-An initial idea is to rewrite the `RLBase.state(env::LotteryEnv)` function to
+An initial idea is to rewrite the `RLBase.state(env::LotteryEnv, ::Observation, ::DefaultPlayer)` function to
 force it return an `Int`. That's workable. But in some cases, we may be using
 environments written by others and it's not very easy to modify the code
 directly. Fortunatelly, some environment wrappers are provided to help us
