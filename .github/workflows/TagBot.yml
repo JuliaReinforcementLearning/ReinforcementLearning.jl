@@ -39,18 +39,14 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           subdir: src/ReinforcementLearningCore
-      - name: Tag ReinforcementLearningZoo.jl
+      - name: Tag ReinforcementLearningFarm.jl
         uses: JuliaRegistries/TagBot@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          subdir: src/ReinforcementLearningZoo
+          subdir: src/ReinforcementLearningFarm
       - name: Tag ReinforcementLearningEnvironments.jl
         uses: JuliaRegistries/TagBot@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           subdir: src/ReinforcementLearningEnvironments
-      - name: Tag ReinforcementLearningExperiments.jl
-        uses: JuliaRegistries/TagBot@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          subdir: src/ReinforcementLearningExperiments
+
