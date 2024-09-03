@@ -70,20 +70,19 @@ end
 
 RLBase.players(::TicTacToeEnv) = (Player(:Cross), Player(:Nought))
 
-RLBase.state(env::TicTacToeEnv, o::Observation, ::DefaultPlayer) = state(env, o, Player(:Any))
-RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}, player) = env.board
-RLBase.state(env::TicTacToeEnv, ::RLBase.AbstractStateStyle) = state(env::TicTacToeEnv, Observation{Int}(), Player(:Any))
-RLBase.state(env::TicTacToeEnv, ::Observation{Int}, player::Player) =
+RLBase.state(env::TicTacToeEnv, o::Observation, ::RLBase.AbstractPlayer) = state(env, o)
+RLBase.state(env::TicTacToeEnv, ::RLBase.AbstractStateStyle) = state(env::TicTacToeEnv, Observation{Int}())
+RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}) = env.board
+RLBase.state(env::TicTacToeEnv, ::Observation{Int}) =
     get_tic_tac_toe_state_info()[env].index
 
-RLBase.state_space(env::TicTacToeEnv, ::Observation{BitArray{3}}, player::Player) = ArrayProductDomain(fill(false:true, 3, 3, 3))
-RLBase.state_space(env::TicTacToeEnv, ::Observation{Int}, player::Player) =
+RLBase.state_space(env::TicTacToeEnv, o::Observation, ::RLBase.AbstractPlayer) = state_space(env, o)
+RLBase.state_space(::TicTacToeEnv, ::Observation{BitArray{3}}) = ArrayProductDomain(fill(false:true, 3, 3, 3))
+RLBase.state_space(::TicTacToeEnv, ::Observation{Int}) =
     Base.OneTo(length(get_tic_tac_toe_state_info()))
-RLBase.state_space(env::TicTacToeEnv, ::Observation{String}, player::Player) = fullspace(String)
+RLBase.state_space(::TicTacToeEnv, ::Observation{String}) = fullspace(String)
 
-RLBase.state(env::TicTacToeEnv, ::Observation{String}) = state(env::TicTacToeEnv, Observation{String}(), Player(1))
-
-function RLBase.state(env::TicTacToeEnv, ::Observation{String}, player::Player)
+function RLBase.state(env::TicTacToeEnv, ::Observation{String})
     buff = IOBuffer()
     for i in 1:3
         for j in 1:3
