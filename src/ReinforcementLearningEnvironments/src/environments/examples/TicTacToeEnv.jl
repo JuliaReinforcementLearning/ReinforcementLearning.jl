@@ -72,6 +72,7 @@ RLBase.players(::TicTacToeEnv) = (Player(:Cross), Player(:Nought))
 
 RLBase.state(env::TicTacToeEnv, ::Observation, ::DefaultPlayer) = state(env, Observation{Int}(), Player(:Any))
 RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}, player) = env.board
+RLBase.state(env::TicTacToeEnv, ::Observation{BitArray{3}}) = env.board
 RLBase.state(env::TicTacToeEnv, ::RLBase.AbstractStateStyle) = state(env::TicTacToeEnv, Observation{Int}(), Player(1))
 RLBase.state(env::TicTacToeEnv, ::Observation{Int}, player::Player) =
     get_tic_tac_toe_state_info()[env].index
