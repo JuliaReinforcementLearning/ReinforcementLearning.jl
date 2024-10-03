@@ -94,10 +94,6 @@ which explains the design idea of this package.
 
 [TODO:]
 
--->
-
-<!-- ``` -->
-
 ## 🌲 Project Structure
 
 `ReinforcementLearning.jl` itself is just a wrapper around several other
