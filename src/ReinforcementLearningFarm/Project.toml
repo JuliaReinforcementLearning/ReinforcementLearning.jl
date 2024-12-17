@@ -13,7 +13,7 @@ ReinforcementLearning = "158674fc-8238-5cab-b5ba-03dfc80d1318"
 
 [compat]
 FillArrays = "1"
-Flux = "0.14"
+Flux = "0.14, 0.15, 0.16"
 CircularArrayBuffers = "0.1.12"
 Distributions = "0.25"
 ReinforcementLearning = "0.11"

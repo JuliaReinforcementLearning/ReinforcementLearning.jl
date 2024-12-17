@@ -75,8 +75,11 @@ function RLBase.optimise!(tn::TargetNetwork, grad::NamedTuple)
 
     if tn.n_optimise % tn.sync_freq == 0
         # polyak averaging
-        for (dest, src) in zip(Flux.params(target(tn)), Flux.params(tn.network))
-            dest .= tn.ρ .* dest .+ (1 - tn.ρ) .* src
+        zip(Flux.params(RLCore.model(tn)), Flux.params(RLCore.target(tn)))
+        src_layers = RLCore.model(tn)
+        dest_layers = RLCore.target(tn)
+        for i in 1:length(src_layers)
+            dest_layers[i].weight .= tn.ρ .* dest_layers[i].weight .+ (1 - tn.ρ) .* src_layers[i].weight
         end
         tn.n_optimise = 0
     end
