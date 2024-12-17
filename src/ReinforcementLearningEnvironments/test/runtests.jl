@@ -16,8 +16,8 @@ using JLD2
 
 ENV["CONDA_JL_USE_MINIFORGE"] = "1"
 
-Conda.add("python")
-Conda.add("gym")
+Conda.pip_interop(true, env)
+Conda.pip("install", "gym")
 Conda.add("numpy")
 
 @testset "ReinforcementLearningEnvironments" begin
