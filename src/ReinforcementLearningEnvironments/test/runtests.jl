@@ -14,8 +14,13 @@ using TimerOutputs
 using Conda
 using JLD2
 
-Conda.add("gym")
-Conda.add("numpy")
+ENV["CONDA_JL_USE_MINIFORGE"] = "1"
+
+Conda.add("python", Conda.ROOTENV)
+Conda.add("numpy", Conda.ROOTENV)
+Conda.pip_interop(true, Conda.ROOTENV)
+Conda.pip("install", "gym", Conda.ROOTENV)
+
 
 @testset "ReinforcementLearningEnvironments" begin
     include("environments/environments.jl")

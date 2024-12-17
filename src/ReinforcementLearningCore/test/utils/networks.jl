@@ -22,13 +22,13 @@ import ReinforcementLearningBase: RLBase
         q_values = NN(rand(Float32, 2))
         @test size(q_values) == (3,)
 
-        gs = gradient(params(NN)) do
+        gs = gradient(NN) do
             sum(NN(rand(Float32, 2, 5)))
         end
 
-        old_params = deepcopy(collect(params(NN).params))
+        old_params = deepcopy(collect(Flux.trainable(NN).params))
         push!(NN, gs)
-        new_params = collect(params(NN).params)
+        new_params = collect(Flux.trainable(NN).params)
 
         @test old_params != new_params
     end
@@ -72,42 +72,40 @@ import ReinforcementLearningBase: RLBase
             end
             @testset "Correctness of gradients" begin
                 @testset "One action per state" begin
-                    @test Flux.params(gn) == Flux.Params([gn.pre.weight, gn.pre.bias, gn.μ.weight, gn.μ.bias, gn.σ.weight, gn.σ.bias])
+                    @test Flux.trainable(gn).pre == gn.pre
+                    @test Flux.trainable(gn).μ == gn.μ
+                    @test Flux.trainable(gn).σ == gn.σ
                     action_saver = Matrix[]
-                    g = Flux.gradient(Flux.params(gn)) do 
-                        a, logp = gn(state, is_sampling = true, is_return_log_prob = true)
+                    g = Flux.gradient(gn) do model
+                        a, logp = model(state, is_sampling = true, is_return_log_prob = true)
                         ChainRulesCore.ignore_derivatives() do 
                             push!(action_saver, a)
                         end
                         sum(logp)
                     end
-                    g2 = Flux.gradient(Flux.params(gn)) do 
-                        logp = gn(state, only(action_saver))
+                    g2 = Flux.gradient(gn) do model
+                        logp = model(state, only(action_saver))
                         sum(logp)
                     end
                     #Check that gradients are identical
-                    for (grad1, grad2) in zip(g,g2)
-                        @test grad1 ≈ grad2
-                    end
+                    @test g == g2
                 end
                 @testset "Multiple actions per state" begin
                     #Same with multiple actions sampled
                     action_saver = []
                     state = unsqueeze(state, dims = 2)
-                    g = Flux.gradient(Flux.params(gn)) do 
-                        a, logp = gn(state, 3)
+                    g1 = Flux.gradient(gn) do model
+                        a, logp = model(state, 3)
                         ChainRulesCore.ignore_derivatives() do 
                             push!(action_saver, a)
                         end
                         sum(logp)
                     end
-                    g2 = Flux.gradient(Flux.params(gn)) do 
-                        logp = gn(state, only(action_saver))
+                    g2 = Flux.gradient(gn) do model
+                        logp = model(state, only(action_saver))
                         sum(logp)
                     end
-                    for (grad1, grad2) in zip(g,g2)
-                        @test grad1 ≈ grad2
-                    end
+                    @test g1 == g2
                 end
             end
         end
@@ -117,7 +115,6 @@ import ReinforcementLearningBase: RLBase
                 gn = GaussianNetwork(Dense(20,15), Dense(15,10), Dense(15,10, softplus)) |> gpu
                 state = rand(Float32, 20,3)  |> gpu #batch of 3 states
                 @testset "Forward pass compatibility" begin
-                    @test Flux.params(gn) == Flux.Params([gn.pre.weight, gn.pre.bias, gn.μ.weight, gn.μ.bias, gn.σ.weight, gn.σ.bias])
                     m, L = gn(state)
                     @test size(m) == size(L) == (10,3)
                     a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
@@ -134,15 +131,15 @@ import ReinforcementLearningBase: RLBase
                 @testset "Backward pass compatibility" begin
                     @testset "One action sampling" begin
                         action_saver = CuMatrix[]
-                        g = Flux.gradient(Flux.params(gn)) do 
-                            a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
+                        g = Flux.gradient(gn) do model
+                            a, logp = model(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
                             ChainRulesCore.ignore_derivatives() do 
                                 push!(action_saver, a)
                             end
                             sum(logp)
                         end
-                        g2 = Flux.gradient(Flux.params(gn)) do 
-                            logp = gn(state, only(action_saver))
+                        g2 = Flux.gradient(gn) do model 
+                            logp = model(state, only(action_saver))
                             sum(logp)
                         end
                         #Check that gradients are identical
@@ -153,15 +150,15 @@ import ReinforcementLearningBase: RLBase
                     @testset "Multiple actions sampling" begin
                         action_saver = []
                         state = unsqueeze(state, dims = 2)
-                        g = Flux.gradient(Flux.params(gn)) do 
+                        g = Flux.gradient(gn) do 
                             a, logp = gn(CUDA.CURAND.RNG(), state, 3)
                             ChainRulesCore.ignore_derivatives() do 
                                 push!(action_saver, a)
                             end
                             sum(logp)
                         end
-                        g2 = Flux.gradient(Flux.params(gn)) do 
-                            logp = gn(state, only(action_saver))
+                        g2 = Flux.gradient(gn) do model
+                            logp = model(state, only(action_saver))
                             sum(logp)
                         end
                         for (grad1, grad2) in zip(g,g2)
@@ -202,7 +199,10 @@ import ReinforcementLearningBase: RLBase
             μ = Dense(15,10)
             Σ = Dense(15,10*11÷2)
             gn = CovGaussianNetwork(pre, μ, Σ)
-            @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, Σ.weight, Σ.bias])
+            @test Flux.trainable(gn).pre == pre
+            @test Flux.trainable(gn).μ == μ
+            @test Flux.trainable(gn).Σ == Σ
+
             state = rand(Float32, 20,3) #batch of 3 states
             #Check that it works in 2D
             m, L = gn(state)
@@ -233,35 +233,34 @@ import ReinforcementLearningBase: RLBase
             logp_truth = [logpdf(mvn, a) for (mvn, a) in zip(mvnormals, eachslice(as, dims = 3))]
             @test stack(logp_truth; dims=2) ≈ dropdims(logps,dims = 1) #test against ground truth
             action_saver = []
-            g = Flux.gradient(Flux.params(gn)) do 
-                a, logp = gn(Flux.unsqueeze(state,dims = 2), is_sampling = true, is_return_log_prob = true)
+            g1 = Flux.gradient(gn) do model
+                a, logp = model(Flux.unsqueeze(state,dims = 2), is_sampling = true, is_return_log_prob = true)
                 ChainRulesCore.ignore_derivatives() do 
                     push!(action_saver, a)
                 end
                 mean(logp)
             end
-            g2 = Flux.gradient(Flux.params(gn)) do
-                logp = gn(Flux.unsqueeze(state,dims = 2), only(action_saver))
+            g2 = Flux.gradient(gn) do model
+                logp = model(Flux.unsqueeze(state,dims = 2), only(action_saver))
                 mean(logp)
             end
-            for (grad1, grad2) in zip(g,g2)
-                @test grad1 ≈ grad2
-            end
+            @test g1 == g2
+
             empty!(action_saver)
-            g3 = Flux.gradient(Flux.params(gn)) do 
-                a, logp = gn(Flux.unsqueeze(state,dims = 2), 3)
+
+            g3 = Flux.gradient(gn) do model
+                a, logp = model(Flux.unsqueeze(state,dims = 2), is_sampling = true, is_return_log_prob = true)
                 ChainRulesCore.ignore_derivatives() do 
                     push!(action_saver, a)
                 end
                 mean(logp)
             end
-            g4 = Flux.gradient(Flux.params(gn)) do
-                logp = gn(Flux.unsqueeze(state,dims = 2), only(action_saver))
+            g4 = Flux.gradient(gn) do model
+                logp = model(Flux.unsqueeze(state, dims = 2), only(action_saver))
                 mean(logp)
             end
-            for (grad1, grad2) in zip(g4,g3)
-                @test grad1 ≈ grad2
-            end
+
+            @test g4 == g3
         end
         @testset "CUDA" begin
             if (@isdefined CUDA) && CUDA.functional()
@@ -271,7 +270,6 @@ import ReinforcementLearningBase: RLBase
                 μ = Dense(15,10) |> gpu
                 Σ = Dense(15,10*11÷2) |> gpu
                 gn = CovGaussianNetwork(pre, μ, Σ)
-                @test Flux.params(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, Σ.weight, Σ.bias])
                 state = rand(Float32, 20,3)|> gpu #batch of 3 states
                 m, L = gn(Flux.unsqueeze(state,dims = 2))
                 @test size(m) == (10,1,3)
@@ -292,31 +290,31 @@ import ReinforcementLearningBase: RLBase
                 logp_truth = [logpdf(mvn, cpu(a)) for (mvn, a) in zip(mvnormals, eachslice(as, dims = 3))]
                 @test reduce(hcat, collect(logp_truth)) ≈ dropdims(cpu(logps); dims=1) #test against ground truth
                 action_saver = []
-                g = Flux.gradient(Flux.params(gn)) do 
-                    a, logp = gn(rng, Flux.unsqueeze(state,dims = 2), is_sampling = true, is_return_log_prob = true)
+                g = Flux.gradient(gn) do model
+                    a, logp = model(rng, Flux.unsqueeze(state,dims = 2), is_sampling = true, is_return_log_prob = true)
                     ChainRulesCore.ignore_derivatives() do 
                         push!(action_saver, a)
                     end
                     mean(logp)
                 end
 
-                g2 = Flux.gradient(Flux.params(gn)) do
-                    logp = gn(Flux.unsqueeze(state,dims = 2), only(action_saver))
+                g2 = Flux.gradient(gn) do model
+                    logp = model(Flux.unsqueeze(state,dims = 2), only(action_saver))
                     mean(logp)
                 end
                 for (grad1, grad2) in zip(g,g2)
                     @test grad1 ≈ grad2
                 end
                 empty!(action_saver)
-                g3 = Flux.gradient(Flux.params(gn)) do 
-                    a, logp = gn(rng, Flux.unsqueeze(state,dims = 2), 3)
+                g3 = Flux.gradient(gn) do model
+                    a, logp = model(rng, Flux.unsqueeze(state,dims = 2), 3)
                     ChainRulesCore.ignore_derivatives() do 
                         push!(action_saver, a)
                     end
                     mean(logp)
                 end
-                g4 = Flux.gradient(Flux.params(gn)) do
-                    logp = gn(Flux.unsqueeze(state,dims = 2), only(action_saver))
+                g4 = Flux.gradient(gn) do model
+                    logp = model(Flux.unsqueeze(state,dims = 2), only(action_saver))
                     mean(logp)
                 end
                 for (grad1, grad2) in zip(g4,g3)

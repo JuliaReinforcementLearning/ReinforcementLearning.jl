@@ -1,5 +1,9 @@
 # ReinforcementLearningCore.jl Release Notes
 
+#### v0.15.4
+
+- Update `Flux.jl` to `v0.16` and fix deprecation warnings and method errors
+
 #### v0.15.3
 
 - Make `FluxApproximator` work with `QBasedPolicy`

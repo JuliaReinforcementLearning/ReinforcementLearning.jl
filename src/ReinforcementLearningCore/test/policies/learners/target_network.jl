@@ -10,9 +10,9 @@ using ReinforcementLearningCore
             @test_throws "AssertionError: `FluxApproximator` model is not on GPU." TargetNetwork(FluxApproximator(model, optimiser), use_gpu=true)
         end
         @test TargetNetwork(FluxApproximator(model=model, optimiser=optimiser, use_gpu=true), use_gpu=true) isa TargetNetwork
-        @test TargetNetwork(FluxApproximator(model, optimiser, use_gpu=true), use_gpu=true) isa TargetNetwork
+        @test TargetNetwork(FluxApproximator(model=model, optimiser=optimiser, use_gpu=true), use_gpu=true) isa TargetNetwork
 
-        approx = FluxApproximator(model, optimiser, use_gpu=false)
+        approx = FluxApproximator(model=model, optimiser=optimiser, use_gpu=false)
         target_network = TargetNetwork(approx, use_gpu=false)
 
         
@@ -38,7 +38,7 @@ using ReinforcementLearningCore
     @testset "Optimise" begin
         optimiser = Adam()
         model = Chain(Dense(10, 5, relu), Dense(5, 2))
-        approximator = FluxApproximator(model, optimiser)
+        approximator = FluxApproximator(model=model, optimiser=optimiser)
         target_network = TargetNetwork(approximator)
         input = rand(Float32, 10)    
         grad = Flux.Zygote.gradient(target_network) do model
@@ -54,7 +54,7 @@ using ReinforcementLearningCore
 
     @testset "Sync" begin
         optimiser = Adam()
-        model = FluxApproximator(Chain(Dense(10, 5, relu), Dense(5, 2)), optimiser)
+        model = FluxApproximator(model=Chain(Dense(10, 5, relu), Dense(5, 2)), optimiser=optimiser)
         target_network = TargetNetwork(model, sync_freq=2, ρ=0.5)
     
         input = rand(Float32, 10)
@@ -75,9 +75,9 @@ end
     m = Chain(Dense(4,1))
     app = FluxApproximator(model = m, optimiser = Flux.Adam(), use_gpu=true)
     tn = TargetNetwork(app, sync_freq = 3, use_gpu=true)
-    @test typeof(model(tn)) == typeof(target(tn))
-    p1 = Flux.destructure(model(tn))[1]
-    pt1 = Flux.destructure(target(tn))[1]
+    @test typeof(RLCore.model(tn)) == typeof(RLCore.target(tn))
+    p1 = Flux.destructure(RLCore.model(tn))[1]
+    pt1 = Flux.destructure(RLCore.target(tn))[1]
     @test p1 == pt1
     input = gpu(ones(Float32, 4))
     grad = Flux.Zygote.gradient(tn) do model
@@ -87,16 +87,16 @@ end
     grad_model = grad[1]
     
     RLCore.optimise!(tn, grad_model)
-    @test p1 != Flux.destructure(model(tn))[1]
+    @test p1 != Flux.destructure(RLCore.model(tn))[1]
+    @test p1 == Flux.destructure(RLCore.target(tn))[1]
+    RLCore.optimise!(tn, grad_model)
+    @test p1 != Flux.destructure(RLCore.model(tn))[1]
     @test p1 == Flux.destructure(target(tn))[1]
     RLCore.optimise!(tn, grad_model)
-    @test p1 != Flux.destructure(model(tn))[1]
-    @test p1 == Flux.destructure(target(tn))[1]
-    RLCore.optimise!(tn, grad_model)
-    @test Flux.destructure(target(tn))[1] == Flux.destructure(model(tn))[1]
+    @test Flux.destructure(RLCore.target(tn))[1] == Flux.destructure(RLCore.model(tn))[1]
     @test p1 != Flux.destructure(target(tn))[1]
-    p2 = Flux.destructure(model(tn))[1]
+    p2 = Flux.destructure(RLCore.model(tn))[1]
     RLCore.optimise!(tn, grad_model)
-    @test p2 != Flux.destructure(model(tn))[1]
-    @test p2 == Flux.destructure(target(tn))[1]
+    @test p2 != Flux.destructure(RLCore.model(tn))[1]
+    @test p2 == Flux.destructure(RLCore.target(tn))[1]
 end

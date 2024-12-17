@@ -26,7 +26,7 @@ end
                     Dense(ns, 64, relu),
                     Dense(64, na, relu),
                 ),
-                Flux.Optimise.Optimiser(ClipNorm(0.5), ADAM(1e-5)),
+                OptimiserChain(ClipNorm(0.5), Adam(1e-5)),
             ),
             explorer = EpsilonGreedyExplorer(ϵ_stable=0.01),
         ),
