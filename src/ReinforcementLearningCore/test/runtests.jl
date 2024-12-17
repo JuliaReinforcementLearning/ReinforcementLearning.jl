@@ -4,9 +4,9 @@ using Preferences
 
 if Sys.isapple() && Sys.ARCH === :aarch64
     flux_uuid = UUID("587475ba-b771-5e3f-ad9e-33799f191a9c")
-    # set_preferences!(flux_uuid, "gpu_backend" => "Metal")
+    set_preferences!(flux_uuid, "gpu_backend" => "Metal")
 
-    # using Metal
+    using Metal
 else
     using CUDA, cuDNN
 end

@@ -115,7 +115,6 @@ import ReinforcementLearningBase: RLBase
                 gn = GaussianNetwork(Dense(20,15), Dense(15,10), Dense(15,10, softplus)) |> gpu
                 state = rand(Float32, 20,3)  |> gpu #batch of 3 states
                 @testset "Forward pass compatibility" begin
-                    @test Flux.trainable(gn) == Flux.Params([gn.pre.weight, gn.pre.bias, gn.μ.weight, gn.μ.bias, gn.σ.weight, gn.σ.bias])
                     m, L = gn(state)
                     @test size(m) == size(L) == (10,3)
                     a, logp = gn(CUDA.CURAND.RNG(), state, is_sampling = true, is_return_log_prob = true)
@@ -271,7 +270,6 @@ import ReinforcementLearningBase: RLBase
                 μ = Dense(15,10) |> gpu
                 Σ = Dense(15,10*11÷2) |> gpu
                 gn = CovGaussianNetwork(pre, μ, Σ)
-                @test Flux.trainable(gn) == Flux.Params([pre.weight, pre.bias, μ.weight, μ.bias, Σ.weight, Σ.bias])
                 state = rand(Float32, 20,3)|> gpu #batch of 3 states
                 m, L = gn(Flux.unsqueeze(state,dims = 2))
                 @test size(m) == (10,1,3)

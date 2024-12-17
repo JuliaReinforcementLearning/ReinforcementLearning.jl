@@ -93,7 +93,7 @@ end
     @test p1 != Flux.destructure(RLCore.model(tn))[1]
     @test p1 == Flux.destructure(target(tn))[1]
     RLCore.optimise!(tn, grad_model)
-    @test Flux.destructure(target(tn))[1] == Flux.destructure(RLCore.model(tn))[1]
+    @test Flux.destructure(RLCore.target(tn))[1] == Flux.destructure(RLCore.model(tn))[1]
     @test p1 != Flux.destructure(target(tn))[1]
     p2 = Flux.destructure(RLCore.model(tn))[1]
     RLCore.optimise!(tn, grad_model)
