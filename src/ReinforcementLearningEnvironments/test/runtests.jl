@@ -14,6 +14,9 @@ using TimerOutputs
 using Conda
 using JLD2
 
+ENV["CONDA_JL_USE_MINIFORGE"] = "1"
+
+Conda.add("python")
 Conda.add("gym")
 Conda.add("numpy")
 
