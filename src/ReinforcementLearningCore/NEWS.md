@@ -1,5 +1,9 @@
 # ReinforcementLearningCore.jl Release Notes
 
+#### v0.15.5
+
+- Move `UnicodePlots` to package extension
+
 #### v0.15.4
 
 - Update `Flux.jl` to `v0.16` and fix deprecation warnings and method errors
