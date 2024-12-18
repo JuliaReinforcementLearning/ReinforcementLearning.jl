@@ -1,4 +1,5 @@
 using Test
+using UnicodePlots
 using UUIDs
 using Preferences
 
