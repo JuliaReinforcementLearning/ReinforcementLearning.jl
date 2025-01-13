@@ -34,6 +34,8 @@ Our design principles are:
 - **Reproducibility**: Facilitate reproducibility from traditional tabular
   methods to modern deep reinforcement learning algorithms.
   
+> [!IMPORTANT]  
+> `ReinforcementLearningZoo.jl` has been deprecated with the release of `ReinforcementLearning.jl` `v0.11`. Algorithms which were previously available in `ReinforcementLearningZoo.jl` are in their current state no longer compatible with `v0.11`. If you would like to 'adopt' a previously available algorithm, you are welcome to contribute it (with tests) to `ReinforcementLearningFarm.jl`, the successor to `ReinforcementLearningZoo.jl`.
 
 ## 🏹 Get Started
 
