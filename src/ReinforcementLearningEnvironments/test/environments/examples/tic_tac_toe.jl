@@ -3,15 +3,15 @@
     using ReinforcementLearningEnvironments, ReinforcementLearningBase, ReinforcementLearningCore
 
     trajectory_1 = Trajectory(
-        CircularArraySARTSTraces(; capacity = 1),
+        CircularArraySARTSTraces(; capacity=1),
         BatchSampler(1),
-        InsertSampleRatioController(n_inserted = -1),
+        InsertSampleRatioController(n_inserted=-1),
     )
 
     trajectory_2 = Trajectory(
-        CircularArraySARTSTraces(; capacity = 1),
+        CircularArraySARTSTraces(; capacity=1),
         BatchSampler(1),
-        InsertSampleRatioController(n_inserted = -1),
+        InsertSampleRatioController(n_inserted=-1),
     )
 
     multiagent_policy = MultiAgentPolicy(PlayerTuple(
@@ -30,6 +30,7 @@
     @test length(state_space(env, Observation{Int}())) == 5478
 
     @test RLBase.state(env, Observation{BitArray{3}}(), Player(:Cross)) == env.board
+    @test RLBase.state(env, Observation{BitArray{3}}()) == env.board
     @test RLBase.state_space(env, Observation{BitArray{3}}(), Player(:Cross)) isa ArrayProductDomain
     @test RLBase.state_space(env, Observation{String}(), Player(:Cross)) isa DomainSets.FullSpace{String}
     @test RLBase.state(env, Observation{String}(), Player(:Cross)) isa String
