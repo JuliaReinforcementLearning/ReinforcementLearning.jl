@@ -93,3 +93,59 @@
         @test policy.learner.approximator.model[t.action, t.state] ≈ t.reward / (1-policy.learner.γ) atol=0.01
     end
 end
+
+@testset "Run Flow with Q-Learning" begin
+    env = RandomWalk1D()
+    q_approx = TabularQApproximator(n_state = length(state_space(env)), n_action = length(action_space(env)))
+    explorer = EpsilonGreedyExplorer(0.1)
+    learner = TDLearner(q_approx, :SARS, γ=0.95, α=0.01, n=0)
+    policy_ = QBasedPolicy(learner, explorer)
+    trajectory = Trajectory(
+        CircularArraySARTSTraces(;
+            capacity = 1,
+            state = Int64 => (),
+            action = Int64 => (),
+            reward = Float64 => (),
+            terminal = Bool => (),
+        ),
+        DummySampler(),
+        InsertSampleRatioController(),
+    )
+    
+    policy = Agent(policy_, trajectory)
+    approx_table = copy(policy.policy.learner.approximator.model)
+
+    push!(policy, PreExperimentStage(), env)
+    push!(policy, PreEpisodeStage(), env)
+    push!(policy, PreActStage(), env)
+    @test length(policy.trajectory.container) == 0
+    optimise!(policy, PreActStage())
+    approx_table_t_1 = copy(policy.policy.learner.approximator.model)
+    actions = RLBase.plan!(policy, env)
+    act!(env, actions)
+    @test length(policy.trajectory.container) == 0 # test that trajectory has not been filled
+    push!(policy, PostActStage(), env, actions)
+    @test length(policy.trajectory.container) == 1
+    optimise!(policy, PostActStage())
+
+    # t=2
+    push!(policy, PreActStage(), env)
+    @test length(policy.trajectory.container) == 1
+    optimise!(policy, PreActStage())
+    approx_table_t_2 = copy(policy.policy.learner.approximator.model)
+    action = RLBase.plan!(policy, env)
+    act!(env, action)
+    push!(policy, PostActStage(), env, actions)
+    optimise!(policy, PostActStage())
+
+    # t=3
+    push!(policy, PreActStage(), env)
+    @test length(policy.trajectory.container) == 1
+    optimise!(policy, PreActStage())
+    approx_table_t_3 = copy(policy.policy.learner.approximator.model)
+    action = RLBase.plan!(policy, env)
+    act!(env, action)
+    push!(policy, PostActStage(), env, actions)
+    optimise!(policy, PostActStage())
+    push!(policy, PostEpisodeStage(), env)
+end

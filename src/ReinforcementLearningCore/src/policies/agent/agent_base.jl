@@ -46,6 +46,7 @@ function Base.push!(agent::Agent, ::PreEpisodeStage, env::AbstractEnv)
     push!(agent.trajectory, (state = state(env),))
 end
 
+
 # !!! TODO: In async scenarios, parameters of the policy may still be updating
 # (partially), which will result to incorrect action. This should be addressed
 # in Oolong.jl with a wrapper
