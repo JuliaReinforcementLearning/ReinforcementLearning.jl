@@ -41,7 +41,7 @@ jobs:
       - uses: julia-actions/cache@v2
       - name: Get changed files
         id: RLBase-changed
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@2f7c5bfce28377bc069a65ba478de0a74aa0ca32 # v46.0.1
         with:
           files: |
             src/ReinforcementLearningBase/**
@@ -82,7 +82,7 @@ jobs:
       - uses: julia-actions/cache@v2
       - name: Get changed files
         id: RLCore-changed
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@2f7c5bfce28377bc069a65ba478de0a74aa0ca32 # v46.0.1
         with:
           files: |
             src/ReinforcementLearningCore/**
@@ -128,7 +128,7 @@ jobs:
       - uses: julia-actions/cache@v2
       - name: Get changed files
         id: RLFarm-changed
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@2f7c5bfce28377bc069a65ba478de0a74aa0ca32 # v46.0.1
         with:
           files: |
             src/ReinforcementLearningFarm/**
@@ -175,7 +175,7 @@ jobs:
       # - uses: julia-actions/cache@v2
       - name: Get changed files
         id: RLEnvironments-changed
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@2f7c5bfce28377bc069a65ba478de0a74aa0ca32 # v46.0.1
         with:
           files: |
             src/ReinforcementLearningEnvironments/**
