@@ -60,6 +60,7 @@ end
 RLBase.act!(env::TicTacToeEnv, action::Int) = RLBase.act!(env, CartesianIndices((3, 3))[action])
 
 function RLBase.act!(env::TicTacToeEnv, action::CartesianIndex{2})
+    !env.board[action,1] && error("The state has already been played.")
     env.board[action, 1] = false
     env.board[action, Base.to_index(env, current_player(env))] = true
 end
