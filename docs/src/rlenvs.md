@@ -27,19 +27,19 @@
 <tr> <th> ConstantSum </th><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> ✔ </td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
 <tr> <th> IdenticalUtility </th><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> ✔ </td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
 </table>
-<ol><li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.MultiArmBanditsEnv-Tuple{}"> MultiArmBanditsEnv </a></li>
-<li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.RandomWalk1D-Tuple{}"> RandomWalk1D </a></li>
-<li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.TigerProblemEnv-Tuple{}"> TigerProblemEnv </a></li>
-<li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.MontyHallEnv-Tuple{}"> MontyHallEnv </a></li>
-<li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.RockPaperScissorsEnv-Tuple{}"> RockPaperScissorsEnv </a></li>
-<li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.TicTacToeEnv-Tuple{}"> TicTacToeEnv </a></li>
-<li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.TinyHanabiEnv-Tuple{}"> TinyHanabiEnv </a></li>
-<li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.PigEnv-Tuple{}"> PigEnv </a></li>
-<li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.KuhnPokerEnv-Tuple{}"> KuhnPokerEnv </a></li>
-<li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.AcrobotEnv-Tuple{}"> AcrobotEnv </a></li>
-<li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.CartPoleEnv-Tuple{}"> CartPoleEnv </a></li>
-<li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.MountainCarEnv-Tuple{}"> MountainCarEnv </a></li>
-<li> <a href="https://juliareinforcementlearning.org/docs/rlenvs/#ReinforcementLearningEnvironments.PendulumEnv-Tuple{}"> PendulumEnv </a></li>
+<ol><li> MultiArmBanditsEnv </li>
+<li> RandomWalk1D </li>
+<li> TigerProblemEnv </li>
+<li> MontyHallEnv </li>
+<li> RockPaperScissorsEnv </li>
+<li> TicTacToeEnv </li>
+<li> TinyHanabiEnv </li>
+<li> PigEnv </li>
+<li> KuhnPokerEnv </li>
+<li> AcrobotEnv </li>
+<li> CartPoleEnv </li>
+<li> MountainCarEnv </li>
+<li> PendulumEnv </li>
 </ol>
 ```
 
