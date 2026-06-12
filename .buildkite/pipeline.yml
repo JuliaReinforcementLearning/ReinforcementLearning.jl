@@ -22,8 +22,7 @@ steps:
         Pkg.test("ReinforcementLearningCore", coverage=true)
       '
     agents:
-      queue: "juliagpu"
-      cuda: "*"
+      queue: "cuda"
     if: build.message !~ /\[skip tests\]/
     timeout_in_minutes: 60
   - label: "Julia v1 RLFarm"
@@ -49,12 +48,10 @@ steps:
         Pkg.test("ReinforcementLearningFarm", coverage=true)
       '
     agents:
-      queue: "juliagpu"
-      cuda: "*"
+      queue: "cuda"
     if: build.message !~ /\[skip tests\]/
     timeout_in_minutes: 60
     agents:
-      queue: "juliagpu"
-      cuda: "*"
+      queue: "cuda"
     if: build.message !~ /\[skip tests\]/
     timeout_in_minutes: 60
